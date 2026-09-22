@@ -40,3 +40,9 @@ preview-1008-fixed.png
 !.env.example
 .wrangler/
 .playwright-mcp/
+
+# Local reference originals, caches and generated files
+reference-3030/
+coverage/
+.cache/
+*.tsbuildinfo

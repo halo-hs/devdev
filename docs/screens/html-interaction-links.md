@@ -69,11 +69,11 @@
 앱 서버는 로컬에서 실행한다. 변경되지 않은 캡처만 캐시에서 재사용할 수 있다.
 
 ```sh
-ERP_HTML_RESUME=1 node scripts/export-erp-html.mjs http://127.0.0.1:4181
-node scripts/check-erp-html.mjs http://127.0.0.1:3031
-node scripts/check-erp-interaction-flows.mjs http://127.0.0.1:3031
-node scripts/check-erp-upload-session.mjs http://127.0.0.1:4181
-node scripts/check-erp-preview-navigation.mjs http://127.0.0.1:3031
+ERP_HTML_RESUME=1 node scripts/handoff/export-erp-html.mjs http://127.0.0.1:4181
+node scripts/checks/check-erp-html.mjs http://127.0.0.1:3031
+node scripts/checks/check-erp-interaction-flows.mjs http://127.0.0.1:3031
+node scripts/checks/check-erp-upload-session.mjs http://127.0.0.1:4181
+node scripts/checks/check-erp-preview-navigation.mjs http://127.0.0.1:3031
 ```
 
 HTML 검사에서는 앱 JavaScript 없이 버튼을 실제로 이동하며 결과·선택값·비활성 조건을 검사한다. 업로드 검사는 실제 React 앱에서 파일 추가·첨부 가져오기·뒤로/앞으로 이동 후 목록 유지를 확인한다.

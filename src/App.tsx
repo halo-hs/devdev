@@ -209,7 +209,7 @@ import {
   HomePrototype as V2HomePrototype,
   type HomePreviewState,
 } from "@trade-os/home-prototype"
-import { ReferenceOperations } from "@trade-os/reference-3030/ReferenceOperations"
+import { ReferenceOperations } from "@trade-os/operations/index"
 import { NotificationsPrototype } from "@trade-os/notifications-prototype"
 import { notifications, type NotificationDealTarget } from "@trade-os/lib/notifications"
 import {

@@ -25,12 +25,12 @@
 - 기존 상태의 직접 URL은 유지하며 **목록·상세와 함께 보기** 링크로 해당 메뉴의 부모 화면에 이동합니다.
 - 설정의 실제 내용이 다른 하위 화면을 포함하고, 같은 내 계정 화면을 다시 여는 버튼은 중복으로 제외합니다.
 - 온보딩의 ECOYA Demo Co. 샘플 값과 파일 미선택 상태는 유지합니다.
-- `scripts/erp-designer-menus.json`은 메뉴별 대표 화면 순서, `scripts/erp-designer-work.json`의 `parentId`는 팝업·상태의 부모 화면을 정의합니다.
+- `scripts/handoff/erp-designer-menus.json`은 메뉴별 대표 화면 순서, `scripts/handoff/erp-designer-work.json`의 `parentId`는 팝업·상태의 부모 화면을 정의합니다.
 
 기존 HTML만으로 작업 목록을 다시 생성할 수 있습니다.
 
 ```sh
-node --input-type=module -e 'import fs from "node:fs/promises"; import { writeErpHtmlIndex } from "./scripts/erp-html-index.mjs"; const m = JSON.parse(await fs.readFile("public/html/erp/manifest.json", "utf8")); await writeErpHtmlIndex("public/html/erp", m.pages);'
+node --input-type=module -e 'import fs from "node:fs/promises"; import { writeErpHtmlIndex } from "./scripts/handoff/erp-html-index.mjs"; const m = JSON.parse(await fs.readFile("public/html/erp/manifest.json", "utf8")); await writeErpHtmlIndex("public/html/erp", m.pages);'
 ```
 
 기존 HTML에 없던 정산/운영 감시 패널 2개는 `assets/designer-source-*.json`에 저장한 원본 조각을 재사용합니다. 현재 devdev에서 다시 열어 갱신할 때만 `ERP_DESIGNER_REFRESH=1`을 사용합니다. 해당 과정은 조회/패널 열기만 수행합니다.
@@ -72,9 +72,9 @@ node --input-type=module -e 'import fs from "node:fs/promises"; import { writeEr
 앱의 개발 서버를 실행한 상태에서 생성합니다. Playwright로 화면을 저장하며, 개별 화면에는 스크립트를 넣지 않습니다. 목록 뷰어의 스크립트는 별도 자산으로 복사됩니다.
 
 ```sh
-node scripts/export-erp-html.mjs http://127.0.0.1:5175
+node scripts/handoff/export-erp-html.mjs http://127.0.0.1:5175
 python3 -m http.server 3031 --directory public --bind 127.0.0.1
-node scripts/check-erp-html.mjs http://127.0.0.1:3031
+node scripts/checks/check-erp-html.mjs http://127.0.0.1:3031
 ```
 
 브라우저: `http://localhost:3031/html/erp/index.html`
@@ -98,7 +98,7 @@ node scripts/check-erp-html.mjs http://127.0.0.1:3031
 - 390px 홈 업무판은 세로로 배치되어 읽을 수 있도록 정적 CSS 적용.
 - `npm run build` 및 정적 파일의 `dist/html/erp` 복사 확인.
 
-생성이 중단되었고 원본 앱 내용은 그대로인 경우에만 `ERP_HTML_RESUME=1 node scripts/export-erp-html.mjs`로 임시 캐시부터 재개할 수 있습니다. 화면이 바뀌었으면 기본 명령으로 새로 생성합니다.
+생성이 중단되었고 원본 앱 내용은 그대로인 경우에만 `ERP_HTML_RESUME=1 node scripts/handoff/export-erp-html.mjs`로 임시 캐시부터 재개할 수 있습니다. 화면이 바뀌었으면 기본 명령으로 새로 생성합니다.
 
 ## 메뉴별 재구성 검증
 

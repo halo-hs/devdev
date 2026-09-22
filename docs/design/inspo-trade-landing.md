@@ -6,7 +6,7 @@ Uses the reference's centered message, generous whitespace and product visual hi
 
 Routes: `/` and `/erp/landing`. The existing workspace is available at `/erp/home`.
 
-Animation: `/lottie/trade-workflow.json`, 780 × 340, 30 fps, 9 seconds, no fonts or external assets. Editable source: `scripts/generate-trade-lottie.py`; regenerate with `python3 scripts/generate-trade-lottie.py`. Named markers: receive, review, connect. Includes pause/play, selectable static stages, reduced-motion support and a skeleton fallback when loading fails.
+Animation: `/lottie/trade-workflow.json`, 780 × 340, 30 fps, 9 seconds, no fonts or external assets. Editable source: `scripts/assets/generate-trade-lottie.py`; regenerate with `python3 scripts/assets/generate-trade-lottie.py`. Named markers: receive, review, connect. Includes pause/play, selectable static stages, reduced-motion support and a skeleton fallback when loading fails.
 
 Validation: production build, ESLint for changed TSX files, Chrome at 1440 and 390px, no horizontal overflow, stage selection, reduced motion and signup navigation.
 

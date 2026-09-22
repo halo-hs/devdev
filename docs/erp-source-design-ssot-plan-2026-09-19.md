@@ -60,7 +60,7 @@
 - 원본 API 클라이언트·BFF·OpenAPI와 디자인 구현을 액션별로 대조한다.
 - 변경에 직접 해당하는 Playwright 테스트를 실행한다. 후보: `tests/erp-source-sync.spec.ts`, `tests/erp-document-workspace.spec.ts` 및 발행 문서 테스트.
 - TypeScript 포함 `npm run build`로 검증한다. 실행 전에 기존 작업을 덮어쓰는 생성 스크립트 영향 범위를 확인한다.
-- HTML 변경 시 `node scripts/check-handoff-refresh.mjs` 및 영향 화면 렌더를 확인한다.
+- HTML 변경 시 `node scripts/checks/check-handoff-refresh.mjs` 및 영향 화면 렌더를 확인한다.
 - Products 문서 갱신 후 상대 링크·README 역참조·승인 정책 충돌·`git diff --check`를 검사한다.
 - fixture/localStorage 검증을 실제 서버 저장·OCR·메일 발송 검증으로 표시하지 않는다.
 

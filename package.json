@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "sync:design-system": "node scripts/sync-design-system-assets.mjs",
+    "sync:design-system": "node scripts/assets/sync-design-system-assets.mjs",
     "predev": "npm run sync:design-system",
     "dev": "vite",
     "prebuild": "npm run sync:design-system",
@@ -19,7 +19,8 @@
     "typecheck": "tsc -b",
     "preview": "vite preview",
     "deploy": "npm run build && wrangler pages deploy dist --project-name=devdev --branch=main",
-    "deploy:preview": "npm run build && wrangler pages deploy dist --project-name=devdev --branch=repo-migration"
+    "deploy:preview": "npm run build && wrangler pages deploy dist --project-name=devdev --branch=repo-migration",
+    "postbuild": "node scripts/assets/prepare-deploy.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

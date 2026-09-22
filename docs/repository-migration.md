@@ -9,7 +9,7 @@
 
 - `landing/`: 메인·제품·가격·도입 문의와 전용 스타일
 - `auth/`: 로그인·회원가입·비밀번호 찾기·무료체험 구성
-- `trade-os/`: Trade OS 업무 화면·로직·기존 업무 참조 코드
+- `trade-os/`: Trade OS 업무 화면·로직·운영 화면(`operations/`)
 - `snap/`: SNAP 업무 화면·로직
 - `packages/shared-ui/`: 공통 애플리케이션 UI·훅·유틸리티
 - `packages/ecoya-ui/`: 기존 공통 레이아웃·상태 컴포넌트 패키지
@@ -32,33 +32,16 @@ npm run typecheck
 
 `@landing/`, `@auth/`, `@trade-os/`, `@snap/`, `@shared/` 별칭은 Vite와 TypeScript에 함께 설정되어 있습니다. 화면 URL `/erp/`는 폴더명과 별개로 유지됩니다.
 
-## 배포
+## 배포 — Cloudflare Git 직접 연동
 
-프로젝트를 새로 만들거나 삭제하지 않습니다. Git 저장소를 교체하기 위해 기존 Pages 사이트를 지우면 기존 URL 유지가 어려워집니다. 기존 프로젝트에 Wrangler로 직접 배포합니다.
+기존 Cloudflare Pages `devdev` 프로젝트가 `halo-hs/devdev` 저장소에 연결되어 있습니다. `main`에 push하면 Cloudflare가 `npm run build`를 실행하고 `dist`를 배포합니다. 루트 디렉터리는 저장소 루트입니다.
 
-```sh
-npx wrangler login
-npm run deploy:preview
-npm run deploy
-```
+- 운영 주소: https://devdev-e6t.pages.dev
+- Production 자동 배포: 활성화
+- GitHub Actions workflow 및 별도 GitHub 배포 토큰: 필요 없음
+- `postbuild`는 배포 결과에 섞인 로컬 참고 원본·환경변수·도구 파일을 제거합니다.
 
-## GitHub 자동 배포 — 필요한 계정 설정
-
-1. Cloudflare → My Profile → API Tokens → Create Custom Token.
-2. 권한: Account → Cloudflare Pages → Edit. Account Resources는 기존 `devdev` 프로젝트가 있는 계정만 선택합니다.
-3. GitHub `halo-hs/devdev` → Settings → Secrets and variables → Actions → New repository secret.
-4. 이름 `CLOUDFLARE_API_TOKEN`, 값은 생성한 토큰. 토큰은 소스나 채팅에 넣지 않습니다.
-5. 저장소 Actions variable `CLOUDFLARE_ACCOUNT_ID`는 이전 작업에서 설정합니다.
-6. GitHub 인증에 `workflow` 권한을 추가한 뒤 `docs/ci/pages.yml.template`을 `.github/workflows/pages.yml`로 복사하여 커밋합니다. 또는 GitHub 웹에서 Add file → Create new file로 해당 경로에 템플릿 내용을 저장하면 됩니다.
-7. Actions → Build and deploy existing Pages site → Run workflow. 이후 `main` push마다 자동 배포됩니다.
-
-이전 시 사용 중인 GitHub OAuth 토큰에는 `workflow` 권한이 없어 활성 workflow 업로드가 거절되었습니다. 따라서 템플릿을 보관하고 수동 배포를 설정했습니다. 자동 배포는 위 연결을 마친 뒤 활성화됩니다.
-
-토큰이 없으면 CI는 빌드만 수행하고 배포를 건너뛰었다는 경고를 표시합니다. GitHub의 빌드 성공과 실제 배포 완료를 구분해야 합니다.
-
-Cloudflare 기존 프로젝트의 이전 저장소 자동 배포는 비활성화했습니다 (production 자동 배포 꺼짐, preview none). 새 저장소 배포를 옛 저장소 빌드가 덮어쓰지 않도록 하는 설정입니다. 이전 프로젝트의 배포 기록은 보존됩니다.
-
-GitHub Pages를 활성화하거나 도메인/DNS를 바꿀 필요가 없습니다.
+직접 연동이 기본입니다. 별도 미리보기 배포가 필요한 개발자는 기존 `npm run deploy:preview`를 사용할 수 있습니다. GitHub Pages나 도메인/DNS 변경은 필요하지 않습니다.
 
 ## 이전 범위
 
@@ -73,4 +56,4 @@ GitHub Pages를 활성화하거나 도메인/DNS를 바꿀 필요가 없습니�
 - 프로덕션 빌드 및 관련 Playwright 테스트 18개 통과.
 - 로컬 프로덕션 주요 경로 18개와 외부 미리보기 주요 화면에서 HTTP 200, 브라우저 실행 오류 없음.
 - 새 로컬 폴더: `/Users/hans/team/1-projects/halo-devdev`
-- GitHub 자동 배포는 아직 비활성 상태입니다. 배포용 Secret과 workflow 활성화가 남아 있습니다. 수동 `npm run deploy`는 사용 가능합니다.
+- 2026-09-22 Git 직접 연결과 자동 배포를 확인했습니다. `6db1027` 빌드·배포 성공 및 주요 공개 페이지 정상 동작을 확인했습니다.

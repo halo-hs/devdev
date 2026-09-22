@@ -86,7 +86,7 @@ Figma는 ‘디자이너 작업 안내’ 한 페이지에 19개 작업 영역(1
 
 원본 반복 캡처와 기존 HTML 링크는 참고용으로 유지합니다. Approval은 Pilot 기본 비활성이므로 승인 활성 모드의 역할별 행동과 구분합니다. 온보딩의 ECOYA Demo Co. 값은 디자인 확인용 샘플입니다.
 
-메뉴 순서는 `scripts/erp-designer-menus.json`, 대표 화면·관련 팝업은 `scripts/erp-designer-work.json`, CTA 흐름과 상태별 요구사항은 `scripts/erp-designer-flows.json`에서 관리하며 공통 디자인 과제는 `scripts/erp-designer-concerns.json`에서 관리합니다. 정렬 간격은 전달 자료의 가독성을 위한 것이며 제품 디자인의 고정 제약이 아닙니다.
+메뉴 순서는 `scripts/handoff/erp-designer-menus.json`, 대표 화면·관련 팝업은 `scripts/handoff/erp-designer-work.json`, CTA 흐름과 상태별 요구사항은 `scripts/handoff/erp-designer-flows.json`에서 관리하며 공통 디자인 과제는 `scripts/handoff/erp-designer-concerns.json`에서 관리합니다. 정렬 간격은 전달 자료의 가독성을 위한 것이며 제품 디자인의 고정 제약이 아닙니다.
 
 ## 사이드바·인증 보완
 
@@ -96,13 +96,13 @@ Figma는 ‘디자이너 작업 안내’ 한 페이지에 19개 작업 영역(1
 
 ## 공통 공개 화면 갱신 방법
 
-현재 공개 화면 목록은 `scripts/erp-public-auth-captures.json`에서 관리합니다. 정적 파일에는 입력값·상태를 보존하고 주요 CTA를 다른 HTML 상태로 연결했습니다. 실제 가입·메일 발송·결제 작업은 수행하지 않습니다. 공개 서비스·요금제 등 이번에 캡처하지 않은 사이트 링크에는 원본 페이지임을 표시합니다.
+현재 공개 화면 목록은 `scripts/handoff/erp-public-auth-captures.json`에서 관리합니다. 정적 파일에는 입력값·상태를 보존하고 주요 CTA를 다른 HTML 상태로 연결했습니다. 실제 가입·메일 발송·결제 작업은 수행하지 않습니다. 공개 서비스·요금제 등 이번에 캡처하지 않은 사이트 링크에는 원본 페이지임을 표시합니다.
 
 ```sh
 # 같은 커밋의 Vite를 4185번 포트에서 실행한 상태
-node scripts/capture-public-auth-handoff.cjs
-python3 scripts/localize-public-auth-assets.py
-node scripts/wire-public-auth-handoff.cjs
+node scripts/capture/capture-public-auth-handoff.cjs
+python3 scripts/handoff/localize-public-auth-assets.py
+node scripts/handoff/wire-public-auth-handoff.cjs
 ```
 
 캡처 후 `writeErpHtmlIndex`로 작업 보드와 화면 목록을 갱신합니다. 공개 페이지 CSS는 독립된 정적 HTML 안에서 적용하여 기존 ERP 캡처의 스타일을 바꾸지 않습니다. 작업 안내의 미리보기는 해당 HTML을 불러오며, 원본 링크에서 구조와 텍스트를 직접 확인할 수 있습니다.
@@ -113,4 +113,4 @@ node scripts/wire-public-auth-handoff.cjs
 
 기존 562개 HTML에서 공통 컴포넌트 사용 흔적과 직접 구현 후보를 확인했습니다. 디자이너 안내는 공통 재사용 / 업무 UI 조합으로 나누고 테이블은 별도 작업으로 정리했습니다. 그래프도 포함하며 사이드바는 기존 공통 재사용 항목입니다. 기존 디자인 파일의 복잡한 분류는 적용하지 않습니다. 상세 근거는 `ui-component-inventory-562.json`, 요약은 `ui-component-work-scope.md`에 있습니다.
 
-구현 확인 목록과 안내를 갱신할 때는 `python3 scripts/audit-erp-component-inventory.py` → `python3 scripts/build-erp-component-guide.py` 순으로 실행한 다음 `writeErpHtmlIndex`를 실행합니다. 분류와 작업 요청 문구의 원본은 `scripts/erp-designer-component-boundaries.json`입니다.
+구현 확인 목록과 안내를 갱신할 때는 `python3 scripts/checks/audit-erp-component-inventory.py` → `python3 scripts/handoff/build-erp-component-guide.py` 순으로 실행한 다음 `writeErpHtmlIndex`를 실행합니다. 분류와 작업 요청 문구의 원본은 `scripts/handoff/erp-designer-component-boundaries.json`입니다.

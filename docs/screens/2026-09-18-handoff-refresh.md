@@ -25,8 +25,8 @@
 
 ## 재생성
 
-1. 현재 소스의 Vite 서버에서 `scripts/export-erp-html.mjs`로 상태·액션 원본을 갱신합니다. 캡처 중 파일 쓰기로 HMR 재로드가 발생하지 않도록 캡처용 서버의 파일 감시를 끕니다.
-2. `scripts/capture-public-auth-handoff.cjs`, `scripts/wire-public-auth-handoff.cjs`, `scripts/localize-public-auth-assets.py`로 인증 자료를 갱신합니다.
-3. `scripts/audit-erp-component-inventory.py`, `scripts/build-erp-component-guide.py`로 컴포넌트 안내를 갱신합니다.
-4. `scripts/capture-handoff-pages.mjs`, `scripts/capture-form-comparison.mjs`로 이미지를 생성하고 `scripts/check-handoff-refresh.mjs`로 검사합니다.
+1. 현재 소스의 Vite 서버에서 `scripts/handoff/export-erp-html.mjs`로 상태·액션 원본을 갱신합니다. 캡처 중 파일 쓰기로 HMR 재로드가 발생하지 않도록 캡처용 서버의 파일 감시를 끕니다.
+2. `scripts/capture/capture-public-auth-handoff.cjs`, `scripts/handoff/wire-public-auth-handoff.cjs`, `scripts/handoff/localize-public-auth-assets.py`로 인증 자료를 갱신합니다.
+3. `scripts/checks/audit-erp-component-inventory.py`, `scripts/handoff/build-erp-component-guide.py`로 컴포넌트 안내를 갱신합니다.
+4. `scripts/capture/capture-handoff-pages.mjs`, `scripts/capture/capture-form-comparison.mjs`로 이미지를 생성하고 `scripts/checks/check-handoff-refresh.mjs`로 검사합니다.
 5. Figma 노드 매핑으로 이미지와 HTML 연결을 갱신합니다. 업로드 URL은 일회용이며 저장소에 기록하지 않습니다.

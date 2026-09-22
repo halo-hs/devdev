@@ -1,4 +1,4 @@
-import { ReferenceOperations } from "@trade-os/reference-3030/ReferenceOperations"
+import { ReferenceOperations } from "@trade-os/operations/index"
 import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@shared/components/form-field"
 import {
   getDealWorkPlan,
