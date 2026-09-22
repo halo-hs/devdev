@@ -1,0 +1,17 @@
+{
+  "id": "bento",
+  "type": "features",
+  "label": "Bento",
+  "macro": "Bento Grid",
+  "note": "Six tiles, irregular spans. The largest carries the lead idea; smaller ones extend it.",
+  "tokens": {
+    "needs": [
+      "--color-accent",
+      "--color-bg",
+      "--color-fg",
+      "--color-fg-muted"
+    ],
+    "aliasBlock": "/* Paste into :root if your tokens are named for their roles. */\n:root {\n  --color-bg: var(--color-paper);\n  --color-fg: var(--color-ink);\n  --color-fg-muted: var(--color-muted);\n}"
+  },
+  "tip": "Paste `tokens.aliasBlock` into your :root if your tokens are role-named (paper / ink / muted / rule / accent). Without it this renders with unstyled links, invisible borders and a transparent background - silently, because an undefined custom property is not an error."
+}

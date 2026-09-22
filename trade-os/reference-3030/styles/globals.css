@@ -1,0 +1,1327 @@
+@import "tailwindcss" source("../");
+@source not "../**/*.test.{ts,tsx}";
+@import "tw-animate-css";
+/* DS 2.0 병존 토큰 레이어 — [data-ds="2"] 스코프. 상세는 파일 헤더 주석 참조. */
+@import "./tokens-ds2.css";
+@import "../../public/fonts/noto-sans-kr/font-face.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@font-face {
+  font-family: "Pretendard";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/pretendard/PretendardVariable.woff2")
+    format("woff2-variations");
+}
+
+:root {
+  --ecoya-font-sans:
+    Pretendard, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --ecoya-font-document: "Noto Sans KR", sans-serif;
+
+  /* SNAP 48:5 table, Hero upload, and document viewer reference values. */
+  --ecoya-table-border: #eeeff1;
+  --ecoya-viewer-divider: #eef1f5;
+  --ecoya-upload-border: #b9c8f2;
+  --ecoya-upload-background: #f8faff;
+  --ecoya-upload-hover: #dee8ff;
+
+  /* Hero specimens 742:11573 / 742:11510: exact values, no palette remapping. */
+  --ecoya-hero-radius: 22px;
+  --ecoya-hero-pill-radius: 99px;
+  --ecoya-hero-upload-radius: 14px;
+  --ecoya-hero-autosave-background: rgba(255,255,255,0.14);
+  --ecoya-hero-autosave-indicator: #00ff0d;
+  --ecoya-hero-card-border: #e9ebef;
+  --ecoya-hero-card-title: #1a1a1f;
+  --ecoya-hero-card-description: #80808c;
+  --ecoya-hero-description: rgba(255,255,255,0.82);
+  --ecoya-hero-elevated: 0px 4px 24px 0px rgba(0,0,0,0.1);
+  --ecoya-hero-empty: 0px 2px 4px rgba(0,0,0,0.08);
+  --ecoya-hero-card: 0px 4px 12px rgba(0,0,0,0.1);
+  --ecoya-hero-height-small: 94px;
+  --ecoya-hero-height: 280px;
+  --ecoya-hero-card-height: 172px;
+  --ecoya-hero-autosave-height: 34px;
+  --ecoya-hero-indicator-size: 7px;
+  --ecoya-hero-inset: 30px;
+  --ecoya-hero-card-inset: 20px;
+  --ecoya-hero-card-gap: 6px;
+  --ecoya-hero-title-inset: 2px;
+  --ecoya-hero-description-inset: 14px;
+  --ecoya-hero-empty-description-height: 45px;
+  --ecoya-hero-upload-gap: 15px;
+  --ecoya-hero-upload-inset-bottom: 29px;
+  --ecoya-hero-title-size: 28px;
+  --ecoya-hero-card-title-size: 22px;
+  --ecoya-hero-body-size: 16px;
+  --ecoya-hero-meta-size: 12px;
+  --ecoya-hero-title-leading: 34px;
+  --ecoya-hero-body-leading: 20px;
+  --ecoya-hero-latest-title-size: 26px;
+  --ecoya-hero-latest-title-leading: 36px;
+  --ecoya-hero-latest-body-size: 17px;
+  --ecoya-hero-latest-body-leading: 24px;
+  --ecoya-hero-latest-meta-size: 13px;
+  --ecoya-hero-latest-gradient-small: linear-gradient(133.404808300446deg, rgb(29, 78, 216) 0%, rgb(37, 99, 235) 52%, rgb(59, 130, 246) 100%);
+  --ecoya-hero-empty-description-leading: 1.6;
+  --ecoya-hero-foreground: #ffffff;
+  --ecoya-hero-gradient: linear-gradient(107.96675835734068deg, rgb(29, 78, 216) 0%, rgb(37, 99, 235) 52%, rgb(59, 130, 246) 100%);
+  --ecoya-hero-gradient-small: linear-gradient(133.9639062095945deg, rgb(29, 78, 216) 0%, rgb(37, 99, 235) 52%, rgb(59, 130, 246) 100%);
+
+  --ecoya-shadow-control-slot: 0 2px 2px rgba(0, 0, 0, 0.05);
+
+  --ecoya-indigo: #192755;
+  --ecoya-blue-1: #223795;
+  --ecoya-blue-2: #2942a7;
+  --ecoya-blue-3: #314cb9;
+  --ecoya-blue-4: #3957cc;
+  --ecoya-blue-5: #4b6cd9;
+  --ecoya-blue-6: #7895e3;
+  --ecoya-blue-7: #9ab1ed;
+  --ecoya-blue-8: #bacaf3;
+  --ecoya-blue-9: #dde6fb;
+  --ecoya-blue-10: #f4f7fe;
+
+  --ecoya-gray-1: #15171d;
+  --ecoya-gray-2: #292b31;
+  --ecoya-gray-3: #3f4147;
+  --ecoya-gray-4: #54575c;
+  --ecoya-gray-5: #636569;
+  --ecoya-gray-6: #898b8f;
+  --ecoya-gray-7: #9ea0a4;
+  --ecoya-gray-8: #b9babe;
+  --ecoya-gray-9: #dcdee1;
+  --ecoya-gray-10: #ebedef;
+  --ecoya-gray-11: #f6f7f9;
+  --ecoya-gray-12: #fafbfc;
+
+  --ecoya-system-red-1: #b71824;
+  --ecoya-system-red-2: #ce2f34;
+  --ecoya-system-red-3: #d87972;
+  --ecoya-system-red-4: #e19891;
+  --ecoya-system-red-5: #e8ada7;
+  --ecoya-system-red-6: #f0c1bc;
+  --ecoya-system-red-7: #f8d9d6;
+  --ecoya-system-red-8: #fdf0ef;
+  --ecoya-system-yellow-ink: #935d02;
+  --ecoya-system-yellow-1: #c78b04;
+  --ecoya-system-yellow-2: #dba632;
+  --ecoya-system-yellow-3: #eabd5d;
+  --ecoya-system-yellow-4: #f3d288;
+  --ecoya-system-yellow-5: #f8e5b5;
+  --ecoya-system-yellow-6: #fdf4de;
+  --ecoya-system-green-1: #14783f;
+  --ecoya-system-green-2: #2a9754;
+  --ecoya-system-green-3: #5ebc7b;
+  --ecoya-system-green-4: #89d69e;
+  --ecoya-system-green-5: #b0e7be;
+  --ecoya-system-green-6: #e8f9ec;
+  --ecoya-system-blue-1: #0659bf;
+  --ecoya-system-blue-2: #2572dd;
+  --ecoya-system-blue-3: #6499e8;
+  --ecoya-system-blue-4: #91b6ee;
+  --ecoya-system-blue-5: #c6d9f6;
+  --ecoya-system-blue-6: #eef4fe;
+  --ecoya-system-pink-1: #c2255c;
+  --ecoya-system-pink-2: #e64980;
+  --ecoya-system-pink-3: #f783ac;
+  --ecoya-system-pink-4: #fcc2d7;
+  --ecoya-system-pink-5: #ffdeeb;
+  --ecoya-system-pink-6: #fff0f6;
+  --ecoya-system-lime-1: #5c940d;
+  --ecoya-system-lime-2: #82c91e;
+  --ecoya-system-lime-3: #c0eb75;
+  --ecoya-system-lime-4: #d8f5a2;
+  --ecoya-system-lime-5: #e9fac8;
+  --ecoya-system-lime-6: #f4fce3;
+  --ecoya-system-grape-1: #862e9c;
+  --ecoya-system-grape-2: #be4bdb;
+  --ecoya-system-grape-3: #da77f2;
+  --ecoya-system-grape-4: #eebefa;
+  --ecoya-system-grape-5: #f3d9fa;
+  --ecoya-system-grape-6: #f8f0fc;
+  --ecoya-system-orange-1: #e8590c;
+  --ecoya-system-orange-2: #fd7e14;
+  --ecoya-system-orange-3: #ffa94d;
+  --ecoya-system-orange-4: #ffd8a8;
+  --ecoya-system-orange-5: #ffe8cc;
+  --ecoya-system-orange-6: #fff4e6;
+
+  --ecoya-dark-indigo: #4c6cd1;
+  --ecoya-dark-blue-1: #9db6f5;
+  --ecoya-dark-blue-2: #202f5e;
+  --ecoya-dark-blue-3: #83a1f3;
+  --ecoya-dark-blue-4: #6c8ceb;
+  --ecoya-dark-blue-5: #7c9aef;
+  --ecoya-dark-blue-6: #8da8f1;
+  --ecoya-dark-blue-7: #a6bcf5;
+  --ecoya-dark-blue-8: #273871;
+  --ecoya-dark-blue-9: #1e2d5b;
+  --ecoya-dark-blue-10: #182448;
+  --ecoya-dark-gray-1: #e3e4e8;
+  --ecoya-dark-gray-2: #ccced2;
+  --ecoya-dark-gray-3: #afb1b6;
+  --ecoya-dark-gray-4: #909297;
+  --ecoya-dark-gray-5: #73767b;
+  --ecoya-dark-gray-6: #5c5f65;
+  --ecoya-dark-gray-7: #494c52;
+  --ecoya-dark-gray-8: #363940;
+  --ecoya-dark-gray-9: #2c2f35;
+  --ecoya-dark-gray-10: #23252b;
+  --ecoya-dark-gray-11: #0f1015;
+  --ecoya-dark-gray-12: #15171d;
+  --ecoya-dark-system-red-1: #f28881;
+  --ecoya-dark-system-red-2: #ec7069;
+  --ecoya-dark-system-red-3: #e15955;
+  --ecoya-dark-system-red-4: #cd4342;
+  --ecoya-dark-system-red-5: #b53434;
+  --ecoya-dark-system-red-6: #932b2a;
+  --ecoya-dark-system-red-7: #722423;
+  --ecoya-dark-system-red-8: #4d1c1a;
+  --ecoya-dark-system-yellow-1: #f5c761;
+  --ecoya-dark-system-yellow-2: #edb345;
+  --ecoya-dark-system-yellow-3: #df9c27;
+  --ecoya-dark-system-yellow-4: #c17f11;
+  --ecoya-dark-system-yellow-5: #875814;
+  --ecoya-dark-system-yellow-6: #3f280a;
+  --ecoya-dark-system-green-1: #71d790;
+  --ecoya-dark-system-green-2: #5dc47e;
+  --ecoya-dark-system-green-3: #49ac6b;
+  --ecoya-dark-system-green-4: #379257;
+  --ecoya-dark-system-green-5: #296d40;
+  --ecoya-dark-system-green-6: #16321f;
+  --ecoya-dark-system-blue-1: #85b3f7;
+  --ecoya-dark-system-blue-2: #6a9fee;
+  --ecoya-dark-system-blue-3: #4e8ce6;
+  --ecoya-dark-system-blue-4: #3072d0;
+  --ecoya-dark-system-blue-5: #2158a7;
+  --ecoya-dark-system-blue-6: #112d55;
+  --ecoya-dark-system-pink-1: #f783ac;
+  --ecoya-dark-system-pink-2: #e64980;
+  --ecoya-dark-system-pink-3: #df306d;
+  --ecoya-dark-system-pink-4: #cf205d;
+  --ecoya-dark-system-pink-5: #bc1a52;
+  --ecoya-dark-system-pink-6: #9b1745;
+  --ecoya-dark-system-lime-1: #c0eb75;
+  --ecoya-dark-system-lime-2: #82c91e;
+  --ecoya-dark-system-lime-3: #73b01c;
+  --ecoya-dark-system-lime-4: #67a018;
+  --ecoya-dark-system-lime-5: #598c12;
+  --ecoya-dark-system-lime-6: #456c0e;
+  --ecoya-dark-system-grape-1: #da77f2;
+  --ecoya-dark-system-grape-2: #be4bdb;
+  --ecoya-dark-system-grape-3: #ae2fd5;
+  --ecoya-dark-system-grape-4: #9628b8;
+  --ecoya-dark-system-grape-5: #81259d;
+  --ecoya-dark-system-grape-6: #631b79;
+  --ecoya-dark-system-orange-1: #ffa94d;
+  --ecoya-dark-system-orange-2: #fd7e14;
+  --ecoya-dark-system-orange-3: #f37002;
+  --ecoya-dark-system-orange-4: #df6602;
+  --ecoya-dark-system-orange-5: #c55b02;
+  --ecoya-dark-system-orange-6: #af5204;
+
+  --ecoya-surface: var(--ecoya-gray-12);
+  --ecoya-surface-muted: var(--ecoya-gray-11);
+  --ecoya-surface-subtle: var(--ecoya-gray-10);
+  --ecoya-surface-primary: var(--ecoya-blue-10);
+  --ecoya-surface-inverse: var(--ecoya-indigo);
+  /* W8-V1b: cards are the literal-white elevation layer sitting on the gray-12
+     page ground (W8-V1a design); dark maps to the raised dark-gray-10 step.
+     Pinned in scripts/verify-foundation.mjs. */
+  --ecoya-surface-card: #ffffff;
+  --ecoya-border: var(--ecoya-gray-9);
+  --ecoya-border-muted: var(--ecoya-gray-10);
+  /* W8-V1b: subtlest divider — the muted-chrome step (gray-11), one softer
+     than border-muted. Pinned in scripts/verify-foundation.mjs. */
+  --ecoya-border-subtle: var(--ecoya-gray-11);
+  --ecoya-text-strong: var(--ecoya-gray-1);
+  --ecoya-text-primary: var(--ecoya-gray-2);
+  --ecoya-text-secondary: var(--ecoya-gray-4);
+  --ecoya-text-muted: var(--ecoya-gray-5);
+  --ecoya-text-disabled: var(--ecoya-gray-6);
+  --ecoya-text-placeholder: var(--ecoya-gray-7);
+  /* FE#793 (user decision, 2026-08-06): was gray-8 (1.87:1 against surface,
+     fails WCAG AA 4.5:1). gray-5 is the lightest step on the ramp that
+     clears AA (5.64:1) — the minimum change that costs the least of the
+     "subtle" visual intent. gray-6 (3.29:1) still fails; gray-4 (7.0:1)
+     passes but reads closer to body text than intended. */
+  --ecoya-text-subtle: var(--ecoya-gray-5);
+  --ecoya-text-inverse: var(--ecoya-gray-12);
+  --ecoya-accent: var(--ecoya-blue-4);
+  --ecoya-accent-hover: var(--ecoya-blue-5);
+  --ecoya-accent-soft: var(--ecoya-blue-10);
+  --ecoya-control-selected: var(--ecoya-blue-1);
+  --ecoya-control-track-active: var(--ecoya-system-blue-2);
+  --ecoya-control-track-inactive: var(--ecoya-gray-7);
+  --ecoya-control-track-disabled: var(--ecoya-gray-8);
+  --ecoya-control-knob: var(--ecoya-gray-12);
+  --ecoya-control-knob-disabled: var(--ecoya-gray-9);
+  --ecoya-control-error: var(--ecoya-system-red-2);
+  --ecoya-status-danger: var(--ecoya-system-red-1);
+  --ecoya-status-danger-bg: var(--ecoya-system-red-8);
+  --ecoya-status-warning: var(--ecoya-system-yellow-ink);
+  --ecoya-status-warning-bg: var(--ecoya-system-yellow-6);
+  --ecoya-status-success: var(--ecoya-system-green-1);
+  --ecoya-status-success-bg: var(--ecoya-system-green-6);
+  --ecoya-status-info: var(--ecoya-system-blue-1);
+  --ecoya-status-info-bg: var(--ecoya-system-blue-6);
+  --ecoya-badge-pink: var(--ecoya-system-pink-2);
+  --ecoya-badge-pink-bg: var(--ecoya-system-pink-6);
+  --ecoya-badge-lime: var(--ecoya-system-lime-2);
+  --ecoya-badge-lime-bg: var(--ecoya-system-lime-6);
+  --ecoya-badge-grape: var(--ecoya-system-grape-2);
+  --ecoya-badge-grape-bg: var(--ecoya-system-grape-6);
+  --ecoya-badge-orange: var(--ecoya-system-orange-2);
+  --ecoya-badge-orange-bg: var(--ecoya-system-orange-6);
+
+  --ecoya-chart-blue-1: #364493;
+  --ecoya-chart-blue-2: #3860ac;
+  --ecoya-chart-blue-3: #3c7ebe;
+  --ecoya-chart-blue-4: #3c96c5;
+  --ecoya-chart-blue-5: #46aec5;
+  --ecoya-chart-blue-6: #53c2c1;
+  --ecoya-chart-blue-7: #71d3ba;
+  --ecoya-chart-blue-8: #98e2b1;
+  --ecoya-chart-blue-9: #c8eca5;
+  --ecoya-chart-blue-10: #f1f1a1;
+  --ecoya-chart-violet-1: #827bbd;
+  --ecoya-chart-violet-2: #988cd6;
+  --ecoya-chart-violet-3: #aa9ede;
+  --ecoya-chart-violet-4: #c2b6ef;
+  --ecoya-chart-violet-5: #d4caf6;
+  --ecoya-chart-aqua-1: #61b3b6;
+  --ecoya-chart-aqua-2: #6cc6c9;
+  --ecoya-chart-aqua-3: #84d4d6;
+  --ecoya-chart-aqua-4: #9be3e3;
+  --ecoya-chart-aqua-5: #aaebec;
+  --ecoya-chart-blueviolet-1: #72bff1;
+  --ecoya-chart-blueviolet-2: #65b2f1;
+  --ecoya-chart-blueviolet-3: #3b79c5;
+  --ecoya-chart-blueviolet-4: #6098de;
+  --ecoya-chart-blueviolet-5: #5e8dcd;
+  --ecoya-chart-blueviolet-6: #5a82be;
+  --ecoya-chart-blueviolet-7: #5677ad;
+  --ecoya-chart-blueviolet-8: #516d9e;
+  --ecoya-chart-blueviolet-9: #4c638f;
+  --ecoya-chart-blueviolet-10: #475880;
+  --ecoya-chart-blueviolet-11: #52638e;
+  --ecoya-chart-blueviolet-12: #5e6f9c;
+  --ecoya-chart-blueviolet-13: #6a7aaa;
+  --ecoya-chart-blueviolet-14: #7686b8;
+  --ecoya-chart-blueviolet-15: #8292c7;
+  --ecoya-chart-blueviolet-16: #8e9fd5;
+  --ecoya-chart-blueviolet-17: #9bace5;
+  --ecoya-chart-blueviolet-18: #b2b0da;
+  --ecoya-chart-blueviolet-19: #a6a4d2;
+  --ecoya-chart-blueviolet-20: #9a98c9;
+  --ecoya-chart-blueviolet-21: #8d8cbf;
+  --ecoya-chart-blueviolet-22: #8081b7;
+  --ecoya-chart-blueviolet-23: #7475ae;
+  --ecoya-chart-blueviolet-24: #676ba5;
+  --ecoya-chart-blueviolet-25: #59609c;
+  --ecoya-chart-teal-1: #3c9196;
+  --ecoya-chart-teal-2: #4d9fa4;
+  --ecoya-chart-teal-3: #5eadb2;
+  --ecoya-chart-teal-4: #6fbbc0;
+  --ecoya-chart-teal-5: #7fc9ce;
+  --ecoya-chart-teal-6: #96cfd7;
+  --ecoya-chart-teal-7: #83bfca;
+  --ecoya-chart-teal-8: #71afbe;
+  --ecoya-chart-teal-9: #5e9fb2;
+  --ecoya-chart-teal-10: #4c90a6;
+  --ecoya-chart-teal-11: #417b93;
+  --ecoya-chart-teal-12: #4c89a6;
+  --ecoya-chart-teal-13: #4d91b0;
+  --ecoya-chart-teal-14: #549bbc;
+  --ecoya-chart-teal-15: #54a1c4;
+  --ecoya-chart-teal-16: #54a8cd;
+  --ecoya-chart-teal-17: #56add4;
+  --ecoya-chart-teal-18: #54b5df;
+  --ecoya-chart-teal-19: #6cbbe1;
+  --ecoya-chart-teal-20: #86c4e3;
+  --ecoya-chart-teal-21: #9bcbe6;
+  --ecoya-chart-teal-22: #aed2e8;
+  --ecoya-chart-teal-23: #c0dae9;
+  --ecoya-chart-teal-24: #cce1ef;
+  --ecoya-chart-teal-25: #d8e7f0;
+  --ecoya-chart-etc: #e9edf0;
+
+  --ecoya-radius-xs: 4px;
+  --ecoya-radius-sm: 8px;
+  --ecoya-radius-md: 10px;
+  --ecoya-radius-lg: 14px;
+  --ecoya-radius-xl: 16px;
+  --ecoya-radius-2xl: 24px;
+  --ecoya-radius-3xl: 32px;
+  --ecoya-radius-4xl: 40px;
+  --ecoya-radius-full: 999px;
+
+  /* TV-PORT G2-R1 브리지: 정본 globals.css:679-683 --r-* 별칭 — shadcn ui 10+모듈이
+     rounded-[var(--r-*)] arbitrary value 로 직접 참조 (G2 toggle 의 --r-md 미정의 적발
+     → 패밀리 선제 브리지). 정본은 var(--radius-*) 경유지만 우리 --radius-* 는
+     @theme inline(런타임 미방출)이라 :root 의 --ecoya-radius-* 직참조로 적응 —
+     W8-V1a 값(4/8/10/14/16px)과 동일함을 검증한다. */
+  --r-xs: var(--ecoya-radius-xs);
+  --r-sm: var(--ecoya-radius-sm);
+  --r-md: var(--ecoya-radius-md);
+  --r-lg: var(--ecoya-radius-lg);
+  --r-xl: var(--ecoya-radius-xl);
+
+  --ecoya-z-background-image: -1;
+  --ecoya-z-side-nav: 100;
+  --ecoya-z-bottom-fixed-buttons: 8000;
+  --ecoya-z-pagination-dropdown: 8010;
+  --ecoya-z-dropdown: 8900;
+  --ecoya-z-dialog: 9000;
+  --ecoya-z-alert-dialog: 9500;
+  --ecoya-z-alert: 9999;
+  --ecoya-z-full-loading: 10001;
+  --ecoya-z-popup: 10500;
+  /* floating-chat-*: SNAP 채팅 전용 예약 레이어 — ERP에서 사용 금지 */
+  --ecoya-z-floating-chat-modal: 10700;
+  --ecoya-z-floating-chat-edit-modal: 10800;
+  --ecoya-z-floating-chat-user-card: 10900;
+  --ecoya-z-floating-chat-sendbird: 11000;
+  --ecoya-z-floating-chat-button: 11100;
+
+  --ecoya-shadow-button-blue:
+    0 1px 2px #0f14281a, 0 0 0 0.5px #3957cc33;
+  --ecoya-shadow-button-blue-hover:
+    0 2px 4px #0f142826, 0 0 0 0.5px #3957cc33;
+  --ecoya-shadow-button-blue-pressed:
+    0 2px 4px #0f142826, 0 0 0 2px #bacaf399, 0 0 0 1px #3957cc99;
+  --ecoya-shadow-button-blue-disabled: 0 1px 2px #0f14281a;
+  --ecoya-shadow-button-red:
+    0 1px 2px #0f14281a, 0 0 0 0.5px #ce2f3433;
+  --ecoya-shadow-button-red-hover:
+    0 2px 4px #0f142826, 0 0 0 0.5px #ce2f3433;
+  --ecoya-shadow-button-red-pressed:
+    0 2px 4px #0f142826, 0 0 0 2px #ce2f3433, 0 0 0 1px #ce2f34;
+  --ecoya-shadow-button-red-disabled:
+    0 1px 2px #0f14281a, 0 0 0 0.5px #ce2f3433;
+  --ecoya-shadow-button-black:
+    0 1px 2px #0f14281a, 0 0 0 0.5px #9ea0a433;
+  --ecoya-shadow-button-black-hover:
+    0 2px 4px #0f142826, 0 0 0 0.5px #9ea0a433;
+  --ecoya-shadow-button-black-pressed:
+    0 2px 4px #0f142826, 0 0 0 2px #0f142833, 0 0 0 1px #0f142899;
+  --ecoya-shadow-button-black-disabled:
+    0 1px 2px #0f14281a, 0 0 0 0.5px #9ea0a433;
+  --ecoya-shadow-input: 0 1px 2px #0f14280a;
+  --ecoya-shadow-input-hover:
+    0 1px 2px #0f142814, 0 0 0 0.5px #9ea0a44d;
+  --ecoya-shadow-input-focus: 0 1px 2px #0f142826, 0 0 0 3px #3957cc2e, 0 0 0 1px #3957cc;
+  --ecoya-shadow-input-focused: var(--ecoya-shadow-input-focus);
+  --ecoya-shadow-input-invalid-focused:
+    0 0 0 1px #ce2f34, 0 0 0 3px #ce2f3433, 0 1px 2px #0f142826;
+  --ecoya-shadow-tag-valid:
+    0 1px 2px #0f14281a, 0 0 0 0.5px #3957cc33;
+  --ecoya-shadow-tag-invalid:
+    0 1px 2px #0f14281a, 0 0 0 0.5px #ce2f3433;
+  --ecoya-shadow-tag-disabled:
+    0 1px 2px #0f14281a, 0 0 0 0.5px #9ea0a433;
+  --ecoya-shadow-filter: 0 4px 12px #0f142814, 0 0 0 1px #0f14280a;
+  --ecoya-shadow-modal: 0 8px 16px #0f142814, 0 20px 48px #0f142824;
+  --ecoya-shadow-card:
+    0 1px 2px #0f14280a, 0 2px 8px #0f14280d;
+  --ecoya-shadow-card-app: 0 1px 2px #0f14280a, 0 4px 12px #0f14280f;
+  --ecoya-shadow-card-hover:
+    0 2px 4px #0f14280f, 0 8px 24px #0f142819, 0 0 0 1px #0f14280a;
+  --ecoya-shadow-card-drag:
+    0 12px 32px #0f142824, 0 0 0 1px #0f14280d;
+  --ecoya-shadow-section: 0 1px 2px #0f142808, 0 1px 3px #0f14280a;
+  --ecoya-shadow-floating-bar: 0 2px 12px #0f142819;
+  /* 정본 confirm.html:1056 ConfirmActionBar shadow-[0_-2px_8px_rgba(0,0,0,0.04)] 토큰화 */
+  --ecoya-shadow-action-bar: 0 -2px 8px #0000000a;
+  /* products Dim atom 계약(gray1 30%)의 토큰화 — overlay/dim 전용 */
+  --ecoya-dim: color-mix(in srgb, var(--ecoya-gray-1) 30%, transparent);
+  /* TV-PORT G4-R1 브리지: 정본 globals.css:193 --overlay-dim — shadcn overlay 4종
+     (dialog/alert-dialog/sheet/drawer 백드롭)이 bg-[var(--overlay-dim)] 로 직접 참조.
+     값은 --ecoya-dim 과 동일 계약(gray-1 30%) — 별칭으로 해소. */
+  --overlay-dim: var(--ecoya-dim);
+  /* TV-PORT G5-R1 브리지: 정본 globals.css:192-200 shadcn 레이어 그림자 토큰 —
+     select/navigation-menu 등이 shadow-(--shadow-*) 괄호 축약으로 런타임 참조
+     (@theme inline 동명 토큰은 유틸 전용·런타임 미방출이라 :root 별칭 필요).
+     input hover/focus 와 modal/filter/section 별칭을 각 ecoya 토큰에 직접 연결한다. */
+  --shadow-input: var(--ecoya-shadow-input);
+  --shadow-modal: var(--ecoya-shadow-modal);
+  --shadow-filter: var(--ecoya-shadow-filter);
+  --shadow-section: var(--ecoya-shadow-section);
+  --shadow-input-hover: var(--ecoya-shadow-input-hover);
+  --shadow-input-focus: var(--ecoya-shadow-input-focus);
+  --shadow-input-focused: var(--ecoya-shadow-input-focus);
+  /* TV-PORT G7-R1 브리지: 정본 globals.css:123-244 의 bare 컬러 패밀리
+     (--color-primary-N / --color-gray-N / --color-red-N / --color-blue-N) —
+     포팅된 shadcn ui 18개 모듈이 [var(--color-*)] / shorthand (--color-*) 로 직접
+     참조하나, 우리 측은 동일 팔레트를 --ecoya-* 로 개명 보유 → 런타임 미해소 갭.
+     기존 --r-* / --overlay-dim / --shadow-* 브리지와 동일 클래스로 :root 별칭 해소.
+     W8-V1a 이후에도 primary/gray/red/system-blue 의 같은 단계 별칭 계약을 유지한다. */
+  --color-primary-1: var(--ecoya-blue-1);
+  --color-primary-4: var(--ecoya-blue-4);
+  --color-primary-10: var(--ecoya-blue-10);
+  --color-gray-2: var(--ecoya-gray-2);
+  --color-gray-4: var(--ecoya-gray-4);
+  --color-gray-6: var(--ecoya-gray-6);
+  --color-gray-7: var(--ecoya-gray-7);
+  --color-gray-8: var(--ecoya-gray-8);
+  --color-gray-9: var(--ecoya-gray-9);
+  --color-gray-10: var(--ecoya-gray-10);
+  --color-gray-11: var(--ecoya-gray-11);
+  --color-gray-12: var(--ecoya-gray-12);
+  --color-red-2: var(--ecoya-system-red-2);
+  --color-blue-2: var(--ecoya-system-blue-2);
+  --background: var(--ecoya-surface);
+  --foreground: var(--ecoya-text-primary);
+  --card: var(--ecoya-surface);
+  --card-foreground: var(--ecoya-text-primary);
+  --popover: var(--ecoya-surface);
+  --popover-foreground: var(--ecoya-text-primary);
+  --primary: var(--ecoya-indigo);
+  --primary-foreground: var(--ecoya-gray-12);
+  --secondary: var(--ecoya-gray-10); /* TV-PORT G2 브리지 (정본 globals.css 정렬): gray-11 → gray-10 */
+  --secondary-foreground: var(--ecoya-gray-3); /* TV-PORT G2 브리지 (정본 globals.css 정렬): gray-2 → gray-3 */
+  --muted: var(--ecoya-gray-10); /* TV-PORT G2 브리지 (정본 globals.css 정렬): gray-11 → gray-10 */
+  --muted-foreground: var(--ecoya-gray-4);
+  --accent: var(--ecoya-blue-10);
+  --accent-foreground: var(--ecoya-indigo);
+  --destructive: var(--ecoya-system-red-2);
+  --destructive-foreground: var(--ecoya-gray-12); /* TV-PORT G2 브리지 (정본 globals.css 정렬): #ffffff onDestructive 텍스트, 정본 --color-gray-12와 동일 hex */
+  --border: var(--ecoya-border);
+  --input: var(--ecoya-border);
+  --ring: var(--ecoya-blue-5);
+  --chart-1: var(--ecoya-chart-blue-4);
+  /* TV-PORT G6-R1: 정본 라이브 globals.css:365/367 정렬 — token-viewer(구 시점)의
+     teal-10/teal-22 시맨틱이 정본에서 teal-4/aqua-3 으로 진화함 (hex 동일 토큰 기보유). */
+  --chart-2: var(--ecoya-chart-teal-4);
+  --chart-3: var(--ecoya-chart-violet-3);
+  --chart-4: var(--ecoya-chart-aqua-3);
+  --chart-5: var(--ecoya-chart-etc);
+  /* TV-PORT G2-R1 브리지: 구 shadcn 기본 0.625rem → 정본 globals.css:369 정렬
+     (우리 측 var(--radius) 직접 소비자 0 실측, 정본 ui 1모듈이 직접 참조) */
+  --radius: 10px;
+  --sidebar: var(--ecoya-surface);
+  --sidebar-foreground: var(--ecoya-text-primary);
+  --sidebar-primary: var(--ecoya-indigo);
+  --sidebar-primary-foreground: var(--ecoya-gray-12);
+  --sidebar-accent: var(--ecoya-blue-10);
+  --sidebar-accent-foreground: var(--ecoya-indigo);
+  --sidebar-border: var(--ecoya-border);
+  --sidebar-ring: var(--ecoya-blue-5);
+}
+
+:root[data-theme="dark"],
+.dark {
+  --ecoya-surface: var(--ecoya-dark-gray-12);
+  --ecoya-surface-muted: var(--ecoya-dark-gray-11);
+  --ecoya-surface-subtle: var(--ecoya-dark-gray-10);
+  --ecoya-surface-primary: var(--ecoya-dark-blue-10);
+  --ecoya-surface-inverse: var(--ecoya-dark-gray-1);
+  --ecoya-surface-card: var(--ecoya-dark-gray-10);
+  --ecoya-border: var(--ecoya-dark-gray-8);
+  --ecoya-border-muted: var(--ecoya-dark-gray-9);
+  --ecoya-border-subtle: var(--ecoya-dark-gray-10);
+  --ecoya-text-strong: var(--ecoya-dark-gray-1);
+  --ecoya-text-primary: var(--ecoya-dark-gray-1);
+  --ecoya-text-secondary: var(--ecoya-dark-gray-3);
+  --ecoya-text-muted: var(--ecoya-dark-gray-4);
+  --ecoya-text-disabled: var(--ecoya-dark-gray-6);
+  --ecoya-text-placeholder: var(--ecoya-dark-gray-7);
+  /* FE#793 (user decision, 2026-08-06): dark counterpart of the light-mode
+     fix above. Was dark-gray-8 (1.55:1 against dark surface = dark-gray-12,
+     fails AA). The dark ramp runs the opposite direction from light (lower
+     step = lighter), so this is NOT the same step index as the light fix —
+     measured independently: dark-gray-5 (3.93:1) still fails, dark-gray-4
+     (5.75:1) is the lightest/least-prominent step that clears AA. Same
+     "minimum passing step" method as the light-mode decision. Structurally
+     unreachable today (no theme toggle applies .dark/data-theme anywhere in
+     this app) but kept correct for when that changes. */
+  --ecoya-text-subtle: var(--ecoya-dark-gray-4);
+  --ecoya-text-inverse: var(--ecoya-dark-gray-12);
+  --ecoya-accent: var(--ecoya-dark-blue-4);
+  --ecoya-accent-hover: var(--ecoya-dark-blue-3);
+  --ecoya-accent-soft: var(--ecoya-dark-blue-10);
+  --ecoya-control-selected: var(--ecoya-dark-blue-1);
+  --ecoya-control-track-active: var(--ecoya-dark-system-blue-2);
+  --ecoya-control-track-inactive: var(--ecoya-dark-gray-7);
+  --ecoya-control-track-disabled: var(--ecoya-dark-gray-8);
+  --ecoya-control-knob: var(--ecoya-dark-gray-12);
+  --ecoya-control-knob-disabled: var(--ecoya-dark-gray-9);
+  --ecoya-control-error: var(--ecoya-dark-system-red-2);
+  --ecoya-status-danger: var(--ecoya-dark-system-red-2);
+  --ecoya-status-danger-bg: var(--ecoya-dark-system-red-8);
+  --ecoya-status-warning: var(--ecoya-dark-system-yellow-2);
+  --ecoya-status-warning-bg: var(--ecoya-dark-system-yellow-6);
+  --ecoya-status-success: var(--ecoya-dark-system-green-2);
+  --ecoya-status-success-bg: var(--ecoya-dark-system-green-6);
+  --ecoya-status-info: var(--ecoya-dark-system-blue-2);
+  --ecoya-status-info-bg: var(--ecoya-dark-system-blue-6);
+  --ecoya-badge-pink: var(--ecoya-dark-system-pink-2);
+  --ecoya-badge-pink-bg: var(--ecoya-dark-system-pink-6);
+  --ecoya-badge-lime: var(--ecoya-dark-system-lime-2);
+  --ecoya-badge-lime-bg: var(--ecoya-dark-system-lime-6);
+  --ecoya-badge-grape: var(--ecoya-dark-system-grape-2);
+  --ecoya-badge-grape-bg: var(--ecoya-dark-system-grape-6);
+  --ecoya-badge-orange: var(--ecoya-dark-system-orange-2);
+  --ecoya-badge-orange-bg: var(--ecoya-dark-system-orange-6);
+  --background: var(--ecoya-surface);
+  --foreground: var(--ecoya-text-primary);
+  --card: var(--ecoya-surface);
+  --card-foreground: var(--ecoya-text-primary);
+  --popover: var(--ecoya-surface);
+  --popover-foreground: var(--ecoya-text-primary);
+  --primary: var(--ecoya-dark-indigo);
+  --primary-foreground: var(--ecoya-dark-gray-12);
+  --secondary: var(--ecoya-dark-gray-10);
+  --secondary-foreground: var(--ecoya-dark-gray-3); /* TV-PORT G2 브리지 (정본 globals.css 정렬): dark #BABDC4 = dark-gray-3 */
+  --muted: var(--ecoya-dark-gray-10);
+  --muted-foreground: var(--ecoya-dark-gray-4);
+  --accent: var(--ecoya-dark-blue-10);
+  --accent-foreground: var(--ecoya-dark-blue-1);
+  --destructive: var(--ecoya-dark-system-red-2);
+  --destructive-foreground: var(--ecoya-gray-12); /* TV-PORT G2 브리지 (정본 globals.css 정렬): 다크 onDestructive도 흰색 #ffffff 유지 (정본 .dark 미정의 보강) */
+  --border: var(--ecoya-border);
+  --input: var(--ecoya-border);
+  --ring: var(--ecoya-dark-blue-5);
+  --sidebar: var(--ecoya-surface);
+  --sidebar-foreground: var(--ecoya-text-primary);
+  --sidebar-primary: var(--ecoya-dark-indigo);
+  --sidebar-primary-foreground: var(--ecoya-dark-gray-12);
+  --sidebar-accent: var(--ecoya-dark-blue-10);
+  --sidebar-accent-foreground: var(--ecoya-dark-blue-1);
+  --sidebar-border: var(--ecoya-border);
+  --sidebar-ring: var(--ecoya-dark-blue-5);
+}
+
+@theme inline {
+  --font-sans: var(--ecoya-font-sans);
+  --font-document: var(--ecoya-font-document);
+  --shadow-control-slot: var(--ecoya-shadow-control-slot);
+  --color-table-border: var(--ecoya-table-border);
+  --color-viewer-divider: var(--ecoya-viewer-divider);
+  --color-upload-border: var(--ecoya-upload-border);
+  --color-upload-background: var(--ecoya-upload-background);
+  --color-upload-hover: var(--ecoya-upload-hover);
+
+  --radius-hero-radius: var(--ecoya-hero-radius);
+  --radius-hero-pill-radius: var(--ecoya-hero-pill-radius);
+  --radius-hero-upload-radius: var(--ecoya-hero-upload-radius);
+  --color-hero-autosave-background: var(--ecoya-hero-autosave-background);
+  --color-hero-autosave-indicator: var(--ecoya-hero-autosave-indicator);
+  --color-hero-card-border: var(--ecoya-hero-card-border);
+  --color-hero-card-title: var(--ecoya-hero-card-title);
+  --color-hero-card-description: var(--ecoya-hero-card-description);
+  --color-hero-description: var(--ecoya-hero-description);
+  --shadow-hero-elevated: var(--ecoya-hero-elevated);
+  --drop-shadow-hero-empty: var(--ecoya-hero-empty);
+  --drop-shadow-hero-card: var(--ecoya-hero-card);
+  --spacing-hero-height-small: var(--ecoya-hero-height-small);
+  --spacing-hero-height: var(--ecoya-hero-height);
+  --spacing-hero-card-height: var(--ecoya-hero-card-height);
+  --spacing-hero-autosave-height: var(--ecoya-hero-autosave-height);
+  --spacing-hero-indicator-size: var(--ecoya-hero-indicator-size);
+  --spacing-hero-inset: var(--ecoya-hero-inset);
+  --spacing-hero-card-inset: var(--ecoya-hero-card-inset);
+  --spacing-hero-card-gap: var(--ecoya-hero-card-gap);
+  --spacing-hero-title-inset: var(--ecoya-hero-title-inset);
+  --spacing-hero-description-inset: var(--ecoya-hero-description-inset);
+  --spacing-hero-empty-description-height: var(--ecoya-hero-empty-description-height);
+  --spacing-hero-upload-gap: var(--ecoya-hero-upload-gap);
+  --spacing-hero-upload-inset-bottom: var(--ecoya-hero-upload-inset-bottom);
+  --text-hero-title-size: var(--ecoya-hero-title-size);
+  --text-hero-card-title-size: var(--ecoya-hero-card-title-size);
+  --text-hero-body-size: var(--ecoya-hero-body-size);
+  --text-hero-meta-size: var(--ecoya-hero-meta-size);
+  --leading-hero-title-leading: var(--ecoya-hero-title-leading);
+  --leading-hero-body-leading: var(--ecoya-hero-body-leading);
+  --leading-hero-empty-description-leading: var(--ecoya-hero-empty-description-leading);
+  --color-hero-foreground: var(--ecoya-hero-foreground);
+  --background-image-hero-gradient: var(--ecoya-hero-gradient);
+  --background-image-hero-gradient-small: var(--ecoya-hero-gradient-small);
+
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-ecoya-indigo: var(--ecoya-indigo);
+  --color-ecoya-blue-1: var(--ecoya-blue-1);
+  --color-ecoya-blue-2: var(--ecoya-blue-2);
+  --color-ecoya-blue-3: var(--ecoya-blue-3);
+  --color-ecoya-blue-4: var(--ecoya-blue-4);
+  --color-ecoya-blue-5: var(--ecoya-blue-5);
+  --color-ecoya-blue-6: var(--ecoya-blue-6);
+  --color-ecoya-blue-7: var(--ecoya-blue-7);
+  --color-ecoya-blue-8: var(--ecoya-blue-8);
+  --color-ecoya-blue-9: var(--ecoya-blue-9);
+  --color-ecoya-blue-10: var(--ecoya-blue-10);
+  --color-ecoya-gray-1: var(--ecoya-gray-1);
+  --color-ecoya-gray-2: var(--ecoya-gray-2);
+  --color-ecoya-gray-3: var(--ecoya-gray-3);
+  --color-ecoya-gray-4: var(--ecoya-gray-4);
+  --color-ecoya-gray-5: var(--ecoya-gray-5);
+  --color-ecoya-gray-6: var(--ecoya-gray-6);
+  --color-ecoya-gray-7: var(--ecoya-gray-7);
+  --color-ecoya-gray-8: var(--ecoya-gray-8);
+  --color-ecoya-gray-9: var(--ecoya-gray-9);
+  --color-ecoya-gray-10: var(--ecoya-gray-10);
+  --color-ecoya-gray-11: var(--ecoya-gray-11);
+  --color-ecoya-gray-12: var(--ecoya-gray-12);
+  --color-ecoya-system-red-1: var(--ecoya-system-red-1);
+  --color-ecoya-system-red-2: var(--ecoya-system-red-2);
+  --color-ecoya-system-red-3: var(--ecoya-system-red-3);
+  --color-ecoya-system-red-4: var(--ecoya-system-red-4);
+  --color-ecoya-system-red-5: var(--ecoya-system-red-5);
+  --color-ecoya-system-red-6: var(--ecoya-system-red-6);
+  --color-ecoya-system-red-7: var(--ecoya-system-red-7);
+  --color-ecoya-system-red-8: var(--ecoya-system-red-8);
+  --color-ecoya-system-yellow-ink: var(--ecoya-system-yellow-ink);
+  --color-ecoya-system-yellow-1: var(--ecoya-system-yellow-1);
+  --color-ecoya-system-yellow-2: var(--ecoya-system-yellow-2);
+  --color-ecoya-system-yellow-3: var(--ecoya-system-yellow-3);
+  --color-ecoya-system-yellow-4: var(--ecoya-system-yellow-4);
+  --color-ecoya-system-yellow-5: var(--ecoya-system-yellow-5);
+  --color-ecoya-system-yellow-6: var(--ecoya-system-yellow-6);
+  --color-ecoya-system-green-1: var(--ecoya-system-green-1);
+  --color-ecoya-system-green-2: var(--ecoya-system-green-2);
+  --color-ecoya-system-green-3: var(--ecoya-system-green-3);
+  --color-ecoya-system-green-4: var(--ecoya-system-green-4);
+  --color-ecoya-system-green-5: var(--ecoya-system-green-5);
+  --color-ecoya-system-green-6: var(--ecoya-system-green-6);
+  --color-ecoya-system-blue-1: var(--ecoya-system-blue-1);
+  --color-ecoya-system-blue-2: var(--ecoya-system-blue-2);
+  --color-ecoya-system-blue-3: var(--ecoya-system-blue-3);
+  --color-ecoya-system-blue-4: var(--ecoya-system-blue-4);
+  --color-ecoya-system-blue-5: var(--ecoya-system-blue-5);
+  --color-ecoya-system-blue-6: var(--ecoya-system-blue-6);
+  --color-ecoya-system-pink-1: var(--ecoya-system-pink-1);
+  --color-ecoya-system-pink-2: var(--ecoya-system-pink-2);
+  --color-ecoya-system-pink-3: var(--ecoya-system-pink-3);
+  --color-ecoya-system-pink-4: var(--ecoya-system-pink-4);
+  --color-ecoya-system-pink-5: var(--ecoya-system-pink-5);
+  --color-ecoya-system-pink-6: var(--ecoya-system-pink-6);
+  --color-ecoya-system-lime-1: var(--ecoya-system-lime-1);
+  --color-ecoya-system-lime-2: var(--ecoya-system-lime-2);
+  --color-ecoya-system-lime-3: var(--ecoya-system-lime-3);
+  --color-ecoya-system-lime-4: var(--ecoya-system-lime-4);
+  --color-ecoya-system-lime-5: var(--ecoya-system-lime-5);
+  --color-ecoya-system-lime-6: var(--ecoya-system-lime-6);
+  --color-ecoya-system-grape-1: var(--ecoya-system-grape-1);
+  --color-ecoya-system-grape-2: var(--ecoya-system-grape-2);
+  --color-ecoya-system-grape-3: var(--ecoya-system-grape-3);
+  --color-ecoya-system-grape-4: var(--ecoya-system-grape-4);
+  --color-ecoya-system-grape-5: var(--ecoya-system-grape-5);
+  --color-ecoya-system-grape-6: var(--ecoya-system-grape-6);
+  --color-ecoya-system-orange-1: var(--ecoya-system-orange-1);
+  --color-ecoya-system-orange-2: var(--ecoya-system-orange-2);
+  --color-ecoya-system-orange-3: var(--ecoya-system-orange-3);
+  --color-ecoya-system-orange-4: var(--ecoya-system-orange-4);
+  --color-ecoya-system-orange-5: var(--ecoya-system-orange-5);
+  --color-ecoya-system-orange-6: var(--ecoya-system-orange-6);
+  --color-ecoya-dark-indigo: var(--ecoya-dark-indigo);
+  --color-ecoya-dark-blue-1: var(--ecoya-dark-blue-1);
+  --color-ecoya-dark-blue-2: var(--ecoya-dark-blue-2);
+  --color-ecoya-dark-blue-3: var(--ecoya-dark-blue-3);
+  --color-ecoya-dark-blue-4: var(--ecoya-dark-blue-4);
+  --color-ecoya-dark-blue-5: var(--ecoya-dark-blue-5);
+  --color-ecoya-dark-blue-6: var(--ecoya-dark-blue-6);
+  --color-ecoya-dark-blue-7: var(--ecoya-dark-blue-7);
+  --color-ecoya-dark-blue-8: var(--ecoya-dark-blue-8);
+  --color-ecoya-dark-blue-9: var(--ecoya-dark-blue-9);
+  --color-ecoya-dark-blue-10: var(--ecoya-dark-blue-10);
+  --color-ecoya-dark-gray-1: var(--ecoya-dark-gray-1);
+  --color-ecoya-dark-gray-2: var(--ecoya-dark-gray-2);
+  --color-ecoya-dark-gray-3: var(--ecoya-dark-gray-3);
+  --color-ecoya-dark-gray-4: var(--ecoya-dark-gray-4);
+  --color-ecoya-dark-gray-5: var(--ecoya-dark-gray-5);
+  --color-ecoya-dark-gray-6: var(--ecoya-dark-gray-6);
+  --color-ecoya-dark-gray-7: var(--ecoya-dark-gray-7);
+  --color-ecoya-dark-gray-8: var(--ecoya-dark-gray-8);
+  --color-ecoya-dark-gray-9: var(--ecoya-dark-gray-9);
+  --color-ecoya-dark-gray-10: var(--ecoya-dark-gray-10);
+  --color-ecoya-dark-gray-11: var(--ecoya-dark-gray-11);
+  --color-ecoya-dark-gray-12: var(--ecoya-dark-gray-12);
+  --color-ecoya-dark-system-red-1: var(--ecoya-dark-system-red-1);
+  --color-ecoya-dark-system-red-2: var(--ecoya-dark-system-red-2);
+  --color-ecoya-dark-system-red-3: var(--ecoya-dark-system-red-3);
+  --color-ecoya-dark-system-red-4: var(--ecoya-dark-system-red-4);
+  --color-ecoya-dark-system-red-5: var(--ecoya-dark-system-red-5);
+  --color-ecoya-dark-system-red-6: var(--ecoya-dark-system-red-6);
+  --color-ecoya-dark-system-red-7: var(--ecoya-dark-system-red-7);
+  --color-ecoya-dark-system-red-8: var(--ecoya-dark-system-red-8);
+  --color-ecoya-dark-system-yellow-1: var(--ecoya-dark-system-yellow-1);
+  --color-ecoya-dark-system-yellow-2: var(--ecoya-dark-system-yellow-2);
+  --color-ecoya-dark-system-yellow-3: var(--ecoya-dark-system-yellow-3);
+  --color-ecoya-dark-system-yellow-4: var(--ecoya-dark-system-yellow-4);
+  --color-ecoya-dark-system-yellow-5: var(--ecoya-dark-system-yellow-5);
+  --color-ecoya-dark-system-yellow-6: var(--ecoya-dark-system-yellow-6);
+  --color-ecoya-dark-system-green-1: var(--ecoya-dark-system-green-1);
+  --color-ecoya-dark-system-green-2: var(--ecoya-dark-system-green-2);
+  --color-ecoya-dark-system-green-3: var(--ecoya-dark-system-green-3);
+  --color-ecoya-dark-system-green-4: var(--ecoya-dark-system-green-4);
+  --color-ecoya-dark-system-green-5: var(--ecoya-dark-system-green-5);
+  --color-ecoya-dark-system-green-6: var(--ecoya-dark-system-green-6);
+  --color-ecoya-dark-system-blue-1: var(--ecoya-dark-system-blue-1);
+  --color-ecoya-dark-system-blue-2: var(--ecoya-dark-system-blue-2);
+  --color-ecoya-dark-system-blue-3: var(--ecoya-dark-system-blue-3);
+  --color-ecoya-dark-system-blue-4: var(--ecoya-dark-system-blue-4);
+  --color-ecoya-dark-system-blue-5: var(--ecoya-dark-system-blue-5);
+  --color-ecoya-dark-system-blue-6: var(--ecoya-dark-system-blue-6);
+  --color-ecoya-dark-system-pink-1: var(--ecoya-dark-system-pink-1);
+  --color-ecoya-dark-system-pink-2: var(--ecoya-dark-system-pink-2);
+  --color-ecoya-dark-system-pink-3: var(--ecoya-dark-system-pink-3);
+  --color-ecoya-dark-system-pink-4: var(--ecoya-dark-system-pink-4);
+  --color-ecoya-dark-system-pink-5: var(--ecoya-dark-system-pink-5);
+  --color-ecoya-dark-system-pink-6: var(--ecoya-dark-system-pink-6);
+  --color-ecoya-dark-system-lime-1: var(--ecoya-dark-system-lime-1);
+  --color-ecoya-dark-system-lime-2: var(--ecoya-dark-system-lime-2);
+  --color-ecoya-dark-system-lime-3: var(--ecoya-dark-system-lime-3);
+  --color-ecoya-dark-system-lime-4: var(--ecoya-dark-system-lime-4);
+  --color-ecoya-dark-system-lime-5: var(--ecoya-dark-system-lime-5);
+  --color-ecoya-dark-system-lime-6: var(--ecoya-dark-system-lime-6);
+  --color-ecoya-dark-system-grape-1: var(--ecoya-dark-system-grape-1);
+  --color-ecoya-dark-system-grape-2: var(--ecoya-dark-system-grape-2);
+  --color-ecoya-dark-system-grape-3: var(--ecoya-dark-system-grape-3);
+  --color-ecoya-dark-system-grape-4: var(--ecoya-dark-system-grape-4);
+  --color-ecoya-dark-system-grape-5: var(--ecoya-dark-system-grape-5);
+  --color-ecoya-dark-system-grape-6: var(--ecoya-dark-system-grape-6);
+  --color-ecoya-dark-system-orange-1: var(--ecoya-dark-system-orange-1);
+  --color-ecoya-dark-system-orange-2: var(--ecoya-dark-system-orange-2);
+  --color-ecoya-dark-system-orange-3: var(--ecoya-dark-system-orange-3);
+  --color-ecoya-dark-system-orange-4: var(--ecoya-dark-system-orange-4);
+  --color-ecoya-dark-system-orange-5: var(--ecoya-dark-system-orange-5);
+  --color-ecoya-dark-system-orange-6: var(--ecoya-dark-system-orange-6);
+  --color-surface: var(--ecoya-surface);
+  --color-surface-muted: var(--ecoya-surface-muted);
+  --color-surface-subtle: var(--ecoya-surface-subtle);
+  --color-surface-primary: var(--ecoya-surface-primary);
+  --color-surface-inverse: var(--ecoya-surface-inverse);
+  --color-surface-card: var(--ecoya-surface-card);
+  --color-border: var(--ecoya-border);
+  --color-border-muted: var(--ecoya-border-muted);
+  --color-border-subtle: var(--ecoya-border-subtle);
+  --color-text-strong: var(--ecoya-text-strong);
+  --color-text-primary: var(--ecoya-text-primary);
+  --color-text-secondary: var(--ecoya-text-secondary);
+  --color-text-muted: var(--ecoya-text-muted);
+  --color-text-disabled: var(--ecoya-text-disabled);
+  --color-text-placeholder: var(--ecoya-text-placeholder);
+  --color-text-subtle: var(--ecoya-text-subtle);
+  --color-text-inverse: var(--ecoya-text-inverse);
+  /* TV-PORT G2 브리지 완료: --color-accent 정본(var(--accent)) 재지정 완료.
+     기존 실소비자 8건(auth·ErpShell·Confirm)은 text/border-ecoya-accent 로 마이그레이션
+     (G3-R1: theme-adaptive — 라이트 blue-4 #166dd7 / 다크 dark-blue-4 #217ee8, 종전과 동일). */
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--ecoya-accent-hover);
+  --color-accent-soft: var(--ecoya-accent-soft);
+  --color-ecoya-accent: var(--ecoya-accent);
+  --color-ecoya-accent-soft: var(--ecoya-accent-soft);
+  --color-ecoya-surface-card: var(--ecoya-surface-card);
+  --color-ecoya-surface-muted: var(--ecoya-surface-muted);
+  --color-ecoya-surface-subtle: var(--ecoya-surface-subtle);
+  --color-ecoya-border: var(--ecoya-border);
+  --color-ecoya-border-subtle: var(--ecoya-border-subtle);
+  --color-ecoya-text-strong: var(--ecoya-text-strong);
+  --color-ecoya-text-primary: var(--ecoya-text-primary);
+  --color-ecoya-text-secondary: var(--ecoya-text-secondary);
+  --color-ecoya-text-muted: var(--ecoya-text-muted);
+  --color-control-selected: var(--ecoya-control-selected);
+  --color-control-track-active: var(--ecoya-control-track-active);
+  --color-control-track-inactive: var(--ecoya-control-track-inactive);
+  --color-control-track-disabled: var(--ecoya-control-track-disabled);
+  --color-control-knob: var(--ecoya-control-knob);
+  --color-control-knob-disabled: var(--ecoya-control-knob-disabled);
+  --color-control-error: var(--ecoya-control-error);
+  --color-status-danger: var(--ecoya-status-danger);
+  --color-status-danger-bg: var(--ecoya-status-danger-bg);
+  --color-status-warning: var(--ecoya-status-warning);
+  --color-status-warning-bg: var(--ecoya-status-warning-bg);
+  --color-status-success: var(--ecoya-status-success);
+  --color-status-success-bg: var(--ecoya-status-success-bg);
+  --color-status-info: var(--ecoya-status-info);
+  --color-status-info-bg: var(--ecoya-status-info-bg);
+  --color-badge-pink: var(--ecoya-badge-pink);
+  --color-badge-pink-bg: var(--ecoya-badge-pink-bg);
+  --color-badge-lime: var(--ecoya-badge-lime);
+  --color-badge-lime-bg: var(--ecoya-badge-lime-bg);
+  --color-badge-grape: var(--ecoya-badge-grape);
+  --color-badge-grape-bg: var(--ecoya-badge-grape-bg);
+  --color-badge-orange: var(--ecoya-badge-orange);
+  --color-badge-orange-bg: var(--ecoya-badge-orange-bg);
+  --color-ecoya-chart-blue-1: var(--ecoya-chart-blue-1);
+  --color-ecoya-chart-blue-2: var(--ecoya-chart-blue-2);
+  --color-ecoya-chart-blue-3: var(--ecoya-chart-blue-3);
+  --color-ecoya-chart-blue-4: var(--ecoya-chart-blue-4);
+  --color-ecoya-chart-blue-5: var(--ecoya-chart-blue-5);
+  --color-ecoya-chart-blue-6: var(--ecoya-chart-blue-6);
+  --color-ecoya-chart-blue-7: var(--ecoya-chart-blue-7);
+  --color-ecoya-chart-blue-8: var(--ecoya-chart-blue-8);
+  --color-ecoya-chart-blue-9: var(--ecoya-chart-blue-9);
+  --color-ecoya-chart-blue-10: var(--ecoya-chart-blue-10);
+  --color-ecoya-chart-violet-1: var(--ecoya-chart-violet-1);
+  --color-ecoya-chart-violet-2: var(--ecoya-chart-violet-2);
+  --color-ecoya-chart-violet-3: var(--ecoya-chart-violet-3);
+  --color-ecoya-chart-violet-4: var(--ecoya-chart-violet-4);
+  --color-ecoya-chart-violet-5: var(--ecoya-chart-violet-5);
+  --color-ecoya-chart-aqua-1: var(--ecoya-chart-aqua-1);
+  --color-ecoya-chart-aqua-2: var(--ecoya-chart-aqua-2);
+  --color-ecoya-chart-aqua-3: var(--ecoya-chart-aqua-3);
+  --color-ecoya-chart-aqua-4: var(--ecoya-chart-aqua-4);
+  --color-ecoya-chart-aqua-5: var(--ecoya-chart-aqua-5);
+  --color-ecoya-chart-blueviolet-1: var(--ecoya-chart-blueviolet-1);
+  --color-ecoya-chart-blueviolet-2: var(--ecoya-chart-blueviolet-2);
+  --color-ecoya-chart-blueviolet-3: var(--ecoya-chart-blueviolet-3);
+  --color-ecoya-chart-blueviolet-4: var(--ecoya-chart-blueviolet-4);
+  --color-ecoya-chart-blueviolet-5: var(--ecoya-chart-blueviolet-5);
+  --color-ecoya-chart-blueviolet-6: var(--ecoya-chart-blueviolet-6);
+  --color-ecoya-chart-blueviolet-7: var(--ecoya-chart-blueviolet-7);
+  --color-ecoya-chart-blueviolet-8: var(--ecoya-chart-blueviolet-8);
+  --color-ecoya-chart-blueviolet-9: var(--ecoya-chart-blueviolet-9);
+  --color-ecoya-chart-blueviolet-10: var(--ecoya-chart-blueviolet-10);
+  --color-ecoya-chart-blueviolet-11: var(--ecoya-chart-blueviolet-11);
+  --color-ecoya-chart-blueviolet-12: var(--ecoya-chart-blueviolet-12);
+  --color-ecoya-chart-blueviolet-13: var(--ecoya-chart-blueviolet-13);
+  --color-ecoya-chart-blueviolet-14: var(--ecoya-chart-blueviolet-14);
+  --color-ecoya-chart-blueviolet-15: var(--ecoya-chart-blueviolet-15);
+  --color-ecoya-chart-blueviolet-16: var(--ecoya-chart-blueviolet-16);
+  --color-ecoya-chart-blueviolet-17: var(--ecoya-chart-blueviolet-17);
+  --color-ecoya-chart-blueviolet-18: var(--ecoya-chart-blueviolet-18);
+  --color-ecoya-chart-blueviolet-19: var(--ecoya-chart-blueviolet-19);
+  --color-ecoya-chart-blueviolet-20: var(--ecoya-chart-blueviolet-20);
+  --color-ecoya-chart-blueviolet-21: var(--ecoya-chart-blueviolet-21);
+  --color-ecoya-chart-blueviolet-22: var(--ecoya-chart-blueviolet-22);
+  --color-ecoya-chart-blueviolet-23: var(--ecoya-chart-blueviolet-23);
+  --color-ecoya-chart-blueviolet-24: var(--ecoya-chart-blueviolet-24);
+  --color-ecoya-chart-blueviolet-25: var(--ecoya-chart-blueviolet-25);
+  --color-ecoya-chart-teal-1: var(--ecoya-chart-teal-1);
+  --color-ecoya-chart-teal-2: var(--ecoya-chart-teal-2);
+  --color-ecoya-chart-teal-3: var(--ecoya-chart-teal-3);
+  --color-ecoya-chart-teal-4: var(--ecoya-chart-teal-4);
+  --color-ecoya-chart-teal-5: var(--ecoya-chart-teal-5);
+  --color-ecoya-chart-teal-6: var(--ecoya-chart-teal-6);
+  --color-ecoya-chart-teal-7: var(--ecoya-chart-teal-7);
+  --color-ecoya-chart-teal-8: var(--ecoya-chart-teal-8);
+  --color-ecoya-chart-teal-9: var(--ecoya-chart-teal-9);
+  --color-ecoya-chart-teal-10: var(--ecoya-chart-teal-10);
+  --color-ecoya-chart-teal-11: var(--ecoya-chart-teal-11);
+  --color-ecoya-chart-teal-12: var(--ecoya-chart-teal-12);
+  --color-ecoya-chart-teal-13: var(--ecoya-chart-teal-13);
+  --color-ecoya-chart-teal-14: var(--ecoya-chart-teal-14);
+  --color-ecoya-chart-teal-15: var(--ecoya-chart-teal-15);
+  --color-ecoya-chart-teal-16: var(--ecoya-chart-teal-16);
+  --color-ecoya-chart-teal-17: var(--ecoya-chart-teal-17);
+  --color-ecoya-chart-teal-18: var(--ecoya-chart-teal-18);
+  --color-ecoya-chart-teal-19: var(--ecoya-chart-teal-19);
+  --color-ecoya-chart-teal-20: var(--ecoya-chart-teal-20);
+  --color-ecoya-chart-teal-21: var(--ecoya-chart-teal-21);
+  --color-ecoya-chart-teal-22: var(--ecoya-chart-teal-22);
+  --color-ecoya-chart-teal-23: var(--ecoya-chart-teal-23);
+  --color-ecoya-chart-teal-24: var(--ecoya-chart-teal-24);
+  --color-ecoya-chart-teal-25: var(--ecoya-chart-teal-25);
+  --color-ecoya-chart-etc: var(--ecoya-chart-etc);
+
+  /* FIGMA-RADIUS-01 (2026-09-07) — rounded-* 유틸 별칭의 값을 Figma 정본으로 옮긴다.
+   *
+   * 체인 실측: `rounded-md` → 이 블록의 `--radius-md` → `--ecoya-radius-md`
+   * (globals.css:301) = **10px**. Figma SNAP 2.0 node 48:5 의 radius 변수는
+   * r/md = 8 이다. 즉 `rounded-md` 를 쓴 모든 표면이 정본 대비 +2px 로 렌더됐다.
+   * `@theme inline` 이라 유틸은 참조를 인라인하므로(.rounded-md { border-radius:
+   * var(--ecoya-radius-md) }) 별칭을 고치지 않는 한 값이 바뀌지 않는다.
+   *
+   * Figma 실측 — 추출본 각 노드의 variables.json 에 있는 `r/` 바인딩 42건, 값 충돌 0건:
+   *   r/xs 4 · r/sm 6 · r/md 8 · r/lg 12 · r/xl 16 · r/pill 999
+   * 코드젠 문자열의 폴백도 같다: `var(--r-md,8px)` 699건 · `var(--r-sm,6px)` 356건 ·
+   * `var(--r-lg,12px)` 75건 · `var(--r-xs,4px)` 112건 · `var(--r-xl,16px)` 8건.
+   * Figma Button 은 높이별로 24px→6 · 32px→8 · 40px→8 이라 ui/button.tsx sizeBase 의
+   * 구조 매핑(h-6→rounded-sm · h-8/h-10→rounded-md)은 이미 정본과 같고 **값만** 틀렸다.
+   *
+   * 영향 범위(전역 재정의): `rounded-sm|md|lg` 1068곳 / 263파일
+   *   (rounded-md 598 · rounded-lg 402 · rounded-sm 68).
+   *   `[data-ds="2"]` 스코프는 tokens-ds2.css:160-176 이 이미 6/8/12 로 재지정하므로
+   *   **렌더 변화 0** 이고, 실제로 움직이는 것은 스코프 밖 DS 1.0 표면뿐이다
+   *   (8/10/14 → 6/8/12). 국소 치환(컴포넌트별 리터럴)은 1068곳 중 몇 곳만 고쳐
+   *   클래스를 닫지 못하므로 별칭 자체를 옮긴다 — 정책상 Figma 가 erp-v2 패리티·
+   *   CI 핀보다 우선한다.
+   *
+   * `--ecoya-radius-*` 선언(:299-307)은 한 글자도 건드리지 않는다. W8-V1a 계약을
+   * 지키는 verify:foundation 의 `ecoya-radius-*` 값 핀도, verify:products-token-parity
+   * 의 CANONICAL_OVERRIDE(erp 6/8/12 ↔ FE 8/10/14)도 그대로 통과한다.
+   * 이 다섯 값은 scripts/verify-figma-radius.mjs 가 Figma 원장과 기계 대조한다. */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --shadow-button-blue: var(--ecoya-shadow-button-blue);
+  --shadow-button-blue-hover: var(--ecoya-shadow-button-blue-hover);
+  --shadow-button-blue-pressed: var(--ecoya-shadow-button-blue-pressed);
+  --shadow-button-blue-disabled: var(--ecoya-shadow-button-blue-disabled);
+  --shadow-button-red: var(--ecoya-shadow-button-red);
+  --shadow-button-red-hover: var(--ecoya-shadow-button-red-hover);
+  --shadow-button-red-pressed: var(--ecoya-shadow-button-red-pressed);
+  --shadow-button-red-disabled: var(--ecoya-shadow-button-red-disabled);
+  --shadow-button-black: var(--ecoya-shadow-button-black);
+  --shadow-button-black-hover: var(--ecoya-shadow-button-black-hover);
+  --shadow-button-black-pressed: var(--ecoya-shadow-button-black-pressed);
+  --shadow-button-black-disabled: var(--ecoya-shadow-button-black-disabled);
+  --shadow-input: var(--ecoya-shadow-input);
+  --shadow-input-hover: var(--ecoya-shadow-input-hover);
+  --shadow-input-focus: var(--ecoya-shadow-input-focus);
+  --shadow-input-focused: var(--ecoya-shadow-input-focused);
+  --shadow-input-invalid-focused: var(--ecoya-shadow-input-invalid-focused);
+  --shadow-tag-valid: var(--ecoya-shadow-tag-valid);
+  --shadow-tag-invalid: var(--ecoya-shadow-tag-invalid);
+  --shadow-tag-disabled: var(--ecoya-shadow-tag-disabled);
+  --shadow-filter: var(--ecoya-shadow-filter);
+  --shadow-modal: var(--ecoya-shadow-modal);
+  --shadow-card: var(--ecoya-shadow-card);
+  --shadow-card-app: var(--ecoya-shadow-card-app);
+  --shadow-card-hover: var(--ecoya-shadow-card-hover);
+  --shadow-card-drag: var(--ecoya-shadow-card-drag);
+  --shadow-section: var(--ecoya-shadow-section);
+  --shadow-floating-bar: var(--ecoya-shadow-floating-bar);
+  --shadow-action-bar: var(--ecoya-shadow-action-bar);
+
+  /* TYPO-CARD-03 — 레거시 타이포 레이어의 line-height 를 정본 px 로 고정한다
+   * (2026-09-07, Figma SNAP 2.0 node 48:5 / 보드 06_Typography — spec).
+   *
+   * 이 레이어는 products 구정본에서 온 병존분이라 line-height 를 **비율**로
+   * 적고 있었다. 비율은 정본 px 와 반올림 없이 어긋난다:
+   *   header-17  1.5 →25.5   정본 header/6  24    Δ+1.5
+   *   body-26    36px        정본 body/1    38    Δ−2
+   *   body-22    1.48→32.56  정본 body/3    34    Δ−1.44
+   *   body-19    1.46→27.74  정본 body/5    26    Δ+1.74
+   *   body-17    1.5 →25.5   정본 body/6    24    Δ+1.5
+   *   body-15    1.46→21.9   정본 body/8    20    Δ+1.9
+   *   body-14    1.46→20.44  정본 body/9    18    Δ+2.44
+   *   body-13    1.5 →19.5   정본 body/10   18    Δ+1.5
+   *   button-17  1.4 →23.8   정본 button/2  24    Δ−0.2
+   *   button-15  1.46→21.9   정본 button/3  20    Δ+1.9
+   *   button-13  1.4 →18.2   정본 button/4  18    Δ+0.2
+   *   button-11  1.46→16.06  정본 button/5  16    Δ+0.06
+   *   label-15   1.46→21.9   정본 label/1   16    Δ+5.9  ← 최대(+37%)
+   * 나머지(body-24/20/16, header 전 계열, display-28)는 비율이 정본 px 와
+   * 정확히 같은 값으로 떨어지지만, 같은 표에서 한쪽만 px 로 두면 다음 사람이
+   * 다시 비율로 되돌린다. 그래서 전 계열을 px 로 통일했다 — 값이 이미 맞던
+   * 항목은 렌더 변화가 없다.
+   *
+   * `--text-body-18` 만 26.28px 로 남는다. 정본이 그 값을 compat 항목
+   * (text/compat/body/5/5 = 18 / leading 26.28)으로 명시한다.
+   *
+   * `--text-label-14`·`--text-label-12` 는 정본 label 스케일(15/13/11)에
+   * 대응물이 없는 레거시 잉여라 비율을 그대로 둔다 — 정본에 없는 값을 지어
+   * 만들지 않는다.
+   *
+   * 회귀 방향 주의: 앞선 커밋이 Button 에서 같은 뿌리의 결함(추출본 전체에
+   * 0건인 `21.9px`/`18.2px`)을 잡았다. 여기 값을 비율로 되돌리면 그 결함이
+   * 유틸리티 층으로 되살아난다. 계약은 scripts/verify-foundation.mjs 가 고정한다. */
+  --text-header-36: 36px;
+  --text-header-36--line-height: 54px;
+  --text-header-26: 26px;
+  --text-header-26--line-height: 38px;
+  --text-header-24: 24px;
+  --text-header-24--line-height: 36px;
+  --text-header-22: 22px;
+  --text-header-22--line-height: 34px;
+  --text-header-20: 20px;
+  --text-header-20--line-height: 30px;
+  --text-header-19: 19px;
+  --text-header-19--line-height: 26px;
+  --text-header-17: 17px;
+  --text-header-17--line-height: 24px;
+  --text-header-16: 16px;
+  --text-header-16--line-height: 24px;
+  --text-header-14: 14px;
+  --text-header-14--line-height: 18px;
+
+  --text-display-28: 28px;
+  --text-display-28--line-height: 38px;
+
+  --text-body-26: 26px;
+  --text-body-26--line-height: 38px;
+  --text-body-24: 24px;
+  --text-body-24--line-height: 36px;
+  --text-body-22: 22px;
+  --text-body-22--line-height: 34px;
+  --text-body-20: 20px;
+  --text-body-20--line-height: 30px;
+  --text-body-19: 19px;
+  --text-body-19--line-height: 26px;
+  --text-body-18: 18px;
+  --text-body-18--line-height: 26.28px;
+  --text-body-17: 17px;
+  --text-body-17--line-height: 24px;
+  --text-body-16: 16px;
+  --text-body-16--line-height: 24px;
+  --text-body-15: 15px;
+  --text-body-15--line-height: 20px;
+  --text-body-14: 14px;
+  --text-body-14--line-height: 18px;
+  --text-body-13: 13px;
+  --text-body-13--line-height: 18px;
+
+  --text-button-17: 17px;
+  --text-button-17--line-height: 24px;
+  --text-button-15: 15px;
+  --text-button-15--line-height: 20px;
+  --text-button-13: 13px;
+  --text-button-13--line-height: 18px;
+  --text-button-11: 11px;
+  --text-button-11--line-height: 16px;
+
+  --text-label-15: 15px;
+  --text-label-15--line-height: 16px;
+  --text-label-14: 14px;
+  --text-label-14--line-height: 1.4;
+  --text-label-12: 12px;
+  --text-label-12--line-height: 1.4;
+
+  --text-badge-12: 12px;
+  --text-badge-12--line-height: 16px;
+  --text-badge-16: 16px;
+  --text-badge-16--line-height: 20px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-2xl: var(--ecoya-radius-2xl);
+  --radius-3xl: var(--ecoya-radius-3xl);
+  --radius-4xl: var(--ecoya-radius-4xl);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    overscroll-behavior-y: none;
+  }
+  button:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    @apply font-sans;
+    background: var(--ecoya-gray-12);
+    overscroll-behavior-y: none;
+  }
+}
+
+/* products scroll.ts / tokens.css 정본 — 내부 스크롤 패널·테이블·drawer body 전용 */
+@layer components {
+  .styled-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+  .styled-scroll::-webkit-scrollbar-track {
+    background: var(--ecoya-gray-10);
+    border: 1px solid var(--ecoya-gray-12);
+    border-radius: 12px;
+    margin: 4px;
+  }
+  .styled-scroll::-webkit-scrollbar-thumb {
+    background: var(--ecoya-gray-12);
+    border: 1px solid var(--ecoya-gray-8);
+    border-radius: 38px;
+  }
+  .styled-horizontal-scroll::-webkit-scrollbar {
+    width: 1px;
+    height: 8px;
+  }
+  .styled-horizontal-scroll::-webkit-scrollbar-track {
+    background: var(--ecoya-gray-10);
+    border: 1px solid var(--ecoya-gray-12);
+    border-radius: 12px;
+    margin: 4px;
+  }
+  .styled-horizontal-scroll::-webkit-scrollbar-thumb {
+    background: var(--ecoya-gray-12);
+    border: 1px solid var(--ecoya-gray-8);
+    border-radius: 38px;
+  }
+}
+
+/* LoadingDots keyframe — 정본 atom/LoadingDots 계약(opacity .3↔1, 1s ease-in-out).
+   컴포넌트 스코프 <style> 주입(span 내 metadata content — HTML5 비표준 + 다중 인스턴스 중복)을
+   전역 정의로 이관 (PR#40 리뷰). 소비자: src/components/ui/loading-dots.tsx */
+@keyframes ecoya-loading-dots {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+/* Landing showcase + market ticker motion — ported from erp-v2
+   (ecoya-erp-v2/user-frontend/src/app/globals.css) for the public root landing.
+   Consumers: src/features/landing/LandingShowcase.tsx, src/features/market/MarketTicker.tsx.
+   Reduced motion is honored in the media query below. */
+@keyframes landing-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes landing-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes landing-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes landing-scan-sweep {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateY(220%);
+    opacity: 0;
+  }
+}
+
+@keyframes landing-tab-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes landing-pulse-ring {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+  }
+}
+
+.landing-showcase-stagger > * {
+  animation: landing-fade-up 0.45s ease-out both;
+}
+.landing-showcase-stagger > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.landing-showcase-stagger > *:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.landing-showcase-stagger > *:nth-child(3) {
+  animation-delay: 0.32s;
+}
+.landing-showcase-stagger > *:nth-child(4) {
+  animation-delay: 0.46s;
+}
+
+.landing-showcase-rows > * {
+  animation: landing-fade-up 0.4s ease-out both;
+}
+.landing-showcase-rows > *:nth-child(1) {
+  animation-delay: 0.25s;
+}
+.landing-showcase-rows > *:nth-child(2) {
+  animation-delay: 0.38s;
+}
+.landing-showcase-rows > *:nth-child(3) {
+  animation-delay: 0.51s;
+}
+
+@keyframes market-ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.market-ticker-track {
+  animation: market-ticker-scroll 36s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-showcase-stagger > *,
+  .landing-showcase-rows > *,
+  .landing-showcase-motion {
+    animation: none !important;
+  }
+  .market-ticker-track {
+    animation: none !important;
+  }
+  .market-ticker-viewport {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@ecoya/ui",
+  "version": "0.1.0",
+  "type": "module",
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.json && node scripts/copy-assets.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./layout": {
+      "types": "./dist/types/layout/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./states": {
+      "types": "./dist/types/states/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./tokens.css": "./dist/tokens.css"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "@ecoya/design-system": "*",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.6.0"
+  }
+}

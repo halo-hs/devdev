@@ -1,0 +1,220 @@
+{
+  "commit": "2385a3a09d5d7d7690ceb0649738105820dca7bf",
+  "liveSixFlows": [
+    {
+      "id": "document-flow-admin-pending",
+      "action": "승인",
+      "count": 1,
+      "disabled": false,
+      "after": "AI 서류 처리\n상업송장 초안\n세계시간\n서울 10:35\nTRADE OS\nToggle Sidebar\nEC\nECOYA Demo Co.\n3\n처음 시작하기\n오늘 할 일\n문서 올리기\n문서 만들기\nAI에게 묻기\n기록\n거래\n선적\n정산\n경영·성과\n운영 감시\n결산 리포트\nPro\n영업 성과\nPro\n조민영\n설정\n고객 지원\n문서 만들기\n초안\n\n상업송장 · CI-2026-0708.pdf · 거래 연결됨 · 검토 후 문서 확정\n\n자동 저장됨 10:35\n항목 수정\n거래 변경\n문서 확정\n상업송장 미리보기\nCI-2026-0708.pdf\n미리보기\n원본 1\n·\n품목 0\n100%\n초안 PDF 다운로드\nCI GENERATED DRAFT\n상업송장\nECOYA Demo Co.\n2026.07.07\n판매자\nECOYA Demo Co.\n구매자\nACME GmbH\n송장번호\nCI-2026-0708\n송장일\n2026-07-08\n품목\n수량\n단가\n금액\nItem 1\n12\n128,333\n1,540,000\nItem 2\n12\n128,333\n1,540,000\nItem 3\n12\n128,333\n1,540,000\n1 / 2 페이지\n검토·확정\n초안\n\n상업송장 · CI-2026-0708.pdf\n\n문서를 확정할 수 있습니다\n확정하면 문서와 PDF를 더 이상 수정할 수 없습니다. 내용을 마지막으로 확인하세요.\n문서 확정\n문서 정보\n문서번호\nCI-2026-0708\n받는 곳\nACME GmbH\n계약금액\n2,566,660 USD\n문서 완성도\n84 / 100\n문서 형태\n로고 파일 선택\nPNG, JPG, SVG · 최대 2MB\nPNG, JPG, SVG · 최대 2MB\n문서 스타일\n모던\n클래식\n강조색\n승인\n승인 완료\n승인 처리 완료\n김도현 · 2026. 09. 16. 10:35\n승인 이력\n요청\n조민영 · 작성자\n2026.09.01 13:42\n승인 대상 · 박서윤, 김도현\n승인\n김도현 · Admin\n2026. 09. 16. 10:35\n승인 처리 완료\n문서 진행 상태\n진행 중\nPDF 검토\n검토 완료\n거래 연결\nDL-260708-08 · ACME GmbH\n승인\n승인 완료 · 김도현\n문서 확정\n상단에서 확정 가능\n공유 링크 생성\n문서 확정 후 가능\n전달·공유\n공유 링크 생성 후 가능\n승인이 완료되었습니다. 문서를 확정할 수 있습니다."
+    },
+    {
+      "id": "document-flow-admin-pending",
+      "action": "반려",
+      "count": 1,
+      "disabled": false,
+      "after": "AI 서류 처리\n상업송장 초안\n세계시간\n서울 10:35\nTRADE OS\nToggle Sidebar\nEC\nECOYA Demo Co.\n3\n처음 시작하기\n오늘 할 일\n문서 올리기\n문서 만들기\nAI에게 묻기\n기록\n거래\n선적\n정산\n경영·성과\n운영 감시\n결산 리포트\nPro\n영업 성과\nPro\n조민영\n설정\n고객 지원\n문서 만들기\n초안\n\n상업송장 · CI-2026-0708.pdf · 거래 연결됨 · 검토 후 문서 확정\n\n자동 저장됨 10:35\n항목 수정\n거래 변경\n문서 확정\n상업송장 미리보기\nCI-2026-0708.pdf\n미리보기\n원본 1\n·\n품목 0\n100%\n초안 PDF 다운로드\nCI GENERATED DRAFT\n상업송장\nECOYA Demo Co.\n2026.07.07\n판매자\nECOYA Demo Co.\n구매자\nACME GmbH\n송장번호\nCI-2026-0708\n송장일\n2026-07-08\n품목\n수량\n단가\n금액\nItem 1\n12\n128,333\n1,540,000\nItem 2\n12\n128,333\n1,540,000\nItem 3\n12\n128,333\n1,540,000\n1 / 2 페이지\n검토·확정\n초안\n\n상업송장 · CI-2026-0708.pdf\n\n승인 요청을 검토하세요\n요청 내용을 확인한 뒤 승인하거나 반려 사유를 남겨주세요.\n승인 검토\n문서 정보\n문서번호\nCI-2026-0708\n받는 곳\nACME GmbH\n계약금액\n2,566,660 USD\n문서 완성도\n84 / 100\n문서 형태\n로고 파일 선택\nPNG, JPG, SVG · 최대 2MB\nPNG, JPG, SVG · 최대 2MB\n문서 스타일\n모던\n클래식\n강조색\n승인\n승인 대기\n상업송장 · CI-2026-0708.pdf\n조민영 요청 · 2026.09.01 13:42\n결정 필요\n김도현 · 승인자\n반려\n승인\n취소\n반려 확정\n승인 이력\n요청\n조민영 · 작성자\n2026.09.01 13:42\n승인 대상 · 박서윤, 김도현\n문서 진행 상태\n진행 중\nPDF 검토\n검토 완료\n거래 연결\nDL-260708-08 · ACME GmbH\n승인\n승인 대기 · 2명\n문서 확정\n승인 완료 후 표시\n공유 링크 생성\n문서 확정 후 가능\n전달·공유\n공유 링크 생성 후 가능"
+    },
+    {
+      "id": "document-flow-requester-rejected",
+      "action": "승인 재요청",
+      "count": 1,
+      "disabled": false,
+      "after": "AI 서류 처리\n상업송장 초안\n세계시간\n서울 10:35\nTRADE OS\nToggle Sidebar\nEC\nECOYA Demo Co.\n3\n처음 시작하기\n오늘 할 일\n문서 올리기\n문서 만들기\nAI에게 묻기\n기록\n거래\n선적\n정산\n경영·성과\n운영 감시\n결산 리포트\nPro\n영업 성과\nPro\n조민영\n설정\n고객 지원\n문서 만들기\n초안\n\n상업송장 · CI-2026-0708.pdf · 거래 연결됨 · 검토 후 문서 확정\n\n자동 저장됨 10:35\n항목 수정\n거래 변경\n문서 확정\n상업송장 미리보기\nCI-2026-0708.pdf\n미리보기\n원본 1\n·\n품목 0\n100%\n초안 PDF 다운로드\nCI GENERATED DRAFT\n상업송장\nECOYA Demo Co.\n2026.07.07\n판매자\nECOYA Demo Co.\n구매자\nACME GmbH\n송장번호\nCI-2026-0708\n송장일\n2026-07-08\n품목\n수량\n단가\n금액\nItem 1\n12\n128,333\n1,540,000\nItem 2\n12\n128,333\n1,540,000\nItem 3\n12\n128,333\n1,540,000\n1 / 2 페이지\n검토·확정\n초안\n\n상업송장 · CI-2026-0708.pdf\n\n승인을 기다리고 있습니다\n승인자가 검토를 완료하면 문서 확정 버튼이 활성화됩니다.\n문서 정보\n문서번호\nCI-2026-0708\n받는 곳\nACME GmbH\n계약금액\n2,566,660 USD\n문서 완성도\n84 / 100\n문서 형태\n로고 파일 선택\nPNG, JPG, SVG · 최대 2MB\nPNG, JPG, SVG · 최대 2MB\n문서 스타일\n모던\n클래식\n강조색\n승인\n승인 대기\n승인 응답을 기다리고 있습니다\n박서윤\n김도현\n조민영 요청 · 2026. 09. 16. 10:35\n승인 전에는 문서를 확정할 수 없습니다.\n승인 이력\n요청\n조민영 · 작성자\n2026.09.01 13:42\n승인 대상 · 박서윤, 김도현\n반려\n김도현 · Admin\n2026.09.01 14:08\n반려 사유 · 받는 곳과 결제조건을 원문 기준으로 다시 확인한 뒤 재요청해 주세요.\n재요청\n조민영 · 작성자\n2026. 09. 16. 10:35\n승인 대상 · 박서윤, 김도현\n문서 진행 상태\n진행 중\nPDF 검토\n검토 완료\n거래 연결\nDL-260708-08 · ACME GmbH\n승인\n승인 대기 · 2명\n문서 확정\n승인 완료 후 표시\n공유 링크 생성\n문서 확정 후 가능\n전달·공유\n공유 링크 생성 후 가능\nOwner·Admin 2명에게 요청했습니다."
+    },
+    {
+      "id": "document-flow-requester-approved",
+      "action": "문서 확정",
+      "count": 2,
+      "disabled": false,
+      "after": "AI 서류 처리\n상업송장 초안\n세계시간\n서울 10:35\nTRADE OS\nToggle Sidebar\nEC\nECOYA Demo Co.\n3\n처음 시작하기\n오늘 할 일\n문서 올리기\n문서 만들기\nAI에게 묻기\n기록\n거래\n선적\n정산\n경영·성과\n운영 감시\n결산 리포트\nPro\n영업 성과\nPro\n조민영\n설정\n고객 지원\n문서 만들기\n확정\n\n상업송장 · CI-2026-0708.pdf · 공유 가능\n\n자동 저장됨 10:35\n상업송장 확정 문서\nCI-2026-0708.pdf\n확정\n원본 1\n·\n품목 0\n100%\n문서 다운로드\nCI GENERATED DRAFT\n상업송장\nECOYA Demo Co.\n2026.07.07\n판매자\nECOYA Demo Co.\n구매자\nACME GmbH\n송장번호\nCI-2026-0708\n송장일\n2026-07-08\n품목\n수량\n단가\n금액\nItem 1\n12\n128,333\n1,540,000\nItem 2\n12\n128,333\n1,540,000\nItem 3\n12\n128,333\n1,540,000\n1 / 2 페이지\n문서 완료\n확정 및 전달 준비\n확정됨\n문서가 확정되었습니다\n\n문서와 PDF는 더 이상 수정할 수 없습니다. 상단 공유에서 링크를 만들거나 이메일로 보낼 수 있습니다.\n\n공유하기\n공유 현황\n관리\n공유 링크\n미생성\n문서당 링크 1개를 만들 수 있습니다.\n최근 전달\n전달 전\n링크를 전달하거나 이메일을 보내면 기록됩니다.\n문서 진행 상태\n문서 확정\n필수 항목\n누락 없음\n품목 합계\n계약금액과 대조됨\n문서 모양\n로고 없음\n변경사항 저장\n저장 완료\n문서 결과 검토\n검토 완료\n거래 연결\nDL-260708-08 · ACME GmbH\n은행 거절 전 점검\n통과\n문서 확정\nCI-2026-0708.pdf\n공유 링크 생성\n링크 생성 가능\n전달·공유\n공유 링크 생성 후 가능\n문서를 확정해 수정을 잠갔습니다. 공유 설정을 열었습니다.\n파일 공유하기\n\n확정한 PDF를 링크 또는 이메일로 공유합니다.\n\n파일 공유하기\n확정한 PDF와 동봉 파일을 묶어 링크 또는 이메일로 공유합니다.\n문서 확정\n문서로 돌아가기\n전달\n전달 내역\n전달 준비 상태\n4/5 준비\n수신처\n확인\nACME GmbH\n패키지\n확인\n본문 PDF + 첨부 0개\n링크\n필요\nMagic Link 필요\n품질\n확인\n94/100 · 검토 권장 1건\n배송\n확인\nETD 07.20 / ETA 08.03\n원소스\n검증 기준 적용\n전달 패키지\n본문 PDF + 첨부 0개\n동봉 파일\nCI-2026-0708.pdf\n본문\n전체 패키지 다운로드\nDL-260708-08 · ACME 7월 상업송장 거래\n거래 연결됨\n생성된 링크\n미생성\n공유 링크 설정\n만료일\n최대 열람\nMagic Link 만들기\n이메일 발송 요청\n링크 필요\n받는 사람\n제목\n이메일에 포함될 Magic Link\n먼저 Magic Link를 생성해야 이메일을 보낼 수 있습니다.\n발송 요청 기록"
+    },
+    {
+      "id": "document-flow-link-copied",
+      "action": "철회",
+      "count": 1,
+      "disabled": false,
+      "after": "AI 서류 처리\n상업송장 초안\n세계시간\n서울 10:35\nTRADE OS\nToggle Sidebar\nEC\nECOYA Demo Co.\n3\n처음 시작하기\n오늘 할 일\n문서 올리기\n문서 만들기\nAI에게 묻기\n기록\n거래\n선적\n정산\n경영·성과\n운영 감시\n결산 리포트\nPro\n영업 성과\nPro\n조민영\n설정\n고객 지원\n문서 만들기\n확정\n\n상업송장 · CI-2026-0708.pdf · 공유 가능\n\n자동 저장됨 10:35\n상업송장 확정 문서\nCI-2026-0708.pdf\n확정\n원본 1\n·\n품목 0\n100%\n문서 다운로드\nCI GENERATED DRAFT\n상업송장\nECOYA Demo Co.\n2026.07.07\n판매자\nECOYA Demo Co.\n구매자\nACME GmbH\n송장번호\nCI-2026-0708\n송장일\n2026-07-08\n품목\n수량\n단가\n금액\nItem 1\n12\n128,333\n1,540,000\nItem 2\n12\n128,333\n1,540,000\nItem 3\n12\n128,333\n1,540,000\n1 / 2 페이지\n문서 완료\n확정 및 전달 준비\n확정됨\n문서가 확정되었습니다\n\n문서와 PDF는 더 이상 수정할 수 없습니다. 상단 공유에서 링크를 만들거나 이메일로 보낼 수 있습니다.\n\n공유하기\n공유 현황\n관리\n공유 링크\n미생성\n문서당 링크 1개를 만들 수 있습니다.\n최근 전달\n전달 전\n링크를 전달하거나 이메일을 보내면 기록됩니다.\n문서 진행 상태\n문서 확정\n필수 항목\n누락 없음\n품목 합계\n계약금액과 대조됨\n문서 모양\n로고 없음\n변경사항 저장\n저장 완료\n문서 결과 검토\n검토 완료\n거래 연결\nDL-260708-08 · ACME GmbH\n은행 거절 전 점검\n통과\n문서 확정\nCI-2026-0708.pdf\n공유 링크 생성\n링크 생성 가능\n전달·공유\n공유 링크 생성 후 가능\nMagic Link를 만들었습니다.\n문서를 확정해 수정을 잠갔습니다. 공유 설정을 열었습니다.\n승인이 완료되었습니다. 문서를 확정할 수 있습니다.\nOwner·Admin 1명에게 요청했습니다.\nPDF 검토를 완료했습니다. 거래 연결 없이 초안 PDF를 다운로드할 수 있습니다.\n파일 공유하기\n\n확정한 PDF를 링크 또는 이메일로 공유합니다.\n\n파일 공유하기\n확정한 PDF와 동봉 파일을 묶어 링크 또는 이메일로 공유합니다.\n문서 확정\n문서로 돌아가기\n전달\n전달 내역\n전달 준비 상태\n4/5 준비\n수신처\n확인\nACME GmbH\n패키지\n확인\n본문 PDF + 첨부 0개\n링크\n필요\nMagic Link 필요\n품질\n확인\n94/100 · 검토 권장 1건\n배송\n확인\nETD 07.20 / ETA 08.03\n원소스\n검증 기준 적용\n전달 패키지\n본문 PDF + 첨부 0개\n동봉 파일\nCI-2026-0708.pdf\n본문\n전체 패키지 다운로드\nDL-260708-08 · ACME 7월 상업송장 거래\n거래 연결됨\n생성된 링크\n미생성\nACME GmbH 링크 1\n철회됨\nhttps://ecoya.app/share/ci-2026-0708-1\n0/10회 열람 · 2026.08.31 만료\n복사됨\n새창\n철회\n삭제\n이메일 발송 요청\n링크 필요\n받는 사람\n제목\n이메일에 포함될 Magic Link\n먼저 Magic Link를 생성해야 이메일을 보낼 수 있습니다.\n발송 요청 기록"
+    },
+    {
+      "id": "document-flow-attachment-added",
+      "action": "Magic Link 만들기",
+      "count": 1,
+      "disabled": false,
+      "after": "AI 서류 처리\n상업송장 초안\n세계시간\n서울 10:35\nTRADE OS\nToggle Sidebar\nEC\nECOYA Demo Co.\n3\n처음 시작하기\n오늘 할 일\n문서 올리기\n문서 만들기\nAI에게 묻기\n기록\n거래\n선적\n정산\n경영·성과\n운영 감시\n결산 리포트\nPro\n영업 성과\nPro\n조민영\n설정\n고객 지원\n문서 만들기\n확정\n\n상업송장 · CI-2026-0708.pdf · 공유 가능\n\n자동 저장됨 10:35\n상업송장 확정 문서\nCI-2026-0708.pdf\n확정\n원본 1\n·\n품목 0\n100%\n문서 다운로드\nCI GENERATED DRAFT\n상업송장\nECOYA Demo Co.\n2026.07.07\n판매자\nECOYA Demo Co.\n구매자\nACME GmbH\n송장번호\nCI-2026-0708\n송장일\n2026-07-08\n품목\n수량\n단가\n금액\nItem 1\n12\n128,333\n1,540,000\nItem 2\n12\n128,333\n1,540,000\nItem 3\n12\n128,333\n1,540,000\n1 / 2 페이지\n공유 준비\n공유 링크 생성됨\n전달 전\n공유 링크가 생성되었습니다\n\n링크 생성은 완료됐지만 아직 전달 전입니다. 공유 관리에서 이메일로 보내거나 링크를 전달하세요.\n\n공유하기\n공유 현황\n관리\n공유 링크\n활성\n2026.08.31 만료 · 0/10회 열람\n최근 전달\n전달 전\n링크를 전달하거나 이메일을 보내면 기록됩니다.\n문서 진행 상태\n링크 생성됨\n필수 항목\n누락 없음\n품목 합계\n계약금액과 대조됨\n문서 모양\n로고 없음\n변경사항 저장\n저장 완료\n문서 결과 검토\n검토 완료\n거래 연결\nDL-260708-08 · ACME GmbH\n은행 거절 전 점검\n통과\n문서 확정\nCI-2026-0708.pdf\n공유 링크 생성\n활성 링크 1개\n전달·공유\n생성한 링크 전달 전\nMagic Link를 만들었습니다.\n문서를 확정해 수정을 잠갔습니다. 공유 설정을 열었습니다.\n승인이 완료되었습니다. 문서를 확정할 수 있습니다.\nOwner·Admin 1명에게 요청했습니다.\nPDF 검토를 완료했습니다. 거래 연결 없이 초안 PDF를 다운로드할 수 있습니다.\n파일 공유하기\n\n확정한 PDF를 링크 또는 이메일로 공유합니다.\n\n파일 공유하기\n확정한 PDF와 동봉 파일을 묶어 링크 또는 이메일로 공유합니다.\n문서 확정\n문서로 돌아가기\n전달\n전달 내역\n전달 준비 상태\n5/5 준비\n수신처\n확인\nACME GmbH\n패키지\n확인\n본문 PDF + 첨부 1개\n링크\n확인\n활성 링크 1개\n품질\n확인\n94/100 · 검토 권장 1건\n배송\n확인\nETD 07.20 / ETA 08.03\n원소스\n검증 기준 적용\n전달 패키지\n본문 PDF + 첨부 1개\n동봉 파일\nCI-2026-0708.pdf\n본문\nPackingList_0707.pdf\n인박스\n전체 패키지 다운로드\nDL-260708-08 · ACME 7월 상업송장 거래\n거래 연결됨\n생성된 링크\n1개 활성\nACME GmbH 링크 1\n활성\nhttps://ecoya.app/share/ci-2026-0708-1\n0/10회 열람 · 2026.08.31 만료\n복사\n새창\n철회\n삭제\n이메일 발송 요청\n링크 포함\n받는 사람\n제목\n이메일에 포함될 Magic Link\nhttps://ecoya.app/share/ci-2026-0708-1\n발송 요청 기록"
+    }
+  ],
+  "staticElevenEntryActions": [
+    {
+      "id": "document-flow-admin-pending",
+      "label": "승인",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        }
+      ]
+    },
+    {
+      "id": "document-flow-admin-pending",
+      "label": "반려",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        }
+      ]
+    },
+    {
+      "id": "document-flow-requester-rejected",
+      "label": "승인 재요청",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        }
+      ]
+    },
+    {
+      "id": "document-flow-requester-approved",
+      "label": "문서 확정",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        }
+      ]
+    },
+    {
+      "id": "document-flow-link-copied",
+      "label": "철회",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        }
+      ]
+    },
+    {
+      "id": "document-flow-attachment-added",
+      "label": "Magic Link 만들기",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        }
+      ]
+    },
+    {
+      "id": "deal-dl-260701-09",
+      "label": "노트 수정",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        }
+      ]
+    },
+    {
+      "id": "deal-dl-260701-09",
+      "label": "노트 삭제",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        }
+      ]
+    },
+    {
+      "id": "notifications",
+      "label": "현재 목록 전체 선택",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "role": "checkbox",
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        }
+      ]
+    },
+    {
+      "id": "shipments",
+      "label": "2페이지",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        }
+      ]
+    },
+    {
+      "id": "settlement",
+      "label": "2페이지",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "disabled": true,
+          "unavailable": true,
+          "href": null
+        }
+      ]
+    }
+  ]
+}

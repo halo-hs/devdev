@@ -1,0 +1,138 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-31 — 거래처 기준정보 설정 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-31 — 거래처 기준정보 설정</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/31-settings-counterparties.md</p><article class="doc"><h1>SC-31 — 거래처 기준정보 설정</h1>
+<blockquote>
+<p>Common 목표 경계: <span>2026-08-20 설정 진입·App User</span>. 목표 표면은 Common 설정 허브의 Trade OS 구획이며, 이 문서는 제품 필드·저장·업무 오류와 기존 <code>/erp/settings</code> 구현을 소유한다.</p>
+</blockquote>
+<blockquote>
+<p>결정 근거: <span>TRADE-DOC-001 — QA 절의 규범 경계</span> · <span>DEC-TRD-009 — 지원 locale과 fallback</span> · <span>DEC-TRD-010 — 접근성 기준과 검증 범위</span></p>
+</blockquote>
+<blockquote>
+<p>확정 근거: <span>ISSUE-144 — 영향 preview와 사용자 확인 기반 거래처 병합</span> · 구현·QA 충족 여부는 이 문서와 별도로 검증한다.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/settings</code>의 거래처 기준정보·별칭 탭</td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td>settings page → 거래처 기준정보 컴포넌트</td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>Deal 목록·상세·거래처 360 (14-deals-and-counterparties.md)</span>, <span>설정 (18-settings-members-billing.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>현재 Space Owner/Admin만 병합 preview·execute; Member·unknown 거부, cross-Space 대상 비열거</td>
+</tr>
+</tbody></table>
+<p>이 화면은 <span>공통 UI 품질 계약</span>의 locale·접근성 기준을 상속한다. 병합 미리보기·충돌 선택·확인 대화상자는 locale resource를 사용하고 키보드와 스크린 리더로 검토·취소·실행과 오류 복구를 완료할 수 있어야 한다.</p>
+<h2>필드·행동·호출</h2>
+<table>
+<thead>
+<tr>
+<th>보이는 항목</th>
+<th>버튼·행동</th>
+<th>호출</th>
+<th>성공·오류·복구</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>기준명, 역할, 상태, 별칭</td>
+<td>추가·수정·삭제</td>
+<td>counterparties·aliases CRUD</td>
+<td>목록 갱신, 실패 시 편집값 유지</td>
+</tr>
+<tr>
+<td>중복 source·canonical target</td>
+<td><strong>병합 영향 미리보기</strong></td>
+<td><code>POST /trade/counterparties/{sourceId}/merge/preview</code> + <code>target_id</code></td>
+<td>활성·보관·마감·과거 종속 수, 통화별 source/target/combined 금액과 unavailable 사유, 필드 충돌, <code>preview_revision/digest</code>·만료 표시</td>
+</tr>
+<tr>
+<td>영향 preview·충돌별 최종값·사유</td>
+<td>source·target, 모든 충돌값, 확인 checkbox 뒤 <strong>병합</strong></td>
+<td><code>POST /trade/counterparties/{sourceId}/merge</code> + target·preview·충돌값·reason·idempotency key</td>
+<td>원자적 재연결 후 target 표시와 receipt 제공; source는 lineage redirect가 있는 <code>MERGED_INACTIVE</code>. stale·미확정 충돌 시 원본 유지</td>
+</tr>
+<tr>
+<td>보관 기준정보</td>
+<td><strong>복구</strong></td>
+<td>counterparty 복구 경로</td>
+<td>활성 목록 복귀</td>
+</tr>
+</tbody></table>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<p>원본·대상 거래처 ID, 기준명, 역할, 별칭, 병합 확인값, preview revision/digest, idempotency key, 처리 영수증을 기록한다. 병합은 단순 이름 변경이 아니다.</p>
+<ul>
+<li>Owner/Admin만 preview와 execute를 호출한다. Member와 알 수 없는 역할은 둘 다 거부한다.</li>
+<li>preview에는 Deal party, 받은/생성 문서, SNAP 연결, alias/learning, 일정, 보관·취소·마감·과거 이력과 통화별 원금·미수/미지급·원본 현금·분쟁·환불/반환·조정을 포함한다.</li>
+<li>원장 coverage가 완전하고 값이 실제 0일 때만 <code>0</code>을 표시한다. unavailable은 <code>—</code> 또는 0으로 바꾸지 않고 “계산 불가”와 reason을 표시하며 실행을 막는다. 금액은 통화별 원장 문자열을 locale 표시만 하고 합산·FX·재반올림하지 않는다.</li>
+<li>같은 값 또는 한쪽만 빈 필드는 자동 결합할 수 있다. 국가·통화·등록번호·은행·역할 충돌은 사용자가 최종값을 선택하기 전에는 진행하지 않는다.</li>
+<li>source·target 또는 종속 writer가 preview 뒤 바뀌거나 10분이 지나면 <code>stale</code>로 거부하고, 입력한 사유·충돌 선택을 보존한 채 최신 preview와 달라진 항목을 다시 보여준다. 기존 bodyless 실행은 <code>MERGE_PREVIEW_REQUIRED</code>로 거부한다.</li>
+<li>실행은 target 재연결, source 비활성, lineage 기록, 영수증 생성을 모두 성공시키거나 모두 실패시킨다. 같은 idempotency key와 같은 payload의 재시도는 같은 영수증을 반환한다.</li>
+<li>source·target 확인 문구, <code>reason_code</code>와 1~500자 note, 충돌별 선택, “원본·대상과 영향을 확인했습니다” checkbox가 모두 있어야 실행 버튼이 활성화된다. 제3의 필드값이 필요하면 대화상자를 닫고 기준정보를 수정한 뒤 새 preview를 만든다.</li>
+<li>대화상자는 키보드만으로 탐색·취소·실행할 수 있고 focus trap/복귀, 제목·설명 연결, 오류 첫 항목 focus, 색상 외 상태문구를 제공한다. 모든 문구는 locale resource를 사용한다.</li>
+<li>source가 이미 병합됐으면 최종 canonical target과 기존 receipt로 이동한다. future writer가 source를 다시 활성화·참조하는 경로와 병합 chain cycle을 허용하지 않는다.</li>
+<li>병합을 취소해 과거를 다시 쓰지 않는다. 잘못된 병합은 새 기준정보와 명시적 재연결 사건으로 forward correction한다.</li>
+</ul>
+<h2>상태·오류·복구</h2>
+<table>
+<thead>
+<tr>
+<th>상태</th>
+<th>화면 표시</th>
+<th>허용 행동</th>
+<th>복구</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>preview 조회 중</td>
+<td>source·target 고정, skeleton</td>
+<td>취소</td>
+<td>같은 후보로 재시도</td>
+</tr>
+<tr>
+<td>preview 준비</td>
+<td>종속·금액·충돌·사유·확인</td>
+<td>충돌 선택·병합</td>
+<td>unavailable/hard conflict는 관련 원본 수정 후 새 preview</td>
+</tr>
+<tr>
+<td>preview stale/expired</td>
+<td>달라진 writer·항목, 기존 입력 보존</td>
+<td><strong>최신 영향 다시 확인</strong></td>
+<td>새 digest를 받은 뒤 재확인</td>
+</tr>
+<tr>
+<td>execute 중</td>
+<td>중복 클릭 차단, 처리 중</td>
+<td>취소 불가</td>
+<td>동일 idempotency key로 결과 조회</td>
+</tr>
+<tr>
+<td>execute 성공</td>
+<td>canonical target·이동 링크·receipt ID</td>
+<td>대상 열기</td>
+<td>잘못된 결과는 forward correction 시작</td>
+</tr>
+<tr>
+<td>권한/대상 오류</td>
+<td><code>MERGE_FORBIDDEN</code>, <code>COUNTERPARTY_NOT_FOUND</code></td>
+<td>설정 복귀</td>
+<td>다른 Space 존재 여부를 노출하지 않음</td>
+</tr>
+</tbody></table>
+<p>backend v2 capability가 없거나 execute gate가 닫혀 있으면 병합 CTA를 숨기고 “현재 병합을 사용할 수 없습니다”를 표시한다. 구형 bodyless 호출로 fallback하지 않는다.</p>
+<h2>개발 역추적</h2>
+<p>counterparty settings → <code>counterpartyAliases.ts</code>와 거래처 API → BFF → trade counterparty handler/service/repository.</p>
+</article></main></body></html>

@@ -1,0 +1,125 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-15 — Deal 상세 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-15 — Deal 상세</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/15-deal-detail.md</p><article class="doc"><h1>SC-15 — Deal 상세</h1>
+<blockquote>
+<p>결정 근거: <span>TRADE-DOC-001 — QA 절의 규범 경계</span></p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-31 결정 반영</strong> — 아래는 확정 정책이다. 구현·QA 상태는 이 문서가 관리하지 않는다.</p>
+<ul>
+<li><span>DEC-TRD-003</span> — Pilot 기본 Approval mode는 **<code>disabled</code>**다. 선택한 조직에만 <code>optional</code>을 제공하고 <code>required</code>·<code>conditional</code>은 고객 통제 요구 확인 후 확장한다. 승인 의미가 바뀐 revision은 재승인한다.</li>
+<li><span>ISSUE-139</span> — 보관과 취소를 분리하고, 복원·재활성화를 새 불변 생명주기 사건으로 기록한다.</li>
+</ul>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/deals/{dealId}</code></td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td><code>user-frontend/src/app/erp/deals/[dealId]/page.tsx</code> → <code>DealDetailConnected.tsx</code>, <code>DealDetailPanels.tsx</code></td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>Deal 연결 (03-deal-matching.md)</span>, <span>정산 (05-settlement.md)</span>, <span>Deal 상세 (14-deals-and-counterparties.md)</span>, <span>선적 (16-shipments-and-snap-evidence.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>Deal 조회 권한; Member는 담당·공동 작업 Deal의 보관·복원, Owner/Admin은 조직 범위 보관·복원과 취소·재활성화</td>
+</tr>
+</tbody></table>
+<h2>핵심 구역·호출</h2>
+<p>구역 노출 순서는 <code>머리말·다음 행동 → 리스크·불일치 → 문서 → 이행·선적 → 재무·정산 → 관계자·공유·메모 → 변경 이력</code>으로 고정한다. 각 구역 안에서는 기한 초과·차단, 임박, 최신 입력 순으로 정렬한다.</p>
+<table>
+<thead>
+<tr>
+<th>구역</th>
+<th>화면 항목·행동</th>
+<th>호출</th>
+<th>성공·오류·이동</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>머리말·담당자</td>
+<td>제목, 상태, 방향, 거래처, 담당자; 담당자 변경</td>
+<td><code>GET /trade/deals/{id}</code>, <code>GET /admin/members</code>, <code>PATCH .../assignee</code></td>
+<td>저장 실패 시 이전 담당자 복원</td>
+</tr>
+<tr>
+<td>생명주기</td>
+<td>현재 <code>ACTIVE/ARCHIVED/CANCELLED</code>, cutoff·coverage, 통화별 원금/조정/적용/미수·미지급/원본 현금/잉여/분쟁/환불·반환, 실제 현금 <code>none/recorded/unknown</code>과 evidence 상태; 보관·복원·취소·재활성화</td>
+<td>lifecycle impact preview와 action API</td>
+<td>사유·최신 preview 확인 뒤 immutable event 추가. <code>recorded/unknown</code> 또는 미해결 금융 예외가 있는 보관은 취소 검토로 전환하고 권한·동시 변경 실패 시 기존 상태 유지</td>
+</tr>
+<tr>
+<td>문서</td>
+<td>연결 문서·원문; 열기·연결 해제·추가·생성</td>
+<td>문서 content, <code>DELETE .../documents/{documentId}</code></td>
+<td>원문 패널 또는 <code>/erp/inbox</code>, <code>/erp/documents/create?deal_id=...</code></td>
+</tr>
+<tr>
+<td>리스크·플래그</td>
+<td>위험과 근거; <strong>해제/보고하기</strong></td>
+<td>risk dismiss, <code>POST /erp/flags</code></td>
+<td>성공 후 재조회, 실패 시 위험·입력 유지</td>
+</tr>
+<tr>
+<td>요약·은행 변경</td>
+<td>AI/자동 요약, 은행 변경 경고</td>
+<td><code>GET .../summary</code>, <code>GET .../bank-change</code></td>
+<td>LLM 실패는 자동 요약 대체 가능; 경고 실패는 주의 상태</td>
+</tr>
+<tr>
+<td>재무·정산·비용</td>
+<td>통화별 매출·원가·매출총이익, 받을 돈·지급할 돈, 현재 미수금·미지급금, 이 Deal에서 발생한 초과 입금·선수금·선급금 잔액, 정산 상태; 비용 CRUD</td>
+<td>finance facts, settlement overview, deal costs; <strong>정산에서 보기</strong></td>
+<td>해당 Deal의 잔액 요약만 표시하고 전체 입출금·배정·환불·반환 이력은 <code>/erp/settlement</code>의 해당 원장 행 일정 상세 패널로 이동. 필수 의무 1건 이상 전부 완료=<code>정산 완료</code>, 의무 0건=<code>정산 대상 아님</code>, 그 외=<code>미정산</code></td>
+</tr>
+<tr>
+<td>주문·선적</td>
+<td>주문 상태·사건, 선적 일정; 완료·취소·다시 열기·새로고침</td>
+<td>order action/events, shipments·refresh tracking</td>
+<td>사유 필요 행동은 입력 후 호출</td>
+</tr>
+<tr>
+<td>검증</td>
+<td>불일치·누락·근거, 근거가 있는 건강도 보조값</td>
+<td>health, match</td>
+<td>패널별 오류와 재시도; 건강도 점수만으로 차단·완료 판정 금지</td>
+</tr>
+<tr>
+<td>관계자·공유·메모</td>
+<td>당사자, 연락처, 열람자, 메모</td>
+<td>parties·contacts·shares·notes CRUD</td>
+<td>성공 목록 갱신, 실패 입력 보존</td>
+</tr>
+</tbody></table>
+<h2>생명주기 영향 확인</h2>
+<ul>
+<li>preview는 server cutoff 시각과 writer revision을 표시하고, 통화별 <code>original_target</code>, <code>adjustment_net</code>, <code>current_target</code>, <code>applied</code>, 받을 돈·지급할 돈 outstanding, 원본 입출금, surplus/prepayment, unresolved dispute, refund/return을 보여준다. 통화별로 분리하고 총액이나 FX 환산값을 만들지 않는다.</li>
+<li>완전한 근거로 계산된 0만 <code>0</code>으로 표시한다. <code>{status: unavailable}</code>은 “계산 불가”와 reason을 보여주며, 전체 coverage가 partial/unavailable이거나 actual cash가 <code>unknown</code>이면 단순 보관 CTA 대신 Owner/Admin 취소 영향 검토를 제공한다.</li>
+<li><code>recorded</code>에는 event 종류·방향·통화·가치일과 마스킹한 source reference를, <code>none</code>에는 검사 source·coverage 완료를, <code>unknown</code>에는 legacy/연결 불명/조회 실패 reason을 표시한다. 원문 계좌·문서·개인정보는 대화상자에 복제하지 않는다.</li>
+<li>모든 행동은 정해진 <code>reason_code</code>와 1~500자 note, 현재 상태, preview digest를 확인한다. 취소·재활성화는 “현재 집계는 바뀌지만 과거 금융·문서 이력은 유지됩니다” 확인 checkbox가 필요하다.</li>
+<li>legacy imported 사건은 actor·시각·금융 근거의 <code>unknown</code>을 그대로 표시한다. 검증되지 않은 값으로 화면을 채우지 않으며 Member에게 legacy restore 실행을 노출하지 않는다.</li>
+<li>stale 응답은 기존 사유 입력을 유지하고 “최신 영향 다시 확인”을 제공한다. 같은 idempotency key 재시도는 생성된 lifecycle event/receipt를 다시 표시하며 별도 성공 사건처럼 보이지 않는다.</li>
+</ul>
+<h2>직접 이동</h2>
+<p><strong>이전 목록</strong>, <code>/erp/documents?deal_id={dealId}</code>, <code>/erp/documents/create?deal_id={dealId}</code>, <code>/erp/inbox?from=deal&amp;deal_id=...</code>, 근거 문서 전달 화면으로 이동한다.</p>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<p>Deal ID, 펼친 패널, 누른 버튼, 입력 사유, 호출 경로, 부분 실패 패널을 기록한다. 보관·취소·복원·재활성화 검증에는 직전 상태, actor, 통화별 예정금액 snapshot, 실제 현금 분류와 근거, preview revision/digest, 생성된 lifecycle event ID를 함께 기록한다. 한 패널 오류를 전체 Deal 없음으로 판단하지 않는다.</p>
+<p>보관·취소 효력 시점부터 Deal은 현재 업무·재무 집계에서 제외하지만 원본 현금·정산·문서·분쟁 이력과 당시 snapshot은 읽을 수 있어야 한다. 복원·재활성화는 과거 snapshot을 수정하지 않고 새 사건의 효력 시점부터 현재 상태를 재계산한다. Member의 취소·재활성화와 <code>recorded/unknown</code> 현금 Deal의 단순 보관은 거부한다.</p>
+<p>반복 archive/restore 또는 cancel/reactivate마다 <code>lifecycle_sequence</code>, <code>cycle_no</code>, cutoff, actor, reason과 새 snapshot이 증가하는지 확인한다. 동일 상태 행동과 허용되지 않은 전이는 <code>INVALID_LIFECYCLE_TRANSITION</code>, 금융 writer 변경은 <code>LIFECYCLE_PREVIEW_STALE</code>, 다른 Space Deal은 존재 여부를 구분하지 않는 <code>DEAL_NOT_FOUND</code>로 복구한다.</p>
+<p>정산 상태는 <span>OD-004</span>를 따른다. 거래 방향이나 의무 정의가 미완료인 Deal을 <code>정산 대상 아님</code>으로 표시하지 않는다.</p>
+<p>재무·정산 구역은 해당 Deal의 현재 잔액을 빠르게 확인하는 요약이다. 미수금·초과 입금·선수금·선급금의 원래 금액과 입출금·배정·환불·반환 전체 이력은 <a href="spec-21-settlement.html">SC-21 정산</a>의 원장 행 일정 상세 패널에서 확인한다. 별도 정산 상세 페이지는 만들지 않는다. 근거: <span>OD-005 UI 위치</span>.</p>
+<p>정보 구조와 정렬 근거: <span>OD-022</span>.</p>
+<h2>개발 역추적</h2>
+<p>Deal detail components → <code>deals.ts</code>, <code>settlement.ts</code>, <code>shipments.ts</code>, <code>salesContacts.ts</code>, <code>dealNotes.ts</code>, <code>flags.ts</code>, <code>members.ts</code> → 각 BFF·백엔드 handler/service/data.</p>
+</article></main></body></html>

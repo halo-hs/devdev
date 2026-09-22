@@ -1,0 +1,71 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-22 — 선적 추적 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-22 — 선적 추적</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/22-shipments.md</p><article class="doc"><h1>SC-22 — 선적 추적</h1>
+<blockquote>
+<p>결정 근거: <span>TRADE-DOC-001 — QA 절의 규범 경계</span></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/shipments</code></td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td><code>user-frontend/src/app/erp/shipments/page.tsx</code> → <code>features/erp/shipments/*</code></td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>선적 추적·SNAP 근거 배정 (16-shipments-and-snap-evidence.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>선적 조회 권한</td>
+</tr>
+</tbody></table>
+<h2>목록·행동·호출</h2>
+<table>
+<thead>
+<tr>
+<th>구역</th>
+<th>보이는 항목</th>
+<th>버튼·필터</th>
+<th>호출</th>
+<th>성공·오류·이동</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>선적 목록</td>
+<td>Deal·계약번호, B/L, 컨테이너, 항구, 선박, ETA·남은 날, 상태, SNAP 근거 수</td>
+<td>B/L·컨테이너·항구·선박·계약 검색, 상태 필터</td>
+<td><code>GET /trade/shipments</code></td>
+<td>화면에 불러온 목록을 조건별 표시</td>
+</tr>
+<tr>
+<td>선적 행</td>
+<td>Deal 표시명, 계약번호, SNAP 배정</td>
+<td><strong>거래 열기/SNAP 근거 열기</strong></td>
+<td>없음</td>
+<td>Deal 상세 또는 <code>/erp/snap-evidence</code></td>
+</tr>
+<tr>
+<td>추적 갱신</td>
+<td>현재 제공자 상태·확인 시각</td>
+<td><strong>새로고침</strong>이 제공되는 상세에서 실행</td>
+<td><code>POST /trade/shipments/{id}/refresh-tracking</code></td>
+<td>해당 선적 갱신; 실패 시 이전 값 유지</td>
+</tr>
+</tbody></table>
+<h2>화면 상태</h2>
+<p>필터는 전체·운송 중·도착 임박·지연·도착으로 표시한다. <span>OD-014</span>에 따라 사용자가 마지막으로 확인한 수동값을 현재 운영값으로 우선하고, 제공자값은 출처·마지막 확인 시각과 함께 병렬 표시한다.</p>
+<h2>개발 역추적</h2>
+<p>shipments components → <code>lib/api/shipments.ts</code> → shipment BFF → shipment handler/service/repository/model.</p>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<p>조회 권한, 검색·상태 필터, 제공자 출처·마지막 확인 시각, 갱신 실패 때 이전 값 유지, Deal·SNAP 이동 주소를 기록한다.</p>
+</article></main></body></html>

@@ -1,0 +1,62 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "es2023",
+    "lib": [
+      "ES2023",
+      "DOM"
+    ],
+    "module": "esnext",
+    "types": [
+      "vite/client"
+    ],
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@landing/*": [
+        "./landing/*"
+      ],
+      "@auth/*": [
+        "./auth/*"
+      ],
+      "@trade-os/*": [
+        "./trade-os/*"
+      ],
+      "@snap/*": [
+        "./snap/*"
+      ],
+      "@shared/*": [
+        "./packages/shared-ui/src/*"
+      ],
+      "@ecoya/ui": [
+        "./packages/ecoya-ui/src/index.ts"
+      ],
+      "@ecoya/ui/*": [
+        "./packages/ecoya-ui/src/*"
+      ]
+    }
+  },
+  "include": [
+    "src",
+    "landing",
+    "auth",
+    "trade-os",
+    "snap",
+    "packages/shared-ui/src",
+    "packages/ecoya-ui/src",
+    "packages/design-system-2.0/src/types"
+  ]
+}

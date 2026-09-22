@@ -1,0 +1,44 @@
+[
+  {
+    "id": "form-login",
+    "figmaNodeId": "587:305",
+    "file": "captures/form-login.png",
+    "width": 520,
+    "height": 414
+  },
+  {
+    "id": "form-signup",
+    "figmaNodeId": "587:306",
+    "file": "captures/form-signup.png",
+    "width": 520,
+    "height": 360
+  },
+  {
+    "id": "form-create",
+    "figmaNodeId": "587:2",
+    "file": "captures/form-create.png",
+    "width": 584,
+    "height": 917
+  },
+  {
+    "id": "form-review",
+    "figmaNodeId": "587:127",
+    "file": "captures/form-review.png",
+    "width": 584,
+    "height": 1554
+  },
+  {
+    "id": "form-deal",
+    "figmaNodeId": "587:307",
+    "file": "captures/form-deal.png",
+    "width": 824,
+    "height": 2669
+  },
+  {
+    "id": "form-duplicate",
+    "figmaNodeId": "587:308",
+    "file": "captures/form-duplicate.png",
+    "width": 1208,
+    "height": 59
+  }
+]

@@ -1,0 +1,375 @@
+{
+  "title": "현재 구현 기준 · 공통 컴포넌트와 업무 UI",
+  "scope": "기존 ERP 562개 HTML 기준. 신규 인증 39개·별도 사이드바 캡처 8개는 이번 목록에서 제외합니다.",
+  "principle": "공통 컴포넌트(shadcn 기반 요소 + 기존 프로젝트 공통)는 재사용하고, 이를 조합한 업무 UI의 구성·상태·상호작용을 설계합니다. 사이드바는 기존 공통으로 재사용합니다. 테이블은 요청에 따라 별도 작업 항목으로 정리합니다.",
+  "rows": [
+    {
+      "id": "review-form",
+      "priority": "P0",
+      "title": "문서 검토·입력 폼",
+      "groups": [
+        "문서 올리기",
+        "문서 만들기",
+        "거래",
+        "처음 시작하기",
+        "설정"
+      ],
+      "reuse": "Input · Select · Textarea · Badge · 구현된 검토 패널",
+      "design": "라벨·필수값·도움말·검토 상태·오류의 연결, 읽기/편집, 1열·2열 배치와 좁은 화면 규칙. 입력창 자체를 새로 만들 필요는 없습니다.",
+      "states": "기본 / 검토 필요 / 불일치 / 필수 누락 / 수정 / 저장 중·실패 / 완료",
+      "decision": "기존 조합 확장",
+      "evidence": [
+        "src/App.tsx:6598 OcrFieldReviewList",
+        "src/App.tsx:11746 CreateFieldReviewPanel",
+        "trade-os/deal-detail-prototype.tsx:2035 DealFieldsPanel"
+      ],
+      "workArea": "업무 UI · 조합 설계"
+    },
+    {
+      "id": "validation-action",
+      "priority": "P0",
+      "title": "오류 요약·다음 행동 안내",
+      "groups": [
+        "문서 올리기",
+        "문서 만들기",
+        "거래",
+        "선적",
+        "정산",
+        "처음 시작하기",
+        "설정"
+      ],
+      "reuse": "Alert · Button · Tooltip · 기존 제목 영역; 코드의 AsyncButton 재사용 검토",
+      "design": "상단 미완료 요약 → 오류 항목으로 이동 → 수정 → 실행 가능 안내. 버튼 비활성 이유와 처리·실패·재시도 안내를 연결합니다. AI 안내와 일반 상태 안내의 역할도 비교 제안합니다.",
+      "states": "비활성 이유 / 화면 밖 오류 / 실행 가능 / 처리 중 / 실패·재시도 / 완료",
+      "decision": "조합 규칙 보완 우선",
+      "evidence": [
+        "src/App.tsx:11864 필수 필드·품목 누락 집계",
+        "trade-os/deal-detail-prototype.tsx:1075 ActionDialog",
+        "packages/design-system-2.0/src/components/extensions/async-button.tsx"
+      ],
+      "workArea": "업무 UI · 조합 설계"
+    },
+    {
+      "id": "line-items",
+      "priority": "P0",
+      "title": "품목 편집·검증",
+      "groups": [
+        "문서 만들기",
+        "거래",
+        "문서 올리기"
+      ],
+      "reuse": "Table · Input · Select · Button",
+      "design": "품목 추가·개별 삭제·전체 삭제, 수량/단위/단가/금액, 행·셀 오류와 합계. 표형 편집과 펼친 폼형 편집의 선택 기준을 정합니다.",
+      "states": "빈 품목 / 여러 행 / 셀 오류 / 수량 불일치 / 삭제 확인 / 읽기 전용",
+      "decision": "테이블 별도 설계 · 편집형",
+      "evidence": [
+        "src/App.tsx:8826 StructuredDocumentCreateEditor",
+        "src/App.tsx:11746 CreateFieldReviewPanel",
+        "trade-os/deal-detail-prototype.tsx:2200 품목 폼"
+      ],
+      "workArea": "테이블 · 별도 작업"
+    },
+    {
+      "id": "worklist",
+      "priority": "P0",
+      "title": "업무 목록·검색·행 액션",
+      "groups": [
+        "오늘 할 일",
+        "거래",
+        "선적",
+        "정산",
+        "운영 감시",
+        "알림",
+        "거래처",
+        "증빙",
+        "설정"
+      ],
+      "reuse": "Table · Pagination · Select · Input · Checkbox · DropdownMenu",
+      "design": "검색/필터 위치, 행 선택과 상세 이동의 구분, 행 액션·일괄 처리, 긴 텍스트·숫자 정렬·스크롤·카드 내부 간격을 업무에 맞게 제안합니다.",
+      "states": "기본 / 필터 적용 / 선택 / 검색 결과 없음 / 로딩 / 권한 제한",
+      "decision": "테이블 별도 설계 · 조회형",
+      "evidence": [
+        "trade-os/deals-prototype.tsx:483 거래 목록",
+        "trade-os/erp-menu-prototypes.tsx:332 PanelTable",
+        "packages/design-system-2.0/src/components/extensions/data-table.tsx"
+      ],
+      "workArea": "테이블 · 별도 작업"
+    },
+    {
+      "id": "status-exception",
+      "priority": "P0",
+      "title": "검토 상태·예외와 조치",
+      "groups": [
+        "문서 올리기",
+        "문서 만들기",
+        "거래",
+        "선적",
+        "정산",
+        "운영 감시",
+        "알림"
+      ],
+      "reuse": "Badge · Alert · Table · Button",
+      "design": "처리 상태, 검증 결과, 위험도, 권한 제한의 의미를 구분합니다. 색·아이콘·문구를 공통 규칙으로 연결하고 예외마다 다음 조치를 제공합니다.",
+      "states": "대기 / 처리 중 / 성공 / 주의 / 실패 / 불일치 / 차단",
+      "decision": "기존 상태 컴포넌트 매핑 보완",
+      "evidence": [
+        "src/App.tsx:1720 ToneBadge",
+        "trade-os/erp-handoff-panels.tsx:65 SampleStatus",
+        "trade-os/deal-detail-prototype.tsx:955 StatusBadge"
+      ],
+      "workArea": "업무 UI · 조합 설계"
+    },
+    {
+      "id": "overlay",
+      "priority": "P0",
+      "title": "확인·입력·상세 팝업",
+      "groups": [
+        "거래",
+        "선적",
+        "정산",
+        "문서 올리기",
+        "문서 만들기",
+        "AI에게 묻기",
+        "설정",
+        "알림"
+      ],
+      "reuse": "공통 Dialog · AlertDialog · Sheet · Popover · Button",
+      "design": "업무에 따른 팝업 종류·크기·제목·본문·버튼 순서, 내부 스크롤, 닫기·포커스 복귀·배경 처리를 정합니다. 별도 구현된 모달은 공통 기반으로 정리할 후보입니다.",
+      "states": "열림 / 입력 오류 / 처리 중 / 처리 실패 / 닫기·미저장 확인",
+      "decision": "공통 기반 적용 + 업무 내용 설계",
+      "evidence": [
+        "trade-os/deals-prototype.tsx:165 DealCreateDialog 직접 Portal 구현",
+        "trade-os/deal-detail-prototype.tsx:1075 ActionDialog 직접 Portal 구현",
+        "trade-os/erp-handoff-panels.tsx:79 공통 Dialog 사용"
+      ],
+      "workArea": "업무 UI · 조합 설계"
+    },
+    {
+      "id": "document-workspace",
+      "priority": "P0",
+      "title": "PDF·폼·문서 비교 작업 영역",
+      "groups": [
+        "문서 올리기",
+        "문서 만들기",
+        "거래",
+        "증빙"
+      ],
+      "reuse": "PDF 보기 · 구현된 검토 패널 · Tabs · 분할 크기 조절 · Button",
+      "design": "PDF와 폼의 관계, 원문 근거 찾기, 비교·선택·확정 흐름, 패널별 스크롤·접힘·좁은 화면 전환을 정합니다. 구현된 PDF 보기를 다시 만드는 작업은 아닙니다.",
+      "states": "원문 준비 중 / PDF 오류 / 근거 선택 / 비교 / 미저장 / 좁은 화면",
+      "decision": "구현된 PDF 보기·검토 패널 조합 정리",
+      "evidence": [
+        "src/App.tsx:5888 DocumentReviewWorkspace",
+        "packages/shared-ui/src/components/pannable-pdf-viewport.tsx",
+        "trade-os/deal-detail-prototype.tsx:1808 DealPdf"
+      ],
+      "workArea": "업무 UI · 조합 설계"
+    },
+    {
+      "id": "analytics",
+      "priority": "P0",
+      "title": "지표·그래프·상세표",
+      "groups": [
+        "결산 리포트",
+        "영업 성과",
+        "정산",
+        "오늘 할 일",
+        "토큰"
+      ],
+      "reuse": "Card · Select · 코드의 ChartContainer/Tooltip(Recharts 기반) · Table",
+      "design": "지표→그래프→상세표 위계, 기간/통화/담당자 필터, 축·단위·색·범례·툴팁과 상세 연결을 설계합니다. 그래프 기본 구현은 ChartContainer와 Recharts를 재사용합니다.",
+      "states": "정상 / 0값 / 데이터 없음 / 미집계 / 부분 실패 / 음수 / 선택 / 좁은 화면",
+      "decision": "기존 카드 재사용 + 그래프 표현 규칙 정리",
+      "evidence": [
+        "packages/shared-ui/src/components/summary-metric-strip.tsx",
+        "trade-os/erp-menu-prototypes.tsx:5401 ReportsPrototype",
+        "trade-os/erp-menu-prototypes.tsx:6579 SalesPerformanceLivePrototype",
+        "packages/design-system-2.0/packages/shared-ui/src/components/ui/chart.tsx"
+      ],
+      "workArea": "업무 UI · 조합 설계"
+    },
+    {
+      "id": "upload-queue",
+      "priority": "P1",
+      "title": "업로드 목록·진행·재시도",
+      "groups": [
+        "문서 올리기",
+        "처음 시작하기",
+        "설정"
+      ],
+      "reuse": "FileDropZone · Progress · Badge · Button · Table",
+      "design": "파일 선택 이후 여러 파일의 진행·중복·형식 오류·실패·취소·재시도를 목록으로 묶습니다. 드롭존과 처리 결과 목록의 역할을 구분합니다.",
+      "states": "선택 전 / 업로드 중 / 처리 대기 / 중복 / 실패 / 취소 / 검토 가능",
+      "decision": "기존 업로드 컴포넌트 조합",
+      "evidence": [
+        "src/App.tsx:3930 HorizontalDocumentTray",
+        "src/App.tsx:5353 PendingUploadDocumentsTable",
+        "packages/design-system-2.0/src/components/extensions/file-drop-zone.tsx"
+      ],
+      "workArea": "업무 UI · 조합 설계"
+    },
+    {
+      "id": "ai-result",
+      "priority": "P1",
+      "title": "AI 질문·결과·근거",
+      "groups": [
+        "AI에게 묻기",
+        "오늘 할 일",
+        "문서 만들기"
+      ],
+      "reuse": "Textarea · Button · Card · Badge · 기존 문서 보기",
+      "design": "질문 입력, 거래 선택, 조회 결과, 근거·시점·신뢰도, 원문 열기와 후속 질문을 연결합니다. 답변 본문과 실제 실행 결과를 구분합니다.",
+      "states": "질문 전 / 조회 중 / 결과 / 근거 없음 / 데이터 갱신 대기 / 실패·재시도",
+      "decision": "업무 조합·상태 추가 설계",
+      "evidence": [
+        "trade-os/erp-menu-prototypes.tsx:1751 AskPrototype",
+        "trade-os/ai-business-tools.tsx:86 AiBusinessTools"
+      ],
+      "workArea": "업무 UI · 조합 설계"
+    },
+    {
+      "id": "step-save",
+      "priority": "P1",
+      "title": "단계 진행·저장·이력",
+      "groups": [
+        "처음 시작하기",
+        "문서 올리기",
+        "문서 만들기",
+        "거래",
+        "정산",
+        "설정"
+      ],
+      "reuse": "Progress · Button · Badge · 기존 AutoSaveStatus",
+      "design": "현재 단계·남은 조건·다음 단계, 자동저장과 확정의 차이, 변경 이력과 재시도를 같은 방식으로 안내합니다.",
+      "states": "진행 전 / 진행 중 / 저장 중 / 저장 실패 / 확정 / 이전 단계 복귀",
+      "decision": "기존 요소 조합 규칙 정리",
+      "evidence": [
+        "packages/shared-ui/src/components/auto-save-status.tsx",
+        "trade-os/erp-menu-prototypes.tsx:640 OnboardingPrototype",
+        "trade-os/deal-detail-prototype.tsx:1333 AuditTrail"
+      ],
+      "workArea": "업무 UI · 조합 설계"
+    },
+    {
+      "id": "navigation",
+      "priority": "재사용",
+      "title": "사이드바·페이지 제목·공통 틀",
+      "groups": [
+        "공통 메뉴",
+        "오늘 할 일",
+        "처음 시작하기",
+        "문서 올리기",
+        "문서 만들기",
+        "거래",
+        "선적",
+        "정산",
+        "운영 감시",
+        "결산 리포트",
+        "영업 성과",
+        "알림",
+        "거래처",
+        "증빙",
+        "설정",
+        "요금제",
+        "토큰",
+        "AI에게 묻기"
+      ],
+      "reuse": "기존 Sidebar · WorkspaceHeader · BusinessPageHero",
+      "design": "사이드바는 이미 정리된 프로젝트 공통 컴포넌트로 재사용합니다. 새 사이드바 제작은 요청하지 않습니다.",
+      "states": "현재 메뉴 / 메뉴 접힘 / 모바일 / 권한별 노출",
+      "decision": "신규 컴포넌트 제작 대상 아님",
+      "evidence": [
+        "사용자 확인: Sidebar는 기존 프로젝트 공통 컴포넌트",
+        "src/App.tsx:1945 AppNav",
+        "packages/shared-ui/src/components/business-page-hero.tsx"
+      ],
+      "workArea": "기존 공통 · 재사용"
+    }
+  ],
+  "charts": [
+    {
+      "name": "예정·실적 비교 막대",
+      "where": "결산 리포트 · 수취 계획 vs 실수금",
+      "base": "ChartContainer + BarChart + Tooltip",
+      "design": "계열 색·범례, 기간/통화 단위, 누락과 0의 구분, 선택 시 상세표 연결"
+    },
+    {
+      "name": "미수·미지급 추세선",
+      "where": "결산 리포트 · 기말 잔액 추세",
+      "base": "ChartContainer + LineChart + Tooltip",
+      "design": "계열 구분, 음수·큰 금액의 축, 날짜 간격, 끊긴 데이터의 표현"
+    },
+    {
+      "name": "연체율 추세선",
+      "where": "결산 리포트 · 연체율",
+      "base": "ChartContainer + LineChart",
+      "design": "0–100% 축, 분모 없음과 0% 구분, 목표/주의 기준선 필요 여부"
+    },
+    {
+      "name": "월별 손익 막대",
+      "where": "현재 영업 성과 · 월별 GP 추세",
+      "base": "ChartContainer + BarChart",
+      "design": "양수/음수 기준선, 금액·통화, 기간 비교와 상세 연결. 이전 프로토타입의 선 그래프는 별도 신규 타입으로 세지 않음"
+    },
+    {
+      "name": "순위·사용량 가로 막대",
+      "where": "영업 성과 담당자별 GP · 토큰 사용량",
+      "base": "현재 div 폭으로 직접 표현; Progress/카드 기반 재사용 검토",
+      "design": "순위 금액과 사용 비율을 구분, 음수 방향·부호, 기준 최대값, 긴 이름·숫자와 빈 목록"
+    },
+    {
+      "name": "선적 일정·구간 막대",
+      "where": "거래 상세 · 주문·선적 / 이전 홈 캡처",
+      "base": "날짜축과 구간 위치를 직접 배치한 업무 UI",
+      "design": "현재 날짜·ETA·구간 상태·겹침·범위 밖 일정·드래그와 상세 연결. 현재 홈은 모듈형으로 바뀌어 홈 적용 여부 재확인"
+    }
+  ],
+  "workingRules": [
+    "공통 요소의 모양·상태 변경이 필요하면 공통 변경안으로 제안합니다. 페이지마다 별도 복제본을 만들지 않습니다.",
+    "테이블은 별도 산출물로 받습니다. 조회형·편집형·문서 비교형을 구분하고, 공통 Table·Input·Select·Button을 기반으로 행과 셀의 업무 규칙을 설계합니다.",
+    "폼은 공통 Input·Select를 사용합니다. 추가 설계 대상은 검증 안내·배치·읽기/편집·업무 상태의 조합입니다.",
+    "각 업무 UI는 적용 페이지, 재사용할 공통 요소, 기본·빈 상태·오류·처리 중·완료·좁은 화면, 버튼 이후 흐름을 함께 보여주세요.",
+    "표·카드·버튼의 그림자는 공통 계층 규칙으로 조정합니다. 기존 배치나 그림자 값을 그대로 따르라는 의미가 아닙니다.",
+    "562개는 상태·팝업을 포함한 참고 파일 수입니다. 562개를 각각 새 컴포넌트로 만들지 않습니다."
+  ],
+  "common": [
+    {
+      "name": "버튼·입력·선택",
+      "implemented": "Button, Input, Textarea, Select, Checkbox",
+      "request": "기존 공통 재사용. 크기·색·포커스·오류 상태 개선은 공통 기준으로 제안."
+    },
+    {
+      "name": "상태·탐색·레이어",
+      "implemented": "Badge, Tabs, Dialog, AlertDialog, Sheet, Popover, Tooltip, Skeleton, Progress",
+      "request": "기존 공통 재사용. 업무별 문구·위치·노출 조건·상태 연결을 설계."
+    },
+    {
+      "name": "표·차트 기반",
+      "implemented": "Table, ChartContainer, ChartTooltip + Recharts",
+      "request": "기반은 재사용. 테이블 타입과 그래프의 표현·필터·상세 연결은 별도 업무 UI 설계."
+    },
+    {
+      "name": "이미 정리된 공통 UI",
+      "implemented": "Sidebar · WorkspaceHeader · BusinessPageHero · SummaryMetricStrip · AutoSaveStatus · MoneyValue",
+      "request": "Sidebar는 사용자 확인에 따른 기존 공통으로 분류. 신규 제작 대상에서 제외. 나머지는 적용 규칙·변형을 검토."
+    }
+  ],
+  "confirmedCustom": [
+    {
+      "name": "거래 만들기·거래 액션 모달",
+      "evidence": "deals-prototype.tsx DealCreateDialog / deal-detail-prototype.tsx ActionDialog: createPortal + div 직접 구성",
+      "action": "내용과 흐름은 업무 UI 설계. 팝업 기반 동작은 공통 Dialog 계열로 정리할 후보."
+    },
+    {
+      "name": "PDF·폼 비교/리사이즈 작업 영역",
+      "evidence": "App.tsx DocumentReviewWorkspace / PannablePdfViewport: 패널 조합·원문 이동·분할 제어",
+      "action": "버튼은 공통 재사용. 문서와 폼 연결·스크롤·좁은 화면은 전용 업무 UI 설계."
+    },
+    {
+      "name": "선적 일정·순위/사용량 막대",
+      "evidence": "거래 FulfillmentTab 날짜축·구간 직접 배치 / 영업 성과·토큰 div width 막대",
+      "action": "일정·순위·사용 비율의 의미별 UI를 정리. 기본 막대를 단순히 같은 차트 타입으로 통일하지 않음."
+    }
+  ],
+  "figmaUrl": "https://www.figma.com/design/utViiVayT0rWuYSB5bpZ31?node-id=527-2"
+}

@@ -1,0 +1,166 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-21 — 정산 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-21 — 정산</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/21-settlement.md</p><article class="doc"><h1>SC-21 — 정산</h1>
+<blockquote>
+<p>결정 근거: <span>TRADE-DOC-001 — QA 절의 규범 경계</span></p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-31 결정 반영</strong> — 아래는 확정 정책이다. 구현·QA 상태는 이 문서가 관리하지 않는다.</p>
+<ul>
+<li><span>DEC-TRD-001</span> — 대손 확정·월 마감·<code>edit_bank_profile</code>은 capability·재인증·감사를 요구하고 <strong>기본값은 Owner/Admin 전용</strong>이다. 입출금·부분 입출금 기록과 대손 제안은 Member가 수행한다. 소규모 조직에 이중 승인을 강제하지 않는다.</li>
+<li><span>ISSUE-133</span> — 원본 현금, 일정 적용, 잉여, 분쟁, 환불/반환, 조정을 별도 이력으로 표시한다.</li>
+</ul>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/settlement</code></td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td><code>user-frontend/src/app/erp/settlement/page.tsx</code> → <code>features/erp/settlement/*</code></td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>정산 (05-settlement.md)</span></td>
+</tr>
+<tr>
+<td>필수 산식</td>
+<td><span>정산 필드·산식 (05-01-settlement-data-dictionary.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>인증된 조직 구성원; 기록·삭제·완료 취소·내보내기는 서버 역할 권한 적용</td>
+</tr>
+</tbody></table>
+<h2>구역·행동·호출</h2>
+<table>
+<thead>
+<tr>
+<th>구역</th>
+<th>화면 항목</th>
+<th>버튼·행동</th>
+<th>호출</th>
+<th>성공·오류·이동</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>정산 요약</td>
+<td>통화, 받을 돈, 지급할 돈, 순노출, 연체 구간, 기준시각</td>
+<td>필터·새로고침</td>
+<td>settlement overview</td>
+<td>통화별 집계; 실패를 0으로 표시하지 않음</td>
+</tr>
+<tr>
+<td>현금 일정</td>
+<td>연체·이번 주·다음 주·이번 달·이후 금액·건수</td>
+<td>일정 구간 선택</td>
+<td>settlement calendar</td>
+<td>원장 조건 변경</td>
+</tr>
+<tr>
+<td>거래처 요약</td>
+<td>거래처, 통화, 받을 돈·지급할 돈, 연체</td>
+<td>행 펼치기·상세 열기</td>
+<td>counterparty scorecard·deals</td>
+<td>거래처·Deal 상세</td>
+</tr>
+<tr>
+<td>Deal 정산 상태</td>
+<td>미정산, 정산 완료, 정산 대상 아님</td>
+<td>상태 필터·Deal 상세 열기</td>
+<td>settlement deals</td>
+<td>필수 의무 0건은 <code>정산 대상 아님</code>; 미정산·연체 건수와 금액 합계에서 제외</td>
+</tr>
+<tr>
+<td>원장</td>
+<td>받을 돈·지급할 돈 구분, Deal, 검증된 문서번호 또는 없음·모호·legacy 상태와 별도 수동 참조, 일정 종류, 예정일, 예정금액, 입출금, 미결제, 상태</td>
+<td>필터·페이지 이동·행 열기</td>
+<td>settlement ledger</td>
+<td>문서 직접 후보 1개만 번호 표시; 0·복수·legacy는 임의 선택 없이 <code>null</code>과 상태 표시. 행을 열면 같은 화면의 일정 상세 패널 표시</td>
+</tr>
+<tr>
+<td>일정 상세 패널</td>
+<td>원래/현재 대상 금액, 원본 현금, 적용 누계, 0 아래로 내려가지 않는 미수금·미지급금, 잉여, 분쟁·환불/반환·조정 이력</td>
+<td>현금 기록, 같은 거래처·통화 일정에 명시 배정, reversal/정정, 이력 확인, <strong>Deal 상세 열기</strong></td>
+<td>cash/application/surplus/dispute/refund/adjustment 계약</td>
+<td>사건별 누계·잔액 재계산; 별도 정산 상세 URL을 만들지 않고 같은 정산 화면에 유지</td>
+</tr>
+<tr>
+<td>분쟁</td>
+<td>현재 대상 금액, 겹치지 않는 정상·분쟁 partition, 사유·근거</td>
+<td>분쟁 등록·부분 해결·재개</td>
+<td>분쟁 상태·이력 계약</td>
+<td>정상 금액은 정산 계속; <code>cash_resumed/written_off/adjusted</code>를 별도 사건에 연결하고 미해결이면 Deal 정산 완료 차단</td>
+</tr>
+<tr>
+<td>받을 돈 일정 상세 — 초과 입금·선수금</td>
+<td>원래 입금액, 일정 적용액, 초과 입금 미처리 잔액, 선수금 전환액, 배정·환불 누계</td>
+<td>같은 거래처 일정에 직접 배정, <strong>선수금으로 구분</strong>, 외부 환불 결과 기록</td>
+<td>초과 입금·선수금·배정·환불 계약</td>
+<td>입금 직후 초과분은 <code>초과 입금</code>; 사용자가 다음 거래 대금 사용을 확정한 금액만 <code>선수금</code>. 자동 전환·자동 배정·매출 집계·은행 실행 표시 금지</td>
+</tr>
+<tr>
+<td>지급할 돈 일정 상세 — 선급금</td>
+<td>원래 지급액, 일정 적용액, 선급금, 배정·반환 누계, 남은 잔액</td>
+<td>같은 공급사 일정에 배정·외부 반환 결과 기록</td>
+<td>초과 지급·선급금 계약</td>
+<td>원래 지급 유지, 초과분은 같은 공급사 선급금; 비용 중복·타 공급사 배정 금지</td>
+</tr>
+<tr>
+<td>대변·조정</td>
+<td>원래 예정 금액, 조정 금액·사유·근거, 현재 정산 대상 금액</td>
+<td>대변·조정 추가</td>
+<td>조정 사건 계약</td>
+<td>원래 예정 금액·실제 입출금 유지, 별도 음수 조정으로 현재 대상 금액 재계산</td>
+</tr>
+<tr>
+<td>완료 취소</td>
+<td>완료일·상태</td>
+<td><strong>완료 취소</strong></td>
+<td>uncomplete schedule</td>
+<td>예정 복귀, Deal 재평가</td>
+</tr>
+<tr>
+<td>취소·종료 포함</td>
+<td>취소된 Deal의 삭제 전 예정 금액, 실제 입출금, 취소된 잔액, 환불·반환 상태</td>
+<td>필터 켜기·Deal/보관 상세 열기</td>
+<td>취소 포함 원장 조회</td>
+<td>기본 원장·집계에서는 제외; 회색 <code>취소됨</code> 읽기 전용</td>
+</tr>
+<tr>
+<td>내보내기</td>
+<td>현재 필터·월·세무 서식</td>
+<td>CSV·세무 CSV</td>
+<td>export API</td>
+<td>파일 생성, 화면 유지</td>
+</tr>
+<tr>
+<td>지급 독촉</td>
+<td>거래처, 미결제, 지급기한, 초안</td>
+<td>복사·메일 앱 열기</td>
+<td>클립보드·외부 앱</td>
+<td>발송됨 처리 금지</td>
+</tr>
+</tbody></table>
+<h2>화면 산식</h2>
+<ul>
+<li>받을 돈: <code>SUM(outstanding WHERE type=receivable)</code></li>
+<li>지급할 돈: <code>SUM(outstanding WHERE type=payable)</code></li>
+<li>순노출: <code>받을 돈 - 지급할 돈</code>, 통화별이며 자동 환산하지 않는다.</li>
+<li>진행 일정의 상세·요약 미결제는 모두 <code>max(현재 대상 금액 - 적용 누계, 0)</code>이다. 음수는 잉여로 분리하며 원본 현금과 적용 금액을 같은 필드로 표시하지 않는다.</li>
+<li>거래처 결제 신뢰도 금액의 통화 혼합 공백은 <code>TR-033</code>이다.</li>
+<li><code>정산 완료</code>는 필수 의무가 하나 이상이고 모두 완료된 경우다. 필수 의무가 0건이면 <span>OD-004</span>에 따라 <code>정산 대상 아님</code>으로 표시한다.</li>
+<li>미수금·초과 입금·선수금·선급금의 전체 이력은 이 화면의 원장 행 <code>일정 상세 패널</code>이 소유한다. 별도 정산 상세 페이지나 독립 메뉴를 만들지 않으며 Deal 상세는 요약과 이동만 제공한다. 근거: <span>OD-005 UI 위치</span>.</li>
+<li>취소 Deal은 기본 받을 돈·지급할 돈·미정산·연체 합계에서 제외하고 <code>취소·종료 포함</code> 필터에서만 조회한다. 근거: <span>OD-009</span>.</li>
+</ul>
+<h2>QA 역추적</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<p>통화·필터·일정 ID·행동·입력금액·문서 후보 상태·화면 오류 문구를 기록한다. 일정 상세·원장·요약·내보내기·Deal·보고서·월 마감에서 raw cash/application/surplus/dispute/refund/return/adjustment 분리가 같은지, 중복·동시 요청과 legacy <code>unknown</code>이 추정값을 만들지 않는지 확인한다. <code>settlement.ts</code>, <code>paymentSchedules.ts</code> → BFF → 정산·지급 일정 handler/service/repository를 확인한다.</p>
+</article></main></body></html>

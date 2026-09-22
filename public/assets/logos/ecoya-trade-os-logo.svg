@@ -1,0 +1,11 @@
+<svg width="256" height="40" viewBox="0 0 320 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="ecoya-wordmark">
+      <rect width="176" height="40" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#ecoya-wordmark)">
+    <image href="/assets/logos/logo-ecoya-snap-color.png" width="327" height="40" preserveAspectRatio="none" />
+  </g>
+  <text x="185" y="29" fill="#141414" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="600" letter-spacing="-0.6">TRADE OS</text>
+</svg>

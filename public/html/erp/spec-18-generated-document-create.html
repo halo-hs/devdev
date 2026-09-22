@@ -1,0 +1,108 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-18 — 발행 문서 작성 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-18 — 발행 문서 작성</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/18-generated-document-create.md</p><article class="doc"><h1>SC-18 — 발행 문서 작성</h1>
+<blockquote>
+<p>결정 근거: <span>TRADE-DOC-001 — QA 절의 규범 경계</span> · <span>DEC-TRD-008 — 반응형 지원 범위</span> · <span>DEC-TRD-009 — 지원 locale과 fallback</span> · <span>DEC-TRD-010 — 접근성 기준과 검증 범위</span></p>
+</blockquote>
+<blockquote>
+<p><strong>Pilot 목표 정책 / 구현 미검증</strong> · 결정: <span>D-015</span></p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-31 결정 반영</strong> — 아래는 확정 정책이다. 구현·QA 상태는 이 문서가 관리하지 않는다.</p>
+<ul>
+<li><span>DEC-TRD-002</span> — 회사 업무용 지급계좌는 <code>Business payment information</code>이다. <strong>실무자는 조회하고 승인된 문서에 사용</strong>하며, 생성·변경·삭제는 <code>edit_bank_profile</code> capability와 재인증을 요구하고 변경 이력·알림을 남긴다. secret 원문을 FE로 내려보내지 않는다.</li>
+</ul>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/documents/create</code></td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td><code>user-frontend/src/app/erp/documents/create/page.tsx</code> → <code>DocumentCreateConnected.tsx</code>와 작성 단계 모듈</td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><a href="spec-02-confirm-and-approval.html">확정·승인 (02-confirm-and-approval.md)</a>, <span>발행 문서 (15-generated-documents.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>Owner/Admin/Member가 본인 담당 또는 공동 작업자로 내부 공유된 모든 유형의 문서를 작성·수정·Confirm. Approval 행동은 향후 활성 모드에서만 해당 권한 적용</td>
+</tr>
+</tbody></table>
+<p>이 화면은 <span>공통 UI 품질 계약</span>의 반응형·locale·접근성 기준을 상속한다. 모바일에서도 단일 발행 문서의 작성·편집·저장·Confirm·오류 복구를 끝까지 완료할 수 있어야 하며, 공식 지원 locale 모두에서 키보드와 스크린 리더로 같은 단계와 상태를 확인·실행할 수 있어야 한다.</p>
+<h2>작성 단계·호출</h2>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>보이는 항목</th>
+<th>버튼·행동</th>
+<th>호출</th>
+<th>성공·오류·복구</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>시작</td>
+<td>자연어 입력, 관련 Deal·수신 문서·최근 문서</td>
+<td><strong>초안 제안 받기/템플릿 선택</strong></td>
+<td>doc draft parse, templates·Deal·source 조회</td>
+<td>종류·필드·추가 질문 제안; 실패 시 입력 유지</td>
+</tr>
+<tr>
+<td>사실 확인</td>
+<td>방향, 당사자, 품목, 금액·통화, 결제·선적 조건</td>
+<td>필드 입력·질문 답변</td>
+<td>클라이언트 상태 후 저장</td>
+<td>누락·형식 오류 표시</td>
+</tr>
+<tr>
+<td>불일치</td>
+<td>원천과 다른 값·필수값</td>
+<td><strong>원천 보기/값 수정</strong></td>
+<td>discrepancies·source 조회</td>
+<td>차단 해소 또는 경고 유지</td>
+</tr>
+<tr>
+<td>서식·브랜드</td>
+<td>원형, 로고, 서명, 스타일</td>
+<td>원형 선택·미리보기</td>
+<td>archetype·style·preview</td>
+<td>실패 시 기존 미리보기 유지</td>
+</tr>
+<tr>
+<td>첨부</td>
+<td>수신 문서·파일</td>
+<td>추가·업로드·제거</td>
+<td>attachments CRUD</td>
+<td>성공 목록 갱신, 실패 행 유지</td>
+</tr>
+<tr>
+<td>저장·확정</td>
+<td>버전, 품질 경고, Job history</td>
+<td><strong>저장/확인 및 확정/Job history 보기</strong></td>
+<td>create·patch·confirm·history</td>
+<td>Confirm 상태와 Job history 갱신. 저장·이력 실패 시 입력과 이전 상태 유지</td>
+</tr>
+<tr>
+<td>Approval — 활성 모드에만 노출</td>
+<td>승인 상태, 승인자, 중요 변경</td>
+<td><strong>승인 요청/승인/반려</strong></td>
+<td>보존된 approval API·event</td>
+<td>활성 모드의 승인 상태 갱신. 중요 변경 뒤 재승인 우회 공백은 TR-004</td>
+</tr>
+</tbody></table>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<p>생성·수정·Confirm·Job history 단계를 구분하고 문서 종류, Deal, 필드 표시명, 누른 버튼, 새 버전, 변경 근거와 오류 문구를 기록한다. Pilot에서는 승인 요청·승인·승인 대기 UI가 노출되지 않는지 확인한다. Approval 모드가 활성화된 경우에만 승인 단계를 별도로 검증한다.</p>
+<p>현재 Frontend의 승인 상태와 CTA는 Pilot 기본 비노출 정책과 충돌하는 <code>IMPLEMENTATION_GAP</code>이다. Backend 승인 API·상태·사건 계약은 보존한다.</p>
+<h2>개발 역추적</h2>
+<p>작성 components → <code>generatedDocuments.ts</code>, <code>orgBrand.ts</code>, <code>orgProfile.ts</code>, <code>tradeDocs.ts</code>, <code>deals.ts</code> → docgen BFF → handler/service/render/data.</p>
+</article></main></body></html>

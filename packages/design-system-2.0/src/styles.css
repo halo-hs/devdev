@@ -1,0 +1,370 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "./tokens.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ECOYA typography roles. These utilities intentionally expose the complete
+   token scale while keeping the values owned by tokens.css. */
+@utility typo-display-1 {
+  font-size: var(--text-display-1);
+  line-height: var(--leading-display-1);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-display-2 {
+  font-size: var(--text-display-2);
+  line-height: var(--leading-display-2);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-display-3 {
+  font-size: var(--text-display-3);
+  line-height: var(--leading-display-3);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-display-4 {
+  font-size: var(--text-display-4);
+  line-height: var(--leading-display-4);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-display-5 {
+  font-size: var(--text-display-5);
+  line-height: var(--leading-display-5);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-display-6 {
+  font-size: var(--text-display-6);
+  line-height: var(--leading-display-6);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-header-1 {
+  font-size: var(--text-header-1);
+  line-height: var(--leading-header-1);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-header-2 {
+  font-size: var(--text-header-2);
+  line-height: var(--leading-header-2);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-header-3 {
+  font-size: var(--text-header-3);
+  line-height: var(--leading-header-3);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-header-4 {
+  font-size: var(--text-header-4);
+  line-height: var(--leading-header-4);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-header-5 {
+  font-size: var(--text-header-5);
+  line-height: var(--leading-header-5);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-header-6 {
+  font-size: var(--text-header-6);
+  line-height: var(--leading-header-6);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-header-7 {
+  font-size: var(--text-header-7);
+  line-height: var(--leading-header-7);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-header-8 {
+  font-size: var(--text-header-8);
+  line-height: var(--leading-header-8);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-header-9 {
+  font-size: var(--text-header-9);
+  line-height: var(--leading-header-9);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-header-10 {
+  font-size: var(--text-header-10);
+  line-height: var(--leading-header-10);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-header-11 {
+  font-size: var(--text-header-11);
+  line-height: var(--leading-header-11);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-body-1 {
+  font-size: var(--text-body-1);
+  line-height: var(--leading-body-1);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-body-2 {
+  font-size: var(--text-body-2);
+  line-height: var(--leading-body-2);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-body-3 {
+  font-size: var(--text-body-3);
+  line-height: var(--leading-body-3);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-body-4 {
+  font-size: var(--text-body-4);
+  line-height: var(--leading-body-4);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-body-5 {
+  font-size: var(--text-body-5);
+  line-height: var(--leading-body-5);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-body-6 {
+  font-size: var(--text-body-6);
+  line-height: var(--leading-body-6);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-body-7 {
+  font-size: var(--text-body-7);
+  line-height: var(--leading-body-7);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-body-8 {
+  font-size: var(--text-body-8);
+  line-height: var(--leading-body-8);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-body-9 {
+  font-size: var(--text-body-9);
+  line-height: var(--leading-body-9);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-body-10 {
+  font-size: var(--text-body-10);
+  line-height: var(--leading-body-10);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-body-11 {
+  font-size: var(--text-body-11);
+  line-height: var(--leading-body-11);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-body-12 {
+  font-size: var(--text-body-12);
+  line-height: var(--leading-body-12);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-button-1 {
+  font-size: var(--text-button-1);
+  line-height: var(--leading-button-1);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0;
+}
+
+@utility typo-button-2 {
+  font-size: var(--text-button-2);
+  line-height: var(--leading-button-2);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0;
+}
+
+@utility typo-button-3 {
+  font-size: var(--text-button-3);
+  line-height: var(--leading-button-3);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0;
+}
+
+@utility typo-button-4 {
+  font-size: var(--text-button-4);
+  line-height: var(--leading-button-4);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0;
+}
+
+@utility typo-button-5 {
+  font-size: var(--text-button-5);
+  line-height: var(--leading-button-5);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0;
+}
+
+@utility typo-label-1 {
+  font-size: var(--text-label-1);
+  line-height: var(--leading-label-1);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-label-2 {
+  font-size: var(--text-label-2);
+  line-height: var(--leading-label-2);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-label-3 {
+  font-size: var(--text-label-3);
+  line-height: var(--leading-label-3);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+/* Public 1.x compatibility roles. Values remain token-owned so legacy API
+   fidelity does not distort the canonical ECOYA typography scale. */
+@utility typo-compat-h0 {
+  font-size: var(--text-compat-h0);
+  line-height: var(--leading-compat-h0);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+@utility typo-compat-body-5-5 {
+  font-size: var(--text-compat-body-5-5);
+  line-height: var(--leading-compat-body-5-5);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@utility typo-compat-badge-lg {
+  font-size: var(--text-compat-badge-lg);
+  line-height: var(--leading-compat-badge-lg);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+@theme inline {
+  --font-heading: var(--font-family-sans);
+  --font-sans: var(--font-family-sans);
+  --text-xs: var(--text-body-11);
+  --text-xs--line-height: var(--leading-body-11);
+  --text-sm: var(--text-body-9);
+  --text-sm--line-height: var(--leading-body-9);
+  --text-base: var(--text-body-7);
+  --text-base--line-height: var(--leading-body-7);
+  --text-lg: var(--text-body-6);
+  --text-lg--line-height: var(--leading-body-6);
+  --text-xl: var(--text-header-4);
+  --text-xl--line-height: var(--leading-header-4);
+  --text-2xl: var(--text-header-2);
+  --text-2xl--line-height: var(--leading-header-2);
+  --font-weight-normal: var(--font-weight-regular);
+  --tracking-tight: var(--letter-spacing-tight);
+  --tracking-shortcut: var(--letter-spacing-shortcut);
+  /* medium/semibold/bold already share their Tailwind variable names with the
+     canonical tokens and therefore need no self-referential alias. */
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-xs: var(--r-xs);
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-xl);
+  --radius-2xl: var(--r-2xl);
+  --radius-3xl: var(--r-3xl);
+  --radius-4xl: var(--r-4xl);
+  --radius-pill: var(--r-pill);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-size: var(--text-body-7);
+    line-height: var(--leading-body-7);
+    font-weight: var(--font-weight-regular);
+  }
+
+  html {
+    @apply font-sans;
+  }
+}

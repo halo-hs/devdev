@@ -1,0 +1,104 @@
+{
+  "protectedLinkBadge": "보호된 문서 링크",
+  "brandSubtitle": "무역 문서 전달",
+  "languageSelectorLabel": "언어 선택",
+  "promo": {
+    "label": "ECOYA 소식",
+    "eyebrow": "ECOYA 제공",
+    "placeholder": "발신자 메시지 또는 제품 안내가 여기에 표시될 수 있습니다."
+  },
+  "securePackageEyebrow": "보안 전달 패키지",
+  "documentFallback": "문서",
+  "verifying": "링크 확인 중…",
+  "currencyOnlyPrefix": "통화",
+  "downloadPack": "패키지 다운로드 (파일 {count}개)",
+  "downloadPdfPack": "PDF 패키지 다운로드",
+  "attachmentSummaryWithExtra": "기본 문서 + 추가 파일 {count}개",
+  "attachmentSummaryMainOnly": "기본 문서만",
+  "opensUsed": "{used}/{max}회 열람됨",
+  "noOpenCap": "열람 횟수 제한 없음",
+  "expiresOn": "{date} 만료",
+  "shipmentMissing": "ETA/ETD 미포함",
+  "routeMissing": "경로 미포함",
+  "vesselMissing": "선박 미포함",
+  "forRecipient": "수신: {recipient}",
+  "notShared": "미공유",
+  "termsIncluded": "조건 포함됨",
+  "etd": "ETD",
+  "eta": "ETA",
+  "footer": "ECOYA - 이 링크는 만료되거나 발신자가 회수할 수 있습니다.",
+  "recipientNotice1": "이 문서는 발신 조직이 ECOYA를 통해 공유한 것입니다. 기밀로 취급하세요. 링크를 더 이상 사용할 수 없으면 접근이 <keep>종료될 수 있습니다.</keep>",
+  "recipientNotice2": "신뢰하기 전에 발신자에게 진위를 확인하세요. <keep>유출이 의심되면</keep> 발신자와 legal@ecoya.io로 연락하세요.",
+  "readiness": {
+    "complete": "고객 전달 준비 완료",
+    "partial": "패키지 상세",
+    "signalsReady": "{ready}/{total} 항목 준비됨",
+    "ready": "준비됨",
+    "missing": "미비",
+    "document": "문서",
+    "recipient": "수신인",
+    "shipment": "선적",
+    "commercial": "상업 조건",
+    "secureLink": "보안 링크"
+  },
+  "brief": {
+    "shipment": "선적",
+    "route": "경로",
+    "vessel": "선박",
+    "linkStatus": "링크 상태"
+  },
+  "commercial": {
+    "title": "상업 조건",
+    "subtitle": "발신자가 이 패키지에 대해 확인한 주요 값입니다.",
+    "amount": "금액",
+    "paymentTerms": "결제 조건",
+    "incoterms": "인코텀즈"
+  },
+  "preview": {
+    "header": "문서 미리보기",
+    "iframeTitle": "전달된 문서"
+  },
+  "contents": {
+    "title": "패키지 구성",
+    "mainPdf": "기본 PDF 문서",
+    "noAdditional": "추가 파일 없음"
+  },
+  "context": {
+    "title": "전달 정보",
+    "recipient": "수신인",
+    "shipment": "선적",
+    "etd": "ETD",
+    "eta": "ETA",
+    "route": "경로",
+    "vessel": "선박",
+    "amount": "금액",
+    "payment": "결제",
+    "incoterms": "인코텀즈"
+  },
+  "temporaryError": {
+    "eyebrow": "일시적인 전달 오류",
+    "title": "문서를 지금 불러올 수 없습니다",
+    "body": "잠시 후 다시 시도하세요. 문제가 계속되면 발신자에게 새 보안 링크를 요청하세요.",
+    "retry": "다시 시도",
+    "retryCountdown": "{seconds}초 후 다시 시도"
+  },
+  "linkGone": {
+    "expired": {
+      "title": "링크가 만료되었습니다",
+      "body": "문서를 보낸 담당자에게 새 링크를 요청해 주세요."
+    },
+    "open_cap": {
+      "title": "이 링크는 열람 한도에 도달했습니다",
+      "body": "발신자가 이 문서의 열람 횟수를 제한했으며, 그 한도에 도달했습니다. 발신자에게 새 링크 발급을 요청하세요."
+    },
+    "not_found": {
+      "title": "<keep>링크를 사용할 수 없습니다</keep>",
+      "body": "<keep>링크를 사용할 수 없습니다.</keep> 주소를 다시 확인하거나 문서를 보낸 담당자에게 문의해 주세요."
+    },
+    "requestNew": "새 링크 요청",
+    "requesting": "요청 중…",
+    "requestSucceeded": "새 링크 요청을 보냈습니다.",
+    "requestFailed": "새 링크 요청을 보내지 못했습니다. 잠시 후 다시 시도하거나 문서를 보낸 담당자에게 문의해 주세요.",
+    "footnote": "양측의 보안을 위해 문서 링크에는 유효 기간이 설정되어 있습니다."
+  }
+}

@@ -1,0 +1,1299 @@
+/* ============================================================================
+ * ECOYA DS 2.0 토큰 — 병존(strangler) 레이어
+ * ----------------------------------------------------------------------------
+ * 기존 `--ecoya-*` 체계를 대체하지 않는다. `[data-ds="2"]` 스코프 안에서만
+ * 유효하므로, 스코프를 켜지 않은 화면은 종전 값을 그대로 쓴다.
+ *
+ * 사용법:  <div data-ds="2"> … </div>   ← 이관 대상 화면 루트에 부여
+ *          html/:root 에는 부여하지 말 것. :root 와 특이도가 같아져 선언 순서에
+ *          의존하게 된다. 반드시 하위 엘리먼트에 건다.
+ *
+ * 왜 스코프가 필요한가: 두 체계가 --background/--foreground/--card/--border/
+ * --primary/--radius/--r-* 등 67개 이름을 공유하는데 값이 다르다(63개 불일치).
+ * 같은 :root 에 병기하면 나중 선언이 이겨 기존 371개 화면 색이 전부 바뀐다.
+ * Tailwind v4 의 `@theme inline` 은 값을 인라인하지 않고 var() 참조를 유지하므로,
+ * 동일한 `bg-background` 클래스가 스코프 안팎에서 각각 다른 값으로 해석된다.
+ *
+ * 출처(2026-08-28 생성):
+ *   - 418개: ecoya-products/ecoya-platform-erp/design-system/src/tokens.css
+ *            Figma SNAP 2.0 node 48:5 이 정본이라 명시한 파일. 값 대조 결과
+ *            Figma 와 실제 충돌 0건(드리프트 29건은 전부 50자 렌더 잘림·별칭
+ *            형태·표기 차이).
+ *   - 237개: Figma node 48:5 (Tokens/shadcn + Tokens/ECOYA extensions).
+ *            badge/button/control/calendar/bubble/file/tabs/table/toggle/
+ *            slider/switch/menu 등 컴포넌트 레벨 토큰. 워크스페이스 어느
+ *            repo 에도 아직 커밋되지 않은 최신분이라 Figma 가 유일 출처다.
+ *
+ * dark 오버라이드의 정본도 Figma 다(2026-09-07 정정). 이전 문장은 "dark 오버라이드는
+ * 코드 소스 `.dark` 블록만을 권위로 삼는다. Figma 프리뷰의 다크 카드 값은 오버라이드가
+ * 아니라 계산 결과 표시라 채택하지 않는다" 였는데, 아래 실측이 그 전제를 기각했다.
+ *
+ *   (a) 보드 01 은 토큰마다 `X · Light` / `X · Dark` **두 개의 스와치 노드**를 그리고
+ *       각 노드에 그 모드의 값을 구워 넣는다. `muted/foreground · Dark`(2197:13575)는
+ *       `bg-[var(--muted-foreground,#9d9ea4)]`, `muted/foreground · Light`(2197:13572)는
+ *       `bg-[var(--muted-foreground,#5c5e66)]` 이다. 한쪽을 계산해 보여 주는 것이라면
+ *       두 노드의 폴백 리터럴이 같아야 하는데 다르다.
+ *   (b) 라벨의 **참조 이름**도 모드별로 갈린다: `L · gray/4` → `D · gray/6`
+ *       (2197:13573 / 2197:13576). 계산은 값을 바꿀 뿐 참조 이름을 바꾸지 못한다.
+ *       즉 Figma 변수 컬렉션에 선언된 Dark 모드 값이다.
+ *   (c) 보드 02 Dark 절이 같은 값을 독립 재현한다 — 카드 라벨 `var(--color-gray-6)`
+ *       (48:2697) + 스와치 `bg-[#9d9ea4]`(48:2692).
+ *   (d) 보드 01 다크 32값 중 **28개가 아래 블록과 이미 정확히 일치**한다. 이 표가 이
+ *       블록의 출처였다는 뜻이고, 어긋난 4개는 Figma 가 아니라 repo 쪽 드리프트다.
+ *
+ * 그래서 아래 4개를 Figma 값으로 되돌렸다(TOKENS-06 / TYPO-CARD-12 다크 축):
+ *   --muted-foreground        #9194A1 → var(--color-gray-6)    #9D9EA4
+ *   --accent-foreground       #66A6F0 → var(--color-primary-9) #DBEAFA
+ *   --sidebar-accent-foreground #66A6F0 → var(--color-primary-9) #DBEAFA
+ *   --sidebar-primary         #217EE8 → var(--color-primary-4) #166DD7
+ * 표기도 Figma 를 따라 리터럴이 아니라 var() 참조로 적는다(보드 02 원문이 그렇다).
+ * 계약은 tokens-ds2.test.ts 의 "다크 오버라이드" 절이 32값 전량으로 고정한다.
+ *
+ * 이관이 끝나 `--ecoya-*` 참조가 0이 되면 스코프 셀렉터를 :root 로 바꾸고
+ * 구 토큰과 브리지 레이어를 제거한다.
+ *
+ * 이 파일은 토큰 외에 파일 끝의 `@layer components` 블록 하나를 더 갖는다 —
+ * ds2 컴포넌트가 방출하는 `ds2-typo-*` 타이포 클래스 30개다. 정의처가 없어 전부
+ * 사문이었고(빌드 산출 CSS 에 `typo` 0회), 여기 토큰을 그대로 쓰므로 같은
+ * 파일에 둔다. 계약은 src/app/tokens-ds2.test.ts 가 고정한다.
+ * ========================================================================= */
+
+[data-ds="2"] {
+  --color-indigo: #052D61;
+  --color-blue1: var(--color-primary-1);
+  --color-blue2: var(--color-primary-2);
+  --color-blue3: var(--color-primary-3);
+  --color-blue4: var(--color-primary-4);
+  --color-blue5: var(--color-primary-5);
+  --color-blue6: var(--color-primary-6);
+  --color-blue7: var(--color-primary-7);
+  --color-blue8: var(--color-primary-8);
+  --color-blue9: var(--color-primary-9);
+  --color-blue10: var(--color-primary-10);
+  --color-gray1: var(--color-gray-1);
+  --color-gray2: var(--color-gray-2);
+  --color-gray3: var(--color-gray-3);
+  --color-gray4: var(--color-gray-4);
+  --color-gray5: var(--color-gray-5);
+  --color-gray6: var(--color-gray-6);
+  --color-gray7: var(--color-gray-7);
+  --color-gray8: var(--color-gray-8);
+  --color-gray9: var(--color-gray-9);
+  --color-gray10: var(--color-gray-10);
+  --color-gray11: var(--color-gray-11);
+  --color-gray12: var(--color-gray-12);
+  --color-system-red1: #BF4040;
+  --color-system-red2: #D64C4C;
+  --color-system-red3: #E68686;
+  --color-system-red4: #EEA3A3;
+  --color-system-red5: #F2B2B2;
+  --color-system-red6: #F5C0C0;
+  --color-system-red7: #FAD8D8;
+  --color-system-red8: #FFEFEF;
+  --color-system-yellow1: #D29700;
+  --color-system-yellow2: #F2BD00;  /* figma 2832:15354 Color 2846:15719 System Yellow 2 (was #EAA800; --color-yellow-2 alias already carried #F2BD00) */
+  --color-system-yellow3: #FFD633;
+  --color-system-yellow4: #FFE066;
+  --color-system-yellow5: #FFF0B3;
+  --color-system-yellow6: #FFF7D9;
+  --color-system-green1: #0A9A32;
+  --color-system-green2: #15BD66;
+  --color-system-green3: #35DB80;
+  --color-system-green4: #64E8A4;
+  --color-system-green5: #93EDBF;
+  --color-system-green6: #EBFAEF;
+  --color-system-blue1: #005CE1;
+  --color-system-blue2: #007AFF;
+  --color-system-blue3: #3395FF;
+  --color-system-blue4: #66AFFF;
+  --color-system-blue5: #B3D7FF;
+  --color-system-blue6: #E5F2FF;
+  --color-system-pink1: #C2255C;
+  --color-system-pink2: #E64980;
+  --color-system-pink3: #F783AC;
+  --color-system-pink4: #FCC2D7;
+  --color-system-pink5: #FFDEEB;
+  --color-system-pink6: #FFF0F6;
+  --color-system-lime1: #5C940D;
+  --color-system-lime2: #82C91E;
+  --color-system-lime3: #C0EB75;
+  --color-system-lime4: #D8F5A2;
+  --color-system-lime5: #E9FAC8;
+  --color-system-lime6: #F4FCE3;
+  --color-system-grape1: #862E9C;
+  --color-system-grape2: #BE4BDB;
+  --color-system-grape3: #DA77F2;
+  --color-system-grape4: #EEBEFA;
+  --color-system-grape5: #F3D9FA;
+  --color-system-grape6: #F8F0FC;
+  --color-system-orange1: #E8590C;
+  --color-system-orange2: #FD7E14;
+  --color-system-orange3: #FFA94D;
+  --color-system-orange4: #FFD8A8;
+  --color-system-orange5: #FFE8CC;
+  --color-system-orange6: #FFF4E6;
+  /* TOKENS-05 — 보드 02 node 48:1689/48:1691 원문 그대로.
+   * 종전 값 `"Pretendard", "Pretendard Variable", Pretendard` 는 상류 products
+   * tokens.css:485 의 축약본(같은 파일 :138 이 선언한 정본을 뒤 블록이 덮은
+   * late-block clobber)을 복사한 것이었다. Figma 가 정본이므로 풀 폴백 체인을
+   * 되돌린다. 보드는 `--font-family-sans`(48:1677/1679)를 이 토큰의 별칭으로
+   * 선언하므로, 이 한 줄이 곧 DS2 본문 서체 스택이다. */
+  --font-pretendard: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  --fw-bold: 700;
+  --fw-medium: 500;
+  --fw-regular: 400;
+  --z-background-image: -1;
+  --z-side-nav: 100;
+  --z-bottom-fixed-buttons: 8000;
+  --z-pagination-dropdown: 8010;
+  --z-dropdown: 8900;
+  --z-dialog: 9000;
+  --z-alert-dialog: 9500;
+  --z-alert: 9999;
+  --z-full-loading: 10001;
+  --z-popup: 10500;
+  --z-floating-chat-modal: 10700;
+  --z-floating-chat-edit-modal: 10800;
+  --z-floating-chat-user-card: 10900;
+  --z-floating-chat-sendbird: 11000;
+  --z-floating-chat-button: 11100;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
+  --radius-4xl: 40px;
+  --r-xs: var(--radius-xs);
+  --r-sm: var(--radius-sm);
+  --r-md: var(--radius-md);
+  --r-lg: var(--radius-lg);
+  --r-xl: var(--radius-xl);
+  --r-2xl: var(--radius-2xl);
+  --r-3xl: var(--radius-3xl);
+  --r-4xl: var(--radius-4xl);
+  --r-pill: 999px;
+  --shadow-btn-primary-blue: 0px 1px 2px 0px rgba(5, 29, 57, 0.1), 0px 0px 0px 0.5px rgba(23, 98, 195, 0.2);
+  --shadow-btn-primary-blue-hover: 0px 2px 4px 0px rgba(5, 29, 57, 0.2), 0px 0px 0px 0.5px rgba(23, 98, 195, 0.2);
+  --shadow-btn-primary-blue-pressed: 0px 2px 4px 0px rgba(5, 29, 57, 0.2), 0px 0px 0px 1px rgba(173, 204, 243, 0.6), 0px 0px 0px 1px rgba(23, 98, 195, 0.6);  /* figma 48:4836 */
+  --shadow-btn-primary-red: 0px 1px 2px 0px rgba(5, 29, 57, 0.1), 0px 0px 0px 0.5px rgba(214, 76, 76, 0.2);
+  --shadow-btn-primary-red-hover: 0px 2px 4px 0px rgba(5, 29, 57, 0.2), 0px 0px 0px 0.5px rgba(214, 76, 76, 0.2);
+  --shadow-btn-primary-red-pressed: 0px 2px 4px 0px rgba(5, 29, 57, 0.2), 0px 0px 0px 1px rgba(214, 76, 76, 0.2), 0px 0px 0px 1px #d64c4c;  /* figma 48:4854 */
+  --shadow-btn-tertiary-black: 0px 0px 0px 0.5px rgba(160, 164, 171, 0.2), 0px 1px 2px rgba(5, 29, 57, 0.1);
+  --shadow-btn-tertiary-black-hover: 0px 0px 0px 0.5px rgba(160, 164, 171, 0.2), 0px 2px 4px rgba(5, 29, 57, 0.2);
+  --shadow-btn-tertiary-black-pressed: 0px 0px 0px 1px rgba(5, 29, 57, 0.6), 0px 0px 0px 1px rgba(5, 29, 57, 0.2), 0px 2px 4px rgba(5, 29, 57, 0.2);  /* figma 48:4872 */
+  --shadow-input-default: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-input-focused: 0px 0px 0px 1px #1479EB, 0px 0px 0px 3px rgba(24, 123, 235, 0.2), 0px 1px 2px rgba(0, 0, 0, 0.25);  /* figma 48:4884 */
+  --shadow-input-invalid-focused: 0px 0px 0px 1px #d64c4c, 0px 0px 0px 3px rgba(214, 76, 76, 0.2), 0px 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-tag-valid: 0 1px 2px 0 rgba(5, 29, 57, .10), 0 0 0 .5px rgba(23, 98, 195, .20);
+  --shadow-tag-invalid: 0 1px 2px 0 rgba(5, 29, 57, .10), 0 0 0 .5px rgba(214, 76, 76, .20);
+  --shadow-tag-disabled: 0 1px 2px 0 rgba(5, 29, 57, .10), 0 0 0 .5px rgba(160, 164, 171, .20);
+  /* TOKENS-05 — 이 줄은 종전 `var(--font-pretendard), …` 를 **전개한 결과와 글자
+   * 그대로 같다**(렌더 무변화). `--font-pretendard` 가 정본 폴백 체인을 되찾으면서
+   * 끝에 generic `sans-serif` 를 갖게 됐는데, var() 로 앞에 끼우면 generic 뒤에
+   * 한글 폴백("Apple SD Gothic Neo"/"Noto Sans KR"/"Malgun Gothic")이 오게 돼
+   * 사실상 도달 불가가 된다. 그래서 참조를 풀어 적는다.
+   * `--font-sans` 는 Figma 보드에 없는 repo 전용 브리지다(TOKENS-10 의 29개 중
+   * 하나) — `--ecoya-font-sans` 가 DS2 스코프 안에서 이 값을 받아 간다. */
+  --font-sans: "Pretendard", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --text-display-1: 48px;
+  --text-display-2: 40px;
+  --text-display-3: 36px;
+  --text-display-4: 32px;
+  --text-display-5: 28px;
+  --text-display-6: 24px;
+  --text-header-1: 26px;
+  --text-header-2: 24px;
+  --text-header-3: 22px;
+  --text-header-4: 20px;
+  --text-header-5: 19px;
+  --text-header-6: 17px;
+  --text-header-7: 16px;
+  --text-header-8: 15px;
+  --text-header-9: 14px;
+  --text-header-10: 13px;
+  --text-header-11: 11px;
+  --text-body-1: 26px;
+  --text-body-2: 24px;
+  --text-body-3: 22px;
+  --text-body-4: 20px;
+  --text-body-5: 19px;
+  --text-body-6: 17px;
+  --text-body-7: 16px;
+  --text-body-8: 15px;
+  --text-body-9: 14px;
+  --text-body-10: 13px;
+  --text-body-11: 11px;
+  --text-body-12: 8px;
+  --text-button-1: 19px;
+  --text-button-2: 17px;
+  --text-button-3: 15px;
+  --text-button-4: 13px;
+  --text-button-5: 11px;
+  --text-label-1: 15px;
+  --text-label-2: 13px;
+  --text-label-3: 11px;
+  --leading-display-1: 56px;
+  --leading-display-2: 52px;
+  --leading-display-3: 42px;
+  --leading-display-4: 42px;
+  --leading-display-5: 38px;
+  --leading-display-6: 38px;
+  --leading-header-1: 38px;
+  --leading-header-2: 36px;
+  --leading-header-3: 34px;
+  --leading-header-4: 30px;
+  --leading-header-5: 26px;
+  --leading-header-6: 24px;
+  --leading-header-7: 24px;
+  --leading-header-8: 20px;
+  --leading-header-9: 18px;
+  --leading-header-10: 18px;
+  --leading-header-11: 16px;
+  --leading-body-1: 38px;
+  --leading-body-2: 36px;
+  --leading-body-3: 34px;
+  --leading-body-4: 30px;
+  --leading-body-5: 26px;
+  --leading-body-6: 24px;
+  --leading-body-7: 24px;
+  --leading-body-8: 20px;
+  --leading-body-9: 18px;
+  --leading-body-10: 18px;
+  --leading-body-11: 16px;
+  --leading-body-12: 10px;
+  --leading-button-1: 26px;
+  --leading-button-2: 24px;
+  --leading-button-3: 20px;
+  --leading-button-4: 18px;
+  --leading-button-5: 16px;
+  --leading-label-1: 16px;
+  --leading-label-2: 14px;
+  --leading-label-3: 12px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --color-primary-1: #1148A2;
+  --color-primary-2: #1353AE;
+  --color-primary-3: #1B60BB;
+  --color-primary-4: #166DD7;
+  --color-primary-5: #2781E7;
+  --color-primary-6: #66A6F0;
+  --color-primary-7: #8EBCF5;
+  --color-primary-8: #AFCEF4;
+  --color-primary-9: #DBEAFA;
+  --color-primary-10: #F1F7FE;
+  --color-gray-1: #000000;
+  --color-gray-2: #2A2C32;
+  --color-gray-3: #42444C;
+  --color-gray-4: #5C5E66;
+  --color-gray-5: #7C7E88;
+  --color-gray-6: #9D9EA4;
+  --color-gray-7: #AFB0B6;
+  --color-gray-8: #C8CAD0;
+  --color-gray-9: #DEDFE3;
+  --color-gray-10: #EEEFF1;
+  --color-gray-11: #F6F7F8;
+  --color-gray-12: #FFFFFF;
+  --indigo-indigo: var(--color-indigo);
+  --primary-blue-blue-1: var(--color-primary-1);
+  --primary-blue-blue-2: var(--color-primary-2);
+  --primary-blue-blue-3: var(--color-primary-3);
+  --primary-blue-blue-4: var(--color-primary-4);
+  --primary-blue-blue-5: var(--color-primary-5);
+  --primary-blue-blue-6: var(--color-primary-6);
+  --primary-blue-blue-7: var(--color-primary-7);
+  --primary-blue-blue-8: var(--color-primary-8);
+  --primary-blue-blue-9: var(--color-primary-9);
+  --primary-blue-blue-10: var(--color-primary-10);
+  --gray-gray-1: var(--color-gray-1);
+  --gray-gray-2: var(--color-gray-2);
+  --gray-gray-3: var(--color-gray-3);
+  --gray-gray-4: var(--color-gray-4);
+  --gray-gray-5: var(--color-gray-5);
+  --gray-gray-6: var(--color-gray-6);
+  --gray-gray-7: var(--color-gray-7);
+  --gray-gray-8: var(--color-gray-8);
+  --gray-gray-9: var(--color-gray-9);
+  --gray-gray-10: var(--color-gray-10);
+  --gray-gray-11: var(--color-gray-11);
+  --gray-gray-12: var(--color-gray-12);
+  --gray-gray-12-white: var(--color-gray-12);
+  --system-red-1: var(--color-red-1);
+  --system-red-2: var(--color-red-2);
+  --system-red-3: var(--color-red-3);
+  --system-red-4: var(--color-red-4);
+  --system-red-5: var(--color-red-5);
+  --system-red-6: var(--color-red-6);
+  --system-red-7: var(--color-red-7);
+  --system-red-8: var(--color-red-8);
+  /* --system-{yellow,green,blue,pink,grape,orange}-N — red 와 같은 별칭 계열.
+   * 이름을 만드는 표면은 두 곳이고 둘 다 이 6계열을 이미 생성한다:
+   *   - Typo/index.tsx resolveTokenColor 의 systemYellow|Green|Blue|Pink|Grape|Orange → --system-<fam>-<n>
+   *   - Table.tsx:236-237 / BasicButton.tsx:69 / PageLoader.tsx:28 의 직접 참조
+   * red 만 선언돼 있어 나머지가 전부 미해소(사문) 였다. 손으로 4건을 열거하는
+   * 대신 이름 생성 규칙이 덮는 범위를 그대로 닫는다. 값 출처는 --color-<fam>-N. */
+  --system-yellow-1: var(--color-yellow-1);
+  --system-yellow-2: var(--color-yellow-2);
+  --system-yellow-3: var(--color-yellow-3);
+  --system-yellow-4: var(--color-yellow-4);
+  --system-yellow-5: var(--color-yellow-5);
+  --system-yellow-6: var(--color-yellow-6);
+  --system-green-1: var(--color-green-1);
+  --system-green-2: var(--color-green-2);
+  --system-green-3: var(--color-green-3);
+  --system-green-4: var(--color-green-4);
+  --system-green-5: var(--color-green-5);
+  --system-green-6: var(--color-green-6);
+  --system-blue-1: var(--color-blue-1);
+  --system-blue-2: var(--color-blue-2);
+  --system-blue-3: var(--color-blue-3);
+  --system-blue-4: var(--color-blue-4);
+  --system-blue-5: var(--color-blue-5);
+  --system-blue-6: var(--color-blue-6);
+  --system-pink-1: var(--color-pink-1);
+  --system-pink-2: var(--color-pink-2);
+  --system-pink-3: var(--color-pink-3);
+  --system-pink-4: var(--color-pink-4);
+  --system-pink-5: var(--color-pink-5);
+  --system-pink-6: var(--color-pink-6);
+  --system-grape-1: var(--color-grape-1);
+  --system-grape-2: var(--color-grape-2);
+  --system-grape-3: var(--color-grape-3);
+  --system-grape-4: var(--color-grape-4);
+  --system-grape-5: var(--color-grape-5);
+  --system-grape-6: var(--color-grape-6);
+  --system-orange-1: var(--color-orange-1);
+  --system-orange-2: var(--color-orange-2);
+  --system-orange-3: var(--color-orange-3);
+  --system-orange-4: var(--color-orange-4);
+  --system-orange-5: var(--color-orange-5);
+  --system-orange-6: var(--color-orange-6);
+  --background: var(--color-gray-11);
+  --foreground: var(--color-gray-2);
+  --card: var(--color-gray-12);
+  --card-foreground: var(--color-gray-2);
+  --popover: var(--color-gray-12);
+  --popover-foreground: var(--color-gray-2);
+  --primary: var(--color-indigo);  /* figma 48:2423 */
+  --primary-foreground: var(--color-gray-12);
+  --secondary: var(--color-gray-10);
+  --secondary-foreground: var(--color-gray-3);
+  --muted: var(--color-gray-10);
+  --muted-foreground: var(--color-gray-4);  /* figma 48:2458 */
+  --accent: var(--color-primary-10);
+  --accent-foreground: var(--color-primary-4);
+  --destructive: var(--color-red-2);
+  --destructive-foreground: var(--color-gray-12);
+  --border: var(--color-gray-9);
+  --input: var(--color-gray-9);
+  --ring: var(--color-primary-4);
+  --shadow-input: 0 2px 4px 0 rgba(0, 0, 0, .05);
+  --overlay-dim: color-mix(in srgb, var(--color-gray-1) 30%, transparent);
+  --shadow-modal: 0 4px 24px rgba(0, 0, 0, .10);
+  --shadow-filter: 0 2px 8px rgba(5, 29, 57, .18);
+  --shadow-section: 0 2px 8px rgba(0, 0, 0, .08);
+  --shadow-input-hover: 0px 0px 0px 0.5px rgba(160, 164, 171, 0.2), 0px 2px 4px rgba(5, 29, 57, 0.2);  /* figma 48:4938 */
+  --color-red-1: #BF4040;
+  --color-red-2: #D64C4C;
+  --color-red-3: #E68686;
+  --color-red-4: #EEA3A3;
+  --color-red-5: #F2B2B2;
+  --color-red-6: #F5C0C0;
+  --color-red-7: #FAD8D8;
+  --color-red-8: #FFEFEF;
+  --color-yellow-1: #D29700;
+  --color-yellow-2: #F2BD00;
+  --color-yellow-3: #FFD633;
+  --color-yellow-4: #FFE066;
+  --color-yellow-5: #FFF0B3;
+  --color-yellow-6: #FFF7D9;
+  --color-green-1: #0A9A32;
+  --color-green-2: #15BD66;
+  --color-green-3: #35DB80;
+  --color-green-4: #64E8A4;
+  --color-green-5: #93EDBF;
+  --color-green-6: #EBFAEF;
+  --color-blue-1: #005CE1;
+  --color-blue-2: #007AFF;
+  --color-blue-3: #3395FF;
+  --color-blue-4: #66AFFF;
+  --color-blue-5: #B3D7FF;
+  --color-blue-6: #E5F2FF;
+  --color-pink-1: #C2255C;
+  --color-pink-2: #E64980;
+  --color-pink-3: #F783AC;
+  --color-pink-4: #FCC2D7;
+  --color-pink-5: #FFDEEB;
+  --color-pink-6: #FFF0F6;
+  --color-lime-1: #5C940D;
+  --color-lime-2: #82C91E;
+  --color-lime-3: #C0EB75;
+  --color-lime-4: #D8F5A2;
+  --color-lime-5: #E9FAC8;
+  --color-lime-6: #F4FCE3;
+  --color-grape-1: #862E9C;
+  --color-grape-2: #BE4BDB;
+  --color-grape-3: #DA77F2;
+  --color-grape-4: #EEBEFA;
+  --color-grape-5: #F3D9FA;
+  --color-grape-6: #F8F0FC;
+  --color-orange-1: #E8590C;
+  --color-orange-2: #FD7E14;
+  --color-orange-3: #FFA94D;
+  --color-orange-4: #FFD8A8;
+  --color-orange-5: #FFE8CC;
+  --color-orange-6: #FFF4E6;
+  --color-chart-blue-1: #274D7B;
+  --color-chart-blue-2: #2A61A3;
+  --color-chart-blue-3: #3B79C5;
+  --color-chart-blue-4: #3D90D5;
+  --color-chart-blue-5: #4EACE2;
+  --color-chart-blue-6: #61BDD8;
+  --color-chart-blue-7: #87D8CF;
+  --color-chart-blue-8: #B7E7C2;
+  --color-chart-blue-9: #D5EFC1;
+  --color-chart-blue-10: #F5F3B6;
+  --color-chart-violet-1: #827BBD;
+  --color-chart-violet-2: #988CD6;
+  --color-chart-violet-3: #AA9EDE;
+  --color-chart-violet-4: #C2B6EF;
+  --color-chart-violet-5: #D4CAF6;
+  --color-chart-aqua-1: #61B3B6;
+  --color-chart-aqua-2: #6CC6C9;
+  --color-chart-aqua-3: #84D4D6;
+  --color-chart-aqua-4: #9BE3E3;
+  --color-chart-aqua-5: #AAEBEC;
+  --color-chart-blueviolet-1: #72BFF1;
+  --color-chart-blueviolet-2: #65B2F1;
+  --color-chart-blueviolet-3: #3B79C5;
+  --color-chart-blueviolet-4: #6098DE;
+  --color-chart-blueviolet-5: #5E8DCD;
+  --color-chart-blueviolet-6: #5A82BE;
+  --color-chart-blueviolet-7: #5677AD;
+  --color-chart-blueviolet-8: #516D9E;
+  --color-chart-blueviolet-9: #4C638F;
+  --color-chart-blueviolet-10: #475880;
+  --color-chart-blueviolet-11: #52638E;
+  --color-chart-blueviolet-12: #5E6F9C;
+  --color-chart-blueviolet-13: #6A7AAA;
+  --color-chart-blueviolet-14: #7686B8;
+  --color-chart-blueviolet-15: #8292C7;
+  --color-chart-blueviolet-16: #8E9FD5;
+  --color-chart-blueviolet-17: #9BACE5;
+  --color-chart-blueviolet-18: #B2B0DA;
+  --color-chart-blueviolet-19: #A6A4D2;
+  --color-chart-blueviolet-20: #9A98C9;
+  --color-chart-blueviolet-21: #8D8CBF;
+  --color-chart-blueviolet-22: #8081B7;
+  --color-chart-blueviolet-23: #7475AE;
+  --color-chart-blueviolet-24: #676BA5;
+  --color-chart-blueviolet-25: #59609C;
+  --color-chart-teal-1: #3C9196;
+  --color-chart-teal-2: #4D9FA4;
+  --color-chart-teal-3: #5EADB2;
+  --color-chart-teal-4: #6FBBC0;
+  --color-chart-teal-5: #7FC9CE;
+  --color-chart-teal-6: #96CFD7;
+  --color-chart-teal-7: #83BFCA;
+  --color-chart-teal-8: #71AFBE;
+  --color-chart-teal-9: #5E9FB2;
+  --color-chart-teal-10: #4C90A6;
+  --color-chart-teal-11: #417B93;
+  --color-chart-teal-12: #4C89A6;
+  --color-chart-teal-13: #4D91B0;
+  --color-chart-teal-14: #549BBC;
+  --color-chart-teal-15: #54A1C4;
+  --color-chart-teal-16: #54A8CD;
+  --color-chart-teal-17: #56ADD4;
+  --color-chart-teal-18: #54B5DF;
+  --color-chart-teal-19: #6CBBE1;
+  --color-chart-teal-20: #86C4E3;
+  --color-chart-teal-21: #9BCBE6;
+  --color-chart-teal-22: #AED2E8;
+  --color-chart-teal-23: #C0DAE9;
+  --color-chart-teal-24: #CCE1EF;
+  --color-chart-teal-25: #D8E7F0;
+  --color-chart-etc: #E9EDF0;
+  --chart-1: var(--color-chart-blue-4);
+  --chart-2: var(--color-chart-teal-4);
+  --chart-3: var(--color-chart-violet-3);
+  --chart-4: var(--color-chart-aqua-3);
+  --chart-5: var(--color-chart-etc);
+  --radius: 8px;
+  --sidebar: var(--color-gray-12);
+  --sidebar-foreground: var(--color-gray-2);
+  --sidebar-primary: var(--color-primary-4);
+  --sidebar-primary-foreground: var(--color-gray-12);
+  --sidebar-accent: var(--color-primary-10);
+  --sidebar-accent-foreground: var(--color-primary-4);
+  --sidebar-border: var(--color-gray-9);
+  --sidebar-ring: var(--color-primary-4);
+
+  /* ======================================================================
+   * 컴포넌트 레벨 토큰 — Figma node 48:5 에만 존재(코드 소스 미커밋분)
+   * =================================================================== */
+
+  /* --- badge --- */
+  /* TABLE-18 — 28_Table_cell(2375:15344) 의 badge 는 배경을
+   * `var(--calendar-range-background,#e5f2ff)` 로 칠한다. 렌더 값은 같지만
+   * (양쪽 다 `--control-selected-soft-background` → `--color-system-blue-6`
+   * = #E5F2FF) 의미 바인딩이 calendar 쪽으로 새어 있다. 값만 같으면 되는 게
+   * 아니라 팔레트를 옮길 때 따라오는 쪽이 달라지므로 배선은 복제하지 않는다 —
+   * 07_Data_Table 의 정규 badge 셀이 쓰는 `badge/default/background` 를 쓴다. */
+  --badge-default-background: var(--color-system-blue-6);  /* figma */
+  --badge-default-background-active: var(--color-system-blue-4);  /* figma */
+  --badge-default-background-hover: var(--color-system-blue-5);  /* figma */
+  --badge-default-foreground: color-mix( in srgb, var(--color-primary-4) 30%, var(--color-gray-2) );  /* figma */
+  --badge-destructive-background: var(--color-red-8);  /* figma */
+  --badge-destructive-background-active: var(--color-red-6);  /* figma */
+  --badge-destructive-background-hover: var(--color-red-7);  /* figma */
+  --badge-destructive-foreground: color-mix( in srgb, var(--color-red-1) 70%, var(--color-gray-2) );  /* figma */
+  --badge-padding-inline-default: 10px;  /* figma */
+  --badge-padding-inline-lg: 14px;  /* figma */
+  --badge-padding-inline-sm: 10px;  /* figma */
+  --badge-palette-blue-fill-foreground: var(--color-primary-5);  /* figma #2781e7 · 753:626 169:285 (2026-09-16, was #007aff) */
+  --badge-palette-blue-outline-foreground: var(--color-primary-5);  /* figma #2781e7 · 753:626 169:376 (2026-09-16, was #007aff) */
+  --badge-palette-grape-fill-foreground: var(--badge-scale-purple-main);  /* figma #bd75f0 · 753:626 169:231 (2026-09-16, was #be4bdb) */
+  --badge-palette-grape-outline-foreground: var(--badge-scale-plum-main);  /* figma #e366ff · 753:626 169:322 (2026-09-16, was #da77f2) */
+  --badge-palette-gray-cancel-fill-foreground: var(--color-gray-7);  /* figma #afb0b6 · 5노드 */
+  --badge-palette-gray-cancel-outline-foreground: var(--color-gray-7);  /* figma #afb0b6 · 5노드 */
+  --badge-palette-gray-complete-fill-foreground: var(--color-gray-4);  /* figma #5c5e66 · 3노드 */
+  --badge-palette-gray-complete-outline-foreground: var(--color-gray-4);  /* figma #5c5e66 · 3노드 */
+  /* badge 20-scale — Badge Color (New) 3199:9339 값을 Badge — spec 753:626 의 168개 팔레트
+   * 인스턴스가 그대로 참조한다(fresh context 2026-09-16, 60 hex 전량 동일). fill 배경 = 03-light,
+   * fill 텍스트 = 01-dark, outline 보더 = 02-main, outline 텍스트 = 01-dark. */
+  --badge-scale-lime-dark: #72CB1A;  /* figma badge/lime/01-dark */
+  --badge-scale-lime-main: #B2ED78;  /* figma badge/lime/02-main */
+  --badge-scale-lime-light: #EDFBDF;  /* figma badge/lime/03-light */
+  --badge-scale-green-dark: #21C458;  /* figma badge/green/01-dark */
+  --badge-scale-green-main: #7CE9A0;  /* figma badge/green/02-main */
+  --badge-scale-green-light: #E0FAE9;  /* figma badge/green/03-light */
+  --badge-scale-forest-dark: #537836;  /* figma badge/forest/01-dark */
+  --badge-scale-forest-main: #9DC57D;  /* figma badge/forest/02-main */
+  --badge-scale-forest-light: #EAF2E3;  /* figma badge/forest/03-light */
+  --badge-scale-teal-dark: #01E4C2;  /* figma badge/teal/01-dark */
+  --badge-scale-teal-main: #67FEE8;  /* figma badge/teal/02-main */
+  --badge-scale-teal-light: #DBFFFA;  /* figma badge/teal/03-light */
+  --badge-scale-pine-dark: #479E9D;  /* figma badge/pine/01-dark */
+  --badge-scale-pine-main: #95D0CE;  /* figma badge/pine/02-main */
+  --badge-scale-pine-light: #E6F4F4;  /* figma badge/pine/03-light */
+  --badge-scale-sky-dark: #038BE2;  /* figma badge/sky/01-dark */
+  --badge-scale-sky-main: #68C3FD;  /* figma badge/sky/02-main */
+  --badge-scale-sky-light: #DCF1FF;  /* figma badge/sky/03-light */
+  --badge-scale-ocean-dark: #136686;  /* figma badge/ocean/01-dark */
+  --badge-scale-ocean-main: #43B7E5;  /* figma badge/ocean/02-main */
+  --badge-scale-ocean-light: #DBF1FA;  /* figma badge/ocean/03-light */
+  --badge-scale-powder-dark: #00315E;  /* figma badge/powder/01-dark */
+  --badge-scale-powder-main: #1C92FF;  /* figma badge/powder/02-main */
+  --badge-scale-powder-light: #DBECFC;  /* figma badge/powder/03-light */
+  --badge-scale-violet-dark: #400ADC;  /* figma badge/violet/01-dark */
+  --badge-scale-violet-main: #916DF8;  /* figma badge/violet/02-main */
+  --badge-scale-violet-light: #E5DDFD;  /* figma badge/violet/03-light */
+  --badge-scale-purple-dark: #8217CF;  /* figma badge/purple/01-dark */
+  --badge-scale-purple-main: #BD75F0;  /* figma badge/purple/02-main */
+  --badge-scale-purple-light: #F0DFFB;  /* figma badge/purple/03-light */
+  --badge-scale-plum-dark: #BB00E6;  /* figma badge/plum/01-dark */
+  --badge-scale-plum-main: #E366FF;  /* figma badge/plum/02-main */
+  --badge-scale-plum-light: #F8DBFF;  /* figma badge/plum/03-light */
+  --badge-scale-mauve-dark: #5D36B0;  /* figma badge/mauve/01-dark */
+  --badge-scale-mauve-main: #A48ADB;  /* figma badge/mauve/02-main */
+  --badge-scale-mauve-light: #EAE4F7;  /* figma badge/mauve/03-light */
+  --badge-scale-rose-dark: #D70E4F;  /* figma badge/rose/01-dark */
+  --badge-scale-rose-main: #F5709B;  /* figma badge/rose/02-main */
+  --badge-scale-rose-light: #FDDEE8;  /* figma badge/rose/03-light */
+  --badge-scale-wine-dark: #A5404E;  /* figma badge/wine/01-dark */
+  --badge-scale-wine-main: #D4919A;  /* figma badge/wine/02-main */
+  --badge-scale-wine-light: #F5E5E7;  /* figma badge/wine/03-light */
+  --badge-scale-flame-dark: #E33C03;  /* figma badge/flame/01-dark */
+  --badge-scale-flame-main: #FD8E68;  /* figma badge/flame/02-main */
+  --badge-scale-flame-light: #FFE5DC;  /* figma badge/flame/03-light */
+  --badge-scale-tangerine-dark: #E16B04;  /* figma badge/tangerine/01-dark */
+  --badge-scale-tangerine-main: #FCAE69;  /* figma badge/tangerine/02-main */
+  --badge-scale-tangerine-light: #FEECDC;  /* figma badge/tangerine/03-light */
+  --badge-scale-brown-dark: #9E6B47;  /* figma badge/brown/01-dark */
+  --badge-scale-brown-main: #D0AD95;  /* figma badge/brown/02-main */
+  --badge-scale-brown-light: #F4ECE6;  /* figma badge/brown/03-light */
+  --badge-scale-khaki-dark: #8B9E47;  /* figma badge/khaki/01-dark */
+  --badge-scale-khaki-main: #C3D095;  /* figma badge/khaki/02-main */
+  --badge-scale-khaki-light: #F1F4E6;  /* figma badge/khaki/03-light */
+  --badge-scale-lemon-dark: #E1D505;  /* figma badge/lemon/01-dark */
+  --badge-scale-lemon-main: #FCF469;  /* figma badge/lemon/02-main */
+  --badge-scale-lemon-light: #FEFCDC;  /* figma badge/lemon/03-light */
+  --badge-scale-sand-dark: #E69100;  /* figma badge/sand/01-dark */
+  --badge-scale-sand-main: #FFC766;  /* figma badge/sand/02-main */
+  --badge-scale-sand-light: #FFF2DB;  /* figma badge/sand/03-light */
+  --badge-palette-forest-fill-foreground: var(--badge-scale-forest-dark);  /* figma 753:626 palette=forest tone=fill (2026-09-16) */
+  --badge-palette-forest-outline-foreground: var(--badge-scale-forest-dark);  /* figma 753:626 palette=forest tone=outline (2026-09-16) */
+  --badge-palette-teal-fill-foreground: var(--badge-scale-teal-dark);  /* figma 753:626 palette=teal tone=fill (2026-09-16) */
+  --badge-palette-teal-outline-foreground: var(--badge-scale-teal-dark);  /* figma 753:626 palette=teal tone=outline (2026-09-16) */
+  --badge-palette-pine-fill-foreground: var(--badge-scale-pine-dark);  /* figma 753:626 palette=pine tone=fill (2026-09-16) */
+  --badge-palette-pine-outline-foreground: var(--badge-scale-pine-dark);  /* figma 753:626 palette=pine tone=outline (2026-09-16) */
+  --badge-palette-sky-fill-foreground: var(--badge-scale-sky-dark);  /* figma 753:626 palette=sky tone=fill (2026-09-16) */
+  --badge-palette-sky-outline-foreground: var(--badge-scale-sky-dark);  /* figma 753:626 palette=sky tone=outline (2026-09-16) */
+  --badge-palette-ocean-fill-foreground: var(--badge-scale-ocean-dark);  /* figma 753:626 palette=ocean tone=fill (2026-09-16) */
+  --badge-palette-ocean-outline-foreground: var(--badge-scale-ocean-dark);  /* figma 753:626 palette=ocean tone=outline (2026-09-16) */
+  --badge-palette-powder-fill-foreground: var(--badge-scale-powder-dark);  /* figma 753:626 palette=powder tone=fill (2026-09-16) */
+  --badge-palette-powder-outline-foreground: var(--badge-scale-powder-dark);  /* figma 753:626 palette=powder tone=outline (2026-09-16) */
+  --badge-palette-violet-fill-foreground: var(--badge-scale-violet-dark);  /* figma 753:626 palette=violet tone=fill (2026-09-16) */
+  --badge-palette-violet-outline-foreground: var(--badge-scale-violet-dark);  /* figma 753:626 palette=violet tone=outline (2026-09-16) */
+  --badge-palette-purple-fill-foreground: var(--badge-scale-purple-dark);  /* figma 753:626 palette=purple tone=fill (2026-09-16) */
+  --badge-palette-purple-outline-foreground: var(--badge-scale-purple-dark);  /* figma 753:626 palette=purple tone=outline (2026-09-16) */
+  --badge-palette-plum-fill-foreground: var(--badge-scale-plum-dark);  /* figma 753:626 palette=plum tone=fill (2026-09-16) */
+  --badge-palette-plum-outline-foreground: var(--badge-scale-plum-dark);  /* figma 753:626 palette=plum tone=outline (2026-09-16) */
+  --badge-palette-mauve-fill-foreground: var(--badge-scale-mauve-dark);  /* figma 753:626 palette=mauve tone=fill (2026-09-16) */
+  --badge-palette-mauve-outline-foreground: var(--badge-scale-mauve-dark);  /* figma 753:626 palette=mauve tone=outline (2026-09-16) */
+  --badge-palette-rose-fill-foreground: var(--badge-scale-rose-dark);  /* figma 753:626 palette=rose tone=fill (2026-09-16) */
+  --badge-palette-rose-outline-foreground: var(--badge-scale-rose-dark);  /* figma 753:626 palette=rose tone=outline (2026-09-16) */
+  --badge-palette-wine-fill-foreground: var(--badge-scale-wine-dark);  /* figma 753:626 palette=wine tone=fill (2026-09-16) */
+  --badge-palette-wine-outline-foreground: var(--badge-scale-wine-dark);  /* figma 753:626 palette=wine tone=outline (2026-09-16) */
+  --badge-palette-flame-fill-foreground: var(--badge-scale-flame-dark);  /* figma 753:626 palette=flame tone=fill (2026-09-16) */
+  --badge-palette-flame-outline-foreground: var(--badge-scale-flame-dark);  /* figma 753:626 palette=flame tone=outline (2026-09-16) */
+  --badge-palette-tangerine-fill-foreground: var(--badge-scale-tangerine-dark);  /* figma 753:626 palette=tangerine tone=fill (2026-09-16) */
+  --badge-palette-tangerine-outline-foreground: var(--badge-scale-tangerine-dark);  /* figma 753:626 palette=tangerine tone=outline (2026-09-16) */
+  --badge-palette-brown-fill-foreground: var(--badge-scale-brown-dark);  /* figma 753:626 palette=brown tone=fill (2026-09-16) */
+  --badge-palette-brown-outline-foreground: var(--badge-scale-brown-dark);  /* figma 753:626 palette=brown tone=outline (2026-09-16) */
+  --badge-palette-khaki-fill-foreground: var(--badge-scale-khaki-dark);  /* figma 753:626 palette=khaki tone=fill (2026-09-16) */
+  --badge-palette-khaki-outline-foreground: var(--badge-scale-khaki-dark);  /* figma 753:626 palette=khaki tone=outline (2026-09-16) */
+  --badge-palette-lemon-fill-foreground: var(--badge-scale-lemon-dark);  /* figma 753:626 palette=lemon tone=fill (2026-09-16) */
+  --badge-palette-lemon-outline-foreground: var(--badge-scale-lemon-dark);  /* figma 753:626 palette=lemon tone=outline (2026-09-16) */
+  --badge-palette-sand-fill-foreground: var(--badge-scale-sand-dark);  /* figma 753:626 palette=sand tone=fill (2026-09-16) */
+  --badge-palette-sand-outline-foreground: var(--badge-scale-sand-dark);  /* figma 753:626 palette=sand tone=outline (2026-09-16) */
+  --badge-palette-green-fill-foreground: var(--badge-scale-green-dark);  /* figma #21c458 · 753:626 169:249 (2026-09-16, was #0a9a32) */
+  --badge-palette-green-outline-foreground: var(--badge-scale-green-dark);  /* figma #21c458 · 753:626 169:340 (2026-09-16, was #0a9a32) */
+  --badge-palette-lime-fill-foreground: var(--badge-scale-lime-dark);  /* figma #72cb1a · 753:626 169:258 (2026-09-16, was #5c940d) */
+  --badge-palette-lime-outline-foreground: var(--badge-scale-lime-dark);  /* figma #72cb1a · 753:626 169:349 (2026-09-16, was #5c940d) */
+  --badge-palette-orange-fill-foreground: var(--color-orange-2);  /* figma #fd7e14 · 04 */
+  --badge-palette-orange-outline-foreground: var(--color-orange-2);  /* figma #fd7e14 · 04 */
+  --badge-palette-pink-fill-foreground: var(--badge-scale-rose-main);  /* figma #f5709b · 753:626 169:213 (2026-09-16, was #e64980) */
+  --badge-palette-pink-outline-foreground: var(--badge-scale-rose-main);  /* figma #f5709b · 753:626 169:304 (2026-09-16, was #e64980) */
+  --badge-palette-red-fill-foreground: var(--color-red-2);  /* figma #d64c4c · 4노드 */
+  --badge-palette-red-outline-foreground: var(--color-red-2);  /* figma #d64c4c · 4노드 */
+  --badge-palette-yellow-fill-foreground: var(--badge-scale-sand-dark);  /* figma #e69100 · 753:626 169:204 (2026-09-16, was #d29700) */
+  --badge-palette-yellow-outline-foreground: var(--badge-scale-sand-dark);  /* figma #e69100 · 753:626 169:295 (2026-09-16, was #d29700) */
+  --badge-secondary-background: var(--color-gray-10);  /* figma */
+  --badge-secondary-background-active: var(--color-gray-8);  /* figma */
+  --badge-secondary-background-hover: var(--color-gray-9);  /* figma */
+  --badge-secondary-foreground: var(--color-gray-2);  /* figma */
+  --badge-size-default: 20px;  /* figma */
+  --badge-size-lg: 24px;  /* figma 187:206 `lg (24px)` · 753:626 2026-09-16 (was 22px) */
+  --badge-size-sm: 16px;  /* figma */
+
+  /* --- bubble --- */
+  --bubble-destructive-background: var(--color-red-8);  /* figma */
+  --bubble-destructive-background-active: var(--color-red-6);  /* figma */
+  --bubble-destructive-background-hover: var(--color-red-7);  /* figma */
+  --bubble-destructive-foreground: var(--color-indigo);  /* figma */
+  --bubble-ghost-background-active: var(--menu-item-background-active);  /* figma */
+  --bubble-muted-background-active: var(--menu-item-background-active);  /* figma */
+  --bubble-outline-background-active: var(--menu-item-background-active);  /* figma */
+  --bubble-primary-background: var(--color-indigo);  /* figma */
+  --bubble-primary-background-active: var(--color-indigo);  /* figma */
+  --bubble-primary-background-hover: var(--color-primary-1);  /* figma */
+  --bubble-primary-foreground: var(--color-gray-12);  /* figma */
+  --bubble-secondary-background: var(--color-primary-10);  /* figma */
+  --bubble-secondary-background-active: var(--color-primary-8);  /* figma */
+  --bubble-secondary-background-hover: var(--color-primary-9);  /* figma */
+  --bubble-secondary-foreground: var(--color-indigo);  /* figma */
+  --bubble-tinted-background-active: var(--color-primary-9);  /* figma */
+
+  /* --- button --- */
+  --button-destructive-background: var(--color-red-1);  /* figma */
+  --button-destructive-background-active: var(--color-red-1);  /* figma */
+  --button-destructive-background-hover: var(--color-red-1);  /* figma */
+  --button-destructive-disabled-background: var(--color-red-6);  /* figma */
+  --button-destructive-disabled-foreground: var(--color-gray-12);  /* figma */
+  --button-destructive-foreground: var(--color-gray-12);  /* figma */
+  --button-ghost-background: transparent;  /* figma */
+  --button-ghost-background-active: var(--color-primary-10);  /* figma */
+  --button-ghost-background-hover: var(--color-primary-10);  /* figma */
+  --button-ghost-disabled-foreground: var(--color-gray-8);  /* figma */
+  --button-ghost-foreground: var(--color-primary-4);  /* figma */
+  --button-link-disabled-foreground: var(--color-gray-8);  /* figma */
+  --button-link-foreground: var(--color-primary-4);  /* figma */
+  --button-link-foreground-active: var(--color-primary-1);  /* figma */
+  --button-outline-background: var(--color-gray-12);  /* figma */
+  --button-outline-background-active: var(--color-gray-11);  /* figma */
+  --button-outline-background-hover: var(--color-gray-11);  /* figma */
+  --button-outline-border: var(--color-gray-10);  /* figma */
+  --button-outline-disabled-background: var(--color-gray-12);  /* figma */
+  --button-outline-disabled-foreground: var(--color-gray-8);  /* figma */
+  --button-outline-foreground: var(--color-gray-2);  /* figma */
+  --button-outline-foreground-active: var(--color-gray-1);  /* figma */
+  --button-primary-background: var(--color-indigo);  /* figma */
+  --button-primary-background-active: var(--color-indigo);  /* figma */
+  --button-primary-background-hover: var(--color-indigo);  /* figma */
+  --button-primary-disabled-background: var(--color-gray-7);  /* figma */
+  --button-primary-disabled-foreground: var(--color-gray-12);  /* figma */
+  --button-primary-foreground: var(--color-gray-12);  /* figma */
+  --button-secondary-background: var(--color-primary-10);  /* figma */
+  --button-secondary-background-active: var(--color-primary-9);  /* figma */
+  --button-secondary-background-hover: var(--color-primary-9);  /* figma */
+  --button-secondary-disabled-background: var(--color-gray-11);  /* figma */
+  --button-secondary-disabled-foreground: var(--color-gray-8);  /* figma */
+  --button-secondary-foreground: var(--color-indigo);  /* figma */
+  --button-spinner-size-md: 20px;  /* figma */
+  --button-spinner-size-sm: 18px;  /* figma */
+  --button-spinner-size-xs: 14px;  /* figma */
+
+  /* --- calendar --- */
+  --calendar-background: var(--surface-background);  /* figma */
+  --calendar-cell-size: 40px;  /* figma */
+  --calendar-day-background-active: var(--menu-item-background-active);  /* figma */
+  --calendar-day-background-hover: var(--menu-item-background-hover);  /* figma */
+  --calendar-day-disabled-foreground: var(--color-gray-8);  /* figma */
+  --calendar-day-foreground: var(--color-gray-1);  /* figma */
+  --calendar-day-height: 28px;  /* figma */
+  --calendar-day-outside-foreground: var(--muted-foreground);  /* figma */
+  --calendar-day-selected-background: var(--color-primary-4);  /* figma */
+  --calendar-day-selected-foreground: var(--color-gray-12);  /* figma */
+  --calendar-day-width: 26px;  /* figma */
+  --calendar-focus-border: var(--color-primary-1);  /* figma */
+  --calendar-focus-ring: var(--calendar-focus-border);  /* figma */
+  --calendar-foreground: var(--color-gray-1);  /* figma */
+  --calendar-heading-foreground: var(--color-gray-1);  /* figma */
+  --calendar-month-option-height: 46px;  /* figma */
+  --calendar-nav-size: 24px;  /* figma */
+  --calendar-range-background: var(--control-selected-soft-background);  /* figma */
+  --calendar-today-border: var(--color-primary-4);  /* figma */
+  --calendar-today-foreground: var(--color-primary-4);  /* figma */
+  --calendar-weekday-foreground: var(--muted-foreground);  /* figma */
+
+  /* --- color --- */
+  --color-system-blue-1: var(--color-system-blue1);  /* figma */
+  --color-system-blue-2: var(--color-system-blue2);  /* figma */
+  --color-system-blue-3: var(--color-system-blue3);  /* figma */
+  --color-system-blue-4: var(--color-system-blue4);  /* figma */
+  --color-system-blue-5: var(--color-system-blue5);  /* figma */
+  --color-system-blue-6: var(--color-system-blue6);  /* figma */
+
+  /* --- control --- */
+  --control-accessory-background-hover: transparent;  /* figma */
+  --control-accessory-background-open: transparent;  /* figma */
+  --control-accessory-foreground: var(--color-gray-5);  /* figma */
+  --control-background: var(--color-gray-12);  /* figma */
+  --control-background-active: var(--color-gray-12);  /* figma */
+  --control-background-hover: var(--color-gray-12);  /* figma */
+  --control-background-open: var(--color-gray-12);  /* figma */
+  --control-border: var(--color-gray-10);  /* figma */
+  --control-border-active: var(--color-primary-1);  /* figma */
+  --control-border-hover: transparent;  /* figma */
+  --control-clear-foreground: var(--color-gray-7);  /* figma */
+  --control-clear-foreground-hover: var(--color-gray-5);  /* figma */
+  --control-disabled-background: var(--color-gray-10);  /* figma */
+  --control-disabled-border: var(--color-gray-8);  /* figma */
+  --control-disabled-foreground: var(--color-gray-6);  /* figma */
+  --control-focus-border: transparent;  /* figma */
+  --control-foreground: var(--color-gray-2);  /* figma */
+  --control-invalid-border: var(--color-red-2);  /* figma */
+  --control-placeholder: var(--color-gray-7);  /* figma */
+  --control-selected-background: var(--color-primary-1);  /* figma */
+  --control-selected-border: var(--color-primary-9);  /* figma */
+  --control-selected-foreground: var(--color-gray-12);  /* figma */
+  --control-selected-soft-background: var(--color-system-blue-6);  /* figma */
+  --control-size-md: 40px;  /* figma */
+  --control-size-sm: 32px;  /* figma */
+  --control-size-xs: 24px;  /* figma */
+  /* TABLE-19 / WIP-MISC-06 — 상태 표시 dot 의 '정상/높음' 색.
+   *
+   * Figma 변수 컬렉션은 `control/success/foreground = #0a9a32` 를 선언하는데,
+   * 정작 dot 을 그리는 6개 노드는 이 변수를 쓰지 않고 raw `#00ff0d`(R0 G255 B13,
+   * 순수 녹색)로 칠해져 있다 — ConfidenceDot Background 2364:18682
+   * (19_Document_Viewer:96 · 21_문서확인_거래연결:327 · 29_ModuleCard:9),
+   * Hero Banner auto_save 2342:16275(16_Hero_Banner:166 · 21:928) 와
+   * 2343:21922(16:416, size 3.5px).
+   *
+   * 판정 근거(값을 그대로 옮기지 않는 이유):
+   *   (1) 6개 전부 노드 이름이 "Background" 이고 변수 바인딩이 0이다 —
+   *       366개 변수 원장·해당 보드 variables.json 어디에도 #00ff0d 가 없다.
+   *   (2) 같은 역할(성공/정상)에 대해 Figma 자신이 #0A9A32 를 두 이름으로
+   *       선언한다: `control/success/foreground`, `badge/palette/green/fill/
+   *       foreground`. 33노드 전체에서 #00ff0d 와 같은 계열의 다른 녹색은 없다.
+   *   (3) 전용 spec 보드(01/02/03 토큰 카드 646개)에 #00ff0d 는 0건이고,
+   *       등장하는 4개 보드는 전부 조합 보드다.
+   * → "같은 토큰이 두 값" 이 아니라 "변수가 있는데 노드가 안 쓴 것" 이므로
+   *   배선 오류로 판정하고 선언된 변수 값을 채택한다.
+   *
+   * 이 토큰은 원장 646 카드에는 없지만 변수 원장에는 있는 이름이라 repo 에
+   * 없었다. dot 을 구현하는 컴포넌트가 리터럴을 쓰지 않도록 여기 세워 둔다. */
+  --control-success-foreground: var(--color-green-1);  /* figma ledger control/success/foreground = #0A9A32 */
+
+  /* --- data --- */
+  --data-table-row-danger-background: var(--color-red-8);  /* figma */
+  --data-table-row-danger-background-active: var(--color-red-6);  /* figma */
+  --data-table-row-danger-background-hover: var(--color-red-7);  /* figma */
+  --data-table-row-success-background: var(--color-green-6);  /* figma */
+  --data-table-row-success-background-active: var(--color-green-4);  /* figma */
+  --data-table-row-success-background-hover: var(--color-green-5);  /* figma */
+  --data-table-row-warning-background: var(--color-yellow-6);  /* figma */
+  --data-table-row-warning-background-active: var(--color-yellow-4);  /* figma */
+  --data-table-row-warning-background-hover: var(--color-yellow-5);  /* figma */
+
+  /* --- file --- */
+  --file-drop-background: var(--color-primary-10);  /* figma */
+  --file-drop-background-active: var(--color-primary-9);  /* figma */
+  --file-drop-background-dragging: var(--color-primary-9);  /* figma */
+  --file-drop-background-hover: var(--color-primary-9);  /* figma */
+  --file-drop-border: var(--color-primary-7);  /* figma */
+  --file-drop-border-dragging: var(--color-primary-5);  /* figma */
+  --file-drop-disabled-background: var(--control-disabled-background);  /* figma */
+  --file-drop-disabled-border: var(--control-disabled-border);  /* figma */
+  --file-drop-disabled-foreground: var(--control-disabled-foreground);  /* figma */
+  --file-drop-foreground: var(--color-primary-4);  /* figma */
+
+  /* --- focus --- */
+  --focus-border: var(--color-primary-1);  /* figma */
+  --focus-invalid-ring: var(--control-invalid-border);  /* figma */
+  --focus-ring: var(--focus-border);  /* figma */
+
+  /* --- font --- */
+  --font-family-sans: var(--font-pretendard);  /* figma */
+
+  /* --- image --- */
+  --image-tile-overlay-hover: color-mix( in srgb, var(--color-gray-1) 70%, transparent );  /* figma */
+
+  /* --- module-card (TABLE-19) --- */
+  /* 29_ModuleCard(2375:15076) 의 필드 그리드도 변수 바인딩이 4개뿐이라
+   * (variables.json = foreground / Indigo / Gray 4 / System Blue 2) 본문 대부분이
+   * raw hex 다. TABLE-17 과 같은 처리 — 값은 Figma, 배선은 역할 토큰.
+   * 세 값 다 ECOYA gray 스케일(gray-9 #DEDFE3 / gray-10 #EEEFF1 / gray-2 #2A2C32)에
+   * 대응물이 없어 별칭이 아니라 리터럴이다.
+   * 등장: 19_Document_Viewer · 21_문서확인_거래연결 · 22_panel · 29_ModuleCard
+   * (divider 8노드 · label 8노드 · value 10노드). */
+  --module-card-divider: #E7EBF1;  /* figma 2375:15080·15086·15092 border-r */
+  --module-card-label-foreground: #7A828F;  /* figma 2375:15082 (12 Regular "Seller") */
+  --module-card-value-foreground: #101319;  /* figma 2375:15085·15091·15097 (14 Bold 파일명) */
+
+  /* --- leading --- */
+  /* TYPO-CARD-05 — badge 3사이즈의 size/leading 짝은 보드 02 토큰 카드가
+   * 직접 선언한다: node 48:2277/2283/2289 = `--text-badge-default 12px` /
+   * `--text-badge-lg 13px` / `--text-badge-sm 11px`, node 48:1827/1833/1839 =
+   * `--leading-badge-default 16px` / `-lg 14px` / `-sm 12px`. 즉 정규 짝은
+   * sm 11/12 · default 12/16 · lg 13/14 세 개다.
+   *
+   * `badgeS` 라는 *Typo 변형 이름* 만 세 갈래로 갈린다:
+   *   06_Typography 보드 162:1816  badgeS = body-11(11) + leading-body-11(16)
+   *   13_Card 보드 187:203         Badge sm      = body-11(11) + leading-badge-sm(12)
+   *   13_Card 보드 187:205         Badge default = badge-default(12) + leading-body-11(16)
+   * 사람에게 묻지 않고 기계적으로 판정했다 —
+   *   (1) 노드 수 다수결(33보드 전수, size+leading 조합 집계):
+   *       11/12 = 131노드(10보드) · 13/14 = 66 · 12/16 = 29 · 11/16 = 17.
+   *       11/16 의 17노드 중 14는 12_Shadcn_group 의 일반 body-11 텍스트고
+   *       badgeS 라벨이 붙은 것은 06 보드의 1노드뿐이다.
+   *   (2) 구체성: badge 전용 토큰 짝을 선언하는 것은 보드 02(토큰 spec)와
+   *       보드 13(Badge spec)이고, 06 보드의 badgeS 는 badge 토큰을 하나도
+   *       쓰지 않는 body-11 혼성 조합이다.
+   * → 작은 배지 텍스트의 정본은 `--text-badge-sm`/`--leading-badge-sm` = 11/12.
+   *   (Typo 의 badgeS 변형은 현재 12/16 = Badge default 쪽에 붙어 있다.
+   *    변형 이름을 어느 짝에 붙일지는 컴포넌트 층의 결정이고, 토큰 층은
+   *    세 짝을 전부 정본 값으로 세워 둔다.) */
+  --leading-badge-default: 16px;  /* figma 48:1827/1829 */
+  --leading-badge-lg: 14px;  /* figma 48:1833/1835 */
+  --leading-badge-sm: 12px;  /* figma 48:1839/1841 */
+  --leading-compat-badge-lg: 20px;  /* figma */
+  --leading-compat-body-5-5: 26.28px;  /* figma */
+  --leading-compat-h0: 54px;  /* figma */
+
+  /* --- letter --- */
+  --letter-spacing-shortcut: 0.1em;  /* figma */
+  --letter-spacing-tight: -0.025em;  /* figma */
+
+  /* --- menu --- */
+  --menu-item-background-active: var(--color-gray-10);  /* figma */
+  --menu-item-background-hover: var(--color-gray-10);  /* figma */
+  --menu-item-disabled-foreground: var(--color-gray-7);  /* figma */
+  --menu-item-foreground: var(--color-gray-2);  /* figma */
+  --menu-item-selected-background: var(--color-system-blue-6);  /* figma */
+
+  /* --- selection --- */
+  --selection-control-border: var(--color-gray-7);  /* figma */
+
+  /* --- shadow --- */
+  --shadow-btn-primary-blue-disabled: 0px 1px 2px 0px rgba(5, 29, 57, 0.1);  /* figma */
+  --shadow-btn-primary-red-disabled: 0px 1px 2px 0px rgba(5, 29, 57, 0.1), 0px 0px 0px 0.5px rgba(214, 76, 76, 0.2);  /* figma */
+  --shadow-btn-tertiary-black-disabled: 0px 0px 0px 0.5px rgba(160, 164, 171, 0.2), 0px 1px 2px rgba(5, 29, 57, 0.1);  /* figma */
+  --shadow-input-active: var(--shadow-input-default);  /* figma */
+  --shadow-input-invalid-active: var(--shadow-input-active);  /* figma */
+  --shadow-input-invalid-open: var(--shadow-input-open);  /* figma */
+  --shadow-input-open: var(--shadow-input-default);  /* figma */
+  --shadow-keyboard-focus: var(--shadow-input-focused);  /* figma */
+  --shadow-keyboard-focus-invalid: var(--shadow-input-invalid-focused);  /* figma */
+
+  /* --- share-panel ---
+   * Figma 노드 30 "확정 및 전달 준비"(frame 2375:14435, 500×841). 이 프레임은
+   * Figma 변수 바인딩이 0개라 색 9종이 전부 리터럴로 박혀 있다(variables.json = {}).
+   * 정책상 Figma 가 정본이므로 리터럴을 그대로 굳히지 않고 여기서 역할 기반 토큰으로
+   * 세운다. --share-panel-accent 의 주황(#FF5600)은 ECOYA 파랑 계열과 충돌하지만
+   * 정본이 주황이라 그대로 채택한다. 노드 번호는 실사용 위치다.
+   */
+  --share-panel-background: #FFFFFF;  /* figma 2375:14435 패널 바닥 · 2375:14566 우하단 아이콘 버튼 */
+  --share-panel-foreground: #000000;  /* figma 2375:14442 제목 · 14454 콜아웃 제목 · 14460 섹션 제목 · 14468/14476 타일 제목 · 14492~ 행 라벨 */
+  --share-panel-foreground-secondary: #666666;  /* figma 2375:14456 콜아웃 본문 · 14462 "관리" · 14470/14478 상태 pill 글자 · 14494~14564 행 값 (총 15회) */
+  --share-panel-foreground-muted: #858A8D;  /* figma 2375:14472 · 14480 타일 보조 설명 */
+  --share-panel-foreground-subtle: #A2A2A2;  /* figma 2375:14439 헤더 eyebrow "문서 완료" */
+  --share-panel-border: #E5E5E5;  /* figma 2375:14435 패널 · 14464 타일 그룹 · 14487 체크리스트 그룹 · 14566 아이콘 버튼 */
+  --share-panel-divider: #EFEFEF;  /* figma 2375:14436 헤더 하단 rule · 14473 두 타일 사이 세로 rule */
+  --share-panel-surface-subtle: #F8F8F8;  /* figma 2375:14469 · 14477 상태 pill 배경 */
+  --share-panel-row-rule: var(--share-panel-surface-subtle);  /* figma 2375:14488~14551 체크리스트 36px 행 하단 rule ×10 (같은 #F8F8F8) */
+  --share-panel-accent: #FF5600;  /* figma 2375:14445 "공유" 버튼 배경 · 14450 아이콘 디스크 · 14444/14486 배지 글자 */
+  --share-panel-accent-foreground: #FFFFFF;  /* figma 2375:14447 주황 버튼 위 글자 */
+  --share-panel-accent-subtle: #FFF2E9;  /* figma 2375:14443 · 14485 배지 pill 배경 · 14449 콜아웃 배경 */
+  --share-panel-accent-border: #FFB894;  /* figma 2375:14449 콜아웃 테두리 */
+  --share-panel-shadow: 0px 1px 1px rgba(0, 0, 0, 0.03);  /* figma 2375:14435 drop-shadow */
+
+  /* --- sidebar --- */
+  --sidebar-disabled-background: var(--sidebar);  /* figma */
+  --sidebar-disabled-foreground: var(--muted-foreground);  /* figma */
+
+  /* --- slider --- */
+  --slider-disabled-background: var(--control-disabled-background);  /* figma */
+  --slider-disabled-foreground: var(--control-disabled-foreground);  /* figma */
+  --slider-focus-ring: var(--focus-ring);  /* figma */
+  --slider-range-background: var(--color-primary-4);  /* figma */
+  --slider-thumb-border: var(--color-primary-1);  /* figma */
+  --slider-track-background: var(--color-gray-10);  /* figma */
+
+  /* --- surface --- */
+  --surface-background: var(--color-gray-12);  /* figma */
+  --surface-border: var(--color-gray-10);  /* figma */
+  --surface-foreground: var(--color-gray-2);  /* figma */
+  --surface-muted-background: var(--color-gray-11);  /* figma */
+  --surface-muted-foreground: var(--muted-foreground);  /* figma */
+
+  /* --- switch --- */
+  --switch-thumb-disabled: var(--color-gray-9);  /* figma */
+  --switch-track-disabled-checked: var(--color-gray-8);  /* figma */
+  --switch-track-disabled-unchecked: var(--color-gray-7);  /* figma */
+  --switch-track-unchecked: var(--color-gray-7);  /* figma */
+
+  /* --- table --- */
+  --table-border: var(--color-gray-10);  /* figma */
+  --table-caption-foreground: var(--surface-muted-foreground);  /* figma */
+  --table-cell-foreground: var(--surface-foreground);  /* figma */
+  --table-header-background: var(--color-gray-11);  /* figma */
+  --table-header-foreground: var(--surface-muted-foreground);  /* figma */
+  --table-row-background-active: var(--color-primary-9);  /* figma */
+  --table-row-background-hover: var(--color-primary-10);  /* figma */
+  --table-row-background-selected: var(--color-primary-10);  /* figma */
+
+  /* TABLE-17 — Table Header size=84 / TableAreaGroup 의 텍스트 3계열.
+   *
+   * 정본이 이 세 색을 **변수에 묶지 않고 raw hex 로** 칠한다. 값은 Figma 를
+   * 따르고(렌더 결과가 판정 기준) 배선은 복제하지 않는다 — TABLE-18 의
+   * `--badge-default-background` 와 같은 처리다. 하드코딩 대신 역할 이름으로 세워 두는 이유는, 세 값이
+   * 한 화면 안에서 강조/라벨/설명의 3단 램프로 일관되게 쓰이기 때문이다.
+   *
+   * 실측(33노드 전수, `text-[#hex] text-[Npx]` 조합 집계):
+   *   #0F172A  강조   14 Bold 40 · 22 Bold 10 · 12 Bold 6 …  총 63노드
+   *   #64748B  라벨   14 Regular 45 · 13 Bold 25 · 11 Regular 2  총 83노드
+   *   #94A3B8  설명   14 Regular 5 · 12 1  총 11노드
+   * 등장 보드: 07_Data_Table · 18_ModuleCard · 19_Document_Viewer ·
+   * 21_문서확인_거래연결 (전부 조합 보드). 같은 컴포넌트의 size=56 변형은
+   * `--table-cell-foreground` / `--muted-foreground` 로 정상 토큰화돼 있으므로
+   * (26·27_Table_Header 보드, 07 보드 size=56 분기) 두 변형은 서로 다른 램프를
+   * 쓴다 — 어느 한쪽을 오타로 보고 뭉치지 말 것.
+   *
+   * 세 값은 Tailwind slate-900/500/400 과 같은데, ECOYA gray 스케일
+   * (gray-2 #2A2C32 / gray-4 #5C5E66 / gray-6 #9D9EA4)에 대응 값이 없어
+   * 별칭으로 잇지 못하고 리터럴로 선언한다. */
+  --table-emphasis-foreground: #0F172A;  /* figma 749:14246·13636 (22 Bold) · I2257:13583;879:1159 (14 Bold) */
+  --table-label-foreground: #64748B;  /* figma I2257:13582;857:970 (13 Bold) */
+  --table-description-foreground: #94A3B8;  /* figma 749:14248·13638 (14 Regular) */
+
+  /* --- tabs --- */
+  --tabs-indicator: var(--color-gray-2);  /* figma */
+  --tabs-list-background: var(--color-gray-10);  /* figma */
+  --tabs-trigger-background-active: var(--color-gray-10);  /* figma */
+  --tabs-trigger-background-selected: var(--color-gray-12);  /* figma */
+  --tabs-trigger-disabled-foreground: var(--control-disabled-foreground);  /* figma */
+  --tabs-trigger-foreground: var(--muted-foreground);  /* figma */
+  --tabs-trigger-foreground-hover: var(--color-gray-2);  /* figma */
+  --tabs-trigger-foreground-selected: var(--color-gray-2);  /* figma */
+
+  /* --- text --- */
+  --text-badge-default: 12px;  /* figma 48:2277/2279 */
+  --text-badge-lg: 13px;  /* figma 48:2283/2285 */
+  --text-badge-sm: 11px;  /* figma 48:2289/2291 */
+  --text-compat-badge-lg: 16px;  /* figma */
+  --text-compat-body-5-5: 18px;  /* figma */
+  --text-compat-h0: 36px;  /* figma */
+
+  /* --- toggle --- */
+  --toggle-background-active: var(--color-gray-10);  /* figma */
+  --toggle-background-hover: var(--color-gray-11);  /* figma */
+  --toggle-background-selected: var(--color-gray-12);  /* figma */
+  --toggle-disabled-foreground: var(--control-disabled-foreground);  /* figma */
+  --toggle-foreground: var(--muted-foreground);  /* figma */
+  --toggle-foreground-hover: var(--color-gray-2);  /* figma */
+  --toggle-foreground-selected: var(--color-primary-4);  /* figma */
+
+  /* ========================================================================
+   * 레거시 토큰 재지정 — @theme 직참조분 흡수
+   * ------------------------------------------------------------------------
+   * globals.css 의 `@theme inline` 은 405개 항목 중 309개가 --ecoya-* 를 직접
+   * 가리킨다. Tailwind 가 그 참조를 유틸리티에 인라인하므로(.rounded-md {
+   * border-radius: var(--ecoya-radius-md) }), 스코프 안에서 --r-md 만 바꿔서는
+   * rounded-md 가 달라지지 않는다. 커스텀 프로퍼티는 상속되므로, 스코프 안에서
+   * 레거시 토큰 이름 자체를 DS 2.0 값으로 다시 묶어 흡수한다.
+   *
+   * globals.css 는 한 글자도 건드리지 않는다 — 스코프 밖 :root 값은 그대로이고,
+   * verify:foundation / verify:semantic-aliases 가 검증하는 @theme 문자열도
+   * 원형을 유지한다. 실측: 레거시 계산값 변화 0건(브라우저 대조).
+   *
+   * 대상은 DS 2.0 에 대응이 있는 20개뿐이다. 나머지 289개(--color-ecoya-blue-4
+   * 등)는 bg-ecoya-* 같은 레거시 전용 유틸이라 DS 2.0 코드가 쓰지 않는다.
+   * ===================================================================== */
+  --ecoya-border: var(--border);
+  --ecoya-font-sans: var(--font-sans);
+  --ecoya-radius-xs: var(--r-xs);
+  --ecoya-radius-sm: var(--r-sm);
+  --ecoya-radius-md: var(--r-md);
+  --ecoya-radius-lg: var(--r-lg);
+  --ecoya-radius-xl: var(--r-xl);
+  --ecoya-radius-2xl: var(--r-2xl);
+  --ecoya-radius-3xl: var(--r-3xl);
+  --ecoya-radius-4xl: var(--r-4xl);
+  --ecoya-shadow-input: var(--shadow-input);
+  --ecoya-shadow-input-hover: var(--shadow-input-hover);
+  --ecoya-shadow-input-focused: var(--shadow-input-focused);
+  --ecoya-shadow-input-invalid-focused: var(--shadow-input-invalid-focused);
+  --ecoya-shadow-tag-valid: var(--shadow-tag-valid);
+  --ecoya-shadow-tag-invalid: var(--shadow-tag-invalid);
+  --ecoya-shadow-tag-disabled: var(--shadow-tag-disabled);
+  --ecoya-shadow-filter: var(--shadow-filter);
+  --ecoya-shadow-modal: var(--shadow-modal);
+  --ecoya-shadow-section: var(--shadow-section);
+}
+
+/* dark 오버라이드 — 우리 repo 의 다크 셀렉터 규약(:root[data-theme="dark"], .dark)에 맞춘다 */
+:root[data-theme="dark"] [data-ds="2"],
+.dark [data-ds="2"],
+[data-ds="2"][data-theme="dark"] {
+  --accent: #113C74;
+  --accent-foreground: var(--color-primary-9);  /* figma 48:2709/2711 · 보드01 2197:13594 "D · primary/9" = #DBEAFA */
+  --background: #121416;
+  --border: #3E414C;
+  --card: #1D1E25;
+  --card-foreground: #DBDDE1;
+  --chart-1: var(--color-chart-blue-4);
+  --chart-2: var(--color-chart-teal-4);
+  --chart-3: var(--color-chart-violet-3);
+  --chart-4: var(--color-chart-aqua-3);
+  --chart-5: var(--color-chart-etc);
+  --destructive: var(--color-red-2);
+  --foreground: #DBDDE1;
+  --input: #3E414C;
+  --muted: #31343A;
+  --muted-foreground: var(--color-gray-6);  /* figma 48:2695/2697 · 보드01 2197:13575 "D · gray/6" = #9D9EA4 */
+  --popover: #1D1E25;
+  --popover-foreground: #DBDDE1;
+  --primary: #217EE8;
+  --primary-foreground: #FFFFFF;
+  --ring: #217EE8;
+  --secondary: #31343A;
+  --secondary-foreground: #BABDC4;
+  --sidebar: #1D1E25;
+  --sidebar-accent: #113C74;
+  --sidebar-accent-foreground: var(--color-primary-9);  /* figma 48:2786/2788 · 보드01 "D · primary/9" = #DBEAFA */
+  --sidebar-border: #3E414C;
+  --sidebar-foreground: #DBDDE1;
+  --sidebar-primary: var(--color-primary-4);  /* figma 48:2765/2767 · 보드01 "D · primary/4" = #166DD7. 다크에서도 --primary(#217EE8)와 갈린다 */
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-ring: #217EE8;
+}
+
+/* ============================================================================
+ * DS 2.0 타이포 유틸 클래스 `ds2-typo-*`
+ * ----------------------------------------------------------------------------
+ * 정본: Figma SNAP 2.0 node 48:5 / 보드 06 "Typography — spec" 의 37 variant.
+ * 각 variant 는 font-family(Pretendard 고정) · size · leading · weight 를 모두
+ * 지정하고, size/leading 은 이 파일이 이미 보유한 --text-* / --leading-* 토큰을
+ * 그대로 가리킨다(보드가 방출한 코드도 `var(--text-body-7,16px)` 형태다).
+ *
+ * 왜 여기에 CSS 가 필요한가: ds2 컴포넌트 21개가 className 에 `ds2-typo-*` 를 82회
+ * 박아 쓰는데(고유 30개) 이 클래스는 repo 어디에도 정의가 없었다. tailwind
+ * config 도 @utility 선언도 없어 유틸이 생성될 경로 자체가 없고, 빌드 산출
+ * CSS 3개 전부 `typo` 문자열 0회 — 즉 82회 전부 사문(死文)이었고 heading 은
+ * weight 조차 상속값으로 렌더됐다. (갭 원장 TYPO-CARD-02 / TYPO-CARD-07)
+ *
+ * @layer components 에 두는 이유: Typo 의 매핑이 `ds2-typo-body-7 font-normal`
+ * (b7r) 처럼 Tailwind 유틸로 weight 를 덮는 것을 전제한다. utilities 레이어가
+ * components 보다 뒤에 오므로 이 순서라야 r 계열이 400 으로 정상 override 된다.
+ * 무(無)스코프인 이유: 컴포넌트가 스코프 셀렉터 없이 클래스만 방출하므로
+ * `[data-ds="2"]` 로 감싸면 스코프 밖 ds2 렌더가 다시 사문이 된다. 대신 모든
+ * var() 에 정본 리터럴을 fallback 으로 달아 스코프 밖에서도 정본값이 나온다.
+ *
+ * 그래서 이름이 격리 수단이다: 이 30개 셀렉터는 globals.css:4 의 @import 를 타고
+ * 앱 전역 CSS 에 실린다. 스코프로 막을 수 없으니 `ds2-` 접두사로 이름 충돌을
+ * 원천 차단한다. 접두사 없는 `typo-*` 는 이 저장소에 더 이상 존재하지 않는다
+ * (2026-09-07 일괄 개명, 137회 / 24파일). 새 타이포 클래스도 반드시 `ds2-` 로
+ * 시작해야 한다 — tokens-ds2.test.ts 가 이 규약을 검사한다.
+ *
+ * 계열 규약(정본): header/display = Bold 700, body -*m = Medium 500,
+ * body -*r = Regular 400(호출부가 font-normal 로 덮는다), button/label = Medium 500.
+ * ========================================================================= */
+@layer components {
+  /* --- header: Bold 700 --- */
+  .ds2-typo-header-1 {
+    font-size: var(--text-header-1, 26px);
+    line-height: var(--leading-header-1, 38px);
+    font-weight: var(--font-weight-bold, 700);  /* figma 162:1678 */
+  }
+  .ds2-typo-header-2 {
+    font-size: var(--text-header-2, 24px);
+    line-height: var(--leading-header-2, 36px);
+    font-weight: var(--font-weight-bold, 700);  /* figma 162:1682 */
+  }
+  .ds2-typo-header-3 {
+    font-size: var(--text-header-3, 22px);
+    line-height: var(--leading-header-3, 34px);
+    font-weight: var(--font-weight-bold, 700);  /* figma 162:1686 */
+  }
+  .ds2-typo-header-4 {
+    font-size: var(--text-header-4, 20px);
+    line-height: var(--leading-header-4, 30px);
+    font-weight: var(--font-weight-bold, 700);  /* figma 162:1690 */
+  }
+  .ds2-typo-header-5 {
+    font-size: var(--text-header-5, 19px);
+    line-height: var(--leading-header-5, 26px);
+    font-weight: var(--font-weight-bold, 700);  /* figma 162:1694 */
+  }
+  .ds2-typo-header-6 {
+    font-size: var(--text-header-6, 17px);
+    line-height: var(--leading-header-6, 24px);
+    font-weight: var(--font-weight-bold, 700);  /* figma 162:1698 */
+  }
+  .ds2-typo-header-7 {
+    font-size: var(--text-header-7, 16px);
+    line-height: var(--leading-header-7, 24px);
+    font-weight: var(--font-weight-bold, 700);  /* figma 162:1702 */
+  }
+  .ds2-typo-header-9 {
+    font-size: var(--text-header-9, 14px);
+    line-height: var(--leading-header-9, 18px);
+    font-weight: var(--font-weight-bold, 700);  /* figma 162:1706 */
+  }
+
+  /* --- body: Medium 500 (b*r 호출부가 font-normal 로 400 override) --- */
+  .ds2-typo-body-1 {
+    font-size: var(--text-body-1, 26px);
+    line-height: var(--leading-body-1, 38px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1715 */
+  }
+  .ds2-typo-body-2 {
+    font-size: var(--text-body-2, 24px);
+    line-height: var(--leading-body-2, 36px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1719 */
+  }
+  .ds2-typo-body-3 {
+    font-size: var(--text-body-3, 22px);
+    line-height: var(--leading-body-3, 34px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1723 */
+  }
+  .ds2-typo-body-4 {
+    font-size: var(--text-body-4, 20px);
+    line-height: var(--leading-body-4, 30px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1727 */
+  }
+  .ds2-typo-body-5 {
+    font-size: var(--text-body-5, 19px);
+    line-height: var(--leading-body-5, 26px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1731 */
+  }
+  .ds2-typo-body-6 {
+    font-size: var(--text-body-6, 17px);
+    line-height: var(--leading-body-6, 24px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1739 */
+  }
+  .ds2-typo-body-7 {
+    font-size: var(--text-body-7, 16px);
+    line-height: var(--leading-body-7, 24px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1743 */
+  }
+  .ds2-typo-body-8 {
+    font-size: var(--text-body-8, 15px);
+    line-height: var(--leading-body-8, 20px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1747 */
+  }
+  .ds2-typo-body-9 {
+    font-size: var(--text-body-9, 14px);
+    line-height: var(--leading-body-9, 18px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1751 */
+  }
+  .ds2-typo-body-10 {
+    font-size: var(--text-body-10, 13px);
+    line-height: var(--leading-body-10, 18px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1783 */
+  }
+
+  /* --- button: Medium 500 --- */
+  .ds2-typo-button-2 {
+    font-size: var(--text-button-2, 17px);
+    line-height: var(--leading-button-2, 24px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1788 */
+  }
+  .ds2-typo-button-3 {
+    font-size: var(--text-button-3, 15px);
+    line-height: var(--leading-button-3, 20px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1792 */
+  }
+  .ds2-typo-button-4 {
+    font-size: var(--text-button-4, 13px);
+    line-height: var(--leading-button-4, 18px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1796 */
+  }
+  .ds2-typo-button-5 {
+    font-size: var(--text-button-5, 11px);
+    line-height: var(--leading-button-5, 16px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1800 */
+  }
+
+  /* --- label: Medium 500 --- */
+  .ds2-typo-label-1 {
+    font-size: var(--text-label-1, 15px);
+    line-height: var(--leading-label-1, 16px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1804 */
+  }
+  .ds2-typo-label-2 {
+    font-size: var(--text-label-2, 13px);
+    line-height: var(--leading-label-2, 14px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1808 */
+  }
+  .ds2-typo-label-3 {
+    font-size: var(--text-label-3, 11px);
+    line-height: var(--leading-label-3, 12px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1812 */
+  }
+
+  /* --- variant 이름 별칭 — 컴포넌트가 스케일명 대신 직접 쓰는 5개.
+   *     (RangePicker·InputLabel·InputTimer·InputMessage·QuantityStepper·FormItem) --- */
+  .ds2-typo-b7m {
+    font-size: var(--text-body-7, 16px);
+    line-height: var(--leading-body-7, 24px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1743 */
+  }
+  .ds2-typo-b8m {
+    font-size: var(--text-body-8, 15px);
+    line-height: var(--leading-body-8, 20px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1747 */
+  }
+  .ds2-typo-b9m {
+    font-size: var(--text-body-9, 14px);
+    line-height: var(--leading-body-9, 18px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1751 */
+  }
+  .ds2-typo-b9r {
+    font-size: var(--text-body-9, 14px);
+    line-height: var(--leading-body-9, 18px);
+    font-weight: var(--font-weight-regular, 400);  /* figma 162:1779 */
+  }
+  .ds2-typo-label1 {
+    font-size: var(--text-label-1, 15px);
+    line-height: var(--leading-label-1, 16px);
+    font-weight: var(--font-weight-medium, 500);  /* figma 162:1804 */
+  }
+}

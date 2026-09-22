@@ -1,0 +1,11 @@
+{
+  "ids": [
+    "auth-login-states",
+    "auth-login-exceptions",
+    "auth-signup-states",
+    "auth-signup-result",
+    "auth-trial-states",
+    "auth-recovery-states"
+  ],
+  "reason": "사용자 요청: 제목만 있는 빈 인증 묶음 캡처 제거. 실제 인증 상태 화면은 참고 · 19 · 로그인·가입 페이지에 유지."
+}

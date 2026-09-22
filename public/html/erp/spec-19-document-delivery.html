@@ -1,0 +1,94 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-19 — 문서 전달 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-19 — 문서 전달</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/19-document-delivery.md</p><article class="doc"><h1>SC-19 — 문서 전달</h1>
+<blockquote>
+<p><strong>Pilot 목표 정책 / 구현 미검증</strong> · 결정: <span>D-015</span> · 2026-08-03 결정: <span>TRADE:DEC-TRD-007 — 공유 링크의 현행 접근 범위</span> · <span>TRADE-DOC-001 — QA 절의 규범 경계</span></p>
+</blockquote>
+<blockquote>
+<p>이슈 결정: <span>ISSUE-134 다중채널 전송</span> · <span>ISSUE-140 첨부 제한</span> · <span>ISSUE-148 발신자 오류 복구</span></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/documents/{id}/deliver</code></td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td><code>user-frontend/src/app/erp/documents/[id]/deliver/page.tsx</code>와 documents 전달 컴포넌트</td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>전달 및 공유 (04-delivery-and-share.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>Owner/Admin/Member가 본인 담당 또는 공동 작업자로 내부 공유된 Confirm 문서를 Share. Pilot에서는 Owner/Admin 확인·Approve·sender capability를 기본 gate로 사용하지 않음</td>
+</tr>
+</tbody></table>
+<h2>구역·행동·호출</h2>
+<table>
+<thead>
+<tr>
+<th>구역</th>
+<th>화면 항목</th>
+<th>버튼·행동</th>
+<th>호출</th>
+<th>성공·오류·복구</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>문서 상태</td>
+<td>문서명, 버전, Confirm·전달 가능 여부</td>
+<td><strong>새로고침</strong></td>
+<td>generated document 상세</td>
+<td>최신 Confirm 상태 표시. 미확정이면 문서로 돌아가 Confirm</td>
+</tr>
+<tr>
+<td>첨부</td>
+<td>파일명, 종류, 저장 원본 byte/MiB 크기, 포함 여부, 현재/최대 개수·합계</td>
+<td>기존 문서 첨부·업로드·제거</td>
+<td>attachments CRUD + server limits</td>
+<td>본문 PDF 제외, 참조+업로드 합계 10개·파일당 10 MiB·총 50 MiB; <code>1 MiB=1,048,576 bytes</code>, PDF/PNG/JPEG signature 검증</td>
+</tr>
+<tr>
+<td>미리보기</td>
+<td>PDF, 첨부 목록, 패키지 버전</td>
+<td>PDF·묶음 내려받기</td>
+<td>preview·PDF·bundle</td>
+<td>현재 후보 출력 확인</td>
+</tr>
+<tr>
+<td>공유 링크</td>
+<td><code>document_id</code>, <code>package_version</code>, <code>content_digest</code>, 만료·최대 열람 횟수·상태</td>
+<td><strong>공유 링크 만들기/주소 복사/공유 취소</strong></td>
+<td>share-links create/list/revoke</td>
+<td>링크 생성은 발송 상태를 바꾸지 않음</td>
+</tr>
+<tr>
+<td>제공자 전송</td>
+<td>검증된 단일 수신자 envelope, Email·SMS·WhatsApp 채널, request와 시도 이력</td>
+<td><strong>전송/실패 시도 재시도</strong></td>
+<td>공통 delivery request/attempt + channel adapter</td>
+<td>Email IDN·전화 E.164 검증; 요청·수락·도달·재시도·일시/영구 실패를 안전한 provider 근거에 따라 표시</td>
+</tr>
+<tr>
+<td>발신자 복구</td>
+<td>invalid·expired·revoked·open-limit·provider/temporary 원인</td>
+<td>재발급·연장·새 공유·재시도</td>
+<td>인증된 delivery/share detail</td>
+<td>공개 수신자보다 상세한 원인과 허용 복구 표시</td>
+</tr>
+</tbody></table>
+<p>공유 링크 하나는 <code>document_id + package_version + content_digest</code>로 식별되는 단일 불변 문서 패키지만 가리킨다. 생성 입력은 만료(<code>expires_days</code>)와 최대 열람 횟수(<code>max_opens</code>)이고 철회는 별도 행동이다. 수신자·도메인·첨부 audience selector는 제공하지 않는다. 외부 제공의 법적 대상 범위인 <span>LR-005</span>는 출시 전 법무 확인까지 <code>DEFERRED</code>다.</p>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<p>문서 ID·버전, 포함 첨부 raw byte 합계, 링크 상태, request/attempt ID, 전송 채널, 마스킹 수신자, template/package digest, 화면 상태 문구와 delivery history를 기록한다. Member가 접근 가능한 Confirm 문서를 직접 Share할 수 있는지 확인한다. Pilot에서는 Owner/Admin 확인·Approve·sender capability가 선행조건으로 노출되지 않아야 한다. 링크 생성·복사·메일 앱 열기·provider 미설정을 실제 발송 완료로 판정하지 않는다. temporary/permanent·최대 시도·late webhook과 fake/채널별 rollback을 재현해 중복 request·중복 전달·provider 내부정보 노출이 없는지 확인한다.</p>
+<h2>개발 역추적</h2>
+<p>delivery components → <code>generatedDocuments.ts</code>, <code>deliveryEvents.ts</code> → share/package/delivery BFF → docgen·delivery handler/service.</p>
+</article></main></body></html>

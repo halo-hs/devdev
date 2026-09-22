@@ -1,0 +1,157 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-08 — Trade OS 시작 가이드 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-08 — Trade OS 시작 가이드</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/08-onboarding.md</p><article class="doc"><h1>SC-08 — Trade OS 시작 가이드</h1>
+<blockquote>
+<p>결정 반영: <span>2026-08-26 제품 시작 가이드 공통 계약</span> · <span>Trade OS 첫 가치 시작 가이드</span></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>목표 계약</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/onboarding</code> 유지</td>
+</tr>
+<tr>
+<td>진입</td>
+<td>Trade OS LNB <code>시작 가이드 X/N</code></td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>FS-13 Trade OS 시작 가이드</span></td>
+</tr>
+<tr>
+<td>대상</td>
+<td>Trade OS 접근 OWNER·ADMIN·MEMBER. App User 제외</td>
+</tr>
+<tr>
+<td>성격</td>
+<td>비차단 체크리스트·최초 출발·중단 후 재개</td>
+</tr>
+</tbody></table>
+<h2>화면 구조</h2>
+<pre><code class="language-text">시작 가이드                         진행 2/6
+Trade OS의 첫 거래를 만들어 보세요.
+
+조직 안내                           OWNER·ADMIN만
+✓ 조직 정보 확인하기
+○ 팀원 초대 방법 확인하기           [확인하기]
+
+제품 시작
+○ 첫 PDF 문서 올리기                [내 PDF 선택]
+○ AI 결과 확인·확정하기             [이어하기]
+○ 거래 만들기·연결하기              [이어하기]
+○ 거래 데이터에 AI로 질문하기       [이어하기]
+</code></pre>
+<p>MEMBER는 조직 안내 구획을 표시하지 않고 <code>진행 X/4</code>를 사용한다. 내부 상태 enum을 사용자에게 표시하지 않으며 <code>완료</code>, <code>진행 중</code>, <code>다음</code>, <code>권한 필요</code>를 항목명·icon·한국어 보조 문구로 전달한다.</p>
+<h2>항목 상태와 행동</h2>
+<table>
+<thead>
+<tr>
+<th>표시</th>
+<th>의미</th>
+<th>CTA</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>완료</td>
+<td>검증된 완료 사건 존재</td>
+<td>기본 CTA 없음</td>
+</tr>
+<tr>
+<td>다음</td>
+<td>현재 바로 실행 가능한 첫 미완료 항목</td>
+<td>해당 화면으로 시작</td>
+</tr>
+<tr>
+<td>진행 중</td>
+<td>처리 또는 외부 결과를 기다림</td>
+<td>상태 보기</td>
+</tr>
+<tr>
+<td>이어하기</td>
+<td>기준 객체가 있고 다음 사용자 행동 가능</td>
+<td>같은 객체의 목적 화면</td>
+</tr>
+<tr>
+<td>권한 필요</td>
+<td>현재 capability로 행동 불가</td>
+<td>잠금 이유만 표시; 임의 요청 action 없음</td>
+</tr>
+<tr>
+<td>일시 오류</td>
+<td>progress 또는 target 조회 실패</td>
+<td>다시 시도</td>
+</tr>
+</tbody></table>
+<p>사용자가 항목을 직접 체크하거나 완료로 PATCH하지 않는다. 실제 제품 성공 사건 또는 Common education receipt가 projection을 갱신한다.</p>
+<h2>클릭 뒤 안내</h2>
+<ul>
+<li>항목 CTA 클릭만 1회성 guide intent를 만든다.</li>
+<li>목적 화면이 준비되면 해당 interactive control에 keyboard focus를 옮기고 target 주변을 강조한다.</li>
+<li>popover는 현재 해야 할 한 행동, 완료 기준, 닫기만 제공한다. 여러 화면 tour를 한꺼번에 실행하지 않는다.</li>
+<li>popover를 닫아도 항목은 미완료다. 다시 안내가 필요하면 LNB에서 같은 항목을 선택한다.</li>
+<li>성공 뒤 이 화면으로 자동 복귀하지 않는다. 실제 업무 화면의 정상 다음 CTA를 계속 사용한다.</li>
+</ul>
+<h2>화면 상태</h2>
+<table>
+<thead>
+<tr>
+<th>상태</th>
+<th>표시</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>최초 진입</td>
+<td>첫 미완료 항목을 강조하고 전체 6/4 항목 표시</td>
+</tr>
+<tr>
+<td>일부 완료</td>
+<td>완료 수와 첫 미완료 항목의 <code>이어하기</code></td>
+</tr>
+<tr>
+<td>처리 중</td>
+<td>처리 중 항목과 상태 보기, 완료 선표시 금지</td>
+</tr>
+<tr>
+<td>제품 접근 회수</td>
+<td>객체 정보 숨김, 제품 접근 안내</td>
+</tr>
+<tr>
+<td>trial 만료·무료 이용량 소진</td>
+<td>Common 제품 전체 잠금 우선, 진행 보존</td>
+</tr>
+<tr>
+<td>전체 완료</td>
+<td>성공한 마지막 제품 화면에서 완료 안내 후 LNB 메뉴 숨김</td>
+</tr>
+<tr>
+<td>projection 오류</td>
+<td>제품 진입은 유지, 가이드만 재시도 오류</td>
+</tr>
+</tbody></table>
+<h2>접근성</h2>
+<ul>
+<li>LNB badge는 <code>2/6</code>처럼 텍스트로 읽히며 색만으로 진행을 표현하지 않는다.</li>
+<li>현재 단계 heading과 CTA로 focus 이동을 알리고, popover 닫기 뒤 focus를 원래 control 또는 페이지 heading으로 되돌린다.</li>
+<li>mobile에서는 target을 가리지 않는 하단 card 형태를 사용할 수 있으나 같은 한 단계 안내를 유지한다.</li>
+<li>motion 감소 설정에서는 spotlight transition을 줄이거나 제거한다.</li>
+</ul>
+<h2>CURRENT_LEGACY·IMPLEMENTATION_GAP</h2>
+<ul>
+<li>기존 <code>OnboardingWizard</code>의 5단계 설정 flow와 <code>OnboardingGate</code> 강제 redirect는 <code>CURRENT_LEGACY</code>다.</li>
+<li>기존 LNB footer checklist, <code>checklist_collapsed</code>, <code>hide_checklist</code>, 72시간 자동 숨김은 목표 진행 계약이 아니다. 영구 숨김 write를 새 기능에서 사용하지 않는다.</li>
+<li>현재 <code>StartGuideChecklist</code>의 단순 Link 이동에는 목적 화면 focus·popover·1회성 intent 검증이 없다.</li>
+<li>실제 route·component·API가 목표 계약으로 교체되고 QA 근거가 생기기 전 구현 완료로 표시하지 않는다.</li>
+</ul>
+<h2>QA</h2>
+<ul>
+<li><input disabled="" type="checkbox"> LNB에서 열리고 Home 본문·우측 패널에 전체 체크리스트가 중복되지 않는다.</li>
+<li><input disabled="" type="checkbox"> OWNER·ADMIN <code>X/6</code>, MEMBER <code>X/4</code>와 한국어 상태가 정확하다.</li>
+<li><input disabled="" type="checkbox"> 일반 route 진입·새로고침·뒤로가기에서 안내가 자동 실행되지 않는다.</li>
+<li><input disabled="" type="checkbox"> 명시적 CTA에서만 target focus·popover가 한 번 실행된다.</li>
+<li><input disabled="" type="checkbox"> 화면 방문·popover 닫기로 완료되지 않는다.</li>
+<li><input disabled="" type="checkbox"> 성공 뒤 업무 화면에 남고 LNB에서만 중단 지점을 재개한다.</li>
+</ul>
+</article></main></body></html>

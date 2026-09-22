@@ -1,0 +1,146 @@
+{
+  "settings": {
+    "title": "SNAP 설정",
+    "subtitle": "SNAP 워크스페이스의 구성원, 브랜딩, 플랜, 데이터 정책을 관리합니다.",
+    "loading": "설정을 불러오는 중…",
+    "loadError": "설정을 불러오지 못했습니다.",
+    "retry": "다시 시도",
+    "saved": "저장되었습니다.",
+    "saveError": "변경 사항을 저장하지 못했습니다.",
+    "forbidden": {
+      "title": "SNAP 관리자 권한이 필요합니다",
+      "body": "이 페이지는 SNAP 관리자만 사용할 수 있습니다. 워크스페이스 관리자에게 권한을 요청하세요."
+    },
+    "unavailable": {
+      "title": "SNAP 설정을 열 수 없습니다",
+      "body": "무료 체험이 진행 중이거나 유료 구독이 활성일 때 SNAP 설정을 사용할 수 있습니다. 조직 > 제품 및 구독에서 다음 행동을 확인하세요.",
+      "action": "제품 및 구독으로 이동"
+    },
+    "members": {
+      "title": "구성원 및 역할",
+      "subtitle": "SNAP 앱 역할은 플랫폼 역할과 별개입니다. 합류 대기 구성원은 관리자 승인이 필요합니다.",
+      "email": "이메일",
+      "role": "역할",
+      "status": "상태",
+      "joined": "합류일",
+      "actions": "작업",
+      "empty": "아직 SNAP 구성원이 없습니다.",
+      "approve": "합류 승인",
+      "deactivate": "비활성화",
+      "deactivateConfirm": "이 구성원의 SNAP 접근 권한을 제거할까요? 플랫폼 계정에는 영향이 없습니다.",
+      "roles": {
+        "snap_admin": "관리자",
+        "snap_reviewer": "리뷰어",
+        "snap_field": "현장",
+        "snap_viewer": "뷰어"
+      },
+      "statuses": {
+        "active": "활성",
+        "inactive": "비활성",
+        "pending_approval": "승인 대기"
+      }
+    },
+    "invites": {
+      "title": "초대",
+      "subtitle": "현장·리뷰어·뷰어 구성원을 초대합니다. 관리자 역할은 초대가 아니라 직접 부여만 가능합니다.",
+      "emailLabel": "이메일 주소",
+      "emailPlaceholder": "name@company.com",
+      "roleLabel": "역할",
+      "send": "초대 보내기",
+      "sending": "보내는 중…",
+      "created": "초대가 생성되었습니다. 이 링크는 저장되지 않으니 한 번만 공유하세요.",
+      "createError": "초대를 생성하지 못했습니다.",
+      "revoke": "회수",
+      "empty": "대기 중인 초대가 없습니다.",
+      "statuses": {
+        "pending": "대기",
+        "accepted": "수락됨",
+        "expired": "만료됨",
+        "revoked": "회수됨"
+      }
+    },
+    "branding": {
+      "title": "브랜딩",
+      "subtitle": "고객 리포트 화면과 PDF에 적용됩니다. \"Powered by ECOYA SNAP\" 표기는 항상 유지됩니다.",
+      "nameLabel": "표시 이름",
+      "colorLabel": "브랜드 색상",
+      "footerLabel": "리포트 푸터",
+      "save": "브랜딩 저장"
+    },
+    "residency": {
+      "title": "데이터 레지던시",
+      "subtitle": "이 조직의 스토리지 리전과 프라이버시 상태를 백엔드 확인값으로 표시합니다.",
+      "homeMarket": "홈 마켓",
+      "targetRegion": "목표 리전",
+      "effectiveRegion": "실제 스토리지 리전",
+      "storageProvider": "스토리지 제공자",
+      "regionPin": "테넌트 리전 고정",
+      "privacyFrameworks": "프라이버시 프레임워크",
+      "alignment": "정렬 상태",
+      "pinEnforced": "리전 고정 적용",
+      "enterprisePinning": "엔터프라이즈 리전 고정 필요",
+      "status": "상태",
+      "statusPinned": "리전 고정",
+      "statusLocal": "로컬 개발",
+      "statusPending": "엔터프라이즈 고정 대기",
+      "statusReview": "검토 필요",
+      "alignmentShared": "공유 자동 리전",
+      "alignmentAligned": "정렬됨",
+      "alignmentUnknown": "지정되지 않음",
+      "pinAuto": "자동(배포 기본값)"
+    },
+    "billing": {
+      "title": "플랜 및 크레딧",
+      "subtitle": "플랜 권한은 과금 정책에서 옵니다 — 여기 표시되는 내용이 백엔드가 실제로 적용하는 기준입니다.",
+      "currentPlan": "현재 플랜",
+      "creditBalance": "크레딧 잔액",
+      "lowBalance": "잔액이 부족해지고 있습니다.",
+      "criticalBalance": "잔액이 매우 부족합니다.",
+      "historyTitle": "최근 크레딧 내역",
+      "historyEmpty": "크레딧 내역이 없습니다.",
+      "perMonth": "/월",
+      "contactSales": "영업팀 문의",
+      "featured": "추천",
+      "activeBadge": "사용 중"
+    },
+    "retention": {
+      "title": "보존 및 데이터",
+      "subtitle": "보존은 고정된 순서로 진행됩니다: 드라이런 → 내보내기 → 회수 → 영구 삭제. 영구 삭제는 삭제 요청을 통해서만 수행됩니다.",
+      "mediaDays": "원본 미디어(일)",
+      "reportDays": "리포트(일)",
+      "linkDays": "공유 링크(일)",
+      "archiveDays": "보관 전환(일)",
+      "save": "정책 저장",
+      "sweepDryRun": "드라이런 스윕 실행",
+      "sweepDone": "드라이런 완료 — 데이터는 변경되지 않았습니다.",
+      "sweepApply": "보존 스윕 적용",
+      "sweepApplyTitle": "보존 스윕을 적용할까요?",
+      "sweepApplyBody": "대상 미디어와 리포트는 보관되고 대상 공유 링크는 만료됩니다. 바이트는 제거하지 않습니다.",
+      "sweepApplyConfirm": "스윕 적용",
+      "sweepApplyCancel": "취소",
+      "sweepApplyDone": "보존 스윕이 적용되었습니다. 대상 미디어와 리포트는 보관되었고 대상 공유 링크는 만료되었습니다.",
+      "sweepMediaToArchive": "보관할 미디어",
+      "sweepReportsToArchive": "보관할 리포트",
+      "sweepShareLinksToExpire": "만료할 공유 링크",
+      "sweepMediaArchived": "보관된 미디어",
+      "sweepReportsArchived": "보관된 리포트",
+      "sweepShareLinksExpired": "만료된 공유 링크",
+      "sweepError": "스윕에 실패했습니다.",
+      "exportTitle": "데이터 내보내기",
+      "exportBody": "SNAP 데이터의 기계 판독용 스냅샷을 다운로드합니다(메타데이터만, 미디어 원본 제외).",
+      "exportAction": "조직 데이터 내보내기",
+      "exportDone": "내보내기가 다운로드되었습니다.",
+      "exportError": "내보내기에 실패했습니다.",
+      "deletionTitle": "삭제 요청",
+      "deletionEmpty": "삭제 요청이 없습니다.",
+      "deletionApprove": "승인",
+      "deletionReject": "반려",
+      "deletionStatuses": {
+        "pending": "대기",
+        "approved": "승인됨",
+        "completed": "완료됨",
+        "rejected": "반려됨"
+      }
+    }
+  }
+}

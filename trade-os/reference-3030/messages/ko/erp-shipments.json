@@ -1,0 +1,67 @@
+{
+  "shipments": {
+    "title": "배송 추적",
+    "subtitle": "선적 ETD·ETA·컨테이너 상태를 한눈에. B/L 서류에서 자동으로 채워지고, 선사 조회는 하루 한 번만 갱신됩니다.",
+    "searchPlaceholder": "B/L·컨테이너·항구·선박·계약(SC/PO)으로 검색",
+    "searchClear": "선적 검색어 지우기",
+    "loading": "선적 정보를 불러오는 중…",
+    "error": "선적 정보를 불러오지 못했습니다.",
+    "loadError": "선적 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+    "retry": "다시 시도",
+    "refreshTracking": "추적 정보 갱신",
+    "refreshingTracking": "추적 정보 갱신 중…",
+    "refreshTrackingError": "추적 정보를 갱신하지 못했습니다. 기존 선적 정보는 변경되지 않았습니다.",
+    "refreshTrackingForbidden": "현재 역할로는 선적 추적 정보를 갱신할 수 없습니다.",
+    "refreshTrackingUnavailable": "현재 요금제 또는 결제 상태에서는 추적 정보를 갱신할 수 없습니다.",
+    "refreshTrackingMissing": "이 선적은 더 이상 존재하지 않아 목록에서 제거했습니다.",
+    "empty": "선적이 없습니다. B/L 서류를 올리면 자동으로 나타납니다.",
+    "emptyFiltered": "선택한 조건에 맞는 선적이 없습니다.",
+    "staleBanner": "선적 목록을 갱신하지 못했습니다. 아래 정보가 최신이 아닐 수 있습니다.",
+    "staleEmpty": "선적 목록을 갱신하지 못했습니다. 선적이 없는 것인지는 확인되지 않았습니다.",
+    "rowFallback": "식별 정보 없음",
+    "cols": {
+      "bl": "B/L 번호",
+      "container": "컨테이너",
+      "route": "구간",
+      "vessel": "선박",
+      "etd": "출항(ETD)",
+      "eta": "도착(ETA)",
+      "status": "상태"
+    },
+    "status": {
+      "booked": "예약",
+      "loaded": "적재",
+      "departed": "출항",
+      "arrived": "도착",
+      "delivered": "인도",
+      "unknown": "미확인"
+    },
+    "filters": {
+      "label": "상태 필터",
+      "all": "전체",
+      "in_transit": "운송 중",
+      "arriving": "도착 임박",
+      "delayed": "지연",
+      "arrived": "도착"
+    },
+    "source": {
+      "document": "서류 기반",
+      "manual": "수동 입력",
+      "carrier": "선사 동기화",
+      "manualAt": "수동 입력 시각 {at}",
+      "manualBy": "확인자 {by}",
+      "carrierAt": "선사 조회 시각 {at}"
+    },
+    "arrivingSoon": "도착 임박",
+    "daysToEta": "D-{days}",
+    "overdueEta": "예정 초과",
+    "dealGroup": "거래 (PO/계약) 단위",
+    "unassigned": "미배정 선적",
+    "shipmentCount": "선적 {count}건",
+    "nextEta": "가장 빠른 도착",
+    "evidenceBadge": "현장 사진 {count}장",
+    "evidenceAllocatedTo": "배정: {label}",
+    "evidenceLink": "SNAP 증거함",
+    "dealLink": "거래 보기 →"
+  }
+}

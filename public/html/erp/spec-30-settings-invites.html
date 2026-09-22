@@ -1,0 +1,142 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-30 — 초대 설정 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-30 — 초대 설정</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/30-settings-invites.md</p><article class="doc"><h1>SC-30 — 초대 설정</h1>
+<blockquote>
+<p><strong>CURRENT_LEGACY</strong>: 이 문서는 기존 <code>/erp/settings</code>의 Space 초대 화면을 보존한다. 목표 Organization Member 초대는 <a href="spec-CS-08-members-invites.html">Common CS-08</a>, Trade OS App User 초대는 <span>SC-45</span>가 소유한다. 두 초대를 같은 역할·상태·API로 처리하지 않는다. 경계 반영: <span>2026-08-20</span>.</p>
+</blockquote>
+<blockquote>
+<p>역사 근거: <span>DEC-TRD-006 초대 가능 역할 행렬</span> · <span>DEC-TRD-011 기존 멤버 관리·자기 이탈</span> · 문서 규범: <span>TRADE-DOC-001 QA 절의 규범 경계</span></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/settings</code>의 초대 탭</td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td>settings page → 초대 관리 컴포넌트</td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>설정·멤버·구독·개인정보 (18-settings-members-billing.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>Owner와 Admin만 초대 탭에 진입하고 초대 CTA를 사용한다. Owner는 <code>Admin</code>·<code>Member</code>, Admin은 <code>Member</code>만 초대하며 Member는 탭·CTA·직접 실행 권한이 없다</td>
+</tr>
+</tbody></table>
+<h2>필드·행동·호출</h2>
+<table>
+<thead>
+<tr>
+<th>상태·필드</th>
+<th>버튼·행동</th>
+<th>호출</th>
+<th>성공·오류·복구</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>이메일, 역할(<code>Admin</code>·<code>Member</code>) — Owner</td>
+<td><strong>팀원 초대/초대 이메일 발송</strong></td>
+<td>invite create</td>
+<td><code>Admin</code>·<code>Member</code> 초대 목록에 대기 상태 추가; <code>Owner</code> 역할은 거부</td>
+</tr>
+<tr>
+<td>이메일, 역할(<code>Member</code>만) — Admin</td>
+<td><strong>팀원 초대/초대 이메일 발송</strong></td>
+<td>invite create</td>
+<td><code>Member</code> 초대 목록에 대기 상태 추가; <code>Admin</code> 선택·직접 요청은 거부</td>
+</tr>
+<tr>
+<td>초대 폼 없음 — Member</td>
+<td>초대 CTA 없음</td>
+<td>직접 경로·invite create</td>
+<td>권한 오류, 초대·멤버십 데이터 변경 없음</td>
+</tr>
+<tr>
+<td>초대 상태·만료 — Owner/Admin</td>
+<td><strong>다시 보내기</strong></td>
+<td>resend invite</td>
+<td>만료·발송 결과 갱신</td>
+</tr>
+<tr>
+<td>대기 초대 — Owner/Admin</td>
+<td><strong>취소</strong></td>
+<td>revoke/cancel invite</td>
+<td>취소됨 표시</td>
+</tr>
+<tr>
+<td>수락 링크</td>
+<td><strong>링크 복사</strong></td>
+<td>서버 호출 없음 또는 기존 응답 사용</td>
+<td>클립보드 결과 표시</td>
+</tr>
+</tbody></table>
+<h2>초대와 기존 멤버 권한 변경의 구분</h2>
+<table>
+<thead>
+<tr>
+<th>행동</th>
+<th>Owner</th>
+<th>Admin</th>
+<th>Member</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>새 팀원 초대</td>
+<td>초대 CTA 활성. <code>Admin</code>·<code>Member</code> 선택 가능</td>
+<td>초대 CTA 활성. <code>Member</code>만 선택 가능</td>
+<td>초대 CTA 없음. 직접 경로·API도 거부</td>
+</tr>
+<tr>
+<td>기존 멤버 역할 변경</td>
+<td>비-Owner·비자기 대상에 <code>Admin</code>·<code>Member</code> 선택 가능</td>
+<td>비-Owner·비자기 대상에 <code>Admin</code>·<code>Member</code> 선택 가능</td>
+<td>역할 Select·저장 CTA 없음. 직접 API도 거부</td>
+</tr>
+<tr>
+<td>기존 멤버 조직 접근 차단</td>
+<td>비-Owner·비자기 대상 <strong>조직에서 제거</strong> CTA 사용 가능</td>
+<td>비-Owner·비자기 대상 <strong>조직에서 제거</strong> CTA 사용 가능</td>
+<td>CTA 없음. 직접 API도 거부</td>
+</tr>
+<tr>
+<td>자기 역할 변경·제거·워크스페이스 나가기</td>
+<td>이 화면에 없음</td>
+<td>이 화면에 없음</td>
+<td>이 화면에 없음</td>
+</tr>
+<tr>
+<td><code>Owner</code> 권한 변경</td>
+<td>일반 역할 선택이 아니라 별도 소유권 이전 절차 사용</td>
+<td>실행 불가</td>
+<td>실행 불가</td>
+</tr>
+</tbody></table>
+<ul>
+<li>초대 폼의 역할 선택과 기존 멤버의 역할 편집은 서로 다른 행동과 권한 검사다.</li>
+<li>Admin의 새 초대에는 <code>Admin</code> 역할이 없지만, 이 초대 행렬을 기존 멤버의 역할 변경에 재사용하지 않는다.</li>
+<li>기존 멤버 관리는 <a href="spec-29-settings-members.html">SC-29 멤버 설정</a>과 <span>DEC-TRD-011</span>을 따른다. Owner와 Admin은 비-Owner·비자기 멤버를 <code>Admin</code>·<code>Member</code>로 변경하거나 조직에서 제거하고 Member는 타인 관리를 실행할 수 없다. 자기 행의 변경·제거와 <code>워크스페이스 나가기</code>는 초대 화면과 SC-29 모두에 없으며 자기 이탈은 Common <code>CS-06 일반</code>의 Trade 변형으로 분리한다.</li>
+<li>현재 Owner는 일반 역할 변경 대상이 아니며 <code>Owner</code> 변경은 별도 소유권 이전 절차로만 처리한다.</li>
+</ul>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<ul>
+<li><input disabled="" type="checkbox"> Owner의 역할 선택에는 <code>Admin</code>·<code>Member</code>가 보이고 두 초대가 각각 성공한다.</li>
+<li><input disabled="" type="checkbox"> Admin의 역할 선택에는 <code>Member</code>만 보이며 <code>Member</code> 초대는 성공한다.</li>
+<li><input disabled="" type="checkbox"> Admin→<code>Admin</code> 선택 시도와 직접 API 요청은 초대·멤버십 데이터 변경 없이 거부된다.</li>
+<li><input disabled="" type="checkbox"> Member에게 초대 CTA를 노출하지 않고 직접 경로·API 요청도 데이터 변경 없이 거부한다.</li>
+<li><input disabled="" type="checkbox"> 초대 역할 선택과 기존 멤버 역할 편집을 같은 권한으로 처리하지 않는다. DEC-TRD-006의 초대 역할 행렬을 SC-29의 역할 변경 목적값·대상 제약으로 재사용하지 않는다.</li>
+<li><input disabled="" type="checkbox"> Admin은 새 <code>Admin</code> 초대를 만들 수 없지만 SC-29에서 기존 Member를 <code>Admin</code>으로 승격하고 비-Owner·비자기 멤버를 조직에서 제거할 수 있다.</li>
+<li><input disabled="" type="checkbox"> 이 화면에는 어떤 역할에도 자기 역할 변경·조직에서 제거·워크스페이스 나가기 CTA가 없고 초대와 자기 이탈을 같은 흐름으로 처리하지 않는다.</li>
+<li><input disabled="" type="checkbox"> 이메일, 역할, 현재 초대 상태, 버튼명, 만료 시각, 오류 문구를 기록하고 이메일 전송 요청과 상대방 수락 완료를 분리한다.</li>
+</ul>
+<h2>개발 역추적</h2>
+<p>invite settings → <code>invites.ts</code> → admin invites BFF → invite handler/service와 멤버십 저장.</p>
+</article></main></body></html>

@@ -1,0 +1,289 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@ecoya/ui/styles.css";
+@import "../packages/shared-ui/src/styles/hero-filter-tokens.css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --ai-entry-hero-padding-top: 6rem;
+  --ai-entry-header-min-height: 8rem;
+  --ui-ai-hero-background: linear-gradient(
+    118deg,
+    var(--color-primary-1) 0%,
+    var(--color-primary-5) 100%
+  );
+}
+
+:root:not(.dark) {
+  /* Keep the page canvas lighter than Gray 11 table headers so data regions
+     remain visible without adding heavier borders or shadows. */
+  --background: color-mix(
+    in srgb,
+    var(--color-gray-11) 20%,
+    var(--color-gray-12)
+  );
+  --sidebar: var(--color-gray-12);
+}
+
+@media (min-width: 40rem) {
+  :root {
+    --ai-entry-hero-padding-top: 10rem;
+  }
+}
+
+@layer base {
+  :root * {
+    @apply border-border outline-ring/50;
+    border-color: var(--border);
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: var(--text-body-7);
+    line-height: var(--leading-body-7);
+    font-weight: var(--font-weight-regular);
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+.field-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(
+      in srgb,
+      var(--ui-action-primary) 45%,
+      var(--ui-border-default)
+    )
+    transparent;
+}
+
+.field-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.field-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.field-scrollbar::-webkit-scrollbar-thumb {
+  min-height: 64px;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: color-mix(
+    in srgb,
+    var(--ui-action-primary) 45%,
+    var(--ui-border-default)
+  );
+  background-clip: content-box;
+}
+
+.field-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--ui-action-primary);
+  background-clip: content-box;
+}
+
+/* Product-specific layout hooks may remain while semantic values stay common. */
+.snap-product {
+  background: var(--ui-surface-page);
+}
+
+.snap-product [data-slot="card"] {
+  border-radius: var(--ui-radius-panel);
+  box-shadow: var(--ui-shadow-panel);
+}
+
+.snap-product [data-slot="card-footer"] {
+  border-bottom-right-radius: var(--ui-radius-panel);
+  border-bottom-left-radius: var(--ui-radius-panel);
+}
+
+/* Product shell pattern: the DS owns the sidebar primitive while the product
+   supplies its branded navigation surface. All values resolve to DS tokens. */
+.snap-navigation [data-slot="sidebar-inner"],
+.settings-navigation [data-slot="sidebar-inner"],
+[data-slot="sidebar"][data-mobile="true"] {
+  background: var(--sidebar);
+}
+
+.snap-navigation [data-slot="sidebar-container"],
+.settings-navigation [data-slot="sidebar-container"] {
+  border-inline-end: 0;
+}
+
+.snap-navigation [data-slot="sidebar-menu-button"][data-active="true"],
+.settings-navigation [data-slot="sidebar-menu-button"][data-active="true"] {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+  box-shadow: none;
+}
+
+.snap-navigation [data-slot="sidebar-menu-button"]:hover,
+.snap-navigation [data-slot="sidebar-menu-button"][data-open="true"],
+.settings-navigation [data-slot="sidebar-menu-button"]:hover,
+.settings-navigation [data-slot="sidebar-menu-button"][data-open="true"] {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+.snap-navigation [data-slot="sidebar-header"],
+.snap-navigation [data-slot="sidebar-footer"],
+.settings-navigation [data-slot="sidebar-header"],
+.settings-navigation [data-slot="sidebar-footer"] {
+  border-color: var(--sidebar-border);
+}
+
+.snap-navigation-brand {
+  background: transparent;
+  color: var(--foreground);
+}
+
+.snap-navigation-brand .snap-product-switcher {
+  background: transparent;
+  color: var(--foreground);
+  box-shadow: none;
+}
+
+.snap-navigation-brand .snap-product-switcher:hover,
+.snap-navigation-brand .snap-product-switcher[data-state="open"] {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+.snap-navigation-brand [aria-label="알림"] {
+  color: var(--muted-foreground);
+}
+
+.snap-shell-header {
+  --ui-shell-header-foreground: var(--surface-foreground);
+  --ui-shell-header-muted-foreground: var(--surface-muted-foreground);
+  --ui-shell-header-border: var(--surface-border);
+  --ui-shell-header-control-background: transparent;
+  --ui-shell-header-control-background-hover: var(--surface-muted-background);
+  --foreground: var(--surface-foreground);
+  --muted-foreground: var(--surface-muted-foreground);
+  --primary: var(--color-primary-4);
+  --border: var(--surface-border);
+  border-bottom: 1px solid var(--surface-border);
+  background: var(--surface-background);
+  color: var(--surface-foreground);
+}
+
+.snap-shell-header .snap-navigation-brand {
+  background: var(--sidebar);
+}
+
+.snap-shell-header [data-slot="sidebar-trigger"],
+.snap-shell-header [aria-label="더보기"] {
+  color: var(--ui-shell-header-muted-foreground);
+}
+
+.snap-shell-header [data-slot="sidebar-trigger"]:hover,
+.snap-shell-header [aria-label="더보기"]:hover {
+  background: var(--ui-shell-header-control-background-hover);
+  color: var(--ui-shell-header-foreground);
+}
+
+.snap-shell-header [aria-label="세계시간 열기"] {
+  border-color: var(--ui-shell-header-border);
+  background: var(--ui-shell-header-control-background);
+  color: var(--ui-shell-header-foreground);
+  box-shadow: none;
+}
+
+.snap-shell-header [aria-label="세계시간 열기"]:hover,
+.snap-shell-header [aria-label="세계시간 열기"][aria-expanded="true"] {
+  border-color: var(--ui-shell-header-border);
+  background: var(--ui-shell-header-control-background-hover);
+  color: var(--ui-shell-header-foreground);
+}
+
+.snap-shell-header [aria-label="세계시간 열기"] .text-muted-foreground {
+  color: var(--ui-shell-header-muted-foreground);
+}
+
+/* The V2 ERP workspace uses a light command bar while the legacy root keeps
+   the existing branded header unchanged. */
+.v2-shell-header {
+  --ui-shell-header-foreground: var(--surface-foreground);
+  --ui-shell-header-muted-foreground: var(--surface-muted-foreground);
+  --ui-shell-header-border: var(--surface-border);
+  --ui-shell-header-control-background: var(--surface-background);
+  --ui-shell-header-control-background-hover: var(--surface-muted-background);
+  --foreground: var(--surface-foreground);
+  --muted-foreground: var(--surface-muted-foreground);
+  --primary: var(--color-primary-4);
+  border-bottom: 1px solid var(--surface-border);
+  background: var(--surface-background);
+  color: var(--surface-foreground);
+}
+
+.v2-shell-header .snap-navigation-brand {
+  position: relative;
+  z-index: 1;
+  border-inline-end: 0;
+  background: transparent;
+  color: var(--surface-foreground);
+  box-shadow: none;
+}
+
+/* Data-display pattern: every standalone DS table is a white surface on the
+   light app canvas. Gray 11 remains reserved for table headers and muted
+   regions. Tables already composed inside a Card inherit that
+   Card's surface so shadows and radii never stack. */
+[data-slot="sidebar-inset"] {
+  background: var(--background);
+}
+
+[data-slot="sidebar-inset"] [data-slot="table-container"],
+.snap-product [data-slot="table-container"] {
+  border-radius: var(--r-lg);
+  background: var(--surface-background);
+  box-shadow:
+    0 0 0 1px var(--surface-border),
+    var(--shadow-section);
+}
+
+[data-slot="card"] [data-slot="table-container"] {
+  border-radius: var(--r-md);
+  box-shadow: none;
+}
+
+[data-slot="panel-table"] [data-slot="table-container"] {
+  border-radius: 0;
+}
+
+[data-slot="content-panel-content"] > [data-slot="panel-table"]:last-child {
+  margin-bottom: calc(var(--spacing) * -4);
+}
+
+@media (min-width: 40rem) {
+  [data-slot="content-panel-content"] > [data-slot="panel-table"]:last-child {
+    margin-bottom: calc(var(--spacing) * -5);
+  }
+}
+
+[data-slot="card-content"][data-layout="flush-table"]
+  [data-slot="table-container"] {
+  border-radius: 0;
+}
+
+/* Public authentication keeps labels, controls and recovery text readable. */
+.auth-surface {
+  & .text-xs { font-size: 0.875rem; line-height: 1.5rem; }
+  & .text-sm { font-size: 1rem; line-height: 1.75rem; }
+  & [data-slot="button"] { min-height: 2.75rem; font-size: 1rem; }
+  & [data-slot="input"] { min-height: 3rem; font-size: 1rem; }
+}
+
+/* Login and signup share title-adjacent label and control dimensions. */
+.auth-surface:is([data-auth-layout="login"], [data-auth-layout="signup"]) {
+  & .text-xs { font-size: 13px; line-height: 18.2px; }
+  & .text-sm { font-size: 14px; line-height: 20.44px; }
+  & label { font-size: 15px; line-height: 21.9px; }
+  & [data-slot="button"] { min-height: 40px; font-size: 15px; line-height: 21.9px; }
+  & [data-slot="button"].h-auto { min-height: 0; font-size: 14px; }
+  & [data-slot="input"] { height: 40px; min-height: 40px; font-size: 16px; line-height: 24px; }
+  & [data-slot="input"] + button { top: 0; right: 0; }
+}

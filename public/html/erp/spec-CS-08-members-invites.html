@@ -1,0 +1,141 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>CS-08 — ECOYA Platform Common Organization 멤버·초대 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>CS-08 — ECOYA Platform Common Organization 멤버·초대</h1><p class="tag">기획 기준 문서 · ECOYA-Platform-Common-SSOT-v1.0/functional-specs/screens/CS-08-members-invites.md</p><article class="doc"><h1>CS-08 — ECOYA Platform Common Organization 멤버·초대</h1>
+<blockquote>
+<p>결정 반영: <span>2026-08-19 Organization·Paddle Customer·제품 관계</span> — <code>COMMON:DEC-WORKSPACE-001</code></p>
+<p>추가 반영: <span>2026-08-20 Common 설정 진입·Trade OS App User 경계</span></p>
+</blockquote>
+<h2>화면 목적</h2>
+<p>Organization Member 목록, 초대, <code>OWNER/ADMIN/MEMBER</code> 역할과 제품·메뉴 접근 권한을 <code>설정 &gt; 조직 &gt; 사용자 관리</code> 한 곳에서 관리한다.</p>
+<h2>용어</h2>
+<ul>
+<li>Organization Member: Organization Membership이 활성인 Account</li>
+<li>Organization role: <code>OWNER</code>, <code>ADMIN</code>, <code>MEMBER</code></li>
+<li>제품·메뉴 접근: Organization role과 별도 권한</li>
+<li>App User: Organization 외부 제품 사용자. 이 화면의 멤버가 아님</li>
+</ul>
+<h2>권한</h2>
+<table>
+<thead>
+<tr>
+<th>행동</th>
+<th align="right">OWNER</th>
+<th align="right">ADMIN</th>
+<th align="right">MEMBER</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>멤버 목록</td>
+<td align="right">허용</td>
+<td align="right">허용</td>
+<td align="right">불가</td>
+</tr>
+<tr>
+<td>MEMBER 초대</td>
+<td align="right">허용</td>
+<td align="right">허용</td>
+<td align="right">불가</td>
+</tr>
+<tr>
+<td>OWNER 지정·해제</td>
+<td align="right">허용</td>
+<td align="right">불가</td>
+<td align="right">불가</td>
+</tr>
+<tr>
+<td>ADMIN 지정·해제</td>
+<td align="right">허용</td>
+<td align="right">불가</td>
+<td align="right">불가</td>
+</tr>
+<tr>
+<td>MEMBER 변경·삭제</td>
+<td align="right">허용</td>
+<td align="right">허용</td>
+<td align="right">불가</td>
+</tr>
+<tr>
+<td>MEMBER 제품·메뉴 접근 설정</td>
+<td align="right">허용</td>
+<td align="right">허용</td>
+<td align="right">불가</td>
+</tr>
+</tbody></table>
+<ul>
+<li>ADMIN은 OWNER·ADMIN을 변경·삭제하지 않는다.</li>
+<li>마지막 OWNER의 권한 해제·이탈은 거부한다.</li>
+<li>OWNER 지정은 대상 Membership이 활성화된 뒤 수행한다.</li>
+<li>ADMIN은 Organization의 active entitlement·Plan 범위를 넘는 접근을 부여할 수 없다.</li>
+</ul>
+<h2>초대</h2>
+<ol>
+<li>OWNER 또는 ADMIN이 이메일로 Organization 초대를 만든다.</li>
+<li>ADMIN 초대의 역할은 MEMBER다. OWNER는 활성화 뒤 역할을 OWNER·ADMIN·MEMBER로 지정할 수 있다.</li>
+<li>수신자가 Organization·초대자·대상 이메일을 확인한다.</li>
+<li>Account 인증과 이메일 일치 뒤 수락한다.</li>
+<li>기존 Organization Membership을 만들고 새 Organization은 만들지 않는다.</li>
+<li>제품·메뉴 접근을 별도 판정하고 <code>/me</code>·landing을 새로 조회한다.</li>
+</ol>
+<h2>상태·오류</h2>
+<table>
+<thead>
+<tr>
+<th>상태</th>
+<th>화면</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>pending</code></td>
+<td>수락·거절</td>
+</tr>
+<tr>
+<td><code>accepted</code></td>
+<td>Membership과 역할 표시</td>
+</tr>
+<tr>
+<td><code>expired</code></td>
+<td>만료·재초대 요청</td>
+</tr>
+<tr>
+<td><code>revoked</code></td>
+<td>취소 안내</td>
+</tr>
+<tr>
+<td><code>rejected</code></td>
+<td>거절 완료</td>
+</tr>
+<tr>
+<td>이메일 불일치</td>
+<td>Account 전환·대상 이메일 인증</td>
+</tr>
+<tr>
+<td>중복 Membership</td>
+<td>최신 멤버 상태 표시, 중복 생성 없음</td>
+</tr>
+<tr>
+<td>dependency 오류</td>
+<td>초대 없음으로 강등하지 않고 재시도</td>
+</tr>
+<tr>
+<td>권한 충돌</td>
+<td>최신 actor·target 역할 재조회</td>
+</tr>
+</tbody></table>
+<h2>제품·App User 경계</h2>
+<ul>
+<li>제품별 Workspace Membership이나 제품별 멤버 관리 화면을 만들지 않는다.</li>
+<li>제품·메뉴 접근은 Organization Member 행의 별도 설정이다.</li>
+<li>App User(<code>USER</code>, <code>ANONYMOUS</code>)는 목록·초대 역할에 포함하지 않는다.</li>
+<li>Organization Member 초대와 Trade OS App User 초대는 서로 다른 기능이다. App User 초대·아이디 등록·제품 관리자 지정은 Organization Membership이나 Organization role을 만들지 않는다.</li>
+<li>App User와 Account 연결은 <span>`COMMON:DEC-IDENTITY-001`</span>, 제품별 App User 운영은 제품 계약이 소유한다.</li>
+</ul>
+<h2>CURRENT_LEGACY</h2>
+<p>Trade OS legacy <code>owner/admin/member</code>와 SNAP legacy <code>owner/admin/manager/worker/customer_viewer</code>는 최종 Organization 역할·제품 접근·제품 사용자 분리에 맞춘 migration이 필요하다. SNAP <code>/workers</code>는 Organization Member와 제품 사용자·현장 참여자 기능을 분류하기 전 전체를 이 화면으로 이관하지 않는다. 기존 제품 역할 문자열을 자동 변환하거나 완료된 것으로 표시하지 않는다.</p>
+<h2>QA</h2>
+<ul>
+<li>OWNER 다중 지정, 마지막 OWNER 보호, OWNER/ADMIN 역할 제한을 확인한다.</li>
+<li>ADMIN이 MEMBER만 초대·변경·삭제하는지 서버 부정 시험을 포함한다.</li>
+<li>제품 entitlement 밖 권한 부여가 거부되는지 확인한다.</li>
+<li>초대 수락이 새 Organization·제품 Workspace·구독을 만들지 않는지 확인한다.</li>
+<li>App User가 Organization Member에 섞이지 않는지 확인한다.</li>
+<li>Trade OS App User 초대·아이디 등록·제품 관리자 지정이 Organization 초대·역할 API를 사용하지 않는지 확인한다.</li>
+</ul>
+</article></main></body></html>

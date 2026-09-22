@@ -1,0 +1,587 @@
+/* Host token bridge for the five imported operational screens.
+ * Capture aliases on the theme root before the source scope redeclares common
+ * names. Portals inherit the same values. No host token is overwritten.
+ */
+:root, .dark {
+  --erp-reference-font-family-sans: var(--font-family-sans);
+  --erp-reference-color-indigo: var(--color-indigo);
+  --erp-reference-color-primary-1: var(--color-primary-1);
+  --erp-reference-color-primary-2: var(--color-primary-2);
+  --erp-reference-color-primary-3: var(--color-primary-3);
+  --erp-reference-color-primary-4: var(--color-primary-4);
+  --erp-reference-color-primary-5: var(--color-primary-5);
+  --erp-reference-color-primary-6: var(--color-primary-6);
+  --erp-reference-color-primary-7: var(--color-primary-7);
+  --erp-reference-color-primary-8: var(--color-primary-8);
+  --erp-reference-color-primary-9: var(--color-primary-9);
+  --erp-reference-color-primary-10: var(--color-primary-10);
+  --erp-reference-color-gray-1: var(--color-gray-1);
+  --erp-reference-color-gray-2: var(--color-gray-2);
+  --erp-reference-color-gray-3: var(--color-gray-3);
+  --erp-reference-color-gray-4: var(--color-gray-4);
+  --erp-reference-color-gray-5: var(--color-gray-5);
+  --erp-reference-color-gray-6: var(--color-gray-6);
+  --erp-reference-color-gray-7: var(--color-gray-7);
+  --erp-reference-color-gray-8: var(--color-gray-8);
+  --erp-reference-color-gray-9: var(--color-gray-9);
+  --erp-reference-color-gray-10: var(--color-gray-10);
+  --erp-reference-color-gray-11: var(--color-gray-11);
+  --erp-reference-color-gray-12: var(--color-gray-12);
+  --erp-reference-color-system-red1: var(--color-system-red1);
+  --erp-reference-color-system-red2: var(--color-system-red2);
+  --erp-reference-color-system-red3: var(--color-system-red3);
+  --erp-reference-color-system-red4: var(--color-system-red4);
+  --erp-reference-color-system-red5: var(--color-system-red5);
+  --erp-reference-color-system-red6: var(--color-system-red6);
+  --erp-reference-color-system-red7: var(--color-system-red7);
+  --erp-reference-color-system-red8: var(--color-system-red8);
+  --erp-reference-color-system-yellow1: var(--color-system-yellow1);
+  --erp-reference-color-system-yellow2: var(--color-system-yellow2);
+  --erp-reference-color-system-yellow3: var(--color-system-yellow3);
+  --erp-reference-color-system-yellow4: var(--color-system-yellow4);
+  --erp-reference-color-system-yellow5: var(--color-system-yellow5);
+  --erp-reference-color-system-yellow6: var(--color-system-yellow6);
+  --erp-reference-color-system-green1: var(--color-system-green1);
+  --erp-reference-color-system-green2: var(--color-system-green2);
+  --erp-reference-color-system-green3: var(--color-system-green3);
+  --erp-reference-color-system-green4: var(--color-system-green4);
+  --erp-reference-color-system-green5: var(--color-system-green5);
+  --erp-reference-color-system-green6: var(--color-system-green6);
+  --erp-reference-color-system-blue1: var(--color-system-blue1);
+  --erp-reference-color-system-blue2: var(--color-system-blue2);
+  --erp-reference-color-system-blue3: var(--color-system-blue3);
+  --erp-reference-color-system-blue4: var(--color-system-blue4);
+  --erp-reference-color-system-blue5: var(--color-system-blue5);
+  --erp-reference-color-system-blue6: var(--color-system-blue6);
+  --erp-reference-color-system-pink1: var(--color-system-pink1);
+  --erp-reference-color-system-pink2: var(--color-system-pink2);
+  --erp-reference-color-system-pink3: var(--color-system-pink3);
+  --erp-reference-color-system-pink4: var(--color-system-pink4);
+  --erp-reference-color-system-pink5: var(--color-system-pink5);
+  --erp-reference-color-system-pink6: var(--color-system-pink6);
+  --erp-reference-color-system-lime1: var(--color-system-lime1);
+  --erp-reference-color-system-lime2: var(--color-system-lime2);
+  --erp-reference-color-system-lime3: var(--color-system-lime3);
+  --erp-reference-color-system-lime4: var(--color-system-lime4);
+  --erp-reference-color-system-lime5: var(--color-system-lime5);
+  --erp-reference-color-system-lime6: var(--color-system-lime6);
+  --erp-reference-color-system-grape1: var(--color-system-grape1);
+  --erp-reference-color-system-grape2: var(--color-system-grape2);
+  --erp-reference-color-system-grape3: var(--color-system-grape3);
+  --erp-reference-color-system-grape4: var(--color-system-grape4);
+  --erp-reference-color-system-grape5: var(--color-system-grape5);
+  --erp-reference-color-system-grape6: var(--color-system-grape6);
+  --erp-reference-color-system-orange1: var(--color-system-orange1);
+  --erp-reference-color-system-orange2: var(--color-system-orange2);
+  --erp-reference-color-system-orange3: var(--color-system-orange3);
+  --erp-reference-color-system-orange4: var(--color-system-orange4);
+  --erp-reference-color-system-orange5: var(--color-system-orange5);
+  --erp-reference-color-system-orange6: var(--color-system-orange6);
+  --erp-reference-ui-surface-page: var(--ui-surface-page);
+  --erp-reference-ui-surface-panel: var(--ui-surface-panel);
+  --erp-reference-ui-shadow-panel: var(--ui-shadow-panel);
+  --erp-reference-shadow-modal: var(--shadow-modal);
+  --erp-reference-shadow-filter: var(--shadow-filter);
+  --erp-reference-shadow-input-default: var(--shadow-input-default);
+  --erp-reference-shadow-input-hover: var(--shadow-input-hover);
+  --erp-reference-shadow-input-active: var(--shadow-input-active);
+  --erp-reference-shadow-btn-primary-blue: var(--shadow-btn-primary-blue);
+  --erp-reference-shadow-btn-primary-blue-hover: var(--shadow-btn-primary-blue-hover);
+  --erp-reference-shadow-btn-primary-blue-pressed: var(--shadow-btn-primary-blue-pressed);
+  --erp-reference-shadow-btn-primary-blue-disabled: var(--shadow-btn-primary-blue-disabled);
+  --erp-reference-shadow-btn-primary-red: var(--shadow-btn-primary-red);
+  --erp-reference-shadow-btn-primary-red-hover: var(--shadow-btn-primary-red-hover);
+  --erp-reference-shadow-btn-primary-red-pressed: var(--shadow-btn-primary-red-pressed);
+  --erp-reference-shadow-btn-primary-red-disabled: var(--shadow-btn-primary-red-disabled);
+  --erp-reference-shadow-btn-tertiary-black: var(--shadow-btn-tertiary-black);
+  --erp-reference-shadow-btn-tertiary-black-hover: var(--shadow-btn-tertiary-black-hover);
+  --erp-reference-shadow-btn-tertiary-black-pressed: var(--shadow-btn-tertiary-black-pressed);
+  --erp-reference-shadow-btn-tertiary-black-disabled: var(--shadow-btn-tertiary-black-disabled);
+  --erp-reference-r-xs: var(--r-xs);
+  --erp-reference-r-sm: var(--r-sm);
+  --erp-reference-r-md: var(--r-md);
+  --erp-reference-r-lg: var(--r-lg);
+  --erp-reference-r-xl: var(--r-xl);
+  --erp-reference-r-2xl: var(--r-2xl);
+  --erp-reference-r-3xl: var(--r-3xl);
+  --erp-reference-r-4xl: var(--r-4xl);
+  --erp-reference-r-pill: var(--r-pill);
+}
+
+.reference-3030 {
+  --ecoya-font-sans: var(--erp-reference-font-family-sans);
+  --ecoya-indigo: var(--erp-reference-color-indigo);
+  --ecoya-blue-1: var(--erp-reference-color-primary-1);
+  --ecoya-blue-2: var(--erp-reference-color-primary-2);
+  --ecoya-blue-3: var(--erp-reference-color-primary-3);
+  --ecoya-blue-4: var(--erp-reference-color-primary-4);
+  --ecoya-blue-5: var(--erp-reference-color-primary-5);
+  --ecoya-blue-6: var(--erp-reference-color-primary-6);
+  --ecoya-blue-7: var(--erp-reference-color-primary-7);
+  --ecoya-blue-8: var(--erp-reference-color-primary-8);
+  --ecoya-blue-9: var(--erp-reference-color-primary-9);
+  --ecoya-blue-10: var(--erp-reference-color-primary-10);
+  --ecoya-gray-1: var(--erp-reference-color-gray-1);
+  --ecoya-gray-2: var(--erp-reference-color-gray-2);
+  --ecoya-gray-3: var(--erp-reference-color-gray-3);
+  --ecoya-gray-4: var(--erp-reference-color-gray-4);
+  --ecoya-gray-5: var(--erp-reference-color-gray-5);
+  --ecoya-gray-6: var(--erp-reference-color-gray-6);
+  --ecoya-gray-7: var(--erp-reference-color-gray-7);
+  --ecoya-gray-8: var(--erp-reference-color-gray-8);
+  --ecoya-gray-9: var(--erp-reference-color-gray-9);
+  --ecoya-gray-10: var(--erp-reference-color-gray-10);
+  --ecoya-gray-11: var(--erp-reference-color-gray-11);
+  --ecoya-gray-12: var(--erp-reference-color-gray-12);
+  --ecoya-system-red-1: var(--erp-reference-color-system-red1);
+  --ecoya-system-red-2: var(--erp-reference-color-system-red2);
+  --ecoya-system-red-3: var(--erp-reference-color-system-red3);
+  --ecoya-system-red-4: var(--erp-reference-color-system-red4);
+  --ecoya-system-red-5: var(--erp-reference-color-system-red5);
+  --ecoya-system-red-6: var(--erp-reference-color-system-red6);
+  --ecoya-system-red-7: var(--erp-reference-color-system-red7);
+  --ecoya-system-red-8: var(--erp-reference-color-system-red8);
+  --ecoya-system-yellow-1: var(--erp-reference-color-system-yellow1);
+  --ecoya-system-yellow-2: var(--erp-reference-color-system-yellow2);
+  --ecoya-system-yellow-3: var(--erp-reference-color-system-yellow3);
+  --ecoya-system-yellow-4: var(--erp-reference-color-system-yellow4);
+  --ecoya-system-yellow-5: var(--erp-reference-color-system-yellow5);
+  --ecoya-system-yellow-6: var(--erp-reference-color-system-yellow6);
+  --ecoya-system-green-1: var(--erp-reference-color-system-green1);
+  --ecoya-system-green-2: var(--erp-reference-color-system-green2);
+  --ecoya-system-green-3: var(--erp-reference-color-system-green3);
+  --ecoya-system-green-4: var(--erp-reference-color-system-green4);
+  --ecoya-system-green-5: var(--erp-reference-color-system-green5);
+  --ecoya-system-green-6: var(--erp-reference-color-system-green6);
+  --ecoya-system-blue-1: var(--erp-reference-color-system-blue1);
+  --ecoya-system-blue-2: var(--erp-reference-color-system-blue2);
+  --ecoya-system-blue-3: var(--erp-reference-color-system-blue3);
+  --ecoya-system-blue-4: var(--erp-reference-color-system-blue4);
+  --ecoya-system-blue-5: var(--erp-reference-color-system-blue5);
+  --ecoya-system-blue-6: var(--erp-reference-color-system-blue6);
+  --ecoya-system-pink-1: var(--erp-reference-color-system-pink1);
+  --ecoya-system-pink-2: var(--erp-reference-color-system-pink2);
+  --ecoya-system-pink-3: var(--erp-reference-color-system-pink3);
+  --ecoya-system-pink-4: var(--erp-reference-color-system-pink4);
+  --ecoya-system-pink-5: var(--erp-reference-color-system-pink5);
+  --ecoya-system-pink-6: var(--erp-reference-color-system-pink6);
+  --ecoya-system-lime-1: var(--erp-reference-color-system-lime1);
+  --ecoya-system-lime-2: var(--erp-reference-color-system-lime2);
+  --ecoya-system-lime-3: var(--erp-reference-color-system-lime3);
+  --ecoya-system-lime-4: var(--erp-reference-color-system-lime4);
+  --ecoya-system-lime-5: var(--erp-reference-color-system-lime5);
+  --ecoya-system-lime-6: var(--erp-reference-color-system-lime6);
+  --ecoya-system-grape-1: var(--erp-reference-color-system-grape1);
+  --ecoya-system-grape-2: var(--erp-reference-color-system-grape2);
+  --ecoya-system-grape-3: var(--erp-reference-color-system-grape3);
+  --ecoya-system-grape-4: var(--erp-reference-color-system-grape4);
+  --ecoya-system-grape-5: var(--erp-reference-color-system-grape5);
+  --ecoya-system-grape-6: var(--erp-reference-color-system-grape6);
+  --ecoya-system-orange-1: var(--erp-reference-color-system-orange1);
+  --ecoya-system-orange-2: var(--erp-reference-color-system-orange2);
+  --ecoya-system-orange-3: var(--erp-reference-color-system-orange3);
+  --ecoya-system-orange-4: var(--erp-reference-color-system-orange4);
+  --ecoya-system-orange-5: var(--erp-reference-color-system-orange5);
+  --ecoya-system-orange-6: var(--erp-reference-color-system-orange6);
+  --ecoya-system-yellow-ink: var(--erp-reference-color-system-yellow1);
+  --ecoya-surface: var(--erp-reference-ui-surface-page);
+  --ecoya-surface-card: var(--erp-reference-ui-surface-panel);
+  --ecoya-shadow-section: var(--erp-reference-ui-shadow-panel);
+  --ecoya-shadow-card: var(--erp-reference-ui-shadow-panel);
+  --ecoya-shadow-card-app: var(--erp-reference-ui-shadow-panel);
+  --ecoya-shadow-modal: var(--erp-reference-shadow-modal);
+  --ecoya-shadow-filter: var(--erp-reference-shadow-filter);
+  --ecoya-shadow-input: var(--erp-reference-shadow-input-default);
+  --ecoya-shadow-input-hover: var(--erp-reference-shadow-input-hover);
+  --ecoya-shadow-input-focus: var(--erp-reference-shadow-input-active);
+  --ecoya-shadow-control-slot: var(--erp-reference-shadow-input-default);
+  --ecoya-shadow-button-blue: var(--erp-reference-shadow-btn-primary-blue);
+  --ecoya-shadow-button-blue-hover: var(--erp-reference-shadow-btn-primary-blue-hover);
+  --ecoya-shadow-button-blue-pressed: var(--erp-reference-shadow-btn-primary-blue-pressed);
+  --ecoya-shadow-button-blue-disabled: var(--erp-reference-shadow-btn-primary-blue-disabled);
+  --ecoya-shadow-button-red: var(--erp-reference-shadow-btn-primary-red);
+  --ecoya-shadow-button-red-hover: var(--erp-reference-shadow-btn-primary-red-hover);
+  --ecoya-shadow-button-red-pressed: var(--erp-reference-shadow-btn-primary-red-pressed);
+  --ecoya-shadow-button-red-disabled: var(--erp-reference-shadow-btn-primary-red-disabled);
+  --ecoya-shadow-button-black: var(--erp-reference-shadow-btn-tertiary-black);
+  --ecoya-shadow-button-black-hover: var(--erp-reference-shadow-btn-tertiary-black-hover);
+  --ecoya-shadow-button-black-pressed: var(--erp-reference-shadow-btn-tertiary-black-pressed);
+  --ecoya-shadow-button-black-disabled: var(--erp-reference-shadow-btn-tertiary-black-disabled);
+  --ecoya-radius-xs: var(--erp-reference-r-xs);
+  --ecoya-radius-sm: var(--erp-reference-r-sm);
+  --ecoya-radius-md: var(--erp-reference-r-md);
+  --ecoya-radius-lg: var(--erp-reference-r-lg);
+  --ecoya-radius-xl: var(--erp-reference-r-xl);
+  --ecoya-radius-2xl: var(--erp-reference-r-2xl);
+  --ecoya-radius-3xl: var(--erp-reference-r-3xl);
+  --ecoya-radius-4xl: var(--erp-reference-r-4xl);
+  --ecoya-radius-full: var(--erp-reference-r-pill);
+}
+
+.reference-3030 .text-body-26 { font-size: var(--text-body-1); line-height: var(--leading-body-1); }
+
+.reference-3030 .text-body-24 { font-size: var(--text-body-2); line-height: var(--leading-body-2); }
+
+.reference-3030 .text-body-22 { font-size: var(--text-body-3); line-height: var(--leading-body-3); }
+
+.reference-3030 .text-body-20 { font-size: var(--text-body-4); line-height: var(--leading-body-4); }
+
+.reference-3030 .text-body-19 { font-size: var(--text-body-5); line-height: var(--leading-body-5); }
+
+.reference-3030 .text-body-17 { font-size: var(--text-body-6); line-height: var(--leading-body-6); }
+
+.reference-3030 .text-body-16 { font-size: var(--text-body-7); line-height: var(--leading-body-7); }
+
+.reference-3030 .text-body-15 { font-size: var(--text-body-8); line-height: var(--leading-body-8); }
+
+.reference-3030 .text-body-14 { font-size: var(--text-body-9); line-height: var(--leading-body-9); }
+
+.reference-3030 .text-body-13 { font-size: var(--text-body-10); line-height: var(--leading-body-10); }
+
+.reference-3030 .text-body-11 { font-size: var(--text-body-11); line-height: var(--leading-body-11); }
+
+.reference-3030 .text-header-26 { font-size: var(--text-header-1); line-height: var(--leading-header-1); }
+
+.reference-3030 .text-header-24 { font-size: var(--text-header-2); line-height: var(--leading-header-2); }
+
+.reference-3030 .text-header-22 { font-size: var(--text-header-3); line-height: var(--leading-header-3); }
+
+.reference-3030 .text-header-20 { font-size: var(--text-header-4); line-height: var(--leading-header-4); }
+
+.reference-3030 .text-header-19 { font-size: var(--text-header-5); line-height: var(--leading-header-5); }
+
+.reference-3030 .text-header-17 { font-size: var(--text-header-6); line-height: var(--leading-header-6); }
+
+.reference-3030 .text-header-16 { font-size: var(--text-header-7); line-height: var(--leading-header-7); }
+
+.reference-3030 .text-header-14 { font-size: var(--text-header-9); line-height: var(--leading-header-9); }
+
+.reference-3030 .rounded-xs { border-radius: var(--erp-reference-r-xs); }
+
+.reference-3030 .rounded-sm { border-radius: var(--erp-reference-r-sm); }
+
+.reference-3030 .rounded-md { border-radius: var(--erp-reference-r-md); }
+
+.reference-3030 .rounded-lg { border-radius: var(--erp-reference-r-lg); }
+
+.reference-3030 .rounded-xl { border-radius: var(--erp-reference-r-xl); }
+
+.reference-3030 .rounded-2xl { border-radius: var(--erp-reference-r-2xl); }
+
+.reference-3030 .rounded-3xl { border-radius: var(--erp-reference-r-3xl); }
+
+.reference-3030 .rounded-4xl { border-radius: var(--erp-reference-r-4xl); }
+
+:root, .dark {
+  --erp-reference-chart-aqua-1: var(--color-chart-aqua-1);
+  --erp-reference-chart-aqua-2: var(--color-chart-aqua-2);
+  --erp-reference-chart-aqua-3: var(--color-chart-aqua-3);
+  --erp-reference-chart-aqua-4: var(--color-chart-aqua-4);
+  --erp-reference-chart-aqua-5: var(--color-chart-aqua-5);
+  --erp-reference-chart-blue-1: var(--color-chart-blue-1);
+  --erp-reference-chart-blue-10: var(--color-chart-blue-10);
+  --erp-reference-chart-blue-2: var(--color-chart-blue-2);
+  --erp-reference-chart-blue-3: var(--color-chart-blue-3);
+  --erp-reference-chart-blue-4: var(--color-chart-blue-4);
+  --erp-reference-chart-blue-5: var(--color-chart-blue-5);
+  --erp-reference-chart-blue-6: var(--color-chart-blue-6);
+  --erp-reference-chart-blue-7: var(--color-chart-blue-7);
+  --erp-reference-chart-blue-8: var(--color-chart-blue-8);
+  --erp-reference-chart-blue-9: var(--color-chart-blue-9);
+  --erp-reference-chart-blueviolet-1: var(--color-chart-blueviolet-1);
+  --erp-reference-chart-blueviolet-10: var(--color-chart-blueviolet-10);
+  --erp-reference-chart-blueviolet-11: var(--color-chart-blueviolet-11);
+  --erp-reference-chart-blueviolet-12: var(--color-chart-blueviolet-12);
+  --erp-reference-chart-blueviolet-13: var(--color-chart-blueviolet-13);
+  --erp-reference-chart-blueviolet-14: var(--color-chart-blueviolet-14);
+  --erp-reference-chart-blueviolet-15: var(--color-chart-blueviolet-15);
+  --erp-reference-chart-blueviolet-16: var(--color-chart-blueviolet-16);
+  --erp-reference-chart-blueviolet-17: var(--color-chart-blueviolet-17);
+  --erp-reference-chart-blueviolet-18: var(--color-chart-blueviolet-18);
+  --erp-reference-chart-blueviolet-19: var(--color-chart-blueviolet-19);
+  --erp-reference-chart-blueviolet-2: var(--color-chart-blueviolet-2);
+  --erp-reference-chart-blueviolet-20: var(--color-chart-blueviolet-20);
+  --erp-reference-chart-blueviolet-21: var(--color-chart-blueviolet-21);
+  --erp-reference-chart-blueviolet-22: var(--color-chart-blueviolet-22);
+  --erp-reference-chart-blueviolet-23: var(--color-chart-blueviolet-23);
+  --erp-reference-chart-blueviolet-24: var(--color-chart-blueviolet-24);
+  --erp-reference-chart-blueviolet-25: var(--color-chart-blueviolet-25);
+  --erp-reference-chart-blueviolet-3: var(--color-chart-blueviolet-3);
+  --erp-reference-chart-blueviolet-4: var(--color-chart-blueviolet-4);
+  --erp-reference-chart-blueviolet-5: var(--color-chart-blueviolet-5);
+  --erp-reference-chart-blueviolet-6: var(--color-chart-blueviolet-6);
+  --erp-reference-chart-blueviolet-7: var(--color-chart-blueviolet-7);
+  --erp-reference-chart-blueviolet-8: var(--color-chart-blueviolet-8);
+  --erp-reference-chart-blueviolet-9: var(--color-chart-blueviolet-9);
+  --erp-reference-chart-etc: var(--color-chart-etc);
+  --erp-reference-chart-teal-1: var(--color-chart-teal-1);
+  --erp-reference-chart-teal-10: var(--color-chart-teal-10);
+  --erp-reference-chart-teal-11: var(--color-chart-teal-11);
+  --erp-reference-chart-teal-12: var(--color-chart-teal-12);
+  --erp-reference-chart-teal-13: var(--color-chart-teal-13);
+  --erp-reference-chart-teal-14: var(--color-chart-teal-14);
+  --erp-reference-chart-teal-15: var(--color-chart-teal-15);
+  --erp-reference-chart-teal-16: var(--color-chart-teal-16);
+  --erp-reference-chart-teal-17: var(--color-chart-teal-17);
+  --erp-reference-chart-teal-18: var(--color-chart-teal-18);
+  --erp-reference-chart-teal-19: var(--color-chart-teal-19);
+  --erp-reference-chart-teal-2: var(--color-chart-teal-2);
+  --erp-reference-chart-teal-20: var(--color-chart-teal-20);
+  --erp-reference-chart-teal-21: var(--color-chart-teal-21);
+  --erp-reference-chart-teal-22: var(--color-chart-teal-22);
+  --erp-reference-chart-teal-23: var(--color-chart-teal-23);
+  --erp-reference-chart-teal-24: var(--color-chart-teal-24);
+  --erp-reference-chart-teal-25: var(--color-chart-teal-25);
+  --erp-reference-chart-teal-3: var(--color-chart-teal-3);
+  --erp-reference-chart-teal-4: var(--color-chart-teal-4);
+  --erp-reference-chart-teal-5: var(--color-chart-teal-5);
+  --erp-reference-chart-teal-6: var(--color-chart-teal-6);
+  --erp-reference-chart-teal-7: var(--color-chart-teal-7);
+  --erp-reference-chart-teal-8: var(--color-chart-teal-8);
+  --erp-reference-chart-teal-9: var(--color-chart-teal-9);
+  --erp-reference-chart-violet-1: var(--color-chart-violet-1);
+  --erp-reference-chart-violet-2: var(--color-chart-violet-2);
+  --erp-reference-chart-violet-3: var(--color-chart-violet-3);
+  --erp-reference-chart-violet-4: var(--color-chart-violet-4);
+  --erp-reference-chart-violet-5: var(--color-chart-violet-5);
+}
+.reference-3030 {
+  --ecoya-chart-aqua-1: var(--erp-reference-chart-aqua-1);
+  --ecoya-chart-aqua-2: var(--erp-reference-chart-aqua-2);
+  --ecoya-chart-aqua-3: var(--erp-reference-chart-aqua-3);
+  --ecoya-chart-aqua-4: var(--erp-reference-chart-aqua-4);
+  --ecoya-chart-aqua-5: var(--erp-reference-chart-aqua-5);
+  --ecoya-chart-blue-1: var(--erp-reference-chart-blue-1);
+  --ecoya-chart-blue-10: var(--erp-reference-chart-blue-10);
+  --ecoya-chart-blue-2: var(--erp-reference-chart-blue-2);
+  --ecoya-chart-blue-3: var(--erp-reference-chart-blue-3);
+  --ecoya-chart-blue-4: var(--erp-reference-chart-blue-4);
+  --ecoya-chart-blue-5: var(--erp-reference-chart-blue-5);
+  --ecoya-chart-blue-6: var(--erp-reference-chart-blue-6);
+  --ecoya-chart-blue-7: var(--erp-reference-chart-blue-7);
+  --ecoya-chart-blue-8: var(--erp-reference-chart-blue-8);
+  --ecoya-chart-blue-9: var(--erp-reference-chart-blue-9);
+  --ecoya-chart-blueviolet-1: var(--erp-reference-chart-blueviolet-1);
+  --ecoya-chart-blueviolet-10: var(--erp-reference-chart-blueviolet-10);
+  --ecoya-chart-blueviolet-11: var(--erp-reference-chart-blueviolet-11);
+  --ecoya-chart-blueviolet-12: var(--erp-reference-chart-blueviolet-12);
+  --ecoya-chart-blueviolet-13: var(--erp-reference-chart-blueviolet-13);
+  --ecoya-chart-blueviolet-14: var(--erp-reference-chart-blueviolet-14);
+  --ecoya-chart-blueviolet-15: var(--erp-reference-chart-blueviolet-15);
+  --ecoya-chart-blueviolet-16: var(--erp-reference-chart-blueviolet-16);
+  --ecoya-chart-blueviolet-17: var(--erp-reference-chart-blueviolet-17);
+  --ecoya-chart-blueviolet-18: var(--erp-reference-chart-blueviolet-18);
+  --ecoya-chart-blueviolet-19: var(--erp-reference-chart-blueviolet-19);
+  --ecoya-chart-blueviolet-2: var(--erp-reference-chart-blueviolet-2);
+  --ecoya-chart-blueviolet-20: var(--erp-reference-chart-blueviolet-20);
+  --ecoya-chart-blueviolet-21: var(--erp-reference-chart-blueviolet-21);
+  --ecoya-chart-blueviolet-22: var(--erp-reference-chart-blueviolet-22);
+  --ecoya-chart-blueviolet-23: var(--erp-reference-chart-blueviolet-23);
+  --ecoya-chart-blueviolet-24: var(--erp-reference-chart-blueviolet-24);
+  --ecoya-chart-blueviolet-25: var(--erp-reference-chart-blueviolet-25);
+  --ecoya-chart-blueviolet-3: var(--erp-reference-chart-blueviolet-3);
+  --ecoya-chart-blueviolet-4: var(--erp-reference-chart-blueviolet-4);
+  --ecoya-chart-blueviolet-5: var(--erp-reference-chart-blueviolet-5);
+  --ecoya-chart-blueviolet-6: var(--erp-reference-chart-blueviolet-6);
+  --ecoya-chart-blueviolet-7: var(--erp-reference-chart-blueviolet-7);
+  --ecoya-chart-blueviolet-8: var(--erp-reference-chart-blueviolet-8);
+  --ecoya-chart-blueviolet-9: var(--erp-reference-chart-blueviolet-9);
+  --ecoya-chart-etc: var(--erp-reference-chart-etc);
+  --ecoya-chart-teal-1: var(--erp-reference-chart-teal-1);
+  --ecoya-chart-teal-10: var(--erp-reference-chart-teal-10);
+  --ecoya-chart-teal-11: var(--erp-reference-chart-teal-11);
+  --ecoya-chart-teal-12: var(--erp-reference-chart-teal-12);
+  --ecoya-chart-teal-13: var(--erp-reference-chart-teal-13);
+  --ecoya-chart-teal-14: var(--erp-reference-chart-teal-14);
+  --ecoya-chart-teal-15: var(--erp-reference-chart-teal-15);
+  --ecoya-chart-teal-16: var(--erp-reference-chart-teal-16);
+  --ecoya-chart-teal-17: var(--erp-reference-chart-teal-17);
+  --ecoya-chart-teal-18: var(--erp-reference-chart-teal-18);
+  --ecoya-chart-teal-19: var(--erp-reference-chart-teal-19);
+  --ecoya-chart-teal-2: var(--erp-reference-chart-teal-2);
+  --ecoya-chart-teal-20: var(--erp-reference-chart-teal-20);
+  --ecoya-chart-teal-21: var(--erp-reference-chart-teal-21);
+  --ecoya-chart-teal-22: var(--erp-reference-chart-teal-22);
+  --ecoya-chart-teal-23: var(--erp-reference-chart-teal-23);
+  --ecoya-chart-teal-24: var(--erp-reference-chart-teal-24);
+  --ecoya-chart-teal-25: var(--erp-reference-chart-teal-25);
+  --ecoya-chart-teal-3: var(--erp-reference-chart-teal-3);
+  --ecoya-chart-teal-4: var(--erp-reference-chart-teal-4);
+  --ecoya-chart-teal-5: var(--erp-reference-chart-teal-5);
+  --ecoya-chart-teal-6: var(--erp-reference-chart-teal-6);
+  --ecoya-chart-teal-7: var(--erp-reference-chart-teal-7);
+  --ecoya-chart-teal-8: var(--erp-reference-chart-teal-8);
+  --ecoya-chart-teal-9: var(--erp-reference-chart-teal-9);
+  --ecoya-chart-violet-1: var(--erp-reference-chart-violet-1);
+  --ecoya-chart-violet-2: var(--erp-reference-chart-violet-2);
+  --ecoya-chart-violet-3: var(--erp-reference-chart-violet-3);
+  --ecoya-chart-violet-4: var(--erp-reference-chart-violet-4);
+  --ecoya-chart-violet-5: var(--erp-reference-chart-violet-5);
+}
+
+/* Inherit live host typography rather than the imported snapshot values. */
+:root, .dark {
+  --erp-reference--text-body-1: var(--text-body-1);
+  --erp-reference--text-body-2: var(--text-body-2);
+  --erp-reference--text-body-3: var(--text-body-3);
+  --erp-reference--text-body-4: var(--text-body-4);
+  --erp-reference--text-body-5: var(--text-body-5);
+  --erp-reference--text-body-6: var(--text-body-6);
+  --erp-reference--text-body-7: var(--text-body-7);
+  --erp-reference--text-body-8: var(--text-body-8);
+  --erp-reference--text-body-9: var(--text-body-9);
+  --erp-reference--text-body-10: var(--text-body-10);
+  --erp-reference--text-body-11: var(--text-body-11);
+  --erp-reference--leading-body-1: var(--leading-body-1);
+  --erp-reference--leading-body-2: var(--leading-body-2);
+  --erp-reference--leading-body-3: var(--leading-body-3);
+  --erp-reference--leading-body-4: var(--leading-body-4);
+  --erp-reference--leading-body-5: var(--leading-body-5);
+  --erp-reference--leading-body-6: var(--leading-body-6);
+  --erp-reference--leading-body-7: var(--leading-body-7);
+  --erp-reference--leading-body-8: var(--leading-body-8);
+  --erp-reference--leading-body-9: var(--leading-body-9);
+  --erp-reference--leading-body-10: var(--leading-body-10);
+  --erp-reference--leading-body-11: var(--leading-body-11);
+  --erp-reference--text-header-1: var(--text-header-1);
+  --erp-reference--text-header-2: var(--text-header-2);
+  --erp-reference--text-header-3: var(--text-header-3);
+  --erp-reference--text-header-4: var(--text-header-4);
+  --erp-reference--text-header-5: var(--text-header-5);
+  --erp-reference--text-header-6: var(--text-header-6);
+  --erp-reference--text-header-7: var(--text-header-7);
+  --erp-reference--text-header-8: var(--text-header-8);
+  --erp-reference--text-header-9: var(--text-header-9);
+  --erp-reference--text-header-10: var(--text-header-10);
+  --erp-reference--text-header-11: var(--text-header-11);
+  --erp-reference--leading-header-1: var(--leading-header-1);
+  --erp-reference--leading-header-2: var(--leading-header-2);
+  --erp-reference--leading-header-3: var(--leading-header-3);
+  --erp-reference--leading-header-4: var(--leading-header-4);
+  --erp-reference--leading-header-5: var(--leading-header-5);
+  --erp-reference--leading-header-6: var(--leading-header-6);
+  --erp-reference--leading-header-7: var(--leading-header-7);
+  --erp-reference--leading-header-8: var(--leading-header-8);
+  --erp-reference--leading-header-9: var(--leading-header-9);
+  --erp-reference--leading-header-10: var(--leading-header-10);
+  --erp-reference--leading-header-11: var(--leading-header-11);
+  --erp-reference--text-label-1: var(--text-label-1);
+  --erp-reference--text-label-2: var(--text-label-2);
+  --erp-reference--text-label-3: var(--text-label-3);
+  --erp-reference--leading-label-1: var(--leading-label-1);
+  --erp-reference--leading-label-2: var(--leading-label-2);
+  --erp-reference--leading-label-3: var(--leading-label-3);
+  --erp-reference--text-button-1: var(--text-button-1);
+  --erp-reference--text-button-2: var(--text-button-2);
+  --erp-reference--text-button-3: var(--text-button-3);
+  --erp-reference--text-button-4: var(--text-button-4);
+  --erp-reference--text-button-5: var(--text-button-5);
+  --erp-reference--leading-button-1: var(--leading-button-1);
+  --erp-reference--leading-button-2: var(--leading-button-2);
+  --erp-reference--leading-button-3: var(--leading-button-3);
+  --erp-reference--leading-button-4: var(--leading-button-4);
+  --erp-reference--leading-button-5: var(--leading-button-5);
+}
+.reference-3030 {
+  --text-body-1: var(--erp-reference--text-body-1);
+  --text-body-2: var(--erp-reference--text-body-2);
+  --text-body-3: var(--erp-reference--text-body-3);
+  --text-body-4: var(--erp-reference--text-body-4);
+  --text-body-5: var(--erp-reference--text-body-5);
+  --text-body-6: var(--erp-reference--text-body-6);
+  --text-body-7: var(--erp-reference--text-body-7);
+  --text-body-8: var(--erp-reference--text-body-8);
+  --text-body-9: var(--erp-reference--text-body-9);
+  --text-body-10: var(--erp-reference--text-body-10);
+  --text-body-11: var(--erp-reference--text-body-11);
+  --leading-body-1: var(--erp-reference--leading-body-1);
+  --leading-body-2: var(--erp-reference--leading-body-2);
+  --leading-body-3: var(--erp-reference--leading-body-3);
+  --leading-body-4: var(--erp-reference--leading-body-4);
+  --leading-body-5: var(--erp-reference--leading-body-5);
+  --leading-body-6: var(--erp-reference--leading-body-6);
+  --leading-body-7: var(--erp-reference--leading-body-7);
+  --leading-body-8: var(--erp-reference--leading-body-8);
+  --leading-body-9: var(--erp-reference--leading-body-9);
+  --leading-body-10: var(--erp-reference--leading-body-10);
+  --leading-body-11: var(--erp-reference--leading-body-11);
+  --text-header-1: var(--erp-reference--text-header-1);
+  --text-header-2: var(--erp-reference--text-header-2);
+  --text-header-3: var(--erp-reference--text-header-3);
+  --text-header-4: var(--erp-reference--text-header-4);
+  --text-header-5: var(--erp-reference--text-header-5);
+  --text-header-6: var(--erp-reference--text-header-6);
+  --text-header-7: var(--erp-reference--text-header-7);
+  --text-header-8: var(--erp-reference--text-header-8);
+  --text-header-9: var(--erp-reference--text-header-9);
+  --text-header-10: var(--erp-reference--text-header-10);
+  --text-header-11: var(--erp-reference--text-header-11);
+  --leading-header-1: var(--erp-reference--leading-header-1);
+  --leading-header-2: var(--erp-reference--leading-header-2);
+  --leading-header-3: var(--erp-reference--leading-header-3);
+  --leading-header-4: var(--erp-reference--leading-header-4);
+  --leading-header-5: var(--erp-reference--leading-header-5);
+  --leading-header-6: var(--erp-reference--leading-header-6);
+  --leading-header-7: var(--erp-reference--leading-header-7);
+  --leading-header-8: var(--erp-reference--leading-header-8);
+  --leading-header-9: var(--erp-reference--leading-header-9);
+  --leading-header-10: var(--erp-reference--leading-header-10);
+  --leading-header-11: var(--erp-reference--leading-header-11);
+  --text-label-1: var(--erp-reference--text-label-1);
+  --text-label-2: var(--erp-reference--text-label-2);
+  --text-label-3: var(--erp-reference--text-label-3);
+  --leading-label-1: var(--erp-reference--leading-label-1);
+  --leading-label-2: var(--erp-reference--leading-label-2);
+  --leading-label-3: var(--erp-reference--leading-label-3);
+  --text-button-1: var(--erp-reference--text-button-1);
+  --text-button-2: var(--erp-reference--text-button-2);
+  --text-button-3: var(--erp-reference--text-button-3);
+  --text-button-4: var(--erp-reference--text-button-4);
+  --text-button-5: var(--erp-reference--text-button-5);
+  --leading-button-1: var(--erp-reference--leading-button-1);
+  --leading-button-2: var(--erp-reference--leading-button-2);
+  --leading-button-3: var(--erp-reference--leading-button-3);
+  --leading-button-4: var(--erp-reference--leading-button-4);
+  --leading-button-5: var(--erp-reference--leading-button-5);
+}
+
+/* Operational labels and metadata stay readable at normal browser zoom. */
+.reference-3030 .text-label-15,
+.reference-3030 .text-label-14 { font-size: var(--text-label-1); line-height: var(--leading-body-8); }
+.reference-3030 .text-label-12,
+.reference-3030 .text-body-11 { font-size: var(--text-body-10); line-height: var(--leading-body-10); }
+.reference-3030 .text-button-15,
+.reference-3030 .text-button-3 { font-size: var(--text-button-3); line-height: var(--leading-button-3); }
+.reference-3030 .text-button-13,
+.reference-3030 .text-button-11 { font-size: var(--text-body-9); line-height: var(--leading-body-9); }
+
+:root, .dark {
+  --erp-reference-text-display-3: var(--text-display-3);
+  --erp-reference-leading-display-3: var(--leading-display-3);
+  --erp-reference-text-display-5: var(--text-display-5);
+  --erp-reference-leading-display-5: var(--leading-display-5);
+}
+.reference-3030 .text-display-28 { font-size: var(--erp-reference-text-display-5); line-height: var(--erp-reference-leading-display-5); }
+.reference-3030 .text-header-36 { font-size: var(--erp-reference-text-display-3); line-height: var(--erp-reference-leading-display-3); }
+
+/* Native operational tables use the same live table tokens as host lists. */
+:root, .dark {
+  --erp-reference-table-header-background: var(--table-header-background);
+  --erp-reference-table-header-foreground: var(--table-header-foreground);
+  --erp-reference-table-border: var(--table-border);
+  --erp-reference-table-cell-foreground: var(--table-cell-foreground);
+  --erp-reference-table-caption-foreground: var(--table-caption-foreground);
+  --erp-reference-table-row-background-hover: var(--table-row-background-hover);
+  --erp-reference-table-row-background-active: var(--table-row-background-active);
+  --erp-reference-table-row-background-selected: var(--table-row-background-selected);
+}
+.reference-3030 {
+  --table-header-background: var(--erp-reference-table-header-background);
+  --table-header-foreground: var(--erp-reference-table-header-foreground);
+  --table-border: var(--erp-reference-table-border);
+  --table-cell-foreground: var(--erp-reference-table-cell-foreground);
+  --table-caption-foreground: var(--erp-reference-table-caption-foreground);
+  --table-row-background-hover: var(--erp-reference-table-row-background-hover);
+  --table-row-background-active: var(--erp-reference-table-row-background-active);
+  --table-row-background-selected: var(--erp-reference-table-row-background-selected);
+}

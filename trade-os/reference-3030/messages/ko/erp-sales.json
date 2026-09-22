@@ -1,0 +1,62 @@
+{
+  "pipeline": {
+    "title": "영업 파이프라인",
+    "subtitle": "담당자별 거래 파이프라인·성과·이력을 한 곳에서 조회합니다.",
+    "searchPlaceholder": "담당자 이름 검색",
+    "searchHint": "담당자를 검색해 선택하면 파이프라인이 표시됩니다.",
+    "noContacts": "담당자가 없습니다. 거래 상세의 ‘영업 담당자’에서 연결하세요.",
+    "loading": "불러오는 중…",
+    "error": "영업 파이프라인을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+    "errorNotFound": "이 담당자는 삭제되었거나 보관되어 파이프라인을 조회할 수 없습니다. 다른 담당자를 선택하세요.",
+    "errorForbidden": "이 담당자의 파이프라인을 볼 권한이 없습니다. 조직 관리자에게 권한을 요청하세요.",
+    "retry": "다시 시도",
+    "refresh": "새로고침",
+    "contactsError": "담당자 목록을 불러오지 못했습니다.",
+    "empty": "이 담당자가 연결된 거래가 없습니다.",
+    "totalDeals": "총 거래",
+    "valueTitle": "매출(받을 돈)",
+    "stagesTitle": "단계 분포",
+    "historyTitle": "거래 이력",
+    "unassigned": "미지정",
+    "activityTitle": "최근 업무 활동",
+    "activityScope": "연결된 거래의 변경 이력",
+    "activityEmpty": "연결된 거래에서 기록된 활동이 없습니다.",
+    "activityNoDescription": "별도 설명 없음",
+    "activityLimited": "최근 {count}건만 표시합니다.",
+    "activityTypes": {
+      "archive": "거래 보관",
+      "restore": "거래 복원",
+      "cancel": "거래 취소",
+      "reactivate": "거래 재활성화",
+      "document_field_changed": "문서 값 정정",
+      "risk_dismissed": "리스크 해제",
+      "document_linked": "문서 연결",
+      "document_unlinked": "문서 연결 해제"
+    },
+    "unit": "건",
+    "kind": { "internal": "내부", "counterparty": "업체", "other": "기타" },
+    "contactStatus": { "active": "활성", "archived": "보관" },
+    "roles": {
+      "closer": "계약 성사자",
+      "manager": "관리자",
+      "counterparty_contact": "업체 담당자",
+      "other": "기타"
+    },
+    "status": {
+      "contract": "계약",
+      "shipment": "선적",
+      "customs": "통관",
+      "settled": "정산",
+      "archived": "보관"
+    },
+    "cols": {
+      "deal": "거래",
+      "counterparty": "거래처",
+      "role": "역할",
+      "assignee": "담당자",
+      "amount": "받을 금액",
+      "stage": "단계",
+      "date": "생성일"
+    }
+  }
+}

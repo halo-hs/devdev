@@ -1,0 +1,473 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>FS-02 — 확정 및 승인 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>FS-02 — 확정 및 승인</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/shared-flows/02-confirm-and-approval.md</p><article class="doc"><h1>FS-02 — 확정 및 승인</h1>
+<blockquote>
+<p>결정 근거: <span>TRADE-DOC-001 — QA 절의 규범 경계</span> · <span>TRADE:DEC-TRD-009 — 지원 locale과 fallback</span> · <span>TRADE:DEC-TRD-010 — 접근성 기준과 검증 범위</span></p>
+</blockquote>
+<blockquote>
+<p><strong>공통 업무 흐름 문서</strong> · 실제 페이지별 주소·필드·버튼·호출·오류·이동은 <span>화면별 기능 명세 (screens/README.md)</span>에서 확인한다.</p>
+</blockquote>
+<blockquote>
+<p><strong>Pilot 및 Approval 목표 정책 / 구현 미검증</strong> · 결정: <span>D-015</span>, <span>OPEN-014</span>, <span>OPEN-016</span>, <span>OD-020</span></p>
+</blockquote>
+<blockquote>
+<p>읽는 순서: 목적·범위 → 화면 항목·행동·이동 → 단계별 정상·오류·복구 → 업무 규칙·표시 기준 → QA → 정책·구현 상태 → 개발 참조</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-31 결정 반영</strong> — 아래는 확정 정책이다. 구현·QA 상태는 이 문서가 관리하지 않는다.</p>
+<ul>
+<li><span>DEC-TRD-003</span> — Pilot 기본 Approval mode는 **<code>disabled</code>**다. 선택한 조직에만 <code>optional</code>을 제공하고 <code>required</code>·<code>conditional</code>은 고객 통제 요구 확인 후 확장한다. 승인 의미가 바뀐 revision은 재승인한다.</li>
+</ul>
+</blockquote>
+<h2>1. 문서 목적과 적용 범위</h2>
+<h3>사용자 문제와 완료 결과</h3>
+<p>검토 담당자의 사실 확인과 권한자의 승인이 같은 행동처럼 보이면 책임과 부수 효과를 예측할 수 없다. Pilot 완료는 <strong>현재 문서 버전을 Confirm하고 변경 전후값·수정자·작업 오너·사유·시각·근거를 Job history에 기록한 상태</strong>다. 향후 Approval 모드가 활성화된 경우에만 같은 문서 버전의 승인 조건을 추가한다.</p>
+<h3>사용자와 권한</h3>
+<ul>
+<li>owner/admin/member: 본인 담당 또는 공동 작업자로 내부 공유된 문서의 수정·Confirm</li>
+<li>Pilot <code>disabled</code>: 모든 역할에 승인 요청·승인·승인 대기 UI 기본 비노출</li>
+<li>Approval 모드 활성 시: owner/admin/member는 승인 요청, 지정 승인자는 승인/반려</li>
+</ul>
+<h3>표준 의미</h3>
+<ul>
+<li>확정: 검토한 사실을 업무 데이터로 채택</li>
+<li>Job history: 변경 전후값·수정자·작업 오너·사유·시각·근거 기록</li>
+<li>승인 요청·승인·반려·재승인 필요: Approval 모드가 활성화된 경우에만 사용하는 Backend 보존 상태와 UI 의미</li>
+</ul>
+<h2>2. 화면 항목·버튼·이동</h2>
+<table>
+<thead>
+<tr>
+<th>화면/구역</th>
+<th>화면에 보이는 항목</th>
+<th>버튼/행동</th>
+<th>처리 결과</th>
+<th>이동/유지 화면</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>문서 머리말</td>
+<td>문서명, 문서 종류, 현재 문서 버전, 문서 상태</td>
+<td>문서 새로고침</td>
+<td>최신 문서 버전과 권한 반영</td>
+<td>현재 문서 유지</td>
+</tr>
+<tr>
+<td>초안 편집</td>
+<td>문서 필드, 품목, 첨부, 품질 경고</td>
+<td>저장</td>
+<td>새 문서 버전 저장</td>
+<td>편집 화면 유지</td>
+</tr>
+<tr>
+<td>Job history</td>
+<td>변경 전후값, 수정자, 작업 오너, 사유, 시각, 근거</td>
+<td>이력 보기</td>
+<td>현재 문서 버전의 변경 근거 확인</td>
+<td>현재 문서 유지</td>
+</tr>
+<tr>
+<td>확정 하단 행동</td>
+<td>품질 경고, 현재 문서 버전</td>
+<td>확인 및 확정</td>
+<td>문서 “확정됨”과 Job history 기록</td>
+<td>Deal 연결이 필요하면 확정 2단계, 있으면 관련 문서/Deal 흐름</td>
+</tr>
+<tr>
+<td>Approval 영역 — 활성 모드에만 노출</td>
+<td>승인 필요 여부, 현재 승인 상태, 승인자 안내</td>
+<td>승인 요청/승인/반려</td>
+<td>승인 대기·승인됨·반려됨과 이벤트 생성</td>
+<td>승인 상태에 따른 현재 문서 화면</td>
+</tr>
+</tbody></table>
+<h2>3. 단계별 정상·오류·복구 흐름</h2>
+<h3>단계별 통합 상태표</h3>
+<table>
+<thead>
+<tr>
+<th>화면 섹션</th>
+<th>상태 구분</th>
+<th>진입 상태</th>
+<th>사용자 행동</th>
+<th>API·외부 호출</th>
+<th>처리 중 상태</th>
+<th>성공 상태</th>
+<th>실패 및 복구</th>
+<th>다음 흐름</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>문서 머리말</td>
+<td>화면 표시</td>
+<td>문서 조회 중</td>
+<td>현재 문서 버전 열기</td>
+<td>문서 조회 API</td>
+<td>문서 조회 중</td>
+<td>문서 버전·상태 표시</td>
+<td>권한 없음, 문서 없음, 서버 오류를 구분; 재시도 또는 목록 복귀</td>
+<td>초안 편집</td>
+</tr>
+<tr>
+<td>초안 편집</td>
+<td>저장 상태</td>
+<td>초안</td>
+<td>필드/첨부 수정</td>
+<td>저장 API</td>
+<td>저장 요청 중</td>
+<td>새 문서 버전이 “초안” 유지</td>
+<td>검증, 오래된 버전, 권한 오류; 미저장 입력 유지, 충돌 시 재조회</td>
+<td>확정</td>
+</tr>
+<tr>
+<td>Pilot 확정 실행</td>
+<td>저장 상태</td>
+<td>필수값 검토 완료</td>
+<td>현재 문서 버전 Confirm</td>
+<td>확정 API</td>
+<td>확정 요청 중</td>
+<td>“확정됨”과 Job history 기록</td>
+<td>필수값, 오래된 버전, 저장·이력 오류; 이전 상태와 입력 유지</td>
+<td>FS-03 또는 FS-04</td>
+</tr>
+<tr>
+<td>승인 요청 — 활성 모드</td>
+<td>저장 상태</td>
+<td>초안, 승인 필요</td>
+<td>승인 요청</td>
+<td>승인 요청 API</td>
+<td>승인 요청 중</td>
+<td>“승인 대기” 및 승인 이벤트 생성</td>
+<td>승인자 없음, 오래된 버전, 금지; 초안 유지</td>
+<td>승인함</td>
+</tr>
+<tr>
+<td>승인함 — 활성 모드</td>
+<td>저장 상태 + 화면 표시</td>
+<td>승인 대기</td>
+<td>승인 또는 반려(사유)</td>
+<td>목록 조회·승인/반려 API</td>
+<td>결정 요청 중</td>
+<td>“승인됨” 또는 “반려됨”</td>
+<td>오래된 문서 버전, 권한 없음, 처리 기록 저장 실패; 서버 상태 유지 후 재조회</td>
+<td>확정 또는 초안 편집</td>
+</tr>
+<tr>
+<td>중요 변경 — 활성 모드</td>
+<td>저장 상태</td>
+<td>승인됨</td>
+<td>중요 필드 수정</td>
+<td>저장 API</td>
+<td>저장 및 기존 승인 무효화 중</td>
+<td>“재승인 필요”</td>
+<td>승인 상태 초기화·이력 저장 실패; 수정값 유지 후 최신 상태 재조회</td>
+<td>승인 요청</td>
+</tr>
+</tbody></table>
+<p><code>API·외부 호출</code>은 이 행동에서 실제 연결이 발생하는지를 보여준다. 정확한 메서드·경로·응답은 7장 개발 참조의 같은 행동에서 확인한다.</p>
+<h3>상태 계약</h3>
+<pre><code class="language-text">Pilot disabled: 초안 → 수정 → Confirm → Job history
+
+Approval 활성:
+초안 → 승인 대기 → 승인됨 → 확정됨
+승인 대기 → 반려됨 → 수정됨 → 승인 대기
+승인됨 → 중요 변경 → 재승인 필요 → 승인 대기 → 승인됨
+</code></pre>
+<p>내부 상태값은 달라도 다음 화면 의미를 보존한다.</p>
+<table>
+<thead>
+<tr>
+<th>현재 상태</th>
+<th>실행 조건</th>
+<th>다음 상태</th>
+<th>부수 효과</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Pilot 초안</td>
+<td>필수값 검토 완료 후 Confirm</td>
+<td>확정됨</td>
+<td>문서 버전 고정·Job history·다음 업무 계약</td>
+</tr>
+<tr>
+<td>활성 모드의 초안</td>
+<td>승인 요청</td>
+<td>승인 대기</td>
+<td>승인자 알림</td>
+</tr>
+<tr>
+<td>활성 모드의 승인 대기</td>
+<td>승인</td>
+<td>승인됨</td>
+<td>승인 처리 기록</td>
+</tr>
+<tr>
+<td>활성 모드의 승인 대기</td>
+<td>반려</td>
+<td>반려됨</td>
+<td>사유와 수정 동선</td>
+</tr>
+<tr>
+<td>활성 모드의 승인 대기</td>
+<td>문서 수정</td>
+<td>재승인 필요</td>
+<td>새 리비전 저장·대기 승인 무효화·Job history</td>
+</tr>
+<tr>
+<td>활성 모드의 승인됨</td>
+<td>중요 항목 수정</td>
+<td>재승인 필요</td>
+<td>이전 승인 무효화</td>
+</tr>
+<tr>
+<td>활성 모드의 재승인 필요</td>
+<td>확정/공유</td>
+<td><strong>차단</strong></td>
+<td>변경 없음</td>
+</tr>
+<tr>
+<td>활성 모드의 승인됨</td>
+<td>확정</td>
+<td>확정됨</td>
+<td>문서 버전 고정·Job history·다음 업무 계약</td>
+</tr>
+</tbody></table>
+<h2>4. 업무 규칙과 표시 기준</h2>
+<h3>중요 변경과 Job history</h3>
+<p>기본 검토 후보:</p>
+<ul>
+<li>금액, 통화</li>
+<li>판매자/구매자/거래처</li>
+<li>문서 종류</li>
+<li>필수 품목/수량/단가</li>
+<li>결제 조건/지급기한</li>
+<li>Deal 연결 또는 거래 방향</li>
+</ul>
+<p>Pilot 기본 Approval은 <code>disabled</code>다. 조직이 향후 <code>required</code> 모드를 활성화한 경우에만 Owner가 <code>설정 &gt; 업무 정책 &gt; 승인</code>에서 문서 종류와 금액 기준을 정한다. 제품 전체에 단일 금액 기준을 강제하지 않는다. 근거: <span>OD-001</span>.</p>
+<p>Pilot에서는 위 변경을 권한으로 일률 차단하지 않고 Job history에 남긴다. Approval 모드가 활성화된 경우 위 중요 변경과 승인 대기 중 수정은 새 리비전의 <code>재승인 필요</code>로 전환한다. 이전 승인은 현재 리비전에 재사용하지 않으며 확정·공유를 차단하고 <code>승인 요청</code> CTA를 표시한다.</p>
+<p>Member는 본인 담당 또는 공동 작업 문서·Deal의 일상 필드를 수정할 수 있다. 중요 변경에는 변경 전후값·수정자·작업 오너·사유·시각·근거를 남긴다. 조직·과금·영구 삭제·권한 설정은 이 범위에 포함하지 않는다.</p>
+<p>Approval 모드가 활성화된 경우 다음 방식은 재승인으로 인정하지 않는다.</p>
+<ul>
+<li>중요 수정 뒤 승인 상태를 단순히 “없음”으로 숨기고 확정을 계속 허용하는 방식</li>
+<li><strong>확정하기</strong>를 재승인 대신 사용하는 방식</li>
+<li>문구·메모처럼 거래 의미가 바뀌지 않는 모든 수정에 무조건 재승인을 요구하는 방식</li>
+</ul>
+<h3>공통 UI 품질 계약 적용</h3>
+<p><span>공통 UI 품질 계약</span>의 지원 locale 전체에서 <code>Confirm</code>은 현재 문서 버전의 사실 확정, <code>Approval</code>은 활성화된 승인 모드의 승인·반려라는 서로 다른 업무 의미를 유지한다. 버튼명·상태·오류·복구 안내가 두 행동을 합치거나 번역에 따라 바꾸어서는 안 된다. Confirm과 활성 Approval의 주요 행동은 키보드로 도달·실행·취소할 수 있고, 화면 읽기 도구가 이름·역할·현재 상태와 오류를 구분해 읽을 수 있어야 한다.</p>
+<p>근거: <span>DEC-TRD-009</span>, <span>DEC-TRD-010</span>.</p>
+<h2>5. 정책·구현 QA 점검 항목</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+<p>실제 통과 기준은 6~7장의 현행 구현 상태와 프론트·API·백엔드 원본 근거가 확인된 범위로 제한한다.</p>
+</blockquote>
+<ul>
+<li><input disabled="" type="checkbox"> Pilot에서 승인 요청·승인·승인 대기 UI가 기본 노출되지 않는다.</li>
+<li><input disabled="" type="checkbox"> owner/admin/member가 접근 가능한 문서를 수정→Confirm하고 Job history를 확인한다.</li>
+<li><input disabled="" type="checkbox"> Confirm한 문서 버전과 Job history의 변경 전후값·수정자·작업 오너·사유·시각·근거가 일치한다.</li>
+<li><input disabled="" type="checkbox"> Backend 승인 API와 상태 계약은 삭제되지 않는다.</li>
+<li><input disabled="" type="checkbox"> Approval 모드가 활성화된 경우에만 승인 요청·승인·반려·재승인 UI와 차단 조건이 적용된다.</li>
+<li><input disabled="" type="checkbox"> 지원 locale 전체에서 Confirm과 활성 Approval의 의미·상태·오류를 구분하고, 키보드와 화면 읽기 도구로 각 행동을 도달·실행·취소하고 결과를 확인할 수 있다.</li>
+</ul>
+<h3>QA 오류 제보·현행 소스 조회 정보</h3>
+<table>
+<thead>
+<tr>
+<th>필수 항목</th>
+<th>기록 기준</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>페이지 주소</td>
+<td>오류가 발생한 실제 브라우저 경로와 쿼리. 비밀 토큰은 제거</td>
+</tr>
+<tr>
+<td>화면명·구역</td>
+<td>2장의 화면/구역 명칭과 실제 화면 제목</td>
+</tr>
+<tr>
+<td>버튼·행동</td>
+<td>화면에 보이는 버튼명 또는 선택한 필터·입력값과 실행 행동</td>
+</tr>
+<tr>
+<td>발생 단계</td>
+<td>목록 조회·상세 조회·생성·수정·삭제·상태 변경·내려받기</td>
+</tr>
+<tr>
+<td>오류 문구</td>
+<td>토스트·본문·필드 아래 문구를 그대로 기록. 없으면 <code>화면 오류 문구 없음</code></td>
+</tr>
+<tr>
+<td>발생 전 상태</td>
+<td>화면에 표시된 한글 상태, 권한, 필요한 선행 데이터</td>
+</tr>
+<tr>
+<td>실제 결과</td>
+<td>입력값 유지, 화면 이동, 재시도 가능 여부를 포함</td>
+</tr>
+<tr>
+<td>현행 확인 기준</td>
+<td>6~7장에서 확인한 프론트·API/BFF·백엔드 현재 동작</td>
+</tr>
+</tbody></table>
+<p>2~5장의 목표 업무 규칙이나 정책·구현 상태을 현재 구현으로 추정하지 않는다. 원본 조사는 <span>개발자 원본 추적 체크리스트 (04-source-audit-checklist.md)</span>에 따라 프론트 화면·API 계약·백엔드 처리와 저장을 모두 확인한다.</p>
+<h2>6. 정책 및 구현 상태</h2>
+<h3>현재 충돌</h3>
+<p>현재 Frontend의 승인 요청·승인·승인 대기 UI는 Pilot 기본 비노출 정책과 충돌한다. Backend 승인 기능과 상태 계약은 보존 대상이다. 승인 상태 초기화 뒤 확정을 허용하는 현재 동작은 향후 Approval 활성 모드에서 상태 우회가 되므로 별도 <code>CODE_GAP</code>으로 유지한다.</p>
+<h2>7. 개발 참조</h2>
+<p>기획자가 읽는 Pilot 정상 결과와 실패·복구는 3장의 같은 행동 행에 통합했다. 아래 승인 상세값은 삭제 대상이 아닌 보존된 Backend 계약이며, Pilot Frontend 기본 UI를 의미하지 않는다.</p>
+<h3>개발 참조 — 상태 코드·경계 조건: 같은 버튼의 상태별 결과</h3>
+<table>
+<thead>
+<tr>
+<th>처리 단계</th>
+<th>버튼·선행 상태</th>
+<th>정상 동작</th>
+<th>API·업무 엣지</th>
+<th>화면 결과·선택지</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>TRANSITION</code></td>
+<td><strong>승인 요청</strong>, 초안·필수값 충족</td>
+<td><code>200</code>, 승인 대기</td>
+<td><code>400</code> 입력 미완료, <code>404</code> 문서 없음, <code>409</code> 현재 상태 불일치</td>
+<td>누락값 수정 / 목록 복귀 / 최신 리비전 재조회</td>
+</tr>
+<tr>
+<td><code>TRANSITION</code></td>
+<td><strong>승인</strong>, 승인 대기·승인자 권한</td>
+<td><code>200</code>, 승인됨</td>
+<td><code>403</code> 승인 권한 없음, <code>404</code>, <code>409</code> 이미 결정·리비전 변경</td>
+<td>권한 요청 / 최신 승인 이력 확인 / 다시 결정</td>
+</tr>
+<tr>
+<td><code>TRANSITION</code></td>
+<td><strong>반려</strong>, 승인 대기·사유 입력</td>
+<td><code>200</code>, 반려됨과 사유 기록</td>
+<td><code>400</code> 사유·상태 오류, <code>403</code>, <code>409</code></td>
+<td>사유 보완 / 권한 요청 / 최신 상태 확인</td>
+</tr>
+<tr>
+<td><code>TRANSITION</code></td>
+<td><strong>확정하기</strong>, Pilot 필수값 충족 또는 활성 모드 승인됨</td>
+<td><code>200</code>, 확정됨</td>
+<td><code>400</code> 필수값, <code>404</code>, <code>409</code> 재승인 필요·상태 충돌</td>
+<td>필드 수정 / 최신 리비전 확인 / 활성 모드에서만 승인 요청으로 이동</td>
+</tr>
+</tbody></table>
+<h3>오류 및 복구</h3>
+<ul>
+<li>반려됨: 사유와 수정→재요청 동선</li>
+<li>오래된 승인: 최신 리비전 다시 조회</li>
+<li>권한 없음: 승인자 요청 동선</li>
+<li>감사/트랜잭션 실패: 상태 전이 전체 되돌림</li>
+</ul>
+<h3>금지되는 상태 전이 — Approval 활성 모드</h3>
+<ul>
+<li>approved→edit→<code>none</code>→Confirm</li>
+<li>승인 대기/반려 상태의 확정/공유</li>
+<li>오래된 리비전 승인</li>
+<li>승인된 리비전과 확정된 리비전 불일치</li>
+<li>프론트 버튼 숨김만으로 서버 상태 전이 허용</li>
+</ul>
+<h3>API·DB·감사</h3>
+<ul>
+<li>리비전 또는 ETag로 승인/수정 경합을 차단한다.</li>
+<li>안정적 오류 코드: <code>APPROVAL_REQUIRED</code>, <code>REAPPROVAL_REQUIRED</code>, <code>STALE_REVISION</code>, <code>FORBIDDEN</code>.</li>
+<li>감사: 리비전, 승인자, 실행자, 중요 필드, 변경 전/후, 사유, 시각.</li>
+</ul>
+<h3>개발 참조 — 검증된 구현 계약 (2026-07-22)</h3>
+<table>
+<thead>
+<tr>
+<th>계층</th>
+<th>검증 근거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>진입/경로</td>
+<td>추출 문서 <code>/erp/confirm/[documentId]</code>; 생성 문서 <code>/erp/documents/create</code></td>
+</tr>
+<tr>
+<td>프론트 클라이언트</td>
+<td><code>src/lib/api/generatedDocuments.ts</code>: 수정, 확정, 승인 요청, 승인, 반려, 승인 이벤트</td>
+</tr>
+<tr>
+<td>서버 HTTP</td>
+<td><code>handler/trade/docgen.go</code>: 생성 문서 PATCH 및 <code>confirm/submit/approve/reject/approval-events</code></td>
+</tr>
+<tr>
+<td>상태 책임</td>
+<td><code>backend/internal/docgen/model.go</code>, <code>service.go</code>; 생성 문서 리비전/상태/승인 필드와 이벤트</td>
+</tr>
+<tr>
+<td>Goal/명세 근거</td>
+<td>Build Plan G0-5, V2-1-3/4; <span>D-015</span>; <span>OPEN-014·OPEN-016</span></td>
+</tr>
+</tbody></table>
+<h4>화면 기능별 API 연결</h4>
+<table>
+<thead>
+<tr>
+<th>화면 기능</th>
+<th>API</th>
+<th>요청</th>
+<th>화면 성공값</th>
+<th>개발 참조 응답/실패</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>문서 열기</td>
+<td><code>GET /trade/generated-documents/:id</code></td>
+<td>문서 ID</td>
+<td>초안/승인 대기/승인됨/확정됨, 현재 리비전</td>
+<td><code>DocumentView</code>; 403/404</td>
+</tr>
+<tr>
+<td>초안 저장</td>
+<td><code>PATCH /trade/generated-documents/:id</code></td>
+<td><code>{content}</code></td>
+<td>“저장됨”, 새 리비전</td>
+<td><code>DocumentView</code>; 검증/충돌</td>
+</tr>
+<tr>
+<td>승인 요청</td>
+<td><code>POST .../:id/submit</code></td>
+<td>빈 본문</td>
+<td>“승인 대기”</td>
+<td><code>approval_status=pending</code></td>
+</tr>
+<tr>
+<td>승인</td>
+<td><code>POST .../:id/approve</code></td>
+<td>빈 본문</td>
+<td>“승인됨”</td>
+<td><code>approval_status=approved</code>; 403/충돌</td>
+</tr>
+<tr>
+<td>반려</td>
+<td><code>POST .../:id/reject</code></td>
+<td><code>{reason}</code></td>
+<td>“반려됨”, 반려 사유</td>
+<td><code>approval_status=rejected</code></td>
+</tr>
+<tr>
+<td>확정</td>
+<td><code>POST .../:id/confirm</code></td>
+<td>선택 <code>quality_acknowledged</code></td>
+<td>“확정됨”</td>
+<td><code>status=confirmed</code>; 승인/재승인 필요 오류</td>
+</tr>
+<tr>
+<td>승인 이력</td>
+<td><code>GET .../:id/approval-events</code></td>
+<td>문서 ID</td>
+<td>처리자·행동·시각 이력</td>
+<td><code>ApprovalEventsResponse</code></td>
+</tr>
+</tbody></table>
+<p>변경 요청은 인증된 사용자와 문서 ID를 사용하며, 반려에는 사유가 필요하다. 응답은 결과 문서 상태와 리비전을 반환하고, 승인 이벤트 목록은 처리자·행동·시각을 제공한다. <code>Docgen</code>, <code>Confirm</code> 권한 검사는 서버가 수행하며 버튼을 숨기는 것만으로 권한을 대신하지 않는다.</p>
+<p>문서 최초 조회, 초안 저장, 승인 요청, 승인 결정, 확정은 각각 별도 처리 중/오류 상태를 가진다. 404, 403, 오래된 버전/충돌, 검증, 승인 필요/재승인 필요, 일시 오류를 구분한다. 변경 실패 시 마지막 서버 상태를 그대로 표시하고 화면 흐름을 앞당기지 않는다.</p>
+<p>현재 판정: Backend 승인 API와 감사 이벤트는 보존한다. Pilot Frontend 승인 UI 비노출과 Job history 필수값은 <code>IMPLEMENTATION_GAP</code>, 활성 Approval 모드의 중요 필드 정의는 <span>OPEN-016</span>, 승인 초기화 우회는 <code>CODE_GAP</code>(TR-004)이다.</p>
+<ul>
+<li>전수 재검증: <span>원본 기능 연결 전수 목록 (05-source-function-inventory.md)</span> · <span>API 요청·응답 전수 목록 (06-source-api-contract-inventory.md)</span> · <span>원본 코드 전수 목록 (07-source-code-manifest.md)</span></li>
+</ul>
+</article></main></body></html>

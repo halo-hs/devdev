@@ -1,0 +1,946 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>[Web] SC-30 — 설정 (CURRENT_LEGACY 제품 화면) · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>[Web] SC-30 — 설정 (CURRENT_LEGACY 제품 화면)</h1><p class="tag">기획 기준 문서 · ECOYA-Snap-SSOT-v1.0/functional-specs/screens/SC-30-settings.md</p><article class="doc"><h1>[Web] SC-30 — 설정 (CURRENT_LEGACY 제품 화면)</h1>
+<blockquote>
+<p>시작 가이드 반영: <span>COMMON:DEC-QUICKSTART-001</span></p>
+<p>상태: <strong>CURRENT_LEGACY / Common 설정으로 통합 대상</strong>
+대상: <strong>admin·owner</strong>
+목표 경계: <a href="spec-CS-06-account-profile.html">Common 설정</a>이 화면·IA와 Organization·구성원·구독·Paddle 결제·인보이스를 소유한다. SNAP은 Common 안 SNAP 구획의 제품별 업무 설정·사용량 의미를 소유한다.
+추가 반영: <span>2026-08-20 Common 설정 진입·제품 사용자 경계</span></p>
+</blockquote>
+<h2>화면 목적</h2>
+<p>현행 SNAP <strong>조직 설정</strong> 화면이다. 목표 구조에서는 별도 설정 셸을 유지하지 않고 Common 설정 안에 책임별 항목을 배치한다.</p>
+<p><img src="spec-assets/SC-30-settings-SC-30-settings.png" alt="Web SC-30 설정"></p>
+<h2>진입 조건</h2>
+<ul>
+<li>로그인 후 admin·owner 권한과 조직 승인 상태를 확인한 뒤 진입한다.</li>
+<li>대표 진입 위치: /settings</li>
+<li>조직·역할·링크 범위를 통과하지 못하면 업무 데이터를 보여주지 않는다.</li>
+</ul>
+<h2>사용자가 보는 내용과 행동</h2>
+<ul>
+<li><p>Common 설정에는 <code>일반</code>, <code>조직</code>, <code>Trade OS</code>, <code>SNAP</code> 구획을 단일 깊이로 표시한다.</p>
+</li>
+<li><p>SNAP 구획은 현재 Organization의 SNAP entitlement가 활성일 때만 표시한다.</p>
+</li>
+<li><p>Organization 정보·사용자 관리·제품 및 구독·결제 및 인보이스는 Common의 조직 구획에서 관리한다.</p>
+</li>
+<li><p>SNAP 구획에는 현장 운영·제품 브랜딩·보존·데이터·제품 사용량처럼 SNAP이 정의하는 필드만 둔다.</p>
+</li>
+<li><p><code>/workers</code>를 SNAP 설정 하위 메뉴로 확정하지 않는다. Organization Member 기능과 SNAP 제품 행위자 기능을 먼저 분리한다.</p>
+</li>
+<li><p>별도 Workspace 메뉴는 만들지 않는다. 조직 전환은 Common Organization 컨텍스트를 사용한다.</p>
+</li>
+<li><p><code>조직 &gt; 소유권 이전</code>은 owner에게만 표시한다.</p>
+</li>
+<li><p>멤버 수와 좌석 사용량은 초대 제한 UI로 사용하지 않는다.</p>
+</li>
+<li><p>화면의 현재 대상과 상태를 먼저 확인한다.</p>
+</li>
+<li><p>조직·과금·보존·알림 등 고객사 설정을 관리한다.</p>
+</li>
+<li><p>주 행동의 결과와 다음 이동을 화면에서 확인한다.</p>
+</li>
+<li><p>실패한 경우 입력과 업무 맥락을 잃지 않고 다시 시도한다.</p>
+</li>
+</ul>
+<h2>화면 상태</h2>
+<table>
+<thead>
+<tr>
+<th>상태</th>
+<th>제품 동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>로딩</td>
+<td>기존 내용을 없는 것으로 표시하지 않고 진행 상태를 보여준다</td>
+</tr>
+<tr>
+<td>정상</td>
+<td>조직 설정에 필요한 정보와 주 행동을 보여준다</td>
+</tr>
+<tr>
+<td>빈 상태</td>
+<td>데이터가 없는 이유와 첫 행동 또는 이전 화면 이동을 안내한다</td>
+</tr>
+<tr>
+<td>오류</td>
+<td>입력·선택을 가능한 한 보존하고 다시 시도할 수 있게 한다</td>
+</tr>
+<tr>
+<td>권한 없음</td>
+<td>데이터를 노출하지 않고 역할에 맞는 화면 또는 안내로 이동한다</td>
+</tr>
+</tbody></table>
+<h2>이동과 복구</h2>
+<p>선택한 업무 항목의 상세·검토·설정 또는 이전 목록으로 이동한다.</p>
+<p>뒤로 이동하거나 재시도해도 이미 완료된 성공 결과를 중복 실행하지 않아야 한다.</p>
+<h2>제품 규칙</h2>
+<ul>
+<li>사용자에게는 내부 함수·API·DB 이름이 아니라 업무 의미를 보여준다.</li>
+<li>성공·실패·권한 없음·데이터 없음 상태를 서로 구분한다.</li>
+<li>고객과 작업자에게 조직 내부 정보나 AI 실행 맥락을 과도하게 노출하지 않는다.</li>
+<li>중요 변경과 외부 전달은 성공 응답을 확인한 뒤 완료로 표시한다.</li>
+<li>SNAP entitlement가 없는 Organization에도 Common 설정은 유지하되 SNAP 제품 구획·설정값은 노출하지 않는다.</li>
+<li>개인 UI 언어·시간대는 Common 계정 기본값이고, 이 화면의 조직 언어·업무 시간대는 SNAP 업무·리포트·알림 기준이다.</li>
+<li>현행 <code>billing</code> 탭의 요금제 구독·체크아웃·Paddle 결제·인보이스는 Common 조직 구획으로 이동한다. SNAP 크레딧 잔액·사용량·원장 의미는 SNAP이 정의하되 Common 설정 IA 안에서 표시한다.</li>
+<li><code>자동 충전</code>의 결제수단·ON/OFF·상한 변경은 Common OWNER capability로만 제공한다. ADMIN에게는 SNAP 제품 capability가 허용한 크레딧 사용량·원장만 표시하고 결제수단·Paddle 상세는 노출하지 않는다.</li>
+</ul>
+<h2>QA 기준</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 제목과 대상 사용자가 실제 화면과 일치한다.</li>
+<li><input disabled="" type="checkbox"> 대표 진입과 다음 이동이 끊기지 않는다.</li>
+<li><input disabled="" type="checkbox"> 로딩·빈 상태·오류·권한 없음이 정상 데이터처럼 보이지 않는다.</li>
+<li><input disabled="" type="checkbox"> 실패 후 입력·선택·업무 맥락을 복구할 수 있다.</li>
+<li><input disabled="" type="checkbox"> Web 대표 캡처가 기준 리비전의 화면과 일치한다.</li>
+</ul>
+<h2>현재 구현 상태</h2>
+<p>화면 파일과 <code>/settings</code> 연결 경로는 기준 리비전에서 확인했다. 이는 <code>CURRENT_LEGACY</code> 구현 기록이며, 목표 진입은 제품의 <code>설정</code> 메뉴에서 Common 설정으로 이동하는 것이다.</p>
+<p>공개 <code>/pricing</code>은 요금제 비교 화면이며 로그인 후 크레딧·결제 기능을 설정 밖으로 이동하지 않는다.</p>
+<h2>개발 역추적</h2>
+<p>아래는 재구성 전 문서에 있던 소스 검증 기록이다. 제품 설명과 분리해 보존한다.</p>
+<details>
+<summary>기존 소스·API·QA 기록</summary><blockquote>
+<p>경계: 고객사 Owner/Admin의 data·retention·residency 설정은 SNAP 제품 정본으로 유지한다. ECOYA 내부 운영자의 감독·집행은 <span>Platform Admin SSOT</span>가 소유한다.</p>
+</blockquote>
+<blockquote>
+<p>상태: <strong>소스 검증 완료 (설정 전수 추출)</strong> · 표면: <strong>Web</strong>
+기준 리비전: <code>main@02509c7</code> · 검증일 2026-07-27
+화면 정본: <code>frontends/ecoya-web/src/pages/Settings.tsx</code> + <code>pages/settings/*.tsx</code>
+API 정본: <code>apps/snap-backend/internal/httpapi/org_settings.go</code> · <code>branding.go</code> · <code>retention.go</code> · <code>plan.go</code> · <code>storage_quota.go</code>
+관련 결정: <span>OD-001/010/011/012/013/014 확정</span> · <code>OD-005</code>(MD_APPLIED)</p>
+</blockquote>
+<p><strong>이 문서의 목적:</strong> SNAP의 설정은 한 화면에 모여 있지 않다. 조직 JSONB·별도 테이블·플랫폼 운영자 전용·읽기 전용 카탈로그로 흩어져 있다. <strong>이 문서가 &quot;설정이 어디 있는가&quot;의 전수 지도다.</strong></p>
+<h2>1. 주소와 접근</h2>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+<th>소스</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/settings</code></td>
+<td><code>App.tsx:130</code></td>
+</tr>
+<tr>
+<td>게이트</td>
+<td><code>Shell</code> = <code>TenantFlowGuard</code> → <code>ManagerGuard</code> → <code>AppShell</code></td>
+<td><code>App.tsx:49-56</code></td>
+</tr>
+<tr>
+<td>통과 역할</td>
+<td><code>manager</code> <code>admin</code> <code>owner</code> <code>operator</code></td>
+<td><code>ManagerGuard.tsx:7</code></td>
+</tr>
+<tr>
+<td>내비 위치</td>
+<td><code>ADMIN_NAV</code> (<code>/workers</code>·<code>/safety/corrective-actions</code>와 같은 그룹)</td>
+<td><code>AppShell.tsx:45-49</code></td>
+</tr>
+<tr>
+<td>탭 전환</td>
+<td><code>?tab=</code> 쿼리 파라미터. <code>org</code>이 기본이며 이때 쿼리 제거</td>
+<td><code>Settings.tsx:33-49</code></td>
+</tr>
+</tbody></table>
+<p><strong>통과하지 못하면</strong> 화면 대신 <code>rbac.manager_only_title</code> 안내 카드와 로그인 버튼을 본다 (<code>ManagerGuard.tsx:22-33</code>).</p>
+<blockquote>
+<p>⚠️ 화면 게이트는 <code>manager</code> 이상이지만 <strong>개별 설정 API는 대부분 게이트가 더 강하거나 약하다.</strong> §3의 API별 권한 열을 따른다.</p>
+</blockquote>
+<h2>2. 탭 구성 (5)</h2>
+<p><code>Settings.tsx:22-28</code>의 <code>TABS</code> 배열이 정본이다.</p>
+<table>
+<thead>
+<tr>
+<th align="right">#</th>
+<th><code>?tab=</code></th>
+<th>라벨 키</th>
+<th>아이콘</th>
+<th>포함 패널</th>
+<th>소스</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">1</td>
+<td><code>org</code> (기본)</td>
+<td><code>set.tab_org</code></td>
+<td><code>Building2</code></td>
+<td><code>OrgSettingsPanel</code> · <code>FieldDispatchPanel</code> · <code>DeliveryOutcomePanel</code> · <code>DeliveryChannelsPanel</code> · <code>AITextPilotPanel</code></td>
+<td><code>Settings.tsx:72-79</code></td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td><code>branding</code></td>
+<td><code>set.tab_branding</code></td>
+<td><code>Palette</code></td>
+<td><code>BrandingPanel</code></td>
+<td><code>:111</code></td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td><code>loc</code></td>
+<td><code>set.tab_loc</code></td>
+<td><code>Globe</code></td>
+<td>현지화 (인라인)</td>
+<td><code>:82-99</code></td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td><code>data</code></td>
+<td><code>set.tab_data</code></td>
+<td><code>Database</code></td>
+<td><code>DataResidencyPanel</code> · <code>StorageQuotaPanel</code> · <code>DataRetentionPanel</code> · <code>OrgExportPanel</code> · <code>AuditLogPanel</code></td>
+<td><code>:101-107</code></td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td><code>billing</code></td>
+<td><code>set.tab_billing</code></td>
+<td><code>CreditCard</code></td>
+<td><code>BillingPanel</code></td>
+<td><code>:113</code></td>
+</tr>
+</tbody></table>
+<p><strong>현행 코드에서 멤버·초대는 이 화면에 없고</strong> 별도 최상위 화면 <code>/workers</code>(SC-28)다. 목표 구조는 <code>/workers</code>를 통째로 설정 하위로 옮기지 않는다. Organization Member 기능은 Common으로, SNAP 제품 행위자 기능은 SNAP으로 분리하며 새 화면·경로는 후속 기획에서 확정한다.</p>
+<h2>3. 설정 저장소 전수 — &quot;설정이 어디 있는가&quot;</h2>
+<p>설정은 <strong>5개 서로 다른 저장 위치</strong>에 흩어져 있다.</p>
+<table>
+<thead>
+<tr>
+<th align="right">#</th>
+<th>저장 위치</th>
+<th>무엇</th>
+<th>읽기 API</th>
+<th>쓰기 API</th>
+<th>쓰기 권한</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">S1</td>
+<td><code>organizations.settings</code> (JSONB)</td>
+<td>조직 프로필·AI 모드·전달 기본값·현장 배정·파일럿·마켓</td>
+<td><code>GET /org/settings</code></td>
+<td><code>PATCH /org/settings</code></td>
+<td>확인 필요</td>
+</tr>
+<tr>
+<td align="right">S2</td>
+<td><code>organizations.settings-&gt;&#39;branding&#39;</code> (JSONB 하위)</td>
+<td>브랜드 이름·색·푸터·로고</td>
+<td><code>GET /org/branding</code></td>
+<td><code>PUT /org/branding</code>, <code>POST /org/branding/logo</code></td>
+<td>manager+</td>
+</tr>
+<tr>
+<td align="right">S3</td>
+<td><code>organizations.settings-&gt;&#39;plan&#39;</code> (JSONB 하위)</td>
+<td>플랜 티어·좌석·Paddle 고객·구독 상태</td>
+<td><code>GET /org/plan</code></td>
+<td><strong>테넌트 쓰기 없음</strong> — <code>PUT /ops/tenants/:id/plan</code> (platform_ops)</td>
+<td><strong>운영자 전용</strong></td>
+</tr>
+<tr>
+<td align="right">S4</td>
+<td><code>organizations.settings-&gt;&#39;storage_quota&#39;</code> (JSONB 하위)</td>
+<td>저장 쿼터 오버라이드</td>
+<td>(쿼터 조회 경유)</td>
+<td><strong>API 없음</strong> — DB 직접</td>
+<td><strong>없음</strong></td>
+</tr>
+<tr>
+<td align="right">S5</td>
+<td><strong><code>retention_policies</code> (별도 테이블)</strong></td>
+<td>보존 기간 4종</td>
+<td><code>GET /org/retention-policy</code></td>
+<td><code>PUT /org/retention-policy</code></td>
+<td>manager+</td>
+</tr>
+</tbody></table>
+<h3>3.1 S1 — <code>organizations.settings</code> JSONB 키 전수</h3>
+<p><strong>소스에서 실제로 접근되는 키 16종</strong> (<code>grep</code>으로 전수 추출):</p>
+<table>
+<thead>
+<tr>
+<th>키</th>
+<th>성격</th>
+<th align="center"><code>PATCH /org/settings</code>로 쓸 수 있나</th>
+<th align="center">설정 화면에 있나</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>plan</code></td>
+<td>플랜·좌석 (S3)</td>
+<td align="center">❌</td>
+<td align="center">조회만 (billing 탭)</td>
+</tr>
+<tr>
+<td><code>branding</code></td>
+<td>브랜딩 (S2)</td>
+<td align="center">❌ (별도 API)</td>
+<td align="center">✅ branding 탭</td>
+</tr>
+<tr>
+<td><code>billing</code></td>
+<td>과금 상태</td>
+<td align="center">❌</td>
+<td align="center">조회만</td>
+</tr>
+<tr>
+<td><code>storage_quota</code></td>
+<td>쿼터 오버라이드 (S4)</td>
+<td align="center">❌</td>
+<td align="center">조회만 (data 탭)</td>
+</tr>
+<tr>
+<td><code>ai_mode</code></td>
+<td><code>mock</code> / <code>live</code></td>
+<td align="center">✅</td>
+<td align="center">✅ org 탭 (<code>AITextPilotPanel</code>)</td>
+</tr>
+<tr>
+<td><code>industry</code></td>
+<td>업종</td>
+<td align="center">✅</td>
+<td align="center">✅ org 탭</td>
+</tr>
+<tr>
+<td><code>company_size</code></td>
+<td>규모</td>
+<td align="center">✅</td>
+<td align="center">⬜ 확인 필요</td>
+</tr>
+<tr>
+<td><code>use_cases</code></td>
+<td>용도</td>
+<td align="center">✅</td>
+<td align="center">⬜ 확인 필요</td>
+</tr>
+<tr>
+<td><code>enabled_workflows</code></td>
+<td>활성 워크플로</td>
+<td align="center">✅</td>
+<td align="center">⬜ 확인 필요</td>
+</tr>
+<tr>
+<td><code>field_dispatch</code></td>
+<td>현장 배정 기본값</td>
+<td align="center">✅</td>
+<td align="center">✅ org 탭 (<code>FieldDispatchPanel</code>)</td>
+</tr>
+<tr>
+<td><code>delivery</code></td>
+<td><code>default_outcome_mode</code>·<code>allowed_outcome_modes</code></td>
+<td align="center">✅</td>
+<td align="center">✅ org 탭 (<code>DeliveryOutcomePanel</code>)</td>
+</tr>
+<tr>
+<td><code>delivery_channel_priority</code></td>
+<td>채널 우선순위 (마켓 프리셋에서 주입)</td>
+<td align="center">❌ (읽기만)</td>
+<td align="center">✅ org 탭 (<code>DeliveryChannelsPanel</code>, 조회)</td>
+</tr>
+<tr>
+<td><code>storage_region_pin</code></td>
+<td>데이터 소재지 핀</td>
+<td align="center">✅</td>
+<td align="center">✅ data 탭 (<code>DataResidencyPanel</code>)</td>
+</tr>
+<tr>
+<td><code>recommended_persona_keys</code></td>
+<td>추천 페르소나</td>
+<td align="center">❌</td>
+<td align="center">⬜</td>
+</tr>
+<tr>
+<td><code>home_market</code></td>
+<td>홈 마켓</td>
+<td align="center">❌</td>
+<td align="center">⬜</td>
+</tr>
+<tr>
+<td><code>auth_provider</code></td>
+<td>인증 제공자</td>
+<td align="center">❌</td>
+<td align="center">⬜</td>
+</tr>
+<tr>
+<td><code>pilot_route</code></td>
+<td>파일럿 라우트 (가입 시 주입)</td>
+<td align="center">❌</td>
+<td align="center">⬜</td>
+</tr>
+<tr>
+<td><code>pilot_delivery_locale</code></td>
+<td>파일럿 전달 로케일</td>
+<td align="center">❌</td>
+<td align="center">⬜</td>
+</tr>
+<tr>
+<td><code>onboarding_completed</code></td>
+<td><code>CURRENT_LEGACY</code> 강제 설정 완료 플래그</td>
+<td align="center">✅</td>
+<td align="center">❌ (목표 시작 가이드 진행률로 사용 금지)</td>
+</tr>
+<tr>
+<td><code>primary_persona_key</code></td>
+<td>주 페르소나</td>
+<td align="center">✅</td>
+<td align="center">⬜ 확인 필요</td>
+</tr>
+<tr>
+<td><code>secondary_persona_keys</code></td>
+<td>부 페르소나</td>
+<td align="center">✅</td>
+<td align="center">⬜ 확인 필요</td>
+</tr>
+<tr>
+<td><code>name</code> <code>website</code> <code>country_code</code> <code>default_language</code> <code>timezone</code></td>
+<td>조직 프로필 (일부는 <code>organizations</code> 컬럼)</td>
+<td align="center">✅</td>
+<td align="center">✅ org 탭</td>
+</tr>
+</tbody></table>
+<h3>3.2 <code>PATCH /org/settings</code>가 받는 필드 전체</h3>
+<p><code>org_settings.go</code> 익명 struct 전수:</p>
+<pre><code>name · website · country_code · default_language · timezone
+company_size · industry · use_cases
+ai_mode · enabled_workflows
+primary_persona_key · secondary_persona_keys
+onboarding_completed (`CURRENT_LEGACY`) · storage_region_pin
+delivery.{ default_outcome_mode, allowed_outcome_modes }
+field_dispatch.{ default }
+</code></pre>
+<p><strong>모두 포인터 타입(<code>*string</code>, <code>*[]string</code>)이다</strong> — 즉 <strong>보낸 필드만 갱신하고 나머지는 건드리지 않는다.</strong></p>
+<p>실제 쓰기는 <code>merge[...]</code>로 JSONB에 병합된다. 병합 키 9개:</p>
+<pre><code>ai_mode · company_size · delivery · enabled_workflows
+field_dispatch · industry · storage_region_pin · use_cases · website
+</code></pre>
+<p><strong>검증:</strong> <code>allowed_outcome_modes</code>가 빈 배열이면 400 <code>allowed_outcome_modes_required</code> (<code>org_settings.go:110-111</code>).</p>
+<h3>3.3 S5 — <code>retention_policies</code> 테이블 (별도)</h3>
+<p><strong>JSONB가 아니라 독립 테이블이다.</strong> 조직당 1행 (<code>organization_id</code> PRIMARY KEY).</p>
+<table>
+<thead>
+<tr>
+<th>컬럼</th>
+<th align="right">기본값</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>original_media_days</code></td>
+<td align="right"><strong>365</strong></td>
+<td>원본 미디어 최소 보존</td>
+</tr>
+<tr>
+<td><code>report_days</code></td>
+<td align="right"><strong>1825</strong> (약 5년)</td>
+<td>리포트 보존</td>
+</tr>
+<tr>
+<td><code>share_link_days</code></td>
+<td align="right"><strong>30</strong></td>
+<td>이 기간 지난 링크 자동 만료</td>
+</tr>
+<tr>
+<td><code>archive_after_days</code></td>
+<td align="right"><strong>180</strong></td>
+<td>이 기간 후 콜드·아카이브 이동</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>권한</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GET /api/v1/org/retention-policy</code></td>
+<td>조직 RLS만 (역할 게이트 없음)</td>
+</tr>
+<tr>
+<td><code>PUT /api/v1/org/retention-policy</code></td>
+<td>manager+</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>⚠️ 현행 <code>GET</code>에 역할 게이트가 없어 작업자도 조직 보존 정책을 조회할 수 있다. <span>OD-006 확정 정책</span>의 admin+ 최소 권한과 다른 <code>IMPLEMENTATION_GAP</code>이다.</p>
+</blockquote>
+<h3>3.4 S2 — 브랜딩 필드</h3>
+<p><code>putOrgBranding</code>이 받는 필드 (<code>branding.go</code>):</p>
+<pre><code>name · color · footer
+</code></pre>
+<p>로고는 별도 업로드: <code>POST /org/branding/logo</code> → 조회 <code>GET /org/branding/logo</code>. 공개 표면에서는 <code>GET /public/links/:token/logo</code>·<code>/share/:token/logo</code>로 노출된다 (<code>routes.go:241</code>, <code>:273</code>).</p>
+<h3>3.5 S3 — 플랜 (테넌트가 못 바꾼다)</h3>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>저장</td>
+<td><code>organizations.settings-&gt;&#39;plan&#39;</code></td>
+</tr>
+<tr>
+<td>조회</td>
+<td><code>GET /api/v1/org/plan</code> — 역할 게이트 없음</td>
+</tr>
+<tr>
+<td>변경</td>
+<td><strong><code>PUT /api/v1/ops/tenants/:id/plan</code> — <code>platform_ops</code> 전용</strong></td>
+</tr>
+<tr>
+<td>필드</td>
+<td><code>tier</code> <code>plan_key</code> <code>checkout_status</code> <code>subscription_status</code> <code>paddle_customer_id</code> + 계산값 <code>seats</code>·<code>seats_used</code>·<code>seats_available</code>·<code>unlimited</code>·<code>in_trial</code></td>
+</tr>
+</tbody></table>
+<p><strong>설계 의도가 코드 주석에 있다</strong> (<code>plan.go:31-34</code>): 플랜 티어는 <strong>ECOYA 운영자가 설정</strong>하고(Paddle 구독과 연동된 상업적 결정), 테넌트는 멤버 추가·초대로 좌석을 소비한다.</p>
+<p>좌석 계산 (<code>plan.go:122-133</code>):</p>
+<pre><code class="language-sql">members = COUNT(*) FROM users WHERE organization_id=$1 AND COALESCE(status,&#39;active&#39;) &lt;&gt; &#39;inactive&#39;
+invites = COUNT(*) FROM org_invites WHERE organization_id=$1 AND status=&#39;pending&#39;
+seats_used = members + invites
+</code></pre>
+<p><strong>현행 계산은 역할을 구분하지 않아 작업자도 좌석을 소비한다.</strong> <span>OD-012 확정 정책</span>은 멤버 무제한·좌석 초대 차단 없음이며 현행은 <code>IMPLEMENTATION_GAP</code>이다.</p>
+<h3>3.6 S4 — 저장 쿼터 오버라이드 (API 없음)</h3>
+<p><code>resolveStorageLimits</code>(<code>storage_quota.go:54-70</code>) 우선순위:</p>
+<table>
+<thead>
+<tr>
+<th align="right">순위</th>
+<th>조건</th>
+<th><code>source</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">1</td>
+<td><code>settings-&gt;&#39;storage_quota&#39;-&gt;&#39;bytes_limit&#39; &gt; 0</code></td>
+<td><code>override</code></td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td>티어에 정책 쿼터 존재</td>
+<td><code>plan</code></td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td>그 외</td>
+<td><code>default</code></td>
+</tr>
+</tbody></table>
+<p><strong>1번을 설정할 API가 없다.</strong> DB 직접 수정만 가능하다 → <code>TR-019</code></p>
+<h2>4. 설정처럼 보이지만 설정이 아닌 것 (읽기 전용 카탈로그)</h2>
+<p>아래는 조직이 바꿀 수 없는 <strong>전역 카탈로그</strong>다. 설정 화면에서 값을 고르는 데 쓰이지만 그 자체는 설정이 아니다.</p>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>내용</th>
+<th>권한</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GET /api/v1/constants</code></td>
+<td>통제 어휘 19종 117값</td>
+<td>비인증 공개</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/i18n</code>·<code>/i18n/:locale</code></td>
+<td>메시지 카탈로그</td>
+<td>비인증 공개</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/markets</code></td>
+<td>글로벌 마켓 프리셋 (KR/JP/SG/AU/TH)</td>
+<td>비인증 공개</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/markets/suggest</code></td>
+<td>가입 마켓 추천</td>
+<td>비인증 공개</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/task-type-schemas</code></td>
+<td>페르소나 스키마</td>
+<td>비인증 공개</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/report-templates</code></td>
+<td>리포트 템플릿</td>
+<td>비인증 공개</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/report-templates/resolve</code></td>
+<td>템플릿 해석 (customer &gt; org &gt; global)</td>
+<td>조직 RLS</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/report-profiles</code></td>
+<td>목적 프로파일</td>
+<td>조직 RLS</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/org/localization</code></td>
+<td>테넌트 현지화 해석 결과</td>
+<td>조직 RLS</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/billing/plans</code></td>
+<td>플랜 카탈로그</td>
+<td>비인증 공개</td>
+</tr>
+</tbody></table>
+<p><strong>예외 — 조직이 만들 수 있는 것:</strong> <code>POST /api/v1/report-templates</code>로 조직·고객 단위 템플릿 오버라이드를 만든다 (<code>routes.go:76</code>, admin).</p>
+<h2>5. 설정 화면에 <strong>없는</strong> 관리 기능</h2>
+<p>같은 <code>ADMIN_NAV</code> 그룹이거나 설정에 있을 것으로 기대되지만 다른 위치에 있는 것들이다.</p>
+<table>
+<thead>
+<tr>
+<th>기능</th>
+<th>실제 위치</th>
+<th>API</th>
+<th>결정</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>멤버 목록·역할 변경·비활성화</td>
+<td><strong><code>/workers</code> (SC-28)</strong></td>
+<td><code>GET/PATCH/DELETE /org/members*</code></td>
+<td><code>CURRENT_LEGACY</code>; 목표는 Common 사용자 관리, 새 route는 migration에서 확정</td>
+</tr>
+<tr>
+<td>초대 발급·취소</td>
+<td><strong><code>/workers</code> (SC-28)</strong></td>
+<td><code>POST /auth/invites</code>, <code>POST /org/invites/:id/revoke</code></td>
+<td><code>CURRENT_LEGACY</code>; Organization 초대는 Common으로 분리</td>
+</tr>
+<tr>
+<td>합류 승인</td>
+<td><strong><code>/workers</code> (SC-28)</strong></td>
+<td><code>POST /org/members/:id/approve-join</code></td>
+<td><code>CURRENT_LEGACY</code>; 제품 행위자 등록·승인은 별도 SNAP 계약</td>
+</tr>
+<tr>
+<td><strong>OWNER 추가·이전</strong></td>
+<td><strong>현행 기능 없음</strong></td>
+<td>없음</td>
+<td>Common에서 활성 Member의 OWNER 지정과 마지막 OWNER 보호로 처리</td>
+</tr>
+<tr>
+<td>감사 로그 조회</td>
+<td>설정 <code>data</code> 탭 (<code>AuditLogPanel</code>)</td>
+<td><code>GET /org/audit-logs</code> (admin+)</td>
+<td><code>OD-014</code> §4</td>
+</tr>
+<tr>
+<td>조직 데이터 내보내기</td>
+<td>설정 <code>data</code> 탭 (<code>OrgExportPanel</code>)</td>
+<td><code>GET /org/export</code> (admin+)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>삭제 요청</td>
+<td><strong>설정에 없음</strong></td>
+<td><code>POST /deletion-requests</code></td>
+<td><code>OD-014</code></td>
+</tr>
+<tr>
+<td>보존 스윕 실행</td>
+<td><strong>설정에 없음</strong></td>
+<td><code>POST /retention/sweep</code></td>
+<td><code>OD-014</code></td>
+</tr>
+<tr>
+<td>시정조치</td>
+<td><strong><code>/safety/corrective-actions</code> (SC-29)</strong></td>
+<td><code>GET /ops/corrective-actions</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>워크스페이스</td>
+<td><strong>도입하지 않음</strong></td>
+<td>없음</td>
+<td>Organization을 테넌트·과금 단위로 유지</td>
+</tr>
+<tr>
+<td>워터마크 조직 정책</td>
+<td><strong>설정 UI 없음</strong> — <code>watermark.EffectivePolicy</code>가 <code>OrgPolicy</code>를 읽지만 설정 경로 미확인</td>
+<td>미확인</td>
+<td><code>TR-020</code></td>
+</tr>
+<tr>
+<td>전달 채널 우선순위 변경</td>
+<td>조회만 (마켓 프리셋에서 주입)</td>
+<td>쓰기 API 없음</td>
+<td><code>OD-014</code></td>
+</tr>
+</tbody></table>
+<h2>6. 플랫폼 운영자 전용 설정 (테넌트 화면 밖)</h2>
+<p><code>platform_ops</code>만 접근한다. <strong>테넌트 설정 화면에 절대 나타나지 않는다.</strong></p>
+<table>
+<thead>
+<tr>
+<th>설정</th>
+<th>API</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>테넌트 플랜·좌석 변경</td>
+<td><code>PUT /api/v1/ops/tenants/:id/plan</code></td>
+</tr>
+<tr>
+<td>테넌트 정지 / 복구</td>
+<td><code>POST /api/v1/ops/tenants/:id/suspend</code> · <code>/reactivate</code></td>
+</tr>
+<tr>
+<td>크레딧 수동 조정 (±100,000, 사유 필수)</td>
+<td><code>POST /api/v1/ops/tenants/:id/credit-adjust</code></td>
+</tr>
+<tr>
+<td>가입 승인 / 거절</td>
+<td><code>POST /api/v1/ops/pending-signups/:org_id/approve</code> · <code>/reject</code></td>
+</tr>
+<tr>
+<td>외부 연동 준비도 (env 존재만)</td>
+<td><code>GET /api/v1/ops/integrations</code></td>
+</tr>
+<tr>
+<td>AI 원가 대비 마진</td>
+<td><code>GET /api/v1/ai/unit-economics</code></td>
+</tr>
+<tr>
+<td>과금 준비도</td>
+<td><code>GET /api/v1/ops/billing-readiness</code></td>
+</tr>
+</tbody></table>
+<h2>7. env 기반 설정 (코드·DB 아님)</h2>
+<p><code>config</code> 패키지(401줄, <strong>미정독</strong>)가 다룬다. 화면에서 바꿀 수 없다.</p>
+<table>
+<thead>
+<tr>
+<th>변수</th>
+<th>영향</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>LLM_MODE</code></td>
+<td><code>mock</code>(기본, 외부 호출 없음) / <code>live</code></td>
+</tr>
+<tr>
+<td><code>APP_ENV</code></td>
+<td><code>local</code>이면 <code>X-Role</code> 헤더 인증 허용</td>
+</tr>
+<tr>
+<td><code>PLATFORM_OPS_ENABLED</code></td>
+<td>운영자 평면 활성화</td>
+</tr>
+<tr>
+<td><code>PLATFORM_OPS_ORG_ID</code></td>
+<td>운영 조직 지정 — <strong>이 조직의 admin만 운영자</strong></td>
+</tr>
+<tr>
+<td><code>TRUSTED_PROXIES</code></td>
+<td><code>X-Forwarded-For</code> 신뢰 범위 (잘못되면 프록시 전체 불신으로 fail-safe)</td>
+</tr>
+<tr>
+<td><code>METRICS_TOKEN</code></td>
+<td><code>/metrics</code> 노출</td>
+</tr>
+<tr>
+<td><code>PADDLE_API_KEY</code> · <code>PADDLE_WEBHOOK_SECRET</code></td>
+<td>과금</td>
+</tr>
+<tr>
+<td><code>FIREBASE_*</code></td>
+<td>인증</td>
+</tr>
+<tr>
+<td><code>STORAGE_*</code></td>
+<td>저장소</td>
+</tr>
+<tr>
+<td><code>SMTP_*</code></td>
+<td>이메일</td>
+</tr>
+<tr>
+<td>레이트리밋 RPM 3종</td>
+<td><code>PublicRateLimitRPM</code> · <code>AuthRateLimitRPM</code> · <code>ExpensiveRateLimitRPM</code></td>
+</tr>
+</tbody></table>
+<h2>8. 설정 전체 지도 (요약)</h2>
+<pre><code>설정
+├── 테넌트가 바꿀 수 있는 것
+│   ├── organizations.settings (JSONB)         ← PATCH /org/settings (9키 병합)
+│   │   ├── 조직 프로필 (name·website·country·language·timezone)
+│   │   ├── ai_mode (mock/live)                ← OD-005/OD-014 검토 대상
+│   │   ├── delivery.{default,allowed} outcome modes
+│   │   ├── field_dispatch.default
+│   │   ├── storage_region_pin
+│   │   └── industry · company_size · use_cases · enabled_workflows · persona_keys
+│   ├── organizations.settings-&gt;&#39;branding&#39;     ← PUT /org/branding (name·color·footer) + 로고 업로드
+│   └── retention_policies (별도 테이블)        ← PUT /org/retention-policy (4개 기간)
+│
+├── 조회만 가능한 것
+│   ├── settings-&gt;&#39;plan&#39; (티어·좌석)            ← 운영자가 설정
+│   ├── settings-&gt;&#39;storage_quota&#39; (오버라이드)   ← API 없음, DB 직접
+│   ├── delivery_channel_priority               ← 마켓 프리셋 주입
+│   └── pilot_route · pilot_delivery_locale · home_market · auth_provider
+│
+├── 플랫폼 운영자 전용                          ← /platform* (SC-31~36)
+│   └── 플랜·정지·크레딧조정·가입승인·연동준비도·AI마진
+│
+├── env (코드 배포 시점)
+│   └── LLM_MODE · APP_ENV · PLATFORM_OPS_* · 레이트리밋 · 외부 서비스 키
+│
+└── 존재하지 않는 것 (확정 정책의 구현 차이)
+    ├── 소유권 이전            → OD-010 `IMPLEMENTATION_GAP`
+    ├── 별도 SNAP 워크스페이스  → OD-013에 따라 만들지 않음
+    ├── 워터마크 조직 정책 UI   → TR-020 `IMPLEMENTATION_GAP`
+    ├── 저장 쿼터 오버라이드 UI → TR-019 `IMPLEMENTATION_GAP`
+    └── 전달 채널 우선순위 쓰기 → OD-014 `IMPLEMENTATION_GAP`
+</code></pre>
+<h2>9. QA 인수 조건</h2>
+<table>
+<thead>
+<tr>
+<th align="right">#</th>
+<th>조건</th>
+<th>기대</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">S1</td>
+<td>worker 세션으로 <code>/settings</code> 접근</td>
+<td><code>rbac.manager_only_title</code> 안내 카드</td>
+</tr>
+<tr>
+<td align="right">S2</td>
+<td><code>?tab=org</code>으로 진입</td>
+<td>쿼리가 제거되고 기본 탭 표시</td>
+</tr>
+<tr>
+<td align="right">S3</td>
+<td><code>?tab=billing</code>으로 직접 진입</td>
+<td>billing 탭이 열림</td>
+</tr>
+<tr>
+<td align="right">S4</td>
+<td>알 수 없는 <code>?tab=xyz</code></td>
+<td>동작 확인 필요 (⬜ 미검증)</td>
+</tr>
+<tr>
+<td align="right">S5</td>
+<td><code>PATCH /org/settings</code>에 <code>industry</code>만 전송</td>
+<td>나머지 키 보존 (포인터 필드 + merge)</td>
+</tr>
+<tr>
+<td align="right">S6</td>
+<td><code>allowed_outcome_modes: []</code> 전송</td>
+<td>400 <code>allowed_outcome_modes_required</code></td>
+</tr>
+<tr>
+<td align="right">S7</td>
+<td>manager(비 admin) 세션으로 <code>GET /org/audit-logs</code></td>
+<td>403 (admin+ 요구)</td>
+</tr>
+<tr>
+<td align="right">S8</td>
+<td>manager 세션으로 <code>PUT /org/retention-policy</code></td>
+<td>성공</td>
+</tr>
+<tr>
+<td align="right">S9</td>
+<td>worker 세션으로 <code>GET /org/retention-policy</code></td>
+<td>현행 성공, 목표는 403 — <code>IMPLEMENTATION_GAP</code></td>
+</tr>
+<tr>
+<td align="right">S10</td>
+<td>테넌트 세션으로 플랜 티어 변경 시도</td>
+<td>경로 없음 (운영자 전용)</td>
+</tr>
+<tr>
+<td align="right">S11</td>
+<td><code>POST /org/branding/logo</code>에 큰 파일</td>
+<td>크기 제한 동작 (⬜ 미검증)</td>
+</tr>
+<tr>
+<td align="right">S12</td>
+<td>설정 화면에서 소유권 이전 찾기</td>
+<td>현행 없음, 목표는 <code>조직 &gt; 소유권 이전</code> — <code>IMPLEMENTATION_GAP</code></td>
+</tr>
+<tr>
+<td align="right">S13</td>
+<td>설정 화면에서 멤버 관리 찾기</td>
+<td>현행 없음, 목표는 <code>SNAP &gt; 멤버·초대</code>에서 <code>/workers</code> 진입 — <code>IMPLEMENTATION_GAP</code></td>
+</tr>
+<tr>
+<td align="right">S14</td>
+<td>보존 기간을 0으로 설정</td>
+<td>검증 동작 확인 필요 (⬜ 미검증)</td>
+</tr>
+</tbody></table>
+<h2>10. 미검증 항목</h2>
+<table>
+<thead>
+<tr>
+<th align="right">#</th>
+<th>항목</th>
+<th>필요 작업</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">1</td>
+<td><code>PATCH /org/settings</code>의 실제 권한 게이트</td>
+<td>핸들러 <code>ensureRole</code> 확인 — 권한 행렬에서 &quot;RLS만&quot;으로 나왔으나 재확인 필요</td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td><code>loc</code> 탭의 인라인 필드 구성</td>
+<td><code>Settings.tsx:82-99</code> 정독</td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td>각 패널의 필드·검증·오류 문구</td>
+<td><code>pages/settings/*.tsx</code> 6개 파일 정독</td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td><code>AITextPilotPanel</code>이 노출하는 값</td>
+<td>AI 비가시성 정책과 대조 (<code>OD-005</code> CLOSED, <code>OD-014</code> §3)</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td>알 수 없는 <code>?tab=</code> 처리</td>
+<td><code>Settings.tsx:33-49</code></td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td>워터마크 조직 정책 설정 경로</td>
+<td><code>watermark.Input.OrgPolicy</code>를 채우는 코드 추적</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td>로고 업로드 크기·형식 제한</td>
+<td><code>uploadOrgLogo</code> 정독</td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td>보존 기간 값 검증 범위</td>
+<td><code>putRetentionPolicy</code> 정독</td>
+</tr>
+<tr>
+<td align="right">9</td>
+<td>i18n 키 전수 (<code>set.*</code>)</td>
+<td>카탈로그 대조</td>
+</tr>
+<tr>
+<td align="right">10</td>
+<td>설정 변경의 감사 이벤트</td>
+<td><code>audit.Log</code> 호출 여부 확인</td>
+</tr>
+</tbody></table>
+</details>
+</article></main></body></html>

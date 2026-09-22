@@ -1,0 +1,9 @@
+import {chromium} from '@playwright/test';import fs from 'node:fs/promises';import path from 'node:path';
+const root=path.resolve('public/html/erp'),mp=path.join(root,'captures/modules/manifest.json'),m=JSON.parse(await fs.readFile(mp,'utf8'));m.modules=m.modules.filter(e=>e.kind!=='inline');
+const b=await chromium.launch({channel:'chrome'}),p=await b.newPage({viewport:{width:1920,height:1200}});
+for(const [source,group,selector] of [['deal-dl-260701-09','거래','section[id^="deal-"],[data-deal-information-aside]'],['home','오늘 할 일','[data-module-id]']]){
+ await p.goto('file://'+path.join(root,source+'.html'));await p.evaluate(()=>document.fonts.ready);await p.addStyleTag({content:'html,body,#root,main{height:auto!important;overflow:visible!important}[data-deal-scroll-viewport]{height:auto!important;overflow:visible!important}*,*::before,*::after{animation:none!important;transition:none!important}'})
+ const nodes=p.locator(selector);for(let i=0;i<await nodes.count();i++){const n=nodes.nth(i);if(!await n.isVisible())continue;const info=await n.evaluate(n=>({key:n.id||n.getAttribute('data-module-id')||'information-aside',title:n.querySelector('h2,h3,h4,[data-slot=card-title]')?.textContent||n.innerText.split('\n').find(s=>s.trim()),text:n.innerText.slice(0,160)}));
+ if(info.key==='deal-documents')continue;
+ const id=source+'-module-'+info.key,file='captures/modules/'+id+'.png';await n.screenshot({path:path.join(root,file)});const data=await fs.readFile(path.join(root,file));m.modules.push({id,title:(group==='거래'?'거래 상세':'오늘 할 일')+' · '+info.title,group,parent:source,html:source+'.html'+(info.key.startsWith('deal-')?'#'+info.key:''),file,width:data.readUInt32BE(16),height:data.readUInt32BE(20),kind:'inline',text:info.text});
+ }}await b.close();await fs.writeFile(mp,JSON.stringify(m,null,2)+'\n');console.log('Modules',m.modules.length,'inline',m.modules.filter(e=>e.kind==='inline').map(e=>e.title));

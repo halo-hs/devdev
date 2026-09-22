@@ -1,0 +1,170 @@
+[
+  {
+    "id": "landing",
+    "title": "서비스 소개",
+    "screens": [
+      "landing"
+    ]
+  },
+  {
+    "id": "common",
+    "title": "공통 UI · 사이드바",
+    "screens": [
+      "sidebar-full"
+    ]
+  },
+  {
+    "id": "auth",
+    "title": "로그인·가입·무료체험",
+    "screens": [
+      "auth-login",
+      "auth-signup",
+      "auth-free-trial",
+      "auth-recovery",
+      "auth-terms",
+      "auth-privacy"
+    ]
+  },
+  {
+    "id": "onboarding",
+    "title": "처음 시작하기",
+    "screens": [
+      "onboarding"
+    ]
+  },
+  {
+    "id": "home",
+    "title": "오늘 할 일",
+    "screens": [
+      "home"
+    ]
+  },
+  {
+    "id": "document-upload",
+    "title": "문서 올리기",
+    "screens": [
+      "document-upload",
+      "document-review",
+      "document-connect"
+    ]
+  },
+  {
+    "id": "document-create",
+    "title": "문서 만들기",
+    "screens": [
+      "document-create",
+      "document-create-qt",
+      "document-flow-summary",
+      "share-recipient"
+    ]
+  },
+  {
+    "id": "ai",
+    "title": "AI에게 묻기",
+    "screens": [
+      "ai",
+      "ai-answer"
+    ]
+  },
+  {
+    "id": "deals",
+    "title": "거래",
+    "screens": [
+      "deals",
+      "deal-dl-260701-09"
+    ]
+  },
+  {
+    "id": "shipments",
+    "title": "선적",
+    "screens": [
+      "shipments"
+    ]
+  },
+  {
+    "id": "settlement",
+    "title": "정산",
+    "screens": [
+      "settlement"
+    ]
+  },
+  {
+    "id": "monitoring",
+    "title": "운영 감시",
+    "screens": [
+      "monitoring"
+    ]
+  },
+  {
+    "id": "reports",
+    "title": "결산 리포트",
+    "screens": [
+      "reports"
+    ]
+  },
+  {
+    "id": "sales",
+    "title": "영업 성과",
+    "screens": [
+      "sales"
+    ]
+  },
+  {
+    "id": "notifications",
+    "title": "알림",
+    "screens": [
+      "notifications"
+    ]
+  },
+  {
+    "id": "counterparties",
+    "title": "거래처",
+    "screens": [
+      "counterparties"
+    ]
+  },
+  {
+    "id": "evidence",
+    "title": "증빙",
+    "screens": [
+      "evidence"
+    ]
+  },
+  {
+    "id": "settings",
+    "title": "설정",
+    "screens": [
+      "settings",
+      "settings-action-05",
+      "settings-action-06",
+      "settings-action-07",
+      "settings-action-08",
+      "settings-action-09",
+      "settings-action-10",
+      "settings-action-11",
+      "settings-action-12",
+      "settings-action-13",
+      "settings-action-14",
+      "settings-action-15",
+      "settings-action-16",
+      "settings-action-17",
+      "settings-action-18",
+      "settings-action-19",
+      "settings-notifications"
+    ]
+  },
+  {
+    "id": "billing",
+    "title": "요금제",
+    "screens": [
+      "billing"
+    ]
+  },
+  {
+    "id": "tokens",
+    "title": "토큰",
+    "screens": [
+      "tokens"
+    ]
+  }
+]

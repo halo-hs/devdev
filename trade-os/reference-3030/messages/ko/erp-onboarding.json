@@ -1,0 +1,239 @@
+{
+  "meta": {
+    "title": "온보딩",
+    "description": "ECOYA ERP 역할별 온보딩 진입 흐름."
+  },
+  "breadcrumb": {
+    "page": "온보딩",
+    "member": "멤버"
+  },
+  "welcome": {
+    "ownerTitle": "ECOYA ERP에 오신 것을 환영합니다",
+    "ownerBody": "무역 문서를 업로드하면 정보를 추출합니다. 제안된 내용을 검토·확정한 뒤 기존 거래에 연결하거나 새 거래를 만드세요. 준비되면 함께 일할 팀원을 초대할 수 있습니다.",
+    "ownerInvite": "팀원 초대",
+    "ownerSetup": "설정 시작",
+    "ownerLater": "나중에 하기",
+    "memberTitle": "{org}에 참여했습니다",
+    "memberBody": "문서를 업로드하고 거래와 연결하는 업무를 진행하게 됩니다.",
+    "memberStart": "시작하기",
+    "close": "닫기"
+  },
+  "wizard": {
+    "title": "ECOYA ERP 설정",
+    "stepOf": "{current} / {total} 단계",
+    "profile": {
+      "title": "회사 정보",
+      "desc": "여기에 입력한 정보는 인보이스, 계약서 등 생성 문서에 사용됩니다. 먼저 회사 정보를 채워 고객에게 신뢰감 있는 문서를 제공하세요."
+    },
+    "preferences": {
+      "title": "관심 정보 설정",
+      "desc": "ECOYA가 먼저 보여줄 역할과 무역 신호를 선택하세요.",
+      "personaLabel": "역할",
+      "interestsLabel": "관심 신호",
+      "saving": "저장 중...",
+      "error": "관심 설정을 저장하지 못했습니다. 다시 시도해 주세요.",
+      "personas": {
+        "owner": "오너",
+        "finance": "재무",
+        "sales": "영업",
+        "operations": "운영",
+        "management": "관리"
+      },
+      "interests": {
+        "gp_margin": "GP와 마진",
+        "cash_ar_ap": "현금, AR, AP",
+        "counterparty_risk": "거래처 리스크",
+        "document_gaps": "문서 누락",
+        "logistics_readiness": "물류 준비도",
+        "sales_owner_profitability": "영업 담당자 수익성"
+      }
+    },
+    "upload": {
+      "title": "기존 문서 가져오기",
+      "desc": "이미 가지고 있는 PDF 문서를 올리면 AI가 읽고 거래 정보로 정리합니다. 지금 몇 개만 올려도 되고, 나중에 Inbox에서 더 추가할 수 있습니다.",
+      "cta": "PDF 문서 선택",
+      "uploading": "업로드 중...",
+      "saving": "저장 중...",
+      "uploaded": "{count}개 업로드됨",
+      "empty": "아직 업로드한 문서가 없습니다.",
+      "failed": "{count}개를 업로드하지 못했습니다",
+      "error": "업로드에 실패했습니다. PDF 파일인지 확인해 주세요.",
+      "stateError": "가져오기 상태를 저장하지 못했습니다. 다시 시도해 주세요.",
+      "aha": {
+        "title": "이미 주고받는 문서부터 시작하세요",
+        "desc": "ECOYA는 사용자가 확정하기 전까지 초기 PDF를 설정용으로만 사용합니다. 목표는 재입력을 줄이고, 확인된 정보를 문서·거래·GP·현금흐름·물류 화면에서 재사용하는 것입니다.",
+        "items": {
+          "invoice": {
+            "title": "최근 인보이스",
+            "desc": "거래처, 금액, 통화, 결제조건, 문서번호를 읽습니다."
+          },
+          "bill_of_lading": {
+            "title": "B/L",
+            "desc": "Shipper, Consignee, 항로, 선명, 컨테이너, ETD, ETA를 읽습니다."
+          },
+          "purchase_order": {
+            "title": "PO 또는 SO",
+            "desc": "Buyer, Seller, 품목, 수량, 단가, 무역조건, 예정일을 읽습니다."
+          }
+        },
+        "outcome": "업로드 후 추천 거래처와 초기 신호를 검토한 뒤에만 재사용 가능한 마스터 데이터가 됩니다."
+      }
+    },
+    "review": {
+      "title": "추천 거래처 검토",
+      "desc": "초기 문서에서 고객, 공급처, 파트너 후보를 찾았습니다. 앞으로 재사용할 이름만 승인하세요.",
+      "loading": "초기 문서를 확인하는 중입니다...",
+      "empty": "아직 검토할 추천 항목이 없습니다. 추출이 끝난 뒤 다시 확인할 수 있습니다.",
+      "emptyNoUploads": "업로드된 초기 문서가 없습니다. 지금 계속 진행하거나 최근 인보이스, PO, B/L을 추가한 뒤 다시 확인하세요.",
+      "emptyProcessing": "초기 문서를 아직 읽는 중입니다. 지금 계속 진행해도 되며, 분석이 끝나면 추천 항목이 여기에 표시됩니다.",
+      "emptyNoMatches": "아직 재사용할 거래처 추천을 찾지 못했습니다. 계속 진행한 뒤 Inbox 필드를 검토하세요.",
+      "occurrences": "{count}개 문서",
+      "bulkHint": "{count}개 추천을 재사용 가능한 거래처 데이터로 만들 수 있습니다.",
+      "canonicalLabel": "표준 이름",
+      "approve": "승인",
+      "approveAll": "모두 승인",
+      "dismiss": "제외",
+      "saving": "저장 중...",
+      "loadError": "추천 거래처를 불러오지 못했습니다. 다시 시도해 주세요.",
+      "actionError": "추천 항목을 업데이트하지 못했습니다. 다시 시도해 주세요.",
+      "actionErrorStale": "추천 항목을 업데이트하지 못했고, 목록도 다시 불러오지 못했습니다. 다시 시도해 주세요.",
+      "stateError": "검토 상태를 저장하지 못했습니다. 다시 시도해 주세요.",
+      "roleLabel": "역할",
+      "roles": {
+        "buyer": "구매처 / 고객",
+        "seller": "판매처 / 공급처",
+        "both": "양쪽 / 확인 필요"
+      },
+      "roleEvidence": "{role}: {count}",
+      "sampleDocs": "샘플 문서 {count}개"
+    },
+    "done": {
+      "title": "설정 완료",
+      "desc": "기본 설정이 준비되었습니다. 이제 거래 업무를 시작해 보세요.",
+      "invite": "팀원 초대",
+      "deals": "거래 보기",
+      "inbox": "Inbox 보기",
+      "home": "Home으로 이동"
+    },
+    "cockpit": {
+      "title": "초기 인텔리전스",
+      "desc": "업로드한 초기 문서에서 읽어낸 신호입니다.",
+      "empty": "초기 문서를 몇 개 업로드하면 첫 분석 신호가 표시됩니다.",
+      "nextActions": "다음 작업",
+      "readiness": {
+        "title": "초기 준비도",
+        "blocked": "ECOYA가 초기 설정을 개인화하려면 출시 전 차단 항목 {count}개를 먼저 해결해야 합니다.",
+        "review": "온보딩 품질을 높이기 위해 신호 공백 {count}개를 검토하세요.",
+        "strong": "첫 업무 Cockpit을 시작하기에 충분한 초기 데이터가 준비되었습니다.",
+        "blockingBadge": "P0",
+        "warningBadge": "P1"
+      },
+      "reuse": {
+        "title": "재사용 준비 완료",
+        "desc": "초기 문서에서 사람이 반복 입력하던 필드를 미리 읽었습니다.",
+        "signals": {
+          "counterparty_master": "거래처 마스터",
+          "cash_gp_fields": "현금 및 GP 필드",
+          "logistics_timing": "ETA/ETD와 경로",
+          "trade_terms": "무역 조건",
+          "document_memory": "문서 메모리"
+        }
+      },
+      "filter": {
+        "title": "내 인텔리전스 필터",
+        "desc": "선택한 역할과 관심 신호에 맞춰 초기 문서에서 읽힌 데이터를 점검합니다.",
+        "ready": "준비됨",
+        "needsData": "데이터 필요",
+        "signalCount": "{count}개 신호"
+      },
+      "highlights": {
+        "analysis_progress": "분석된 문서",
+        "currency_amount": "감지된 거래 금액",
+        "counterparty": "주요 거래처",
+        "route": "무역 경로",
+        "shipment_timing": "선적 일정",
+        "payment_terms": "결제 조건",
+        "incoterms": "인코텀즈"
+      },
+      "groups": {
+        "counterparties": "거래처",
+        "amounts": "금액",
+        "routes": "경로",
+        "payment_terms": "결제 조건",
+        "shipment_timing": "선적 일정",
+        "incoterms": "인코텀즈",
+        "doc_types": "문서 유형"
+      },
+      "actions": {
+        "upload_starter_documents": "최근 인보이스, PO, B/L 업로드",
+        "wait_for_extraction": "문서 추출 완료 대기",
+        "review_starter_documents": "Inbox에서 초기 문서 검토",
+        "review_counterparties": "추천 거래처 검토",
+        "open_settlement": "현금 및 정산 신호 확인",
+        "open_shipments": "물류 준비 상태 확인",
+        "open_home": "ECOYA cockpit 열기"
+      }
+    },
+    "back": "이전",
+    "next": "다음",
+    "skip": "건너뛰기",
+    "finish": "완료"
+  },
+  "startGuide": {
+    "title": "시작 가이드",
+    "progress": "{done}/{total}",
+    "fallbackItem": "온보딩 항목",
+    "groups": {
+      "common": "조직 안내",
+      "product": "제품 시작"
+    },
+    "companyProfile": "회사 정보 입력",
+    "companyProfileMeta": "Settings > Company profile",
+    "ownerInvite": "팀원 초대",
+    "ownerInviteMeta": "Settings > Member management",
+    "bootstrapImport": "초기 문서 가져오기",
+    "bootstrapImportMeta": "Onboarding > 최근 인보이스, PO, B/L 업로드",
+    "ownerFirstDeal": "첫 거래 검토",
+    "ownerFirstDealMeta": "첫 Confirm 완료 시 자동 체크",
+    "operatorFirstUpload": "첫 문서 업로드",
+    "operatorFirstUploadMeta": "Inbox UploadZone으로 이동",
+    "operatorFirstConfirm": "첫 Confirm 완료",
+    "operatorFirstConfirmMeta": "Confirm 완료 시 자동 체크",
+    "trailing": {
+      "go": "이동",
+      "deals": "Deals",
+      "inbox": "Inbox",
+      "confirm": "확인",
+      "continue": "이어하기"
+    },
+    "expand": "시작 가이드 펼치기",
+    "collapse": "시작 가이드 접기",
+    "completed": "완료됨",
+    "loading": "시작 가이드를 불러오는 중입니다.",
+    "missingConfig": "시작 가이드를 준비하는 중입니다.",
+    "loadError": "시작 가이드를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    "updateError": "시작 가이드를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    "bootstrapImportMetaError": "초기 문서 분석 상태를 확인하지 못함",
+    "bootstrapImportLoadingMeta": "초기 문서 분석 상태를 확인하는 중...",
+    "bootstrapAnalysisError": "초기 문서 분석 상태를 확인하지 못했습니다. 회사 설정은 계속할 수 있습니다.",
+    "bootstrapAnalysisRetry": "분석 상태 다시 확인",
+    "bootstrapAnalysisRetrying": "다시 확인하는 중...",
+    "bootstrapAnalysisRetryFailed": "재시도했지만 초기 문서 분석 상태를 확인하지 못했습니다. 회사 설정은 계속할 수 있습니다.",
+    "tradeFirstDocument": "첫 PDF 문서 올리기",
+    "tradeFirstDocumentMeta": "최근 발주서(PO) 1건을 권장합니다",
+    "tradeConfirmResult": "AI 결과 확인·확정하기",
+    "tradeConfirmResultMeta": "추출 필드·원문 근거·신뢰도를 확인합니다",
+    "tradeLinkDeal": "거래 만들기·연결하기",
+    "tradeLinkDealMeta": "거래를 고르거나 만든 뒤 Confirm 합니다",
+    "tradeAskAI": "거래 데이터에 AI로 질문하기",
+    "tradeAskAIMeta": "방금 만든 거래를 기준으로 물어봅니다",
+    "snapFirstTask": "첫 업무 만들기",
+    "snapFirstTaskMeta": "새 업무 화면에서 작업 내용을 입력합니다",
+    "snapAssignWorker": "작업자 연결하기",
+    "snapAssignWorkerMeta": "기준 업무에서 App worker를 배정하거나 작업 링크를 연결합니다",
+    "snapReviewResult": "첫 결과 검토하기",
+    "snapReviewResultMeta": "기준 업무에서 제출된 첫 결과를 검토합니다",
+    "snapPublishReport": "첫 리포트 발행하기",
+    "snapPublishReportMeta": "기준 업무의 첫 리포트 발행 화면으로 이동합니다"
+  }
+}

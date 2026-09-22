@@ -1,0 +1,360 @@
+[
+  {
+    "id": "sales-sgd",
+    "title": "영업 성과 · SGD 조회",
+    "group": "영업 성과",
+    "route": "/erp/sales"
+  },
+  {
+    "id": "shipments-list-1-page-2",
+    "title": "선적 · 목록 1 · 2페이지",
+    "group": "선적",
+    "parent": "shipments",
+    "route": "/erp/shipments",
+    "workflow": "목록 페이지",
+    "sourceId": "shipments",
+    "action": "2페이지"
+  },
+  {
+    "id": "shipments-list-1-page-3",
+    "title": "선적 · 목록 1 · 3페이지",
+    "group": "선적",
+    "parent": "shipments",
+    "route": "/erp/shipments",
+    "workflow": "목록 페이지",
+    "sourceId": "shipments",
+    "action": "3페이지"
+  },
+  {
+    "id": "settlement-list-1-page-2",
+    "title": "정산 · 목록 1 · 2페이지",
+    "group": "정산",
+    "parent": "settlement",
+    "route": "/erp/settlement",
+    "workflow": "목록 페이지",
+    "sourceId": "settlement",
+    "action": "2페이지"
+  },
+  {
+    "id": "settlement-list-2-page-2",
+    "title": "정산 · 목록 2 · 2페이지",
+    "group": "정산",
+    "parent": "settlement",
+    "route": "/erp/settlement",
+    "workflow": "목록 페이지",
+    "sourceId": "settlement",
+    "action": "2페이지"
+  },
+  {
+    "id": "shipments-action-41",
+    "title": "선적 · 전체14",
+    "group": "선적",
+    "parent": "shipments",
+    "route": "/erp/shipments"
+  },
+  {
+    "id": "shipments-action-42",
+    "title": "선적 · 운송 중8",
+    "group": "선적",
+    "parent": "shipments",
+    "route": "/erp/shipments"
+  },
+  {
+    "id": "shipments-action-43",
+    "title": "선적 · 도착 임박3",
+    "group": "선적",
+    "parent": "shipments",
+    "route": "/erp/shipments"
+  },
+  {
+    "id": "shipments-action-44",
+    "title": "선적 · 지연1",
+    "group": "선적",
+    "parent": "shipments",
+    "route": "/erp/shipments"
+  },
+  {
+    "id": "shipments-action-45",
+    "title": "선적 · 도착2",
+    "group": "선적",
+    "parent": "shipments",
+    "route": "/erp/shipments"
+  },
+  {
+    "id": "settlement-action-04",
+    "title": "정산 · 회계용 CSV",
+    "group": "정산",
+    "parent": "settlement",
+    "route": "/erp/settlement"
+  },
+  {
+    "id": "settlement-action-29",
+    "title": "정산 · 입금 기록",
+    "group": "정산",
+    "parent": "settlement",
+    "route": "/erp/settlement"
+  },
+  {
+    "id": "shipments-action-51",
+    "title": "선적 · 확인",
+    "group": "선적",
+    "parent": "shipments",
+    "route": "/erp/deals/DL-260701-04"
+  },
+  {
+    "id": "settlement-action-18",
+    "title": "정산 · 자금 일정",
+    "group": "정산",
+    "parent": "settlement",
+    "route": "/erp/settlement"
+  },
+  {
+    "id": "settlement-action-19",
+    "title": "정산 · 지급 기록",
+    "group": "정산",
+    "parent": "settlement",
+    "route": "/erp/settlement"
+  },
+  {
+    "id": "shipments-action-53",
+    "title": "선적 · 확인",
+    "group": "선적",
+    "parent": "shipments",
+    "route": "/erp/deals/DL-260630-06"
+  },
+  {
+    "id": "settlement-action-22",
+    "title": "정산 · ACME GmbH연체 42,000.00USDAR 82,000.00 · AP 0.00",
+    "group": "정산",
+    "parent": "settlement",
+    "route": "/erp/settlement"
+  },
+  {
+    "id": "settlement-action-23",
+    "title": "정산 · KATAMAN ASIA-PACIFICUSDAR 0.00 · AP 120,000.00",
+    "group": "정산",
+    "parent": "settlement",
+    "route": "/erp/settlement"
+  },
+  {
+    "id": "shipments-action-38",
+    "title": "선적 · 페이지당",
+    "group": "선적",
+    "parent": "shipments",
+    "route": "/erp/shipments"
+  },
+  {
+    "id": "settlement-action-25",
+    "title": "정산 · 보낼 돈",
+    "group": "정산",
+    "parent": "settlement",
+    "route": "/erp/settlement"
+  },
+  {
+    "id": "settlement-action-26",
+    "title": "정산 · 정산 상태 필터",
+    "group": "정산",
+    "parent": "settlement",
+    "route": "/erp/settlement"
+  },
+  {
+    "id": "settlement-action-29",
+    "title": "정산 · 입금 기록",
+    "group": "정산",
+    "parent": "settlement",
+    "route": "/erp/settlement"
+  },
+  {
+    "id": "settlement-action-30",
+    "title": "정산 · 거래처별",
+    "group": "정산",
+    "parent": "settlement",
+    "route": "/erp/settlement"
+  },
+  {
+    "id": "settlement-action-31",
+    "title": "정산 · 담당자별",
+    "group": "정산",
+    "parent": "settlement",
+    "route": "/erp/settlement"
+  },
+  {
+    "id": "monitoring-action-04",
+    "title": "운영 감시 · 심각도 필터",
+    "group": "운영 감시",
+    "parent": "monitoring",
+    "route": "/erp/monitoring"
+  },
+  {
+    "id": "monitoring-action-05",
+    "title": "운영 감시 · 담당자 필터",
+    "group": "운영 감시",
+    "parent": "monitoring",
+    "route": "/erp/monitoring"
+  },
+  {
+    "id": "monitoring-action-07",
+    "title": "운영 감시 · 6월 재활용 원자재 수입",
+    "group": "운영 감시",
+    "parent": "monitoring",
+    "route": "/erp/deals/DL-260701-04"
+  },
+  {
+    "id": "reports-action-10",
+    "title": "결산 리포트 · 전체 담당자",
+    "group": "결산 리포트",
+    "parent": "reports",
+    "route": "/erp/reports"
+  },
+  {
+    "id": "reports-action-11",
+    "title": "결산 리포트 · 다시 조회",
+    "group": "결산 리포트",
+    "parent": "reports",
+    "route": "/erp/reports"
+  },
+  {
+    "id": "reports-action-14",
+    "title": "결산 리포트 · 재개방",
+    "group": "결산 리포트",
+    "parent": "reports",
+    "route": "/erp/reports"
+  },
+  {
+    "id": "sales-action-08",
+    "title": "영업 성과 · SGD",
+    "group": "영업 성과",
+    "parent": "sales",
+    "route": "/erp/sales"
+  },
+  {
+    "id": "monitoring-action-18",
+    "title": "운영 감시 · DL-260625-03",
+    "group": "운영 감시",
+    "parent": "monitoring",
+    "route": "/erp/deals/DL-260625-03"
+  },
+  {
+    "id": "monitoring-action-19",
+    "title": "운영 감시 · 거래에서 확인",
+    "group": "운영 감시",
+    "parent": "monitoring",
+    "route": "/erp/deals/DL-260625-03"
+  },
+  {
+    "id": "monitoring-action-20",
+    "title": "운영 감시 · DL-260512-08",
+    "group": "운영 감시",
+    "parent": "monitoring",
+    "route": "/erp/deals/DL-260512-08"
+  },
+  {
+    "id": "document-review-action-08",
+    "title": "문서 올리기 · 문서 검토 · 수정 필요",
+    "group": "문서 올리기",
+    "parent": "document-review",
+    "route": "/erp/documents/upload/%EC%9D%B8%EB%B3%B4%EC%9D%B4%EC%8A%A4_2607_003.pdf/review"
+  },
+  {
+    "id": "document-review-action-06",
+    "title": "문서 올리기 · 문서 검토 · 원문과 비교",
+    "group": "문서 올리기",
+    "parent": "document-review",
+    "route": "/erp/documents/upload/%EC%9D%B8%EB%B3%B4%EC%9D%B4%EC%8A%A4_2607_003.pdf/review"
+  },
+  {
+    "id": "document-review-action-08",
+    "title": "문서 올리기 · 문서 검토 · 수정 필요",
+    "group": "문서 올리기",
+    "parent": "document-review",
+    "route": "/erp/documents/upload/%EC%9D%B8%EB%B3%B4%EC%9D%B4%EC%8A%A4_2607_003.pdf/review"
+  },
+  {
+    "id": "deal-dl-260701-09-action-19",
+    "title": "거래 · DL-260701-09 · 메모·이력",
+    "group": "거래",
+    "parent": "deal-dl-260701-09",
+    "route": "/erp/deals/DL-260701-09"
+  },
+  {
+    "id": "deal-dl-260701-09-action-09",
+    "title": "거래 · DL-260701-09 · 노트 추가",
+    "group": "거래",
+    "parent": "deal-dl-260701-09",
+    "route": "/erp/deals/DL-260701-09"
+  },
+  {
+    "id": "reports-close-check-action-16",
+    "title": "결산 리포트 · 마감 전 점검 · 누락 문서 확인 완료",
+    "group": "결산 리포트",
+    "parent": "reports-close-check",
+    "route": "/erp/reports"
+  },
+  {
+    "id": "deal-dl-260701-09-action-48",
+    "title": "거래 · DL-260701-09 · SNAP 연결",
+    "group": "거래",
+    "parent": "deal-dl-260701-09",
+    "route": "/erp/deals/DL-260701-09"
+  },
+  {
+    "id": "deal-dl-260701-09-action-49",
+    "title": "거래 · DL-260701-09 · 새로고침",
+    "group": "거래",
+    "parent": "deal-dl-260701-09",
+    "route": "/erp/deals/DL-260701-09"
+  },
+  {
+    "id": "deal-dl-260701-09-action-50",
+    "title": "거래 · DL-260701-09 · B/L 014W-01 일정 07.20부터 08.03까지",
+    "group": "거래",
+    "parent": "deal-dl-260701-09",
+    "route": "/erp/deals/DL-260701-09"
+  },
+  {
+    "id": "deal-dl-260701-09-action-51",
+    "title": "거래 · DL-260701-09 · B/L 014W-02 일정 07.27부터 08.11까지",
+    "group": "거래",
+    "parent": "deal-dl-260701-09",
+    "route": "/erp/deals/DL-260701-09"
+  },
+  {
+    "id": "deal-dl-260701-09-action-52",
+    "title": "거래 · DL-260701-09 · B/L 014W-03 일정 07.22부터 10.17까지",
+    "group": "거래",
+    "parent": "deal-dl-260701-09",
+    "route": "/erp/deals/DL-260701-09"
+  },
+  {
+    "id": "settings-action-05",
+    "title": "설정 · 소속 Organization · 이전 화면 · 이전 화면",
+    "group": "변경된 화면",
+    "parent": "settings",
+    "route": "/erp/settings",
+    "retired": true
+  },
+  {
+    "id": "settings-action-07",
+    "title": "설정 · 사용자 관리 · 이전 화면 · 이전 화면",
+    "group": "변경된 화면",
+    "parent": "settings",
+    "route": "/erp/settings",
+    "retired": true
+  },
+  {
+    "id": "settings-action-08",
+    "title": "설정 · 제품 및 구독 · 이전 화면 · 이전 화면",
+    "group": "변경된 화면",
+    "parent": "settings",
+    "route": "/erp/settings",
+    "retired": true
+  },
+  {
+    "id": "settings-action-10",
+    "title": "설정 · 업무 기본 설정 · 이전 화면 · 이전 화면",
+    "group": "변경된 화면",
+    "parent": "settings",
+    "route": "/erp/settings",
+    "retired": true
+  }
+]

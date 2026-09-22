@@ -1,0 +1,165 @@
+{
+  "workspaces": {
+    "meta": {
+      "title": "내 조직 · ECOYA",
+      "description": "가입된 조직을 확인하고 조직에서 나갑니다."
+    },
+    "eyebrow": "일반",
+    "title": "내 조직",
+    "subtitle": "가입된 조직을 확인하고, 더 이상 참여하지 않는 조직에서 나갑니다. 계정과 다른 조직의 멤버십은 그대로 유지됩니다.",
+    "createOrganization": "새 조직 만들기",
+    "productsLink": "제품 및 구독 보기",
+    "loading": "조직을 불러오는 중입니다",
+    "table": {
+      "workspace": "조직",
+      "product": "제품",
+      "role": "내 역할",
+      "activeDeals": "활성 업무",
+      "leaveAvailability": "나가기 가능 여부"
+    },
+    "currentBadge": "현재",
+    "unknownValue": "—",
+    "leave": "조직 나가기",
+    "leaveAvailable": "나갈 수 있습니다",
+    "leaveBlockedNotCurrent": "이 조직으로 전환한 뒤 나갈 수 있습니다",
+    "switchToLeave": "전환하기",
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member",
+      "operator": "Operator"
+    },
+    "preparing": "활성 업무를 확인하는 중입니다",
+    "assignment": {
+      "title": "활성 업무 처리 방법을 선택하세요",
+      "description": "이 조직에서 담당 중인 활성 Deal이 {count}건 있습니다. 나가기 전에 모두 이관하거나 회수해야 합니다.",
+      "legend": "업무 처리 방식",
+      "transfer": "한 명에게 일괄 이관",
+      "transferHint": "선택한 멤버가 활성 Deal을 모두 이어받습니다.",
+      "recall": "미배정으로 회수",
+      "recallHint": "활성 Deal이 담당자 없음 상태가 됩니다.",
+      "recipientLabel": "이관 대상",
+      "recipientPlaceholder": "멤버를 선택하세요",
+      "noRecipients": "이관할 수 있는 다른 멤버가 없습니다. 미배정으로 회수만 선택할 수 있습니다.",
+      "next": "다음",
+      "cancel": "취소"
+    },
+    "confirm": {
+      "title": "나가기 전에 확인하세요",
+      "workspace": "조직",
+      "role": "이전 역할",
+      "activeDeals": "활성 Deal",
+      "activeDealsValue": "{count}건",
+      "plan": "업무 처리",
+      "planNone": "이관할 활성 Deal 없음",
+      "planRecall": "미배정으로 회수",
+      "planTransfer": "{recipient}에게 일괄 이관",
+      "notice": "멤버십과 이 조직 접근이 종료됩니다. 계정, 개인정보, 다른 조직의 멤버십은 삭제되지 않으며, 다시 참여하려면 새 초대가 필요합니다.",
+      "submit": "나가기",
+      "submitting": "나가는 중",
+      "cancel": "취소"
+    },
+    "ownerSuccessor": {
+      "title": "다른 Owner가 필요합니다",
+      "description": "이 조직의 마지막 Owner입니다. 다른 멤버를 Owner로 지정하거나 소유권을 넘긴 뒤 다시 시도하세요. 지금은 아무것도 변경되지 않았습니다.",
+      "back": "목록으로 돌아가기"
+    },
+    "conflict": {
+      "title": "조직 정보가 그사이 바뀌었습니다",
+      "description": "멤버십, Owner, 이관 대상 또는 업무 상태가 변경되었습니다. 최신 목록을 다시 불러온 뒤 선택하세요. 지금은 아무것도 변경되지 않았습니다.",
+      "refresh": "목록 다시 불러오기"
+    },
+    "error": {
+      "title": "나가기를 완료하지 못했습니다",
+      "description": "요청이 처리되지 않아 멤버십이 그대로 유지됩니다. 잠시 후 다시 시도하세요.",
+      "retry": "다시 시도",
+      "loadTitle": "조직 목록을 불러오지 못했습니다",
+      "loadDescription": "목록을 확인할 수 없어 이전에 보던 정보를 그대로 표시하지 않습니다. 다시 불러오세요.",
+      "loadRetry": "다시 불러오기"
+    },
+    "successSwitched": {
+      "title": "조직에서 나왔습니다",
+      "description": "이제 {workspace} 조직을 사용합니다. 나간 조직의 화면과 데이터는 더 이상 열리지 않습니다.",
+      "cta": "{workspace} 열기"
+    },
+    "successNeedsWorkspace": {
+      "title": "조직에서 나왔습니다",
+      "description": "가입된 조직이 없습니다. 계정은 그대로 유지되며, 새 조직을 만들거나 초대를 받으면 다시 시작할 수 있습니다.",
+      "cta": "조직 만들기"
+    }
+  },
+  "products": {
+    "meta": {
+      "title": "제품 및 구독 · ECOYA",
+      "description": "조직의 제품별 무료 체험·구독 상태를 확인합니다."
+    },
+    "eyebrow": "조직",
+    "title": "제품 및 구독",
+    "subtitle": "조직이 사용 중인 제품의 상태를 한곳에서 확인하고, 다음 행동을 이어갑니다. 시작·구독은 Organization OWNER만 실행할 수 있습니다.",
+    "backToWorkspaces": "소속 조직 보기",
+    "loadingActions": "제품 상태를 확인하는 중입니다",
+    "retry": "다시 시도",
+    "ownerOnly": "Organization OWNER가 시작·구독할 수 있습니다",
+    "states": {
+      "not_started": "무료 체험 미시작",
+      "trial_active": "무료 체험 중 · 무료 이용량 사용 가능",
+      "trial_exhausted": "무료 이용량 소진",
+      "trial_expired": "무료 체험 기간 종료",
+      "paid_active": "유료 구독 활성",
+      "paid_inactive": "유료 구독 비활성",
+      "unknown": "상태를 확인할 수 없습니다"
+    },
+    "descriptions": {
+      "not_started": "아직 시작하지 않은 제품입니다. 무료 체험 또는 구독을 시작하면 사용할 수 있습니다.",
+      "trial_active": "무료 체험으로 사용 중입니다. 기간이 끝나거나 무료 이용량을 모두 사용하면 이 제품이 잠깁니다.",
+      "trial_exhausted": "무료 이용량을 모두 사용해 이 제품은 전체 잠금 상태입니다. 입력한 데이터는 보존되며 구독 후 이어서 사용할 수 있습니다.",
+      "trial_expired": "무료 체험 기간이 끝나 이 제품은 전체 잠금 상태입니다. 입력한 데이터는 보존되며 구독 후 이어서 사용할 수 있습니다.",
+      "paid_active": "유료 구독으로 사용 중입니다.",
+      "paid_inactive": "유료 구독이 활성 상태가 아닙니다.",
+      "unknown": "지금은 이 제품의 상태를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요."
+    },
+    "actions": {
+      "subscribe": "구독하기",
+      "viewPlans": "플랜 보기",
+      "checkoutDisabled": "결제 준비 중"
+    },
+    "noOrganization": {
+      "title": "현재 선택된 조직이 없습니다",
+      "description": "제품과 구독은 조직 단위로 관리됩니다. 조직을 선택하거나 새로 만든 뒤 다시 확인해 주세요.",
+      "cta": "소속 조직 보기"
+    }
+  },
+  "organization": {
+    "meta": {
+      "title": "조직 · ECOYA",
+      "description": "현재 조직 정보를 확인하고 멤버와 초대를 관리합니다."
+    },
+    "eyebrow": "조직",
+    "title": "조직",
+    "subtitle": "현재 조직의 기본 정보를 확인하고, 조직 멤버와 초대를 관리합니다. 제품 이용 상태와 무관하게 언제든 사용할 수 있습니다.",
+    "entryLink": "조직 정보·사용자 관리",
+    "workspacesLink": "소속 조직 보기",
+    "productsLink": "제품 및 구독 보기",
+    "profile": {
+      "title": "조직 정보",
+      "name": "조직 이름",
+      "role": "내 역할",
+      "loading": "조직 정보를 불러오는 중입니다", "retry": "다시 시도", "ownerHelp": "ECOYA 제품에서 공통으로 사용하는 법적·연락처 정보를 관리합니다.", "readOnlyHelp": "모든 조직 구성원이 볼 수 있으며 Owner만 변경할 수 있습니다.", "missing": "입력되지 않음", "updatedAt": "마지막 수정 {value}", "save": "변경사항 저장", "saved": "변경사항을 저장했습니다", "load400": "조직 정보 요청이 올바르지 않습니다.", "load401": "세션이 만료되었습니다. 다시 로그인해 주세요.", "load403": "이 조직 정보를 볼 권한이 없습니다.", "loadDefault": "조직 정보를 불러오지 못해 기존 값을 표시하지 않습니다.", "save400": "입력값을 확인해 주세요. 변경된 내용은 없습니다.", "save401": "세션이 만료되었습니다. 로그인 후 다시 저장해 주세요.", "save403": "조직 Owner만 이 정보를 저장할 수 있습니다.", "saveDefault": "변경사항을 저장하지 못했습니다. 입력한 내용은 유지됩니다.",
+      "fields": { "legal_name": "법적 회사명", "display_name": "표시 이름", "registration_no": "사업자 등록번호", "phone": "전화번호", "email": "이메일", "country_code": "국가 코드", "postal_code": "우편번호", "administrative_area": "시·도 / 주", "city": "도시", "address_line1": "주소 1", "address_line2": "주소 2", "locale": "언어 및 지역", "timezone": "시간대" }
+    },
+    "members": {
+      "title": "사용자 관리",
+      "roleNotice": "Organization OWNER 또는 ADMIN만 조직 멤버와 초대를 관리할 수 있습니다."
+    },
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+    },
+    "noOrganization": {
+      "title": "현재 선택된 조직이 없습니다",
+      "description": "조직 정보와 사용자 관리는 조직 단위로 제공됩니다. 조직을 선택하거나 새로 만든 뒤 다시 확인해 주세요.",
+      "cta": "소속 조직 보기"
+    }
+  }
+}

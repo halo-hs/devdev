@@ -1,0 +1,15 @@
+{
+  "sourceCommit": "3ac3e4f262a360f62145392990f17b9362323cde",
+  "capturedDeployment": "https://c853433e.devdev-e6t.pages.dev",
+  "figma": "https://www.figma.com/design/utViiVayT0rWuYSB5bpZ31?node-id=557-2",
+  "formExamples": 39,
+  "localTestsPassed": 66,
+  "deployedTestsPassed": 2,
+  "screens": 810,
+  "modules": 137,
+  "authLayout": "unchanged",
+  "deploymentCommit": "0c00e8df083ff3ef4b6e824c5647173dd45fc449",
+  "referenceEntries": 994,
+  "referenceImages": 978,
+  "demo": true
+}

@@ -1,0 +1,388 @@
+{
+  "meta": {
+    "description": "ECOYA ERP 역할별 Home 대시보드."
+  },
+  "marketTicker": {
+    "eyebrow": "시장 맥락",
+    "cadence": "약 1시간 갱신 · 공개 출처",
+    "demo": "데모",
+    "more": "Intelligence →"
+  },
+  "today": {
+    "tagline": "서류는 AI가 읽고 만들고, 당신은 확인만.",
+    "sourceLoadError": "조회 실패: {source}",
+    "pulse": {
+      "overdue": "AR/AP 만기",
+      "docGap": "서류 갭",
+      "risk": "선적 리스크",
+      "riskStale": "동기화 실패 — 수치가 다를 수 있음",
+      "adjustedGp": "송장 기준 추정 거래손익",
+      "adjustedGpMulti": "{count}개 통화 중 대표",
+      "gpRisk": "거래손익 검토",
+      "gpRiskSub": "{loss}건 손실 · {blocked}건 보완"
+    },
+    "workQueue": {
+      "title": "작업함",
+      "subtitle": "{count}건 대기",
+      "loading": "작업함 불러오는 중…",
+      "loadError": "Inbox 서류를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      "retry": "다시 시도",
+      "empty": "대기 중인 작업이 없습니다. 새 서류를 올리거나 문서를 만들어 보세요.",
+      "emptyCta": "서류 올리기",
+      "quality": "품질 {score}/100",
+      "fixRequiredFields": "고객 전달 전 필수 항목을 채워주세요",
+      "addEta": "고객 링크 전 ETA/ETD를 입력하세요",
+      "negativeGp": "추정 거래손실",
+      "handoffBlocked": "회계 인계 차단",
+      "blockers": "차단 요인: {list}",
+      "dataQuality": "데이터 품질: {value}",
+      "unassigned": "미배정"
+    },
+    "decision": {
+      "title": "오늘 확인이 필요합니다",
+      "subtitle": "대표님이 결정할 {count}건",
+      "loading": "결정 필요 불러오는 중…",
+      "empty": "지금 결정할 예외가 없습니다.",
+      "cardCta": "처리",
+      "cardHint": "확인 후 다음 단계로 진행하세요.",
+      "needsConfirm": "확인 필요"
+    },
+    "cta": {
+      "confirm": "확인",
+      "approve": "승인",
+      "send": "발송",
+      "open": "열기",
+      "inbox": "문서 올리기",
+      "documents": "문서 보기",
+      "money": "정산 보기",
+      "docGap": "거래 보기",
+      "shipment": "선적 보기",
+      "finance": "거래손익 검토",
+      "viewDeal": "거래 보기",
+      "relatedWork": "관련 업무 열기"
+    },
+    "row": {
+      "confirm": "{type} · {file}",
+      "confidence": "AI {pct}% · 확인 필요",
+      "unlinked": "거래 미연결",
+      "approval": "{type} · 승인 대기",
+      "sendReady": "{type} · 보낼 준비됨",
+      "sendDraft": "{type} · 작성 중",
+      "overdue": "만기·연체 {count}건",
+      "docGap": "ETA 임박·서류 없음 {count}건",
+      "shipment": "선적 임박·지연 {count}건",
+      "financeGap": "{party} 추정 거래손익 {gp}",
+      "insightFallback": "검토 필요",
+      "unassignedParty": "담당 미지정",
+      "actionItem": {
+        "entityTypes": {
+          "deal": "거래",
+          "document": "문서",
+          "settlement": "정산",
+          "shipment": "운송",
+          "counterparty": "거래처",
+          "other": "업무"
+        },
+        "statuses": {
+          "open": "열림",
+          "ack": "확인됨",
+          "resolved": "처리됨"
+        },
+        "due": "기한 {date}",
+        "dueOverdue": "기한 초과 · {date}",
+        "assignedToMe": "나에게 배정",
+        "assignedToOther": "다른 담당자",
+        "unassigned": "담당 미지정",
+        "readOnly": "권한이 없어 조회만 가능",
+        "requestAccess": "필요한 경우 담당자 또는 관리자에게 요청하세요"
+      },
+      "gate": {
+        "fieldsBlocked": "필수 필드 {count}개 미입력 — 발송 전 보완해 주세요",
+        "scheduleMissing": "ETA·ETD 미입력 — 고객 전달 전 보완해 주세요"
+      },
+      "finance": {
+        "negativeGp": "추정 거래손실",
+        "negativeGpWithPct": "추정 거래손실 ({pct}%)",
+        "handoffBlocked": "회계 인계 보류",
+        "blockers": "보완 필요 {count}건",
+        "dataQuality": "데이터 확인 필요"
+      },
+      "insights": {
+        "document-readiness": {
+          "title": "서류 확인 대기",
+          "body": "AI가 읽은 서류의 확인이 밀려 있습니다. 문서 올리기에서 확인해 주세요."
+        },
+        "compliance-gap": {
+          "title": "필수 서류 갭",
+          "body": "거래에 필요한 서류가 비어 있습니다. 문서 화면에서 보완해 주세요."
+        },
+        "shipment-readiness": {
+          "title": "선적 준비 점검",
+          "body": "선적 전에 확인할 항목이 있습니다. 선적 화면에서 확인해 주세요."
+        },
+        "shipment-pipeline": {
+          "title": "선적 일정 점검",
+          "body": "진행 중인 선적 일정을 점검해 주세요."
+        },
+        "margin-risk": {
+          "title": "마진 리스크",
+          "body": "마진이 흔들리는 거래가 있습니다. 거래 화면에서 확인해 주세요."
+        },
+        "margin-leakage": {
+          "title": "마진 누수",
+          "body": "비용 반영 후 마진이 줄어든 거래가 있습니다. 거래 화면에서 확인해 주세요."
+        },
+        "landed-cost": {
+          "title": "총 원가 점검",
+          "body": "원가 구성 확인이 필요한 거래가 있습니다. 거래 화면에서 확인해 주세요."
+        },
+        "cash-conversion-cycle": {
+          "title": "현금 전환 주기",
+          "body": "현금 전환 주기가 길어지고 있습니다. 정산에서 확인해 주세요."
+        },
+        "near-term-cash-gap": {
+          "title": "단기 현금 갭",
+          "body": "가까운 만기의 지출이 수금보다 큽니다. 정산에서 확인해 주세요."
+        },
+        "cashflow-overdue-ar": {
+          "title": "연체 미수금",
+          "body": "연체 미수금이 현금흐름을 묶고 있습니다. 정산에서 회수 상태를 확인해 주세요."
+        },
+        "counterparty-dso": {
+          "title": "거래처 수금 지연",
+          "body": "수금이 늦어지는 거래처가 있습니다. 정산에서 확인해 주세요."
+        },
+        "fx-exposure": {
+          "title": "환노출 확대",
+          "body": "특정 통화 쏠림이 커지고 있습니다. 정산에서 확인해 주세요."
+        },
+        "counterparty-concentration": {
+          "title": "거래처 집중",
+          "body": "특정 거래처 비중이 큽니다. 정산에서 확인해 주세요."
+        }
+      }
+    }
+  },
+  "kpi": {
+    "openDeals": "진행 거래",
+    "closedDeals": "종료 거래",
+    "valueUsd": "거래액 (USD)",
+    "valueKrw": "거래액 (KRW)",
+    "asOf": "기준 시각 {date}",
+    "dealsUnit": "건",
+    "overdue": "연체 수금/지급 — 정산에서 확인",
+    "shipmentRisk": "도착 임박·지연 선적 — 배송 추적",
+    "reviewNeeded": "검토 필요 거래 — AI가 불일치를 잡았어요",
+    "myPending": "내 대기 작업",
+    "todayDue": "오늘 마감",
+    "sharedRisk": "공유 업무 리스크",
+    "sharedDeal": "함께 보는 Deal",
+    "myDeal": "내 Deal",
+    "todayCompleted": "오늘 완료",
+    "todayProcessed": "오늘 처리",
+    "completionRate": "완료율",
+    "receivable": "받을 돈 (AR)",
+    "payable": "줄 돈 (AP)"
+  },
+  "intel": {
+    "title": "글로벌 시그널",
+    "titlePersonalized": "맞춤 시장·리스크 브리핑",
+    "subtitlePersonalized": "{persona} 관심사 기준 · Intelligence 연동",
+    "subtitleLegacy": "플랫폼 공개 시그널 (맞춤 feed 미연결)",
+    "labLink": "Intelligence에서 더 보기",
+    "openBriefing": "브리핑 열기",
+    "openMap": "인과 지도",
+    "scoreLabel": "맞춤 {score}",
+    "noAutoAnalyze": "ERP에서는 요약만 표시합니다. 심층 분석은 Intelligence에서 진행합니다.",
+    "priorityCritical": "긴급",
+    "priorityHigh": "높음",
+    "priorityMedium": "중간",
+    "priorityLow": "낮음",
+    "empty": "관련 시그널이 감지되면 여기에 표시됩니다."
+  },
+  "benchmarks": {
+    "title": "관련 벤치마크",
+    "subtitle": "시장·환율 참조 지표의 최신 관측",
+    "series": "지표",
+    "value": "값",
+    "observed": "관측일",
+    "unit": "단위",
+    "labLink": "Intelligence Lab → benchmarks",
+    "empty": "벤치마크 데이터가 쌓이면 여기에 표시됩니다."
+  },
+  "ownerCockpit": {
+    "title": "운영 감시",
+    "detailLink": "운영 상세 →",
+    "todayProcessed": "오늘 처리",
+    "completionRate": "완료율",
+    "loading": "운영 지표 불러오는 중…"
+  },
+  "ownerBrief": {
+    "title": "경영 브리프",
+    "sourceLabel": "자동 요약",
+    "sourceLabelAi": "AI 요약",
+    "exceptionLoad": "거래 {dealCount}건에 미해결 예외 {count}건이 있습니다.",
+    "exceptionLoadCritical": "거래 {dealCount}건에 미해결 예외 {count}건이 있으며, 이 중 {critical}건이 심각합니다.",
+    "mostUrgent": "가장 시급한 건: {ref} — {risk}.",
+    "mostUrgentDetail": "가장 시급한 건: {ref} — {risk} ({detail}).",
+    "financialWatch": "재무 관찰: {items}.",
+    "financialAlert": "확인이 필요한 재무 경고",
+    "unknownRisk": "분류되지 않은 예외",
+    "clean": "미해결 예외나 중요한 재무 경고가 없습니다. 장부가 안정적입니다."
+  },
+  "ownerInsightCockpit": {
+    "goTo": "바로 가기 →",
+    "dismiss": "이번 주 숨기기",
+    "title": "재무 인사이트",
+    "subtitle": "현금흐름 · 마진 · 거래처 · 환노출 — 내 거래 데이터 기반",
+    "empty": "거래와 서류가 쌓이면 현금흐름·마진·환노출 인사이트가 여기에 표시됩니다.",
+    "upgrade": "재무 인사이트 콕핏은 Pro 플랜에서 열립니다. 설정 → 결제에서 업그레이드하세요.",
+    "loadError": "재무 인사이트를 불러오지 못했습니다.",
+    "retry": "다시 시도"
+  },
+  "ownerStrategic": {
+    "moneyTitle": "받을 돈 · 줄 돈",
+    "moneyLink": "정산 상세 →",
+    "receivable": "받을 돈 (AR)",
+    "payable": "줄 돈 (AP)",
+    "moneyEmpty": "받을 돈·줄 돈이 있는 거래가 확정되면 여기에 표시됩니다.",
+    "shipmentsTitle": "들어오는 선적",
+    "shipmentsLink": "배송 추적 →",
+    "shipmentFallback": "선적",
+    "shipmentsEmpty": "7일 내 도착 예정 선적이 등록되면 여기에 표시됩니다.",
+    "viewDeal": "거래 보기",
+    "loading": "경영 지표 불러오는 중…"
+  },
+  "ownerFx": {
+    "title": "환율 (오늘)",
+    "empty": "환율 데이터가 연결되면 여기에 표시됩니다."
+  },
+  "ownerSchedule": {
+    "title": "이번 주 일정",
+    "subtitle": "7일 내 결제·입항",
+    "badgeReceivable": "수금",
+    "badgePayable": "지급",
+    "badgeShipment": "입항",
+    "paymentFallback": "결제",
+    "shipmentFallback": "선적",
+    "open": "열기",
+    "loading": "일정 불러오는 중…",
+    "empty": "선적을 등록하면 이번 주 일정이 여기에 표시됩니다."
+  },
+  "ownerFlagFeed": {
+    "title": "미확인 이슈",
+    "subtitle": "팀이 올린 플래그 — 확인 후 운영 감시에서 전체 보기",
+    "monitorLink": "운영 감시 →",
+    "ack": "확인함",
+    "loading": "플래그 불러오는 중…",
+    "empty": "미확인 이슈가 없습니다.",
+    "loadingBadge": "조회 중",
+    "countBadge": "{count}건",
+    "loadFailed": "조회 실패",
+    "error": "미확인 이슈를 불러오지 못했습니다. 이 구역만 다시 불러와 주세요."
+  },
+  "ownerRiskFeed": {
+    "title": "활성 리스크",
+    "subtitle": "일정·수량·미수금 운영 감시 집계",
+    "monitorLink": "운영 감시 →",
+    "loading": "리스크 불러오는 중…",
+    "empty": "활성 리스크가 없습니다.",
+    "overdueBand": "미수 {count}건"
+  },
+  "quickActions": {
+    "title": "무엇을 할까요?",
+    "subtitle": "서류를 올리면 AI가 읽고, 한 줄이면 문서를 만들고, 물으면 답합니다.",
+    "upload": {
+      "title": "서류 올리기",
+      "desc": "PDF를 던지면 AI가 읽어 거래로 만듭니다"
+    },
+    "create": {
+      "title": "문서 만들기",
+      "desc": "한 줄이면 전문 송장·계약서를 작성"
+    },
+    "ask": {
+      "title": "AI에게 묻기",
+      "desc": "거래·정산·시장을 자연어로 질문"
+    },
+    "deals": {
+      "title": "거래 보기",
+      "desc": "진행 중인 수출입 거래와 상태"
+    },
+    "settlement": {
+      "title": "정산",
+      "desc": "받을 돈·보낼 돈·자금 일정·환노출"
+    },
+    "shipments": {
+      "title": "선적 보기",
+      "desc": "선적·도착 일정을 확인하세요"
+    }
+  },
+  "ask": {
+    "title": "무엇이든 물어보세요",
+    "subtitle": "사내 거래 데이터와 시장 자료를 자연어로 조회합니다.",
+    "placeholder": "예: 이번 주 받을 돈이 가장 큰 거래처는?",
+    "submit": "질문하기",
+    "asking": "조회 중…",
+    "examples": "예시",
+    "examplePrompts": [
+      "이번 주 받을 돈",
+      "오늘 승인할 문서",
+      "B/L이 누락된 거래"
+    ],
+    "answerLabel": "답변",
+    "evidenceLabel": "근거 데이터",
+    "sqlLabel": "AI가 실행한 질의",
+    "sqlShow": "질의 보기",
+    "sqlHide": "질의 숨기기",
+    "rowsMeta": "{count}행",
+    "truncated": "· 일부만 표시(상한 도달)",
+    "aiVisible": "AI가 데이터를 직접 조회했습니다",
+    "noAnswer": "요약 문장은 비어 있습니다 — 아래 근거 데이터를 확인하세요.",
+    "emptyResult": "조회 결과가 없습니다.",
+    "errors": {
+      "unavailable": "AI 질의 기능이 아직 활성화되지 않았습니다(키 설정 후 동작).",
+      "rejected": "이 질문은 안전 규칙에 의해 거부되었습니다. 다시 표현해 주세요.",
+      "budget": "오늘 질의 한도를 초과했습니다. 잠시 후 다시 시도하세요.",
+      "timeout": "질의 시간이 초과되었습니다. 범위를 좁혀 다시 질문해 주세요.",
+      "generic": "질문을 처리하지 못했습니다.",
+      "signedOut": "로그인이 필요합니다."
+    }
+  },
+  "lists": {
+    "taskQueue": "통합 작업 목록",
+    "taskQueueDescription": "ERP Confirm, 결제, SNAP 검토를 한 줄 목록으로 표시",
+    "sharedWork": "함께 보는 업무",
+    "sharedWorkDescription": "멤버 공유 + 개별 Deal 공유",
+    "ownerDecision": "오늘 결정할 일",
+    "ownerDecisionDescription": "Owner 권한이 필요한 승인/확인 작업",
+    "ownerRisk": "조직 리스크",
+    "ownerRiskDescription": "Owner가 전체 범위로 확인"
+  },
+  "panel": {
+    "nextActions": "다음 작업",
+    "dday": "D-day",
+    "updates": "업데이트"
+  },
+  "memberManagement": {
+    "title": "멤버 관리",
+    "description": "권한과 공유 범위를 확인하고 필요한 멤버 작업만 바로 엽니다.",
+    "invite": "멤버 초대",
+    "role": "역할",
+    "status": "상태",
+    "changeRole": "권한 변경",
+    "export": "내보내기",
+    "empty": "관리할 멤버가 아직 없습니다."
+  },
+  "overview": {
+    "progress": "진행 현황·받을 돈",
+    "summary": "업무 요약",
+    "shipping": "선적 일정",
+    "firstUse": "첫 문서를 올리거나 만들어 업무를 시작하세요.",
+    "review": "검토 대기",
+    "approval": "승인 대기",
+    "connection": "연결 대기",
+    "emptyShipping": "예정된 선적이 없습니다.",
+    "etd": "출발",
+    "eta": "도착"
+  }
+}

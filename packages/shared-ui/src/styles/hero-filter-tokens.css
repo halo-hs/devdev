@@ -1,0 +1,16 @@
+/* Shared with the transaction list's BusinessPageHero. */
+.business-hero-controls,
+.reference-hero-filters {
+  --control-background: rgba(255, 255, 255, 0.12);
+  --control-background-hover: rgba(255, 255, 255, 0.16);
+  --control-background-active: rgba(255, 255, 255, 0.2);
+  --control-background-open: rgba(255, 255, 255, 0.2);
+  --control-border: rgba(255, 255, 255, 0.24);
+  --control-border-hover: rgba(255, 255, 255, 0.52);
+  --control-foreground: white;
+  --control-placeholder: rgba(255, 255, 255, 0.68);
+  --control-accessory-foreground: rgba(255, 255, 255, 0.72);
+  --hero-filter-button-background: rgba(255, 255, 255, 0.1);
+  --hero-filter-button-border: rgba(255, 255, 255, 0.25);
+  --hero-filter-focus-ring: rgba(255, 255, 255, 0.85);
+}

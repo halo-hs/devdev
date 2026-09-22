@@ -1,0 +1,348 @@
+{
+  "reference": "localhost:3030",
+  "copied_at": "2026-09-20",
+  "files": {
+    "components/ui/utils.ts": {
+      "sha256": "a25f62490e2b49775470e02d3d5f51c8b4cb9183baa8db6601d02bdf5bcc0241"
+    },
+    "components/ui/button.tsx": {
+      "sha256": "dbd31218af09f8bafbdd3b4d1a4be4e7db792d5010b31375b4216ca488a0e7fd"
+    },
+    "lib/assets.ts": {
+      "sha256": "d71833d4d0c45b9f1d9c87848f55a28bb988acb6d093af0a0bb1f90e5bcc7011"
+    },
+    "components/ui/icon.tsx": {
+      "sha256": "7efa8f1edc13dfb956bcb82647808baec63971fe91a8c084430e3b9112ed70c8"
+    },
+    "components/ui/info-list.tsx": {
+      "sha256": "68fc0bdfc95a7168e8e7a6df67d1797ddc9900975b1f9a0a34ed3ff77366e39e"
+    },
+    "components/platform/InfoBox.tsx": {
+      "sha256": "6e1836dcd0141419464a16b17e404aaff405c3523a1a9d98e43d455e40b745e8"
+    },
+    "components/ui/skeleton.tsx": {
+      "sha256": "e6078455206cf628ef1a6d1b7d61c2d5d6f29294794874ad5f230ae4e7b0697f"
+    },
+    "components/platform/Skeletons.tsx": {
+      "sha256": "0ad4b1c0453d3c5027b5694dfa3ed56bda7c0f79936ca91a2ebf0de8d0829c9c"
+    },
+    "components/platform/AnalyticsSkeleton.tsx": {
+      "sha256": "11cab4f3d3a867bc6dd2265d1f2bfd4babe8228627722291a717da872d714a88"
+    },
+    "components/platform/toast/toastStore.ts": {
+      "sha256": "3d3b12e211de0f150a7944fe999af92b34ac13573f04b41331b4e763e1572525"
+    },
+    "components/platform/toast/useToast.ts": {
+      "sha256": "25c9522ced0c90cbfbd41a8ad4b8db01c3137af3857cb1b00136908e1f9148ea"
+    },
+    "components/platform/ChipGroup.tsx": {
+      "sha256": "45acc048a5dd0d6322566e40dc5c5b32a66061959a7d61ffdb0a89bdd0fb56b6"
+    },
+    "components/platform/MetricCard.tsx": {
+      "sha256": "2179a326563f59230ea4c1327dd0bb21fcac797b36dcbd2a5a8ff93774edcb22"
+    },
+    "components/platform/PageHeader.tsx": {
+      "sha256": "916beb9541ab318fbdb7f876a515e1c4f986450ea459accf5c88ae9b09d047f3"
+    },
+    "components/platform/ScreenLayouts.tsx": {
+      "sha256": "7262ca0b87185d2d54cc7927fa2f570ec0f011fe10de3c5768aa0f1df607dcd8"
+    },
+    "components/platform/SectionPanel.tsx": {
+      "sha256": "3d8e1d6bd685db8f64c908c383c17b2b0e29b3fd8d592b21d14add9354bac6e9"
+    },
+    "components/platform/StatusBadge.tsx": {
+      "sha256": "d6eb455f60fdb804efc997cd3a397ba4e871814cd7acf0f59e576b526d991bde"
+    },
+    "components/ui/input.tsx": {
+      "sha256": "671db836c71ab0dc334529a6e887c047031cf814086e6db3077da45d761a521a"
+    },
+    "components/ui/switch.tsx": {
+      "sha256": "d8efc282f620389fce74fb47ff178df561a9768f3dc726b0ff32061abef33762"
+    },
+    "components/ui/table.tsx": {
+      "sha256": "0492d4fa2f47387d43842eea31691884106952051c1d0970842d2b26f9aacc0b"
+    },
+    "components/platform/ScreenSupportUnits.tsx": {
+      "sha256": "85ed11789704c5036bd597686c35fd35b3bb2e116824f04052746f64caea3a50"
+    },
+    "components/ui/etc.tsx": {
+      "sha256": "f7d62d6abfee27b4547e2679d33c1eb2f5a7f781916960ed0242bb7a8dedc255"
+    },
+    "components/platform/TaskQueue.tsx": {
+      "sha256": "daf4b967f5c02f0cf9bda41583e81cd7b889d9b21a104ba28e9c717b933eb4a0"
+    },
+    "lib/api/rateLimitGate.ts": {
+      "sha256": "fa60fe2c33b0053457d79b1b616e366fccd8d4ed1d7c5c4ad04050cee6df887f"
+    },
+    "lib/api/client.ts": {
+      "sha256": "ca0c89068b2b4adbe64b86c5beb237b8d8804973c36ee5bab4b329ca820111d1"
+    },
+    "lib/api/retry.ts": {
+      "sha256": "a5126df08ca5b6a0ac31afaf2a11cba0109c4c5b2620af19985bdd1910dca5a3"
+    },
+    "lib/financeDecimal.ts": {
+      "sha256": "0c0d47d6c5d367b482747920554e827abcae923ef1977250d472a01f7de781ef"
+    },
+    "lib/api/settlement.ts": {
+      "sha256": "bd84c553b2ba3a4aabe910b8e3754d080529962fdae9e831d9157e2b3f6bb4b5"
+    },
+    "lib/money.ts": {
+      "sha256": "6be46de85c439da0d8237c7165f95ecda111a8e744b0d7cb271f399545e43e53"
+    },
+    "features/erp/settlement/settlementDecisionCardData.ts": {
+      "sha256": "41f99daa46983fb5642ab461c11951b224a912929257f08ed765e93e08836af6"
+    },
+    "lib/api/monitor.ts": {
+      "sha256": "4a6bd2242c049b8ee0588801d6573362c67c25469c74ed9e88a048095e62c10f"
+    },
+    "lib/api/flags.ts": {
+      "sha256": "5b1a3bfef2db8c5059a888f72b1c37621710befb25149b32e71e1c4f439e5728"
+    },
+    "features/erp/monitor/monitorRollout.ts": {
+      "sha256": "ea5b83699f7416a9223a210e3960116a3d9b35b3a639f7ee1e4f66ea6ab08d92"
+    },
+    "features/erp/monitor/mapMonitorLive.ts": {
+      "sha256": "32e8777d429b734245364af9dff9aaff21f27ddca65ad729d379c7da66517004"
+    },
+    "components/platform/screens/MonitorScreen.tsx": {
+      "sha256": "e6f0ba4308f008595cc05ddafcf541aac3061e7b2fd7f8fa38cce8ef1f243440"
+    },
+    "lib/api/entitlements.ts": {
+      "sha256": "4d7aa8959885480c795b0055e342c8c0641b8db659b5d5bbdf88b690e15d34cc"
+    },
+    "lib/api/generated/me.ts": {
+      "sha256": "2e6b6d575e22e17fe69d89430c14f44b6e2b1c967feeeb536c8ff545cee24839"
+    },
+    "lib/api/me.ts": {
+      "sha256": "0a11679b12c40ff72e14fd570df8b44df0c3be1621d14a6d4fbb662e68b64da9"
+    },
+    "features/auth/PlatformSessionContext.tsx": {
+      "sha256": "8a2ceeecf6da90d150a757c258b79a0fab6eb6560a15e976cdd6d81525a5f124"
+    },
+    "lib/api/erpExtraction.ts": {
+      "sha256": "f062c0ebf33909b2d6d990dbd71c9a11f5d9eb0cfc4d30874c2287ca0ae4dd37"
+    },
+    "lib/api/dealMatchFailure.ts": {
+      "sha256": "57b2cdefbdd748f8150cefcfe7053f8f3d870c1b3e4387e7cf85ce0e65c08edf"
+    },
+    "lib/api/deals.ts": {
+      "sha256": "a1b1e5ab8a89623f68afc8548d4e3fab6bcc5e3651bda137f43353ffe2f766d5"
+    },
+    "lib/api/listAllDeals.ts": {
+      "sha256": "5e901c87b120025491e4da29d2560c57d98bb0026dbb9440bcb94b20aa4d693e"
+    },
+    "lib/deals/opsSignals.ts": {
+      "sha256": "118634a65836c369346f810c165143cec4da6674d1b6ba1deb42394cc406dd5b"
+    },
+    "features/erp/monitor/MonitorDealsOpsPanels.tsx": {
+      "sha256": "a14a0b97c3f5ea5f4c2f987f3c74465e7d14c908ff9688712787179a0825107e"
+    },
+    "i18n/useLocaleTag.ts": {
+      "sha256": "b0be18ef05082b70bf9f405e42a881613f12bcf6c6c3af4112f8e980aee1cd3f"
+    },
+    "lib/api/exceptions.ts": {
+      "sha256": "c35d548e14ce74f19cf7219413512f3b06f1f42130129ef1ed36db59d202821a"
+    },
+    "features/erp/monitor/ExceptionCenter.tsx": {
+      "sha256": "898fbe3be89505ec16d45a8e653d7d6de4095fbdb79c92ae050a5d54804522f5"
+    },
+    "features/erp/monitor/MonitorConnected.tsx": {
+      "sha256": "fd55205bf0d765be8149495961af155920362a332e8805f8a06c362c049c099d"
+    },
+    "components/platform/SectionCard.tsx": {
+      "sha256": "0582cdd16ee1e5b8ed3daefa4586cbf5faac9994f2f1c5f9e9f6e800de16d216"
+    },
+    "components/ui/dialog.tsx": {
+      "sha256": "27f5eb6015d94493c05734f7dcb37010ab1d241e6026bc33ef94d3dc35b9a5de"
+    },
+    "components/ui/dropdown.tsx": {
+      "sha256": "b30720ba827f636efae40480cfe3bef4049e975da13b5ff3b6e02a0e85e89160"
+    },
+    "features/erp/shared/InsightsGateNotice.tsx": {
+      "sha256": "784339a8145b1056f856f5363cc139dd7972e57638862d496c69e2c3fed5b035"
+    },
+    "lib/api/reports.ts": {
+      "sha256": "777690f1d7ef2f324fc240d60c7ac472cc08c87f459e21d9df3396f9ec2788be"
+    },
+    "lib/api/members.ts": {
+      "sha256": "782ff3c4bfa25b27bccb80e5754026bda9a7c36f960b1fd12afb47d04d7aeeee"
+    },
+    "lib/orgDate.ts": {
+      "sha256": "b946739f66b60e6554df66b8c7504715d9663791aaae0bcae80fa26fc4ac4b75"
+    },
+    "features/erp/reports/charts/ChartTooltip.tsx": {
+      "sha256": "4bbb163abcd0bc19490257b322fe2520b99ca635d7d470aaeb4281ecbd7dcd66"
+    },
+    "features/erp/reports/charts/chartGeometry.ts": {
+      "sha256": "7ccabf48bc38aced66a179594f76df8b7e3ec624ec12b2f4c8d855e6ea63739a"
+    },
+    "features/erp/reports/charts/chartFrame.tsx": {
+      "sha256": "296275f46f905ac47f9b50b27098a0292b2313abbf2e363eedc2527185c2cf01"
+    },
+    "features/erp/reports/charts/useMeasuredWidth.ts": {
+      "sha256": "a46d6f7f16c4b2b2a66991218a3851278cfa697a71077e4c64fd90d12c70656f"
+    },
+    "features/erp/reports/charts/BalanceLineChart.tsx": {
+      "sha256": "f816343af2ff9034ac3ed730cab1a56f67a5ac24e168ec0257a19f9edbd67275"
+    },
+    "features/erp/reports/charts/GpBarChart.tsx": {
+      "sha256": "52ff670036a6acc45c2abf3a249605de27bc0bfecad121706514b77c2089a1b3"
+    },
+    "features/erp/reports/charts/OverdueRateChart.tsx": {
+      "sha256": "098676835155e56cf9949f9f527d28bb68162c53afa1fd7de0c8086e2e8e955c"
+    },
+    "features/erp/reports/charts/PlanActualBarChart.tsx": {
+      "sha256": "c383511e43058334875f10bf73e759278d9a47f01f65e8f6b144fee85c265028"
+    },
+    "features/erp/reports/reportsData.ts": {
+      "sha256": "a90ceb00afcce45ba0190d7055f30041b947982ccc9f940caefbfae3d27ec462"
+    },
+    "features/erp/reports/ReportsConnected.tsx": {
+      "sha256": "28422aa23f91e049430dbb297c6823fe46c1bad670fb275065381c87028c03dc"
+    },
+    "features/erp/salesperf/salesPerfData.ts": {
+      "sha256": "e1c746979179d42ce6376d14dd1556e0c79acec54ff4c0df25756fce9c3b4ae9"
+    },
+    "features/erp/salesperf/SalesPerformanceConnected.tsx": {
+      "sha256": "d58d16d7b05cfd02b52dbff4d2ebb6d9d324ffc518faa417878c2527e4ff77d3"
+    },
+    "components/platform/FilterChipGroup.tsx": {
+      "sha256": "248e987c81920130d4113927999807c40957250c496c659e06afc3163fd54718"
+    },
+    "components/platform/SearchFilterBar.tsx": {
+      "sha256": "87493fcb7741508e7b38934e03589e75e9708a8660d4f40bc82a542ed6b1c4fd"
+    },
+    "lib/api/shipments.ts": {
+      "sha256": "2686d02337cad7273b8a8ddc6216a9e64e2d97225a51d99773e220fa6402c6e5"
+    },
+    "lib/api/snapEvidence.ts": {
+      "sha256": "8a88565ed472641995fe5228501c4e521f6c7649848c19b12a181e763c119dc9"
+    },
+    "lib/firebase/deploymentEnvironments.ts": {
+      "sha256": "46a85e3f6b886648fe1e3681f7ea27de7d2c883e44ed14b8e0443c92c0a91587"
+    },
+    "lib/productEntitlements.ts": {
+      "sha256": "7b16e0b61ffc1009913f001f7701abeed488195c75ae9346dcede9d1971b1575"
+    },
+    "features/erp/shipments/ShipmentsConnected.tsx": {
+      "sha256": "351b24ee0024d584acfcf3343033cc0a1635cfac5a4ac5630b9b69c6655edace"
+    },
+    "lib/loadable.ts": {
+      "sha256": "91042b303405eb2d8a509e0fc082be43c886a197dfeb8c843030c1d9491afb69"
+    },
+    "components/platform/LoadableSection.tsx": {
+      "sha256": "3e997cd53a59b2cf0f56ec1b5c25fa19df64dee77a3b4635e14eb3a07bb08eaf"
+    },
+    "components/platform/OperationalTableFrame.tsx": {
+      "sha256": "bd8f37d2e68ec49ef689eb854039b5bc9b3422a924466ee791f9d3823b10958f"
+    },
+    "components/ui/text-link.tsx": {
+      "sha256": "19296dd6f5eddd38b1a540592c871c66c4d09e945f66db985ec81018d60b2dfe"
+    },
+    "lib/api/scheduleCash.ts": {
+      "sha256": "44dcd55157841eb884556dd4526670b5e62b98fec6d36c2b5d4f3baf5bf3c18e"
+    },
+    "features/erp/settlement/CounterpartyScorecardPanel.tsx": {
+      "sha256": "84bb912308fdf84c85439e4a86a229424ad4734bf1f0dc1b79acbf93fb30a714"
+    },
+    "features/erp/shared/DecisionCard.tsx": {
+      "sha256": "6146a036b4e86067bfb979ab1c5e7bbcb87ee662b57925c678d8c05ca1a6098f"
+    },
+    "features/erp/settlement/SettlementDecisionCards.tsx": {
+      "sha256": "12da8bfadc7ed4daf85e3b9fe7bcff83cff4cbd1ea056d5ed79cf33b37382ce3"
+    },
+    "features/erp/settlement/settlementDunning.ts": {
+      "sha256": "2190e321c6775faaa876c5fe6a01a80f3cbcfeee835667b0ef9f13faec74eae3"
+    },
+    "features/erp/settlement/SettlementDunningPanel.tsx": {
+      "sha256": "27399bd3d84b3e69109ca5956b12bfc43b19541a6bb4bc1e3432b9163f3439c1"
+    },
+    "components/ui/accordion.tsx": {
+      "sha256": "7c43e430414f772a93cb75d36e1bd6bb805304096b2d67124220724cbc0122fb"
+    },
+    "components/ui/alert.tsx": {
+      "sha256": "5308f965480ee39b87cb5d2c3a81445194bdcb38fe4629304fd78564fecb33e0"
+    },
+    "components/ui/card.tsx": {
+      "sha256": "6a599deb2eec21390ff3ac23272a8ecf339a0a7fca7230fcdb522e62fd26de92"
+    },
+    "components/ui/control-state.ts": {
+      "sha256": "adba834bbed5c71088c791ff808f54e8aa89465646749e8f90f7ab0167e1b209"
+    },
+    "components/ui/checkbox.tsx": {
+      "sha256": "aa7693765771d06a72dbc8e6a19426d65d35bd58dac32f02bf0fdec432e324d9"
+    },
+    "components/ui/date-picker.tsx": {
+      "sha256": "cd9e2dd2925fa3722e725f4652d3682e5eae86aad708044a88e099fb98ddc092"
+    },
+    "components/ui/dot.tsx": {
+      "sha256": "fa48f43343d9dd87880efec9e88197f5e08b3ee941c2821a85fedf1f8d06fee1"
+    },
+    "components/ui/form.tsx": {
+      "sha256": "c38e9cbc20ed980992b16f38aff5a978d75e79ca270b68b47be33560fa3ccd8f"
+    },
+    "components/ui/filter.tsx": {
+      "sha256": "00e68162c92ac3d83e107432ed5106859923e35359ca8b45c4860c060c6bcea6"
+    },
+    "components/ui/footer.tsx": {
+      "sha256": "d348aecd855cb1d5eba8a994b5a2e5dc4d466a31c875baf9bdc2cdd28bb23b43"
+    },
+    "components/ui/header.tsx": {
+      "sha256": "74a666cfc8335e87359dcc2cb1962a384bd54f2affefd36b0e0bb73a382f826d"
+    },
+    "components/ui/image.tsx": {
+      "sha256": "aef9485bb68bc887b281c702fda6f78d479b8bc370563fc61b3521bbe58b4b9e"
+    },
+    "components/ui/loading-dots.tsx": {
+      "sha256": "31faa42c38cfe9224cf04097c4d5ea14034391f5367e08a537eecd29e5ac38bc"
+    },
+    "components/ui/nav.tsx": {
+      "sha256": "c91d6555c8ab76bed06b73aba686e2c0dbf0aeb45c83d7434d8d8a6292b67166"
+    },
+    "components/ui/quantity-stepper.tsx": {
+      "sha256": "8b84b201856efe400dc82c396f004fb7cd317b10ef6c9053d9df06522dff4b2f"
+    },
+    "components/ui/radio.tsx": {
+      "sha256": "fd6cd7ade3681500e97d7a626e29f65249a0ef1f0a6083b2f3093a60bc4d4116"
+    },
+    "components/ui/rectangular-badge.tsx": {
+      "sha256": "d954921b474db74bbcc07043b37db2de06a5e8de027d95b564e330e12f9b6be0"
+    },
+    "components/ui/tab.tsx": {
+      "sha256": "b890669f0313d5b07908e1561ba582ac01a9619654e74da716a035487d937c1b"
+    },
+    "components/ui/disclosure-header.tsx": {
+      "sha256": "b40a2e55ee8d260a3f1a1c2b4b3815dfbebc8a272bf4c5add45a03fcd5bcf266"
+    },
+    "components/ui/toggle-button.tsx": {
+      "sha256": "7c142178683f5f8de7743990951581b71952d5cdddae34f301eb7ea431c67fc4"
+    },
+    "components/ui/index.ts": {
+      "sha256": "d6c7cd62c6dd1e8c391f6e1a1fa3b1763958dba764c7da370c44cdf30bac1caa"
+    },
+    "features/erp/settlement/SettlementExceptionPanel.tsx": {
+      "sha256": "5b55b106878bff9d806d3d2015e375cb1ea014182463611b9b314480c2cf46e0"
+    },
+    "lib/session/sessionEndCleanup.ts": {
+      "sha256": "eb9bb252868ea7bc466f9cb6fb217deed3c9aa931ba449334548f283e14e9c3b"
+    },
+    "features/erp/settlement/moneyCommandKeys.ts": {
+      "sha256": "b4536f6f49899e32d3a80473c1d89a16c6e196b8d4a528404e2fa08e4ce96e44"
+    },
+    "features/erp/settlement/CanonicalScheduleCashPanel.tsx": {
+      "sha256": "d4085186e51487180813e6d34c4c0d28f7b96e6fe27a1b2d0b8b3206dd5fb3bf"
+    },
+    "features/erp/settlement/settlementRecordErrors.ts": {
+      "sha256": "92dfb1f42dab2abc0f6fd3b5106921bd291813681dda6e3496d0cf262e212587"
+    },
+    "features/erp/settlement/settlementMath.ts": {
+      "sha256": "2882092fe23bd559f89eebc287b5576cc4d83f244025876f3c158bc831c01402"
+    },
+    "features/erp/settlement/settlementDrill.ts": {
+      "sha256": "4531c4773c29a7cc5362f12a94011b4f38ed16d19acc8599cad34fe86611614b"
+    },
+    "features/erp/settlement/SettlementConnected.tsx": {
+      "sha256": "164e31d223d1f7027149eea0e0fc3de60abb83d59c59b54395231bed8bc538b6"
+    }
+  }
+}

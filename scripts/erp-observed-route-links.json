@@ -1,0 +1,170 @@
+[
+  {
+    "source": "ai-empty",
+    "key": "BUTTON|AI 서류 처리||1",
+    "target": "home",
+    "destination": "/erp/home"
+  },
+  {
+    "source": "sales-sgd",
+    "key": "BUTTON|경영·성과||1",
+    "target": "monitoring",
+    "destination": "/erp/monitoring"
+  },
+  {
+    "source": "home-empty",
+    "key": "BUTTON|AI 서류 처리||1",
+    "target": "home",
+    "destination": "/erp/home"
+  },
+  {
+    "source": "home-error",
+    "key": "BUTTON|내 거래||1",
+    "target": "deals",
+    "destination": "/erp/deals"
+  },
+  {
+    "source": "home-error",
+    "key": "BUTTON|선적 보기||1",
+    "target": "shipments",
+    "destination": "/erp/shipments"
+  },
+  {
+    "source": "ai-action-06",
+    "key": "BUTTON|거래에서 문서 계획·관계 확인||1",
+    "target": "deals",
+    "destination": "/erp/deals"
+  },
+  {
+    "source": "ai-action-06",
+    "key": "BUTTON|선적 연결·일정 확인||1",
+    "target": "shipments",
+    "destination": "/erp/shipments"
+  },
+  {
+    "source": "ai-action-13",
+    "key": "BUTTON|검토·배정 대기 문서B/L 분석 중 1건문서||1",
+    "target": "document-upload",
+    "destination": "/erp/documents/upload"
+  },
+  {
+    "source": "ai-action-14",
+    "key": "BUTTON|ACME GmbH최근 30일 GP 11.2% → 6.4%성과||1",
+    "target": "sales",
+    "destination": "/erp/sales"
+  },
+  {
+    "source": "ai-action-14",
+    "key": "BUTTON|영업 성과거래처별 GP 분석리포트||1",
+    "target": "sales",
+    "destination": "/erp/sales"
+  },
+  {
+    "source": "ai-action-15",
+    "key": "BUTTON|판매계약서 · SC-2026-0708.pdf박서윤 요청 · 은행 점검 통과승인||1",
+    "target": "document-create",
+    "destination": "/erp/documents/create"
+  },
+  {
+    "source": "ai-action-15",
+    "key": "BUTTON|상업송장 · CI-2026-0703.pdf김도현 요청 · 거래 연결 확인승인||1",
+    "target": "document-create",
+    "destination": "/erp/documents/create"
+  },
+  {
+    "source": "ai-action-15",
+    "key": "BUTTON|오늘 할 일승인 대기 업무 모아보기업무||1",
+    "target": "home",
+    "destination": "/erp/home"
+  },
+  {
+    "source": "document-retry",
+    "key": "BUTTON|AI 서류 처리||1",
+    "target": "home",
+    "destination": "/erp/home"
+  },
+  {
+    "source": "home-action-04",
+    "key": "BUTTON|질문||1",
+    "target": "ai",
+    "destination": "/erp/ai"
+  },
+  {
+    "source": "deal-dl-260704-02",
+    "key": "BUTTON|기록||1",
+    "target": "deals",
+    "destination": "/erp/deals"
+  },
+  {
+    "source": "deal-dl-260704-02",
+    "key": "BUTTON|이 거래로 문서 올리기||1",
+    "target": "document-upload",
+    "destination": "/erp/documents/upload"
+  },
+  {
+    "source": "document-create-pi",
+    "key": "BUTTON|AI 서류 처리||1",
+    "target": "home",
+    "destination": "/erp/home"
+  },
+  {
+    "source": "onboarding-action-09",
+    "key": "BUTTON|팀원 초대||1",
+    "target": "settings",
+    "destination": "/erp/settings"
+  },
+  {
+    "source": "settlement-action-22",
+    "key": "BUTTON|Deal 보기||1",
+    "target": "deals",
+    "destination": "/erp/deals"
+  },
+  {
+    "source": "settlement-action-22",
+    "key": "BUTTON|Customer 360||1",
+    "target": "counterparties",
+    "destination": "/erp/counterparties"
+  },
+  {
+    "source": "settlement-action-22",
+    "key": "BUTTON|DL-260704-04||1",
+    "target": "deals",
+    "destination": "/erp/deals"
+  },
+  {
+    "source": "settlement-action-25",
+    "key": "BUTTON|HMM Green|보낼 돈HMM Green8,200 USD8,200 USD0 USD07.10DL-260625-03정산 완료완료 취소|1",
+    "target": "counterparties",
+    "destination": "/erp/counterparties"
+  },
+  {
+    "source": "monitoring-action-07",
+    "key": "BUTTON|기록||1",
+    "target": "deals",
+    "destination": "/erp/deals"
+  },
+  {
+    "source": "document-invoice-connect",
+    "key": "BUTTON|항목 검토||1",
+    "target": "document-review",
+    "destination": "/erp/documents/upload/%EC%9D%B8%EB%B3%B4%EC%9D%B4%EC%8A%A4_2607_003.pdf/review"
+  },
+  {
+    "source": "deal-dl-260701-09-action-12",
+    "key": "BUTTON|전달 준비||1",
+    "target": "document-existing-soa",
+    "destination": "/erp/documents/create/SOA-2026-0629"
+  },
+  {
+    "source": "document-create-qt-action-04",
+    "key": "BUTTON|이어쓰기|계약서표준 매매계약서 초안SC-2026-0708거래처 ACME GmbH조건 CIF Hamburg미연결작성 중거래 연결 필요박서윤오늘 09:42이어쓰기|1",
+    "target": "document-existing-sc",
+    "destination": "/erp/documents/create/SC-2026-0708"
+  },
+  {
+    "source": "document-create-qt-action-04",
+    "key": "BUTTON|은행 제출용 상업송장 초안 PDF 초안 보기|인보이스은행 제출용 상업송장 초안CI-2026-0708은행 거절 전 점검거래 연결됨DL-260708-08작성 중은행 거절 전 점검 통과김도현오늘 09:36이어쓰기|1",
+    "target": "document-flow-draft",
+    "destination": "/erp/documents/create/CI-2026-0708"
+  }
+]

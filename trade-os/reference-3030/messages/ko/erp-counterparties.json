@@ -1,0 +1,101 @@
+{
+  "meta": {
+    "description": "ECOYA ERP Customer 360 — 거래처 운영 모니터링."
+  },
+  "page": {
+    "title": "Customer 360",
+    "description": "이 거래처의 잔액·기한·서류를 한곳에서 봅니다.",
+    "backToSettlement": "정산으로 돌아가기",
+    "loading": "거래처 불러오는 중…",
+    "notFoundTitle": "거래처를 찾을 수 없습니다",
+    "notFoundBody": "마스터에 없는 거래처입니다. 정산 또는 설정에서 열어 주세요.",
+    "loadError": "거래처를 불러오지 못했습니다.",
+    "retry": "다시 시도",
+    "tabs": {
+      "ops": "운영",
+      "analytics": "분석",
+      "analyticsLocked": "분석 (Pro)",
+      "aria": "Customer 360 섹션"
+    },
+    "analyticsStub": {
+      "title": "분석은 Pro 플랜 기능입니다",
+      "body": "GP 추세·계정 분석은 Pro에 있습니다. 위 운영 모니터링은 코어 플랜으로 이용합니다."
+    },
+    "ops": {
+      "asOf": "기준 {date}",
+      "openBalances": {
+        "title": "미결제 잔액",
+        "description": "통화별 AR/AP — 통화 간 합산하지 않습니다.",
+        "currency": "통화",
+        "receivable": "매출채권",
+        "payable": "매입채무",
+        "overdue": "연체 (AR)",
+        "none": "이 거래처와 미결제 잔액이 없습니다.",
+        "loadError": "잔액을 불러오지 못했습니다.",
+        "retry": "다시 시도"
+      },
+      "overdue": {
+        "title": "미결제 입출금 일정",
+        "description": "기간별 거래 합계가 아닌 현재 받을 돈·줄 돈의 미결제 일정입니다.",
+        "deal": "거래",
+        "type": "유형",
+        "amount": "미결제금액",
+        "due": "기한",
+        "none": "조회 범위에 미결제 일정이 없습니다.",
+        "loadError": "미결제 일정을 불러오지 못했습니다.",
+        "retry": "다시 시도",
+        "receivable": "매출채권",
+        "payable": "매입채무",
+        "currency": "통화",
+        "all": "전체",
+        "timing": "기한 상태",
+        "overdueOnly": "연체",
+        "current": "미연체",
+        "search": "거래명·거래 ID·일정 ID 검색",
+        "noResults": "필터에 맞는 일정이 없습니다.",
+        "reset": "필터 초기화",
+        "scopeNote": "잔액 요약에 있는 통화의 일정을 조회합니다(통화가 없으면 USD 조회). 요약과 상세는 별도로 조회하므로 변경 시 차이가 날 수 있으며, 기간 합계나 동일 시점의 스냅샷을 보장하지 않습니다.",
+        "showSchedules": "{currency} {type} 일정 보기",
+        "settlementLink": "정산에서 확인"
+      },
+      "nextDue": {
+        "title": "다음 기한",
+        "none": "다가오는 기한이 없습니다."
+      },
+      "accessibleDeals": {
+        "title": "조회 가능한 주문 이력",
+        "description": "이 거래처에 대해 내 권한으로 볼 수 있는 주문과 이행 현황입니다.",
+        "scopeNote": "내가 조회 가능한 Deal 이력이며 조직 전체 이력임을 의미하지 않습니다.",
+        "partialNote": "일부 과거 명칭이나 추가 페이지를 확인하지 못해 표시된 이력이 일부일 수 있습니다.",
+        "none": "이 거래처의 조회 가능한 Deal 이력이 없습니다.",
+        "loadError": "조회 가능한 주문 이력을 불러오지 못했습니다.",
+        "retry": "다시 시도",
+        "deal": "거래", "itemPo": "품목 / PO", "stage": "거래 단계", "fulfilment": "수량 이행", "lifecycle": "주문 상태",
+        "contracted": "계약", "shipped": "선적", "remaining": "잔량", "nextEta": "다음 ETA", "unknown": "—", "untitled": "제목 없는 거래",
+        "stageValues": { "contract": "계약", "shipment": "선적", "customs": "통관", "settled": "정산 완료", "archived": "보관", "cancelled": "취소" },
+        "fulfilmentValues": { "open": "잔량 있음", "fulfilled": "수량 이행 완료", "over_shipped": "초과 선적" },
+        "lifecycleValues": { "open": "진행 중", "closed": "종료", "short_closed": "잔량 종료", "cancelled": "취소" }
+      },
+      "requiredDocs": {
+        "title": "필요 서류",
+        "description": "이 거래처 활성 거래에서 빠진 서류.",
+        "deal": "거래",
+        "document": "서류",
+        "none": "불러온 거래에서 빠진 필요 서류가 없습니다.",
+        "loadError": "필요 서류를 불러오지 못했습니다.",
+        "retry": "다시 시도",
+        "partialNote": "거래 목록의 다음 서류 신호만 표시합니다 (상세 조회 제한)."
+      },
+      "recentDocs": {
+        "title": "최근 서류",
+        "description": "이 거래처 거래에 연결된 최근 파일.",
+        "filename": "파일",
+        "type": "유형",
+        "updated": "업데이트",
+        "none": "이 거래처 거래의 최근 서류가 없습니다.",
+        "loadError": "최근 서류를 불러오지 못했습니다.",
+        "retry": "다시 시도"
+      }
+    }
+  }
+}

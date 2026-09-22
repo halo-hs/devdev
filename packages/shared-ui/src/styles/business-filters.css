@@ -1,0 +1,336 @@
+/* Shared search/filter presentation. Query state and option visibility belong to screens. */
+.business-filter-bar {
+  --filter-gap: 8px;
+  --filter-row-gap: 12px;
+  --filter-height: var(--control-size-md, 40px);
+  --filter-search-height: var(--filter-height);
+  --filter-radius: var(--ui-radius-control, 8px);
+  --filter-font-size: var(--text-body-9);
+  --filter-foreground: var(--control-foreground, var(--foreground));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--filter-gap);
+  min-width: 0;
+  width: 100%;
+}
+.business-filter-bar[data-layout="stack"] {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--filter-row-gap);
+}
+.business-filter-bar .business-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--filter-gap);
+  min-width: 0;
+}
+.business-filter-bar .business-filter-field {
+  display: flex;
+  align-items: center;
+  gap: var(--filter-gap);
+  min-width: 0;
+  max-width: 100%;
+}
+.business-filter-bar .business-filter-label {
+  color: var(--control-accessory-foreground);
+  white-space: nowrap;
+  font-size: var(--filter-font-size);
+  line-height: var(--leading-body-9);
+}
+.business-filter-bar .business-filter-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 560px;
+  min-width: 0;
+  height: var(--filter-search-height);
+  padding-inline: 12px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--filter-radius);
+  background: var(--control-background);
+  color: var(--control-foreground);
+}
+.business-filter-bar .business-filter-search > svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--control-accessory-foreground);
+}
+.business-filter-bar .business-filter-search input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: none;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font-size: var(--text-body-9);
+  box-shadow: none;
+}
+.business-filter-bar .business-filter-search input::placeholder {
+  color: var(--control-placeholder);
+}
+.business-filter-bar
+  .business-filter-search
+  input::-webkit-search-cancel-button {
+  display: none;
+}
+.business-filter-bar .business-filter-search > button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--filter-radius);
+  color: inherit;
+  background: transparent;
+}
+.business-filter-bar .business-filter-search > button svg {
+  width: 16px;
+  height: 16px;
+}
+.business-filter-bar .business-filter-search:focus-within {
+  border-color: var(--control-border-hover);
+  outline: 2px solid var(--hero-filter-focus-ring, var(--ring));
+  outline-offset: 2px;
+}
+.business-filter-bar .business-filter-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 8px;
+  height: var(--filter-height);
+  max-width: 100%;
+  border: 1px solid var(--control-border);
+  border-radius: var(--filter-radius);
+  background: var(--control-background);
+  color: var(--control-foreground);
+  font-size: var(--filter-font-size);
+}
+.business-filter-select > span {
+  color: var(--control-accessory-foreground);
+  white-space: nowrap;
+}
+.business-filter-bar .business-filter-select > button {
+  height: calc(var(--filter-height) - 2px);
+  min-height: 0;
+  font-size: var(--filter-font-size);
+}
+.business-filter-bar .business-filter-select:focus-within {
+  outline: 2px solid var(--hero-filter-focus-ring, var(--ring));
+  outline-offset: 2px;
+}
+.business-filter-segments {
+  display: inline-flex;
+  flex-wrap: wrap;
+  overflow: hidden;
+  max-width: 100%;
+  border: 1px solid var(--control-border);
+  border-radius: var(--filter-radius, 8px);
+  background: var(--control-background);
+}
+.business-filter-segments > button {
+  flex: 1 0 auto;
+  min-height: calc(var(--filter-height, 32px) - 2px);
+  padding: 4px 12px;
+  border: 0;
+  color: var(--filter-foreground);
+  font-size: var(--filter-font-size, 12px);
+  line-height: 20px;
+  white-space: nowrap;
+  background: transparent;
+}
+.business-filter-segments > button:hover {
+  background: var(--control-background-hover);
+}
+.business-filter-segments > button[aria-pressed="true"] {
+  background: var(--control-background-active);
+  box-shadow: inset 0 -2px var(--filter-foreground);
+  font-weight: 700;
+}
+.business-filter-bar :is(button, input, select):disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.business-filter-bar button:focus-visible {
+  outline: 2px solid var(--hero-filter-focus-ring, var(--ring));
+  outline-offset: -3px;
+}
+.business-filter-bar[data-layout]
+  :is(
+    [data-ui="select-trigger"],
+    [data-slot="select-trigger"],
+    button[role="combobox"],
+    input[type="month"],
+    input[type="date"],
+    select,
+    [data-slot="button"]
+  ) {
+  height: var(--filter-height);
+  min-height: 0;
+  font-size: var(--filter-font-size);
+  line-height: var(--leading-body-9);
+}
+.business-filter-bar[data-layout] :is(label, [data-reference-button]) {
+  font-size: var(--filter-font-size);
+  white-space: nowrap;
+}
+@media (max-width: 639px) {
+  .business-filter-bar .business-filter-search {
+    max-width: none;
+  }
+  .business-filter-bar .business-filter-segments[data-wrap="grid"] {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+}
+
+/* Adapt source controls to the transaction hero's shared translucent tokens.
+   Dropdown option surfaces intentionally retain their normal panel tokens. */
+.business-filter-bar[data-layout]
+  :is(
+    [data-ui="text-input"],
+    [data-ui="select-trigger"],
+    [data-slot="select-trigger"],
+    button[role="combobox"],
+    input[type="month"],
+    input[type="date"],
+    select
+  ) {
+  color: var(--control-foreground);
+  background: var(--control-background);
+  border: 1px solid var(--control-border);
+  border-radius: var(--filter-radius);
+  box-shadow: none;
+  font-size: var(--filter-font-size);
+  line-height: var(--leading-body-9);
+}
+.business-filter-bar[data-layout]
+  :is(
+    [data-ui="text-input"],
+    [data-ui="select-trigger"],
+    [data-slot="select-trigger"],
+    button[role="combobox"],
+    input[type="month"],
+    input[type="date"],
+    select
+  ):hover {
+  background: var(--control-background-hover);
+  border-color: var(--control-border-hover);
+  box-shadow: none;
+}
+.business-filter-bar[data-layout]
+  :is(
+    [data-ui="text-input"],
+    [data-ui="select-trigger"],
+    [data-slot="select-trigger"],
+    button[role="combobox"],
+    input[type="month"],
+    input[type="date"],
+    select
+  ):is(:focus-within, [aria-expanded="true"]) {
+  background: var(--control-background-open);
+  border-color: var(--control-border-hover);
+  box-shadow: 0 0 0 2px var(--hero-filter-focus-ring, var(--ring));
+}
+.business-filter-bar[data-layout] [data-ui="text-input"] input {
+  color: var(--control-foreground);
+  font-size: var(--filter-font-size);
+  line-height: var(--leading-body-9);
+}
+.business-filter-bar[data-layout] [data-ui="text-input"] input::placeholder {
+  color: var(--control-placeholder);
+}
+.business-filter-bar[data-layout] [data-ui="text-input"] :is(span, button, svg),
+.business-filter-bar[data-layout]
+  [data-ui="select-trigger"]
+  :is(svg, [data-ui="icon"]) {
+  color: var(--control-accessory-foreground);
+}
+:is(.business-hero-controls, .reference-hero-filters)
+  .business-filter-bar[data-layout]
+  input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.72;
+}
+.business-filter-bar[data-layout]
+  :is([data-reference-button="tertiary"], [data-reference-button="secondary"]) {
+  height: var(--filter-height);
+  color: var(--control-foreground);
+  background: var(--hero-filter-button-background, var(--control-background));
+  border: 1px solid var(--hero-filter-button-border, var(--control-border));
+  border-radius: var(--filter-radius);
+  box-shadow: none;
+}
+.business-filter-bar[data-layout]
+  :is(
+    [data-reference-button="tertiary"],
+    [data-reference-button="secondary"]
+  ):enabled:hover {
+  background: var(--control-background-active);
+  border-color: var(--control-border-hover);
+}
+
+.business-filter-bar select option {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Menus share structure and density; their query state remains screen-owned. */
+.business-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--filter-gap);
+  margin-inline-start: auto;
+  max-width: 100%;
+  min-width: 0;
+}
+.business-filter-result {
+  color: var(--control-accessory-foreground);
+  font-size: var(--filter-font-size);
+  line-height: var(--leading-body-9);
+}
+.business-filter-bar .business-filter-field {
+  flex-wrap: nowrap;
+}
+.business-filter-bar .business-filter-field > :not(.business-filter-label) {
+  min-width: 0;
+}
+.business-filter-bar [data-slot="tabs-list"] {
+  height: auto;
+  min-height: var(--filter-height);
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+.business-filter-bar [data-slot="tabs-trigger"] {
+  min-height: calc(var(--filter-height) - 4px);
+  font-size: var(--filter-font-size);
+}
+.business-filter-bar .business-filter-search {
+  flex: 1 1 280px;
+}
+.business-filter-bar .business-filter-result > * {
+  margin: 0;
+}
+@media (max-width: 639px) {
+  .business-filter-bar .business-filter-search {
+    flex-basis: 100%;
+  }
+  .business-filter-actions {
+    margin-inline-start: 0;
+  }
+}
+.business-filter-bar[data-layout] button[data-reference-button] {
+  height: var(--filter-height);
+  min-height: 0;
+  font-size: var(--filter-font-size);
+  line-height: var(--leading-body-9);
+}

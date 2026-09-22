@@ -1,0 +1,1862 @@
+/* ============================================================
+   ECOYA SNAP — Design Tokens
+   1:1 mirror of:
+     - color.ts       (Last synced 2026-02-09, Figma File 6LbaMySNFggZMwt9JFrJYw)
+     - typography.ts
+     - shadow.ts
+     - scroll.ts
+     - zIndex.ts
+     - GlobalStyle.ts
+
+   Canonical primitive values mirror the Figma variable definitions.
+   Semantic and component role aliases below are the runtime SSOT consumed by
+   shadcn structure; change primitive values only at their canonical source.
+   ============================================================ */
+
+/* ---------- Pretendard (local) -------------------------------- */
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/Pretendard-Thin.otf") format("opentype");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/Pretendard-ExtraLight.otf") format("opentype");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/Pretendard-Light.otf") format("opentype");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/Pretendard-Regular.otf") format("opentype");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/Pretendard-Medium.otf") format("opentype");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/Pretendard-SemiBold.otf") format("opentype");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/Pretendard-Bold.otf") format("opentype");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/Pretendard-ExtraBold.otf") format("opentype");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/Pretendard-Black.otf") format("opentype");
+}
+
+:root {
+  /* ============================================================
+     1. COLORS  ←  color.ts
+     ============================================================ */
+
+  /* Product, primary-blue, and gray primitives are declared once in the
+     canonical color section below. Legacy no-hyphen names remain aliases. */
+
+  /* System Red (1~8) */
+  --color-system-red1: #bf4040;
+  --color-system-red2: #d64c4c;
+  --color-system-red3: #e68686;
+  --color-system-red4: #eea3a3;
+  --color-system-red5: #f2b2b2;
+  --color-system-red6: #f5c0c0;
+  --color-system-red7: #fad8d8;
+  --color-system-red8: #ffefef;
+
+  /* System Yellow (1~6) */
+  --color-system-yellow1: #d29700;
+  --color-system-yellow2: #eaa800;
+  --color-system-yellow3: #ffd633;
+  --color-system-yellow4: #ffe066;
+  --color-system-yellow5: #fff0b3;
+  --color-system-yellow6: #fff7d9;
+
+  /* System Green (1~6) */
+  --color-system-green1: #0a9a32;
+  --color-system-green2: #15bd66;
+  --color-system-green3: #35db80;
+  --color-system-green4: #64e8a4;
+  --color-system-green5: #93edbf;
+  --color-system-green6: #ebfaef;
+
+  /* System Blue (1~6) */
+  --color-system-blue1: #005ce1;
+  --color-system-blue2: #007aff;
+  --color-system-blue3: #3395ff;
+  --color-system-blue4: #66afff;
+  --color-system-blue5: #b3d7ff;
+  --color-system-blue6: #e5f2ff;
+
+  /* System Pink (1~6) */
+  --color-system-pink1: #c2255c;
+  --color-system-pink2: #e64980;
+  --color-system-pink3: #f783ac;
+  --color-system-pink4: #fcc2d7;
+  --color-system-pink5: #ffdeeb;
+  --color-system-pink6: #fff0f6;
+
+  /* System Lime (1~6) */
+  --color-system-lime1: #5c940d;
+  --color-system-lime2: #82c91e;
+  --color-system-lime3: #c0eb75;
+  --color-system-lime4: #d8f5a2;
+  --color-system-lime5: #e9fac8;
+  --color-system-lime6: #f4fce3;
+
+  /* System Grape (1~6) */
+  --color-system-grape1: #862e9c;
+  --color-system-grape2: #be4bdb;
+  --color-system-grape3: #da77f2;
+  --color-system-grape4: #eebefa;
+  --color-system-grape5: #f3d9fa;
+  --color-system-grape6: #f8f0fc;
+
+  /* System Orange (1~6) */
+  --color-system-orange1: #e8590c;
+  --color-system-orange2: #fd7e14;
+  --color-system-orange3: #ffa94d;
+  --color-system-orange4: #ffd8a8;
+  --color-system-orange5: #ffe8cc;
+  --color-system-orange6: #fff4e6;
+
+  /* ============================================================
+     2. TYPOGRAPHY  ←  typography.ts
+     ============================================================ */
+
+  --font-pretendard:
+    "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
+    sans-serif;
+  --font-family-sans: var(--font-pretendard);
+
+  --fw-bold: 700;
+  --fw-medium: 500;
+  --fw-regular: 400;
+
+  /* ============================================================
+     3. Z-INDEX  ←  zIndex.ts
+     ============================================================ */
+  --z-background-image: -1;
+  --z-side-nav: 100;
+  --z-bottom-fixed-buttons: 8000;
+  --z-pagination-dropdown: 8010;
+  --z-dropdown: 8900;
+  --z-dialog: 9000;
+  --z-alert-dialog: 9500;
+  --z-alert: 9999;
+  --z-full-loading: 10001;
+  --z-popup: 10500;
+  --z-floating-chat-modal: 10700;
+  --z-floating-chat-edit-modal: 10800;
+  --z-floating-chat-user-card: 10900;
+  --z-floating-chat-sendbird: 11000;
+  --z-floating-chat-button: 11100;
+}
+/* ============================================================
+   4. RESET CSS  ←  GlobalStyle.ts (resetCss)
+   ============================================================ */
+@layer base {
+  html,
+  body,
+  div,
+  span,
+  applet,
+  object,
+  iframe,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  blockquote,
+  pre,
+  a,
+  abbr,
+  acronym,
+  address,
+  big,
+  cite,
+  code,
+  del,
+  dfn,
+  em,
+  img,
+  ins,
+  kbd,
+  q,
+  s,
+  samp,
+  small,
+  strike,
+  strong,
+  sub,
+  sup,
+  tt,
+  var,
+  b,
+  u,
+  i,
+  center,
+  dl,
+  dt,
+  dd,
+  ol,
+  ul,
+  li,
+  fieldset,
+  form,
+  label,
+  legend,
+  table,
+  caption,
+  tbody,
+  tfoot,
+  thead,
+  tr,
+  th,
+  td,
+  article,
+  aside,
+  canvas,
+  details,
+  embed,
+  figure,
+  figcaption,
+  footer,
+  header,
+  hgroup,
+  menu,
+  nav,
+  output,
+  ruby,
+  section,
+  summary,
+  time,
+  mark,
+  audio,
+  video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+  }
+  /* HTML5 display-role reset for older browsers */
+  article,
+  aside,
+  details,
+  figcaption,
+  figure,
+  footer,
+  header,
+  hgroup,
+  menu,
+  nav,
+  section {
+    display: block;
+  }
+  body {
+    line-height: 1;
+    font-family:
+      var(--font-pretendard),
+      "Pretendard",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      "Helvetica Neue",
+      Arial,
+      sans-serif;
+  }
+  body::-webkit-scrollbar {
+    display: none;
+  }
+  ol,
+  ul {
+    list-style: none;
+  }
+  blockquote,
+  q {
+    quotes: none;
+  }
+  blockquote:before,
+  blockquote:after,
+  q:before,
+  q:after {
+    content: "";
+    content: none;
+  }
+  table {
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--color-gray-1);
+    -webkit-box-shadow: 0 0 0px 1000px var(--color-gray-12) inset;
+    box-shadow: 0 0 0px 1000px var(--color-gray-12) inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  html {
+    font-family:
+      var(--font-pretendard),
+      "Pretendard",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      "Helvetica Neue",
+      Arial,
+      sans-serif;
+  }
+  * {
+    box-sizing: border-box;
+  }
+}
+
+/* ============================================================
+   5. TYPOGRAPHY UTILITY CLASSES  ←  typography.ts (typo object)
+   각 토큰 = font-family + font-weight + font-size + line-height
+   ============================================================ */
+
+/* Header (Bold) */
+.typo-h0 {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-display-3);
+  line-height: var(--leading-display-3);
+}
+.typo-h1 {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-header-1);
+  line-height: var(--leading-header-1);
+}
+.typo-h2 {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-header-2);
+  line-height: var(--leading-header-2);
+}
+.typo-h3 {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-header-3);
+  line-height: var(--leading-header-3);
+}
+.typo-h4 {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-header-4);
+  line-height: var(--leading-header-4);
+}
+.typo-h5 {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-header-5);
+  line-height: var(--leading-header-5);
+}
+.typo-h6 {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-header-6);
+  line-height: var(--leading-header-6);
+}
+.typo-h7 {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-header-7);
+  line-height: var(--leading-header-7);
+}
+.typo-h9 {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-header-9);
+  line-height: var(--leading-header-9);
+}
+
+/* Display (Bold) */
+.typo-d5 {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-display-5);
+  line-height: var(--leading-display-5);
+}
+
+/* Body Medium */
+.typo-b1m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-body-1);
+  line-height: var(--leading-body-1);
+}
+.typo-b2m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-body-2);
+  line-height: var(--leading-body-2);
+}
+.typo-b3m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-body-3);
+  line-height: var(--leading-body-3);
+}
+.typo-b4m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-body-4);
+  line-height: var(--leading-body-4);
+}
+.typo-b5m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-body-5);
+  line-height: var(--leading-body-5);
+}
+.typo-b5_5m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-body-6);
+  line-height: var(--leading-body-6);
+}
+.typo-b6m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-body-6);
+  line-height: var(--leading-body-6);
+}
+.typo-b7m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-body-7);
+  line-height: var(--leading-body-7);
+}
+.typo-b8m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-body-8);
+  line-height: var(--leading-body-8);
+}
+.typo-b9m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-body-9);
+  line-height: var(--leading-body-9);
+}
+
+/* Body Regular */
+.typo-b4r {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--text-body-4);
+  line-height: var(--leading-body-4);
+}
+.typo-b5r {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--text-body-5);
+  line-height: var(--leading-body-5);
+}
+.typo-b5_5r {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--text-body-6);
+  line-height: var(--leading-body-6);
+}
+.typo-b6r {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--text-body-6);
+  line-height: var(--leading-body-6);
+}
+.typo-b7r {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--text-body-7);
+  line-height: var(--leading-body-7);
+}
+.typo-b8r {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--text-body-8);
+  line-height: var(--leading-body-8);
+}
+.typo-b9r {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--text-body-9);
+  line-height: var(--leading-body-9);
+}
+.typo-b10r {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--text-body-10);
+  line-height: var(--leading-body-10);
+}
+
+/* Button Medium */
+.typo-btn2m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-button-2);
+  line-height: var(--leading-button-2);
+}
+.typo-btn3m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-button-3);
+  line-height: var(--leading-button-3);
+}
+.typo-btn4m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-button-4);
+  line-height: var(--leading-button-4);
+}
+.typo-btn5m {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-button-5);
+  line-height: var(--leading-button-5);
+}
+
+/* Label */
+.typo-label1 {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-label-1);
+  line-height: var(--leading-label-1);
+}
+.typo-label2 {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-label-2);
+  line-height: var(--leading-label-2);
+}
+.typo-label3 {
+  font-family: var(--font-pretendard);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-label-3);
+  line-height: var(--leading-label-3);
+}
+
+/* ============================================================
+   6. SHADOW UTILITY CLASSES  ←  shadow.ts
+   ============================================================ */
+
+/* Button · Primary Blue */
+.shadow-btn-primary-blue {
+  box-shadow:
+    0px 1px 2px 0px rgba(5, 29, 57, 0.1),
+    0px 0px 0px 0.5px rgba(23, 98, 195, 0.2);
+}
+.shadow-btn-primary-blue-hover {
+  box-shadow:
+    0px 2px 4px 0px rgba(5, 29, 57, 0.2),
+    0px 0px 0px 0.5px rgba(23, 98, 195, 0.2);
+}
+.shadow-btn-primary-blue-pressed {
+  box-shadow:
+    0px 2px 4px 0px rgba(5, 29, 57, 0.2),
+    0px 0px 0px 1px rgba(173, 204, 243, 0.6),
+    0px 0px 0px 1px rgba(23, 98, 195, 0.6);
+}
+.shadow-btn-primary-blue-disabled {
+  box-shadow: 0px 1px 2px 0px rgba(5, 29, 57, 0.1);
+}
+
+/* Button · Primary Red */
+.shadow-btn-primary-red {
+  box-shadow:
+    0px 1px 2px 0px rgba(5, 29, 57, 0.1),
+    0px 0px 0px 0.5px rgba(214, 76, 76, 0.2);
+}
+.shadow-btn-primary-red-hover {
+  box-shadow:
+    0px 2px 4px 0px rgba(5, 29, 57, 0.2),
+    0px 0px 0px 0.5px rgba(214, 76, 76, 0.2);
+}
+.shadow-btn-primary-red-pressed {
+  box-shadow:
+    0px 2px 4px 0px rgba(5, 29, 57, 0.2),
+    0px 0px 0px 1px rgba(214, 76, 76, 0.2),
+    0px 0px 0px 1px #d64c4c;
+}
+.shadow-btn-primary-red-disabled {
+  box-shadow:
+    0px 1px 2px 0px rgba(5, 29, 57, 0.1),
+    0px 0px 0px 0.5px rgba(214, 76, 76, 0.2);
+}
+
+/* Button · Tertiary Black */
+.shadow-btn-tertiary-black {
+  box-shadow:
+    0px 0px 0px 0.5px rgba(160, 164, 171, 0.2),
+    0px 1px 2px rgba(5, 29, 57, 0.1);
+}
+.shadow-btn-tertiary-black-hover {
+  box-shadow:
+    0px 0px 0px 0.5px rgba(160, 164, 171, 0.2),
+    0px 2px 4px rgba(5, 29, 57, 0.2);
+}
+.shadow-btn-tertiary-black-pressed {
+  box-shadow:
+    0px 0px 0px 1px rgba(5, 29, 57, 0.6),
+    0px 0px 0px 1px rgba(5, 29, 57, 0.2),
+    0px 2px 4px rgba(5, 29, 57, 0.2);
+}
+.shadow-btn-tertiary-black-disabled {
+  box-shadow:
+    0px 0px 0px 0.5px rgba(160, 164, 171, 0.2),
+    0px 1px 2px rgba(5, 29, 57, 0.1);
+}
+
+/* Input */
+.shadow-input {
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+}
+.shadow-input-hover {
+  box-shadow:
+    0px 0px 0px 0.5px rgba(160, 164, 171, 0.2),
+    0px 2px 4px rgba(5, 29, 57, 0.2);
+}
+.shadow-input-active {
+  box-shadow: var(--shadow-input-active);
+}
+.shadow-input-open {
+  box-shadow: var(--shadow-input-open);
+}
+.shadow-input-focused {
+  box-shadow:
+    0px 0px 0px 1px #1479eb,
+    0px 0px 0px 3px rgba(24, 123, 235, 0.2),
+    0px 1px 2px rgba(0, 0, 0, 0.25);
+}
+.shadow-input-disabled {
+  box-shadow: none;
+}
+
+/* Filter (2DP) */
+.shadow-filter {
+  box-shadow: 0px 2px 8px rgba(5, 29, 57, 0.18);
+}
+
+/* Modal (4DP) */
+.shadow-modal {
+  box-shadow: 0px 4px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Card (4DP) */
+.shadow-card-web-default {
+  box-shadow:
+    0px 4px 15px rgba(0, 0, 0, 0.05),
+    0px 0px 0px 1px rgba(0, 0, 0, 0.1);
+}
+.shadow-card-app-default {
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.06);
+}
+.shadow-card-hover {
+  box-shadow:
+    0px 4px 15px rgba(0, 0, 0, 0.2),
+    0px 0px 0px 1px rgba(0, 0, 0, 0.1);
+}
+.shadow-card-drag {
+  box-shadow:
+    0px 4px 20px rgba(0, 0, 0, 0.16),
+    0px 0px 0px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Section (2DP) */
+.shadow-section {
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Raw shadow values (shadowRaw) — for inline / conditional use */
+:root {
+  /* Canonical radius primitives. Tailwind's --radius-* namespace bridges to
+     these values in globals.css; the dependency is intentionally one-way. */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-2xl: 24px;
+  --r-3xl: 32px;
+  --r-4xl: 40px;
+  --r-pill: 999px;
+
+  /* Shared component dimensions. */
+  --control-size-xs: 24px;
+  --control-size-sm: 32px;
+  --control-size-md: 40px;
+  --badge-size-sm: 16px;
+  --badge-size-default: 20px;
+  --badge-size-lg: 22px;
+  --badge-padding-inline-sm: 10px;
+  --badge-padding-inline-default: 10px;
+  --badge-padding-inline-lg: 14px;
+  --text-badge-sm: 11px;
+  --leading-badge-sm: 12px;
+  --text-badge-default: 12px;
+  --leading-badge-default: 16px;
+  --text-badge-lg: 13px;
+  --leading-badge-lg: 14px;
+  --button-spinner-size-xs: 14px;
+  --button-spinner-size-sm: 18px;
+  --button-spinner-size-md: 20px;
+  --calendar-cell-size: 40px;
+  --calendar-day-width: 26px;
+  --calendar-day-height: 28px;
+  --calendar-nav-size: 24px;
+  --calendar-month-option-height: 46px;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-shortcut: 0.1em;
+
+  --shadow-btn-primary-blue:
+    0px 1px 2px 0px rgba(5, 29, 57, 0.1),
+    0px 0px 0px 0.5px rgba(23, 98, 195, 0.2);
+  --shadow-btn-primary-blue-hover:
+    0px 2px 4px 0px rgba(5, 29, 57, 0.2),
+    0px 0px 0px 0.5px rgba(23, 98, 195, 0.2);
+  --shadow-btn-primary-blue-pressed:
+    0px 2px 4px 0px rgba(5, 29, 57, 0.2),
+    0px 0px 0px 1px rgba(173, 204, 243, 0.6),
+    0px 0px 0px 1px rgba(23, 98, 195, 0.6);
+  --shadow-btn-primary-blue-disabled: 0px 1px 2px 0px rgba(5, 29, 57, 0.1);
+  --shadow-btn-primary-red:
+    0px 1px 2px 0px rgba(5, 29, 57, 0.1),
+    0px 0px 0px 0.5px rgba(214, 76, 76, 0.2);
+  --shadow-btn-primary-red-hover:
+    0px 2px 4px 0px rgba(5, 29, 57, 0.2),
+    0px 0px 0px 0.5px rgba(214, 76, 76, 0.2);
+  --shadow-btn-primary-red-pressed:
+    0px 2px 4px 0px rgba(5, 29, 57, 0.2),
+    0px 0px 0px 1px rgba(214, 76, 76, 0.2), 0px 0px 0px 1px #d64c4c;
+  --shadow-btn-primary-red-disabled:
+    0px 1px 2px 0px rgba(5, 29, 57, 0.1),
+    0px 0px 0px 0.5px rgba(214, 76, 76, 0.2);
+  --shadow-btn-tertiary-black:
+    0px 0px 0px 0.5px rgba(160, 164, 171, 0.2), 0px 1px 2px rgba(5, 29, 57, 0.1);
+  --shadow-btn-tertiary-black-hover:
+    0px 0px 0px 0.5px rgba(160, 164, 171, 0.2), 0px 2px 4px rgba(5, 29, 57, 0.2);
+  --shadow-btn-tertiary-black-pressed:
+    0px 0px 0px 1px rgba(5, 29, 57, 0.6), 0px 0px 0px 1px rgba(5, 29, 57, 0.2),
+    0px 2px 4px rgba(5, 29, 57, 0.2);
+  --shadow-btn-tertiary-black-disabled:
+    0px 0px 0px 0.5px rgba(160, 164, 171, 0.2), 0px 1px 2px rgba(5, 29, 57, 0.1);
+  --shadow-input-default: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  /* Pointer pressed/open controls keep their normal elevation. The blue/red
+     halo is reserved for keyboard focus-visible states. */
+  --shadow-input-active: var(--shadow-input-default);
+  --shadow-input-open: var(--shadow-input-default);
+  --shadow-input-invalid-active: var(--shadow-input-active);
+  --shadow-input-invalid-open: var(--shadow-input-open);
+  --shadow-input-focused:
+    0px 0px 0px 1px #1479eb, 0px 0px 0px 3px rgba(24, 123, 235, 0.2),
+    0px 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-input-invalid-focused:
+    0px 0px 0px 1px #d64c4c, 0px 0px 0px 3px rgba(214, 76, 76, 0.2),
+    0px 1px 2px rgba(0, 0, 0, 0.25);
+  /* Shared keyboard-only focus roles. Form controls retain their public input
+     aliases while selection, toggle, and navigation primitives consume these
+     interaction-level names. */
+  --shadow-keyboard-focus: var(--shadow-input-focused);
+  --shadow-keyboard-focus-invalid: var(--shadow-input-invalid-focused);
+  --shadow-tag-valid:
+    0px 1px 2px 0px rgba(5, 29, 57, 0.1),
+    0px 0px 0px 0.5px rgba(23, 98, 195, 0.2);
+  --shadow-tag-invalid:
+    0px 1px 2px 0px rgba(5, 29, 57, 0.1),
+    0px 0px 0px 0.5px rgba(214, 76, 76, 0.2);
+  --shadow-tag-disabled:
+    0px 1px 2px 0px rgba(5, 29, 57, 0.1),
+    0px 0px 0px 0.5px rgba(160, 164, 171, 0.2);
+}
+
+/* ============================================================
+   7. SCROLL  ←  scroll.ts
+   ============================================================ */
+
+/* StyledScroll — vertical (8px wide) */
+.styled-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.styled-scroll::-webkit-scrollbar-track {
+  background: var(--color-gray10);
+  border: 1px solid var(--color-gray12);
+  border-radius: 12px;
+  margin: 4px;
+}
+.styled-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-gray12);
+  border: 1px solid var(--color-gray8);
+  border-radius: 38px;
+}
+
+/* StyledHorizontalScroll */
+.styled-horizontal-scroll::-webkit-scrollbar {
+  width: 1px;
+  height: 8px;
+}
+.styled-horizontal-scroll::-webkit-scrollbar-track {
+  background: var(--color-gray10);
+  border: 1px solid var(--color-gray12);
+  border-radius: 12px;
+  margin: 4px;
+}
+.styled-horizontal-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-gray12);
+  border: 1px solid var(--color-gray8);
+  border-radius: 38px;
+}
+
+/* ============================================================
+   8. TAILWIND / SHADCN ALIASES
+   Runtime token bridge for globals.css @theme inline.
+   Values were moved from globals.css so src/tokens.css is the CSS SSOT.
+   ============================================================ */
+:root {
+  /* Font aliases. The canonical sans stack is declared once above. */
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+
+  /* ========================================
+     Typography - Font Sizes
+     ======================================== */
+  --text-display-1: 48px;
+  --text-display-2: 40px;
+  --text-display-3: 36px;
+  --text-display-4: 32px;
+  --text-display-5: 28px;
+  --text-display-6: 24px;
+
+  --text-header-1: 26px;
+  --text-header-2: 24px;
+  --text-header-3: 22px;
+  --text-header-4: 20px;
+  --text-header-5: 19px;
+  --text-header-6: 17px;
+  --text-header-7: 16px;
+  --text-header-8: 15px;
+  --text-header-9: 14px;
+  --text-header-10: 13px;
+  --text-header-11: 11px;
+
+  --text-body-1: 26px;
+  --text-body-2: 24px;
+  --text-body-3: 22px;
+  --text-body-4: 20px;
+  --text-body-5: 19px;
+  --text-body-6: 17px;
+  --text-body-7: 16px;
+  --text-body-8: 15px;
+  --text-body-9: 14px;
+  --text-body-10: 13px;
+  --text-body-11: 11px;
+  --text-body-12: 8px;
+
+  --text-button-1: 19px;
+  --text-button-2: 17px;
+  --text-button-3: 15px;
+  --text-button-4: 13px;
+  --text-button-5: 11px;
+
+  --text-label-1: 15px;
+  --text-label-2: 13px;
+  --text-label-3: 11px;
+
+  /* Legacy Typography compatibility roles. These preserve the public 1.x
+     component contract without changing the canonical ECOYA type scale. */
+  --text-compat-h0: 36px;
+  --text-compat-body-5-5: 18px;
+  --text-compat-badge-lg: 16px;
+
+  /* ========================================
+     Typography - Line Heights
+     ======================================== */
+  --leading-display-1: 56px;
+  --leading-display-2: 52px;
+  --leading-display-3: 42px;
+  --leading-display-4: 42px;
+  --leading-display-5: 38px;
+  --leading-display-6: 38px;
+
+  --leading-header-1: 38px;
+  --leading-header-2: 36px;
+  --leading-header-3: 34px;
+  --leading-header-4: 30px;
+  --leading-header-5: 26px;
+  --leading-header-6: 24px;
+  --leading-header-7: 24px;
+  --leading-header-8: 20px;
+  --leading-header-9: 18px;
+  --leading-header-10: 18px;
+  --leading-header-11: 16px;
+
+  --leading-body-1: 38px;
+  --leading-body-2: 36px;
+  --leading-body-3: 34px;
+  --leading-body-4: 30px;
+  --leading-body-5: 26px;
+  --leading-body-6: 24px;
+  --leading-body-7: 24px;
+  --leading-body-8: 20px;
+  --leading-body-9: 18px;
+  --leading-body-10: 18px;
+  --leading-body-11: 16px;
+  --leading-body-12: 10px;
+
+  --leading-button-1: 26px;
+  --leading-button-2: 24px;
+  --leading-button-3: 20px;
+  --leading-button-4: 18px;
+  --leading-button-5: 16px;
+
+  --leading-label-1: 16px;
+  --leading-label-2: 14px;
+  --leading-label-3: 12px;
+
+  --leading-compat-h0: 54px;
+  --leading-compat-body-5-5: 26.28px;
+  --leading-compat-badge-lg: 20px;
+
+  /* ========================================
+     Typography - Font Weights
+     ======================================== */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ========================================
+     ECOYA Color Tokens - Product Colors
+     ======================================== */
+
+  /* Primary Indigo */
+  --color-indigo: #052d61;
+
+  /* Primary Blue */
+  --color-primary-1: #1148a2;
+  --color-primary-2: #1353ae;
+  --color-primary-3: #1b60bb;
+  --color-primary-4: #166dd7;
+  --color-primary-5: #2781e7;
+  --color-primary-6: #66a6f0;
+  --color-primary-7: #8ebcf5;
+  --color-primary-8: #afcef4;
+  --color-primary-9: #dbeafa;
+  --color-primary-10: #f1f7fe;
+
+  /* Gray */
+  --color-gray-1: #000000;
+  --color-gray-2: #2a2c32;
+  --color-gray-3: #42444c;
+  --color-gray-4: #5c5e66;
+  --color-gray-5: #7c7e88;
+  --color-gray-6: #9d9ea4;
+  --color-gray-7: #afb0b6;
+  --color-gray-8: #c8cad0;
+  --color-gray-9: #dedfe3;
+  --color-gray-10: #eeeff1;
+  --color-gray-11: #f6f7f8;
+  --color-gray-12: #ffffff;
+
+  /* Legacy handoff aliases: help/blog CMS components use no-hyphen tokens. */
+  --color-blue1: var(--color-primary-1);
+  --color-blue2: var(--color-primary-2);
+  --color-blue3: var(--color-primary-3);
+  --color-blue4: var(--color-primary-4);
+  --color-blue5: var(--color-primary-5);
+  --color-blue6: var(--color-primary-6);
+  --color-blue7: var(--color-primary-7);
+  --color-blue8: var(--color-primary-8);
+  --color-blue9: var(--color-primary-9);
+  --color-blue10: var(--color-primary-10);
+  --color-gray1: var(--color-gray-1);
+  --color-gray2: var(--color-gray-2);
+  --color-gray3: var(--color-gray-3);
+  --color-gray4: var(--color-gray-4);
+  --color-gray5: var(--color-gray-5);
+  --color-gray6: var(--color-gray-6);
+  --color-gray7: var(--color-gray-7);
+  --color-gray8: var(--color-gray-8);
+  --color-gray9: var(--color-gray-9);
+  --color-gray10: var(--color-gray-10);
+  --color-gray11: var(--color-gray-11);
+  --color-gray12: var(--color-gray-12);
+
+  /* Figma export compatibility aliases used by existing atom components. */
+  --indigo-indigo: var(--color-indigo);
+  --primary-blue-blue-1: var(--color-primary-1);
+  --primary-blue-blue-2: var(--color-primary-2);
+  --primary-blue-blue-3: var(--color-primary-3);
+  --primary-blue-blue-4: var(--color-primary-4);
+  --primary-blue-blue-5: var(--color-primary-5);
+  --primary-blue-blue-6: var(--color-primary-6);
+  --primary-blue-blue-7: var(--color-primary-7);
+  --primary-blue-blue-8: var(--color-primary-8);
+  --primary-blue-blue-9: var(--color-primary-9);
+  --primary-blue-blue-10: var(--color-primary-10);
+  --gray-gray-1: var(--color-gray-1);
+  --gray-gray-2: var(--color-gray-2);
+  --gray-gray-3: var(--color-gray-3);
+  --gray-gray-4: var(--color-gray-4);
+  --gray-gray-5: var(--color-gray-5);
+  --gray-gray-6: var(--color-gray-6);
+  --gray-gray-7: var(--color-gray-7);
+  --gray-gray-8: var(--color-gray-8);
+  --gray-gray-9: var(--color-gray-9);
+  --gray-gray-10: var(--color-gray-10);
+  --gray-gray-11: var(--color-gray-11);
+  --gray-gray-12: var(--color-gray-12);
+  --gray-gray-12-white: var(--color-gray-12);
+  --system-red-1: var(--color-red-1);
+  --system-red-2: var(--color-red-2);
+  --system-red-3: var(--color-red-3);
+  --system-red-4: var(--color-red-4);
+  --system-red-5: var(--color-red-5);
+  --system-red-6: var(--color-red-6);
+  --system-red-7: var(--color-red-7);
+  --system-red-8: var(--color-red-8);
+  --color-system-blue-1: var(--color-system-blue1);
+  --color-system-blue-2: var(--color-system-blue2);
+  --color-system-blue-3: var(--color-system-blue3);
+  --color-system-blue-4: var(--color-system-blue4);
+  --color-system-blue-5: var(--color-system-blue5);
+  --color-system-blue-6: var(--color-system-blue6);
+
+  /* shadcn-compatible semantic aliases. Component structure comes from shadcn; visuals come from ECOYA tokens. */
+  --background: var(--color-gray-11);
+  --foreground: var(--color-gray-2);
+  --card: var(--color-gray-12);
+  --card-foreground: var(--color-gray-2);
+  --popover: var(--color-gray-12);
+  --popover-foreground: var(--color-gray-2);
+  /* Brand & Neutral role: Primary CTA/surface is Indigo · Product. */
+  --primary: var(--color-indigo);
+  --primary-foreground: var(--color-gray-12);
+  --secondary: var(--color-gray-10);
+  --secondary-foreground: var(--color-gray-3);
+  --muted: var(--color-gray-10);
+  --muted-foreground: var(--color-gray-4);
+  --accent: var(--color-primary-10);
+  --accent-foreground: var(--color-primary-4);
+  --destructive: var(--color-red-2);
+  --destructive-foreground: var(--color-gray-12);
+  --border: var(--color-gray-9);
+  --input: var(--color-gray-9);
+  --ring: var(--color-primary-4);
+
+  /* Shared control roles. shadcn owns structure; these ECOYA roles own visuals. */
+  --control-background: var(--color-gray-12);
+  --control-background-hover: var(--color-gray-12);
+  --control-background-active: var(--color-gray-12);
+  --control-background-open: var(--color-gray-12);
+  --control-foreground: var(--color-gray-2);
+  --control-placeholder: var(--color-gray-7);
+  --control-border: var(--color-gray-10);
+  --selection-control-border: var(--color-gray-7);
+  --control-border-hover: transparent;
+  --control-border-active: var(--color-primary-1);
+  /* Focus is drawn by --shadow-input-focused; keep the physical 1px border
+     transparent so the blue perimeter is exactly one pixel, not doubled. */
+  --control-focus-border: transparent;
+  --control-disabled-background: var(--color-gray-10);
+  --control-disabled-foreground: var(--color-gray-6);
+  --control-disabled-border: var(--color-gray-8);
+  --control-invalid-border: var(--color-red-2);
+  --control-selected-background: var(--color-primary-1);
+  --control-selected-foreground: var(--color-gray-12);
+  --control-selected-border: var(--color-primary-9);
+  --control-selected-soft-background: var(--color-system-blue-6);
+  --control-accessory-foreground: var(--color-gray-5);
+  --control-clear-foreground: var(--color-gray-7);
+  --control-clear-foreground-hover: var(--color-gray-5);
+  --control-accessory-background-hover: transparent;
+  --control-accessory-background-open: transparent;
+
+  /* Shared focus roles. Keep focus treatment consistent across interactive
+     primitives that are not form controls (tabs, badges, resize handles). */
+  --focus-border: var(--color-primary-1);
+  --focus-ring: var(--focus-border);
+  --focus-invalid-ring: var(--control-invalid-border);
+
+  /* Shared surface and menu roles. */
+  --surface-background: var(--color-gray-12);
+  --surface-foreground: var(--color-gray-2);
+  --surface-muted-background: var(--color-gray-11);
+  --surface-muted-foreground: var(--muted-foreground);
+  /* Component contours need a clearer boundary than input/table dividers.
+     This matches the stronger #E5E5E5 stroke used by the Figma component
+     reference while controls and table rules keep the subtler Gray 10. */
+  --surface-border: #e5e5e5;
+  --menu-item-background-hover: var(--color-gray-10);
+  --menu-item-background-active: var(--color-gray-10);
+  --menu-item-foreground: var(--color-gray-2);
+  --menu-item-disabled-foreground: var(--color-gray-7);
+  --menu-item-selected-background: var(--color-system-blue-6);
+
+  /* Component-state roles. Foundation colors live above; public components
+     consume these names so a future palette change does not require source
+     rewrites. */
+  --table-header-background: var(--color-gray-11);
+  --table-header-foreground: var(--surface-muted-foreground);
+  --table-border: var(--color-gray-10);
+  --table-cell-foreground: var(--surface-foreground);
+  --table-caption-foreground: var(--surface-muted-foreground);
+  --table-row-background-hover: var(--color-primary-10);
+  --table-row-background-active: var(--color-primary-9);
+  --table-row-background-selected: var(--color-primary-10);
+  --data-table-row-danger-background: var(--color-red-8);
+  --data-table-row-danger-background-hover: var(--color-red-7);
+  --data-table-row-danger-background-active: var(--color-red-6);
+  --data-table-row-warning-background: var(--color-yellow-6);
+  --data-table-row-warning-background-hover: var(--color-yellow-5);
+  --data-table-row-warning-background-active: var(--color-yellow-4);
+  --data-table-row-success-background: var(--color-green-6);
+  --data-table-row-success-background-hover: var(--color-green-5);
+  --data-table-row-success-background-active: var(--color-green-4);
+
+  --toggle-background-hover: var(--color-gray-11);
+  --toggle-background-active: var(--color-gray-10);
+  --toggle-foreground: var(--muted-foreground);
+  --toggle-foreground-hover: var(--color-gray-2);
+  --toggle-background-selected: var(--color-gray-12);
+  --toggle-foreground-selected: var(--color-primary-4);
+  --toggle-disabled-foreground: var(--control-disabled-foreground);
+
+  --tabs-list-background: var(--color-gray-10);
+  --tabs-trigger-foreground: var(--muted-foreground);
+  --tabs-trigger-foreground-hover: var(--color-gray-2);
+  --tabs-trigger-background-active: var(--color-gray-10);
+  --tabs-trigger-background-selected: var(--color-gray-12);
+  --tabs-trigger-foreground-selected: var(--color-gray-2);
+  --tabs-indicator: var(--color-gray-2);
+  --tabs-trigger-disabled-foreground: var(--control-disabled-foreground);
+
+  --switch-track-unchecked: var(--color-gray-7);
+  --switch-track-disabled-checked: var(--color-gray-8);
+  --switch-track-disabled-unchecked: var(--color-gray-7);
+  --switch-thumb-disabled: var(--color-gray-9);
+
+  --file-drop-background: var(--color-primary-10);
+  --file-drop-background-hover: var(--color-primary-9);
+  --file-drop-background-active: var(--color-primary-9);
+  --file-drop-background-dragging: var(--color-primary-9);
+  --file-drop-border: var(--color-primary-7);
+  --file-drop-border-dragging: var(--color-primary-5);
+  --file-drop-foreground: var(--color-primary-4);
+  --file-drop-disabled-background: var(--control-disabled-background);
+  --file-drop-disabled-border: var(--control-disabled-border);
+  --file-drop-disabled-foreground: var(--control-disabled-foreground);
+
+  --image-tile-overlay-hover: color-mix(
+    in srgb,
+    var(--color-gray-1) 70%,
+    transparent
+  );
+
+  --slider-track-background: var(--color-gray-10);
+  --slider-range-background: var(--color-primary-4);
+  --slider-thumb-border: var(--color-primary-1);
+  --slider-focus-ring: var(--focus-ring);
+  --slider-disabled-background: var(--control-disabled-background);
+  --slider-disabled-foreground: var(--control-disabled-foreground);
+
+  --sidebar-disabled-background: var(--sidebar);
+  --sidebar-disabled-foreground: var(--muted-foreground);
+
+  --bubble-destructive-background: var(--color-red-8);
+  --bubble-destructive-background-hover: var(--color-red-7);
+  --bubble-destructive-background-active: var(--color-red-6);
+  --bubble-destructive-foreground: var(--color-indigo);
+
+  /* Calendar roles. Calendar controls keep shadcn/DayPicker anatomy while
+     consuming the ECOYA date-state contract instead of Button variants. */
+  --calendar-background: var(--surface-background);
+  --calendar-foreground: var(--color-gray-1);
+  --calendar-heading-foreground: var(--color-gray-1);
+  --calendar-weekday-foreground: var(--muted-foreground);
+  --calendar-day-foreground: var(--color-gray-1);
+  --calendar-day-outside-foreground: var(--muted-foreground);
+  --calendar-day-disabled-foreground: var(--color-gray-8);
+  --calendar-day-background-hover: var(--menu-item-background-hover);
+  --calendar-day-background-active: var(--menu-item-background-active);
+  --calendar-day-selected-background: var(--color-primary-4);
+  --calendar-day-selected-foreground: var(--color-gray-12);
+  --calendar-range-background: var(--control-selected-soft-background);
+  --calendar-today-border: var(--color-primary-4);
+  --calendar-today-foreground: var(--color-primary-4);
+  --calendar-focus-border: var(--color-primary-1);
+  --calendar-focus-ring: var(--calendar-focus-border);
+
+  /* Button — ECOYA component semantics consumed by the shadcn Button API. */
+  --button-primary-background: var(--color-indigo);
+  --button-primary-background-hover: var(--color-indigo);
+  --button-primary-background-active: var(--color-indigo);
+  --button-primary-foreground: var(--color-gray-12);
+  --button-primary-disabled-background: var(--color-gray-7);
+  --button-primary-disabled-foreground: var(--color-gray-12);
+
+  --button-secondary-background: var(--color-primary-10);
+  --button-secondary-background-hover: var(--color-primary-9);
+  --button-secondary-background-active: var(--color-primary-9);
+  --button-secondary-foreground: var(--color-indigo);
+  --button-secondary-disabled-background: var(--color-gray-11);
+  --button-secondary-disabled-foreground: var(--color-gray-8);
+
+  --button-outline-background: var(--color-gray-12);
+  --button-outline-background-hover: var(--color-gray-11);
+  --button-outline-background-active: var(--color-gray-11);
+  --button-outline-foreground: var(--color-gray-2);
+  --button-outline-foreground-active: var(--color-gray-1);
+  --button-outline-border: var(--color-gray-10);
+  --button-outline-disabled-background: var(--color-gray-12);
+  --button-outline-disabled-foreground: var(--color-gray-8);
+
+  --button-ghost-background: transparent;
+  --button-ghost-background-hover: var(--color-primary-10);
+  --button-ghost-background-active: var(--color-primary-10);
+  --button-ghost-foreground: var(--color-primary-4);
+  --button-ghost-disabled-foreground: var(--color-gray-8);
+
+  --button-destructive-background: var(--color-red-1);
+  --button-destructive-background-hover: var(--color-red-1);
+  --button-destructive-background-active: var(--color-red-1);
+  --button-destructive-foreground: var(--color-gray-12);
+  --button-destructive-disabled-background: var(--color-red-6);
+  --button-destructive-disabled-foreground: var(--color-gray-12);
+
+  --button-link-foreground: var(--color-primary-4);
+  --button-link-foreground-active: var(--color-primary-1);
+  --button-link-disabled-foreground: var(--color-gray-8);
+
+  /* Badge and conversational surface states. */
+  --badge-default-background: var(--color-system-blue-6);
+  --badge-default-background-hover: var(--color-system-blue-5);
+  --badge-default-background-active: var(--color-system-blue-4);
+  --badge-default-foreground: color-mix(
+    in srgb,
+    var(--color-primary-4) 30%,
+    var(--color-gray-2)
+  );
+  --badge-secondary-background: var(--color-gray-10);
+  --badge-secondary-background-hover: var(--color-gray-9);
+  --badge-secondary-background-active: var(--color-gray-8);
+  --badge-secondary-foreground: var(--color-gray-2);
+  --badge-destructive-background: var(--color-red-8);
+  --badge-destructive-background-hover: var(--color-red-7);
+  --badge-destructive-background-active: var(--color-red-6);
+  --badge-destructive-foreground: color-mix(
+    in srgb,
+    var(--color-red-1) 70%,
+    var(--color-gray-2)
+  );
+
+  /* Palette badges preserve the ten public palette names while separating
+     fill contrast from outline contrast. The latter follows the active
+     application surface and receives dark-mode overrides below. */
+  --badge-palette-yellow-fill-foreground: color-mix(
+    in srgb,
+    var(--color-yellow-1) 60%,
+    var(--color-gray-2)
+  );
+  --badge-palette-yellow-outline-foreground: var(
+    --badge-palette-yellow-fill-foreground
+  );
+  --badge-palette-pink-fill-foreground: var(--color-pink-1);
+  --badge-palette-pink-outline-foreground: var(--color-pink-1);
+  --badge-palette-gray-cancel-fill-foreground: var(--color-gray-4);
+  --badge-palette-gray-cancel-outline-foreground: var(--color-gray-4);
+  --badge-palette-grape-fill-foreground: var(--color-grape-1);
+  --badge-palette-grape-outline-foreground: var(--color-grape-1);
+  --badge-palette-orange-fill-foreground: color-mix(
+    in srgb,
+    var(--color-orange-1) 70%,
+    var(--color-gray-2)
+  );
+  --badge-palette-orange-outline-foreground: var(
+    --badge-palette-orange-fill-foreground
+  );
+  --badge-palette-green-fill-foreground: color-mix(
+    in srgb,
+    var(--color-green-1) 70%,
+    var(--color-gray-2)
+  );
+  --badge-palette-green-outline-foreground: var(
+    --badge-palette-green-fill-foreground
+  );
+  --badge-palette-lime-fill-foreground: color-mix(
+    in srgb,
+    var(--color-lime-1) 70%,
+    var(--color-gray-2)
+  );
+  --badge-palette-lime-outline-foreground: var(
+    --badge-palette-lime-fill-foreground
+  );
+  --badge-palette-red-fill-foreground: var(--color-red-1);
+  --badge-palette-red-outline-foreground: var(--color-red-1);
+  --badge-palette-gray-complete-fill-foreground: var(--color-gray-3);
+  --badge-palette-gray-complete-outline-foreground: var(--color-gray-3);
+  --badge-palette-blue-fill-foreground: var(--color-blue-1);
+  --badge-palette-blue-outline-foreground: var(--color-blue-1);
+
+  --bubble-primary-background: var(--color-indigo);
+  --bubble-primary-background-hover: var(--color-primary-1);
+  --bubble-primary-background-active: var(--color-indigo);
+  --bubble-primary-foreground: var(--color-gray-12);
+  --bubble-secondary-background: var(--color-primary-10);
+  --bubble-secondary-background-hover: var(--color-primary-9);
+  --bubble-secondary-background-active: var(--color-primary-8);
+  --bubble-secondary-foreground: var(--color-indigo);
+  --bubble-muted-background-active: var(--menu-item-background-active);
+  --bubble-tinted-background-active: var(--color-primary-9);
+  --bubble-outline-background-active: var(--menu-item-background-active);
+  --bubble-ghost-background-active: var(--menu-item-background-active);
+  --shadow-input: var(--shadow-input-default);
+  --overlay-dim: color-mix(in srgb, var(--color-gray-1) 30%, transparent);
+  --shadow-modal: 0 4px 24px rgba(0, 0, 0, 0.1);
+  --shadow-filter: 0 2px 8px rgba(5, 29, 57, 0.18);
+  --shadow-section: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-input-hover:
+    0px 0px 0px 0.5px rgba(160, 164, 171, 0.2), 0px 2px 4px rgba(5, 29, 57, 0.2);
+  /* ========================================
+     ECOYA Color Tokens - System Colors
+     ======================================== */
+
+  /* System Red (Negative) */
+  --color-red-1: #bf4040;
+  --color-red-2: #d64c4c;
+  --color-red-3: #e68686;
+  --color-red-4: #eea3a3;
+  --color-red-5: #f2b2b2;
+  --color-red-6: #f5c0c0;
+  --color-red-7: #fad8d8;
+  --color-red-8: #ffefef;
+
+  /* System Yellow (Warning) */
+  --color-yellow-1: #d29700;
+  --color-yellow-2: #f2bd00;
+  --color-yellow-3: #ffd633;
+  --color-yellow-4: #ffe066;
+  --color-yellow-5: #fff0b3;
+  --color-yellow-6: #fff7d9;
+
+  /* System Green (Positive) */
+  --color-green-1: #0a9a32;
+  --color-green-2: #15bd66;
+  --color-green-3: #35db80;
+  --color-green-4: #64e8a4;
+  --color-green-5: #93edbf;
+  --color-green-6: #ebfaef;
+
+  /* System Blue (Info) */
+  --color-blue-1: #005ce1;
+  --color-blue-2: #007aff;
+  --color-blue-3: #3395ff;
+  --color-blue-4: #66afff;
+  --color-blue-5: #b3d7ff;
+  --color-blue-6: #e5f2ff;
+
+  /* System Pink (Badge) */
+  --color-pink-1: #c2255c;
+  --color-pink-2: #e64980;
+  --color-pink-3: #f783ac;
+  --color-pink-4: #fcc2d7;
+  --color-pink-5: #ffdeeb;
+  --color-pink-6: #fff0f6;
+
+  /* System Lime (Badge) */
+  --color-lime-1: #5c940d;
+  --color-lime-2: #82c91e;
+  --color-lime-3: #c0eb75;
+  --color-lime-4: #d8f5a2;
+  --color-lime-5: #e9fac8;
+  --color-lime-6: #f4fce3;
+
+  /* System Grape (Badge) */
+  --color-grape-1: #862e9c;
+  --color-grape-2: #be4bdb;
+  --color-grape-3: #da77f2;
+  --color-grape-4: #eebefa;
+  --color-grape-5: #f3d9fa;
+  --color-grape-6: #f8f0fc;
+
+  /* System Orange (Badge) */
+  --color-orange-1: #e8590c;
+  --color-orange-2: #fd7e14;
+  --color-orange-3: #ffa94d;
+  --color-orange-4: #ffd8a8;
+  --color-orange-5: #ffe8cc;
+  --color-orange-6: #fff4e6;
+
+  /* ========================================
+     ECOYA Color Tokens - Chart Colors
+     ======================================== */
+
+  /* Chart Blue (Gradient) */
+  --color-chart-blue-1: #274d7b;
+  --color-chart-blue-2: #2a61a3;
+  --color-chart-blue-3: #3b79c5;
+  --color-chart-blue-4: #3d90d5;
+  --color-chart-blue-5: #4eace2;
+  --color-chart-blue-6: #61bdd8;
+  --color-chart-blue-7: #87d8cf;
+  --color-chart-blue-8: #b7e7c2;
+  --color-chart-blue-9: #d5efc1;
+  --color-chart-blue-10: #f5f3b6;
+
+  /* Chart Violet */
+  --color-chart-violet-1: #827bbd;
+  --color-chart-violet-2: #988cd6;
+  --color-chart-violet-3: #aa9ede;
+  --color-chart-violet-4: #c2b6ef;
+  --color-chart-violet-5: #d4caf6;
+
+  /* Chart Aqua */
+  --color-chart-aqua-1: #61b3b6;
+  --color-chart-aqua-2: #6cc6c9;
+  --color-chart-aqua-3: #84d4d6;
+  --color-chart-aqua-4: #9be3e3;
+  --color-chart-aqua-5: #aaebec;
+
+  /* Chart BlueViolet (Gradient) */
+  --color-chart-blueviolet-1: #72bff1;
+  --color-chart-blueviolet-2: #65b2f1;
+  --color-chart-blueviolet-3: #3b79c5;
+  --color-chart-blueviolet-4: #6098de;
+  --color-chart-blueviolet-5: #5e8dcd;
+  --color-chart-blueviolet-6: #5a82be;
+  --color-chart-blueviolet-7: #5677ad;
+  --color-chart-blueviolet-8: #516d9e;
+  --color-chart-blueviolet-9: #4c638f;
+  --color-chart-blueviolet-10: #475880;
+  --color-chart-blueviolet-11: #52638e;
+  --color-chart-blueviolet-12: #5e6f9c;
+  --color-chart-blueviolet-13: #6a7aaa;
+  --color-chart-blueviolet-14: #7686b8;
+  --color-chart-blueviolet-15: #8292c7;
+  --color-chart-blueviolet-16: #8e9fd5;
+  --color-chart-blueviolet-17: #9bace5;
+  --color-chart-blueviolet-18: #b2b0da;
+  --color-chart-blueviolet-19: #a6a4d2;
+  --color-chart-blueviolet-20: #9a98c9;
+  --color-chart-blueviolet-21: #8d8cbf;
+  --color-chart-blueviolet-22: #8081b7;
+  --color-chart-blueviolet-23: #7475ae;
+  --color-chart-blueviolet-24: #676ba5;
+  --color-chart-blueviolet-25: #59609c;
+
+  /* Chart Teal (Gradient) */
+  --color-chart-teal-1: #3c9196;
+  --color-chart-teal-2: #4d9fa4;
+  --color-chart-teal-3: #5eadb2;
+  --color-chart-teal-4: #6fbbc0;
+  --color-chart-teal-5: #7fc9ce;
+  --color-chart-teal-6: #96cfd7;
+  --color-chart-teal-7: #83bfca;
+  --color-chart-teal-8: #71afbe;
+  --color-chart-teal-9: #5e9fb2;
+  --color-chart-teal-10: #4c90a6;
+  --color-chart-teal-11: #417b93;
+  --color-chart-teal-12: #4c89a6;
+  --color-chart-teal-13: #4d91b0;
+  --color-chart-teal-14: #549bbc;
+  --color-chart-teal-15: #54a1c4;
+  --color-chart-teal-16: #54a8cd;
+  --color-chart-teal-17: #56add4;
+  --color-chart-teal-18: #54b5df;
+  --color-chart-teal-19: #6cbbe1;
+  --color-chart-teal-20: #86c4e3;
+  --color-chart-teal-21: #9bcbe6;
+  --color-chart-teal-22: #aed2e8;
+  --color-chart-teal-23: #c0dae9;
+  --color-chart-teal-24: #cce1ef;
+  --color-chart-teal-25: #d8e7f0;
+
+  /* Chart ETC */
+  --color-chart-etc: #e9edf0;
+  --chart-1: var(--color-chart-blue-4);
+  --chart-2: var(--color-chart-teal-4);
+  --chart-3: var(--color-chart-violet-3);
+  --chart-4: var(--color-chart-aqua-3);
+  --chart-5: var(--color-chart-etc);
+  --radius: 8px;
+  --sidebar: var(--color-gray-12);
+  --sidebar-foreground: var(--color-gray-2);
+  --sidebar-primary: var(--color-primary-4);
+  --sidebar-primary-foreground: var(--color-gray-12);
+  --sidebar-accent: var(--color-primary-10);
+  --sidebar-accent-foreground: var(--color-primary-4);
+  --sidebar-border: var(--color-gray-9);
+  --sidebar-ring: var(--color-primary-4);
+}
+
+.dark {
+  --background: #121416;
+  --foreground: #dbdde1;
+  --card: #1d1e25;
+  --card-foreground: #dbdde1;
+  --popover: #1d1e25;
+  --popover-foreground: #dbdde1;
+  --primary: #217ee8;
+  --primary-foreground: #ffffff;
+  --secondary: #31343a;
+  --secondary-foreground: #babdc4;
+  --muted: #31343a;
+  --muted-foreground: var(--color-gray-6);
+  --accent: #113c74;
+  --accent-foreground: var(--color-primary-9);
+  --destructive: var(--color-red-2);
+  --border: #3e414c;
+  --input: #3e414c;
+  --ring: #217ee8;
+  --control-background: var(--popover);
+  --control-background-hover: var(--popover);
+  --control-background-active: var(--popover);
+  --control-background-open: var(--popover);
+  --control-foreground: var(--foreground);
+  --control-placeholder: var(--muted-foreground);
+  --control-border: var(--border);
+  --selection-control-border: var(--muted-foreground);
+  --control-border-hover: transparent;
+  --control-border-active: var(--ring);
+  --control-focus-border: transparent;
+  --control-disabled-background: var(--muted);
+  --control-disabled-foreground: var(--muted-foreground);
+  --control-disabled-border: var(--border);
+  --control-invalid-border: var(--destructive);
+  --control-selected-background: var(--primary);
+  --control-selected-foreground: var(--primary-foreground);
+  --control-selected-border: var(--accent);
+  --control-selected-soft-background: var(--accent);
+  --control-accessory-foreground: var(--muted-foreground);
+  --control-clear-foreground: var(--muted-foreground);
+  --control-clear-foreground-hover: var(--foreground);
+  --control-accessory-background-hover: transparent;
+  --control-accessory-background-open: transparent;
+  --focus-border: var(--ring);
+  --focus-ring: var(--focus-border);
+  --focus-invalid-ring: var(--control-invalid-border);
+  --surface-background: var(--card);
+  --surface-foreground: var(--card-foreground);
+  --surface-muted-background: var(--muted);
+  --surface-muted-foreground: var(--muted-foreground);
+  --surface-border: var(--border);
+  --menu-item-background-hover: var(--muted);
+  --menu-item-background-active: var(--accent);
+  --menu-item-foreground: var(--foreground);
+  --menu-item-disabled-foreground: var(--muted-foreground);
+  --menu-item-selected-background: var(--accent);
+  --table-header-background: var(--surface-muted-background);
+  --table-border: var(--surface-border);
+  --table-row-background-hover: var(--accent);
+  --table-row-background-active: color-mix(
+    in srgb,
+    var(--accent) 80%,
+    var(--foreground)
+  );
+  --table-row-background-selected: var(--accent);
+  --data-table-row-danger-background: color-mix(
+    in srgb,
+    var(--destructive) 18%,
+    var(--surface-background)
+  );
+  --data-table-row-danger-background-hover: color-mix(
+    in srgb,
+    var(--destructive) 26%,
+    var(--surface-background)
+  );
+  --data-table-row-danger-background-active: color-mix(
+    in srgb,
+    var(--destructive) 34%,
+    var(--surface-background)
+  );
+  --data-table-row-warning-background: color-mix(
+    in srgb,
+    var(--color-yellow-2) 18%,
+    var(--surface-background)
+  );
+  --data-table-row-warning-background-hover: color-mix(
+    in srgb,
+    var(--color-yellow-2) 26%,
+    var(--surface-background)
+  );
+  --data-table-row-warning-background-active: color-mix(
+    in srgb,
+    var(--color-yellow-2) 34%,
+    var(--surface-background)
+  );
+  --data-table-row-success-background: color-mix(
+    in srgb,
+    var(--color-green-2) 18%,
+    var(--surface-background)
+  );
+  --data-table-row-success-background-hover: color-mix(
+    in srgb,
+    var(--color-green-2) 26%,
+    var(--surface-background)
+  );
+  --data-table-row-success-background-active: color-mix(
+    in srgb,
+    var(--color-green-2) 34%,
+    var(--surface-background)
+  );
+  --toggle-background-hover: var(--muted);
+  --toggle-background-active: var(--accent);
+  --toggle-foreground: var(--muted-foreground);
+  --toggle-foreground-hover: var(--foreground);
+  --toggle-background-selected: var(--surface-background);
+  --toggle-foreground-selected: var(--primary);
+  --toggle-disabled-foreground: var(--control-disabled-foreground);
+  --tabs-list-background: var(--muted);
+  --tabs-trigger-foreground: var(--muted-foreground);
+  --tabs-trigger-foreground-hover: var(--foreground);
+  --tabs-trigger-background-active: var(--accent);
+  --tabs-trigger-background-selected: var(--surface-background);
+  --tabs-trigger-foreground-selected: var(--foreground);
+  --tabs-indicator: var(--foreground);
+  --tabs-trigger-disabled-foreground: var(--control-disabled-foreground);
+  --switch-track-unchecked: var(--muted-foreground);
+  --switch-track-disabled-checked: var(--border);
+  --switch-track-disabled-unchecked: var(--muted);
+  --switch-thumb-disabled: var(--border);
+  --file-drop-background: var(--accent);
+  --file-drop-background-hover: color-mix(
+    in srgb,
+    var(--accent) 80%,
+    var(--surface-background)
+  );
+  --file-drop-background-active: var(--accent);
+  --file-drop-background-dragging: var(--accent);
+  --file-drop-border: var(--primary);
+  --file-drop-border-dragging: var(--primary);
+  --file-drop-foreground: var(--accent-foreground);
+  --file-drop-disabled-background: var(--control-disabled-background);
+  --file-drop-disabled-border: var(--control-disabled-border);
+  --file-drop-disabled-foreground: var(--control-disabled-foreground);
+  --image-tile-overlay-hover: color-mix(
+    in srgb,
+    var(--color-gray-1) 70%,
+    transparent
+  );
+  --slider-track-background: var(--muted);
+  --slider-range-background: var(--primary);
+  --slider-thumb-border: var(--ring);
+  --slider-focus-ring: var(--focus-ring);
+  --slider-disabled-background: var(--control-disabled-background);
+  --slider-disabled-foreground: var(--control-disabled-foreground);
+  --sidebar-disabled-background: var(--sidebar);
+  --sidebar-disabled-foreground: var(--muted-foreground);
+  --button-primary-background: var(--color-indigo);
+  --button-primary-background-hover: color-mix(
+    in srgb,
+    var(--color-indigo) 88%,
+    var(--foreground)
+  );
+  --button-primary-background-active: color-mix(
+    in srgb,
+    var(--color-indigo) 82%,
+    var(--background)
+  );
+  --button-primary-foreground: var(--primary-foreground);
+  --button-primary-disabled-background: var(--control-disabled-background);
+  --button-primary-disabled-foreground: var(--control-disabled-foreground);
+  --button-secondary-background: var(--accent);
+  --button-secondary-background-hover: color-mix(
+    in srgb,
+    var(--accent) 82%,
+    var(--foreground)
+  );
+  --button-secondary-background-active: color-mix(
+    in srgb,
+    var(--accent) 82%,
+    var(--background)
+  );
+  --button-secondary-foreground: var(--foreground);
+  --button-secondary-disabled-background: var(--control-disabled-background);
+  --button-secondary-disabled-foreground: var(--control-disabled-foreground);
+  --button-outline-background: var(--surface-background);
+  --button-outline-background-hover: var(--surface-muted-background);
+  --button-outline-background-active: var(--menu-item-background-active);
+  --button-outline-foreground: var(--surface-foreground);
+  --button-outline-foreground-active: var(--surface-foreground);
+  --button-outline-border: var(--surface-border);
+  --button-outline-disabled-background: var(--control-disabled-background);
+  --button-outline-disabled-foreground: var(--control-disabled-foreground);
+  --button-ghost-background: transparent;
+  --button-ghost-background-hover: var(--menu-item-background-hover);
+  --button-ghost-background-active: var(--menu-item-background-active);
+  --button-ghost-foreground: var(--accent-foreground);
+  --button-ghost-disabled-foreground: var(--control-disabled-foreground);
+  --button-destructive-background: var(--color-red-1);
+  --button-destructive-background-hover: color-mix(
+    in srgb,
+    var(--color-red-1) 92%,
+    var(--foreground)
+  );
+  --button-destructive-background-active: color-mix(
+    in srgb,
+    var(--color-red-1) 82%,
+    var(--background)
+  );
+  --button-destructive-foreground: var(--destructive-foreground);
+  --button-destructive-disabled-background: var(--control-disabled-background);
+  --button-destructive-disabled-foreground: var(--control-disabled-foreground);
+  --button-link-foreground: var(--accent-foreground);
+  --button-link-foreground-active: var(--primary);
+  --button-link-disabled-foreground: var(--control-disabled-foreground);
+  --badge-default-background: var(--accent);
+  --badge-default-background-hover: color-mix(
+    in srgb,
+    var(--accent) 82%,
+    var(--foreground)
+  );
+  --badge-default-background-active: color-mix(
+    in srgb,
+    var(--accent) 82%,
+    var(--background)
+  );
+  --badge-default-foreground: var(--accent-foreground);
+  --badge-secondary-background: var(--muted);
+  --badge-secondary-background-hover: color-mix(
+    in srgb,
+    var(--muted) 82%,
+    var(--foreground)
+  );
+  --badge-secondary-background-active: var(--accent);
+  --badge-secondary-foreground: var(--foreground);
+
+  --badge-palette-yellow-outline-foreground: var(--color-yellow-3);
+  --badge-palette-pink-outline-foreground: var(--color-pink-3);
+  --badge-palette-gray-cancel-outline-foreground: var(--color-gray-7);
+  --badge-palette-grape-outline-foreground: var(--color-grape-3);
+  --badge-palette-orange-outline-foreground: var(--color-orange-3);
+  --badge-palette-green-outline-foreground: var(--color-green-3);
+  --badge-palette-lime-outline-foreground: var(--color-lime-3);
+  --badge-palette-red-outline-foreground: var(--color-red-3);
+  --badge-palette-gray-complete-outline-foreground: var(--color-gray-8);
+  --badge-palette-blue-outline-foreground: var(--color-blue-3);
+
+  --bubble-destructive-background: color-mix(
+    in srgb,
+    var(--destructive) 18%,
+    var(--surface-background)
+  );
+  --bubble-destructive-background-hover: color-mix(
+    in srgb,
+    var(--destructive) 26%,
+    var(--surface-background)
+  );
+  --bubble-destructive-background-active: color-mix(
+    in srgb,
+    var(--destructive) 34%,
+    var(--surface-background)
+  );
+  --bubble-destructive-foreground: var(--color-red-4);
+  --badge-destructive-background: var(--bubble-destructive-background);
+  --badge-destructive-background-hover: var(
+    --bubble-destructive-background-hover
+  );
+  --badge-destructive-background-active: var(
+    --bubble-destructive-background-active
+  );
+  --badge-destructive-foreground: var(--bubble-destructive-foreground);
+  --bubble-primary-background: var(--color-indigo);
+  --bubble-primary-background-hover: color-mix(
+    in srgb,
+    var(--color-indigo) 88%,
+    var(--foreground)
+  );
+  --bubble-primary-background-active: color-mix(
+    in srgb,
+    var(--color-indigo) 82%,
+    var(--background)
+  );
+  --bubble-primary-foreground: var(--primary-foreground);
+  --bubble-secondary-background: var(--accent);
+  --bubble-secondary-background-hover: color-mix(
+    in srgb,
+    var(--accent) 82%,
+    var(--foreground)
+  );
+  --bubble-secondary-background-active: color-mix(
+    in srgb,
+    var(--accent) 82%,
+    var(--background)
+  );
+  --bubble-secondary-foreground: var(--accent-foreground);
+  --bubble-muted-background-active: var(--menu-item-background-active);
+  --bubble-tinted-background-active: var(--accent);
+  --bubble-outline-background-active: var(--menu-item-background-active);
+  --bubble-ghost-background-active: var(--menu-item-background-active);
+  --calendar-background: var(--surface-background);
+  --calendar-foreground: var(--foreground);
+  --calendar-heading-foreground: var(--foreground);
+  --calendar-weekday-foreground: var(--muted-foreground);
+  --calendar-day-foreground: var(--foreground);
+  --calendar-day-outside-foreground: var(--muted-foreground);
+  --calendar-day-disabled-foreground: var(--muted-foreground);
+  --calendar-day-background-hover: var(--menu-item-background-hover);
+  --calendar-day-background-active: var(--menu-item-background-active);
+  --calendar-day-selected-background: var(--color-primary-4);
+  --calendar-day-selected-foreground: var(--primary-foreground);
+  --calendar-range-background: var(--control-selected-soft-background);
+  --calendar-today-border: var(--color-primary-6);
+  --calendar-today-foreground: var(--color-primary-6);
+  --calendar-focus-border: var(--ring);
+  --calendar-focus-ring: var(--calendar-focus-border);
+  --chart-1: var(--color-chart-blue-4);
+  --chart-2: var(--color-chart-teal-4);
+  --chart-3: var(--color-chart-violet-3);
+  --chart-4: var(--color-chart-aqua-3);
+  --chart-5: var(--color-chart-etc);
+  --sidebar: #1d1e25;
+  --sidebar-foreground: #dbdde1;
+  --sidebar-primary: var(--color-primary-4);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #113c74;
+  --sidebar-accent-foreground: var(--color-primary-9);
+  --sidebar-border: #3e414c;
+  --sidebar-ring: #217ee8;
+}

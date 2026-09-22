@@ -1,0 +1,90 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-36 — AI 사용량 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-36 — AI 사용량</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/36-token-usage.md</p><article class="doc"><h1>SC-36 — AI 사용량</h1>
+<blockquote>
+<p>Common 목표 경계: <span>2026-08-20 설정 진입·App User</span>. 목표 표면은 Common 설정 허브의 <code>Trade OS &gt; AI 사용량</code>이고 사용량 데이터·계산은 Trade OS가 소유한다. 구독·결제 행동은 Common <code>제품 및 구독</code>으로 연결한다.</p>
+</blockquote>
+<blockquote>
+<p>결정 근거: <span>TRADE-DOC-001 — QA 절의 규범 경계</span></p>
+</blockquote>
+<blockquote>
+<p>Common IA: 이 화면은 <code>Trade OS &gt; AI 사용량</code>으로 제공한다. 과거 <code>/erp/settings/token-usage</code>는 <code>CURRENT_LEGACY</code> 주소다.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-31 결정 반영</strong> — 아래는 확정 정책이다. 구현·QA 상태는 이 문서가 관리하지 않는다.</p>
+<ul>
+<li><span>DEC-BM-001</span> — 현재 플랜 크레딧과 추가 크레딧 가격은 <strong>상업 가설</strong>이다. unit economics·국가별 세금·고객 규제·upgrade motivation·fair use 검증 전까지 확정 가격으로 취급하지 않는다.</li>
+<li><span>DEC-TRD-005</span> — 사용량 조회는 현재 Space에 귀속하고 Admin/Member 업그레이드 요청은 결제 mutation과 분리한다.</li>
+</ul>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/settings/token-usage</code></td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td><code>user-frontend/src/app/erp/settings/token-usage/page.tsx</code>와 사용량 컴포넌트</td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>설정·멤버·구독·개인정보 (18-settings-members-billing.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>현재 Space의 모든 활성 Owner·Admin·Member</td>
+</tr>
+</tbody></table>
+<h2>표시·행동·호출</h2>
+<table>
+<thead>
+<tr>
+<th>상태</th>
+<th>표시</th>
+<th>행동</th>
+<th>호출</th>
+<th>결과</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>집계 사용량</td>
+<td>이번 달 제품별 집계 사용량, 한도·잔량, 갱신/리셋일, 기준시각</td>
+<td><strong>새로고침</strong></td>
+<td>현재 Space 집계 사용량 조회</td>
+<td>최신 집계; 실패 시 기존 기준시각과 오류 유지</td>
+</tr>
+<tr>
+<td>업그레이드</td>
+<td>상품 안내</td>
+<td>Owner는 <strong>Billing에서 변경</strong>, Admin/Member는 <strong>업그레이드 요청</strong></td>
+<td>Owner Billing 진입 또는 내부 요청</td>
+<td>요청은 외부 결제·구독을 변경하지 않음</td>
+</tr>
+<tr>
+<td>접근 거부·오류</td>
+<td>안정적 역할·상품·조회 오류</td>
+<td>다시 시도 또는 권한 안내</td>
+<td>해당 없음 또는 재조회</td>
+<td>0 사용·무료 상태로 대체하지 않음</td>
+</tr>
+</tbody></table>
+<p>이 화면은 멤버별 활동, 프롬프트, 제공자 로그, 요청별 raw token을 새로 공개하지 않는다. AI worker 작업 수와 LLM 호출 로그도 이 집계 사용량 값으로 대체하지 않는다. ERP 결제·구독과 한 메뉴로 합치지 않고 별도 클릭 메뉴를 유지한다.</p>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<ul>
+<li>Owner·Admin·Member가 현재 Space의 같은 집계 필드와 기준시각을 조회한다.</li>
+<li>다른 Space, 비활성 membership, 알 수 없는 역할은 데이터 flash 없이 거부된다.</li>
+<li>Admin/Member 업그레이드 요청은 접수 상태만 만들고 외부 결제·구독을 바꾸지 않는다.</li>
+<li>업그레이드 요청은 Space+target당 하나만 활성화하고 24시간 중복을 합치며 30일 후 만료한다.</li>
+<li>사용량 조회 불가를 0·무료로 표시하지 않으며 역할 거부·상품 미구독·조회 실패를 구분한다.</li>
+</ul>
+<h2>개발 역추적</h2>
+<p>현재 서버의 Owner-only token usage gate와 프론트 Owner-only 직접 경로는 <code>CODE_GAP</code>이다. 목표 연결은 전 역할 current-Space 집계 사용량 조회와 역할별 Billing 행동이다.
+token usage page/components → <code>lib/api/tokenUsage.ts</code>, <code>entitlements.ts</code> → usage BFF → platform usage handler/service/data.</p>
+</article></main></body></html>

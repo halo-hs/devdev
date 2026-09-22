@@ -1,0 +1,91 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-03 — 가입·Organization 생성 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-03 — 가입·Organization 생성</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/03-signup.md</p><article class="doc"><h1>SC-03 — 가입·Organization 생성</h1>
+<blockquote>
+<p>결정 근거: <span>TRADE-DOC-001 — QA 절의 규범 경계</span></p>
+<p>Common 가입·trial 반영: <span>2026-08-26 무료체험 정책</span></p>
+</blockquote>
+<blockquote>
+<p>진입 계약: 공개 랜딩의 신규 사용자 주요 CTA는 <code>/signup</code>, 기존 사용자 보조 링크는 <code>/login</code>이다. 근거: <span>ISSUE-147</span>.</p>
+</blockquote>
+<blockquote>
+<p>공통 계약: <span>CS-02 — ECOYA Platform Common 회원가입</span>. 회사명·비밀번호 정책·workspace 생성은 ERP 변형이다.</p>
+</blockquote>
+<blockquote>
+<p>법률 registry: <span>DEC-LEGAL-001</span>과 <span>TRADE:LR-001 입력 준비</span>를 따른다. 서버가 product·document ID·version·language·digest·효력 상태를 선택하고 실제 값은 법무 확인 전 <code>DEFERRED</code>다.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/signup</code></td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td><code>user-frontend/src/app/signup/page.tsx</code> → <code>features/auth/SignupPanel.tsx</code></td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>가입·Organization 생성 (11-signup-and-workspace.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>신규 사용자</td>
+</tr>
+</tbody></table>
+<h2>필드·행동·호출</h2>
+<table>
+<thead>
+<tr>
+<th>구역</th>
+<th>화면 필드·선택</th>
+<th>버튼·행동</th>
+<th>호출</th>
+<th>성공·오류·복구</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>계정·Organization</td>
+<td>Common Account 인증과 첫 Organization 생성 단계</td>
+<td><strong>계정 만들기</strong></td>
+<td>Common CS-02 계약</td>
+<td><code>/me</code> 재판정. 명확한 Trade OS intent를 다시 묻지 않음</td>
+</tr>
+<tr>
+<td>동의</td>
+<td>이용약관 동의, 개인정보처리방침 확인</td>
+<td>체크 후 제출</td>
+<td>워크스페이스 요청에 동의 버전 포함</td>
+<td>미동의·버전 오류 시 화면 유지</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>Google 계정</td>
+<td><strong>Google로 계속</strong></td>
+<td>Common 인증 → Organization 생성 또는 초대 참여</td>
+<td>성공 시 server landing, 실패 시 현재 단계 유지</td>
+</tr>
+<tr>
+<td>개발 우회</td>
+<td>로컬 체험 안내</td>
+<td><strong>데모 워크스페이스 열기</strong></td>
+<td>개발 환경 전용 흐름</td>
+<td><code>/erp/home</code>; 운영 노출이면 결함</td>
+</tr>
+</tbody></table>
+<p>회사명과 Account를 한 폼에서 받고 생성 직후 <code>/erp/onboarding</code>으로 보내는 기존 구현은 <code>CURRENT_LEGACY</code>다. Organization 생성은 trial을 자동 시작하지 않으며 OWNER가 Trade OS 무료체험을 명시적으로 시작했을 때만 선택형 시작 가이드를 연다.</p>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<ul>
+<li>Firebase 계정 성공과 워크스페이스 생성 성공을 하나의 저장 단계로 판단하지 않는다.</li>
+<li>필수값·비밀번호 불일치·동의 누락·중복 계정·워크스페이스 실패를 구분한다.</li>
+<li>FE 표시 artifact와 서버 선택 artifact가 다르면 동의를 저장하지 않는다. 미확인 법무 값을 임의 version·효력일로 대체하지 않는다.</li>
+</ul>
+<h2>개발 역추적</h2>
+<p><code>SignupPanel.tsx</code> → <code>lib/api/account.ts:createWorkspace</code> → <code>/api/platform/workspaces</code> → <code>POST /api/v1/workspaces</code>.</p>
+</article></main></body></html>

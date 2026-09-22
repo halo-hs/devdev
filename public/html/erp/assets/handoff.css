@@ -1,0 +1,14 @@
+
+.static-action{text-decoration:none;cursor:pointer}.static-row-link{display:block;color:inherit;text-decoration:none}.static-row-link:hover{text-decoration:underline}.static-handoff-nav{position:fixed;right:12px;bottom:12px;z-index:2147483647;max-width:min(480px,calc(100vw - 24px));max-height:70vh;overflow:auto;background:#fff;border:1px solid #d7dce2;border-radius:8px;color:#24334a;font:13px/1.5 system-ui;box-shadow:0 2px 8px #10203015;padding:10px 14px}.static-handoff-nav summary{cursor:pointer;font-weight:600}.static-handoff-nav a{display:block;color:#1654aa;padding:5px 0}.static-handoff-nav p{margin:10px 0;color:#626b79}.static-handoff-nav a[aria-current]{font-weight:700}a:focus-visible{outline:2px solid #2878ed;outline-offset:3px}[data-static-unavailable]{cursor:default!important;pointer-events:none!important}*,*::before,*::after{animation:none!important;transition:none!important}body{pointer-events:auto!important} [data-slot="dialog-overlay"]{pointer-events:none} [data-slot="dialog-content"]{pointer-events:auto!important} @media(max-width:1023px){[data-slot="sidebar-inset"]{min-width:0!important;width:100%!important}.static-handoff-nav{max-width:calc(100vw - 24px)}[data-radix-popper-content-wrapper]{left:12px!important;right:12px!important;top:72px!important;transform:none!important;max-width:calc(100vw - 24px)!important}}
+
+[data-sonner-toaster],[data-sonner-toaster] *{pointer-events:none!important}
+body[data-handoff-flow]:not([data-embedded-preview]) [data-slot="sidebar-wrapper"]{height:calc(100svh - 48px)!important}
+body[data-embedded-preview] .static-handoff-nav{display:none}
+/* Desktop splitter measurements become a stacked reading layout on phones. */
+@media(max-width:767px){
+[data-module-grid] [data-slot="resizable-panel-group"]{display:block!important;height:auto!important;overflow:visible!important}
+[data-module-grid] [data-slot="resizable-panel"]{display:block!important;flex:none!important;width:100%!important;height:auto!important;max-height:none!important;margin-bottom:12px!important}
+[data-module-grid] [data-panel]>div{height:auto!important;max-height:none!important;overflow:visible!important}
+[data-module-grid] [data-slot="resizable-handle"]{display:none!important}
+.recharts-wrapper{max-width:100%!important}.recharts-surface{max-width:100%;height:auto}
+}

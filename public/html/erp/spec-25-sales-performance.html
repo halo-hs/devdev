@@ -1,0 +1,86 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-25 — 영업 성과 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-25 — 영업 성과</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/25-sales-performance.md</p><article class="doc"><h1>SC-25 — 영업 성과</h1>
+<blockquote>
+<p>결정 근거: <span>TRADE-DOC-001 — QA 절의 규범 경계</span></p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-31 결정 반영</strong> — 아래는 확정 정책이다. 구현·QA 상태는 이 문서가 관리하지 않는다.</p>
+<ul>
+<li><span>DEC-TRD-004</span> — 회사 전체 요약은 <strong>직재 집계만</strong> 노출한다. 거래처명·마진은 Owner/Admin 전용이다. 조회 범위가 원천 행·수정·내보내기 권한을 확장하지 않으며, 제한된 행을 집계에서 조용히 누락하지 않는다.</li>
+</ul>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/sales-performance</code></td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td><code>user-frontend/src/app/erp/sales-performance/page.tsx</code> → <code>features/erp/salesperf/*</code></td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>보고서·영업 성과·인텔리전스 (17-reports-sales-performance-and-intelligence.md)</span></td>
+</tr>
+<tr>
+<td>필수 산식</td>
+<td><span>정산 필드·산식 (05-01-settlement-data-dictionary.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>Owner/Admin은 담당자·거래처·마진 성과를 조회. Member는 거래처명·마진·원천 행을 제외한 회사 직재 집계만 조회</td>
+</tr>
+</tbody></table>
+<h2>조건·표시·호출</h2>
+<table>
+<thead>
+<tr>
+<th>구역</th>
+<th>화면 항목</th>
+<th>버튼·조건</th>
+<th>호출</th>
+<th>결과·복구</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>조건</td>
+<td>기간, 통화; 담당자 조건은 Owner/Admin만</td>
+<td>전체 또는 특정 담당자 선택</td>
+<td>report series·assignee 조회</td>
+<td>역할에 허용된 범위만 재조회</td>
+</tr>
+<tr>
+<td>추세</td>
+<td>Member는 회사 직재 집계, Owner/Admin은 월별 매출총이익 포함</td>
+<td>기간·통화 변경</td>
+<td>role-scoped report series</td>
+<td>Member 응답·화면에서 마진 필드 제거</td>
+</tr>
+<tr>
+<td>담당자 성과 — Owner/Admin 전용</td>
+<td>담당자별 매출총이익</td>
+<td>담당자 선택</td>
+<td>GP by assignee</td>
+<td>Member 접근 거절</td>
+</tr>
+<tr>
+<td>거래처 상태 — Owner/Admin 전용</td>
+<td>거래처별 상태·성과</td>
+<td>행 선택</td>
+<td>counterparty status</td>
+<td>Member에게 거래처명·성과 행을 반환하거나 표시하지 않음</td>
+</tr>
+</tbody></table>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<p>기간·통화·담당자 선택값, 역할, 응답 필드, 기준시각, 실패한 카드·문구를 기록한다. Member 응답에 거래처명·마진·담당자별 성과가 포함되지 않는지 서버 응답과 화면에서 함께 확인한다.</p>
+<h2>개발 역추적</h2>
+<p>sales performance components → <code>lib/api/reports.ts</code> → reports BFF → 집계 handler/service.</p>
+</article></main></body></html>

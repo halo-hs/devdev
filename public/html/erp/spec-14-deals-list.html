@@ -1,0 +1,76 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-14 — Deal 목록 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-14 — Deal 목록</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/14-deals-list.md</p><article class="doc"><h1>SC-14 — Deal 목록</h1>
+<blockquote>
+<p>결정 근거: <span>TRADE-DOC-001 — QA 절의 규범 경계</span></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/deals</code></td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td><code>user-frontend/src/app/erp/deals/page.tsx</code> → <code>features/erp/deals/DealsListConnected.tsx</code></td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>Deal 목록·상세·거래처 360 (14-deals-and-counterparties.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>인증된 조직 구성원; 범위는 역할·공유 조건 적용</td>
+</tr>
+</tbody></table>
+<h2>목록·필터·이동</h2>
+<table>
+<thead>
+<tr>
+<th>구역</th>
+<th>보이는 항목</th>
+<th>버튼·필터</th>
+<th>호출</th>
+<th>성공·오류·복구</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Deal 목록</td>
+<td>표시명, 거래처, 단계, 담당자, 문서 상태, 금액·통화, 리스크</td>
+<td>검색, 단계·담당자·보관·운영 필터, 페이지 이동</td>
+<td><code>GET /trade/deals</code></td>
+<td>조건별 목록; 실패 시 목록 오류와 재시도</td>
+</tr>
+<tr>
+<td>Deal 행</td>
+<td>주요 상태와 다음 행동</td>
+<td><strong>Deal 열기</strong></td>
+<td>상세 이동</td>
+<td><code>/erp/deals/{dealId}</code></td>
+</tr>
+<tr>
+<td>빈 결과</td>
+<td>적용 필터</td>
+<td>필터 해제·재검색</td>
+<td>같은 목록 API</td>
+<td>빈 목록과 조회 실패를 구분</td>
+</tr>
+</tbody></table>
+<h2>필터 화면값</h2>
+<ul>
+<li>단계: 전체·계약·선적·통관·정산</li>
+<li>담당자: 전체·내 거래건·미배정</li>
+<li>리스크: 전체·있음</li>
+<li>운영 조건: 연체·도착 임박·미선적 잔량·ETA 임박/서류 없음·오픈 오더·수량 불일치·통화 혼재</li>
+</ul>
+<h2>개발 역추적</h2>
+<p><code>DealsListConnected.tsx</code> → <code>lib/api/deals.ts</code> → <code>/api/platform/trade/deals</code> → trade deal handler/service/repository.</p>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<p>역할·공유 범위, 검색·단계·담당자·보관 필터, 페이지 이동, 빈 결과와 조회 실패, 행의 Deal ID·상세 주소를 기록한다.</p>
+</article></main></body></html>

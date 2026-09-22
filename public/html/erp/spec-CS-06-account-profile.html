@@ -1,0 +1,173 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>CS-06 — ECOYA Platform Common 설정 허브 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>CS-06 — ECOYA Platform Common 설정 허브</h1><p class="tag">기획 기준 문서 · ECOYA-Platform-Common-SSOT-v1.0/functional-specs/screens/CS-06-account-profile.md</p><article class="doc"><h1>CS-06 — ECOYA Platform Common 설정 허브</h1>
+<blockquote>
+<p>결정 반영: <span>2026-08-19 Organization·Paddle Customer·제품 관계</span> — <code>COMMON:DEC-WORKSPACE-001</code>, <code>COMMON:DEC-CUSTOMER-001</code>, <code>COMMON:DEC-PRODUCT-REL-001</code></p>
+<p>추가 반영: <span>2026-08-20 Common 설정 진입·Trade OS App User 경계</span></p>
+<p>추가 반영: <span>2026-08-26 무료체험 정책</span> — <code>COMMON:DEC-TRIAL-001</code></p>
+</blockquote>
+<h2>화면 목적</h2>
+<p>Account 개인 설정, Organization 관리, Trade OS와 SNAP의 제품 설정을 한 허브에서 명확히 구분한다. Organization Member·구독·결제를 제품마다 중복하지 않는다.</p>
+<p>Trade OS와 SNAP의 주 메뉴에서 <code>설정</code>을 선택하면 이 Common 설정 허브로 진입한다. Trade OS의 <code>App 사용자</code>는 제품 주 메뉴이며 이 허브의 메뉴가 아니다.</p>
+<h2>최종 메뉴</h2>
+<pre><code class="language-text">설정
+├─ 일반
+│  ├─ 내 계정
+│  └─ 소속 Organization
+├─ 조직
+│  ├─ 조직 정보
+│  ├─ 사용자 관리
+│  ├─ 제품 및 구독
+│  └─ 결제 및 인보이스
+├─ Trade OS
+│  ├─ 업무 기본 설정
+│  ├─ 이메일로 문서 받기
+│  ├─ 거래처 일괄 등록
+│  ├─ 거래 일괄 등록
+│  ├─ 거래처 별칭 학습
+│  ├─ 알림
+│  └─ AI 사용량
+└─ SNAP
+   ├─ 현장 운영
+   ├─ 브랜딩
+   ├─ 지역화
+   ├─ 데이터 및 보존
+   └─ 크레딧 및 사용량
+</code></pre>
+<p>구획 제목은 클릭할 수 없으며 클릭 메뉴는 단일 깊이다.</p>
+<h2>일반</h2>
+<h3>내 계정</h3>
+<p>Account 프로필·인증 수단·로그아웃을 제공한다. Organization 역할·제품·결제 mutation을 두지 않는다.</p>
+<h3>소속 Organization</h3>
+<table>
+<thead>
+<tr>
+<th>보이는 항목</th>
+<th>행동</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Organization명·본인 역할·활성 제품 상태</td>
+<td>OrganizationContext 전환</td>
+</tr>
+<tr>
+<td>대기 초대</td>
+<td>초대 확인·수락·거절</td>
+</tr>
+<tr>
+<td>새 Organization 생성</td>
+<td>개수·플랜·운영 승인 제한 없이 명시적 생성</td>
+</tr>
+<tr>
+<td>활성 Membership</td>
+<td><span>Organization Membership 자기 이탈</span></td>
+</tr>
+</tbody></table>
+<p>마지막 OWNER의 이탈은 차단하고 새 OWNER 등록·소유권 이전을 안내한다.</p>
+<h2>조직</h2>
+<h3>조직 정보</h3>
+<p>현재 Organization의 기본 표시 정보를 모든 활성 Organization Member에게 읽기 전용으로 보여주고 OWNER에게만 변경을 허용한다. 계약·결제 상세는 아래 전용 메뉴에 두며 제품 업무 기본값은 제품 설정에 둔다.</p>
+<h3>사용자 관리</h3>
+<pre><code class="language-text">사용자 관리
+├─ 조직 멤버 목록
+├─ 멤버 초대
+├─ OWNER / ADMIN / MEMBER 역할 관리
+└─ 제품·메뉴 접근 권한 관리
+</code></pre>
+<ul>
+<li>OWNER는 OWNER·ADMIN·MEMBER와 제품·메뉴 접근을 관리한다.</li>
+<li>ADMIN은 MEMBER 초대·변경·삭제와 MEMBER 접근만 관리한다.</li>
+<li>제품별 Workspace·제품별 멤버 관리 메뉴를 두지 않는다.</li>
+<li>App User는 이 화면에 포함하지 않는다. App User 초대·아이디 등록·제품 관리자 지정은 Trade OS의 독립된 <code>App 사용자</code> 주 메뉴가 소유한다.</li>
+<li>접근 권한의 저장·판정 단위는 <span>`COMMON:DEC-ACCESS-001`</span>이 결정하기 전까지 구현에서 임의로 메뉴·화면·기능 중 하나로 고정하지 않는다.</li>
+</ul>
+<h3>제품 및 구독</h3>
+<p>Trade OS·SNAP 각각에 대해 <code>trial 미시작 / trial 활성·무료 이용량 사용 가능 / trial 무료 이용량 소진 / trial 기간 종료 / 유료 구독 활성·비활성</code>을 표시한다. Bundle도 제품별 행으로 풀어 entitlement를 표시한다.</p>
+<ul>
+<li>OWNER: trial 시작, 구독·Plan 변경 등 서버 capability가 허용한 상업 행동</li>
+<li>ADMIN·MEMBER: 비금융 제품 이용 상태와 <code>Organization OWNER가 시작·구독할 수 있습니다</code> 안내만 표시. 요청 발송 action 없음</li>
+<li>trial 시작 전에는 서버 Offer의 기간·제한 무료 이용량·카드 등록/자동 결제 없음·종료 시 전체 잠금을 표시한다.</li>
+<li>제품별 정확한 무료 제공량·차감 기준·유료 구독 상품은 각 제품의 별도 구독·크레딧 정책을 참조한다.</li>
+</ul>
+<h3>결제 및 인보이스</h3>
+<ul>
+<li>활성 OWNER에게만 표시한다.</li>
+<li>Organization의 Paddle Customer를 서버에서 확인하고 목적 제한된 Paddle 상세 페이지로 연결한다.</li>
+<li>OWNER 변경 시 Paddle Customer를 교체하지 않는다.</li>
+<li>별도 payer·billing contact·invoice recipient 역할을 표시하지 않는다.</li>
+<li>ADMIN·MEMBER에게 portal mutation URL·결제수단·인보이스 상세를 노출하지 않는다.</li>
+</ul>
+<h2>제품 설정</h2>
+<ul>
+<li>Trade OS·SNAP 구획은 <code>subscription_state=paid_active</code>이거나 <code>trial_state=active AND trial_quota_state=available</code>일 때만 표시한다.</li>
+<li>제품 구획에는 업무·운영·사용량 설정만 둔다.</li>
+<li>조직 정보·Organization Member·초대·구독·Paddle 결제를 제품 구획에 중복하지 않는다.</li>
+<li>Trade OS App User 관리를 제품 설정 구획에 넣지 않는다.</li>
+<li>같은 Organization이어도 제품 데이터와 설정을 자동 공유하지 않는다.</li>
+</ul>
+<h2>화면 상태</h2>
+<table>
+<thead>
+<tr>
+<th>상태</th>
+<th>표시</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Organization 없음</td>
+<td>일반만 표시, Organization 만들기·초대 참여</td>
+</tr>
+<tr>
+<td>Organization 전환 중</td>
+<td>조직·제품 설정 skeleton, 이전 데이터 미표시</td>
+</tr>
+<tr>
+<td>유료 제품 0개·trial 없음</td>
+<td>조직 구획 표시, 제품 설정 숨김, 제품 시작 CTA</td>
+</tr>
+<tr>
+<td>trial 활성</td>
+<td>해당 제품 설정 표시, trial 상태 안내</td>
+</tr>
+<tr>
+<td>trial 무료 이용량 소진</td>
+<td>제품 설정 숨김, 제품 전체 잠금·데이터 보존·OWNER 구독 안내</td>
+</tr>
+<tr>
+<td>trial 기간 종료</td>
+<td>제품 설정 숨김, 제품 전체 잠금·데이터 보존·OWNER 구독 안내</td>
+</tr>
+<tr>
+<td>Paddle mapping 오류</td>
+<td>결제 mutation 차단, 재시도·지원</td>
+</tr>
+<tr>
+<td>권한 변경 충돌</td>
+<td>최신 Membership·capability 재조회</td>
+</tr>
+</tbody></table>
+<h2>CURRENT_LEGACY와 migration</h2>
+<ul>
+<li>Trade OS legacy <code>/erp/settings</code>와 SNAP <code>/settings</code>의 조직·멤버·결제 탭은 최종 구획으로 분리·이관한다.</li>
+<li>SNAP <code>/workers</code>는 Organization Member와 제품 사용자·현장 참여자 기능을 먼저 분리한다. Organization Member 기능만 Common으로 이관하고 전체 <code>/workers</code> 화면을 Common 설정으로 간주하지 않는다.</li>
+<li>legacy <code>/account/workspaces</code>는 <code>일반 &gt; 소속 Organization</code>으로 승계한다.</li>
+<li>기존 route를 유지하는 동안에도 사용자 표시는 Organization으로 하고 제품별 Workspace를 최종 개념으로 노출하지 않는다.</li>
+</ul>
+<h2>IMPLEMENTATION_GAP</h2>
+<ul>
+<li>최종 메뉴 route와 공통 Organization selector</li>
+<li>Organization 역할·제품/메뉴 권한 관리 API</li>
+<li>Organization:Paddle Customer 1:1과 OWNER portal grant</li>
+<li>legacy 설정의 단계적 이동과 redirect</li>
+<li>제품별 trial·Bundle 상태 projection</li>
+<li>trial Offer 표시값·무료 이용량 상태·전체 잠금과 유료 전환 연결</li>
+</ul>
+<h2>QA</h2>
+<ul>
+<li>Organization 없음·복수 Organization·전환 중 상태를 확인한다.</li>
+<li>유료 제품 0개, trial 활성·무료 이용량 소진·기간 종료, Trade OS만, SNAP만, Bundle을 확인한다.</li>
+<li>OWNER·ADMIN·MEMBER별 사용자 관리·제품·결제 메뉴와 API 거부를 확인한다.</li>
+<li>제품별 멤버 관리·Workspace 정보가 남지 않았는지 확인한다.</li>
+<li>App User가 Organization Member 목록에 섞이지 않는지 확인한다.</li>
+<li>제품의 <code>설정</code>이 Common 허브로 진입하고 Trade OS <code>App 사용자</code>가 설정 밖 주 메뉴로 유지되는지 확인한다.</li>
+<li>Organization 전환 뒤 이전 조직의 결제·제품·데이터가 보이지 않는지 확인한다.</li>
+</ul>
+</article></main></body></html>

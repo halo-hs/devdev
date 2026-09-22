@@ -1,0 +1,94 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-13 — 운영 감시 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-13 — 운영 감시</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/13-monitor.md</p><article class="doc"><h1>SC-13 — 운영 감시</h1>
+<blockquote>
+<p>결정 근거: <span>TRADE-DOC-001 — QA 절의 규범 경계</span> · <span>DEC-TRD-008 — 반응형 지원 범위</span></p>
+</blockquote>
+<blockquote>
+<p>결정 근거: <span>ISSUE-145 — 영역별 `data_as_of`와 부분 실패</span></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/monitor</code></td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td><code>user-frontend/src/app/erp/monitor/page.tsx</code>와 monitor 기능 컴포넌트</td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><a href="spec-06-worklist-and-team-overview.html">내 할 일과 팀 현황 (06-worklist-and-team-overview.md)</a></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>현재 프론트·서버 모두 소유자 전용</td>
+</tr>
+</tbody></table>
+<p>이 화면은 <span>공통 UI 품질 계약</span>의 반응형 범위를 상속한다. 모바일에서는 영역별 상태·목록·오류와 실패 영역 재시도를 안전하게 표시하며, 목록·표의 가로 스크롤은 해당 컨테이너 안에서만 제공한다.</p>
+<h2>구역·행동·호출</h2>
+<table>
+<thead>
+<tr>
+<th>구역</th>
+<th>보이는 항목</th>
+<th>버튼·필터</th>
+<th>호출</th>
+<th>결과·복구</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>KPI</td>
+<td>담당자, 미할당, 기한 초과와 KPI <code>data_as_of</code></td>
+<td>기간·수량 필터, 새로고침</td>
+<td>monitor KPI 조회</td>
+<td>성공 즉시 갱신; 실패 시 마지막 성공값·시각과 오류 유지</td>
+</tr>
+<tr>
+<td>상태</td>
+<td>중요도·병목과 status <code>data_as_of</code></td>
+<td>기간·수량 필터, 새로고침</td>
+<td>monitor status 조회</td>
+<td>성공 즉시 갱신; 실패 영역만 독립 재시도</td>
+</tr>
+<tr>
+<td>처리량</td>
+<td>처리량과 throughput <code>data_as_of</code></td>
+<td>기간·수량 필터, 새로고침</td>
+<td>monitor throughput 조회</td>
+<td>성공 즉시 갱신; 이전 요청·오래된 응답은 현재값을 덮지 않음</td>
+</tr>
+<tr>
+<td>위험·차단</td>
+<td>위험, P0/P1 차단 항목, 근거</td>
+<td>항목 선택</td>
+<td>risks·blocked 조회</td>
+<td>관련 업무 표시</td>
+</tr>
+<tr>
+<td>플래그</td>
+<td>종류, 내용, 확인 여부, Deal 근거</td>
+<td><strong>확인함/거래 열기</strong></td>
+<td>flag 확인 API 또는 Deal 이동</td>
+<td>성공 시 상태 변경, 실패 시 기존 행 유지</td>
+</tr>
+<tr>
+<td>부분·전체 갱신 실패</td>
+<td>영역별 마지막 성공 기준시각, 실패·오래됨 표시</td>
+<td><strong>실패 영역 다시 불러오기</strong></td>
+<td>실패한 monitor endpoint만 재조회</td>
+<td>성공 영역 보존, 실패 영역의 마지막 정상값 유지</td>
+</tr>
+</tbody></table>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<p>사용자 역할, 선택 필터, KPI·상태·처리량 각각의 <code>area/data/data_as_of/timezone/request_id</code>, 실패한 패널과 오류 문구를 기록한다. UTC RFC3339 기준시각은 <code>ko-KR/en-US/en-GB/ja-JP/de-DE/fr-FR</code> locale 형식·초·명시적 IANA timezone label로 표시하고 화면 전체 시각으로 합치지 않는다. 누락·invalid·5분 초과 미래는 새 성공으로 채택하지 않고 15분 초과 값은 <code>오래됨</code>을 표시한다. 혼합 배포의 누락 timestamp를 수신 시각으로 합성하지 않고, backend-first flag rollback 뒤에도 영역별 마지막 성공 cache를 0·빈 상태로 덮지 않는지 확인한다. <span>D-006</span>·<span>OD-006</span>에 따라 운영 감시는 Owner 전용이며 관리자의 접근 거부는 승인 정책과 일치하는지 판정한다.</p>
+<h2>개발 역추적</h2>
+<p>monitor components → <code>lib/api/monitor.ts</code>, <code>flags.ts</code> → monitor·flag BFF → 서버 owner guard와 handler/service.</p>
+</article></main></body></html>

@@ -1,0 +1,461 @@
+/* ECOYA palette supplied by the brand owner. Scoped to the public landing. */
+.trade-landing {
+  --ecoya-paper: #eef0f4;
+  --ecoya-card: #ffffff;
+  --ecoya-card2: #e9ecf2;
+  --ecoya-ink: #1c3d61;
+  --ecoya-ink-soft: #48566c;
+  --ecoya-faint: #8a93a5;
+  --ecoya-rule: #d5dbe6;
+  --ecoya-rule-soft: #e4e8f0;
+  --ecoya-brand: #166dd7;
+  --ecoya-bright: #1478eb;
+  --ecoya-indigo: #1c3d61;
+  --ecoya-band: #0f1e36;
+  --ecoya-band2: #152a48;
+  --ecoya-brand-soft: rgb(22 109 215 / 10%);
+  --ecoya-band-ink: #e9f0fa;
+  --ecoya-good: #0e9f6e;
+  --ecoya-button: #166dd7;
+  --ecoya-button-hover: #125db5;
+  --ecoya-solid-indigo: #1c3d61;
+  --ecoya-label-bg: #e8f0fb;
+  --ecoya-label-ink: #1662d1;
+  --ecoya-white: #ffffff;
+  --trade-ink: var(--ecoya-ink);
+  --trade-secondary: var(--ecoya-ink-soft);
+  --trade-blue: var(--ecoya-indigo);
+  --trade-line: var(--ecoya-rule);
+  --trade-paper: var(--ecoya-paper);
+  --trade-masthead-bg: var(--ecoya-solid-indigo);
+  --trade-intro-bg: var(--ecoya-paper);
+  --color-bg: var(--ecoya-paper);
+  --color-fg: var(--ecoya-ink);
+  --color-fg-muted: var(--ecoya-ink-soft);
+  --color-accent: var(--ecoya-indigo);
+  color-scheme: light;
+  color: var(--ecoya-ink);
+  background: var(--ecoya-paper);
+}
+.trade-landing[data-landing-product="trade"] {
+  --ecoya-paper: #f1f4f8;
+  --ecoya-card2: #e9eef5;
+  --ecoya-faint: #8993a6;
+  --ecoya-rule: #d3dbe6;
+  --ecoya-band: #1c3d61;
+}
+.dark .trade-landing {
+  --ecoya-paper: #0e131b;
+  --ecoya-card: #161c26;
+  --ecoya-card2: #1b222d;
+  --ecoya-ink: #e7ecf3;
+  --ecoya-solid-indigo: #13253c;
+  --ecoya-label-bg: #132b48;
+  --ecoya-label-ink: #8fbaff;
+  --ecoya-ink-soft: #9aa5b6;
+  --ecoya-faint: #6e7788;
+  --ecoya-rule: #29313d;
+  --ecoya-rule-soft: #222932;
+  --ecoya-brand: #4d90f0;
+  --ecoya-bright: #5aa0f5;
+  --ecoya-indigo: #8fb4e6;
+  --ecoya-band: #080d16;
+  --ecoya-band2: #0e1726;
+  --ecoya-brand-soft: rgb(77 144 240 / 14%);
+  --ecoya-band-ink: #e7eef8;
+  --ecoya-good: #34c88a;
+  color-scheme: dark;
+}
+.dark .trade-landing[data-landing-product="trade"] {
+  --ecoya-card2: #1c232e;
+  --ecoya-faint: #6b7686;
+  --ecoya-rule: #28303c;
+  --ecoya-bright: #6aa5f5;
+  --ecoya-band: #13253c;
+}
+.trade-landing :is(.trade-trust-section, .trade-feature-section, .trade-footer) {
+  background: var(--ecoya-paper);
+}
+.trade-landing
+  :is(.trade-reference-grid, .trade-pricing article, .trade-owner-preview) {
+  background: var(--ecoya-card);
+  border-color: var(--ecoya-rule);
+  color: var(--ecoya-ink);
+}
+.trade-landing
+  :is(
+    .trade-products-section,
+    #pricing,
+    #pricing::before
+  ) {
+  background: var(--ecoya-card2);
+}
+.trade-landing
+  :is(
+    .trade-story-change,
+    .trade-timeline-scene,
+    .trade-feature-visual,
+    .trade-trust-visual,
+    .trade-upload-illustration
+  ) {
+  background: var(--ecoya-card2);
+  border-color: var(--ecoya-rule);
+}
+.trade-landing
+  :is(
+    .trade-section-heading h2,
+    .trade-product-intro h3,
+    .trade-story-change span,
+    .trade-demo-caption strong,
+    .trade-feature-pain
+  ) {
+  color: var(--ecoya-indigo);
+}
+.trade-landing
+  :is(
+    .trade-section-heading > p,
+    .trade-story-copy p,
+    .trade-product-intro > p:not(.trade-section-label),
+    .trade-story-change p,
+    .trade-product-capabilities,
+    .trade-hero-description,
+    .trade-hero-note,
+    .trade-prompt,
+    .trade-demo-caption,
+    .trade-story-principle
+  ) {
+  color: var(--ecoya-ink-soft);
+}
+.trade-landing
+  .trade-reference-hero
+  :is(
+    .trade-hero-description,
+    .trade-hero-note,
+    .trade-prompt,
+    .trade-demo-caption
+  ) {
+  color: var(--ecoya-ink-soft);
+}
+.trade-landing .trade-reference-hero .trade-hero-label {
+  color: var(--ecoya-ink);
+  background: var(--ecoya-card);
+  border-color: var(--ecoya-rule);
+}
+.trade-landing
+  .trade-reference-hero
+  .trade-hero-actions
+  > a:not([data-slot="button"]) {
+  color: var(--ecoya-ink-soft);
+}
+.trade-landing .trade-market {
+  background: var(--ecoya-paper);
+  color: var(--ecoya-ink-soft);
+}
+.trade-landing .trade-market strong {
+  color: var(--ecoya-ink);
+}
+.trade-landing .trade-market small {
+  background: var(--ecoya-card2);
+  color: var(--ecoya-ink-soft);
+}
+.trade-landing .trade-market > .trade-container > span:last-child {
+  color: var(--ecoya-ink-soft);
+}
+.trade-landing .trade-owner-section {
+  background: var(--ecoya-solid-indigo);
+}
+.trade-landing
+  .trade-owner-section
+  :is(
+    .trade-section-label,
+    .trade-section-heading h2,
+    .trade-section-heading > p,
+    .trade-owner-grid h3,
+    .trade-owner-grid p,
+    .trade-owner-grid svg
+  ) {
+  color: var(--ecoya-white);
+}
+.trade-landing .trade-nav-wrap {
+  background: var(--ecoya-card);
+  border-bottom: 1px solid var(--ecoya-rule-soft);
+}
+.trade-landing .trade-nav,
+.trade-landing .trade-nav :is(nav, .trade-language, .trade-brand-product) {
+  color: var(--ecoya-ink);
+}
+.trade-landing .trade-nav-actions > a:not([data-slot="button"]) {
+  color: var(--ecoya-ink);
+}
+.trade-landing
+  .trade-nav
+  :is(nav, .trade-nav-actions)
+  > a:not([data-slot="button"]):hover {
+  color: var(--ecoya-brand);
+}
+.trade-landing .trade-nav :is(a, button, select):focus-visible {
+  outline-color: var(--ecoya-brand);
+}
+.trade-nav .ecoya-logo-dark {
+  display: none;
+}
+.dark .trade-nav .ecoya-logo-light {
+  display: none;
+}
+.dark .trade-nav .ecoya-logo-dark {
+  display: block;
+}
+.trade-landing
+  :is(
+    .trade-nav-actions,
+    .trade-hero-actions,
+    .trade-upload-intro,
+    .trade-bottom-cta
+  )
+  [data-slot="button"] {
+  background: var(--ecoya-button);
+  color: var(--ecoya-white);
+  border-color: var(--ecoya-button);
+}
+.trade-landing
+  :is(
+    .trade-nav-actions,
+    .trade-hero-actions,
+    .trade-upload-intro,
+    .trade-bottom-cta
+  )
+  [data-slot="button"]:hover {
+  background: var(--ecoya-button-hover);
+  border-color: var(--ecoya-button-hover);
+}
+.trade-landing
+  :is(.trade-section-divider, .trade-product-intro + .trade-product-intro) {
+  border-color: var(--ecoya-rule);
+}
+.trade-landing .trade-demo-playback .trade-feature-play {
+  background: var(--ecoya-card);
+  color: var(--ecoya-indigo);
+  border-color: var(--ecoya-rule);
+}
+.trade-landing .trade-reference-hero .trade-example-tabs button {
+  color: var(--ecoya-ink-soft);
+}
+.trade-landing
+  .trade-reference-hero
+  .trade-example-tabs
+  button[aria-pressed="true"] {
+  color: var(--ecoya-indigo);
+}
+.trade-landing .trade-reference-hero .trade-example-tabs button:hover {
+  background: var(--ecoya-brand-soft);
+  color: var(--ecoya-indigo);
+}
+.trade-landing .trade-reference-hero .trade-feature-progress {
+  background: var(--ecoya-rule);
+}
+.trade-landing .trade-reference-hero .trade-feature-progress i {
+  background: var(--ecoya-brand);
+}
+/* Keep the demo's semantic hierarchy readable in both page themes. */
+.trade-landing
+  :is(
+    .trade-invoice,
+    .trade-extracted,
+    .trade-answer,
+    .trade-settlement,
+    .trade-delivery,
+    .trade-trust-paper,
+    .trade-trust-field,
+    .trade-trust-difference,
+    .trade-upload-example-drop,
+    .trade-upload-example-result
+  ) {
+  background: var(--ecoya-card);
+  color: var(--ecoya-ink);
+  border-color: var(--ecoya-rule);
+}
+.trade-landing
+  :is(
+    .trade-invoice h3,
+    .trade-invoice-parties strong,
+    .trade-invoice-table strong,
+    .trade-extract-title h3,
+    .trade-extracted dd,
+    .trade-owner-preview h3,
+    .trade-owner-preview strong
+  ) {
+  color: var(--ecoya-ink);
+}
+.trade-landing
+  :is(
+    .trade-invoice-head,
+    .trade-invoice-meta,
+    .trade-invoice-parties span,
+    .trade-invoice-parties p,
+    .trade-invoice-bottom dt,
+    .trade-extracted dt,
+    .trade-owner-preview p,
+    .trade-owner-preview dt,
+    .trade-upload-example-result dt
+  ) {
+  color: var(--ecoya-ink-soft);
+}
+.trade-landing
+  :is(
+    .trade-invoice-meta,
+    .trade-invoice-bottom,
+    .trade-extracted dl > div,
+    .trade-upload-example-result dl > div
+  ) {
+  border-color: var(--ecoya-rule-soft);
+}
+.trade-landing
+  :is(
+    .trade-invoice-table > div:first-child,
+    .trade-upload-example-file,
+    .trade-answer-source
+  ) {
+  background: var(--ecoya-card2);
+  color: var(--ecoya-ink-soft);
+}
+.trade-landing .trade-demo-review {
+  color: var(--ecoya-good);
+}
+.dark .trade-landing :is(.trade-nav-wrap, .trade-owner-section) {
+  background: var(--ecoya-band);
+}
+
+/* The pale curved surface sits behind the hero card and ends above its base. */
+.trade-landing main,
+.trade-landing .trade-reference-hero,
+.trade-landing #how {
+  background: var(--ecoya-card);
+}
+.trade-landing .trade-reference-hero::before {
+  background: var(--ecoya-paper);
+}
+.trade-landing .trade-pricing [data-slot="button"] {
+  background: var(--ecoya-button);
+  border-color: var(--ecoya-button);
+  color: var(--ecoya-white);
+}
+.trade-landing .trade-pricing [data-slot="button"]:hover {
+  background: var(--ecoya-button-hover);
+  border-color: var(--ecoya-button-hover);
+}
+.trade-landing .trade-pricing [data-slot="button"][data-variant="outline"] {
+  background: transparent;
+  border-color: var(--ecoya-indigo);
+  color: var(--ecoya-indigo);
+}
+.trade-landing
+  .trade-pricing
+  [data-slot="button"][data-variant="outline"]:hover {
+  background: var(--ecoya-brand-soft);
+}
+.ecoya-auth-header {
+  position: relative;
+  z-index: 30;
+  flex-shrink: 0;
+}
+.trade-landing.ecoya-auth-header {
+  --ecoya-card: #ffffff;
+  --ecoya-ink: #1c3d61;
+  --ecoya-rule-soft: #e4e8f0;
+  --ecoya-brand: #166dd7;
+}
+.ecoya-auth-header .trade-nav .ecoya-logo-light {
+  display: block;
+}
+.ecoya-auth-header .trade-nav .ecoya-logo-dark {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .ecoya-auth-header:is([data-auth-variant="signup"], [data-auth-variant="login"]) .trade-nav-wrap {
+    background: linear-gradient(to right, transparent 25%, #ffffff 25%);
+    border-bottom: 0;
+  }
+  .ecoya-auth-header:is([data-auth-variant="signup"], [data-auth-variant="login"]) .trade-nav .ecoya-logo-light {
+    display: none;
+  }
+  .ecoya-auth-header:is([data-auth-variant="signup"], [data-auth-variant="login"]) .trade-nav .ecoya-logo-dark {
+    display: block;
+  }
+}
+.trade-landing select.trade-language {
+  background: transparent;
+  border: 0;
+  padding: 4px 0;
+  cursor: pointer;
+}
+.trade-landing select.trade-language option {
+  background: var(--ecoya-card);
+  color: var(--ecoya-ink);
+}
+.trade-landing select.trade-language:focus-visible {
+  outline: 2px solid var(--ecoya-brand);
+  outline-offset: 4px;
+}
+
+.trade-question-layout .trade-timeline-steps button {
+  min-height: 84px;
+}
+.trade-question-layout .trade-answer {
+  width: 100%;
+}
+.trade-question-layout .trade-answer-amount {
+  overflow-wrap: anywhere;
+}
+.trade-feature-visual .trade-owner-preview {
+  width: 100%;
+  min-width: 0;
+  box-shadow: none;
+}
+.trade-feature-visual .trade-owner-preview h3 {
+  font-size: 22px;
+}
+.trade-feature-visual .trade-owner-preview dl > div {
+  gap: 12px;
+}
+.trade-feature-visual .trade-owner-preview dd {
+  white-space: nowrap;
+}
+
+/* The account introduction uses the same palette as the featured pricing card. */
+.ecoya-account-guide {
+  background:
+    radial-gradient(ellipse at 100% 0%, rgb(116 169 224 / 35%), transparent 62%),
+    radial-gradient(ellipse at 0% 100%, rgb(41 101 165 / 40%), transparent 65%),
+    linear-gradient(145deg, #1c3d61 15%, #132840 72%, #0f1e36);
+}
+.ecoya-account-photo { opacity: .16; mix-blend-mode: luminosity; }
+.ecoya-account-photo-shade {
+  background: linear-gradient(180deg, rgb(28 61 97 / 60%), transparent 55%, rgb(15 30 54 / 25%));
+}
+
+/* A single uninterrupted backdrop continues behind the desktop auth logo. */
+@media (min-width: 1024px) {
+  .ecoya-auth-header:is([data-auth-variant="signup"], [data-auth-variant="login"]) {
+    background: transparent;
+  }
+  .ecoya-account-guide {
+    --account-header-height: 88px;
+    overflow: visible;
+    background: none;
+  }
+  .ecoya-account-guide::before {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--account-header-height)) 0 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 100% 0%, rgb(116 169 224 / 35%), transparent 62%),
+      radial-gradient(ellipse at 0% 100%, rgb(41 101 165 / 40%), transparent 65%),
+      linear-gradient(145deg, #1c3d61 15%, #132840 72%, #0f1e36);
+  }
+  .ecoya-account-guide :is(.ecoya-account-photo, .ecoya-account-photo-shade) {
+    top: calc(-1 * var(--account-header-height));
+    height: calc(100% + var(--account-header-height));
+  }
+}

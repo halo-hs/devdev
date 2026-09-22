@@ -1,0 +1,132 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-29 — 멤버 설정 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-29 — 멤버 설정</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/29-settings-members.md</p><article class="doc"><h1>SC-29 — 멤버 설정</h1>
+<blockquote>
+<p><strong>CURRENT_LEGACY</strong>: 이 문서는 기존 <code>/erp/settings</code>의 Space 멤버 화면을 보존한다. 목표 Organization Member 화면과 권한은 <a href="spec-CS-08-members-invites.html">Common CS-08</a>이 소유한다. Trade OS <span>App 사용자 화면 SC-45</span>를 정의하거나 대체하지 않는다. 경계 반영: <span>2026-08-20</span>.</p>
+</blockquote>
+<blockquote>
+<p>결정 근거: <span>DEC-TRD-011 — 기존 멤버 관리·자기 이탈</span> · 대체된 역사 기준: <span>OPEN-017a</span> · <span>TRADE-DOC-001 — QA 절의 규범 경계</span></p>
+</blockquote>
+<blockquote>
+<p>경계: ERP <code>owner/admin/member</code> 역할·제거 API는 현재 구현 역추적값이다. 신규 기획·화면·권한 정본으로 사용하지 않는다.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-31 결정 반영</strong> — 아래는 확정 정책이다. 구현·QA 상태는 이 문서가 관리하지 않는다.</p>
+<ul>
+<li><span>DEC-TRD-001</span> — 대손 확정·월 마감·<code>edit_bank_profile</code>은 capability·재인증·감사를 요구하고 <strong>기본값은 Owner/Admin 전용</strong>이다. 입출금·부분 입출금 기록과 대손 제안은 Member가 수행한다. 소규모 조직에 이중 승인을 강제하지 않는다.</li>
+</ul>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/settings</code>의 멤버 탭</td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td>settings page → 멤버 관리 컴포넌트</td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>보관·삭제·보존 (08-archive-and-retention.md)</span>, <span>설정·멤버·구독·개인정보 (18-settings-members-billing.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>Owner/Admin만 멤버 탭·직접 경로에 접근해 타인을 관리한다. Member는 화면·조회·변경 API 권한이 없다. 화면에 진입한 Owner/Admin의 자기 행에도 역할 변경·제거·나가기 CTA는 없음</td>
+</tr>
+</tbody></table>
+<h2>멤버 관리 권한</h2>
+<p>멤버 관리는 새 초대와 별도 capability다. 초대할 때 선택할 수 있는 역할 범위를 기존 멤버의 역할 변경 Select에 재사용하지 않는다.</p>
+<table>
+<thead>
+<tr>
+<th>행동</th>
+<th>Owner</th>
+<th>Admin</th>
+<th>Member</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>기존 멤버 역할 변경</td>
+<td>비-Owner·비자기 대상에 <code>Admin</code>·<code>Member</code> 선택 가능</td>
+<td>비-Owner·비자기 대상에 <code>Admin</code>·<code>Member</code> 선택 가능</td>
+<td>화면 접근 없음; 직접 API 거부</td>
+</tr>
+<tr>
+<td>기존 멤버 조직 접근 차단</td>
+<td>비-Owner·비자기 대상 <strong>조직에서 제거</strong> CTA 사용 가능</td>
+<td>비-Owner·비자기 대상 <strong>조직에서 제거</strong> CTA 사용 가능</td>
+<td>화면 접근 없음; 직접 API 거부</td>
+</tr>
+<tr>
+<td>자기 행</td>
+<td>역할 배지만 읽기 전용; Select·저장·조직에서 제거·나가기 CTA 없음</td>
+<td>동일</td>
+<td>화면 접근 없음; 자기 이탈은 개인 설정에서 실행</td>
+</tr>
+<tr>
+<td>Owner 변경</td>
+<td>일반 역할 Select 대상 아님; 별도 소유권 이전</td>
+<td>실행 불가</td>
+<td>화면 접근 없음</td>
+</tr>
+</tbody></table>
+<p><strong>조직에서 제거</strong>는 대상 조직의 멤버십을 삭제해 해당 조직의 ERP 접근만 차단한다. 사용자 계정·개인정보·다른 조직 멤버십은 유지하며 별도 <code>blocked</code>·<code>suspended</code> 상태나 차단 해제 CTA는 없다. 담당 업무 재배정과 보존 대상 데이터 처리를 먼저 확인하고, 같은 조직에 다시 접근하려면 새 초대를 수락해 멤버십을 다시 생성한다.</p>
+<p><code>워크스페이스 나가기</code>는 현행 화면의 레거시 명칭이며 이 화면의 멤버 관리 행동이 아니다. 목표 구조에서 본인의 Organization Membership 이탈은 Common <code>CS-06</code>의 <a href="spec-CS-06-account-profile.html">`일반 > 소속 Organization`</a>에서 실행하며, SC-29 자기 행에는 나가기 링크나 대체 CTA도 두지 않는다.</p>
+<h2>목록·행동·호출</h2>
+<table>
+<thead>
+<tr>
+<th>보이는 항목</th>
+<th>버튼·행동</th>
+<th>호출</th>
+<th>성공·오류·복구</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>이름, 이메일, 역할, 상태 — Owner/Admin</td>
+<td>역할 Select(<code>Admin</code>·<code>Member</code>)·<strong>저장</strong></td>
+<td><code>PATCH /api/v1/admin/users/{user_id}/role</code>; 필수 <code>role</code>, 선택 <code>reason</code></td>
+<td>비-Owner·비자기 대상 행 갱신; <code>400/401/403/404/409/502</code>면 기존 서버 역할 복원·목록 재조회</td>
+</tr>
+<tr>
+<td>멤버와 활성 Deal·재배정 안내 — Owner/Admin</td>
+<td><strong>조직에서 제거</strong></td>
+<td><code>DELETE /api/v1/admin/members/{user_id}</code>; <code>mode: recall/transfer/per_deal</code>, 조건부 이관 대상, 선택 <code>reason</code></td>
+<td>활성 Deal 처리·공유 정리·멤버십 삭제가 전부 성공하거나 롤백; 성공 시 접근·목록 제거, 계정·개인정보·다른 조직 멤버십·보관 Deal 역사 유지</td>
+</tr>
+<tr>
+<td>자기 행 — 화면에 진입한 Owner/Admin</td>
+<td>읽기 전용 역할 배지; 관리·나가기 CTA 없음</td>
+<td>역할 변경·관리 제거 호출 없음</td>
+<td>현재 멤버십 유지; 자기 이탈은 개인 설정으로 분리</td>
+</tr>
+<tr>
+<td>개인정보 처리 상태 — Owner 전용</td>
+<td><strong>내보내기/개인정보 삭제</strong></td>
+<td>별도 user export·erasure</td>
+<td>Admin·Member에게 비노출·직접 요청 거부; 자기 이탈과 분리한 요청 상태·결과 표시</td>
+</tr>
+</tbody></table>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<ul>
+<li><input disabled="" type="checkbox"> Owner와 Admin에게 비-Owner·비자기 멤버의 역할 Select와 <strong>조직에서 제거</strong> CTA가 보인다.</li>
+<li><input disabled="" type="checkbox"> Owner와 Admin이 Member를 <code>Admin</code>으로 승격하고 기존 Admin을 <code>Member</code>로 변경할 수 있다.</li>
+<li><input disabled="" type="checkbox"> Member에게 역할 Select·저장·조직에서 제거 CTA를 노출하지 않고 직접 API도 데이터 변경 없이 거부한다.</li>
+<li><input disabled="" type="checkbox"> Member에게 멤버 탭과 직접 경로를 노출하지 않고 목록 조회도 거부한다. 개인 설정 <code>/account/workspaces</code> 접근은 별도 capability로 허용한다.</li>
+<li><input disabled="" type="checkbox"> 화면에 진입한 Owner/Admin의 자기 행은 읽기 전용이고 역할 Select·저장·조직에서 제거·워크스페이스 나가기 CTA가 없다. Member는 이 화면에 접근하지 않으며 자기 이탈은 개인 설정에서 실행한다. Owner 변경은 별도 소유권 이전으로 처리한다.</li>
+<li><input disabled="" type="checkbox"> 조직에서 제거하면 해당 조직 접근만 차단하고 사용자 계정·개인정보·다른 조직 멤버십이 삭제된 것으로 표시하지 않는다.</li>
+<li><input disabled="" type="checkbox"> 제거된 멤버를 <code>blocked</code>·<code>suspended</code> 상태로 남기거나 차단 해제 CTA를 표시하지 않으며, 재접근은 새 초대·수락으로 검증한다.</li>
+<li><input disabled="" type="checkbox"> 제거 모달에서 <code>recall/transfer/per_deal</code>, 모든 활성 Deal 영향, 조건부 이관 대상, 확인 문구를 표시하고 부분 이관·부분 삭제가 없다.</li>
+<li><input disabled="" type="checkbox"> 역할 변경은 <code>/admin/users/{user_id}/role</code>, 제거는 <code>/admin/members/{user_id}</code>로 분리하고 자기 대상 호출은 <code>403</code>으로 무변경 거부한다.</li>
+<li><input disabled="" type="checkbox"> 대상 사용자, 변경 전후 역할, 재배정 선택, 사유, 결과, 시각, request ID를 기록한다. 멤버 제거·자기 이탈·개인정보 삭제를 같은 행동으로 취급하지 않는다.</li>
+</ul>
+<h2>개발 역추적</h2>
+<p>member settings → <code>members.ts</code>, <code>userPrivacy.ts</code> → 역할 변경 <code>PATCH /api/v1/admin/users/{user_id}/role</code>, 조직에서 제거 <code>DELETE /api/v1/admin/members/{user_id}</code>, Owner-only export·erasure BFF → admin handler/service/data. 자기 이탈 API는 이 화면에서 호출하지 않는다.</p>
+</article></main></body></html>

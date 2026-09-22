@@ -1,0 +1,66 @@
+{
+  "slug": "brevo-com",
+  "title": "Brevo: Email & SMS Marketing, CRM & Automation Platform",
+  "sourceUrl": "https://brevo.com/",
+  "capturedAt": "2026-05-27",
+  "image": "https://0nme3pk5am3urwa9.public.blob.vercel-storage.com/captures/brevo-com/hero.1440.webp?v=1779917426",
+  "fullPage": "https://0nme3pk5am3urwa9.public.blob.vercel-storage.com/captures/brevo-com/full.1440.webp?v=1779917426",
+  "thumb": "https://0nme3pk5am3urwa9.public.blob.vercel-storage.com/captures/brevo-com/thumb.384.webp?v=1779917426",
+  "mobile": "https://0nme3pk5am3urwa9.public.blob.vercel-storage.com/captures/brevo-com/mobile.384.webp?v=1779917426",
+  "mobileFull": "https://0nme3pk5am3urwa9.public.blob.vercel-storage.com/captures/brevo-com/mobile-full.png?v=1779917426",
+  "imagePng": "https://0nme3pk5am3urwa9.public.blob.vercel-storage.com/captures/brevo-com/hero.png?v=1779917439",
+  "northstar": "Cool, spacious digital architecture: clean sans-serif, muted teal and warm graphite hues.",
+  "autopsy": "FOLD: Top nav: logo left, four dropdowns, globe icon, \"Log in\", pill \"Sign Up Free\", outline \"Get a demo\" right. Headline: sentence case, left-aligned, ~48px, 3 lines, \"Turn Every Order into a Lifetime Customer\". Body: 2-line paragraph. Two CTAs: filled black pill \"Sign up free\" above, social proof (4.5 stars, G2 badge) below. Hero: dashboard UI collage, right 55% of viewport, overlapping cards showing CRM data, campaign stats, revenue graphs. Left text block balances right visual at ~45/55 split.\n\nTYPE: Sans-serif display (Tomato Grotesk), medium weight, slightly condensed; body same family lighter. ~3:1 scale jump. Sentence case throughout, tight tracking on headline.\n\nCOLOR: Background #c4fca4 (mint green). Text near-black. Accent #dc9140 (terracotta) appears in dashboard UI charts/badges only, not CTAs. Buttons black-on-white inverse.\n\nSIGNATURE: Mint green full-bleed hero background with realistic SaaS dashboard collage floating at right edge, breaking the frame.",
+  "description": "Brevo is the most intuitive all-in-one customer engagement platform: email and SMS marketing, automation, CRM, live chat, and transactional email. Try it free.",
+  "palette": [
+    "#dc9140",
+    "#c4fca4",
+    "#8a4e1c",
+    "#7b5eac",
+    "#b0c0d4"
+  ],
+  "fonts": [
+    "Tomato Grotesk",
+    "ui-sans-serif",
+    "Inter"
+  ],
+  "tech": [
+    "Next.js",
+    "Cloudflare"
+  ],
+  "mode": "light",
+  "tags": {
+    "style": [
+      "minimalism",
+      "swiss",
+      "brutalism"
+    ],
+    "industry": [
+      "saas"
+    ],
+    "components": [
+      "hero-with-cta",
+      "logo-cloud",
+      "feature-trio",
+      "testimonial-wall",
+      "newsletter-signup"
+    ],
+    "vibe": [
+      "technical",
+      "calm",
+      "serious"
+    ]
+  },
+  "macrostructure": {
+    "slug": "bento-grid",
+    "label": "Bento Grid"
+  },
+  "axes": {
+    "paperBand": "light",
+    "displayClass": "grotesk-sans",
+    "accentHue": "chromatic-other",
+    "paperL": 93,
+    "accentDeg": 65,
+    "displayFace": "Tomato Grotesk Semibold"
+  }
+}

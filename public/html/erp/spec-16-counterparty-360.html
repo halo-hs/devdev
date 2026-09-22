@@ -1,0 +1,89 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-16 — 거래처 360 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-16 — 거래처 360</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/16-counterparty-360.md</p><article class="doc"><h1>SC-16 — 거래처 360</h1>
+<blockquote>
+<p>결정 근거: <span>TRADE-DOC-001 — QA 절의 규범 경계</span></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/counterparties/{counterpartyId}</code></td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td><code>user-frontend/src/app/erp/counterparties/[counterpartyId]/page.tsx</code> → <code>Counterparty360Connected.tsx</code></td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>Deal 목록·상세·거래처 360 (14-deals-and-counterparties.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>조직 내 거래처·관련 Deal 조회 권한</td>
+</tr>
+</tbody></table>
+<h2>구역·호출·이동</h2>
+<table>
+<thead>
+<tr>
+<th>구역</th>
+<th>보이는 항목·행동</th>
+<th>호출</th>
+<th>성공·오류·이동</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>거래처 식별</td>
+<td>기준명, 역할</td>
+<td>counterparties와 suggestions 조회</td>
+<td>둘 다 실제 미존재면 찾을 수 없음</td>
+</tr>
+<tr>
+<td>미결제 잔액</td>
+<td>통화별 받을 돈·지급할 돈, 기준시각</td>
+<td>settlement overview</td>
+<td>실패를 0으로 표시하지 않음</td>
+</tr>
+<tr>
+<td>연체·다음 일정</td>
+<td>통화별 일정</td>
+<td>settlement deals 조회</td>
+<td>행 선택 시 <code>/erp/deals/{dealId}</code></td>
+</tr>
+<tr>
+<td>필수 문서</td>
+<td>관련 Deal의 누락 문서</td>
+<td>Deal 목록 후 최대 8개 상세 조회</td>
+<td>8개 초과·부분 실패는 부분 결과 표시</td>
+</tr>
+<tr>
+<td>최근 문서</td>
+<td>받은 문서와 관련 Deal</td>
+<td>문서 목록 조회 후 화면 필터</td>
+<td>행 선택 시 Deal 상세</td>
+</tr>
+<tr>
+<td>운영/분석 탭</td>
+<td>운영 자료 또는 분석 안내</td>
+<td>탭 선택</td>
+<td>분석 탭은 현재 별도 분석 API 없이 준비 안내</td>
+</tr>
+<tr>
+<td>정산 이동</td>
+<td><strong>정산으로 돌아가기</strong></td>
+<td>없음</td>
+<td><code>/erp/settlement</code></td>
+</tr>
+</tbody></table>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<p>거래처 ID·기준명·통화·탭·부분 결과 여부를 기록한다. 분석 준비 안내를 분석 데이터 로딩 실패로 분류하지 않는다.</p>
+<h2>개발 역추적</h2>
+<p><code>Counterparty360Connected.tsx</code> → <code>deals.ts</code>, <code>settlement.ts</code>, <code>tradeDocs.ts</code>, <code>counterpartyAliases.ts</code> → 관련 BFF·서버 원본.</p>
+</article></main></body></html>

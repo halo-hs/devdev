@@ -1,0 +1,17 @@
+{
+  "updatedAt": "2026-09-20T16:36:44.869101+00:00",
+  "mode": "example-data",
+  "applicationCommit": "0c00e8df083ff3ef4b6e824c5647173dd45fc449",
+  "capturedDeployment": "https://c853433e.devdev-e6t.pages.dev",
+  "htmlDeployment": "https://72f6e86f.devdev-e6t.pages.dev",
+  "production": "https://devdev-e6t.pages.dev",
+  "htmlScreens": 810,
+  "moduleCaptures": 137,
+  "referenceEntries": 994,
+  "retiredReferenceFramesHidden": 114,
+  "figmaFileKey": "utViiVayT0rWuYSB5bpZ31",
+  "figmaVerifiedAt": "2026-09-20T16:36:44.869101+00:00",
+  "deployedOperationalTestsPassed": 2,
+  "publicHtmlNavigation": "passed",
+  "localDemoChanges": "browser localStorage only"
+}

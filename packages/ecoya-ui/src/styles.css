@@ -1,0 +1,558 @@
+@import "./tokens.css";
+
+/* Product compatibility aliases. Canonical visual values are owned by the
+   Design System 2.0 token names imported above; these aliases only keep the
+   existing Trade OS/SNAP product layouts source-compatible during migration. */
+:root {
+  --ui-surface-page: var(--background);
+  --ui-surface-panel: var(--surface-background);
+  --ui-surface-subtle: var(--surface-muted-background);
+  --ui-surface-selected: var(--menu-item-selected-background);
+  --ui-surface-hover: var(--menu-item-background-hover);
+  --ui-text-primary: var(--foreground);
+  --ui-text-secondary: var(--muted-foreground);
+  --ui-text-on-action: var(--primary-foreground);
+  --ui-action-primary: var(--button-primary-background);
+  --ui-action-primary-foreground: var(--button-primary-foreground);
+  --ui-action-secondary: var(--button-secondary-background);
+  --ui-action-secondary-foreground: var(--button-secondary-foreground);
+  --ui-action-accent: var(--accent);
+  --ui-action-accent-foreground: var(--accent-foreground);
+  --ui-feedback-success: var(--color-green-2);
+  --ui-feedback-success-background: var(--color-green-6);
+  --ui-feedback-success-border: var(--color-green-5);
+  --ui-feedback-success-foreground: var(--color-green-1);
+  --ui-feedback-warning: var(--color-yellow-2);
+  --ui-feedback-warning-background: var(--color-yellow-6);
+  --ui-feedback-warning-border: var(--color-yellow-5);
+  --ui-feedback-warning-foreground: var(--color-yellow-1);
+  --ui-feedback-danger: var(--color-red-2);
+  --ui-feedback-danger-background: var(--color-red-8);
+  --ui-feedback-danger-border: var(--color-red-5);
+  --ui-feedback-danger-foreground: var(--color-red-1);
+  --ui-feedback-info: var(--color-blue-1);
+  --ui-feedback-info-background: var(--color-blue-6);
+  --ui-feedback-info-border: var(--color-blue-5);
+  --ui-feedback-info-foreground: var(--color-primary-1);
+  --ui-feedback-neutral: var(--color-gray-5);
+  --ui-feedback-neutral-background: var(--color-gray-11);
+  --ui-feedback-neutral-border: var(--color-gray-9);
+  --ui-feedback-neutral-foreground: var(--color-gray-4);
+  --ui-border-default: var(--border);
+  --ui-border-subtle: var(--surface-border);
+  --ui-border-strong: var(--color-gray-8);
+  --ui-border-focus: var(--focus-border);
+  --ui-input-border: var(--control-border);
+  --ui-ring: var(--ring);
+  --ui-sidebar-background: var(--sidebar);
+  --ui-sidebar-foreground: var(--sidebar-foreground);
+  --ui-sidebar-selected: var(--sidebar-accent);
+  --ui-sidebar-selected-foreground: var(--sidebar-accent-foreground);
+  --ui-sidebar-border: var(--sidebar-border);
+  --ui-sidebar-ring: var(--sidebar-ring);
+  --ui-sidebar-gradient: linear-gradient(
+    180deg,
+    var(--color-indigo) 0%,
+    color-mix(in srgb, var(--color-indigo) 88%, var(--color-gray-1)) 52%,
+    color-mix(in srgb, var(--color-indigo) 68%, var(--color-gray-1)) 100%
+  );
+  --ui-sidebar-gradient-foreground: var(--color-gray-12);
+  --ui-sidebar-gradient-muted-foreground: color-mix(
+    in srgb,
+    var(--color-gray-12) 66%,
+    transparent
+  );
+  --ui-sidebar-gradient-hover: color-mix(
+    in srgb,
+    var(--color-primary-8) 14%,
+    transparent
+  );
+  --ui-sidebar-gradient-active: color-mix(
+    in srgb,
+    var(--color-primary-5) 30%,
+    transparent
+  );
+  --ui-sidebar-gradient-border: color-mix(
+    in srgb,
+    var(--color-gray-12) 18%,
+    transparent
+  );
+  --ui-shell-header-gradient: linear-gradient(
+    90deg,
+    var(--color-indigo) 0%,
+    color-mix(in srgb, var(--color-indigo) 92%, var(--color-primary-3)) 34%,
+    color-mix(in srgb, var(--color-indigo) 86%, var(--color-gray-1)) 72%,
+    color-mix(in srgb, var(--color-indigo) 74%, var(--color-gray-1)) 100%
+  );
+  --ui-shell-header-foreground: var(--color-gray-12);
+  --ui-shell-header-muted-foreground: color-mix(
+    in srgb,
+    var(--color-gray-12) 70%,
+    transparent
+  );
+  --ui-shell-header-control-background: color-mix(
+    in srgb,
+    var(--color-gray-12) 12%,
+    transparent
+  );
+  --ui-shell-header-control-background-hover: color-mix(
+    in srgb,
+    var(--color-gray-12) 18%,
+    transparent
+  );
+  --ui-shell-header-border: color-mix(
+    in srgb,
+    var(--color-gray-12) 18%,
+    transparent
+  );
+  --ui-chart-1: var(--chart-1);
+  --ui-chart-2: var(--chart-2);
+  --ui-chart-3: var(--chart-3);
+  --ui-chart-4: var(--chart-4);
+  --ui-chart-5: var(--chart-5);
+  --ui-shell-header-height: 3.75rem;
+  --ui-shell-sidebar-width: 232px;
+  --ui-shell-sidebar-collapsed-width: 3.5rem;
+  --ui-content-gutter: 1.25rem;
+  --ui-content-wide-max: 1440px;
+  --ui-content-wide-xl-max: 1680px;
+  --ui-content-medium-max: 960px;
+  --ui-content-document-max: 760px;
+  --ui-radius-xs: var(--r-xs);
+  --ui-radius-sm: var(--r-sm);
+  --ui-radius-md: var(--r-md);
+  --ui-radius-lg: var(--r-lg);
+  --ui-radius-xl: var(--r-xl);
+  --ui-radius-control: var(--r-md);
+  --ui-radius-panel: var(--r-lg);
+  --ui-shadow-input: var(--shadow-input);
+  --ui-shadow-control: var(--shadow-input);
+  --ui-shadow-section: var(--shadow-section);
+  --ui-shadow-panel: var(--shadow-section);
+  --ui-shadow-action-primary: var(--shadow-btn-primary-blue);
+  --ui-shadow-action-primary-hover: var(--shadow-btn-primary-blue-hover);
+  --ui-shadow-modal: var(--shadow-modal);
+  --ui-shadow-filter: var(--shadow-filter);
+  --ui-overlay-dim: var(--overlay-dim);
+  --ui-z-base: 0;
+  --ui-z-sticky: 10;
+  --ui-z-header: var(--z-side-nav);
+  --ui-z-dropdown: var(--z-dropdown);
+  --ui-z-overlay: var(--z-dialog);
+  --ui-z-modal: var(--z-dialog);
+  --ui-z-toast: var(--z-alert);
+  --info: var(--ui-feedback-info);
+  --info-foreground: var(--ui-feedback-info-foreground);
+  --warning: var(--ui-feedback-warning);
+  --warning-foreground: var(--ui-feedback-warning-foreground);
+  --success: var(--ui-feedback-success);
+  --success-foreground: var(--ui-feedback-success-foreground);
+  --radius: var(--r-md);
+}
+
+/* Tailwind v4 theme names are part of the package contract. Keeping these
+   mappings here makes the npm package self-contained for every product. */
+@theme inline {
+  --font-heading: var(--font-family-sans);
+  --font-sans: var(--font-family-sans);
+  --text-xs: var(--text-body-11);
+  --text-xs--line-height: var(--leading-body-11);
+  --text-sm: var(--text-body-9);
+  --text-sm--line-height: var(--leading-body-9);
+  --text-base: var(--text-body-7);
+  --text-base--line-height: var(--leading-body-7);
+  --text-lg: var(--text-body-6);
+  --text-lg--line-height: var(--leading-body-6);
+  --text-xl: var(--text-header-4);
+  --text-xl--line-height: var(--leading-header-4);
+  --text-2xl: var(--text-header-2);
+  --text-2xl--line-height: var(--leading-header-2);
+  --font-weight-normal: var(--font-weight-regular);
+  --tracking-tight: var(--letter-spacing-tight);
+  --tracking-shortcut: var(--letter-spacing-shortcut);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning: var(--warning);
+  --color-success-foreground: var(--success-foreground);
+  --color-success: var(--success);
+  --color-info-foreground: var(--info-foreground);
+  --color-info: var(--info);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-xs: var(--r-xs);
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-xl);
+  --radius-2xl: var(--r-2xl);
+  --radius-3xl: var(--r-3xl);
+  --radius-4xl: var(--r-4xl);
+  --radius-pill: var(--r-pill);
+  --max-width-ecoya-wide: var(--ui-content-wide-max);
+  --max-width-ecoya-wide-xl: var(--ui-content-wide-xl-max);
+  --max-width-ecoya-medium: var(--ui-content-medium-max);
+  --max-width-ecoya-document: var(--ui-content-document-max);
+  --shadow-ecoya-input: var(--ui-shadow-input);
+  --shadow-ecoya-control: var(--ui-shadow-control);
+  --shadow-ecoya-section: var(--ui-shadow-section);
+  --shadow-ecoya-panel: var(--ui-shadow-panel);
+  --shadow-ecoya-action-primary: var(--ui-shadow-action-primary);
+  --shadow-ecoya-action-primary-hover: var(--ui-shadow-action-primary-hover);
+  --shadow-ecoya-modal: var(--ui-shadow-modal);
+  --shadow-ecoya-filter: var(--ui-shadow-filter);
+}
+
+/* Shared product surfaces. Related summary metrics share a grid, while each
+   metric remains an independent Card surface with the canonical DS treatment. */
+.ui-summary-strip {
+  gap: calc(var(--spacing) * 3);
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ui-summary-strip > * {
+  min-width: 0;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--ui-radius-panel);
+  background: var(--ui-surface-panel);
+  box-shadow: var(--ui-shadow-panel);
+}
+
+/* A non-home page has no image hero, so its first metric row becomes the
+   visual anchor. Keep the tint restrained and derive every state from the
+   canonical DS foundation palette. */
+.ui-summary-hero > * {
+  --ui-summary-hero-background: var(--surface-background);
+  --ui-summary-hero-accent: var(--color-primary-5);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: var(--surface-border);
+  background: var(--ui-summary-hero-background);
+}
+
+.ui-summary-hero > *::before {
+  position: absolute;
+  z-index: 0;
+  top: -1.35rem;
+  right: -1.15rem;
+  width: 5.25rem;
+  height: 5.25rem;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    transparent 0 26%,
+    color-mix(in srgb, var(--ui-summary-hero-accent) 14%, transparent) 27% 35%,
+    transparent 36% 50%,
+    color-mix(in srgb, var(--ui-summary-hero-accent) 12%, transparent) 51% 58%,
+    transparent 59%
+  );
+  content: "";
+  pointer-events: none;
+}
+
+.ui-summary-hero > * > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ui-summary-hero > [data-tone="neutral"] {
+  --ui-summary-hero-accent: var(--color-gray-7);
+}
+
+.ui-summary-hero > [data-tone="red"],
+.ui-summary-hero > [data-tone="danger"] {
+  --ui-summary-hero-accent: var(--color-red-3);
+}
+
+.ui-summary-hero > [data-tone="amber"],
+.ui-summary-hero > [data-tone="warning"] {
+  --ui-summary-hero-accent: var(--color-yellow-2);
+}
+
+.ui-summary-hero > [data-tone="green"],
+.ui-summary-hero > [data-tone="success"] {
+  --ui-summary-hero-accent: var(--color-green-2);
+}
+
+.ui-summary-hero > [data-decoration="blocked"]::before {
+  top: -0.55rem;
+  right: -0.45rem;
+  width: 4.75rem;
+  height: 4rem;
+  border-radius: 0 0 0 2.75rem;
+  background: repeating-linear-gradient(
+    135deg,
+    transparent 0 0.5rem,
+    color-mix(in srgb, var(--ui-summary-hero-accent) 17%, transparent) 0.5rem
+      0.82rem
+  );
+}
+
+.ui-summary-hero > [data-decoration="warning"]::before {
+  top: -0.8rem;
+  right: -0.55rem;
+  width: 4.1rem;
+  height: 3.7rem;
+  border-radius: 0;
+  background: color-mix(
+    in srgb,
+    var(--ui-summary-hero-accent) 15%,
+    transparent
+  );
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.ui-summary-hero > [data-decoration="deadline"]::before {
+  top: -2.15rem;
+  right: -1.2rem;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 999px;
+  background: conic-gradient(
+    from 205deg,
+    transparent 0 22deg,
+    color-mix(in srgb, var(--ui-summary-hero-accent) 18%, transparent) 22deg
+      54deg,
+    transparent 54deg 75deg,
+    color-mix(in srgb, var(--ui-summary-hero-accent) 11%, transparent) 75deg
+      108deg,
+    transparent 108deg
+  );
+}
+
+.ui-summary-hero > [data-decoration="inbound"]::before,
+.ui-summary-hero > [data-decoration="outbound"]::before,
+.ui-summary-hero > [data-decoration="progress"]::before {
+  top: -1.1rem;
+  right: -0.9rem;
+  width: 4.8rem;
+  height: 3.35rem;
+  border-radius: 0;
+  background: color-mix(
+    in srgb,
+    var(--ui-summary-hero-accent) 16%,
+    transparent
+  );
+  clip-path: polygon(0 37%, 61% 37%, 61% 8%, 100% 50%, 61% 92%, 61% 63%, 0 63%);
+}
+
+.ui-summary-hero > [data-decoration="inbound"]::before {
+  transform: rotate(135deg);
+}
+
+.ui-summary-hero > [data-decoration="outbound"]::before {
+  transform: rotate(-45deg);
+}
+
+.ui-summary-hero > [data-decoration="progress"]::before {
+  transform: rotate(-20deg);
+}
+
+.ui-summary-hero > [data-decoration="shipping"]::before {
+  top: -0.7rem;
+  right: -0.65rem;
+  width: 4.75rem;
+  height: 3.5rem;
+  border-radius: 0;
+  background: repeating-linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--ui-summary-hero-accent) 15%, transparent) 0 0.3rem,
+    transparent 0.3rem 0.78rem
+  );
+  clip-path: polygon(14% 0, 100% 0, 86% 100%, 0 100%);
+}
+
+.ui-summary-hero > [data-decoration="document"]::before {
+  top: -0.9rem;
+  right: -0.6rem;
+  width: 3.75rem;
+  height: 4.1rem;
+  border-radius: 0;
+  background: color-mix(
+    in srgb,
+    var(--ui-summary-hero-accent) 14%,
+    transparent
+  );
+  clip-path: polygon(0 0, 68% 0, 100% 29%, 100% 100%, 0 100%);
+}
+
+.ui-summary-hero > [data-decoration="usage"]::before {
+  top: -0.55rem;
+  right: -0.45rem;
+  width: 4rem;
+  height: 3.4rem;
+  border-radius: 0;
+  background:
+    linear-gradient(
+        var(--ui-summary-hero-accent),
+        var(--ui-summary-hero-accent)
+      )
+      0 100% / 18% 38% no-repeat,
+    linear-gradient(
+        var(--ui-summary-hero-accent),
+        var(--ui-summary-hero-accent)
+      )
+      41% 100% / 18% 66% no-repeat,
+    linear-gradient(
+        var(--ui-summary-hero-accent),
+        var(--ui-summary-hero-accent)
+      )
+      82% 100% / 18% 100% no-repeat;
+  opacity: 0.13;
+}
+
+.ui-summary-filter {
+  position: relative;
+  min-width: 0;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 150ms ease;
+}
+
+.ui-summary-filter:hover,
+.ui-summary-filter[aria-pressed="true"],
+.ui-summary-filter[data-active="true"] {
+  background: var(--ui-surface-panel);
+}
+
+.ui-summary-filter:focus-visible {
+  z-index: 1;
+  outline: 2px solid var(--ui-border-focus);
+  outline-offset: -2px;
+}
+
+[data-slot="card"].ecoya-card,
+.ecoya-card {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--ui-radius-panel);
+  background: var(--ui-surface-panel);
+  box-shadow: var(--ui-shadow-panel);
+}
+
+/* Shared semantic state styles. Keep these in the package so product
+   applications get the same status treatment when they import the kit. */
+.ui-status-success,
+.ui-status-warning,
+.ui-status-danger,
+.ui-status-info,
+.ui-status-neutral {
+  transition: background-color 120ms ease;
+}
+
+.ui-status-success {
+  border-color: var(--ui-feedback-success-border);
+  background-color: var(--ui-feedback-success-background);
+  color: var(--ui-feedback-success-foreground);
+}
+
+.ui-status-success:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--ui-feedback-success-background) 85%,
+    var(--ui-feedback-success) 15%
+  );
+}
+
+.ui-status-warning {
+  border-color: var(--ui-feedback-warning-border);
+  background-color: var(--ui-feedback-warning-background);
+  color: var(--ui-feedback-warning-foreground);
+}
+
+.ui-status-warning:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--ui-feedback-warning-background) 85%,
+    var(--ui-feedback-warning) 15%
+  );
+}
+
+.ui-status-danger {
+  border-color: var(--ui-feedback-danger-border);
+  background-color: var(--ui-feedback-danger-background);
+  color: var(--ui-feedback-danger-foreground);
+}
+
+.ui-status-danger:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--ui-feedback-danger-background) 85%,
+    var(--ui-feedback-danger) 15%
+  );
+}
+
+.ui-status-info {
+  border-color: var(--ui-feedback-info-border);
+  background-color: var(--ui-feedback-info-background);
+  color: var(--ui-feedback-info-foreground);
+}
+
+.ui-status-info:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--ui-feedback-info-background) 85%,
+    var(--ui-feedback-info) 15%
+  );
+}
+
+.ui-status-neutral {
+  border-color: var(--ui-feedback-neutral-border);
+  background-color: var(--ui-feedback-neutral-background);
+  color: var(--ui-feedback-neutral-foreground);
+}
+
+.ui-status-neutral:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--ui-feedback-neutral-background) 85%,
+    var(--ui-feedback-neutral) 15%
+  );
+}
+
+.ui-status-success-dot {
+  background-color: var(--ui-feedback-success);
+}
+.ui-status-warning-dot {
+  background-color: var(--ui-feedback-warning);
+}
+.ui-status-danger-dot {
+  background-color: var(--ui-feedback-danger);
+}
+.ui-status-info-dot {
+  background-color: var(--ui-feedback-info);
+}
+.ui-status-neutral-dot {
+  background-color: var(--ui-feedback-neutral);
+}

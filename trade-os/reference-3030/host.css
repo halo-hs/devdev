@@ -1,0 +1,222 @@
+/* Only host-shell adaptations. Body components and their layout are from 3030. */
+.reference-host {
+  --reference-hero-background: linear-gradient(118deg, var(--color-primary-1) 0%, var(--color-primary-5) 100%);
+}
+.reference-3030 {
+  --ecoya-hero-gradient-small: var(--reference-hero-background);
+  font-family: var(--ecoya-font-sans);
+}
+.reference-3030 .reference-page-scroll { height: 100%; min-height: 0; overflow: auto; background: var(--ecoya-gray-12); }
+.reference-3030 .reference-monitor-shell { display: grid; height: 100%; min-height: 0; grid-template-columns: minmax(0, 1fr); background: var(--ecoya-gray-12); }
+@media (max-width: 1279px) {
+  .reference-3030 .reference-monitor-shell { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 639px) {
+  .reference-3030 .reference-monitor-shell { overflow: auto; }
+}
+
+/* Each operational queue fills the content width; long lists scroll within it. */
+.reference-3030 .monitor-operation-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+.reference-3030 .monitor-operation-columns > [data-ui="section-panel"] > [data-ui="section-panel-content"] {
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+.reference-3030 .monitor-operation-columns [data-ui="section-panel-content"] > [data-ui="section-panel"] {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.reference-3030 .monitor-operation-columns [data-ui="section-panel-content"] > [data-ui="section-panel"] > [data-ui="section-panel-content"] {
+  padding: 0;
+}
+.reference-3030 .monitor-operation-columns [data-ui="task-queue-list"] {
+  overflow-wrap: anywhere;
+}
+
+
+.reference-3030 .reference-hero-filters {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding-top: 8px;
+}
+.reference-3030 .reference-hero-filters [data-ui="reports-close-note"] {
+  color: var(--ecoya-hero-description);
+}
+.reference-3030 .reference-hero-filters [data-ui="reports-assignee-filter"] {
+  max-width: 100%;
+}
+@media (max-width: 767px) {
+  .reference-3030 .reference-hero-filters [data-ui="reports-close-note"] { flex-basis: 100%; }
+}
+.reference-3030 .reference-report-actions {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+
+.reference-3030 .reference-hero-filters [data-ui="shipments-evidence-link"] {
+  color: var(--ecoya-hero-foreground);
+}
+
+.reference-3030 .reference-hero-filters [data-ui="salesperf-scope"] {
+  color: var(--ecoya-hero-description);
+}
+.reference-3030 .reference-hero-filters [data-ui="salesperf-assignee-filter"] { max-width: 100%; }
+
+
+
+/* Same inset and overlap as the host transaction list's summary cards. */
+.reference-3030 .reference-hero-group { position: relative; min-width: 0; }
+.reference-3030 .reference-hero-group > header { padding-bottom: 80px; }
+.reference-3030 .reference-hero-summary {
+  position: relative;
+  z-index: 1;
+  margin: -48px 16px 0;
+}
+@media (max-width: 639px) {
+  .reference-3030 .reference-hero-group > header { padding-bottom: 64px; }
+  .reference-3030 .reference-hero-summary { margin: -40px 12px 0; }
+}
+
+/* Reuse the document list's host Tabs immediately above shipment results. */
+.reference-3030 .reference-shipment-tabs { min-width: 0; max-width: 100%; }
+.reference-3030 .reference-shipment-tabs [data-slot="tabs-list"] { max-width: 100%; overflow-x: auto; }
+.reference-3030 [data-ui="shipments-list-controls"] {
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--ui-radius-control, 8px);
+  background: var(--background);
+}
+.reference-3030 .reference-shipment-results { display: flex; flex-direction: column; gap: 16px; }
+
+.reference-3030 .reference-hero-filters [data-ui="settlement-controls"] {
+  align-items: stretch;
+  gap: var(--filter-gap);
+}
+.reference-3030 .reference-hero-filters [data-ui="settlement-controls"] > .business-filter-row {
+  justify-content: flex-start;
+  min-width: 0;
+}
+.reference-3030 .reference-hero-filters [data-ui="settlement-controls"] label,
+.reference-3030 .reference-hero-filters [data-ui="settlement-balance-as-of"] {
+  color: var(--ecoya-hero-description);
+  white-space: nowrap;
+}
+.reference-3030 .reference-hero-summary [data-component="SettlementDecisionCards"] {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+.reference-3030 .reference-hero-summary [data-component="SettlementDecisionCards"] > header {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.reference-3030 .reference-hero-summary [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] { padding: 0; }
+.reference-3030 .reference-hero-summary [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+@media (max-width: 1023px) {
+  .reference-3030 .reference-hero-summary [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 639px) {
+  .reference-3030 .reference-hero-summary [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .reference-3030 .reference-hero-filters [data-ui="settlement-controls"] > .business-filter-row { justify-content: flex-start; }
+}
+
+
+/* Clip decoration alone so header dropdowns can extend above the summary cards. */
+.reference-3030 header[data-variant="hero"] {
+  overflow: visible;
+  isolation: auto;
+}
+.reference-3030 .reference-hero-decoration {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+
+.reference-3030 .reference-hero-filters [data-ui="settlement-balance-as-of"] {
+  font-size: var(--filter-font-size);
+}
+@media (max-width: 639px) {
+  .reference-3030 .reference-hero-filters [data-ui="settlement-balance-as-of"] { margin-left: 0; }
+}
+
+.reference-3030 { font-size: var(--text-body-9); line-height: var(--leading-body-9); }
+.reference-3030 .reference-content-width { width: 100%; max-width: none; min-width: 0; }
+@media (max-width: 639px) {
+  .reference-3030 .reference-content-width { padding-inline: 16px; }
+}
+
+.reference-3030 .reference-deal-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 20px; }
+.reference-3030 .reference-deal-fields dd { margin-inline-start: 0; overflow-wrap: anywhere; }
+.reference-3030 .reference-deal-shipments { display: grid; gap: 20px; }
+.reference-3030 .reference-deal-shipments article { border-bottom: 1px solid var(--control-border); padding-bottom: 20px; }
+.reference-3030 .reference-deal-shipments article:last-child { border-bottom: 0; padding-bottom: 0; }
+.reference-3030 .reference-deal-shipment-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.reference-3030 .reference-deal-shipment-heading > button { margin-left: auto; }
+
+/* Source text utilities must not shrink the shared table primitives. */
+.reference-3030 [data-slot="table-head"],
+.reference-3030 [data-slot="table-cell"] {
+  font-size: var(--text-body-9);
+  line-height: var(--leading-body-9);
+}
+
+/* The source's text-secondary means muted text, not the host's secondary fill. */
+.reference-3030 .text-secondary { color: var(--table-caption-foreground); }
+.reference-3030 .text-xs { font-size: var(--text-body-10); line-height: var(--leading-body-10); }
+
+/* A transaction owns a table of shipments; each row keeps its own actions. */
+.reference-3030 .reference-shipment-group { min-width: 0; overflow: hidden; border: 1px solid var(--table-border); border-radius: var(--erp-reference-r-lg); background: var(--ecoya-gray-12); }
+.reference-3030 .reference-shipment-group-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 20px; }
+.reference-3030 .reference-shipment-group-heading h2 { overflow-wrap: anywhere; }
+.reference-3030 .reference-shipment-group > [data-slot="table-container"] { border-radius: 0; }
+.reference-3030 .reference-shipment-table { min-width: 1040px; table-layout: fixed; }
+.reference-3030 .reference-shipment-table [data-slot="table-cell"] { white-space: normal; overflow-wrap: anywhere; padding-block: 16px; }
+.reference-3030 .reference-shipment-table tbody tr:last-child td { border-bottom: 0; }
+.reference-3030 .reference-shipment-date-details { margin-top: 4px; }
+.reference-3030 .reference-shipment-date-details summary { cursor: pointer; }
+@media (max-width: 639px) { .reference-3030 .reference-shipment-group-heading { padding: 16px; } }
+
+/* Currency tables share the same columns, regardless of empty cells or amount length. */
+.reference-3030 .reference-settlement-bucket-table {
+  width: 100%;
+  min-width: 1080px;
+  table-layout: fixed;
+}
+.reference-3030 .reference-settlement-bucket-label { width: 160px; }
+.reference-3030 .reference-settlement-bucket-table :is(th, td) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.reference-3030 .reference-settlement-bucket-table [data-ui="settlement-calendar-cell"] {
+  max-width: 100%;
+  white-space: normal;
+}

@@ -1,0 +1,39 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
+  "compilerOptions": {
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@landing/*": [
+        "./landing/*"
+      ],
+      "@auth/*": [
+        "./auth/*"
+      ],
+      "@trade-os/*": [
+        "./trade-os/*"
+      ],
+      "@snap/*": [
+        "./snap/*"
+      ],
+      "@shared/*": [
+        "./packages/shared-ui/src/*"
+      ],
+      "@ecoya/ui": [
+        "./packages/ecoya-ui/src/index.ts"
+      ],
+      "@ecoya/ui/*": [
+        "./packages/ecoya-ui/src/*"
+      ]
+    }
+  }
+}

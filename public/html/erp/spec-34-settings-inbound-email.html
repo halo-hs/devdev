@@ -1,0 +1,65 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'"><title>SC-34 — 이메일 수신 설정 · ECOYA Trade OS</title><style>body{margin:0;background:#f5f7fa;color:#182c45;font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1500px;margin:auto;padding:40px}h1{font-size:30px}h2{margin-top:40px}a{color:#175ec0}nav{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}section,article{background:white;border:1px solid #dce4ed;border-radius:12px;padding:24px;margin:20px 0}ul{padding-left:24px}li{margin:8px 0}.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px}.modules article{margin:0;min-width:0}.modules img{width:100%;height:auto;max-height:800px;object-fit:contain;object-position:top;background:#f8fafc}.modules h3{font-size:17px}.tag{color:#687589;font-size:13px}.columns{columns:2;column-gap:40px}.columns li{break-inside:avoid}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;border:1px solid #dce4ed;text-align:left}th{background:#f5f7fa}pre{overflow:auto;padding:20px;background:#f5f7fa}blockquote{border-left:3px solid #ccd8e7;padding-left:20px;color:#526275}.doc{overflow:auto}.doc img{max-width:100%;height:auto}html{scroll-behavior:smooth}@media(max-width:700px){main{padding:16px}.columns{columns:1}.modules{grid-template-columns:1fr}}</style></head><body><main><nav><a target="_top" href="reference-all.html">전체 참고 HTML</a><a target="_top" href="module-gallery.html">모듈·팝업 캡처</a><a target="_top" href="reference-specs.html">기획 참고 문서</a><a target="_top" href="index.html">화면 탐색기</a><a target="_top" href="designer-guide.html">작업 안내</a></nav><h1>SC-34 — 이메일 수신 설정</h1><p class="tag">기획 기준 문서 · ECOYA-Trade-OS-SSOT-v1.0/functional-specs/screens/34-settings-inbound-email.md</p><article class="doc"><h1>SC-34 — 이메일 수신 설정</h1>
+<blockquote>
+<p>Common 목표 경계: <span>2026-08-20 설정 진입·App User</span>. 목표 표면은 Common 설정 허브의 Trade OS 구획이며, 이 문서는 제품 이메일 수신 필드·처리·오류와 기존 <code>/erp/settings</code> 구현을 소유한다.</p>
+</blockquote>
+<blockquote>
+<p>결정 근거: <span>TRADE-DOC-001 — QA 절의 규범 경계</span></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소</td>
+<td><code>/erp/settings</code>의 이메일 수신 탭</td>
+</tr>
+<tr>
+<td>화면 원본</td>
+<td>settings page → 이메일 수신 설정 컴포넌트</td>
+</tr>
+<tr>
+<td>담당 흐름</td>
+<td><span>문서 수신·검토 (01-document-intake-and-review.md)</span>, <span>설정 (18-settings-members-billing.md)</span></td>
+</tr>
+<tr>
+<td>접근</td>
+<td>조직 구성원; 주소 관리 권한은 서버 조건 적용</td>
+</tr>
+</tbody></table>
+<h2>표시·행동</h2>
+<table>
+<thead>
+<tr>
+<th>화면 상태</th>
+<th>보이는 항목</th>
+<th>버튼·행동</th>
+<th>호출</th>
+<th>성공·오류·복구</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>주소 표시</td>
+<td>조직 전용 전달 주소, 사용 제한 안내</td>
+<td><strong>주소 복사</strong></td>
+<td>설정 조회 또는 기존 조직 응답</td>
+<td>클립보드 결과 표시</td>
+</tr>
+<tr>
+<td>주소 조회 실패</td>
+<td>오류 안내</td>
+<td>다시 조회가 제공되면 선택</td>
+<td>같은 설정 조회</td>
+<td>주소를 빈 문자열로 표시하지 않음</td>
+</tr>
+</tbody></table>
+<h2>QA 기준</h2>
+<blockquote>
+<p>이 절은 앞선 제품 계약을 검증하기 위한 점검 항목이며, 독립적인 제품 요구사항을 추가하지 않는다.</p>
+</blockquote>
+<p>실제 주소는 제보에서 마스킹하고 탭명, 복사 결과, 제한 안내, 오류 문구를 기록한다. 복사는 문서 수신 성공을 뜻하지 않는다.</p>
+<h2>개발 역추적</h2>
+<p>inbound email settings → 조직 profile·inbound configuration client → BFF → 조직 수신 설정 원본.</p>
+</article></main></body></html>

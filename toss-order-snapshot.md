@@ -1,0 +1,65 @@
+- generic [active] [ref=e1] [box=0,0,1800,951]:
+  - status [ref=e3] [box=-1,-1,1,1]
+  - generic [ref=e6] [box=0,0,1800,951]:
+    - navigation [ref=e10] [box=16,0,1400,52]:
+      - link "토스증권" [ref=e13] [cursor=pointer] [box=16,6,70,40]:
+        - /url: /
+        - img "토스증권" [ref=e14] [box=16,17,70,18]
+      - generic [ref=e15] [box=104,8,1244,36]:
+        - list [ref=e16] [box=104,8,247,36]:
+          - listitem [ref=e17] [box=104,8,36,36]
+          - listitem [ref=e19] [box=140,8,48,36]
+          - listitem [ref=e21] [box=188,8,100,36]
+          - listitem [ref=e23] [box=288,8,63,36]
+        - button "/ 를 눌러 검색하세요" [ref=e26] [cursor=pointer] [box=1148,10,200,32]:
+          - generic [ref=e30] [box=1183,16,127,20]
+      - link "로그인" [ref=e36] [cursor=pointer] [box=1356,10,60,32]:
+        - /url: /signin?redirectUrl=%2Fstocks%2FA009150%2Forder
+    - main [ref=e38] [box=0,52,1432,899]:
+      - generic [ref=e39] [box=12,53,1408,890]:
+        - generic [ref=e40] [box=12,53,1408,104]:
+          - generic [ref=e41] [box=12,53,1408,64]
+          - generic [ref=e137] [box=12,117,1408,36]
+        - generic [ref=e169] [box=11,160,1410,747]:
+          - generic [ref=e172] [box=12,161,308,367]
+          - generic [ref=e255] [box=332,161,318,367]
+          - generic [ref=e287] [box=487,540,163,367]
+          - generic [ref=e671] [box=662,161,293,745]
+          - generic [ref=e782] [box=317,540,158,367]
+          - generic [ref=e1008] [box=12,540,293,367]
+          - generic [ref=e1230] [box=967,161,158,745]
+          - generic [ref=e1711] [box=1137,161,158,745]
+          - generic [ref=e2206] [box=1307,161,158,745]
+          - generic [ref=e2687] [box=1476,160,2,747]
+          - separator [ref=e3115] [box=1466,160,10,747]
+          - separator [ref=e3118] [box=1296,160,10,747]
+          - separator [ref=e3121] [box=1126,160,10,747]
+          - separator [ref=e3124] [box=956,160,10,747]
+          - separator [ref=e3127] [box=651,160,10,747]
+          - separator [ref=e3130] [box=11,529,640,10]
+          - separator [ref=e3133] [box=321,160,10,369]
+          - separator [ref=e3136] [box=476,539,10,369]
+          - separator [ref=e3139] [box=306,539,10,369]
+        - generic [ref=e3143] [box=12,915,1408,28]:
+          - button "투자 유의사항" [ref=e3144] [cursor=pointer] [box=12,915,86,28]
+          - generic [ref=e3146] [box=111,915,1309,28]
+    - generic [ref=e3179] [box=1432,0,368,951]:
+      - generic [ref=e3182] [box=1744,0,56,951]:
+        - navigation [ref=e3183] [box=1744,0,56,299]:
+          - button "리모콘 닫기" [ref=e3185] [cursor=pointer] [box=1756,10,32,32]
+          - button "내 투자" [ref=e3191] [cursor=pointer] [box=1751,52,42,58]
+          - button "관심" [ref=e3198] [cursor=pointer] [box=1752,110,40,58]
+          - button "최근 본" [ref=e3204] [cursor=pointer] [box=1751,168,42,58]
+          - separator [ref=e3210] [box=1744,233,56,1]
+          - button "실시간" [ref=e3211] [cursor=pointer] [box=1752,241,40,58]
+        - button "화면 모드" [ref=e3221] [cursor=pointer] [box=1756,903,32,32]
+      - generic [ref=e3235] [box=1436,8,304,939]:
+        - generic [ref=e3236] [box=1436,8,304,32]:
+          - generic [ref=e3237] [box=1448,14,226,20]: 관심
+          - radiogroup "통화 선택" [ref=e3239] [box=1682,12,46,24]
+        - button "토스증권 AI 엔비디아 허깅페이스 인수로 1.4% 상승 애플 특허소송 부담으로 0.5% 하락 마이크로소프... OpenAI 논란 부담으로 0.2% 하락 아마존 목표가 상향으로 1.4% 상승 TSMC(A... AI 증설 확대로 0.9% 상승" [ref=e3256] [cursor=pointer] [box=1436,40,304,54]:
+          - generic [ref=e3259] [box=1448,48,268,41]
+        - generic [ref=e3272] [box=1436,94,304,626]:
+          - generic [ref=e3273] [box=1436,94,304,56]
+          - list [ref=e3276] [box=1436,150,304,570]
+  - alert [ref=e2] [box=-1,-1,1,1]: 토스증권

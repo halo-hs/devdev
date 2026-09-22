@@ -1,0 +1,16 @@
+{
+  "id": "split-screen",
+  "type": "hero",
+  "label": "Split-screen",
+  "macro": "Split-screen",
+  "note": "Typography on one half, atmospheric pure-CSS panel on the other. No image placeholder.",
+  "tokens": {
+    "needs": [
+      "--color-accent",
+      "--color-bg",
+      "--color-fg-muted"
+    ],
+    "aliasBlock": "/* Paste into :root if your tokens are named for their roles. */\n:root {\n  --color-bg: var(--color-paper);\n  --color-fg-muted: var(--color-muted);\n}"
+  },
+  "tip": "Paste `tokens.aliasBlock` into your :root if your tokens are role-named (paper / ink / muted / rule / accent). Without it this renders with unstyled links, invisible borders and a transparent background - silently, because an undefined custom property is not an error."
+}

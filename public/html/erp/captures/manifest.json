@@ -1,0 +1,878 @@
+{
+  "generatedAt": "2026-09-20T16:14:24.691Z",
+  "sourceCommit": "3ac3e4f262a360f62145392990f17b9362323cde",
+  "sourceWorktreeState": "WORKTREE_UNVERIFIED",
+  "sourceFingerprint": "3ed070ed052b28a3c6ff5926ea277f72d16dbb1841b691f387874a1cac5fc37e",
+  "pages": [
+    {
+      "id": "sidebar-full",
+      "html": "sidebar-full.html",
+      "title": "공통 UI · 전체 사이드바",
+      "figmaNodeId": "481:2",
+      "width": 232,
+      "height": 1001,
+      "file": "captures/sidebar-full.png",
+      "bytes": 25368
+    },
+    {
+      "id": "onboarding",
+      "html": "onboarding.html",
+      "title": "온보딩 · 회사 정보 입력 완료",
+      "figmaNodeId": "449:2",
+      "width": 1440,
+      "height": 1617,
+      "file": "captures/onboarding.png",
+      "bytes": 297647
+    },
+    {
+      "id": "home",
+      "html": "home.html",
+      "title": "홈 · AI 질문과 오늘 할 업무",
+      "figmaNodeId": "445:445",
+      "width": 1440,
+      "height": 1292,
+      "file": "captures/home.png",
+      "bytes": 219285
+    },
+    {
+      "id": "ai-answer",
+      "html": "ai-answer.html",
+      "title": "AI · 질문 → 결과 → 근거",
+      "figmaNodeId": "445:2",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/ai-answer.png",
+      "bytes": 126582
+    },
+    {
+      "id": "document-upload",
+      "html": "document-upload.html",
+      "title": "문서 올리기 · 목록과 처리 상태",
+      "figmaNodeId": "445:1684",
+      "width": 1440,
+      "height": 1373,
+      "file": "captures/document-upload.png",
+      "bytes": 259790
+    },
+    {
+      "id": "document-review",
+      "html": "document-review.html",
+      "title": "문서 검토 · 필드와 PDF",
+      "figmaNodeId": "445:2831",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/document-review.png",
+      "bytes": 154254
+    },
+    {
+      "id": "document-create",
+      "html": "document-create.html",
+      "title": "문서 만들기 · 시작 화면",
+      "figmaNodeId": "445:3963",
+      "width": 1440,
+      "height": 1369,
+      "file": "captures/document-create.png",
+      "bytes": 316843
+    },
+    {
+      "id": "document-create-qt",
+      "html": "document-create-qt.html",
+      "title": "문서 만들기 · 공통 입력·품목 양식",
+      "figmaNodeId": "445:3454",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/document-create-qt.png",
+      "bytes": 136222
+    },
+    {
+      "id": "deals",
+      "html": "deals.html",
+      "title": "거래 · 공통 목록",
+      "figmaNodeId": "445:2140",
+      "width": 1440,
+      "height": 1979,
+      "file": "captures/deals.png",
+      "bytes": 474672
+    },
+    {
+      "id": "deal-dl-260701-09",
+      "html": "deal-dl-260701-09.html",
+      "title": "거래 상세 · 업무 판단과 다음 행동",
+      "figmaNodeId": "445:4429",
+      "width": 1440,
+      "height": 6274,
+      "file": "captures/deal-dl-260701-09.png",
+      "bytes": 640093
+    },
+    {
+      "id": "shipments",
+      "html": "shipments.html",
+      "title": "선적 · 상태와 반영 검토",
+      "figmaNodeId": "445:5058",
+      "width": 1440,
+      "height": 3178,
+      "file": "captures/shipments.png",
+      "bytes": 588741
+    },
+    {
+      "id": "monitoring",
+      "html": "monitoring.html",
+      "title": "운영 감시 · 예외 목록",
+      "figmaNodeId": "445:7021",
+      "width": 1440,
+      "height": 5890,
+      "file": "captures/monitoring.png",
+      "bytes": 667038
+    },
+    {
+      "id": "settlement",
+      "html": "settlement.html",
+      "title": "정산 · 거래처 잔액과 검증",
+      "figmaNodeId": "445:5794",
+      "width": 1440,
+      "height": 12976,
+      "file": "captures/settlement.png",
+      "bytes": 2536639
+    },
+    {
+      "id": "reports",
+      "html": "reports.html",
+      "title": "결산 리포트 · 대시보드 위계",
+      "figmaNodeId": "445:8870",
+      "width": 1440,
+      "height": 1956,
+      "file": "captures/reports.png",
+      "bytes": 364551
+    },
+    {
+      "id": "sales",
+      "html": "sales.html",
+      "title": "영업 성과 · 공통 대시보드",
+      "figmaNodeId": "445:8157",
+      "width": 1440,
+      "height": 1617,
+      "file": "captures/sales.png",
+      "bytes": 343004
+    },
+    {
+      "id": "settings",
+      "html": "settings.html",
+      "title": "설정 · 공통 설정 틀",
+      "figmaNodeId": "445:7570",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/settings.png",
+      "bytes": 75854
+    },
+    {
+      "id": "evidence",
+      "html": "evidence.html",
+      "title": "증빙 · 목록과 연결 상태",
+      "figmaNodeId": "445:7887",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/evidence.png",
+      "bytes": 129760
+    },
+    {
+      "id": "popup-workspace-menu",
+      "html": "designer-popup-workspace-menu.html",
+      "title": "조직·제품 메뉴",
+      "figmaNodeId": "450:2",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/popup-workspace-menu.png",
+      "bytes": 39303
+    },
+    {
+      "id": "popup-document-upload-action-07",
+      "html": "designer-popup-document-upload-action-07.html",
+      "title": "행 작업 메뉴",
+      "figmaNodeId": "450:42",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/popup-document-upload-action-07.png",
+      "bytes": 31263
+    },
+    {
+      "id": "popup-deal-dl-260701-09-action-03",
+      "html": "designer-popup-deal-dl-260701-09-action-03.html",
+      "title": "거래 공유 대상",
+      "figmaNodeId": "450:55",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/popup-deal-dl-260701-09-action-03.png",
+      "bytes": 43875
+    },
+    {
+      "id": "popup-shipment-review",
+      "html": "designer-popup-shipment-review.html",
+      "title": "선적 반영 검토",
+      "figmaNodeId": "450:104",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/popup-shipment-review.png",
+      "bytes": 41039
+    },
+    {
+      "id": "popup-shipments-action-12",
+      "html": "designer-popup-shipments-action-12.html",
+      "title": "선적 반영 이력",
+      "figmaNodeId": "450:134",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/popup-shipments-action-12.png",
+      "bytes": 36620
+    },
+    {
+      "id": "popup-settlement-action-09",
+      "html": "designer-popup-settlement-action-09.html",
+      "title": "거래처 정산 상세",
+      "figmaNodeId": "450:154",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/popup-settlement-action-09.png",
+      "bytes": 45833
+    },
+    {
+      "id": "popup-settlement-exception-dialog",
+      "html": "designer-popup-settlement-exception-dialog.html",
+      "title": "정산 예외 패널",
+      "figmaNodeId": "450:207",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/popup-settlement-exception-dialog.png",
+      "bytes": 37487
+    },
+    {
+      "id": "popup-monitoring-exception-quantity",
+      "html": "designer-popup-monitoring-exception-quantity.html",
+      "title": "운영 감시 예외 패널",
+      "figmaNodeId": "450:286",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/popup-monitoring-exception-quantity.png",
+      "bytes": 36589
+    },
+    {
+      "id": "popup-reports-close-check",
+      "html": "designer-popup-reports-close-check.html",
+      "title": "결산 마감 전 확인",
+      "figmaNodeId": "450:353",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/popup-reports-close-check.png",
+      "bytes": 54654
+    },
+    {
+      "id": "state-group-0",
+      "html": "designer-state-group-0.html",
+      "title": "홈 · 빈 업무 / 조회 실패",
+      "figmaNodeId": "451:2",
+      "width": 900,
+      "height": 1883,
+      "file": "captures/state-group-0.png",
+      "bytes": 189104
+    },
+    {
+      "id": "state-group-1",
+      "html": "designer-state-group-1.html",
+      "title": "AI · 조회 중 / 근거 없음",
+      "figmaNodeId": "451:50",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/state-group-1.png",
+      "bytes": 66591
+    },
+    {
+      "id": "state-group-2",
+      "html": "designer-state-group-2.html",
+      "title": "문서 처리 · 분석 중 / 실패 / 입력 필요",
+      "figmaNodeId": "451:101",
+      "width": 900,
+      "height": 2051,
+      "file": "captures/state-group-2.png",
+      "bytes": 152251
+    },
+    {
+      "id": "state-group-3",
+      "html": "designer-state-group-3.html",
+      "title": "문서 품목 · 추가 / 전체 삭제",
+      "figmaNodeId": "451:146",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/state-group-3.png",
+      "bytes": 64976
+    },
+    {
+      "id": "approval-states",
+      "html": "designer-approval-states.html",
+      "title": "승인 카드 · 상태와 역할별 행동",
+      "figmaNodeId": "453:2",
+      "width": 900,
+      "height": 3593,
+      "file": "captures/approval-states.png",
+      "bytes": 250173
+    },
+    {
+      "id": "approver-popup",
+      "html": "designer-approver-popup.html",
+      "title": "승인자 선택 팝업",
+      "figmaNodeId": "454:2",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/approver-popup.png",
+      "bytes": 42482
+    },
+    {
+      "id": "delivery-panel",
+      "html": "designer-delivery-panel.html",
+      "title": "문서 공유 패널",
+      "figmaNodeId": "455:2",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/delivery-panel.png",
+      "bytes": 77299
+    },
+    {
+      "id": "link-states",
+      "html": "designer-link-states.html",
+      "title": "매직링크 · 미생성 / 활성 / 철회",
+      "figmaNodeId": "456:2",
+      "width": 900,
+      "height": 1042,
+      "file": "captures/link-states.png",
+      "bytes": 90498
+    },
+    {
+      "id": "attachment-states",
+      "html": "designer-attachment-states.html",
+      "title": "동봉 파일 · 선택 / 추가",
+      "figmaNodeId": "458:2",
+      "width": 900,
+      "height": 2676,
+      "file": "captures/attachment-states.png",
+      "bytes": 193860
+    },
+    {
+      "id": "delivery-history-states",
+      "html": "designer-delivery-history-states.html",
+      "title": "전달 내역 · 없음 / 활성 / 철회",
+      "figmaNodeId": "457:2",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/delivery-history-states.png",
+      "bytes": 52622
+    },
+    {
+      "id": "ai",
+      "html": "ai.html",
+      "title": "AI에게 묻기",
+      "figmaNodeId": "468:589",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/ai.png",
+      "bytes": 111790
+    },
+    {
+      "id": "document-connect",
+      "html": "document-connect.html",
+      "title": "문서 올리기 · 거래 연결",
+      "figmaNodeId": "468:2",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/document-connect.png",
+      "bytes": 186019
+    },
+    {
+      "id": "document-flow-summary",
+      "html": "document-flow-summary.html",
+      "title": "확정 문서 · 공유 전",
+      "figmaNodeId": "465:2",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/document-flow-summary.png",
+      "bytes": 150149
+    },
+    {
+      "id": "notifications",
+      "html": "notifications.html",
+      "title": "알림",
+      "figmaNodeId": "468:1002",
+      "width": 1440,
+      "height": 1033,
+      "file": "captures/notifications.png",
+      "bytes": 218176
+    },
+    {
+      "id": "counterparties",
+      "html": "counterparties.html",
+      "title": "거래처",
+      "figmaNodeId": "468:1470",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/counterparties.png",
+      "bytes": 154381
+    },
+    {
+      "id": "billing",
+      "html": "billing.html",
+      "title": "요금제",
+      "figmaNodeId": "468:6847",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/billing.png",
+      "bytes": 97676
+    },
+    {
+      "id": "tokens",
+      "html": "tokens.html",
+      "title": "토큰",
+      "figmaNodeId": "468:7114",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/tokens.png",
+      "bytes": 91878
+    },
+    {
+      "id": "settings-notifications",
+      "html": "settings-notifications.html",
+      "title": "설정 · 알림 설정",
+      "figmaNodeId": "468:6523",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/settings-notifications.png",
+      "bytes": 82854
+    },
+    {
+      "id": "settings-action-05",
+      "html": "settings-action-05.html",
+      "title": "설정 · 소속 Organization",
+      "figmaNodeId": "468:1782",
+      "width": 1440,
+      "height": 209,
+      "file": "captures/settings-action-05.png",
+      "bytes": 18623
+    },
+    {
+      "id": "settings-action-06",
+      "html": "settings-action-06.html",
+      "title": "설정 · 조직 관리",
+      "figmaNodeId": "468:2103",
+      "width": 1440,
+      "height": 2220,
+      "file": "captures/settings-action-06.png",
+      "bytes": 224381
+    },
+    {
+      "id": "settings-action-07",
+      "html": "settings-action-07.html",
+      "title": "설정 · 사용자 관리",
+      "figmaNodeId": "468:2426",
+      "width": 1440,
+      "height": 209,
+      "file": "captures/settings-action-07.png",
+      "bytes": 17055
+    },
+    {
+      "id": "settings-action-08",
+      "html": "settings-action-08.html",
+      "title": "설정 · 제품 및 구독",
+      "figmaNodeId": "468:2792",
+      "width": 1440,
+      "height": 209,
+      "file": "captures/settings-action-08.png",
+      "bytes": 16847
+    },
+    {
+      "id": "settings-action-09",
+      "html": "settings-action-09.html",
+      "title": "설정 · ERP 결제·구독",
+      "figmaNodeId": "468:3106",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/settings-action-09.png",
+      "bytes": 97752
+    },
+    {
+      "id": "settings-action-10",
+      "html": "settings-action-10.html",
+      "title": "설정 · 업무 기본 설정",
+      "figmaNodeId": "468:3430",
+      "width": 1440,
+      "height": 209,
+      "file": "captures/settings-action-10.png",
+      "bytes": 17365
+    },
+    {
+      "id": "settings-action-11",
+      "html": "settings-action-11.html",
+      "title": "설정 · 이메일로 문서 받기",
+      "figmaNodeId": "468:3762",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/settings-action-11.png",
+      "bytes": 74792
+    },
+    {
+      "id": "settings-action-12",
+      "html": "settings-action-12.html",
+      "title": "설정 · 거래처 일괄 등록",
+      "figmaNodeId": "468:4048",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/settings-action-12.png",
+      "bytes": 83070
+    },
+    {
+      "id": "settings-action-13",
+      "html": "settings-action-13.html",
+      "title": "설정 · 거래 일괄 등록",
+      "figmaNodeId": "468:4367",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/settings-action-13.png",
+      "bytes": 82589
+    },
+    {
+      "id": "settings-action-14",
+      "html": "settings-action-14.html",
+      "title": "설정 · 거래처 별칭 학습",
+      "figmaNodeId": "468:4686",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/settings-action-14.png",
+      "bytes": 80483
+    },
+    {
+      "id": "settings-action-15",
+      "html": "settings-action-15.html",
+      "title": "설정 · ERP AI 사용량",
+      "figmaNodeId": "468:4978",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/settings-action-15.png",
+      "bytes": 91956
+    },
+    {
+      "id": "settings-action-16",
+      "html": "settings-action-16.html",
+      "title": "설정 · 현장 운영",
+      "figmaNodeId": "468:5302",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/settings-action-16.png",
+      "bytes": 67756
+    },
+    {
+      "id": "settings-action-17",
+      "html": "settings-action-17.html",
+      "title": "설정 · 브랜딩",
+      "figmaNodeId": "468:5594",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/settings-action-17.png",
+      "bytes": 65869
+    },
+    {
+      "id": "settings-action-18",
+      "html": "settings-action-18.html",
+      "title": "설정 · 지역화",
+      "figmaNodeId": "468:5886",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/settings-action-18.png",
+      "bytes": 66470
+    },
+    {
+      "id": "settings-action-19",
+      "html": "settings-action-19.html",
+      "title": "설정 · 데이터 관리",
+      "figmaNodeId": "468:6178",
+      "width": 1440,
+      "height": 1000,
+      "file": "captures/settings-action-19.png",
+      "bytes": 97641
+    },
+    {
+      "id": "onboarding-steps",
+      "html": "designer-onboarding-steps.html",
+      "title": "온보딩 단계 · 관심 정보 / 문서 가져오기 / 거래처 검토 / 완료",
+      "figmaNodeId": "494:2",
+      "width": 900,
+      "height": 2029,
+      "file": "captures/onboarding-steps.png",
+      "bytes": 163548
+    },
+    {
+      "id": "home-first-state",
+      "html": "designer-home-first-state.html",
+      "title": "최초 이용 · 첫 문서 시작",
+      "figmaNodeId": "494:3",
+      "width": 900,
+      "height": 1566,
+      "file": "captures/home-first-state.png",
+      "bytes": 178073
+    },
+    {
+      "id": "document-queue-states",
+      "html": "designer-document-queue-states.html",
+      "title": "처리 대기 / 재시도 중",
+      "figmaNodeId": "494:4",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/document-queue-states.png",
+      "bytes": 45114
+    },
+    {
+      "id": "ai-reference-states",
+      "html": "designer-ai-reference-states.html",
+      "title": "참조 자료 없음 / 최신 데이터 대기",
+      "figmaNodeId": "494:5",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/ai-reference-states.png",
+      "bytes": 79974
+    },
+    {
+      "id": "item-delete-state",
+      "html": "designer-item-delete-state.html",
+      "title": "품목 개별 삭제 결과",
+      "figmaNodeId": "494:6",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/item-delete-state.png",
+      "bytes": 44031
+    },
+    {
+      "id": "deal-create-popup",
+      "html": "designer-deal-create-popup.html",
+      "title": "거래 만들기",
+      "figmaNodeId": "494:7",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/deal-create-popup.png",
+      "bytes": 44137
+    },
+    {
+      "id": "cash-record-panels",
+      "html": "designer-cash-record-panels.html",
+      "title": "입금 기록 / 지급 기록",
+      "figmaNodeId": "494:8",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/cash-record-panels.png",
+      "bytes": 57852
+    },
+    {
+      "id": "shipment-result-states",
+      "html": "designer-shipment-result-states.html",
+      "title": "날짜 검증 오류 / 반영 완료",
+      "figmaNodeId": "494:9",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/shipment-result-states.png",
+      "bytes": 60918
+    },
+    {
+      "id": "close-ready-state",
+      "html": "designer-close-ready-state.html",
+      "title": "마감 전 점검 · 누락 문서 확인 완료",
+      "figmaNodeId": "494:10",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/close-ready-state.png",
+      "bytes": 47561
+    },
+    {
+      "id": "approval-role-states",
+      "html": "designer-approval-role-states.html",
+      "title": "Admin 검토 / Owner 승인 완료 / Owner 반려 완료",
+      "figmaNodeId": "494:11",
+      "width": 900,
+      "height": 1369,
+      "file": "captures/approval-role-states.png",
+      "bytes": 106402
+    },
+    {
+      "id": "shipment-processing-popups",
+      "html": "designer-shipment-processing-popups.html",
+      "title": "선적 재반영 / 연결 충돌 / 연결 대상 확인",
+      "figmaNodeId": "494:12",
+      "width": 900,
+      "height": 1433,
+      "file": "captures/shipment-processing-popups.png",
+      "bytes": 94793
+    },
+    {
+      "id": "settlement-exception-types",
+      "html": "designer-settlement-exception-types.html",
+      "title": "금액 조정 / 환불·반환 / 분쟁 / 대손 제안",
+      "figmaNodeId": "494:13",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/settlement-exception-types.png",
+      "bytes": 81271
+    },
+    {
+      "id": "sidebar-switchers",
+      "html": "designer-sidebar-switchers.html",
+      "title": "제품·조직 전환",
+      "figmaNodeId": "505:2",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/sidebar-switchers.png",
+      "bytes": 64878
+    },
+    {
+      "id": "sidebar-account-menu",
+      "html": "designer-sidebar-account-menu.html",
+      "title": "프로필·사용량·요금제·언어",
+      "figmaNodeId": "505:11",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/sidebar-account-menu.png",
+      "bytes": 65843
+    },
+    {
+      "id": "sidebar-support-actions",
+      "html": "designer-sidebar-support-actions.html",
+      "title": "고객 지원 · 문의·약관·개인정보",
+      "figmaNodeId": "505:20",
+      "width": 900,
+      "height": 1000,
+      "file": "captures/sidebar-support-actions.png",
+      "bytes": 47259
+    },
+    {
+      "id": "sidebar-responsive-states",
+      "html": "designer-sidebar-responsive-states.html",
+      "title": "접힘·모바일 탐색",
+      "figmaNodeId": "505:26",
+      "width": 900,
+      "height": 1116,
+      "file": "captures/sidebar-responsive-states.png",
+      "bytes": 80840
+    },
+    {
+      "id": "auth-login",
+      "html": "auth-login.html",
+      "title": "공통 로그인 · 기본",
+      "figmaNodeId": "504:4",
+      "width": 1424,
+      "height": 438,
+      "file": "captures/auth-login.png",
+      "bytes": 38936
+    },
+    {
+      "id": "auth-signup",
+      "html": "auth-signup.html",
+      "title": "공통 회원가입 · 정보 입력",
+      "figmaNodeId": "504:7",
+      "width": 1424,
+      "height": 1090,
+      "file": "captures/auth-signup.png",
+      "bytes": 96749
+    },
+    {
+      "id": "auth-free-trial",
+      "html": "auth-free-trial.html",
+      "title": "무료체험 · 제품 선택",
+      "figmaNodeId": "518:144",
+      "width": 1424,
+      "height": 970,
+      "file": "captures/auth-free-trial.png",
+      "bytes": 118109
+    },
+    {
+      "id": "auth-recovery",
+      "html": "auth-recovery.html",
+      "title": "비밀번호 복구 · 링크 요청",
+      "figmaNodeId": "518:175",
+      "width": 1424,
+      "height": 761,
+      "file": "captures/auth-recovery.png",
+      "bytes": 95375
+    },
+    {
+      "id": "auth-terms",
+      "html": "auth-terms.html",
+      "title": "이용약관 · 승인본 준비 상태",
+      "figmaNodeId": "518:211",
+      "width": 1424,
+      "height": 883,
+      "file": "captures/auth-terms.png",
+      "bytes": 112325
+    },
+    {
+      "id": "auth-privacy",
+      "html": "auth-privacy.html",
+      "title": "개인정보 처리방침 · 승인본 준비 상태",
+      "figmaNodeId": "518:218",
+      "width": 1424,
+      "height": 883,
+      "file": "captures/auth-privacy.png",
+      "bytes": 118011
+    },
+    {
+      "id": "landing",
+      "html": "landing.html",
+      "title": "서비스 소개 · Trade OS",
+      "figmaNodeId": "617:5",
+      "width": 1440,
+      "height": 8026,
+      "file": "captures/landing.png",
+      "bytes": 850126
+    },
+    {
+      "id": "share-recipient",
+      "html": "share-recipient.html",
+      "title": "고객 전달 · 수신 화면",
+      "figmaNodeId": "617:6",
+      "width": 1440,
+      "height": 1435,
+      "file": "captures/share-recipient.png",
+      "bytes": 166705
+    },
+    {
+      "id": "share-recipient-states",
+      "html": "designer-share-recipient-states.html",
+      "title": "공유 수신 · 만료·열람 한도·오류",
+      "figmaNodeId": "617:7",
+      "width": 900,
+      "height": 2371,
+      "file": "captures/share-recipient-states.png",
+      "bytes": 118755
+    },
+    {
+      "id": "deal-lifecycle-seeds",
+      "html": "designer-deal-lifecycle-seeds.html",
+      "title": "거래 · 완료·취소·유형 확인",
+      "figmaNodeId": "617:8",
+      "width": 900,
+      "height": 18793,
+      "file": "captures/deal-lifecycle-seeds.png",
+      "bytes": 1427993
+    },
+    {
+      "id": "document-approval-seeds",
+      "html": "designer-document-approval-seeds.html",
+      "title": "문서 만들기 · 승인 상태 예시",
+      "figmaNodeId": "617:9",
+      "width": 900,
+      "height": 4282,
+      "file": "captures/document-approval-seeds.png",
+      "bytes": 434264
+    },
+    {
+      "id": "upload-extra-states",
+      "html": "designer-upload-extra-states.html",
+      "title": "문서 올리기 · 중복·제외·유형 확인",
+      "figmaNodeId": "617:10",
+      "width": 900,
+      "height": 2071,
+      "file": "captures/upload-extra-states.png",
+      "bytes": 202504
+    }
+  ]
+}
