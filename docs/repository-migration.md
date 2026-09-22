@@ -49,17 +49,28 @@ npm run deploy
 3. GitHub `halo-hs/devdev` → Settings → Secrets and variables → Actions → New repository secret.
 4. 이름 `CLOUDFLARE_API_TOKEN`, 값은 생성한 토큰. 토큰은 소스나 채팅에 넣지 않습니다.
 5. 저장소 Actions variable `CLOUDFLARE_ACCOUNT_ID`는 이전 작업에서 설정합니다.
-6. GitHub 인증에 `workflow` 권한을 추가한 뒤 `docs/ci/pages.yml.template`을 `.github/workflows/pages.yml`로 복사하여 커밋합니다.
+6. GitHub 인증에 `workflow` 권한을 추가한 뒤 `docs/ci/pages.yml.template`을 `.github/workflows/pages.yml`로 복사하여 커밋합니다. 또는 GitHub 웹에서 Add file → Create new file로 해당 경로에 템플릿 내용을 저장하면 됩니다.
 7. Actions → Build and deploy existing Pages site → Run workflow. 이후 `main` push마다 자동 배포됩니다.
 
 이전 시 사용 중인 GitHub OAuth 토큰에는 `workflow` 권한이 없어 활성 workflow 업로드가 거절되었습니다. 따라서 템플릿을 보관하고 수동 배포를 설정했습니다. 자동 배포는 위 연결을 마친 뒤 활성화됩니다.
 
 토큰이 없으면 CI는 빌드만 수행하고 배포를 건너뛰었다는 경고를 표시합니다. GitHub의 빌드 성공과 실제 배포 완료를 구분해야 합니다.
 
-Cloudflare 기존 프로젝트의 이전 저장소 자동 배포는 새 배포 검증 후 비활성화합니다. 새 저장소 배포를 옛 저장소 빌드가 덮어쓰지 않도록 하는 설정입니다. 이전 프로젝트의 배포 기록은 보존됩니다.
+Cloudflare 기존 프로젝트의 이전 저장소 자동 배포는 비활성화했습니다 (production 자동 배포 꺼짐, preview none). 새 저장소 배포를 옛 저장소 빌드가 덮어쓰지 않도록 하는 설정입니다. 이전 프로젝트의 배포 기록은 보존됩니다.
 
 GitHub Pages를 활성화하거나 도메인/DNS를 바꿀 필요가 없습니다.
 
 ## 이전 범위
 
 이전 시점의 로컬 소스, 미커밋 변경, 테스트, 문서, `/html` 캡처 자산을 포함합니다. `node_modules`, 빌드 산출물, 로컬 환경변수·인증정보, 임시 브라우저 캡처는 제외했습니다. 원래 로컬 폴더와 원격 저장소는 삭제하지 않습니다.
+
+## 이전 검증 결과
+
+- 초기 이전 커밋: `95111cd`
+- 미리보기: https://522b08ee.devdev-e6t.pages.dev
+- 운영 배포: https://15f80eb3.devdev-e6t.pages.dev
+- 고정 URL 유지: https://devdev-e6t.pages.dev
+- 프로덕션 빌드 및 관련 Playwright 테스트 18개 통과.
+- 로컬 프로덕션 주요 경로 18개와 외부 미리보기 주요 화면에서 HTTP 200, 브라우저 실행 오류 없음.
+- 새 로컬 폴더: `/Users/hans/team/1-projects/halo-devdev`
+- GitHub 자동 배포는 아직 비활성 상태입니다. 배포용 Secret과 workflow 활성화가 남아 있습니다. 수동 `npm run deploy`는 사용 가능합니다.
