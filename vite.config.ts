@@ -21,6 +21,7 @@ export default defineConfig(({ command }) => {
       "@auth": path.resolve(__dirname, "./auth"),
       "@trade-os": path.resolve(__dirname, "./trade-os"),
       "@snap": path.resolve(__dirname, "./snap"),
+      "@share": path.resolve(__dirname, "./share"),
       "@shared": path.resolve(__dirname, "./packages/shared-ui/src"),
 
       "@ecoya/ui": path.resolve(__dirname, "./packages/ecoya-ui/src"),

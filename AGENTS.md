@@ -10,6 +10,7 @@
 | 인증 | `auth/` | 로그인, 회원가입, 계정 복구, 인증 레이아웃 |
 | Trade OS 업무 | `trade-os/` | `/erp/*` 업무 화면과 로직 |
 | SNAP 업무 | `snap/` | 현장 업무 화면과 로직 |
+| 공통 업무·공개 링크 | `share/` | 업무 홈 모듈, 설정, 알림, 고객 공유 링크 |
 | 공통 UI | `packages/shared-ui/`, `packages/ecoya-ui/` | 여러 영역이 소비하는 컴포넌트·훅·유틸리티 |
 | 디자인 시스템 | `packages/design-system-2.0/` | 공통 토큰·브랜드 자산 |
 | 앱 연결 | `src/` | 진입점, 라우팅, 전역 스타일 |

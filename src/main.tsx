@@ -4,7 +4,7 @@ import { ThemeProvider } from "next-themes"
 
 import "./index.css"
 import App from "./App.tsx"
-import { CommonEntry } from "@/common-entry"
+import { CommonEntry } from "@/app/public-entry"
 import { Toaster } from "../packages/shared-ui/src/components/ui/sonner"
 import { TooltipProvider } from "../packages/shared-ui/src/components/ui/tooltip"
 import { configureSnapRuntime } from "@snap/lib/snap-runtime"

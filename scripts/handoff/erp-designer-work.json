@@ -1606,7 +1606,7 @@
     "title": "공통 로그인 · 기본",
     "priority": "P0",
     "brief": "공통 ECOYA 계정 로그인, 제품 진입과 이용내역 복귀를 연결합니다. 인증·연결·조직·세션 오류의 인지와 재시도 방법을 함께 제안해주세요.",
-    "refs": "Common CS-01·CS-02 / functional-specs/screens/02-login.md · 03-signup.md / common-entry.tsx",
+    "refs": "Common CS-01·CS-02 / functional-specs/screens/02-login.md · 03-signup.md / src/app/public-entry.tsx",
     "figmaNodeId": "504:4",
     "figmaRepresentation": "reference-screenshot",
     "sourceIds": [
@@ -1622,7 +1622,7 @@
     "title": "공통 회원가입 · 정보 입력",
     "priority": "P0",
     "brief": "조직·계정 입력 → 법률 문서 확인·동의 → 계정·조직 준비 → 로그인으로 이어집니다. 단계별 입력 보존과 부분 실패 복구를 검토해주세요.",
-    "refs": "Common CS-01·CS-02 / functional-specs/screens/02-login.md · 03-signup.md / common-entry.tsx",
+    "refs": "Common CS-01·CS-02 / functional-specs/screens/02-login.md · 03-signup.md / src/app/public-entry.tsx",
     "figmaNodeId": "504:7",
     "figmaRepresentation": "reference-screenshot",
     "sourceIds": [
@@ -1638,7 +1638,7 @@
     "title": "무료체험 · 제품 선택",
     "priority": "P0",
     "brief": "Trade OS / SNAP 제품 선택 → 제품 의도를 유지한 가입 진입. 기본 14일과 크레딧 환산 안내를 구분하고 체험 가능 여부를 확인하는 다음 단계를 제안해주세요.",
-    "refs": "Common CS-01·CS-02 / functional-specs/screens/02-login.md · 03-signup.md / common-entry.tsx",
+    "refs": "Common CS-01·CS-02 / functional-specs/screens/02-login.md · 03-signup.md / src/app/public-entry.tsx",
     "figmaNodeId": "518:144",
     "figmaRepresentation": "reference-screenshot",
     "sourceIds": [
@@ -1654,7 +1654,7 @@
     "title": "비밀번호 복구 · 링크 요청",
     "priority": "P0",
     "brief": "이메일 요청 → 발송 안내 → 비밀번호 재설정 → 완료 또는 링크 만료·재발급 흐름입니다. 계정 존재 여부를 노출하지 않는 안내와 복구 경로를 검토해주세요.",
-    "refs": "Common CS-01·CS-02 / functional-specs/screens/02-login.md · 03-signup.md / common-entry.tsx",
+    "refs": "Common CS-01·CS-02 / functional-specs/screens/02-login.md · 03-signup.md / src/app/public-entry.tsx",
     "figmaNodeId": "518:175",
     "figmaRepresentation": "reference-screenshot",
     "sourceIds": [
@@ -1670,7 +1670,7 @@
     "title": "이용약관 · 승인본 준비 상태",
     "priority": "P0",
     "brief": "가입 동의에서 연결되는 공개 이용약관 화면입니다. 현재 법무 승인본 준비 상태이며 확정된 약관 전문이 아닙니다.",
-    "refs": "Common CS-01·CS-02 / functional-specs/screens/02-login.md · 03-signup.md / common-entry.tsx",
+    "refs": "Common CS-01·CS-02 / functional-specs/screens/02-login.md · 03-signup.md / src/app/public-entry.tsx",
     "figmaNodeId": "518:211",
     "figmaRepresentation": "reference-screenshot",
     "sourceIds": [
@@ -1686,7 +1686,7 @@
     "title": "개인정보 처리방침 · 승인본 준비 상태",
     "priority": "P0",
     "brief": "가입 동의에서 연결되는 공개 개인정보 처리방침 화면입니다. 현재 법무 승인본 준비 상태이며 확정된 전문이 아닙니다.",
-    "refs": "Common CS-01·CS-02 / functional-specs/screens/02-login.md · 03-signup.md / common-entry.tsx",
+    "refs": "Common CS-01·CS-02 / functional-specs/screens/02-login.md · 03-signup.md / src/app/public-entry.tsx",
     "figmaNodeId": "518:218",
     "figmaRepresentation": "reference-screenshot",
     "sourceIds": [
@@ -1702,7 +1702,7 @@
     "title": "로그인 · 입력·인증·제품 진입",
     "priority": "P0",
     "brief": "현재 구현된 상태 차이입니다. 공개 UI에서 확인한 상태와 로컬 미리보기 전용 상태를 각 원본 HTML에 표시했습니다. 서버 연동 완료를 의미하지 않습니다.",
-    "refs": "공통 인증·무료체험 / common-entry.tsx · common-prototypes.tsx",
+    "refs": "공통 인증·무료체험 / src/app/public-entry.tsx · auth/screens.tsx",
     "figmaNodeId": "505:38",
     "figmaRepresentation": "reference-screenshot",
     "sourceIds": [
@@ -1744,7 +1744,7 @@
     "title": "로그인 · 연결·조직·세션 예외",
     "priority": "P0",
     "brief": "현재 구현된 상태 차이입니다. 공개 UI에서 확인한 상태와 로컬 미리보기 전용 상태를 각 원본 HTML에 표시했습니다. 서버 연동 완료를 의미하지 않습니다.",
-    "refs": "공통 인증·무료체험 / common-entry.tsx · common-prototypes.tsx",
+    "refs": "공통 인증·무료체험 / src/app/public-entry.tsx · auth/screens.tsx",
     "figmaNodeId": "518:34",
     "figmaRepresentation": "reference-screenshot",
     "sourceIds": [
@@ -1791,7 +1791,7 @@
     "title": "회원가입 · 입력·동의·처리",
     "priority": "P0",
     "brief": "이메일·비밀번호 입력 → 이메일 인증 → 조직 설정 순서입니다. 입력 오류와 단계 이동, 동작 시 법률 동의 안내를 함께 확인합니다.",
-    "refs": "공통 인증·무료체험 / common-entry.tsx · common-prototypes.tsx",
+    "refs": "공통 인증·무료체험 / src/app/public-entry.tsx · auth/screens.tsx",
     "figmaNodeId": "505:47",
     "figmaRepresentation": "reference-screenshot",
     "sourceIds": [
@@ -1843,7 +1843,7 @@
     "title": "회원가입 · 완료·실패·복구",
     "priority": "P0",
     "brief": "가입 완료와 계정·연결·약관 오류, 조직 준비 실패를 비교합니다. 오류는 로컬 미리보기이며, 실제 가입 승인·거절 상태는 현재 제공하지 않습니다.",
-    "refs": "공통 인증·무료체험 / common-entry.tsx · common-prototypes.tsx",
+    "refs": "공통 인증·무료체험 / src/app/public-entry.tsx · auth/screens.tsx",
     "figmaNodeId": "505:68",
     "figmaRepresentation": "reference-screenshot",
     "sourceIds": [
@@ -1885,7 +1885,7 @@
     "title": "무료체험 · 제품별 가입·크레딧 환산",
     "priority": "P0",
     "brief": "현재 구현된 상태 차이입니다. 공개 UI에서 확인한 상태와 로컬 미리보기 전용 상태를 각 원본 HTML에 표시했습니다. 서버 연동 완료를 의미하지 않습니다.",
-    "refs": "공통 인증·무료체험 / common-entry.tsx · common-prototypes.tsx",
+    "refs": "공통 인증·무료체험 / src/app/public-entry.tsx · auth/screens.tsx",
     "figmaNodeId": "518:150",
     "figmaRepresentation": "reference-screenshot",
     "sourceIds": [
@@ -1922,7 +1922,7 @@
     "title": "비밀번호 복구 · 발송·재설정·만료",
     "priority": "P0",
     "brief": "현재 구현된 상태 차이입니다. 공개 UI에서 확인한 상태와 로컬 미리보기 전용 상태를 각 원본 HTML에 표시했습니다. 서버 연동 완료를 의미하지 않습니다.",
-    "refs": "공통 인증·무료체험 / common-entry.tsx · common-prototypes.tsx",
+    "refs": "공통 인증·무료체험 / src/app/public-entry.tsx · auth/screens.tsx",
     "figmaNodeId": "518:181",
     "figmaRepresentation": "reference-screenshot",
     "sourceIds": [

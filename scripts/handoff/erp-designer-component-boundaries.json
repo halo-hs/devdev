@@ -21,7 +21,7 @@
       "evidence": [
         "src/App.tsx:6598 OcrFieldReviewList",
         "src/App.tsx:11746 CreateFieldReviewPanel",
-        "trade-os/deal-detail-prototype.tsx:2035 DealFieldsPanel"
+        "trade-os/deals/detail.tsx:2035 DealFieldsPanel"
       ],
       "workArea": "업무 UI · 조합 설계"
     },
@@ -44,7 +44,7 @@
       "decision": "조합 규칙 보완 우선",
       "evidence": [
         "src/App.tsx:11864 필수 필드·품목 누락 집계",
-        "trade-os/deal-detail-prototype.tsx:1075 ActionDialog",
+        "trade-os/deals/detail.tsx:1075 ActionDialog",
         "packages/design-system-2.0/src/components/extensions/async-button.tsx"
       ],
       "workArea": "업무 UI · 조합 설계"
@@ -65,7 +65,7 @@
       "evidence": [
         "src/App.tsx:8826 StructuredDocumentCreateEditor",
         "src/App.tsx:11746 CreateFieldReviewPanel",
-        "trade-os/deal-detail-prototype.tsx:2200 품목 폼"
+        "trade-os/deals/detail.tsx:2200 품목 폼"
       ],
       "workArea": "테이블 · 별도 작업"
     },
@@ -89,8 +89,8 @@
       "states": "기본 / 필터 적용 / 선택 / 검색 결과 없음 / 로딩 / 권한 제한",
       "decision": "테이블 별도 설계 · 조회형",
       "evidence": [
-        "trade-os/deals-prototype.tsx:483 거래 목록",
-        "trade-os/erp-menu-prototypes.tsx:332 PanelTable",
+        "trade-os/deals/page.tsx:483 거래 목록",
+        "trade-os/screens.tsx:332 PanelTable",
         "packages/design-system-2.0/src/components/extensions/data-table.tsx"
       ],
       "workArea": "테이블 · 별도 작업"
@@ -114,8 +114,8 @@
       "decision": "기존 상태 컴포넌트 매핑 보완",
       "evidence": [
         "src/App.tsx:1720 ToneBadge",
-        "trade-os/erp-handoff-panels.tsx:65 SampleStatus",
-        "trade-os/deal-detail-prototype.tsx:955 StatusBadge"
+        "trade-os/documents/handoff-panels.tsx:65 SampleStatus",
+        "trade-os/deals/detail.tsx:955 StatusBadge"
       ],
       "workArea": "업무 UI · 조합 설계"
     },
@@ -138,9 +138,9 @@
       "states": "열림 / 입력 오류 / 처리 중 / 처리 실패 / 닫기·미저장 확인",
       "decision": "공통 기반 적용 + 업무 내용 설계",
       "evidence": [
-        "trade-os/deals-prototype.tsx:165 DealCreateDialog 직접 Portal 구현",
-        "trade-os/deal-detail-prototype.tsx:1075 ActionDialog 직접 Portal 구현",
-        "trade-os/erp-handoff-panels.tsx:79 공통 Dialog 사용"
+        "trade-os/deals/page.tsx:165 DealCreateDialog 직접 Portal 구현",
+        "trade-os/deals/detail.tsx:1075 ActionDialog 직접 Portal 구현",
+        "trade-os/documents/handoff-panels.tsx:79 공통 Dialog 사용"
       ],
       "workArea": "업무 UI · 조합 설계"
     },
@@ -161,7 +161,7 @@
       "evidence": [
         "src/App.tsx:5888 DocumentReviewWorkspace",
         "packages/shared-ui/src/components/pannable-pdf-viewport.tsx",
-        "trade-os/deal-detail-prototype.tsx:1808 DealPdf"
+        "trade-os/deals/detail.tsx:1808 DealPdf"
       ],
       "workArea": "업무 UI · 조합 설계"
     },
@@ -182,8 +182,8 @@
       "decision": "기존 카드 재사용 + 그래프 표현 규칙 정리",
       "evidence": [
         "packages/shared-ui/src/components/summary-metric-strip.tsx",
-        "trade-os/erp-menu-prototypes.tsx:5401 ReportsPrototype",
-        "trade-os/erp-menu-prototypes.tsx:6579 SalesPerformanceLivePrototype",
+        "trade-os/screens.tsx:5401 ReportsPrototype",
+        "trade-os/screens.tsx:6579 SalesPerformanceLivePrototype",
         "packages/design-system-2.0/packages/shared-ui/src/components/ui/chart.tsx"
       ],
       "workArea": "업무 UI · 조합 설계"
@@ -222,8 +222,8 @@
       "states": "질문 전 / 조회 중 / 결과 / 근거 없음 / 데이터 갱신 대기 / 실패·재시도",
       "decision": "업무 조합·상태 추가 설계",
       "evidence": [
-        "trade-os/erp-menu-prototypes.tsx:1751 AskPrototype",
-        "trade-os/ai-business-tools.tsx:86 AiBusinessTools"
+        "trade-os/screens.tsx:1751 AskPrototype",
+        "trade-os/ask/business-tools.tsx:86 AiBusinessTools"
       ],
       "workArea": "업무 UI · 조합 설계"
     },
@@ -245,8 +245,8 @@
       "decision": "기존 요소 조합 규칙 정리",
       "evidence": [
         "packages/shared-ui/src/components/auto-save-status.tsx",
-        "trade-os/erp-menu-prototypes.tsx:640 OnboardingPrototype",
-        "trade-os/deal-detail-prototype.tsx:1333 AuditTrail"
+        "trade-os/screens.tsx:640 OnboardingPrototype",
+        "trade-os/deals/detail.tsx:1333 AuditTrail"
       ],
       "workArea": "업무 UI · 조합 설계"
     },

@@ -52,7 +52,7 @@ try {
   await capture('status-saved', '처리 상태', '자동 저장 상태', '상태 표시 + 짧은 문구', 'document-review', 'span[role=status]', '자동 저장됨', { code: 'packages/shared-ui/src/components/auto-save-status.tsx' })
   await capture('status-processing', '처리 상태', '처리 중', '진행 아이콘 / 제목·설명 / 상태 배지', 'document-processing', alert, 'AI가 문서를 읽고', { code: 'src/App.tsx:6286' })
   await capture('status-failure', '처리 상태', '처리 실패', '오류 아이콘 / 제목·설명 / 상태 배지', 'document-failed', alert, '문서를 처리하지', { code: 'src/App.tsx:6286' })
-  await capture('confirm-delete', '확인 팝업', '삭제 확인', '제목 / 설명 / 취소·삭제', 'deal-note-1-delete-confirm', '[role=dialog]', '노트 삭제', { code: 'trade-os/deal-detail-prototype.tsx' })
+  await capture('confirm-delete', '확인 팝업', '삭제 확인', '제목 / 설명 / 취소·삭제', 'deal-note-1-delete-confirm', '[role=dialog]', '노트 삭제', { code: 'trade-os/deals/detail.tsx' })
 
   // Render the real toast hosts locally; only example notifications are dispatched.
   // No business action, payment, email, or external API mutation is performed.

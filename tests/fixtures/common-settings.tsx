@@ -2,7 +2,7 @@ import { createRoot, type Root } from "react-dom/client"
 import {
   SettingsHubV2,
   type ProductEntitlement,
-} from "../../trade-os/settings-hub-v2"
+} from "../../share/settings/page"
 import { SidebarProvider } from "../../packages/shared-ui/src/components/ui/sidebar"
 import { TooltipProvider } from "../../packages/shared-ui/src/components/ui/tooltip"
 

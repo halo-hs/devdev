@@ -1,7 +1,7 @@
 import { BusinessListToolbar, BusinessFilterSearch, BusinessFilterField } from "@shared/components/business-filters"
 import { FormField, FormFieldHeader } from "@shared/components/form-field"
 import { PageLoadingBoundary } from "@shared/components/page-loading-boundary"
-import { DeliveryAttachmentPicker, DeliveryAttachmentPreview, type DeliveryAttachment } from "@trade-os/delivery-attachment-picker"
+import { DeliveryAttachmentPicker, DeliveryAttachmentPreview, type DeliveryAttachment } from "@trade-os/documents/attachment-picker"
 import { focusDocumentRequirement } from "@trade-os/lib/document-requirement-navigation"
 import { currentBankSchedules, eligibleBankSchedules, bankCashValidation, readDocumentReview, type ReviewedField, type BankCashInput } from "@trade-os/lib/erp-document-workflow"
 import { exactDocumentMoneyTotals, exactLineItemAmount } from "@trade-os/lib/document-money"
@@ -204,14 +204,14 @@ import {
   DealDetailScreen,
   DealsScreen,
   type GeneratedDealDocumentSummary,
-} from "@trade-os/deals-prototype"
+} from "@trade-os/deals/page"
 import {
   HomePrototype as V2HomePrototype,
   type HomePreviewState,
-} from "@trade-os/home-prototype"
+} from "@trade-os/home/page"
 import { ReferenceOperations } from "@trade-os/operations/index"
-import { NotificationsPrototype } from "@trade-os/notifications-prototype"
-import { notifications, type NotificationDealTarget } from "@trade-os/lib/notifications"
+import { NotificationsPrototype } from "@share/notifications/page"
+import { notifications, type NotificationDealTarget } from "@share/notifications/data"
 import {
   AskPrototype,
   BillingPrototype,
@@ -221,12 +221,12 @@ import {
   SnapEvidencePrototype,
   TokenUsagePrototype,
   type ErpMenuTarget,
-} from "@trade-os/erp-menu-prototypes"
+} from "@trade-os/screens"
 import {
   SnapProductPrototype,
   type SnapScreenKey,
-} from "@snap/snap-prototypes"
-import { SnapRouteAccessScreen } from "@snap/snap-route-access"
+} from "@snap/screens"
+import { SnapRouteAccessScreen } from "@snap/access/route-guard"
 import {
   resetSnapSessionAccessCache,
   useSnapRouteAccess,

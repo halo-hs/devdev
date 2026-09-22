@@ -1,4 +1,4 @@
-import type { ErpMenuTarget } from "@trade-os/erp-menu-prototypes"
+import type { ErpMenuTarget } from "@trade-os/screens"
 
 export type ErpRouteScreen = ErpMenuTarget | "result"
 

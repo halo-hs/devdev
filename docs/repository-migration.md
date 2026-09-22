@@ -11,6 +11,7 @@
 - `auth/`: 로그인·회원가입·비밀번호 찾기·무료체험 구성
 - `trade-os/`: Trade OS 업무 화면·로직·운영 화면(`operations/`)
 - `snap/`: SNAP 업무 화면·로직
+- `share/`: 공통 업무 홈·설정·알림·고객 공유 링크
 - `packages/shared-ui/`: 공통 애플리케이션 UI·훅·유틸리티
 - `packages/ecoya-ui/`: 기존 공통 레이아웃·상태 컴포넌트 패키지
 - `packages/design-system-2.0/`: 기존 디자인 토큰·기본 UI (토큰 복제 없음)
@@ -30,7 +31,7 @@ npm run build
 npm run typecheck
 ```
 
-`@landing/`, `@auth/`, `@trade-os/`, `@snap/`, `@shared/` 별칭은 Vite와 TypeScript에 함께 설정되어 있습니다. 화면 URL `/erp/`는 폴더명과 별개로 유지됩니다.
+`@landing/`, `@auth/`, `@trade-os/`, `@snap/`, `@share/`, `@shared/` 별칭은 Vite와 TypeScript에 함께 설정되어 있습니다. 화면 URL `/erp/`는 폴더명과 별개로 유지됩니다.
 
 ## 배포 — Cloudflare Git 직접 연동
 

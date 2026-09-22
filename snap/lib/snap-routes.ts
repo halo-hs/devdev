@@ -1,4 +1,4 @@
-import type { SnapScreenKey } from "@snap/snap-prototypes"
+import type { SnapScreenKey } from "@snap/screens"
 
 export type SnapRole =
   | "owner"
