@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Check } from "lucide-react"
 import { Button } from "@shared/components/ui/button"
 import { LandingShell, StartButton } from "./landing-shell"
 
@@ -139,7 +139,7 @@ export function BrandStoryLanding() {
             <div>
               <p className="trade-section-label">이전</p>
               <h3>흩어진 증거</h3>
-              <ul>
+              <ul className="ecoya-change-before" role="list">
                 <li>여기저기 저장된 현장 사진</li>
                 <li>손으로 맞추는 엑셀</li>
                 <li>메일 첨부와 폴더 분류</li>
@@ -154,11 +154,18 @@ export function BrandStoryLanding() {
             <div>
               <p className="trade-section-label">이후</p>
               <h3>믿을 수 있는 기록</h3>
-              <ul>
-                <li>확인된 하나의 기록</li>
-                <li>확인을 거친 리포트</li>
-                <li>바로 전달되는 공유 링크</li>
-                <li>근거가 남는 감사추적</li>
+              <ul className="ecoya-change-after" role="list">
+                {[
+                  "확인된 하나의 기록",
+                  "확인을 거친 리포트",
+                  "바로 전달되는 공유 링크",
+                  "근거가 남는 감사추적",
+                ].map((item) => (
+                  <li key={item}>
+                    <Check aria-hidden="true" />
+                    <span>{item}</span>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
