@@ -215,29 +215,6 @@ export function TradeLanding() {
   }, [])
   return (
     <LandingShell page="trade">
-      <div className="trade-market">
-        <div className="trade-container">
-          <span>
-            시장 맥락 <small>데모</small>
-          </span>
-          <div role="group" aria-label="시장 맥락">
-            {[
-              ["USD/KRW", "1,382.40"],
-              ["EUR/KRW", "1,498.20"],
-              ["JPY/KRW", "9.12"],
-              ["COMEX Copper", "4.28"],
-              ["HRC Steel", "542"],
-              ["Crude Oil", "78.40"],
-            ].map(([label, value]) => (
-              <span key={label}>
-                {label}
-                <strong>{value}</strong>
-              </span>
-            ))}
-          </div>
-          <span>Intelligence</span>
-        </div>
-      </div>
       <main>
         <section
           className="trade-hero trade-reference-hero"
