@@ -1,186 +1,63 @@
-import { useEffect, useState } from "react"
-import { ArrowRight, Check, Files, Camera } from "lucide-react"
+import { useEffect } from "react"
+import { ArrowRight, Check } from "lucide-react"
 import { LandingShell } from "../shared/layout"
 import "./styles.css"
 
-type Product = "erp" | "snap"
-function useProduct() {
-  const [product, setProduct] = useState<Product>(() =>
-    new URLSearchParams(window.location.search).get("product") === "snap"
-      ? "snap"
-      : "erp"
-  )
-  useEffect(() => {
-    const sync = () =>
-      setProduct(
-        new URLSearchParams(window.location.search).get("product") === "snap"
-          ? "snap"
-          : "erp"
-      )
-    window.addEventListener("popstate", sync)
-    return () => window.removeEventListener("popstate", sync)
-  }, [])
-  const select = (value: Product) => {
-    setProduct(value)
-    const url = new URL(window.location.href)
-    url.searchParams.set("product", value)
-    window.history.replaceState({}, "", url)
-  }
-  return [product, select] as const
-}
-function ProductTabs({
-  product,
-  onChange,
-}: {
-  product: Product
-  onChange: (product: Product) => void
-}) {
-  return (
-    <div className="ecoya-product-tabs" role="tablist" aria-label="제품 선택">
-      {(["erp", "snap"] as const).map((value) => (
-        <button
-          key={value}
-          id={`product-tab-${value}`}
-          type="button"
-          role="tab"
-          aria-selected={product === value}
-          aria-controls="product-panel"
-          tabIndex={product === value ? 0 : -1}
-          onClick={() => onChange(value)}
-          onKeyDown={(event) => {
-            if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
-              return
-            event.preventDefault()
-            const next =
-              event.key === "Home"
-                ? "erp"
-                : event.key === "End"
-                  ? "snap"
-                  : value === "erp"
-                    ? "snap"
-                    : "erp"
-            onChange(next)
-            document.getElementById(`product-tab-${next}`)?.focus()
-          }}
-        >
-          {value === "erp" ? <Files size={18} /> : <Camera size={18} />}ECOYA{" "}
-          {value === "erp" ? "Trade OS" : "SNAP"}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-type Plan = {
-  name: string
-  audience: string
-  price: string
-  unit?: string
-  features: string[]
-  featured?: boolean
-  start?: boolean
-}
-const tradePlans: Plan[] = [
+const includedMembers = 5
+const plans = [
   {
-    name: "파일럿",
-    audience: "우리 팀의 업무로 도입 검증",
-    price: "문의",
-    start: true,
-    features: [
-      "문서 수신·발행 · 거래 · 정산",
-      "AI 읽기 결과 표시 · 감사추적",
-      "1개 조직 · 파일럿 기간",
-    ],
-  },
-  {
-    name: "ERP Pro",
-    audience: "함께 일하는 무역팀을 위해",
-    price: "문의",
-    featured: true,
-    features: [
-      "조직 월 구독 · 멤버 협업",
-      "문서 만들기·읽기·질문·정산",
-      "Intelligence Awareness 포함",
-    ],
-  },
-  {
-    name: "엔터프라이즈",
-    audience: "보안과 운영 규모에 맞춘 도입",
-    price: "맞춤",
-    features: [
-      "전용 배포 · SSO",
-      "감사 로그 · 세분 권한",
-      "SNAP seat · Intel Reasoning 추가 옵션",
-    ],
-  },
-]
-const snapPlans: Plan[] = [
-  {
-    name: "Starter",
-    audience: "소규모 현장에서 시작하기",
-    price: "59,000",
-    unit: "원 / 월",
-    start: true,
+    name: "SNAP",
+    audience: "현장 기록부터 검토·리포트 공유까지",
+    price: 200,
+    href: "/signup?product=snap",
+    action: "시작하기",
+    featured: false,
     features: ["작업·증거 관리", "사람 검토와 승인 이력", "고객 공유 링크"],
   },
   {
-    name: "Team",
-    audience: "팀의 승인·리포트 운영",
-    price: "149,000",
-    unit: "원 / 월",
-    featured: true,
-    start: true,
-    features: ["작업·증거 관리", "사람 검토와 승인 이력", "고객 공유 링크"],
+    name: "Trade OS",
+    audience: "무역 문서부터 거래·정산까지",
+    price: 300,
+    href: "/signup?product=erp",
+    action: "시작하기",
+    featured: false,
+    features: [
+      "문서 만들기·AI 읽기·질문",
+      "거래·정산 관리",
+      "멤버 협업·감사추적",
+    ],
   },
   {
-    name: "Business",
-    audience: "다조직 운영과 연동·지원",
-    price: "문의",
+    name: "SNAP + Trade OS",
+    audience: "현장과 무역 업무를 함께 운영하는 팀",
+    price: 400,
+    href: "/contact",
+    action: "통합 도입 문의",
+    featured: true,
     features: [
-      "다조직 운영 상담",
-      "업무 연동 범위 협의",
-      "도입 및 운영 지원 상담",
+      "SNAP 기능 포함",
+      "Trade OS 기능 포함",
+      "현장 기록과 무역 업무를 함께 이용",
     ],
   },
 ]
 
 export function PricingLanding() {
-  const [product, select] = useProduct()
+  const product =
+    new URLSearchParams(window.location.search).get("product") === "snap"
+      ? "snap"
+      : "erp"
   const contact = `/contact?product=${product}`
   useEffect(() => {
     document.title = "ECOYA — 가격"
   }, [])
-  const trade = product === "erp"
-  const plans = trade ? tradePlans : snapPlans
-  const comparisons = trade
-    ? [
-        ["도입 대상", "도입 검증", "성장하는 무역팀", "보안·규모 확장"],
-        ["구독 방식", "파일럿 기간", "조직 월 구독", "맞춤 협의"],
-        [
-          "주요 범위",
-          "문서 · 거래 · 정산",
-          "문서 · AI 질의 · 협업",
-          "전용 배포 · SSO",
-        ],
-        [
-          "추가 옵션",
-          "상담 안내",
-          "Intelligence Awareness 포함",
-          "SNAP · Intel 옵션 협의",
-        ],
-      ]
-    : [
-        [
-          "도입 대상",
-          "소규모 현장 검증",
-          "팀의 승인·리포트 운영",
-          "다조직·연동·지원",
-        ],
-        ["월 요금", "59,000원", "149,000원", "문의"],
-        ["작업·증거 관리", "포함", "포함", "범위 협의"],
-        ["검토·승인 이력", "포함", "포함", "범위 협의"],
-        ["고객 공유 링크", "포함", "포함", "범위 협의"],
-      ]
+  const comparisons = [
+    ["월 기본 요금 (USD)", ...plans.map((plan) => `$${plan.price}`)],
+    ["기본 포함 인원", ...plans.map(() => `${includedMembers}인`)],
+    ["인원 추가", ...plans.map(() => "6인부터 인원별 추가 과금")],
+    ["현장 작업·증거·리포트", "포함", "—", "포함"],
+    ["무역 문서·거래·정산", "—", "포함", "포함"],
+  ]
   return (
     <LandingShell page="pricing" product={product}>
       <main className="ecoya-pricing-page">
@@ -191,18 +68,15 @@ export function PricingLanding() {
             <br />
             필요한 만큼 시작하세요.
           </h1>
-          <p>현장의 규모와 일하는 방식에 맞는 플랜을 선택하세요.</p>
-          <ProductTabs product={product} onChange={select} />
+          <p>기본 5인으로 시작하고, 팀이 커지면 인원을 추가하세요.</p>
         </section>
         <section
           id="product-panel"
-          role="tabpanel"
-          tabIndex={0}
-          aria-labelledby={`product-tab-${product}`}
+          aria-labelledby="pricing-plans-title"
           className="trade-container ecoya-pricing-panel"
         >
-          <h2 className="sr-only">
-            ECOYA {trade ? "Trade OS" : "SNAP"} 요금제
+          <h2 id="pricing-plans-title" className="sr-only">
+            ECOYA 요금제
           </h2>
           <div className="ecoya-price-grid">
             {plans.map((plan) => (
@@ -213,20 +87,19 @@ export function PricingLanding() {
                 <div className="ecoya-price-card">
                   <div className="ecoya-plan-heading">
                     <h3>{plan.name}</h3>
-                    {plan.featured && (
-                      <span>{trade ? "메인 플랜" : "추천"}</span>
-                    )}
+                    {plan.featured && <span>통합</span>}
                   </div>
                   <p>{plan.audience}</p>
                   <div className="ecoya-plan-price">
-                    <strong>{plan.price}</strong>
-                    {plan.unit && <span>{plan.unit}</span>}
+                    <strong>${plan.price}</strong>
+                    <span>USD / 월부터</span>
                   </div>
-                  <a
-                    className="ecoya-plan-cta"
-                    href={plan.start ? `/signup?product=${product}` : contact}
-                  >
-                    {plan.start ? "시작하기" : "도입 문의"}
+                  <p className="ecoya-plan-members">
+                    기본 {includedMembers}인 포함
+                  </p>
+                  <p className="ecoya-plan-extra">6인부터 인원별 추가 과금</p>
+                  <a className="ecoya-plan-cta" href={plan.href}>
+                    {plan.action}
                     <ArrowRight size={17} />
                   </a>
                 </div>
@@ -242,7 +115,8 @@ export function PricingLanding() {
             ))}
           </div>
           <p className="ecoya-price-note">
-            최종 요금과 제공 범위는 도입 상담에서 안내합니다.
+            표시 금액은 기본 5인 기준의 월 요금(USD)입니다. 추가 인원당 요금은
+            별도 안내합니다.
           </p>
           <section
             className="ecoya-price-compare"
@@ -288,12 +162,16 @@ export function PricingLanding() {
               "서류·거래·정산을 관리하려면 Trade OS, 현장 작업을 사진과 리포트로 남기려면 SNAP을 선택하세요. 필요한 제품부터 시작할 수 있습니다.",
             ],
             [
-              "우리 팀에 맞는 플랜은 어떻게 정하나요?",
-              "도입 문의를 남겨주시면 업무 방식과 운영 규모를 확인해 적합한 플랜과 제공 범위를 안내드립니다.",
+              "기본 요금에는 몇 명이 포함되나요?",
+              "모든 플랜은 기본 5인이 포함됩니다. SNAP은 월 $200, Trade OS는 월 $300, 통합 플랜은 월 $400부터 시작합니다.",
+            ],
+            [
+              "5명을 초과하면 어떻게 과금되나요?",
+              "6번째 인원부터 추가 인원 수에 따라 월 요금이 더해집니다. 추가 인원당 요금은 별도 안내합니다.",
             ],
             [
               "다른 제품도 함께 사용할 수 있나요?",
-              "Trade OS와 SNAP을 함께 사용하는 방식과 연동 범위는 도입 상담에서 확인할 수 있습니다.",
+              "SNAP + Trade OS 통합 플랜으로 두 제품을 함께 이용할 수 있습니다. 기본 5인 기준 월 $400부터 시작하며, 구체적인 도입 범위는 상담에서 안내합니다.",
             ],
           ].map(([q, a]) => (
             <details key={q}>

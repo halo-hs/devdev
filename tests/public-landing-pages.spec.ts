@@ -262,7 +262,7 @@ test("Trade OS source order, five workflow stages and question examples", async 
 })
 
 for (const width of [1440, 390]) {
-  test(`product menu, pricing tabs and product context at ${width}px`, async ({
+  test(`product menu, team pricing and product context at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 1000 })
@@ -279,29 +279,43 @@ for (const width of [1440, 390]) {
     ).toHaveCount(0)
     await menu.getByRole("link", { name: "가격", exact: true }).click()
     await expect(page).toHaveURL(/\/pricing\?product=snap$/)
-    await expect(page.getByRole("tab", { name: "ECOYA SNAP" })).toHaveAttribute(
-      "aria-selected",
-      "true"
+    const cards = page.locator(".ecoya-price-grid > article")
+    await expect(cards).toHaveCount(3)
+    for (const [index, name, price] of [
+      [0, "SNAP", "$200"],
+      [1, "Trade OS", "$300"],
+      [2, "SNAP + Trade OS", "$400"],
+    ] as const) {
+      const card = cards.nth(index)
+      await expect(
+        card.getByRole("heading", { name, exact: true })
+      ).toBeVisible()
+      await expect(card.locator(".ecoya-plan-price")).toContainText(price)
+      await expect(card.locator(".ecoya-plan-members")).toHaveText(
+        "기본 5인 포함"
+      )
+      await expect(card.locator(".ecoya-plan-extra")).toContainText("6인부터")
+    }
+    await expect(cards.nth(1).getByRole("link")).toHaveAttribute(
+      "href",
+      "/signup?product=erp"
     )
-    await expect(page.locator(".ecoya-plan-price").first()).toContainText(
-      "59,000"
+    await expect(cards.nth(2).getByRole("link")).toHaveAttribute(
+      "href",
+      "/contact"
     )
-    await page.getByRole("tab", { name: "ECOYA SNAP" }).focus()
-    await page.keyboard.press("ArrowLeft")
-    await expect(
-      page.getByRole("tab", { name: "ECOYA Trade OS" })
-    ).toBeFocused()
-    await expect(page.locator(".ecoya-plan-price").first()).toHaveText("문의")
+    const basePrice = page.getByRole("row", {
+      name: "월 기본 요금 (USD) $200 $300 $400",
+    })
+    await expect(basePrice).toBeVisible()
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth
+      )
+    ).toBe(true)
     await page.reload()
-    await expect(
-      page.getByRole("tab", { name: "ECOYA Trade OS" })
-    ).toHaveAttribute("aria-selected", "true")
-    await page.getByRole("tab", { name: "ECOYA SNAP" }).click()
-    await page
-      .locator(".ecoya-price-card")
-      .first()
-      .getByRole("link", { name: "시작하기" })
-      .click()
+    await expect(cards).toHaveCount(3)
+    await cards.first().getByRole("link", { name: "시작하기" }).click()
     await expect(page).toHaveURL(/\/signup\?product=snap$/)
     expect(
       await page.evaluate(

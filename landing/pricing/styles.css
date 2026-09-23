@@ -22,29 +22,6 @@
   margin: 24px 0 36px;
   word-break: keep-all;
 }
-.ecoya-product-tabs {
-  display: inline-flex;
-  padding: 5px;
-  gap: 4px;
-  background: var(--ecoya-paper);
-  border: 1px solid var(--ecoya-rule-soft);
-  border-radius: 99px;
-}
-.ecoya-product-tabs > button {
-  border: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 12px 26px;
-  border-radius: 99px;
-  color: var(--ecoya-ink-soft);
-  background: transparent;
-  font-size: 15px;
-  font-weight: 550;
-  cursor: pointer;
-}
-
 .ecoya-price-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -240,17 +217,6 @@
   .ecoya-product-intro > p:not(.trade-section-label) {
     font-size: 18px;
   }
-  .ecoya-product-tabs {
-    max-width: 100%;
-  }
-  .ecoya-product-tabs > button {
-    font-size: 13px;
-    padding: 11px 14px;
-    gap: 7px;
-  }
-  .ecoya-product-tabs > button svg {
-    width: 15px;
-  }
   .ecoya-price-grid {
     grid-template-columns: 1fr;
     gap: 36px;
@@ -281,11 +247,6 @@
 .ecoya-price-grid > .is-featured .ecoya-plan-cta:hover {
   background: #e8f0fb;
 }
-.ecoya-product-tabs > button[aria-selected="true"] {
-  background: linear-gradient(135deg, #254e7a, #1c3d61 60%, #142c49);
-  color: white;
-  box-shadow: 0 4px 12px rgb(15 30 54 / 18%);
-}
 
 .trade-landing .ecoya-pricing-page > .ecoya-pricing-panel::after,
 .trade-landing .ecoya-pricing-page > .ecoya-product-intro::after {
@@ -298,4 +259,20 @@
   .ecoya-pricing-page .ecoya-product-intro {
     padding-bottom: 48px;
   }
+}
+
+[data-landing-page="pricing"] .ecoya-plan-heading > h3 {
+  font-size: clamp(21px, 2vw, 25px);
+}
+[data-landing-page="pricing"] .ecoya-plan-price {
+  padding-bottom: 16px;
+}
+[data-landing-page="pricing"] .ecoya-plan-members {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+[data-landing-page="pricing"] .ecoya-plan-extra {
+  margin: 6px 0 24px;
+  font-size: 14px;
 }
