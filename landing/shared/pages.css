@@ -690,7 +690,7 @@
   max-width: none;
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
   height: 88px;
   min-height: 88px;
   padding: 0 40px;
