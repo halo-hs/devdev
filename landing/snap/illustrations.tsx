@@ -16,6 +16,7 @@ import {
   Sparkles,
   Wrench,
 } from "lucide-react"
+import { useT } from "../shared/locale"
 
 const screens = {
   create: {
@@ -49,36 +50,39 @@ const screens = {
 export type SnapScreenName = keyof typeof screens
 
 function EvidenceTiles() {
+  const t = useT()
   return (
     <div className="snap-art-photos">
       <div>
         <Home />
-        <span>작업 전</span>
+        <span>{t("작업 전")}</span>
       </div>
       <div>
         <Wrench />
-        <span>작업 결과</span>
+        <span>{t("작업 결과")}</span>
       </div>
       <div>
         <Package />
-        <span>상태 확인</span>
+        <span>{t("상태 확인")}</span>
       </div>
     </div>
   )
 }
 function Checklist() {
+  const t = useT()
   return (
     <div className="snap-art-checklist">
       {["작업 전 상태", "작업 결과", "확인할 부분"].map((label) => (
         <div key={label}>
           <Check />
-          <span>{label}</span>
+          <span>{t(label)}</span>
         </div>
       ))}
     </div>
   )
 }
 function CaptureArtwork() {
+  const t = useT()
   return (
     <div className="snap-capture-composition">
       <div className="snap-capture-app">
@@ -89,27 +93,27 @@ function CaptureArtwork() {
         </div>
         <div className="snap-capture-job">
           <span>
-            작업코드 <b>E69554</b>
+            {t("작업코드")} <b>E69554</b>
           </span>
-          <span className="snap-capture-working">작업 중</span>
+          <span className="snap-capture-working">{t("작업 중")}</span>
         </div>
         <div className="snap-capture-heading">
-          <strong>단계별로, 빠짐없이.</strong>
-          <p>컨테이너 KMTU9349455</p>
+          <strong>{t("단계별로, 빠짐없이.")}</strong>
+          <p>{t("컨테이너")} KMTU9349455</p>
         </div>
         <div className="snap-capture-steps">
           <span>
-            <Check size={12} /> 외관
+            <Check size={12} /> {t("외관")}
           </span>
-          <span className="is-current">02 씰 촬영</span>
-          <span>03 적재</span>
+          <span className="is-current">{t("02 씰 촬영")}</span>
+          <span>{t("03 적재")}</span>
         </div>
         <div className="snap-capture-evidence">
           <div className="snap-capture-evidence-title">
-            <strong>씰 근접 촬영</strong>
+            <strong>{t("씰 근접 촬영")}</strong>
             <span>4 / 4</span>
           </div>
-          <p>씰 번호가 선명하게 보이도록 촬영해주세요.</p>
+          <p>{t("씰 번호가 선명하게 보이도록 촬영해주세요.")}</p>
           <div className="snap-capture-photo-grid">
             {[0, 1, 2, 3].map((index) => (
               <div
@@ -123,18 +127,18 @@ function CaptureArtwork() {
             ))}
           </div>
           <div className="snap-capture-seal-number">
-            <span>씰 번호</span>
+            <span>{t("씰 번호")}</span>
             <strong>PUS2509624</strong>
             <Check size={13} />
           </div>
         </div>
         <div className="snap-capture-camera-action">
           <Camera size={16} />
-          다음 단계 촬영하기
+          {t("다음 단계 촬영하기")}
         </div>
         <div className="snap-capture-safe">
           <ShieldCheck size={13} />
-          촬영한 사진은 기기에 안전하게 저장됩니다
+          {t("촬영한 사진은 기기에 안전하게 저장됩니다")}
         </div>
       </div>
       <div className="snap-capture-sync">
@@ -142,29 +146,32 @@ function CaptureArtwork() {
           <CloudUpload size={22} />
         </span>
         <div>
-          <small>현장에서 사무실까지</small>
-          <strong>사진 전송 현황</strong>
+          <small>{t("현장에서 사무실까지")}</small>
+          <strong>{t("사진 전송 현황")}</strong>
         </div>
         <ol>
           <li>
             <i className="is-waiting" />
-            전송 대기<span>기기 저장</span>
+            {t("전송 대기")}
+            <span>{t("기기 저장")}</span>
           </li>
           <li>
             <i className="is-uploading" />
-            전송 중<span>자동 업로드</span>
+            {t("전송 중")}
+            <span>{t("자동 업로드")}</span>
           </li>
           <li>
             <Check size={12} />
-            완료<span>사무실 공유</span>
+            {t("완료")}
+            <span>{t("사무실 공유")}</span>
           </li>
         </ol>
         <div className="snap-capture-offline">
           <WifiOff size={13} />
           <span>
-            연결이 끊겨도 촬영은 계속.
+            {t("연결이 끊겨도 촬영은 계속.")}
             <br />
-            다시 연결되면 자동 업로드.
+            {t("다시 연결되면 자동 업로드.")}
           </span>
         </div>
       </div>
@@ -286,20 +293,21 @@ function FieldScene({
 }
 
 function RequestArtwork() {
+  const t = useT()
   return (
     <div className="snap-storyboard snap-request-board">
       <div className="snap-request-scene">
         <FieldScene />
         <span className="snap-scene-tag">
-          <Camera size={14} /> 사진으로 남길 작업
+          <Camera size={14} /> {t("사진으로 남길 작업")}
         </span>
       </div>
       <div className="snap-request-message">
-        <span>이렇게 말하면</span>
+        <span>{t("이렇게 말하면")}</span>
         <strong>
-          “컨테이너 외관과 씰 번호,
+          {t("“컨테이너 외관과 씰 번호,")}
           <br />
-          적재 상태를 사진으로 남겨줘.”
+          {t("적재 상태를 사진으로 남겨줘.”")}
         </strong>
         <div className="snap-request-wave">
           {Array.from({ length: 18 }, (_, i) => (
@@ -310,7 +318,7 @@ function RequestArtwork() {
       </div>
       <div className="snap-board-footer">
         <span>
-          <Sparkles size={16} /> 한 문장을 촬영 계획으로
+          <Sparkles size={16} /> {t("한 문장을 촬영 계획으로")}
         </span>
         <ArrowRight size={18} />
       </div>
@@ -319,15 +327,16 @@ function RequestArtwork() {
 }
 
 function PlanArtwork() {
+  const t = useT()
   return (
     <div className="snap-storyboard snap-plan-board">
       <div className="snap-plan-title">
         <div>
-          <span>요청에 맞춰 정리한</span>
-          <strong>빠짐없는 촬영 목록</strong>
+          <span>{t("요청에 맞춰 정리한")}</span>
+          <strong>{t("빠짐없는 촬영 목록")}</strong>
         </div>
         <span className="snap-plan-count">
-          03<small>촬영 항목</small>
+          03<small>{t("촬영 항목")}</small>
         </span>
       </div>
       <div className="snap-plan-rows">
@@ -340,8 +349,8 @@ function PlanArtwork() {
             <FieldScene kind={shot.kind} />
             <div>
               <span>0{i + 1}</span>
-              <strong>{shot.title}</strong>
-              <p>{shot.detail}</p>
+              <strong>{t(shot.title)}</strong>
+              <p>{t(shot.detail)}</p>
             </div>
             <span className="snap-plan-camera">
               <Camera size={18} />
@@ -351,7 +360,7 @@ function PlanArtwork() {
       </div>
       <div className="snap-board-footer">
         <span>
-          <ClipboardCheck size={17} /> 목록대로 찍으면 준비 끝
+          <ClipboardCheck size={17} /> {t("목록대로 찍으면 준비 끝")}
         </span>
         <Check size={18} />
       </div>
@@ -360,13 +369,14 @@ function PlanArtwork() {
 }
 
 function ReviewArtwork() {
+  const t = useT()
   return (
     <div className="snap-storyboard snap-review-board">
       <div className="snap-review-title">
         <strong>
-          사진이 모여,
+          {t("사진이 모여,")}
           <br />
-          하나의 근거가 됩니다.
+          {t("하나의 근거가 됩니다.")}
         </strong>
         <span>
           <ShieldCheck size={32} />
@@ -378,34 +388,34 @@ function ReviewArtwork() {
             <FieldScene kind={shot.kind} />
             <span>
               <Check size={13} />
-              {shot.title}
+              {t(shot.title)}
             </span>
           </div>
         ))}
       </div>
       <div className="snap-review-summary">
         <div>
-          <span className="snap-review-avatar">김</span>
+          <span className="snap-review-avatar">{t("김")}</span>
           <div>
-            <strong>담당자 확인 완료</strong>
-            <small>항목별 사진 · 검토 이력 보존</small>
+            <strong>{t("담당자 확인 완료")}</strong>
+            <small>{t("항목별 사진 · 검토 이력 보존")}</small>
           </div>
         </div>
         <span>
-          <Check size={15} /> 확인
+          <Check size={15} /> {t("확인")}
         </span>
       </div>
       <div className="snap-review-delivery">
         <span>
           <Link2 size={21} />
-          <strong>웹 리포트</strong>
-          <small>링크 하나로 공유</small>
+          <strong>{t("웹 리포트")}</strong>
+          <small>{t("링크 하나로 공유")}</small>
         </span>
         <ArrowRight size={18} />
         <span>
           <FileCheck2 size={21} />
-          <strong>PDF 성적서</strong>
-          <small>제출 문서로 정리</small>
+          <strong>{t("PDF 성적서")}</strong>
+          <small>{t("제출 문서로 정리")}</small>
         </span>
       </div>
     </div>
@@ -413,11 +423,12 @@ function ReviewArtwork() {
 }
 
 function SnapIllustration({ name }: { name: SnapScreenName }) {
+  const t = useT()
   return (
     <div
       className={`snap-art snap-art-${name}`}
       role="img"
-      aria-label={screens[name].description}
+      aria-label={t(screens[name].description)}
     >
       <div className="snap-art-stage" aria-hidden="true">
         {name === "create" && <RequestArtwork />}
@@ -432,16 +443,16 @@ function SnapIllustration({ name }: { name: SnapScreenName }) {
               <i />
               <Link2 />
             </div>
-            <span className="snap-art-kicker">고객에게 전하는 기록</span>
-            <strong>확인된 현장 리포트</strong>
+            <span className="snap-art-kicker">{t("고객에게 전하는 기록")}</span>
+            <strong>{t("확인된 현장 리포트")}</strong>
             <EvidenceTiles />
             <div className="snap-art-approved">
               <ShieldCheck />
-              항목별 증거와 확인 상태
+              {t("항목별 증거와 확인 상태")}
             </div>
             <span className="snap-art-bottom">
               <Link2 />
-              링크 하나로 공유
+              {t("링크 하나로 공유")}
             </span>
           </div>
         )}
@@ -449,11 +460,12 @@ function SnapIllustration({ name }: { name: SnapScreenName }) {
           <div className="snap-art-sheet snap-art-document">
             <span className="snap-art-kicker">
               <FileCheck2 />
-              검사 성적서
+              {t("검사 성적서")}
             </span>
             <strong>
-              확인된 결과를
-              <br />한 문서에.
+              {t("확인된 결과를")}
+              <br />
+              {t("한 문서에.")}
             </strong>
             <Checklist />
             <div className="snap-art-document-lines">
@@ -462,7 +474,7 @@ function SnapIllustration({ name }: { name: SnapScreenName }) {
               <i />
             </div>
             <div className="snap-art-signature">
-              <span>사진 부록 · 서명 · 발행 정보</span>
+              <span>{t("사진 부록 · 서명 · 발행 정보")}</span>
               <ShieldCheck />
             </div>
           </div>

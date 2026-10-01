@@ -1,28 +1,30 @@
 import { useState } from "react"
 import { ArrowRight, FileText } from "lucide-react"
+import { useT } from "../shared/locale"
 
 export function TradeDealPreview() {
+  const t = useT()
   return (
     <div className="trade-owner-preview">
-      <span>거래건 · 제품 예시</span>
-      <h3>확인된 문서가 거래건으로 모입니다</h3>
+      <span>{t("거래건 · 제품 예시")}</span>
+      <h3>{t("확인된 문서가 거래건으로 모입니다")}</h3>
       <div>
         <strong>ACME GmbH</strong>
-        <span>선적 준비</span>
+        <span>{t("선적 준비")}</span>
       </div>
       <p>DL-260917-01 · Stainless Steel Coil</p>
       <dl>
         <div>
-          <dt>받을 돈</dt>
+          <dt>{t("받을 돈")}</dt>
           <dd>USD 50,820</dd>
         </div>
         <div>
-          <dt>확인한 서류</dt>
+          <dt>{t("확인한 서류")}</dt>
           <dd>Commercial Invoice</dd>
         </div>
         <div>
-          <dt>다음 일정</dt>
-          <dd>09.21 수금 예정</dd>
+          <dt>{t("다음 일정")}</dt>
+          <dd>{t("09.21 수금 예정")}</dd>
         </div>
       </dl>
     </div>
@@ -30,40 +32,42 @@ export function TradeDealPreview() {
 }
 
 export function TradeClosingPreview() {
+  const t = useT()
   return (
     <div className="trade-owner-preview">
-      <span>월마감 · 제품 예시</span>
-      <h3>결산 · 영업 성과</h3>
+      <span>{t("월마감 · 제품 예시")}</span>
+      <h3>{t("결산 · 영업 성과")}</h3>
       <div>
-        <strong>2026년 9월</strong>
-        <span>검토 중</span>
+        <strong>{t("2026년 9월")}</strong>
+        <span>{t("검토 중")}</span>
       </div>
-      <p>확정된 달은 마감해 공식 숫자로 동결합니다.</p>
+      <p>{t("확정된 달은 마감해 공식 숫자로 동결합니다.")}</p>
       <dl>
         <div>
-          <dt>매출</dt>
+          <dt>{t("매출")}</dt>
           <dd>USD 50,820</dd>
         </div>
         <div>
-          <dt>매입</dt>
+          <dt>{t("매입")}</dt>
           <dd>USD 38,400</dd>
         </div>
         <div>
-          <dt>거래 GP</dt>
+          <dt>{t("거래 GP")}</dt>
           <dd>USD 12,420</dd>
         </div>
       </dl>
-      <p>세무사·더존 인계</p>
+      <p>{t("세무사·더존 인계")}</p>
     </div>
   )
 }
 
 export function TradeMarketPreview() {
+  const t = useT()
   return (
     <div className="trade-owner-preview">
-      <span>시장 지표 · 예시 데이터</span>
-      <h3>실시간 시장 지표</h3>
-      <p>환율과 물류 벤치마크를 함께 참조합니다.</p>
+      <span>{t("시장 지표 · 예시 데이터")}</span>
+      <h3>{t("실시간 시장 지표")}</h3>
+      <p>{t("환율과 물류 벤치마크를 함께 참조합니다.")}</p>
       <dl>
         <div>
           <dt>USD/KRW</dt>
@@ -106,10 +110,11 @@ const questions = [
 ]
 
 export function TradeQuestionPreview() {
+  const t = useT()
   const [active, setActive] = useState(0)
   return (
     <div className="trade-timeline trade-question-layout">
-      <ol className="trade-timeline-steps" aria-label="AI 질의 예시">
+      <ol className="trade-timeline-steps" aria-label={t("AI 질의 예시")}>
         {questions.map(([question], index) => (
           <li key={question}>
             <button
@@ -120,7 +125,7 @@ export function TradeQuestionPreview() {
             >
               <span className="trade-timeline-title">
                 <span>0{index + 1}</span>
-                <h3>{question}</h3>
+                <h3>{t(question)}</h3>
               </span>
             </button>
           </li>
@@ -132,25 +137,25 @@ export function TradeQuestionPreview() {
           className="trade-answer"
           aria-live="polite"
         >
-          <div className="trade-chat-question">{questions[active][0]}</div>
+          <div className="trade-chat-question">{t(questions[active][0])}</div>
           <div className="trade-chat-answer">
             <div>
               <span className="trade-answer-amount">
-                {questions[active][1]}
+                {t(questions[active][1])}
               </span>
-              <p>{questions[active][2]}</p>
+              <p>{t(questions[active][2])}</p>
             </div>
           </div>
           <div className="trade-answer-source">
             <FileText size={18} />
             <div>
               <strong>Commercial Invoice · INV-2026-0917</strong>
-              <span>예시 거래 DL-260917-01</span>
+              <span>{t("예시 거래 DL-260917-01")}</span>
             </div>
             <ArrowRight size={16} />
           </div>
           <p className="trade-demo-warning">
-            제품 예시 데이터입니다. 질문 → 답변 → 근거 문서까지 한 흐름으로.
+            {t("제품 예시 데이터입니다. 질문 → 답변 → 근거 문서까지 한 흐름으로.")}
           </p>
         </div>
       </div>

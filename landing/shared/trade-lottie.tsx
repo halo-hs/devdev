@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { LottieLight, type LottieHandle } from "lottie-react"
 import { useReducedMotion } from "@shared/lib/use-reduced-motion"
 import { FileText, Pause, Play } from "lucide-react"
+import { useT } from "./locale"
 
 export function TradeLottie({
   src,
@@ -16,6 +17,7 @@ export function TradeLottie({
   label: string
   controls?: boolean
 }) {
+  const t = useT()
   const player = useRef<LottieHandle>(null)
   const root = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotion()
@@ -66,12 +68,14 @@ export function TradeLottie({
           type="button"
           className="trade-feature-play"
           aria-label={
-            paused ? "업로드 애니메이션 재생" : "업로드 애니메이션 일시정지"
+            paused
+              ? t("업로드 애니메이션 재생")
+              : t("업로드 애니메이션 일시정지")
           }
           onClick={() => setPaused(!paused)}
         >
           {paused ? <Play size={16} /> : <Pause size={16} />}
-          {paused ? "재생" : "일시정지"}
+          {paused ? t("재생") : t("일시정지")}
         </button>
       )}
     </div>

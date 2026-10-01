@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import { ArrowRight, Check } from "lucide-react"
 import { LandingShell } from "../shared/layout"
+import { useT } from "../shared/locale"
 import "./styles.css"
 
 const includedMembers = 5
@@ -43,14 +44,15 @@ const plans = [
 ]
 
 export function PricingLanding() {
+  const t = useT()
   const product =
     new URLSearchParams(window.location.search).get("product") === "snap"
       ? "snap"
       : "erp"
   const contact = `/contact?product=${product}`
   useEffect(() => {
-    document.title = "ECOYA — 가격"
-  }, [])
+    document.title = t("ECOYA — 가격")
+  }, [t])
   const comparisons = [
     ["월 기본 요금 (USD)", ...plans.map((plan) => `$${plan.price}`)],
     ["기본 포함 인원", ...plans.map(() => `${includedMembers}인`)],
@@ -64,11 +66,11 @@ export function PricingLanding() {
         <section className="ecoya-product-intro trade-container">
           <p className="trade-section-label">PRICING</p>
           <h1>
-            우리 팀에 맞게,
+            {t("우리 팀에 맞게,")}
             <br />
-            필요한 만큼 시작하세요.
+            {t("필요한 만큼 시작하세요.")}
           </h1>
-          <p>기본 5인으로 시작하고, 팀이 커지면 인원을 추가하세요.</p>
+          <p>{t("기본 5인으로 시작하고, 팀이 커지면 인원을 추가하세요.")}</p>
         </section>
         <section
           id="product-panel"
@@ -76,7 +78,7 @@ export function PricingLanding() {
           className="trade-container ecoya-pricing-panel"
         >
           <h2 id="pricing-plans-title" className="sr-only">
-            ECOYA 요금제
+            {t("ECOYA 요금제")}
           </h2>
           <div className="ecoya-price-grid">
             {plans.map((plan) => (
@@ -87,19 +89,22 @@ export function PricingLanding() {
                 <div className="ecoya-price-card">
                   <div className="ecoya-plan-heading">
                     <h3>{plan.name}</h3>
-                    {plan.featured && <span>통합</span>}
+                    {plan.featured && <span>{t("통합")}</span>}
                   </div>
-                  <p>{plan.audience}</p>
+                  <p>{t(plan.audience)}</p>
                   <div className="ecoya-plan-price">
                     <strong>${plan.price}</strong>
-                    <span>USD / 월부터</span>
+                    <span>{t("USD / 월부터")}</span>
                   </div>
                   <p className="ecoya-plan-members">
-                    기본 {includedMembers}인 포함
+                    {t("기본")} {includedMembers}
+                    {t("인 포함")}
                   </p>
-                  <p className="ecoya-plan-extra">6인부터 인원별 추가 과금</p>
+                  <p className="ecoya-plan-extra">
+                    {t("6인부터 인원별 추가 과금")}
+                  </p>
                   <a className="ecoya-plan-cta" href={plan.href}>
-                    {plan.action}
+                    {t(plan.action)}
                     <ArrowRight size={17} />
                   </a>
                 </div>
@@ -107,7 +112,7 @@ export function PricingLanding() {
                   {plan.features.map((feature) => (
                     <li key={feature}>
                       <Check size={17} />
-                      <span>{feature}</span>
+                      <span>{t(feature)}</span>
                     </li>
                   ))}
                 </ul>
@@ -115,24 +120,25 @@ export function PricingLanding() {
             ))}
           </div>
           <p className="ecoya-price-note">
-            표시 금액은 기본 5인 기준의 월 요금(USD)입니다. 추가 인원당 요금은
-            별도 안내합니다.
+            {t(
+              "표시 금액은 기본 5인 기준의 월 요금(USD)입니다. 추가 인원당 요금은 별도 안내합니다.",
+            )}
           </p>
           <section
             className="ecoya-price-compare"
             aria-labelledby="compare-title"
           >
-            <h2 id="compare-title">플랜 한눈에 비교하기</h2>
+            <h2 id="compare-title">{t("플랜 한눈에 비교하기")}</h2>
             <div
               className="ecoya-table-scroll"
               role="region"
-              aria-label="요금제 비교표"
+              aria-label={t("요금제 비교표")}
               tabIndex={0}
             >
               <table>
                 <thead>
                   <tr>
-                    <th scope="col">비교 항목</th>
+                    <th scope="col">{t("비교 항목")}</th>
                     {plans.map((plan) => (
                       <th scope="col" key={plan.name}>
                         {plan.name}
@@ -143,9 +149,9 @@ export function PricingLanding() {
                 <tbody>
                   {comparisons.map(([label, ...values]) => (
                     <tr key={label}>
-                      <th scope="row">{label}</th>
+                      <th scope="row">{t(label)}</th>
                       {values.map((value, i) => (
-                        <td key={i}>{value}</td>
+                        <td key={i}>{t(value)}</td>
                       ))}
                     </tr>
                   ))}
@@ -155,7 +161,7 @@ export function PricingLanding() {
           </section>
         </section>
         <section className="ecoya-faq trade-section trade-container">
-          <h2>가격에 대해 궁금한 점</h2>
+          <h2>{t("가격에 대해 궁금한 점")}</h2>
           {[
             [
               "어떤 제품으로 시작하면 되나요?",
@@ -175,21 +181,21 @@ export function PricingLanding() {
             ],
           ].map(([q, a]) => (
             <details key={q}>
-              <summary>{q}</summary>
-              <p>{a}</p>
+              <summary>{t(q)}</summary>
+              <p>{t(a)}</p>
             </details>
           ))}
         </section>
         <section className="ecoya-pricing-contact">
           <div className="trade-container">
             <h2>
-              우리 팀의 다음 시작,
+              {t("우리 팀의 다음 시작,")}
               <br />
-              함께 정해볼까요?
+              {t("함께 정해볼까요?")}
             </h2>
-            <p>업무에 맞는 도입 방법을 안내해드립니다.</p>
+            <p>{t("업무에 맞는 도입 방법을 안내해드립니다.")}</p>
             <a href={contact}>
-              도입 문의 <ArrowRight size={18} />
+              {t("도입 문의")} <ArrowRight size={18} />
             </a>
           </div>
         </section>

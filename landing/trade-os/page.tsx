@@ -27,8 +27,10 @@ import {
   TradeQuestionPreview,
 } from "./sections"
 import { LandingShell, StartButton } from "../shared/layout"
+import { useT } from "../shared/locale"
 
 function WorkflowGuide() {
+  const t = useT()
   const [active, setActive] = useState(0)
   const [playing, setPlaying] = useState(
     () => !window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -81,7 +83,7 @@ function WorkflowGuide() {
       data-inspo-reference="glideapps-com/product"
     >
       <div className="trade-timeline-copy">
-        <ol className="trade-timeline-steps" aria-label="서류 처리 단계">
+        <ol className="trade-timeline-steps" aria-label={t("서류 처리 단계")}>
           {workflow.map(([title, detail], index) => (
             <li key={title}>
               <button
@@ -99,9 +101,9 @@ function WorkflowGuide() {
                 </span>
                 <span className="trade-timeline-title">
                   <span>0{index + 1}</span>
-                  <h3>{title}</h3>
+                  <h3>{t(title)}</h3>
                 </span>
-                <span className="trade-timeline-detail">{detail}</span>
+                <span className="trade-timeline-detail">{t(detail)}</span>
               </button>
             </li>
           ))}
@@ -110,12 +112,12 @@ function WorkflowGuide() {
           className="trade-timeline-play"
           type="button"
           aria-label={
-            playing ? "안내 애니메이션 일시정지" : "안내 애니메이션 재생"
+            playing ? t("안내 애니메이션 일시정지") : t("안내 애니메이션 재생")
           }
           onClick={() => setPlaying(!playing)}
         >
           {playing ? <Pause size={16} /> : <Play size={16} />}
-          {playing ? "일시정지" : "재생"}
+          {playing ? t("일시정지") : t("재생")}
         </button>
       </div>
       <div
@@ -210,9 +212,10 @@ const sourceFeatures = [
   },
 ]
 export function TradeLanding() {
+  const t = useT()
   useEffect(() => {
-    document.title = "ECOYA Trade OS — 무역 업무 운영 시스템"
-  }, [])
+    document.title = t("ECOYA Trade OS — 무역 업무 운영 시스템")
+  }, [t])
   return (
     <LandingShell page="trade">
       <main>
@@ -223,24 +226,24 @@ export function TradeLanding() {
           <div className="trade-reference-grid">
             <div className="trade-hero-copy">
               <p className="trade-section-label trade-hero-label">
-                무역 서류·운영 자동화
+                {t("무역 서류·운영 자동화")}
               </p>
               <h1 id="trade-title">
-                <span>서류는 AI가 읽고 만들고,</span>
-                <span>확인만 당신이</span>
+                <span>{t("서류는 AI가 읽고 만들고,")}</span>
+                <span>{t("확인만 당신이")}</span>
               </h1>
               <p className="trade-hero-description">
-                서류 한 장이 거래에서 정산·결산까지 끊김 없이 흐릅니다.
+                {t("서류 한 장이 거래에서 정산·결산까지 끊김 없이 흐릅니다.")}
               </p>
               <div className="trade-hero-actions">
                 <StartButton label="ECOYA Trade OS 시작하기" />
                 <a href="#flow">
-                  작동 방식 보기 <ChevronDown size={18} />
+                  {t("작동 방식 보기")} <ChevronDown size={18} />
                 </a>
               </div>
               <p className="trade-hero-note">
                 <ShieldCheck size={18} />
-                AI가 제안합니다 · 사람이 확정합니다 · 시스템이 기록합니다
+                {t("AI가 제안합니다 · 사람이 확정합니다 · 시스템이 기록합니다")}
               </p>
             </div>
             <div className="trade-hero-demo">
@@ -252,19 +255,19 @@ export function TradeLanding() {
           <div className="trade-container trade-section">
             <div className="trade-section-heading">
               <h2>
-                당신은 어떤 하루를
+                {t("당신은 어떤 하루를")}
                 <br />
-                보내고 있나요?
+                {t("보내고 있나요?")}
               </h2>
-              <p>막히는 곳은 저마다 다르지만, 푸는 방식은 하나의 흐름입니다</p>
+              <p>{t("막히는 곳은 저마다 다르지만, 푸는 방식은 하나의 흐름입니다")}</p>
             </div>
             <div className="trade-trust-grid">
               {roles.map(([role, audience, title, detail], index) => (
                 <article key={role}>
-                  <p className="trade-section-label">{role}</p>
-                  <p>{audience}</p>
-                  <h3>{title}</h3>
-                  <p>{detail}</p>
+                  <p className="trade-section-label">{t(role)}</p>
+                  <p>{t(audience)}</p>
+                  <h3>{t(title)}</h3>
+                  <p>{t(detail)}</p>
                   <TradeTrustVisual index={index} />
                 </article>
               ))}
@@ -275,30 +278,34 @@ export function TradeLanding() {
           <span id="how" aria-hidden="true" />
           <div className="trade-section-heading">
             <div>
-              <p className="trade-section-label">작동 방식</p>
+              <p className="trade-section-label">{t("작동 방식")}</p>
               <h2>
-                PDF 하나에서 결산까지,
-                <br />한 흐름
+                {t("PDF 하나에서 결산까지,")}
+                <br />
+                {t("한 흐름")}
               </h2>
             </div>
             <p>
-              올리면 AI가 읽고, 확인 한 번으로 거래·정산·회계 인계까지 그대로
-              이어집니다
+              {t(
+                "올리면 AI가 읽고, 확인 한 번으로 거래·정산·회계 인계까지 그대로 이어집니다",
+              )}
             </p>
           </div>
           <div className="trade-receive-send-guidance">
             <div>
-              <span>받을 때</span>
+              <span>{t("받을 때")}</span>
               <p>
-                PDF만 올리면 AI가 읽고 필드를 채웁니다. 확인하면 거래·정산까지
-                이어집니다.
+                {t(
+                  "PDF만 올리면 AI가 읽고 필드를 채웁니다. 확인하면 거래·정산까지 이어집니다.",
+                )}
               </p>
             </div>
             <div>
-              <span>보낼 때</span>
+              <span>{t("보낼 때")}</span>
               <p>
-                AI에게 말하면 송장·계약서가 만들어지고, 같은 데이터로
-                정산됩니다. 고객은 링크 하나로 받습니다.
+                {t(
+                  "AI에게 말하면 송장·계약서가 만들어지고, 같은 데이터로 정산됩니다. 고객은 링크 하나로 받습니다.",
+                )}
               </p>
             </div>
           </div>
@@ -311,21 +318,21 @@ export function TradeLanding() {
           <div className="trade-container trade-section">
             <div className="trade-section-heading">
               <div>
-                <p className="trade-section-label">주요 기능</p>
+                <p className="trade-section-label">{t("주요 기능")}</p>
                 <h2>
-                  흩어져 있던 무역 업무,
+                  {t("흩어져 있던 무역 업무,")}
                   <br />
-                  이제 한 곳에서
+                  {t("이제 한 곳에서")}
                 </h2>
               </div>
-              <p>기능마다 다른 프로그램을 열 필요가 없습니다</p>
+              <p>{t("기능마다 다른 프로그램을 열 필요가 없습니다")}</p>
             </div>
             <InspoFeatureOverview>
               {sourceFeatures.map((item) => (
                 <article key={item.title} className="trade-overview-feature">
                   <item.icon className="trade-feature-symbol" size={28} />
-                  <h3>{item.title}</h3>
-                  <p>{item.description}</p>
+                  <h3>{t(item.title)}</h3>
+                  <p>{t(item.description)}</p>
                   <div className="trade-feature-visual">
                     {item.preview === 4 ? (
                       <TradeClosingPreview />
@@ -344,30 +351,30 @@ export function TradeLanding() {
             >
               <div className="trade-upload-intro">
                 <div>
-                  <h3 id="trade-upload-title">오늘 첫 서류를 올려보세요</h3>
-                  <p>파일을 올리고, AI가 읽은 내용을 확인하세요.</p>
+                  <h3 id="trade-upload-title">{t("오늘 첫 서류를 올려보세요")}</h3>
+                  <p>{t("파일을 올리고, AI가 읽은 내용을 확인하세요.")}</p>
                 </div>
                 <StartButton label="파일 올리기 시작하기" />
               </div>
               <TradeUploadPreview />
               <figure className="trade-upload-motion trade-upload-flow">
                 <figcaption>
-                  <h3>추출한 내용을 확인한 뒤 거래에 반영합니다.</h3>
+                  <h3>{t("추출한 내용을 확인한 뒤 거래에 반영합니다.")}</h3>
                 </figcaption>
                 <div className="trade-upload-flow-visual">
                   <ol
                     className="trade-upload-flow-labels"
-                    aria-label="파일 업로드 처리 흐름"
+                    aria-label={t("파일 업로드 처리 흐름")}
                   >
-                    <li>파일 업로드</li>
-                    <li>AI 읽기</li>
-                    <li>검토·거래 연결</li>
+                    <li>{t("파일 업로드")}</li>
+                    <li>{t("AI 읽기")}</li>
+                    <li>{t("검토·거래 연결")}</li>
                   </ol>
                   <TradeLottie
                     src="/lottie/trade-workflow.json"
                     controls
                     className="trade-upload-lottie"
-                    label="서류 업로드부터 AI 필드 추출, 거래 연결까지의 흐름"
+                    label={t("서류 업로드부터 AI 필드 추출, 거래 연결까지의 흐름")}
                   />
                 </div>
               </figure>
@@ -378,14 +385,14 @@ export function TradeLanding() {
           <div className="trade-container trade-section">
             <div className="trade-section-heading">
               <div>
-                <p className="trade-section-label">정산</p>
+                <p className="trade-section-label">{t("정산")}</p>
                 <h2>
-                  받을 돈과 보낼 돈이 오갈 때마다,
+                  {t("받을 돈과 보낼 돈이 오갈 때마다,")}
                   <br />
-                  자금 현황이 정리됩니다
+                  {t("자금 현황이 정리됩니다")}
                 </h2>
               </div>
-              <p>한 번 확인한 숫자는, 다시 입력할 일이 없습니다</p>
+              <p>{t("한 번 확인한 숫자는, 다시 입력할 일이 없습니다")}</p>
             </div>
             <div className="trade-owner-layout">
               <div className="trade-owner-grid">
@@ -397,32 +404,32 @@ export function TradeLanding() {
                   <article key={title}>
                     <CircleCheckIcon />
                     <div>
-                      <h3>{title}</h3>
-                      <p>{detail}</p>
+                      <h3>{t(title)}</h3>
+                      <p>{t(detail)}</p>
                     </div>
                   </article>
                 ))}
               </div>
               <div className="trade-owner-preview">
-                <span>오늘의 업무</span>
-                <h3>진행 중인 거래를 한눈에</h3>
+                <span>{t("오늘의 업무")}</span>
+                <h3>{t("진행 중인 거래를 한눈에")}</h3>
                 <div>
                   <strong>ACME GmbH</strong>
-                  <span>선적 준비</span>
+                  <span>{t("선적 준비")}</span>
                 </div>
                 <p>DL-260917-01 · Stainless Steel Coil</p>
                 <dl>
                   <div>
-                    <dt>받을 돈</dt>
+                    <dt>{t("받을 돈")}</dt>
                     <dd>USD 50,820</dd>
                   </div>
                   <div>
-                    <dt>확인할 서류</dt>
+                    <dt>{t("확인할 서류")}</dt>
                     <dd>Commercial Invoice</dd>
                   </div>
                   <div>
-                    <dt>다음 일정</dt>
-                    <dd>09.21 수금 예정</dd>
+                    <dt>{t("다음 일정")}</dt>
+                    <dd>{t("09.21 수금 예정")}</dd>
                   </div>
                 </dl>
               </div>
@@ -433,12 +440,12 @@ export function TradeLanding() {
           <div className="trade-container trade-section">
             <div className="trade-section-heading">
               <h2>
-                숫자를 찾지 말고,
+                {t("숫자를 찾지 말고,")}
                 <br />
-                물어보세요
+                {t("물어보세요")}
               </h2>
               <p>
-                거래 원장과 시장 지표를 자연어로 물으면 AI가 조회해 답합니다
+                {t("거래 원장과 시장 지표를 자연어로 물으면 AI가 조회해 답합니다")}
               </p>
             </div>
             <TradeQuestionPreview />
@@ -456,8 +463,8 @@ export function TradeLanding() {
             height={1600}
           />
           <div className="trade-container trade-logistics-content">
-            <h2>지금, 첫 서류를 올려보세요</h2>
-            <p>몇 분이면 충분합니다</p>
+            <h2>{t("지금, 첫 서류를 올려보세요")}</h2>
+            <p>{t("몇 분이면 충분합니다")}</p>
             <StartButton />
           </div>
         </section>

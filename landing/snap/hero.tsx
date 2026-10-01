@@ -9,10 +9,12 @@ import {
 } from "lucide-react"
 import { useReducedMotion } from "@shared/lib/use-reduced-motion"
 import { useSnapPreviewPlayback } from "@landing/snap/use-preview-playback"
+import { useT } from "../shared/locale"
 import { moreSnapUses, snapUseCases } from "./content"
 import { SnapScreen, type SnapScreenName } from "./illustrations"
 
 export function SnapIndustryLabels({ playing }: { playing: boolean }) {
+  const t = useT()
   const [index, setIndex] = useState(0)
   const [interacting, setInteracting] = useState(false)
   const reduced = useReducedMotion()
@@ -27,7 +29,7 @@ export function SnapIndustryLabels({ playing }: { playing: boolean }) {
   return (
     <div
       className="ecoya-snap-industries"
-      aria-label="SNAP 활용 분야"
+      aria-label={t("SNAP 활용 분야")}
       onMouseEnter={() => setInteracting(true)}
       onMouseLeave={() => setInteracting(false)}
       onFocusCapture={() => setInteracting(true)}
@@ -38,13 +40,13 @@ export function SnapIndustryLabels({ playing }: { playing: boolean }) {
     >
       {snapUseCases.slice(0, 5).map(({ title }) => (
         <a href="#snap-use-cases" key={title}>
-          {title}
+          {t(title)}
         </a>
       ))}
       <a href="#snap-more-uses" className="ecoya-rotating-use">
-        <span>그리고</span>
+        <span>{t("그리고")}</span>
         <span className="ecoya-rotating-use-text" key={index}>
-          {moreSnapUses[index]}
+          {t(moreSnapUses[index])}
         </span>
       </a>
     </div>
@@ -92,6 +94,7 @@ export function SnapHeroPreview({
 }: {
   playback: ReturnType<typeof useSnapPreviewPlayback>
 }) {
+  const t = useT()
   const { step, playing, progress, root, select, toggle } = playback
   const reduced = useReducedMotion()
   const current = heroStages[step]
@@ -108,18 +111,18 @@ export function SnapHeroPreview({
             type="button"
             onClick={toggle}
             aria-label={
-              playing ? "SNAP 미리보기 일시정지" : "SNAP 미리보기 재생"
+              playing ? t("SNAP 미리보기 일시정지") : t("SNAP 미리보기 재생")
             }
           >
             {playing ? <Pause size={16} /> : <Play size={16} />}
-            {playing ? "일시정지" : "재생"}
+            {playing ? t("일시정지") : t("재생")}
           </button>
         )}
       </div>
       <div id="snap-hero-preview" aria-live={playing ? "off" : "polite"}>
         <div className="ecoya-snap-hero-caption">
-          <h3>{current.title}</h3>
-          <p>{current.description}</p>
+          <h3>{t(current.title)}</h3>
+          <p>{t(current.description)}</p>
         </div>
         <div key={step} className="ecoya-snap-screen-transition">
           <SnapScreen name={current.name} />
@@ -128,7 +131,7 @@ export function SnapHeroPreview({
       <div
         className="ecoya-snap-hero-tabs"
         role="group"
-        aria-label="SNAP 서비스 미리보기"
+        aria-label={t("SNAP 서비스 미리보기")}
       >
         {heroStages.map((item, i) => (
           <button
@@ -146,7 +149,7 @@ export function SnapHeroPreview({
               />
             </span>
             <item.icon size={18} />
-            <span>{item.label}</span>
+            <span>{t(item.label)}</span>
           </button>
         ))}
       </div>

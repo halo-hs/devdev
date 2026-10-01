@@ -1,6 +1,7 @@
 import { Children, useRef, useState, type ReactNode } from "react"
 import { ArrowLeft, ArrowRight, Check } from "lucide-react"
 import { Button } from "@shared/components/ui/button"
+import { useT } from "./locale"
 
 /* Product-led composition based on the selected Glide reference.
  * Earlier Inspo source captures remain archived in docs/design/inspo-source/.
@@ -29,6 +30,7 @@ export function InspoHeroProductStage({
 }
 
 export function InspoFeatureOverview({ children }: { children: ReactNode }) {
+  const t = useT()
   const rail = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ start: true, end: false })
   const scroll = (direction: number) => {
@@ -50,7 +52,7 @@ export function InspoFeatureOverview({ children }: { children: ReactNode }) {
       <div className="trade-feature-scroll-controls">
         <button
           type="button"
-          aria-label="이전 기능 보기"
+          aria-label={t("이전 기능 보기")}
           disabled={position.start}
           onClick={() => scroll(-1)}
         >
@@ -58,7 +60,7 @@ export function InspoFeatureOverview({ children }: { children: ReactNode }) {
         </button>
         <button
           type="button"
-          aria-label="다음 기능 보기"
+          aria-label={t("다음 기능 보기")}
           disabled={position.end}
           onClick={() => scroll(1)}
         >
@@ -70,7 +72,10 @@ export function InspoFeatureOverview({ children }: { children: ReactNode }) {
         ref={rail}
         tabIndex={0}
         role="region"
-        aria-label={`주요 기능 ${Children.count(children)}개, 가로 스크롤`}
+        aria-label={t("주요 기능 {n}개, 가로 스크롤").replace(
+          "{n}",
+          String(Children.count(children))
+        )}
         onScroll={(event) => {
           const el = event.currentTarget
           setPosition({
@@ -103,6 +108,7 @@ type Plan = {
  * Unmodified source: docs/design/inspo-source/pricing-three-card.jsx.txt
  */
 export function InspoPricingThreeCard({ plans }: { plans: Plan[] }) {
+  const t = useT()
   return (
     <div
       className="trade-pricing grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-3"
@@ -119,7 +125,7 @@ export function InspoPricingThreeCard({ plans }: { plans: Plan[] }) {
           <div className="inspo-plan-header space-y-2">
             <h3>{plan.name}</h3>
             {index === 1 && (
-              <span className="inspo-plan-recommended">메인 플랜</span>
+              <span className="inspo-plan-recommended">{t("메인 플랜")}</span>
             )}
             <strong className="trade-plan-price">{plan.price}</strong>
           </div>
