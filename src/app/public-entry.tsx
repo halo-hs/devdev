@@ -213,13 +213,15 @@ export function CommonEntry({ children }: { children: ReactNode }) {
     initialProduct:
       url.searchParams.get("product") === "snap"
         ? ("snap" as const)
-        : ("erp" as const),
+        : url.searchParams.get("product") === "erp"
+          ? ("erp" as const)
+          : undefined,
   }
   return (
     <div data-common-screen={screen}>
       <CommonPublicLayout
         sharedHeader
-        homeHref={props.initialProduct === "erp" ? "/" : "/snap"}
+        homeHref={props.initialProduct === "snap" ? "/snap" : "/"}
         authVariant={
           screen === "login"
             ? "login"

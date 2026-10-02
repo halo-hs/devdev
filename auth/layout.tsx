@@ -35,11 +35,17 @@ export function CommonPublicLayout({
   return (
     <div className="flex min-h-svh flex-col bg-background">
       {authVariant || sharedHeader ? (
-        <div className="trade-landing ecoya-auth-header" data-auth-variant={authVariant}>
+        <div
+          className="trade-landing ecoya-auth-header"
+          data-auth-variant={authVariant}
+        >
           <LandingHeader
             product={homeHref === "/snap" ? "snap" : "erp"}
             homeHref={homeHref}
             homeLabel="ECOYA 서비스 홈"
+            showLocaleToggle
+            showLoginAction={false}
+            showStartAction={false}
           />
         </div>
       ) : (
@@ -119,7 +125,11 @@ export function CommonPublicLayout({
               </a>
               <a
                 className={linkClass}
-                href={homeHref === "/" ? "/pricing?product=erp" : "/pricing?product=snap"}
+                href={
+                  homeHref === "/"
+                    ? "/pricing?product=erp"
+                    : "/pricing?product=snap"
+                }
               >
                 요금제
               </a>
@@ -204,7 +214,9 @@ export function AccountGuide({ variant }: { variant: AuthLayoutVariant }) {
       aria-label="ECOYA 이용 안내"
       className={cn(
         "relative isolate order-2 flex min-w-0 flex-col overflow-hidden border-t px-6 py-7 text-white lg:order-none lg:border-t-0 lg:border-r lg:px-10 lg:py-16",
-        branded ? "ecoya-account-guide border-[#1c3d61]" : "border-indigo-800 bg-indigo-950"
+        branded
+          ? "ecoya-account-guide border-[#1c3d61]"
+          : "border-indigo-800 bg-indigo-950"
       )}
     >
       {branded && (

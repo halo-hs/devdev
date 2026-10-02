@@ -1,4 +1,5 @@
 import { useCallback, useSyncExternalStore } from "react"
+import { ChevronDown, Languages } from "lucide-react"
 import { en } from "./i18n/en"
 
 export type Locale = "ko" | "en"
@@ -59,26 +60,30 @@ export function useT() {
   )
 }
 
+const localeOptions = [
+  { value: "ko", label: "한국어" },
+  { value: "en", label: "English" },
+] as const
+
 export function LocaleToggle() {
   const locale = useLocale()
+  const selectedOption = localeOptions.find((option) => option.value === locale)
   return (
-    <div className="ecoya-locale-toggle" role="group" aria-label="Language">
-      <button
-        type="button"
-        data-active={locale === "ko"}
-        aria-pressed={locale === "ko"}
-        onClick={() => setLocale("ko")}
+    <label className="ecoya-locale-select">
+      <Languages aria-hidden="true" />
+      <span aria-hidden="true">{selectedOption?.label ?? "한국어"}</span>
+      <select
+        aria-label="언어 선택"
+        value={locale}
+        onChange={(event) => setLocale(event.target.value as Locale)}
       >
-        KO
-      </button>
-      <button
-        type="button"
-        data-active={locale === "en"}
-        aria-pressed={locale === "en"}
-        onClick={() => setLocale("en")}
-      >
-        EN
-      </button>
-    </div>
+        {localeOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <ChevronDown aria-hidden="true" />
+    </label>
   )
 }

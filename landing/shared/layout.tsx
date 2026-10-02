@@ -18,13 +18,15 @@ const pages = [
 export function StartButton({
   label = "시작하기",
   product = "erp",
+  className,
 }: {
   label?: string
   product?: "erp" | "snap"
+  className?: string
 }) {
   const t = useT()
   return (
-    <Button size="lg" asChild>
+    <Button size="lg" asChild className={className}>
       <a href={`/signup?product=${product}`}>
         {t(label)}
         <ArrowRight />
@@ -39,12 +41,16 @@ export function LandingHeader({
   homeHref = "/",
   homeLabel = "ECOYA 홈",
   showLocaleToggle = false,
+  showLoginAction = true,
+  showStartAction = true,
 }: {
   page?: LandingPage
   product?: "erp" | "snap"
   homeHref?: "/" | "/snap"
   homeLabel?: string
   showLocaleToggle?: boolean
+  showLoginAction?: boolean
+  showStartAction?: boolean
 }) {
   const t = useT()
   const suffix = page === "trade" ? "Trade OS" : page === "snap" ? "SNAP" : null
@@ -80,7 +86,16 @@ export function LandingHeader({
         </nav>
         <div className="trade-nav-actions">
           {showLocaleToggle && <LocaleToggle />}
-          <a href={`/login?product=${product}`}>{t("로그인")}</a>
+          {showLoginAction && (
+            <Button
+              variant="outline"
+              size="lg"
+              asChild
+              className="ecoya-nav-login"
+            >
+              <a href={`/login?product=${product}`}>{t("로그인")}</a>
+            </Button>
+          )}
           <a
             className="ecoya-nav-contact"
             href={page === "story" ? "/contact" : `/contact?product=${product}`}
@@ -88,7 +103,9 @@ export function LandingHeader({
           >
             {t("도입 문의")}
           </a>
-          <StartButton product={product} />
+          {showStartAction && (
+            <StartButton product={product} className="ecoya-nav-start" />
+          )}
         </div>
       </header>
     </div>

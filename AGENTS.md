@@ -39,3 +39,16 @@
 - 운영 주소: `https://devdev-e6t.pages.dev`
 - Git 직접 연동: `main` push → `npm run build` → `dist` 배포.
 - GitHub Actions나 별도 배포 토큰은 현재 직접 연동에 필요하지 않습니다. 다른 배포 파이프라인을 임의로 추가하지 않습니다.
+
+## GitHub 변경 제출 규칙
+
+GitHub의 `main`은 보호된 기본 브랜치입니다. 변경 작업은 `main`에 직접 커밋하거나 푸시하지 않고, 항상 새 작업 브랜치에서 진행한 뒤 Pull Request로 제출합니다.
+
+```bash
+git fetch origin
+git switch -c <type>/<short-description> origin/main
+git push -u origin HEAD
+gh pr create --base main
+```
+
+Pull Request가 검토·승인되고 필요한 검사를 통과한 뒤에만 `main`에 병합합니다. `main`에 대한 force push, 보호 규칙 우회, 로컬에서의 직접 배포를 하지 않습니다. 병합된 `main`만 Cloudflare Pages 배포 대상입니다.
