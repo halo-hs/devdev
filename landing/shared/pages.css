@@ -690,7 +690,8 @@
   max-width: none;
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
+  /* The action group has reserved space so translated labels never overlap the centered nav. */
+  grid-template-columns: minmax(0, 1fr) auto minmax(502px, 1fr);
   height: 88px;
   min-height: 88px;
   padding: 0 40px;
@@ -698,6 +699,7 @@
 }
 .trade-landing .trade-nav > .trade-brand {
   justify-self: start;
+  min-width: 0;
 }
 .trade-landing .trade-nav > nav {
   display: flex;
@@ -2248,35 +2250,97 @@
   .ecoya-contact-privacy dl > div { grid-template-columns: 1fr; gap: 4px; }
 }
 
-/* Language toggle (KO / EN) — landing header */
-.ecoya-locale-toggle {
+/* Language selector: reserve one width so adding more locales does not move the actions. */
+.ecoya-locale-select {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 2px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--background) 60%, transparent);
+  gap: 7px;
+  width: 112px;
+  min-width: 112px;
+  height: 44px;
+  padding-inline: 10px 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ecoya-ink);
+  cursor: pointer;
 }
-.ecoya-locale-toggle button {
+.ecoya-locale-select > svg:first-child,
+.ecoya-locale-select > span {
+  pointer-events: none;
+}
+.ecoya-locale-select > svg:first-child {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  color: var(--ecoya-brand);
+}
+.ecoya-locale-select > svg:last-child {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  color: var(--ecoya-brand);
+  pointer-events: none;
+}
+.ecoya-locale-select select {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
   appearance: none;
   border: 0;
+  outline: 0;
   background: transparent;
+  color: inherit;
+  opacity: 0;
   cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1;
-  padding: 5px 9px;
+  padding: 0;
+}
+.ecoya-locale-select:hover {
+  background: transparent;
+  color: var(--ecoya-brand);
+}
+.ecoya-locale-select:focus-within {
+  outline: none;
+}
+
+/* Header actions keep their anchor points when translated labels get longer. */
+.trade-landing .trade-nav-actions > .ecoya-nav-login,
+.trade-landing .trade-nav-actions > .ecoya-nav-contact,
+.trade-landing .trade-nav-actions > .ecoya-nav-start {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+.trade-landing .trade-nav-actions > .ecoya-nav-login {
+  width: 86px;
+  min-width: 86px;
+  border: 1px solid var(--ecoya-button);
   border-radius: 999px;
-  color: var(--muted-foreground);
-  transition: color 0.15s, background 0.15s;
+  background: var(--ecoya-card);
+  color: var(--ecoya-button);
 }
-.ecoya-locale-toggle button:hover {
-  color: var(--foreground);
+.trade-landing .trade-nav-actions > .ecoya-nav-login:hover {
+  background: var(--ecoya-brand-soft) !important;
+  color: var(--ecoya-button-hover) !important;
+  border-color: var(--ecoya-button) !important;
+  box-shadow: none !important;
 }
-.ecoya-locale-toggle button[data-active="true"] {
-  background: var(--primary);
-  color: var(--primary-foreground);
+.trade-landing .trade-nav-actions > .ecoya-nav-login:active {
+  background: color-mix(in srgb, var(--ecoya-button) 14%, var(--ecoya-card)) !important;
+  color: var(--ecoya-button-hover) !important;
+  border-color: var(--ecoya-button-hover) !important;
+  box-shadow: none !important;
+}
+.trade-landing .trade-nav-actions > .ecoya-nav-contact {
+  width: 128px;
+  min-width: 128px;
+}
+.trade-landing .trade-nav-actions > .ecoya-nav-start {
+  width: 128px;
+  min-width: 128px;
 }
