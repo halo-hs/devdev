@@ -8330,7 +8330,11 @@ function RecentDocumentsTable({
 function TemplateStrip({ onResult }: {
   onResult: (mode?: CreateStartMode, templateCode?: string, options?: GeneratedDocumentOpenOptions) => void
 }) {
-  const [selectedCode, setSelectedCode] = useState<string | null>(null)
+  const [direction, setDirection] = useState<"purchase" | "sales">("sales")
+  const [selectedCode, setSelectedCode] = useState<string | null>("QT")
+  const visibleTemplates = templates.filter(([kind]) =>
+    direction === "purchase" ? kind === "PO" : kind !== "PO"
+  )
   const viewportRef = useRef<HTMLDivElement>(null)
   const [scrollState, setScrollState] = useState({ previous: false, next: false })
   useEffect(() => {
@@ -8361,7 +8365,7 @@ function TemplateStrip({ onResult }: {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-semibold">문서 유형 선택</h2>
-          <ToneBadge tone="neutral">{templates.length}개</ToneBadge>
+          <ToneBadge tone="neutral">{visibleTemplates.length}개</ToneBadge>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon-sm" aria-label="이전 문서 유형" disabled={!scrollState.previous} onClick={() => scroll(-1)}><ChevronLeft /></Button>
@@ -8371,8 +8375,22 @@ function TemplateStrip({ onResult }: {
           </Button>
         </div>
       </div>
+      <Tabs
+        value={direction}
+        onValueChange={(value) => {
+          const nextDirection = value as "purchase" | "sales"
+          setDirection(nextDirection)
+          setSelectedCode(nextDirection === "purchase" ? "PO" : "QT")
+        }}
+        className="mb-3"
+      >
+        <TabsList aria-label="문서 거래 방향">
+          <TabsTrigger value="sales">매출</TabsTrigger>
+          <TabsTrigger value="purchase">매입</TabsTrigger>
+        </TabsList>
+      </Tabs>
       <div ref={viewportRef} aria-label="문서 유형 목록" className="flex min-w-0 snap-x snap-proximity gap-3 overflow-x-auto overscroll-x-contain px-0.5 pt-0.5 pb-3">
-        {templates.map(([kind, title, description]) => {
+        {visibleTemplates.map(([kind, title, description]) => {
           const selected = selectedCode === kind
           return (
             <button key={kind} type="button" aria-pressed={selected}
@@ -8380,7 +8398,7 @@ function TemplateStrip({ onResult }: {
               className={cn("flex w-60 shrink-0 snap-start flex-col items-start rounded-lg border bg-card p-4 text-left transition hover:border-primary/60 focus-visible:outline-2 focus-visible:outline-primary", selected && "border-primary bg-primary/5 ring-1 ring-primary")}
             >
               <span className="flex w-full items-center justify-between gap-2"><ToneBadge tone="blue">{kind}</ToneBadge>{selected && <Check className="size-4 text-primary" />}</span>
-              <strong className="mt-2 text-sm">{title} <span className="text-xs font-normal text-muted-foreground">· {kind === "PO" ? "매입" : "매입·매출"}</span></strong>
+              <strong className="mt-2 text-sm">{title} <span className="text-xs font-normal text-muted-foreground">· {direction === "purchase" ? "매입" : "매출"}</span></strong>
               <span className="mt-1.5 text-xs leading-5 text-muted-foreground">{description}</span>
             </button>
           )
