@@ -735,6 +735,26 @@ const templates = [
   ["CN", "대변표", "관련 인보이스, 감액 금액, 통화, 사유", "CN-STD-1"],
 ] as const
 
+// The SSOT's public document type cards mark PO as purchase-only and the
+// remaining 12 types as usable for both purchase and sales flows. Keep that
+// direction metadata beside the source list so the tabs change the actual
+// available templates and their count, rather than only changing a label.
+const templateDirections = {
+  QT: ["purchase", "sales"],
+  PI: ["purchase", "sales"],
+  SC: ["purchase", "sales"],
+  PO: ["purchase"],
+  CI: ["purchase", "sales"],
+  PL: ["purchase", "sales"],
+  SI: ["purchase", "sales"],
+  BC: ["purchase", "sales"],
+  DLV: ["purchase", "sales"],
+  CO: ["purchase", "sales"],
+  SOA: ["purchase", "sales"],
+  DN: ["purchase", "sales"],
+  CN: ["purchase", "sales"],
+} as const
+
 const commonLineItemSlots: PrototypeSlot[] = [
   {
     key: "description",
@@ -8187,8 +8207,16 @@ function TemplateStrip({ onResult }: {
 }) {
   const [direction, setDirection] = useState<"purchase" | "sales">("purchase")
   const [selectedCode, setSelectedCode] = useState<string>(templates[0][0])
+  const visibleTemplates = templates.filter(([kind]) =>
+    templateDirections[kind].some((availableDirection) => availableDirection === direction)
+  )
   const viewportRef = useRef<HTMLDivElement>(null)
   const [scrollState, setScrollState] = useState({ previous: false, next: false })
+  useEffect(() => {
+    if (!visibleTemplates.some(([kind]) => kind === selectedCode)) {
+      setSelectedCode(visibleTemplates[0]?.[0] ?? "")
+    }
+  }, [direction, selectedCode, visibleTemplates])
   useEffect(() => {
     const viewport = viewportRef.current
     if (!viewport) return
@@ -8226,7 +8254,7 @@ function TemplateStrip({ onResult }: {
             </TabsList>
           </Tabs>
           <h2 className="text-base font-semibold">문서 유형 선택</h2>
-          <ToneBadge tone="neutral">{templates.length}개</ToneBadge>
+          <ToneBadge tone="neutral">{visibleTemplates.length}개</ToneBadge>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon-sm" aria-label="이전 문서 유형" disabled={!scrollState.previous} onClick={() => scroll(-1)}><ChevronLeft /></Button>
@@ -8237,7 +8265,7 @@ function TemplateStrip({ onResult }: {
         </div>
       </div>
       <div ref={viewportRef} aria-label="문서 유형 목록" className="flex min-w-0 snap-x snap-proximity gap-3 overflow-x-auto overscroll-x-contain px-0.5 pt-0.5 pb-3">
-        {templates.map(([kind, title, description]) => {
+        {visibleTemplates.map(([kind, title, description]) => {
           const selected = selectedCode === kind
           return (
             <button key={kind} type="button" aria-pressed={selected}
