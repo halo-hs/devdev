@@ -1382,7 +1382,7 @@ type GeneratedDraft = {
   type: string
   number: string
   party: string
-  status: "작성 중" | "승인 대기" | "승인 완료" | "반려" | "확정" | "발송됨"
+  status: "작성 중" | "승인 대기" | "승인 완료" | "반려" | "확정" | "전달 요청됨"
   tone: Tone
   readiness: string
   tab: "draft" | "confirmed" | "progress" | "sharing" | "done"
@@ -1525,10 +1525,10 @@ const generatedDrafts: GeneratedDraft[] = [
     type: "정산서",
     number: "SOA-2026-0629",
     party: "한빛무역",
-    status: "발송됨",
+    status: "확정",
     tone: "success",
-    readiness: "이메일 전달 완료",
-    tab: "done",
+    readiness: "이메일 요청 기록 · 전달 미확인",
+    tab: "sharing",
     creatorName: "김도현",
     creatorAccountId: "account-member",
     updated: "08.26 14:32",
@@ -7685,7 +7685,7 @@ const generatedDraftReuseFacts: Record<string, string[]> = {
   "CI-2026-0703": ["품목 Aluminium Scrap", "수량 20 MT", "통화 USD"],
   "CI-2026-0704": ["공유 링크 활성", "이메일 전달 전", "거래 연결됨"],
   "QT-2026-0630": ["운임 Hamburg", "선사 HMM", "ETA 08.03"],
-  "SOA-2026-0629": ["정산 6월", "미수금 없음", "고객 전달 완료"],
+  "SOA-2026-0629": ["정산 6월", "미수금 없음", "고객 전달 요청"],
 }
 
 type DealDocumentContext = {
@@ -10506,6 +10506,7 @@ function ShareDeliveryPanel({
   const activeMagicLinkCount = magicLinks.filter(
     (link) => link.status === "active"
   ).length
+  const linkSlotOccupied = magicLinks.some((link) => link.status !== "revoked")
   const activeLinks = magicLinks.filter((link) => link.status === "active")
   const emailLink = activeLinks.at(-1)
   const handleCopyLink = (link: DeliveryLink) => {
@@ -10634,7 +10635,8 @@ function ShareDeliveryPanel({
                 <div className="grid gap-2">
                   {magicLinks.map((link, index) => {
                     const linkUrl = `https://ecoya.app/share/${templateCode.toLowerCase()}-2026-0708-${link.id}`
-                    const linkActive = link.status === "active"
+                    const linkUsable = link.status === "active"
+                    const linkRevocable = link.status !== "revoked"
                     const linkStatus =
                       link.status === "active"
                         ? "활성"
@@ -10642,7 +10644,7 @@ function ShareDeliveryPanel({
                           ? "철회됨"
                           : link.status === "expired"
                             ? "만료"
-                            : "열람 초과"
+                            : "한도 도달"
                     return (
                       <div
                         key={link.id}
@@ -10654,7 +10656,7 @@ function ShareDeliveryPanel({
                           </span>
                           <ToneBadge
                             tone={
-                              linkActive
+                              linkUsable
                                 ? "success"
                                 : link.status === "revoked"
                                   ? "neutral"
@@ -10675,7 +10677,7 @@ function ShareDeliveryPanel({
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={!linkActive}
+                            disabled={!linkUsable}
                             onClick={() => handleCopyLink(link)}
                           >
                             {copiedLinkId === link.id ? (
@@ -10691,7 +10693,7 @@ function ShareDeliveryPanel({
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={!linkActive}
+                            disabled={!linkUsable}
                             onClick={() =>
                               window.open(
                                 linkUrl,
@@ -10705,7 +10707,7 @@ function ShareDeliveryPanel({
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={!linkActive}
+                            disabled={!linkRevocable}
                             onClick={() => onRevokeMagicLink(link.id)}
                           >
                             철회
@@ -10718,7 +10720,11 @@ function ShareDeliveryPanel({
               ) : null}
               {activeMagicLinkCount === 0 ? (
                 <div className={cn("space-y-3", magicLinks.length > 0 && "mt-3")}>
-                  <p className="text-xs text-muted-foreground">링크를 만들어 고객에게 전달하세요.</p>
+                  <p className="text-xs text-muted-foreground">
+                    {linkSlotOccupied
+                      ? "기존 공유 링크를 철회해야 새 링크를 만들 수 있습니다."
+                      : "링크를 만들어 고객에게 전달하세요."}
+                  </p>
                   <details className="group rounded-md bg-muted/30 px-3 py-2">
                     <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 text-xs [&::-webkit-details-marker]:hidden">
                       <span>링크 설정 · {expires.replaceAll("-", ".")} 만료 · 최대 {maxOpens}회</span>
@@ -10735,20 +10741,20 @@ function ShareDeliveryPanel({
                       </label>
                     </div>
                   </details>
-                  <Button className="w-full" disabled={!relatedDeal || !linkSettingsValid} onClick={() => onCreateMagicLink({ expires: expires.replaceAll("-", "."), maxOpens: Number(maxOpens) })}>
+                  <Button className="w-full" disabled={!relatedDeal || !linkSettingsValid || linkSlotOccupied} onClick={() => onCreateMagicLink({ expires: expires.replaceAll("-", "."), maxOpens: Number(maxOpens) })}>
                     <Link2 data-icon="inline-start" /> 공유 링크 만들기
                   </Button>
                 </div>
               ) : null}
             </div>
 
-            <details className="group border-t pt-4">
+            {emailLink ? <details className="group border-t pt-4">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-1 [&::-webkit-details-marker]:hidden">
                 <span className="inline-flex items-center gap-2 text-sm font-semibold"><Mail className="size-4" /> 이메일로도 보내기 <span className="text-xs font-normal text-muted-foreground">선택</span></span>
                 <ChevronDown className="size-4 group-open:rotate-180" />
               </summary>
               <div className="pt-3">
-              <div className="grid gap-2">
+                <div className="grid gap-2">
                 <FormField label="받는 사람" htmlFor="share-email-recipient">
                   <Input id="share-email-recipient" type="email" className="h-10 bg-background" value={recipient} onChange={(event) => setRecipient(event.target.value)} />
                 </FormField>
@@ -10758,49 +10764,52 @@ function ShareDeliveryPanel({
                 <FormField label="이메일 내용" htmlFor="share-email-body">
                   <Textarea id="share-email-body" aria-label="이메일 내용" className="min-h-28 resize-none bg-background text-xs leading-5" value={textBody} onChange={(event) => setTextBody(event.target.value)} />
                 </FormField>
-              </div>
-              <div className="mt-3 rounded-md border bg-background p-3 text-xs">
-                <div className="font-medium">이메일에 포함될 공유 링크</div>
-                <div className="mt-2 text-muted-foreground">
-                  {emailLink
-                    ? `https://ecoya.app/share/${templateCode.toLowerCase()}-2026-0708-${emailLink.id}`
-                    : "먼저 공유 링크를 생성해야 이메일을 보낼 수 있습니다."}
                 </div>
+                <div className="mt-3 rounded-md border bg-background p-3 text-xs">
+                  <div className="font-medium">이메일에 포함될 공유 링크</div>
+                  <div className="mt-2 text-muted-foreground">
+                    {`https://ecoya.app/share/${templateCode.toLowerCase()}-2026-0708-${emailLink.id}`}
+                  </div>
+                </div>
+                <Button
+                  className="mt-3 w-full"
+                  disabled={
+                    !recipient.trim() ||
+                    !subject.trim() ||
+                    isSending
+                  }
+                  onClick={async () => {
+                    setIsSending(true)
+                    const sent = await onSendEmail({
+                      linkCount: 1,
+                      recipient,
+                      subject,
+                      textBody,
+                      shareLinkId: String(emailLink.id),
+                    })
+                    setIsSending(false)
+                    if (sent) setDeliveryMode("history")
+                  }}
+                >
+                  {isSending ? (
+                    <LoaderCircle
+                      className="animate-spin"
+                      data-icon="inline-start"
+                    />
+                  ) : (
+                    <Mail data-icon="inline-start" />
+                  )}
+                  {isSending ? "보내는 중" : "이메일 보내기"}
+                </Button>
               </div>
-              <Button
-                className="mt-3 w-full"
-                disabled={
-                  !emailLink ||
-                  !recipient.trim() ||
-                  !subject.trim() ||
-                  isSending
-                }
-                onClick={async () => {
-                  if (!emailLink) return
-                  setIsSending(true)
-                  const sent = await onSendEmail({
-                    linkCount: 1,
-                    recipient,
-                    subject,
-                    textBody,
-                    shareLinkId: String(emailLink.id),
-                  })
-                  setIsSending(false)
-                  if (sent) setDeliveryMode("history")
-                }}
-              >
-                {isSending ? (
-                  <LoaderCircle
-                    className="animate-spin"
-                    data-icon="inline-start"
-                  />
-                ) : (
-                  <Mail data-icon="inline-start" />
-                )}
-                {isSending ? "요청 중" : "발송 요청 기록"}
-              </Button>
+            </details> : (
+              <div className="border-t pt-4">
+                <div className="inline-flex items-center gap-2 text-sm font-semibold">
+                  <Mail className="size-4" /> 이메일로도 보내기 <span className="text-xs font-normal text-muted-foreground">선택</span>
+                </div>
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">공유 링크를 먼저 만든 뒤 이메일로 보낼 수 있습니다.</p>
               </div>
-            </details>
+            )}
           </div>
         ) : (
           <div className="grid gap-3">
@@ -10808,14 +10817,16 @@ function ShareDeliveryPanel({
               ...magicLinks.map((link) => ({
                 id: `link-${link.id}`,
                 title: `공유 링크 ${link.id}`,
-                meta: `${link.status === "active" ? "활성" : "철회됨"} · ${link.expires} 만료`,
-                tone: link.status === "active" ? "success" : "neutral",
+                meta: `${link.status === "active" ? "활성" : link.status === "revoked" ? "철회됨" : link.status === "expired" ? "만료" : "한도 도달"} · ${link.expires} 만료`,
+                tone: link.status === "active" ? "success" : link.status === "revoked" ? "neutral" : "warning",
+                badge: link.status === "active" ? "생성됨" : "기록",
               })),
               ...emailRecords.map((email) => ({
                 id: `email-${email.id}`,
                 title: `이메일 발송 요청 · ${email.recipient}`,
                 meta: `요청 시각 ${email.sentAt} · 공유 링크 ${email.linkCount}개 포함 · 실제 발송·수신 미확인`,
                 tone: "blue",
+                badge: "요청됨",
               })),
             ].map((item) => (
               <div
@@ -10827,7 +10838,7 @@ function ShareDeliveryPanel({
                     {item.title}
                   </div>
                   <ToneBadge tone={item.tone as Tone}>
-                    {item.tone === "success" ? "완료" : "기록"}
+                    {item.badge}
                   </ToneBadge>
                 </div>
                 <div className="mt-2 text-xs text-muted-foreground">
@@ -10894,7 +10905,7 @@ function CustomerPreviewDialog({
               options={[
                 ["active", "활성 링크"],
                 ["expired", "만료"],
-                ["maxed", "열람 초과"],
+                ["maxed", "한도 도달"],
                 ["revoked", "철회"],
                 ["missing", "찾을 수 없음"],
               ]}
@@ -12755,6 +12766,7 @@ function buildDocumentReviewRows({
   templateCode,
   documentNumber = `${templateCode}-2026-0708`,
   activeLinkCount = 0,
+  linkSlotOccupied = false,
   deliveryRecordCount = 0,
   interactive = true,
   approvalEnabled = false,
@@ -12781,6 +12793,7 @@ function buildDocumentReviewRows({
   templateCode: string
   documentNumber?: string
   activeLinkCount?: number
+  linkSlotOccupied?: boolean
   deliveryRecordCount?: number
   interactive?: boolean
   approvalEnabled?: boolean
@@ -12963,6 +12976,8 @@ function buildDocumentReviewRows({
       value:
         activeLinkCount > 0
           ? `활성 링크 ${activeLinkCount}개`
+          : linkSlotOccupied
+            ? "기존 링크 철회 후 새 링크 가능"
           : !deliveryAllowed
             ? "고객 전달 권한 필요"
             : documentConfirmed
@@ -12971,6 +12986,8 @@ function buildDocumentReviewRows({
       state:
         activeLinkCount > 0
           ? "complete"
+          : linkSlotOccupied
+            ? "pending"
           : documentConfirmed && deliveryAllowed
             ? "pending"
             : "blocked",
@@ -12979,7 +12996,7 @@ function buildDocumentReviewRows({
       label: "전달·공유",
       value:
         deliveryRecordCount > 0
-          ? `전달 완료 ${deliveryRecordCount}건`
+          ? `전달 요청 ${deliveryRecordCount}건`
           : !deliveryAllowed
             ? "고객 전달 권한 필요"
             : activeLinkCount > 0
@@ -12987,7 +13004,7 @@ function buildDocumentReviewRows({
               : "공유 링크 생성 후 가능",
       state:
         deliveryRecordCount > 0
-          ? "complete"
+          ? "pending"
           : activeLinkCount > 0
             ? "pending"
             : "blocked",
@@ -14513,7 +14530,7 @@ function DocumentConfirmedSummaryPanel({
   documentStyle,
   activeLinkCount,
   deliveryRecordCount,
-  deliveryCompleted,
+  deliveryRequested,
   activeLink,
   latestEmail,
   relatedDeal,
@@ -14531,7 +14548,7 @@ function DocumentConfirmedSummaryPanel({
   documentStyle: DocumentStyle
   activeLinkCount: number
   deliveryRecordCount: number
-  deliveryCompleted: boolean
+  deliveryRequested: boolean
   activeLink: DeliveryLink | null
   latestEmail: EmailRecord | null
   relatedDeal: DealDocumentContext | null
@@ -14546,7 +14563,16 @@ function DocumentConfirmedSummaryPanel({
   const lastDecisionEvent = approvalEvents.findLast(
     (event) => event.type === "approve" || event.type === "reject"
   )
-  const linkCreated = activeLinkCount > 0 && !deliveryCompleted
+  const linkCreated = Boolean(activeLink)
+  const linkStatusLabel = !activeLink
+    ? "미생성"
+    : activeLink.status === "active"
+      ? "활성"
+      : activeLink.status === "expired"
+        ? "만료"
+        : activeLink.status === "maxed"
+          ? "한도 도달"
+          : "철회"
   const completedReviewRows = buildDocumentReviewRows({
     missingRequiredCount: 0,
     documentStyle,
@@ -14565,6 +14591,7 @@ function DocumentConfirmedSummaryPanel({
     templateCode,
     documentNumber,
     activeLinkCount,
+    linkSlotOccupied: Boolean(activeLink),
     deliveryRecordCount,
     interactive: false,
     deliveryAllowed,
@@ -14592,25 +14619,25 @@ function DocumentConfirmedSummaryPanel({
       <div className="flex min-h-16 shrink-0 items-center justify-between gap-3 border-b border-[var(--surface-border)] px-4 py-2.5 sm:px-5">
         <div className="min-w-0">
           <div className="text-[11px] font-medium text-[var(--surface-muted-foreground)]">
-            {deliveryCompleted
-              ? "공유 완료"
+            {deliveryRequested
+              ? "전달 요청됨"
               : linkCreated
                 ? "공유 준비"
                 : "문서 완료"}
           </div>
           <div className="mt-1 flex items-center gap-2">
             <h2 className="truncate text-sm font-semibold">
-              {deliveryCompleted
-                ? "전달 및 공유 완료"
+              {deliveryRequested
+                ? "전달 요청 기록됨"
                 : linkCreated
                   ? "공유 링크 생성됨"
                   : deliveryAllowed
                     ? "확정 및 전달 준비"
                     : "확정 문서"}
             </h2>
-            <ToneBadge tone="success">
-              {deliveryCompleted
-                ? "공유됨"
+            <ToneBadge tone={deliveryRequested ? "blue" : "success"}>
+              {deliveryRequested
+                ? "요청됨"
                 : linkCreated
                   ? "전달 전"
                   : "확정됨"}
@@ -14627,15 +14654,15 @@ function DocumentConfirmedSummaryPanel({
               </span>
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold">
-                  {deliveryCompleted
-                    ? "문서 공유가 완료되었습니다"
+                  {deliveryRequested
+                    ? "이메일 보내기 요청이 기록되었습니다"
                     : linkCreated
                       ? "공유 링크가 생성되었습니다"
                       : "문서가 확정되었습니다"}
                 </div>
                 <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                  {deliveryCompleted
-                    ? "공유 링크와 이메일 전달 내역을 확인하거나 추가로 공유할 수 있습니다."
+                  {deliveryRequested
+                    ? "제공자 전달 근거가 확인되기 전까지 전달 완료로 표시하지 않습니다. 전달 내역에서 요청 상태를 확인할 수 있습니다."
                     : linkCreated
                       ? "링크 생성은 완료됐지만 아직 전달 전입니다. 공유 관리에서 이메일로 보내거나 링크를 전달하세요."
                       : deliveryAllowed
@@ -14651,7 +14678,7 @@ function DocumentConfirmedSummaryPanel({
                   onClick={onOpenShare}
                 >
                   <Send data-icon="inline-start" />
-                  {deliveryCompleted ? "공유 관리" : "공유하기"}
+                  {deliveryRequested || linkCreated ? "공유 관리" : "공유하기"}
                 </Button>
               ) : null}
             </div>
@@ -14671,13 +14698,15 @@ function DocumentConfirmedSummaryPanel({
               <div className="min-w-0 px-3 py-3 sm:border-r">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium">공유 링크</span>
-                  <ToneBadge tone={activeLink ? "success" : "neutral"}>
-                    {activeLink ? "활성" : "미생성"}
+                  <ToneBadge tone={activeLink?.status === "active" ? "success" : activeLink ? "warning" : "neutral"}>
+                    {linkStatusLabel}
                   </ToneBadge>
                 </div>
                 <div className="mt-2 truncate text-[11px] text-muted-foreground">
                   {activeLink
-                    ? `${activeLink.expires} 만료 · ${activeLink.opens}/${activeLink.maxOpens}회 열람`
+                    ? activeLink.status === "active"
+                      ? `${activeLink.expires} 만료 · ${activeLink.opens}/${activeLink.maxOpens}회 열람`
+                      : `기존 링크를 철회해야 새 링크를 만들 수 있습니다. (${activeLink.expires} 만료)`
                     : deliveryAllowed
                       ? "문서당 링크 1개를 만들 수 있습니다."
                       : "고객 전달 권한이 있는 구성원이 링크를 만들 수 있습니다."}
@@ -14686,13 +14715,13 @@ function DocumentConfirmedSummaryPanel({
               <div className="min-w-0 border-t px-3 py-3 sm:border-t-0">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium">최근 전달</span>
-                  <ToneBadge tone={latestEmail ? "success" : "neutral"}>
-                    {latestEmail ? "완료" : "전달 전"}
+                  <ToneBadge tone={latestEmail ? "blue" : "neutral"}>
+                    {latestEmail ? "요청됨" : "전달 전"}
                   </ToneBadge>
                 </div>
                 <div className="mt-2 truncate text-[11px] text-muted-foreground">
                   {latestEmail
-                    ? `${latestEmail.recipient} · ${latestEmail.sentAt}`
+                    ? `${latestEmail.recipient} · ${latestEmail.sentAt} · 제공자 전달 미확인`
                     : deliveryAllowed
                       ? "링크를 전달하거나 이메일을 보내면 기록됩니다."
                       : "전달 이력이 없습니다."}
@@ -14705,8 +14734,8 @@ function DocumentConfirmedSummaryPanel({
             <div className="flex items-center justify-between gap-3">
               <div className="text-sm font-semibold">문서 진행 상태</div>
               <ToneBadge tone="success">
-                {deliveryCompleted
-                  ? "공유 완료"
+                {deliveryRequested
+                  ? "전달 요청됨"
                   : linkCreated
                     ? "링크 생성됨"
                     : "문서 확정"}
@@ -15214,8 +15243,8 @@ function ResultScreen({
   }
   const createMagicLink = (settings?: { expires: string; maxOpens: number }) => {
     if (!deliveryAllowed) return
-    if (magicLinks.some((link) => link.status === "active")) {
-      toast.info("이 문서에는 이미 활성 공유 링크가 있습니다.")
+    if (magicLinks.some((link) => link.status !== "revoked")) {
+      toast.info("기존 공유 링크를 철회한 뒤 새 링크를 만들 수 있습니다.")
       return
     }
     setMagicLinks((links) => [
@@ -15447,8 +15476,8 @@ function ResultScreen({
         magicLinks.filter((link) => link.status === "active").length
       }
       deliveryRecordCount={emailRecords.length}
-      deliveryCompleted={emailRecords.length > 0}
-      activeLink={magicLinks.find((link) => link.status === "active") ?? null}
+      deliveryRequested={emailRecords.length > 0}
+      activeLink={magicLinks.find((link) => link.status !== "revoked") ?? null}
       latestEmail={emailRecords.at(0) ?? null}
       relatedDeal={selectedDeal}
       dealConnectionRestricted={dealConnectionRestricted}
@@ -15951,10 +15980,7 @@ export function App() {
   const [readNotificationIds, setReadNotificationIds] = useState<Set<number>>(
     new Set()
   )
-  const [openDeliveryOnResult, setOpenDeliveryOnResult] = useState(
-    initialGeneratedDocument?.tab === "sharing" ||
-      initialGeneratedDocument?.tab === "done"
-  )
+  const [openDeliveryOnResult, setOpenDeliveryOnResult] = useState(false)
   const [openConfirmedOnResult, setOpenConfirmedOnResult] = useState(
     Boolean(
       initialGeneratedDocument &&
@@ -16079,10 +16105,7 @@ export function App() {
         )
         setResultDocumentNumber(documentNumber)
         setSelectedTemplateCode(documentNumber.split("-")[0] ?? "SC")
-        setOpenDeliveryOnResult(
-          generatedDocument?.tab === "sharing" ||
-            generatedDocument?.tab === "done"
-        )
+        setOpenDeliveryOnResult(false)
         setOpenConfirmedOnResult(
           Boolean(
             generatedDocument &&
