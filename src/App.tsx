@@ -10524,9 +10524,9 @@ function ShareDeliveryPanel({
   const linkSlotOccupied = magicLinks.some((link) => link.status !== "revoked")
   const activeLinks = magicLinks.filter((link) => link.status === "active")
   const emailLink = activeLinks.at(-1)
-  const deliveryHistorySummary = emailRecords.some((record) => record.status === "failed")
+  const deliveryHistorySummary = emailRecords.at(0)?.status === "failed"
     ? "전달 실패"
-    : emailRecords.some((record) => record.status === "delivered")
+    : emailRecords.at(0)?.status === "delivered"
       ? "전달 완료"
       : "전달 전"
   const formatLinkStatus = (status: DeliveryLink["status"]) =>
@@ -10537,9 +10537,10 @@ function ShareDeliveryPanel({
         : status === "expired"
           ? "만료"
           : "한도 도달"
+  const currentLink = magicLinks.find((link) => link.status !== "revoked") ?? magicLinks.at(-1)
   const statusLabel = (status: EmailRecord["status"] = "requested") =>
     status === "queued"
-      ? "전송 중"
+      ? "전송 요청됨"
       : status === "sending"
         ? "전송 중"
         : status === "accepted"
@@ -10552,12 +10553,7 @@ function ShareDeliveryPanel({
                 ? "취소됨"
                 : "전송 요청됨"
   const attachmentKind = (attachment: DeliveryAttachment) =>
-    attachment.kind ??
-    (attachment.name.toLowerCase().includes("packing") || attachment.name.includes("포장")
-      ? "포장명세서"
-      : attachment.name.toLowerCase().includes("invoice") || attachment.name.includes("인보이스")
-        ? "인보이스"
-        : "기타 첨부")
+    attachment.kind ?? "기타 첨부"
   const attachmentMeta = (attachment: DeliveryAttachment) => {
     const bytes = attachment.sizeBytes ?? attachment.file?.size
     return bytes
@@ -10569,7 +10565,7 @@ function ShareDeliveryPanel({
     0
   )
   const handleCopyLink = (link: DeliveryLink) => {
-    const url = `/share/${documentNumber.toLowerCase()}-${link.id}`
+    const url = `https://ecoya.app/share/${documentNumber.toLowerCase()}-${link.id}`
     void navigator.clipboard?.writeText(url)
     setCopiedLinkId(link.id)
     window.setTimeout(() => setCopiedLinkId(null), 1200)
@@ -10685,15 +10681,15 @@ function ShareDeliveryPanel({
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-sm font-semibold">공유 링크</h3>
-                  <ToneBadge tone={activeMagicLinkCount > 0 ? "success" : "warning"}>
-                    {activeMagicLinkCount > 0 ? `${activeMagicLinkCount}개 활성` : "미생성"}
+                  <ToneBadge tone={!currentLink ? "neutral" : currentLink.status === "active" ? "success" : currentLink.status === "revoked" ? "danger" : "warning"}>
+                    {currentLink ? formatLinkStatus(currentLink.status) : "미생성"}
                   </ToneBadge>
                 </div>
               </div>
               {magicLinks.length > 0 ? (
                 <div className="grid gap-2">
                   {magicLinks.map((link, index) => {
-                    const linkUrl = `/share/${documentNumber.toLowerCase()}-${link.id}`
+                    const linkUrl = `https://ecoya.app/share/${documentNumber.toLowerCase()}-${link.id}`
                     const linkUsable = link.status === "active"
                     const linkRevocable = link.status !== "revoked"
                     const linkStatus = formatLinkStatus(link.status)
@@ -10818,7 +10814,7 @@ function ShareDeliveryPanel({
                 <div className="mt-3 rounded-md border bg-background p-3 text-xs">
                   <div className="font-medium">이메일에 포함될 공유 링크</div>
                   <div className="mt-2 text-muted-foreground">
-                    {`/share/${documentNumber.toLowerCase()}-${emailLink.id}`}
+                    {`https://ecoya.app/share/${documentNumber.toLowerCase()}-${emailLink.id}`}
                   </div>
                 </div>
                 <Button
@@ -10880,7 +10876,7 @@ function ShareDeliveryPanel({
                 title: `공유 링크 ${link.id}`,
                 meta: `${formatLinkStatus(link.status)} · ${link.expires} 만료${link.revokeReason ? ` · 사유: ${link.revokeReason}` : ""}`,
                 tone: link.status === "active" ? "success" : link.status === "revoked" ? "neutral" : "warning",
-                badge: link.status === "active" ? "활성" : "기록",
+                badge: formatLinkStatus(link.status),
                 email: undefined,
               })),
               ...emailRecords.map((email) => ({
@@ -10909,8 +10905,8 @@ function ShareDeliveryPanel({
                 </div>
                 {item.email ? (
                   <div className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
-                    <span className="text-[11px] text-muted-foreground">시도 {item.email.attempts ?? 1}회 · 요청 기록 보존</span>
-                    {item.email.status === "requested" || item.email.status === "queued" || item.email.status === "sending" ? (
+                    <span className="text-[11px] text-muted-foreground">시도 {item.email.attempts ?? 1}회</span>
+                    {item.email.status === "requested" || item.email.status === "queued" ? (
                       <Button variant="outline" size="xs" onClick={() => onCancelEmail?.(item.email!.id)}>
                         요청 취소
                       </Button>
@@ -14712,7 +14708,7 @@ function DocumentConfirmedSummaryPanel({
     templateCode,
     documentNumber,
     activeLinkCount,
-    linkSlotOccupied: Boolean(activeLink),
+    linkSlotOccupied: Boolean(activeLink && activeLink.status !== "revoked"),
     deliveryRecordCount,
     interactive: false,
     deliveryAllowed,
@@ -14786,15 +14782,13 @@ function DocumentConfirmedSummaryPanel({
               <div className="min-w-0 px-3 py-3 sm:border-r">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium">공유 링크</span>
-                  <ToneBadge tone={activeLink?.status === "active" ? "success" : activeLink ? "warning" : "neutral"}>
+                  <ToneBadge tone={!activeLink ? "neutral" : activeLink.status === "active" ? "success" : activeLink.status === "revoked" ? "danger" : "warning"}>
                     {linkStatusLabel}
                   </ToneBadge>
                 </div>
                 <div className="mt-2 truncate text-[11px] text-muted-foreground">
                   {activeLink
-                    ? activeLink.status === "active"
-                      ? `${activeLink.expires} 만료 · ${activeLink.opens}/${activeLink.maxOpens}회 열람`
-                      : `기존 링크를 철회해야 새 링크를 만들 수 있습니다. (${activeLink.expires} 만료)`
+                    ? `${activeLink.expires} 만료 · ${activeLink.opens}/${activeLink.maxOpens}회 열람`
                     : ""}
                 </div>
               </div>
@@ -15578,7 +15572,7 @@ function ResultScreen({
         magicLinks.filter((link) => link.status === "active").length
       }
       deliveryRecordCount={emailRecords.length}
-      activeLink={magicLinks.find((link) => link.status !== "revoked") ?? null}
+      activeLink={magicLinks.find((link) => link.status !== "revoked") ?? magicLinks.at(-1) ?? null}
       latestEmail={emailRecords.at(0) ?? null}
       relatedDeal={selectedDeal}
       dealConnectionRestricted={dealConnectionRestricted}
