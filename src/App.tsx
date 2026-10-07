@@ -8185,7 +8185,8 @@ function RecentDocumentsTable({
 function TemplateStrip({ onResult }: {
   onResult: (mode?: CreateStartMode, templateCode?: string, options?: GeneratedDocumentOpenOptions) => void
 }) {
-  const [selectedCode, setSelectedCode] = useState<string | null>(null)
+  const [direction, setDirection] = useState<"purchase" | "sales">("purchase")
+  const [selectedCode, setSelectedCode] = useState<string>(templates[0][0])
   const viewportRef = useRef<HTMLDivElement>(null)
   const [scrollState, setScrollState] = useState({ previous: false, next: false })
   useEffect(() => {
@@ -8219,9 +8220,18 @@ function TemplateStrip({ onResult }: {
           <ToneBadge tone="neutral">{templates.length}개</ToneBadge>
         </div>
         <div className="flex items-center gap-2">
+          <Tabs
+            value={direction}
+            onValueChange={(value) => setDirection(value as "purchase" | "sales")}
+          >
+            <TabsList aria-label="거래 방향">
+              <TabsTrigger value="purchase">매입</TabsTrigger>
+              <TabsTrigger value="sales">매출</TabsTrigger>
+            </TabsList>
+          </Tabs>
           <Button variant="outline" size="icon-sm" aria-label="이전 문서 유형" disabled={!scrollState.previous} onClick={() => scroll(-1)}><ChevronLeft /></Button>
           <Button variant="outline" size="icon-sm" aria-label="다음 문서 유형" disabled={!scrollState.next} onClick={() => scroll(1)}><ChevronRight /></Button>
-          <Button size="sm" disabled={!selectedCode} onClick={() => selectedCode && onResult("template", selectedCode)}>
+          <Button size="sm" onClick={() => onResult("template", selectedCode)}>
             <FilePlus2 data-icon="inline-start" />문서 만들기
           </Button>
         </div>
