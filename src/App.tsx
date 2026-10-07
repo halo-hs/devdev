@@ -8216,10 +8216,6 @@ function TemplateStrip({ onResult }: {
     <section aria-label="문서 폼 선택" className="min-w-0">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <h2 className="text-base font-semibold">문서 유형 선택</h2>
-          <ToneBadge tone="neutral">{templates.length}개</ToneBadge>
-        </div>
-        <div className="flex items-center gap-2">
           <Tabs
             value={direction}
             onValueChange={(value) => setDirection(value as "purchase" | "sales")}
@@ -8229,6 +8225,10 @@ function TemplateStrip({ onResult }: {
               <TabsTrigger value="sales">매출</TabsTrigger>
             </TabsList>
           </Tabs>
+          <h2 className="text-base font-semibold">문서 유형 선택</h2>
+          <ToneBadge tone="neutral">{templates.length}개</ToneBadge>
+        </div>
+        <div className="flex items-center gap-2">
           <Button variant="outline" size="icon-sm" aria-label="이전 문서 유형" disabled={!scrollState.previous} onClick={() => scroll(-1)}><ChevronLeft /></Button>
           <Button variant="outline" size="icon-sm" aria-label="다음 문서 유형" disabled={!scrollState.next} onClick={() => scroll(1)}><ChevronRight /></Button>
           <Button size="sm" onClick={() => onResult("template", selectedCode)}>
