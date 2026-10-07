@@ -614,6 +614,7 @@ type EmailRecord = {
   id: number
   recipient: string
   subject: string
+  textBody?: string
   sentAt: string
   linkCount: number
   status?: "requested" | "queued" | "sending" | "accepted" | "delivered" | "failed" | "cancelled"
@@ -10525,31 +10526,31 @@ function ShareDeliveryPanel({
   const emailLink = activeLinks.at(-1)
   const deliveryHistorySummary = emailRecords.some((record) => record.status === "failed")
     ? "전달 실패"
-    : emailRecords.some((record) => ["accepted", "delivered"].includes(record.status ?? "requested"))
+    : emailRecords.some((record) => record.status === "delivered")
       ? "전달 완료"
       : "전달 전"
   const formatLinkStatus = (status: DeliveryLink["status"]) =>
     status === "active"
       ? "활성"
       : status === "revoked"
-        ? "철회됨"
+        ? "철회"
         : status === "expired"
           ? "만료"
           : "한도 도달"
   const statusLabel = (status: EmailRecord["status"] = "requested") =>
     status === "queued"
-      ? "대기열"
+      ? "전송 중"
       : status === "sending"
         ? "전송 중"
         : status === "accepted"
-          ? "제공자 접수"
+          ? "발송됨"
           : status === "delivered"
             ? "전달됨"
             : status === "failed"
-              ? "실패"
+              ? "전송 실패"
               : status === "cancelled"
                 ? "취소됨"
-                : "요청됨"
+                : "전송 요청됨"
   const attachmentKind = (attachment: DeliveryAttachment) =>
     attachment.kind ??
     (attachment.name.toLowerCase().includes("packing") || attachment.name.includes("포장")
@@ -10557,16 +10558,18 @@ function ShareDeliveryPanel({
       : attachment.name.toLowerCase().includes("invoice") || attachment.name.includes("인보이스")
         ? "인보이스"
         : "기타 첨부")
-  const attachmentSize = (attachment: DeliveryAttachment) => {
+  const attachmentMeta = (attachment: DeliveryAttachment) => {
     const bytes = attachment.sizeBytes ?? attachment.file?.size
-    return bytes ? `${(bytes / (1024 * 1024)).toFixed(1)} MiB` : "크기 확인 중"
+    return bytes
+      ? `${attachment.source} · ${(bytes / (1024 * 1024)).toFixed(1)} MiB`
+      : attachment.source
   }
   const attachmentTotalBytes = attachments.reduce(
     (total, attachment) => total + (attachment.sizeBytes ?? attachment.file?.size ?? 0),
     0
   )
   const handleCopyLink = (link: DeliveryLink) => {
-    const url = `https://ecoya.app/share/${documentNumber.toLowerCase()}-${link.id}`
+    const url = `/share/${documentNumber.toLowerCase()}-${link.id}`
     void navigator.clipboard?.writeText(url)
     setCopiedLinkId(link.id)
     window.setTimeout(() => setCopiedLinkId(null), 1200)
@@ -10577,9 +10580,6 @@ function ShareDeliveryPanel({
         <div className="flex min-w-0 items-start gap-3">
           <div className="min-w-0">
             <div className="text-sm font-semibold">파일 공유하기</div>
-            <div className="mt-1 text-xs leading-5 text-muted-foreground">
-              확정한 PDF와 동봉 파일을 묶어 링크 또는 이메일로 공유합니다.
-            </div>
           </div>
         </div>
         <Button variant="ghost" size="sm" className="shrink-0" onClick={onClose}>
@@ -10619,7 +10619,7 @@ function ShareDeliveryPanel({
                   첨부 {attachments.length}/10개 · {(attachmentTotalBytes / (1024 * 1024)).toFixed(1)}/50.0 MiB
                 </span>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => window.print()}><Download data-icon="inline-start" /> 전체 패키지 다운로드</Button>
+                  <Button variant="outline" size="sm" onClick={() => window.print()}><Download data-icon="inline-start" /> 패키지 내려받기</Button>
                 </div>
               </div>
               <div className="overflow-hidden rounded-xl border bg-background">
@@ -10668,7 +10668,7 @@ function ShareDeliveryPanel({
                         </button>
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                           <ToneBadge tone="neutral">{attachmentKind(attachment)}</ToneBadge>
-                          <span>{attachment.source} · {attachmentSize(attachment)}</span>
+                          <span>{attachmentMeta(attachment)}</span>
                         </div>
                       </div>
                       <Button variant="ghost" size="icon-sm" className="shrink-0 text-muted-foreground hover:text-destructive" aria-label={`${attachment.name} 동봉 해제`} title="동봉 해제" onClick={() => setAttachments((current) => current.filter((item) => item.id !== attachment.id))}>
@@ -10690,23 +10690,13 @@ function ShareDeliveryPanel({
                   </ToneBadge>
                 </div>
               </div>
-              <p className="-mt-1 mb-3 text-xs text-muted-foreground">
-                링크를 아는 사람은 누구나 열람할 수 있으며, 만료일과 열람 횟수로 제한합니다.
-              </p>
               {magicLinks.length > 0 ? (
                 <div className="grid gap-2">
                   {magicLinks.map((link, index) => {
-                    const linkUrl = `https://ecoya.app/share/${documentNumber.toLowerCase()}-${link.id}`
+                    const linkUrl = `/share/${documentNumber.toLowerCase()}-${link.id}`
                     const linkUsable = link.status === "active"
                     const linkRevocable = link.status !== "revoked"
-                    const linkStatus =
-                      link.status === "active"
-                        ? "활성"
-                        : link.status === "revoked"
-                          ? "철회됨"
-                          : link.status === "expired"
-                            ? "만료"
-                            : "한도 도달"
+                    const linkStatus = formatLinkStatus(link.status)
                     return (
                       <div
                         key={link.id}
@@ -10714,7 +10704,7 @@ function ShareDeliveryPanel({
                       >
                         <div className="flex items-center justify-between gap-3">
                           <span className="font-semibold">
-                            ACME GmbH 링크 {index + 1}
+                            공유 링크 {index + 1}
                           </span>
                           <ToneBadge
                             tone={
@@ -10785,11 +10775,6 @@ function ShareDeliveryPanel({
               ) : null}
               {activeMagicLinkCount === 0 ? (
                 <div className={cn("space-y-3", magicLinks.length > 0 && "mt-3")}>
-                  <p className="text-xs text-muted-foreground">
-                    {linkSlotOccupied
-                      ? "기존 공유 링크를 철회해야 새 링크를 만들 수 있습니다."
-                      : "링크를 만들어 고객에게 전달하세요."}
-                  </p>
                   <details className="group rounded-md bg-muted/30 px-3 py-2">
                     <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 text-xs [&::-webkit-details-marker]:hidden">
                       <span>링크 설정 · {expires.replaceAll("-", ".")} 만료 · 최대 {maxOpens}회</span>
@@ -10833,7 +10818,7 @@ function ShareDeliveryPanel({
                 <div className="mt-3 rounded-md border bg-background p-3 text-xs">
                   <div className="font-medium">이메일에 포함될 공유 링크</div>
                   <div className="mt-2 text-muted-foreground">
-                    {`https://ecoya.app/share/${documentNumber.toLowerCase()}-${emailLink.id}`}
+                    {`/share/${documentNumber.toLowerCase()}-${emailLink.id}`}
                   </div>
                 </div>
                 <Button
@@ -10872,7 +10857,6 @@ function ShareDeliveryPanel({
                 <div className="inline-flex items-center gap-2 text-sm font-semibold">
                   <Mail className="size-4" /> 이메일로도 보내기 <span className="text-xs font-normal text-muted-foreground">선택</span>
                 </div>
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">공유 링크를 먼저 만든 뒤 이메일로 보낼 수 있습니다.</p>
               </div>
             )}
           </div>
@@ -10896,12 +10880,12 @@ function ShareDeliveryPanel({
                 title: `공유 링크 ${link.id}`,
                 meta: `${formatLinkStatus(link.status)} · ${link.expires} 만료${link.revokeReason ? ` · 사유: ${link.revokeReason}` : ""}`,
                 tone: link.status === "active" ? "success" : link.status === "revoked" ? "neutral" : "warning",
-                badge: link.status === "active" ? "생성됨" : "기록",
+                badge: link.status === "active" ? "활성" : "기록",
                 email: undefined,
               })),
               ...emailRecords.map((email) => ({
                 id: `email-${email.id}`,
-                title: `이메일 전달 요청 · ${email.recipient.replace(/(^.).*(@.*$)/, "$1***$2")}`,
+                title: `이메일 요청 · ${email.recipient.replace(/(^.).*(@.*$)/, "$1***$2")}`,
                 meta: `요청 시각 ${email.sentAt} · 공유 링크 ${email.linkCount}개 포함 · ${email.attempts ?? 1}차 시도`,
                 tone: email.status === "failed" ? "danger" : email.status === "delivered" ? "success" : "blue",
                 badge: statusLabel(email.status),
@@ -10942,7 +10926,7 @@ function ShareDeliveryPanel({
             ))}
             {magicLinks.length + emailRecords.length === 0 ? (
               <div className="rounded-lg border bg-background p-4 text-xs leading-5 text-muted-foreground">
-                아직 고객에게 전달한 내역이 없습니다.
+                전달 내역이 없습니다.
               </div>
             ) : null}
             </div>
@@ -10961,9 +10945,9 @@ function ShareDeliveryPanel({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>공유 링크를 철회할까요?</AlertDialogTitle>
+            <AlertDialogTitle>공유 링크 철회</AlertDialogTitle>
             <AlertDialogDescription>
-              철회하면 이후 공개 열람이 차단되고, 이력은 전달 내역에 남습니다. 새 링크를 만들려면 기존 링크를 먼저 철회해야 합니다.
+              철회하면 접근이 차단되고 전달 내역과 감사 근거가 보존됩니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid gap-2">
@@ -10987,7 +10971,7 @@ function ShareDeliveryPanel({
                 setRevokeReason("")
               }}
             >
-              철회 확정
+              철회
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -15444,6 +15428,7 @@ function ResultScreen({
         id: records.length + 1,
         recipient,
         subject,
+        textBody,
         sentAt: new Date(result.updatedAt).toLocaleString("ko-KR"),
         linkCount,
         status: "requested",
@@ -15458,7 +15443,7 @@ function ResultScreen({
       linkCount: record.linkCount,
       recipient: record.recipient,
       subject: record.subject,
-      textBody: `안녕하세요.\n${templateTitle}와 관련 서류를 전달드립니다.\n내용 확인 후 회신 부탁드립니다.`,
+      textBody: record.textBody ?? "",
       shareLinkId: String(magicLinks.find((link) => link.status === "active")?.id ?? ""),
     })
   const cancelEmail = (id: number) => {
@@ -16010,9 +15995,7 @@ function ResultScreen({
         >
           <SheetHeader className="sr-only">
             <SheetTitle>파일 공유하기</SheetTitle>
-            <SheetDescription>
-              확정한 PDF를 링크 또는 이메일로 공유합니다.
-            </SheetDescription>
+            <SheetDescription>파일 공유하기</SheetDescription>
           </SheetHeader>
           <ShareDeliveryPanel
             magicLinks={magicLinks}
