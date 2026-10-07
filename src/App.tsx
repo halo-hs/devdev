@@ -14648,7 +14648,6 @@ function DocumentConfirmedSummaryPanel({
   documentStyle,
   activeLinkCount,
   deliveryRecordCount,
-  deliveryRequested,
   activeLink,
   latestEmail,
   relatedDeal,
@@ -14666,7 +14665,6 @@ function DocumentConfirmedSummaryPanel({
   documentStyle: DocumentStyle
   activeLinkCount: number
   deliveryRecordCount: number
-  deliveryRequested: boolean
   activeLink: DeliveryLink | null
   latestEmail: EmailRecord | null
   relatedDeal: DealDocumentContext | null
@@ -14681,7 +14679,6 @@ function DocumentConfirmedSummaryPanel({
   const lastDecisionEvent = approvalEvents.findLast(
     (event) => event.type === "approve" || event.type === "reject"
   )
-  const linkCreated = Boolean(activeLink)
   const linkStatusLabel = !activeLink
     ? "미생성"
     : activeLink.status === "active"
@@ -14689,8 +14686,14 @@ function DocumentConfirmedSummaryPanel({
       : activeLink.status === "expired"
         ? "만료"
         : activeLink.status === "maxed"
-          ? "한도 도달"
-          : "철회"
+        ? "한도 도달"
+        : "철회"
+  const latestDeliveryStatus = latestEmail?.status === "failed"
+    ? "전달 실패"
+    : latestEmail?.status === "delivered"
+      ? "전달 완료"
+      : "전달 전"
+  const latestRecipient = latestEmail?.recipient.replace(/(^.).*(@.*$)/, "$1***$2")
   const completedReviewRows = buildDocumentReviewRows({
     missingRequiredCount: 0,
     documentStyle,
@@ -14736,30 +14739,12 @@ function DocumentConfirmedSummaryPanel({
     <aside className="flex h-full min-h-0 flex-col bg-[var(--surface-background)]">
       <div className="flex min-h-16 shrink-0 items-center justify-between gap-3 border-b border-[var(--surface-border)] px-4 py-2.5 sm:px-5">
         <div className="min-w-0">
-          <div className="text-[11px] font-medium text-[var(--surface-muted-foreground)]">
-            {deliveryRequested
-              ? "전달 요청됨"
-              : linkCreated
-                ? "공유 준비"
-                : "문서 완료"}
-          </div>
+          <div className="text-[11px] font-medium text-[var(--surface-muted-foreground)]">문서</div>
           <div className="mt-1 flex items-center gap-2">
             <h2 className="truncate text-sm font-semibold">
-              {deliveryRequested
-                ? "전달 요청 기록됨"
-                : linkCreated
-                  ? "공유 링크 생성됨"
-                  : deliveryAllowed
-                    ? "확정 및 전달 준비"
-                    : "확정 문서"}
+              확정 문서
             </h2>
-            <ToneBadge tone={deliveryRequested ? "blue" : "success"}>
-              {deliveryRequested
-                ? "요청됨"
-                : linkCreated
-                  ? "전달 전"
-                  : "확정됨"}
-            </ToneBadge>
+            <ToneBadge tone="success">확정</ToneBadge>
           </div>
         </div>
       </div>
@@ -14771,22 +14756,7 @@ function DocumentConfirmedSummaryPanel({
                 <Check className="size-4" />
               </span>
               <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold">
-                  {deliveryRequested
-                    ? "이메일 보내기 요청이 기록되었습니다"
-                    : linkCreated
-                      ? "공유 링크가 생성되었습니다"
-                      : "문서가 확정되었습니다"}
-                </div>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                  {deliveryRequested
-                    ? "제공자 전달 근거가 확인되기 전까지 전달 완료로 표시하지 않습니다. 전달 내역에서 요청 상태를 확인할 수 있습니다."
-                    : linkCreated
-                      ? "링크 생성은 완료됐지만 아직 전달 전입니다. 공유 관리에서 이메일로 보내거나 링크를 전달하세요."
-                      : deliveryAllowed
-                        ? "문서와 PDF는 더 이상 수정할 수 없습니다. 상단 공유에서 링크를 만들거나 이메일로 보낼 수 있습니다."
-                        : "문서와 PDF는 더 이상 수정할 수 없습니다. 고객 전달은 별도 권한이 있는 구성원만 실행할 수 있습니다."}
-                </p>
+                <div className="text-sm font-semibold">문서가 확정되었습니다</div>
               </div>
               {deliveryAllowed ? (
                 <Button
@@ -14796,7 +14766,7 @@ function DocumentConfirmedSummaryPanel({
                   onClick={onOpenShare}
                 >
                   <Send data-icon="inline-start" />
-                  {deliveryRequested || linkCreated ? "공유 관리" : "공유하기"}
+                  공유하기
                 </Button>
               ) : null}
             </div>
@@ -14807,7 +14777,7 @@ function DocumentConfirmedSummaryPanel({
               <div className="text-sm font-semibold">공유 현황</div>
               {deliveryAllowed ? (
                 <Button variant="ghost" size="xs" onClick={onOpenShare}>
-                  관리
+                  공유하기
                   <ChevronRight data-icon="inline-end" />
                 </Button>
               ) : null}
@@ -14825,24 +14795,20 @@ function DocumentConfirmedSummaryPanel({
                     ? activeLink.status === "active"
                       ? `${activeLink.expires} 만료 · ${activeLink.opens}/${activeLink.maxOpens}회 열람`
                       : `기존 링크를 철회해야 새 링크를 만들 수 있습니다. (${activeLink.expires} 만료)`
-                    : deliveryAllowed
-                      ? "문서당 링크 1개를 만들 수 있습니다."
-                      : "고객 전달 권한이 있는 구성원이 링크를 만들 수 있습니다."}
+                    : ""}
                 </div>
               </div>
               <div className="min-w-0 border-t px-3 py-3 sm:border-t-0">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium">최근 전달</span>
-                  <ToneBadge tone={latestEmail ? "blue" : "neutral"}>
-                    {latestEmail ? "요청됨" : "전달 전"}
+                  <ToneBadge tone={latestDeliveryStatus === "전달 실패" ? "danger" : latestDeliveryStatus === "전달 완료" ? "success" : "neutral"}>
+                    {latestDeliveryStatus}
                   </ToneBadge>
                 </div>
                 <div className="mt-2 truncate text-[11px] text-muted-foreground">
                   {latestEmail
-                    ? `${latestEmail.recipient} · ${latestEmail.sentAt} · 제공자 전달 미확인`
-                    : deliveryAllowed
-                      ? "링크를 전달하거나 이메일을 보내면 기록됩니다."
-                      : "전달 이력이 없습니다."}
+                    ? `${latestRecipient} · ${latestEmail.sentAt}`
+                    : ""}
                 </div>
               </div>
             </div>
@@ -14852,11 +14818,7 @@ function DocumentConfirmedSummaryPanel({
             <div className="flex items-center justify-between gap-3">
               <div className="text-sm font-semibold">문서 진행 상태</div>
               <ToneBadge tone="success">
-                {deliveryRequested
-                  ? "전달 요청됨"
-                  : linkCreated
-                    ? "링크 생성됨"
-                    : "문서 확정"}
+                확정
               </ToneBadge>
             </div>
             <div className="mt-2 overflow-hidden rounded-md border bg-background">
@@ -15616,7 +15578,6 @@ function ResultScreen({
         magicLinks.filter((link) => link.status === "active").length
       }
       deliveryRecordCount={emailRecords.length}
-      deliveryRequested={emailRecords.length > 0}
       activeLink={magicLinks.find((link) => link.status !== "revoked") ?? null}
       latestEmail={emailRecords.at(0) ?? null}
       relatedDeal={selectedDeal}
