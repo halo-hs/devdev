@@ -3952,7 +3952,7 @@ function matchesDocumentQueueStatus(
 }
 
 function uploadDocumentTypeLabel(documentType: UploadDocumentType) {
-  if (documentType === "UNK") return "유형 확인 필요"
+  if (documentType === "UNK") return "미확인 문서"
   if (documentType === "OTHER") return "기타 문서"
   return (
     manualUploadDocumentTypeOptions.find(
@@ -5145,11 +5145,22 @@ function InboxScreen({
       <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-end gap-2 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-3 py-2 sm:px-4">
         <div className="mr-auto min-w-0">
           <h1 className="text-sm font-semibold">문서 올리기</h1>
-          <p className="truncate text-[11px] text-[var(--surface-muted-foreground)]">
-            {uploadDocumentTypeLabel(selectedDocument.documentType)} ·{" "}
-            {step === "deal" ? "거래 연결" : "항목 검토"} ·{" "}
-            {selectedDocument.name}
-          </p>
+          <div className="mt-1 flex min-w-0 items-center gap-1.5 text-[11px] text-[var(--surface-muted-foreground)]">
+            <UploadDocumentTypeMark
+              documentType={selectedDocument.documentType}
+              pages={selectedDocument.pages}
+              className="size-7"
+            />
+            <span className="shrink-0 font-medium text-[var(--surface-foreground)]">
+              {uploadDocumentTypeLabel(selectedDocument.documentType)}
+            </span>
+            <span className="shrink-0">· {step === "deal" ? "거래 연결" : "항목 검토"}</span>
+            {isTypeUnresolved ? (
+              <span className="min-w-0 truncate" title={selectedDocument.name}>
+                · {selectedDocument.name}
+              </span>
+            ) : null}
+          </div>
         </div>
         <DocumentBlockingAlerts errors={uploadErrors} checks={uploadChecks} />
         <AutoSaveStatus
