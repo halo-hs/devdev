@@ -690,7 +690,8 @@
   max-width: none;
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
+  /* The action group has reserved space so translated labels never overlap the centered nav. */
+  grid-template-columns: minmax(0, 1fr) auto minmax(502px, 1fr);
   height: 88px;
   min-height: 88px;
   padding: 0 40px;
@@ -698,6 +699,7 @@
 }
 .trade-landing .trade-nav > .trade-brand {
   justify-self: start;
+  min-width: 0;
 }
 .trade-landing .trade-nav > nav {
   display: flex;
@@ -2248,7 +2250,7 @@
   .ecoya-contact-privacy dl > div { grid-template-columns: 1fr; gap: 4px; }
 }
 
-/* Language select (KO / EN) — landing header */
+/* Language selector: reserve one width so adding more locales does not move the actions. */
 .ecoya-locale-select {
   position: relative;
   display: inline-flex;
@@ -2260,7 +2262,7 @@
   padding-inline: 10px 8px;
   border: 0;
   border-radius: 0;
-  background: none;
+  background: transparent;
   color: var(--ecoya-ink);
   cursor: pointer;
 }
@@ -2291,20 +2293,60 @@
   padding: 0;
   border: 0;
   outline: 0;
-  background: none;
+  appearance: none;
+  background: transparent;
   color: inherit;
   opacity: 0;
   cursor: pointer;
-  appearance: none;
 }
 .ecoya-locale-select:hover {
+  background: transparent;
   color: var(--ecoya-brand);
 }
 .ecoya-locale-select:focus-within {
   outline: none;
 }
-/* Mobile: collapse to an icon-only control so the header actions row
-   (Log in / Contact Sales / Get started) never overflows or overlaps. */
+
+/* Header actions keep their anchor points when translated labels get longer. */
+.trade-landing .trade-nav-actions > .ecoya-nav-login,
+.trade-landing .trade-nav-actions > .ecoya-nav-contact,
+.trade-landing .trade-nav-actions > .ecoya-nav-start {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+.trade-landing .trade-nav-actions > .ecoya-nav-login {
+  width: 86px;
+  min-width: 86px;
+  border: 1px solid var(--ecoya-button);
+  border-radius: 999px;
+  background: var(--ecoya-card);
+  color: var(--ecoya-button);
+}
+.trade-landing .trade-nav-actions > .ecoya-nav-login:hover {
+  background: var(--ecoya-brand-soft) !important;
+  color: var(--ecoya-button-hover) !important;
+  border-color: var(--ecoya-button) !important;
+  box-shadow: none !important;
+}
+.trade-landing .trade-nav-actions > .ecoya-nav-login:active {
+  background: color-mix(in srgb, var(--ecoya-button) 14%, var(--ecoya-card)) !important;
+  color: var(--ecoya-button-hover) !important;
+  border-color: var(--ecoya-button-hover) !important;
+  box-shadow: none !important;
+}
+.trade-landing .trade-nav-actions > .ecoya-nav-contact {
+  width: 128px;
+  min-width: 128px;
+}
+.trade-landing .trade-nav-actions > .ecoya-nav-start {
+  width: 128px;
+  min-width: 128px;
+}
+
+/* Mobile: collapse to an icon-only control so the header actions row never overlaps. */
 @media (max-width: 800px) {
   .ecoya-locale-select {
     width: auto;
@@ -2317,3 +2359,4 @@
     display: none;
   }
 }
+
