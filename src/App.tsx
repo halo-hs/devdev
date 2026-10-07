@@ -1510,7 +1510,7 @@ const generatedDrafts: GeneratedDraft[] = [
     party: "ACME GmbH",
     status: "확정",
     tone: "success",
-    readiness: "Magic Link 활성 · 미발송",
+    readiness: "공유 링크 활성 · 미발송",
     tab: "sharing",
     creatorName: "박서윤",
     creatorAccountId: "account-admin",
@@ -7683,7 +7683,7 @@ const generatedDraftReuseFacts: Record<string, string[]> = {
   "CI-2026-0708": ["은행 거절 전 점검", "거래 연결됨", "통화 USD"],
   "CI-2026-0712": ["은행 거절 전 점검", "거래처명 불일치", "확정 차단"],
   "CI-2026-0703": ["품목 Aluminium Scrap", "수량 20 MT", "통화 USD"],
-  "CI-2026-0704": ["Magic Link 활성", "이메일 전달 전", "거래 연결됨"],
+  "CI-2026-0704": ["공유 링크 활성", "이메일 전달 전", "거래 연결됨"],
   "QT-2026-0630": ["운임 Hamburg", "선사 HMM", "ETA 08.03"],
   "SOA-2026-0629": ["정산 6월", "미수금 없음", "고객 전달 완료"],
 }
@@ -9652,7 +9652,7 @@ function DocumentStepPage({
 
         <div className="rounded-lg border bg-background p-4">
           <div className="flex items-center justify-between gap-3">
-            <div className="font-medium text-foreground">Magic Link 만들기</div>
+            <div className="font-medium text-foreground">공유 링크 만들기</div>
             <ToneBadge tone={magicLinkCount > 0 ? "success" : "neutral"}>
               생성된 링크 {magicLinkCount}개
             </ToneBadge>
@@ -9702,7 +9702,7 @@ function DocumentStepPage({
               onOpenSharePanel()
             }}
           >
-            <Send data-icon="inline-start" /> Magic Link 생성
+            <Send data-icon="inline-start" /> 공유 링크 만들기
           </Button>
         </div>
       </section>
@@ -10310,7 +10310,7 @@ function DocumentCreateWorkbench({
           </div>
           <div className="flex flex-wrap justify-end gap-2">
             <ToneBadge tone={activeMagicLinkCount > 0 ? "success" : "neutral"}>
-              Magic Link{" "}
+              공유 링크{" "}
               {activeMagicLinkCount > 0 ? `${activeMagicLinkCount}개` : "없음"}
             </ToneBadge>
             <ToneBadge tone={emailRecords.length > 0 ? "success" : "neutral"}>
@@ -10456,7 +10456,6 @@ function ShareDeliveryPanel({
   onSendEmail,
   onCreateMagicLink,
   onRevokeMagicLink,
-  onDeleteMagicLink,
   onClose,
   templateCode,
   relatedDeal,
@@ -10474,7 +10473,6 @@ function ShareDeliveryPanel({
   }) => Promise<boolean>
   onCreateMagicLink: (settings: { expires: string; maxOpens: number }) => void
   onRevokeMagicLink: (id: number) => void
-  onDeleteMagicLink: (id: number) => void
   onClose: () => void
   templateCode: string
   relatedDeal: DealDocumentContext | null
@@ -10673,7 +10671,7 @@ function ShareDeliveryPanel({
                           {link.opens}/{link.maxOpens}회 열람 · {link.expires}{" "}
                           만료
                         </div>
-                        <div className="mt-3 grid grid-cols-4 gap-2">
+                        <div className="mt-3 grid grid-cols-3 gap-2">
                           <Button
                             variant="outline"
                             size="sm"
@@ -10712,20 +10710,14 @@ function ShareDeliveryPanel({
                           >
                             철회
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onDeleteMagicLink(link.id)}
-                          >
-                            <Trash2 data-icon="inline-start" /> 삭제
-                          </Button>
                         </div>
                       </div>
                     )
                   })}
                 </div>
-              ) : (
-                <div className="space-y-3">
+              ) : null}
+              {activeMagicLinkCount === 0 ? (
+                <div className={cn("space-y-3", magicLinks.length > 0 && "mt-3")}>
                   <p className="text-xs text-muted-foreground">링크를 만들어 고객에게 전달하세요.</p>
                   <details className="group rounded-md bg-muted/30 px-3 py-2">
                     <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 text-xs [&::-webkit-details-marker]:hidden">
@@ -10747,7 +10739,7 @@ function ShareDeliveryPanel({
                     <Link2 data-icon="inline-start" /> 공유 링크 만들기
                   </Button>
                 </div>
-              )}
+              ) : null}
             </div>
 
             <details className="group border-t pt-4">
@@ -10768,11 +10760,11 @@ function ShareDeliveryPanel({
                 </FormField>
               </div>
               <div className="mt-3 rounded-md border bg-background p-3 text-xs">
-                <div className="font-medium">이메일에 포함될 Magic Link</div>
+                <div className="font-medium">이메일에 포함될 공유 링크</div>
                 <div className="mt-2 text-muted-foreground">
                   {emailLink
                     ? `https://ecoya.app/share/${templateCode.toLowerCase()}-2026-0708-${emailLink.id}`
-                    : "먼저 Magic Link를 생성해야 이메일을 보낼 수 있습니다."}
+                    : "먼저 공유 링크를 생성해야 이메일을 보낼 수 있습니다."}
                 </div>
               </div>
               <Button
@@ -10815,14 +10807,14 @@ function ShareDeliveryPanel({
             {[
               ...magicLinks.map((link) => ({
                 id: `link-${link.id}`,
-                title: `Magic Link ${link.id}`,
+                title: `공유 링크 ${link.id}`,
                 meta: `${link.status === "active" ? "활성" : "철회됨"} · ${link.expires} 만료`,
                 tone: link.status === "active" ? "success" : "neutral",
               })),
               ...emailRecords.map((email) => ({
                 id: `email-${email.id}`,
                 title: `이메일 발송 요청 · ${email.recipient}`,
-                meta: `요청 시각 ${email.sentAt} · Magic Link ${email.linkCount}개 포함 · 실제 발송·수신 미확인`,
+                meta: `요청 시각 ${email.sentAt} · 공유 링크 ${email.linkCount}개 포함 · 실제 발송·수신 미확인`,
                 tone: "blue",
               })),
             ].map((item) => (
@@ -14643,7 +14635,7 @@ function DocumentConfirmedSummaryPanel({
                 </div>
                 <p className="mt-1 text-xs leading-5 text-muted-foreground">
                   {deliveryCompleted
-                    ? "Magic Link와 이메일 전달 내역을 확인하거나 추가로 공유할 수 있습니다."
+                    ? "공유 링크와 이메일 전달 내역을 확인하거나 추가로 공유할 수 있습니다."
                     : linkCreated
                       ? "링크 생성은 완료됐지만 아직 전달 전입니다. 공유 관리에서 이메일로 보내거나 링크를 전달하세요."
                       : deliveryAllowed
@@ -15227,6 +15219,7 @@ function ResultScreen({
       return
     }
     setMagicLinks((links) => [
+      ...links,
       {
         id: (links.at(-1)?.id ?? 0) + 1,
         recipient: selectedDeal?.party ?? "ACME GmbH",
@@ -15236,7 +15229,7 @@ function ResultScreen({
         maxOpens: settings?.maxOpens ?? 10,
       },
     ])
-    toast.success("Magic Link를 만들었습니다.")
+    toast.success("공유 링크를 만들었습니다.")
   }
   const preparePdf = () => {
     if (!draftReady) return
@@ -15848,9 +15841,6 @@ function ResultScreen({
                   link.id === id ? { ...link, status: "revoked" } : link
                 )
               )
-            }
-            onDeleteMagicLink={(id) =>
-              setMagicLinks((links) => links.filter((link) => link.id !== id))
             }
             onClose={() => setSharePanelOpen(false)}
             templateCode={templateCode}
