@@ -3976,18 +3976,16 @@ function uploadDocumentTypeCode(documentType: UploadDocumentType) {
 
 function UploadDocumentTypeMark({
   documentType,
-  pages,
   className,
 }: {
   documentType: UploadDocumentType
-  pages?: number
   className?: string
 }) {
   const unresolved = documentType === "UNK"
   return (
     <span
       className={cn(
-        "inline-flex size-9 shrink-0 flex-col items-center justify-center rounded-[var(--r-sm)] border bg-[var(--surface-background)] text-primary",
+        "inline-flex size-9 shrink-0 flex-row items-center justify-center gap-1 rounded-[var(--r-sm)] border bg-[var(--surface-background)] text-primary",
         unresolved && "border-dashed text-[var(--surface-muted-foreground)]",
         className
       )}
@@ -3997,11 +3995,6 @@ function UploadDocumentTypeMark({
       <span className="text-[9px] leading-none font-bold tracking-wide">
         {uploadDocumentTypeCode(documentType)}
       </span>
-      {pages ? (
-        <span className="mt-1 text-[8px] leading-none text-[var(--surface-muted-foreground)]">
-          {pages}p
-        </span>
-      ) : null}
     </span>
   )
 }
@@ -4046,6 +4039,7 @@ function HorizontalDocumentTray({
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null)
   const [cancelUploadOpen, setCancelUploadOpen] = useState(false)
+  const selectedDocument = documents[selectedIndex] ?? documents[0]
   const processingCount = documents.filter((document) =>
     ["ocr", "queued"].includes(document.stage)
   ).length
@@ -4131,7 +4125,7 @@ function HorizontalDocumentTray({
       <div
         role="button"
         tabIndex={0}
-        aria-label="오늘 처리할 서류 목록"
+        aria-label="검토·배정 대기 문서 목록"
         aria-expanded={expanded}
         className="flex min-h-14 cursor-pointer items-center gap-2 p-2 outline-none hover:bg-muted/20 focus-visible:[box-shadow:var(--shadow-keyboard-focus)]"
         onClick={() => handleExpandedChange(!expanded)}
@@ -4143,16 +4137,45 @@ function HorizontalDocumentTray({
           }
         }}
       >
-        <div
-          className="flex h-11 min-w-52 items-center gap-2 px-3 pr-4 text-primary"
-        >
-          <span className="font-semibold">오늘 처리할 서류</span>
+        <div className="flex h-11 min-w-52 items-center gap-2 px-3 pr-4 text-primary">
+          <span className="font-semibold">검토·배정 대기 문서</span>
+          <span className="inline-flex size-6 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
+            {documents.length}
+          </span>
           {expanded ? (
             <ChevronUp className="ml-auto size-4" />
           ) : (
             <ChevronDown className="ml-auto size-4" />
           )}
         </div>
+
+        {selectedDocument ? (
+          <div className="ml-2 flex min-w-0 flex-1 items-center gap-2 pl-4 pr-1">
+            <UploadDocumentTypeMark
+              documentType={selectedDocument.documentType}
+              className="size-9"
+            />
+            <div className="min-w-0 flex-1 leading-tight">
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[var(--surface-foreground)]">
+                  {uploadDocumentTypeLabel(selectedDocument.documentType)}
+                </span>
+                <span className="shrink-0 text-[11px] text-[var(--surface-muted-foreground)]">
+                  · {selectedIndex + 1} / {documents.length}
+                </span>
+                <span
+                  className="min-w-0 truncate text-[10px] text-[var(--surface-muted-foreground)]"
+                  title={selectedDocument.name}
+                >
+                  · {selectedDocument.name}
+                </span>
+              </div>
+            </div>
+            <ToneBadge tone={selectedDocument.tone}>
+              {selectedDocument.status}
+            </ToneBadge>
+          </div>
+        ) : null}
 
         <div className="ml-auto flex h-11 items-center gap-2 pr-2 text-[11px]">
           <span className="rounded-full bg-[var(--color-system-orange6)] px-2 py-1 text-[var(--color-orange-2)]">
@@ -4420,9 +4443,8 @@ function HorizontalDocumentTray({
                           <span className="flex min-w-0 items-center gap-2">
                             <UploadDocumentTypeMark
                               documentType={document.documentType}
-                              pages={document.pages}
                             />
-                            <span className="truncate text-xs font-semibold">
+                            <span className="flex min-w-0 items-center gap-1.5 truncate text-xs font-semibold">
                               {uploadDocumentTypeLabel(document.documentType)}
                             </span>
                           </span>
@@ -5145,22 +5167,6 @@ function InboxScreen({
       <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-end gap-2 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-3 py-2 sm:px-4">
         <div className="mr-auto min-w-0">
           <h1 className="text-sm font-semibold">문서 올리기</h1>
-          <div className="mt-1 flex min-w-0 items-center gap-1.5 text-[11px] text-[var(--surface-muted-foreground)]">
-            <UploadDocumentTypeMark
-              documentType={selectedDocument.documentType}
-              pages={selectedDocument.pages}
-              className="size-7"
-            />
-            <span className="shrink-0 font-medium text-[var(--surface-foreground)]">
-              {uploadDocumentTypeLabel(selectedDocument.documentType)}
-            </span>
-            <span className="shrink-0">· {step === "deal" ? "거래 연결" : "항목 검토"}</span>
-            {isTypeUnresolved ? (
-              <span className="min-w-0 truncate" title={selectedDocument.name}>
-                · {selectedDocument.name}
-              </span>
-            ) : null}
-          </div>
         </div>
         <DocumentBlockingAlerts errors={uploadErrors} checks={uploadChecks} />
         <AutoSaveStatus
@@ -5461,9 +5467,8 @@ function PendingUploadDocumentsTable({
                       <div className="flex min-w-0 items-center gap-2.5">
                         <UploadDocumentTypeMark
                           documentType={document.documentType}
-                          pages={document.pages}
                         />
-                        <span className="truncate text-sm font-semibold">
+                        <span className="flex min-w-0 items-center gap-1.5 truncate text-sm font-semibold">
                           {uploadDocumentTypeLabel(document.documentType)}
                         </span>
                       </div>
