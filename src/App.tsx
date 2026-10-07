@@ -9303,15 +9303,8 @@ function CreateScreen({
   if (showInitialTemplateState) {
     return (
       <div className="flex h-full min-h-0 flex-col overflow-auto bg-background">
-        <div className="mx-auto w-full max-w-ecoya-wide-xl shrink-0 px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
-          <BusinessPageHero
-            variant="ai"
-            eyebrow="AI 문서 작성"
-            title="문서 만들기"
-            description="유형을 선택하고 문서 만들기를 누르면 작성을 시작합니다."
-            align="center"
-          />
-          {relatedDeal ? <div className="mt-4"><RelatedDealNotice deal={relatedDeal} /></div> : null}
+        <div className="mx-auto w-full max-w-ecoya-wide-xl shrink-0 px-5 pt-5 sm:px-6 sm:pt-6 xl:px-8">
+          {relatedDeal ? <RelatedDealNotice deal={relatedDeal} /> : null}
         </div>
 
         <section className="mx-auto w-full max-w-ecoya-wide-xl shrink-0 space-y-5 px-5 pb-8 sm:px-6 xl:px-8">
@@ -9324,20 +9317,7 @@ function CreateScreen({
   return (
     <div className="h-full min-h-0 overflow-auto bg-background">
       <section className="mx-auto w-full max-w-ecoya-wide-xl px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
-        <section className="mb-7">
-          <BusinessPageHero
-            variant="ai"
-            eyebrow="AI 문서 작성"
-            title="문서 만들기"
-            description="유형을 선택하고 문서 만들기를 누르면 작성을 시작합니다."
-            align="center"
-          />
-          {relatedDeal ? (
-            <div className="mt-4">
-              <RelatedDealNotice deal={relatedDeal} compact />
-            </div>
-          ) : null}
-        </section>
+        {relatedDeal ? <RelatedDealNotice deal={relatedDeal} compact /> : null}
 
         <section className="mb-7">
           <TemplateStrip onResult={openUnifiedWorkbench} />
