@@ -146,7 +146,6 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
@@ -658,8 +657,8 @@ const erpNavGroups = [
     label: "경영·성과",
     items: [
       ["운영 감시", Monitor, "monitoring"],
-      ["결산 리포트", ClipboardList, "reports", "Pro"],
-      ["영업 성과", History, "sales", "Pro"],
+      ["결산 리포트", ClipboardList, "reports"],
+      ["영업 성과", History, "sales"],
     ],
   },
 ] as const
@@ -2194,7 +2193,7 @@ function AppNav({
                 ) : null}
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {group.items.map(([label, Icon, key, plan]) => {
+                    {group.items.map(([label, Icon, key]) => {
                       if (key === "monitoring" && erpRole !== "owner") return null
                       const active =
                         key === screen ||
@@ -2213,11 +2212,6 @@ function AppNav({
                             <Icon />
                             <span>{label}</span>
                           </SidebarMenuButton>
-                          {plan ? (
-                            <SidebarMenuBadge className="bg-primary/10 text-[9px] font-semibold text-primary">
-                              {plan}
-                            </SidebarMenuBadge>
-                          ) : null}
                         </SidebarMenuItem>
                       )
                     })}
