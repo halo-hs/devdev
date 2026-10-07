@@ -210,6 +210,7 @@ import {
   type HomePreviewState,
 } from "@trade-os/home/page"
 import { ReferenceOperations } from "@trade-os/operations/index"
+import { SalesPrototype } from "@trade-os/extended-screens"
 import { NotificationsPrototype } from "@share/notifications/page"
 import { notifications, type NotificationDealTarget } from "@share/notifications/data"
 import {
@@ -16771,7 +16772,7 @@ export function App() {
                   ) : screen === "reports" ? (
                     <ReferenceOperations screen="reports" />
                   ) : screen === "sales" ? (
-                    <ReferenceOperations screen="sales" />
+                    <SalesPrototype />
                   ) : screen === "notifications" ? (
                     <NotificationsPrototype
                       readIds={readNotificationIds}
