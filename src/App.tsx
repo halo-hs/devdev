@@ -12396,7 +12396,7 @@ function DocumentSourceSetupStep({
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between gap-3 px-1 text-[11px] text-muted-foreground">
                     <span>문서함</span>
-                    <span>{selectedSources.size}/3</span>
+                    <span>{selectedSources.size}개 선택</span>
                   </div>
                   {draftSources.map((source) => {
                     const selected = selectedSources.has(source.title)
@@ -13165,8 +13165,8 @@ function DocumentDiscrepancyPanel({
       </div>
 
       <p className="mt-1 text-[11px] text-muted-foreground">
-        AI가 연결 거래 {relatedDeal.id}의 서류 간 불일치(통화·금액·거래처·L/C)를
-        발송 전에 점검합니다.
+        연결 거래 {relatedDeal.id}의 서류 간 불일치(통화·금액·거래처·L/C)를
+        발송 전에 대조합니다. 불일치를 수정해야 다음 단계로 진행할 수 있습니다.
       </p>
 
       <div className="mt-2 overflow-hidden rounded-md border">
@@ -13710,8 +13710,8 @@ function DocumentReviewSharePanel({
   const applyLogoFiles = (files: File[]) => {
     const file = files[0]
     if (!file) return
-    if (!file.type.startsWith("image/")) {
-      setLogoError("PNG, JPG, SVG 이미지 파일만 사용할 수 있습니다.")
+    if (!(file.type === "image/png" || file.type === "image/jpeg")) {
+      setLogoError("PNG, JPG 이미지 파일만 사용할 수 있습니다.")
       return
     }
     if (file.size > 2 * 1024 * 1024) {
@@ -13918,10 +13918,10 @@ function DocumentReviewSharePanel({
                 ) : null}
                 {logoSourceMode === "file" || !organizationLogo ? (
                   <FileDropZone
-                    accept="image/png,image/jpeg,image/svg+xml,.png,.jpg,.jpeg,.svg"
+                    accept="image/png,image/jpeg,.png,.jpg,.jpeg"
                     aria-label="로고 파일 선택 또는 끌어놓기"
                     label="로고 파일 선택"
-                    instructions="PNG, JPG, SVG · 최대 2MB"
+                    instructions="PNG, JPG · 최대 2MB"
                     onFiles={applyLogoFiles}
                     className={cn(
                       "min-h-10 flex-row justify-start gap-2 border-solid bg-background px-2.5 py-1.5 text-left",
@@ -13938,7 +13938,7 @@ function DocumentReviewSharePanel({
                           : "로고 파일 선택"}
                       </span>
                       <span className="shrink-0 text-[11px] text-muted-foreground">
-                        PNG, JPG, SVG · 최대 2MB
+                        PNG, JPG · 최대 2MB
                       </span>
                     </span>
                     {documentStyle.logo?.source === "file" ? (
@@ -14017,6 +14017,15 @@ function DocumentReviewSharePanel({
                         />
                       )
                     )}
+                    <label className="relative size-6 cursor-pointer overflow-hidden rounded-full border-2 border-background shadow-sm ring-offset-1" aria-label="강조색 직접 선택">
+                      <input
+                        type="color"
+                        value={documentStyle.accent}
+                        onChange={(event) => onStyleChange({ ...documentStyle, accent: event.target.value })}
+                        className="absolute inset-0 size-full cursor-pointer opacity-0"
+                      />
+                      <span className="absolute inset-0 rounded-full border border-dashed border-muted-foreground/60 bg-[conic-gradient(from_0deg,#ef4444,#f59e0b,#22c55e,#06b6d4,#3b82f6,#a855f7,#ef4444)]" />
+                    </label>
                   </div>
                 </div>
               </div>
@@ -15409,6 +15418,11 @@ function ResultScreen({
     <DocumentSourceSetupStep
       templateCode={templateCode}
       onTemplateChange={(code) => {
+        if (code === templateCode) return
+        const confirmed = window.confirm(
+          "문서 유형을 바꾸면 현재 입력값이 초기화되고 새 초안으로 다시 시작합니다. 계속할까요?"
+        )
+        if (!confirmed) return
         setTemplateCode(code)
         setPdfPrepared(false)
         markDocumentChanged()
@@ -15426,7 +15440,7 @@ function ResultScreen({
         setSelectedSources((current) => {
           const next = new Set(current)
           if (next.has(title)) next.delete(title)
-          else if (next.size < 3) next.add(title)
+          else next.add(title)
           return next
         })
         setPdfPrepared(false)
