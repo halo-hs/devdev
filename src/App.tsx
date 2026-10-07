@@ -4013,12 +4013,10 @@ function HorizontalDocumentTray({
   expanded: boolean
   onExpandedChange: (expanded: boolean) => void
 }) {
-  const fileDropZoneRef = useRef<FileDropZoneRef | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const folderInputRef = useRef<HTMLInputElement | null>(null)
   const queueDragDepthRef = useRef(0)
   const [mailOpen, setMailOpen] = useState(false)
-  const [addPanelOpen, setAddPanelOpen] = useState(false)
   const [queueDragActive, setQueueDragActive] = useState(false)
   const [filter, setFilter] = useState<DocumentTrayFilter>("all")
   const [typeFilter, setTypeFilter] = useState<UploadDocumentType | "all">(
@@ -4028,7 +4026,6 @@ function HorizontalDocumentTray({
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null)
   const [cancelUploadOpen, setCancelUploadOpen] = useState(false)
-  const selectedDocument = documents[selectedIndex] ?? documents[0]
   const processingCount = documents.filter((document) =>
     ["ocr", "queued"].includes(document.stage)
   ).length
@@ -4055,14 +4052,12 @@ function HorizontalDocumentTray({
     )
 
   const handleExpandedChange = (nextExpanded: boolean) => {
-    if (!nextExpanded) setAddPanelOpen(false)
     onExpandedChange(nextExpanded)
   }
 
   const acceptFiles = (files: File[]) => {
     if (files.length === 0 || uploadProgress) return
     handleExpandedChange(true)
-    setAddPanelOpen(false)
     onFilesSelected(files)
   }
   const handleQueueDragEnter = (event: ReactDragEvent<HTMLDivElement>) => {
@@ -4108,7 +4103,7 @@ function HorizontalDocumentTray({
       onDrop={handleQueueDrop}
       className={cn(
         "shrink-0 transition-[box-shadow,background-color]",
-        expanded && "ring-[var(--control-selected-border)]",
+        !expanded && "border-0 shadow-none",
         queueDragActive &&
           "bg-[var(--control-selected-soft-background)] ring-2 ring-[var(--control-selected-border)]"
       )}
@@ -4116,7 +4111,7 @@ function HorizontalDocumentTray({
       <div
         role="button"
         tabIndex={0}
-        aria-label="검토·배정 대기 문서 목록"
+        aria-label="오늘 처리할 서류 목록"
         aria-expanded={expanded}
         className="flex min-h-14 cursor-pointer items-center gap-2 p-2 outline-none hover:bg-muted/20 focus-visible:[box-shadow:var(--shadow-keyboard-focus)]"
         onClick={() => handleExpandedChange(!expanded)}
@@ -4129,71 +4124,24 @@ function HorizontalDocumentTray({
         }}
       >
         <div
-          className={cn(
-            "flex h-11 min-w-48 items-center justify-between rounded-[var(--r-md)] px-3 text-primary",
-            expanded && "bg-[var(--button-secondary-background)]"
-          )}
+          className="flex h-11 min-w-52 items-center gap-2 px-3 pr-4 text-primary"
         >
-          <span className="font-semibold">검토·배정 대기 문서</span>
-          <span className="ml-auto text-xs text-muted-foreground">
-            {documents.length}
-          </span>
-          {expanded ? <ChevronUp /> : <ChevronDown />}
+          <span className="font-semibold">오늘 처리할 서류</span>
+          {expanded ? (
+            <ChevronUp className="ml-auto size-4" />
+          ) : (
+            <ChevronDown className="ml-auto size-4" />
+          )}
         </div>
 
-        {selectedDocument ? (
-          <Item
-            variant="outline"
-            size="xs"
-            role="button"
-            tabIndex={0}
-            aria-label={`${selectedDocument.name} 문서 목록 ${expanded ? "닫기" : "열기"}`}
-            className="h-11 min-w-0 flex-1 cursor-pointer flex-nowrap border-[var(--control-selected-border)] bg-[var(--control-selected-soft-background)] text-left sm:max-w-[460px]"
-            onClick={(event) => {
-              event.stopPropagation()
-              handleExpandedChange(!expanded)
-            }}
-            onKeyDown={(event) => {
-              event.stopPropagation()
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault()
-                handleExpandedChange(!expanded)
-              }
-            }}
-          >
-            <ItemMedia className="shrink-0">
-              <UploadDocumentTypeMark
-                documentType={selectedDocument.documentType}
-                pages={selectedDocument.pages}
-                className="size-8"
-              />
-            </ItemMedia>
-            <ItemContent className="min-w-0 gap-0">
-              <ItemTitle className="block truncate text-xs font-semibold">
-                {selectedDocument.name}
-              </ItemTitle>
-              <ItemDescription className="mt-0.5 block truncate text-[11px]">
-                {uploadDocumentTypeLabel(selectedDocument.documentType)} ·{" "}
-                {selectedIndex + 1} / {documents.length}
-              </ItemDescription>
-            </ItemContent>
-            <ItemActions>
-              <ToneBadge tone={selectedDocument.tone}>
-                {selectedDocument.status}
-              </ToneBadge>
-            </ItemActions>
-          </Item>
-        ) : null}
-
-        <div className="ml-auto hidden h-11 items-center gap-3 rounded-[var(--r-md)] border border-[var(--surface-border)] px-4 text-[11px] lg:flex">
-          <span className="font-semibold">오늘 처리할 서류</span>
-          <span className="text-[var(--surface-muted-foreground)]">
+        <div className="ml-auto flex h-11 items-center gap-2 pr-2 text-[11px]">
+          <span className="rounded-full bg-[var(--color-system-orange6)] px-2 py-1 text-[var(--color-orange-2)]">
             확인 대기 {reviewCount}
           </span>
-          <span className="text-[var(--color-blue-2)]">
+          <span className="rounded-full bg-[var(--color-system-blue6)] px-2 py-1 text-[var(--color-blue-2)]">
             AI 분석 중 {processingCount}
           </span>
-          <span className="text-[var(--color-red-2)]">
+          <span className="rounded-full bg-[var(--color-system-red6)] px-2 py-1 text-[var(--color-red-2)]">
             재업로드 필요 {failedCount}
           </span>
         </div>
@@ -4203,23 +4151,12 @@ function HorizontalDocumentTray({
           onClick={(event) => event.stopPropagation()}
           onKeyDown={(event) => event.stopPropagation()}
         >
-          <DropdownMenu
-            onOpenChange={(open) => {
-              if (open) {
-                handleExpandedChange(true)
-                setAddPanelOpen(true)
-              }
-            }}
-          >
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
                 size="sm"
                 aria-label="파일 추가 메뉴"
-                onClick={() => {
-                  handleExpandedChange(true)
-                  setAddPanelOpen(true)
-                }}
               >
                 <FilePlus2 data-icon="inline-start" />
                 파일 추가
@@ -4230,7 +4167,6 @@ function HorizontalDocumentTray({
               <DropdownMenuItem
                 onSelect={() => {
                   handleExpandedChange(true)
-                  setAddPanelOpen(false)
                   setMailOpen(true)
                 }}
               >
@@ -4238,8 +4174,6 @@ function HorizontalDocumentTray({
               </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => {
-                  handleExpandedChange(true)
-                  setAddPanelOpen(false)
                   folderInputRef.current?.click()
                 }}
               >
@@ -4247,8 +4181,6 @@ function HorizontalDocumentTray({
               </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => {
-                  handleExpandedChange(true)
-                  setAddPanelOpen(false)
                   fileInputRef.current?.click()
                 }}
               >
@@ -4259,156 +4191,51 @@ function HorizontalDocumentTray({
         </div>
       </div>
 
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/pdf,.pdf"
+        multiple
+        hidden
+        onChange={(event) => {
+          if (!uploadProgress && event.target.files) {
+            acceptFiles(Array.from(event.target.files))
+          }
+          event.target.value = ""
+        }}
+      />
+      <input
+        ref={(node) => {
+          folderInputRef.current = node
+          node?.setAttribute("webkitdirectory", "")
+          node?.setAttribute("directory", "")
+        }}
+        type="file"
+        accept="application/pdf,.pdf"
+        multiple
+        hidden
+        onChange={(event) => {
+          if (!uploadProgress && event.target.files) {
+            acceptFiles(Array.from(event.target.files))
+          }
+          event.target.value = ""
+        }}
+      />
+
       {expanded ? (
-        <CardContent className="border-t border-[var(--surface-border)] bg-[var(--surface-muted-background)] p-2.5">
-          <div className="mb-2 grid gap-2">
-            {duplicateUploadNotice ? (
+        <CardContent className="border-t border-[var(--surface-border)] bg-[var(--surface-background)] p-2.5">
+          {duplicateUploadNotice ? (
+            <div className="mb-2 grid gap-2">
               <DuplicateUploadAlert
                 notice={duplicateUploadNotice}
                 onDismiss={onDismissDuplicateUpload}
               />
-            ) : null}
-          </div>
-          {documents.length === 0 ? (
-            <FileDropZone
-              ref={fileDropZoneRef}
-              accept="application/pdf,.pdf"
-              multiple
-              clickToSelect={!uploadProgress}
-              label="새 파일 추가"
-              instructions={`PDF를 선택하거나 이 영역에 끌어놓기 · 최대 ${TRADE_DOCUMENT_MAX_UPLOAD_FILES}개 · 파일당 ${TRADE_DOCUMENT_MAX_UPLOAD_MB}MB`}
-              onFiles={(files) => {
-                if (!uploadProgress) acceptFiles(files)
-              }}
-              className="min-h-32 flex-row justify-start gap-3 px-4 py-5 text-left"
-            >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--r-md)] border border-[var(--surface-border)] bg-[var(--surface-background)] text-[var(--file-drop-foreground)]">
-                {uploadProgress ? (
-                  <LoaderCircle className="animate-spin" />
-                ) : (
-                  <Upload />
-                )}
-              </span>
-              <span className="min-w-0 text-[var(--surface-foreground)]">
-                <span className="block text-xs font-semibold">
-                  {uploadProgress ? "파일 업로드 중" : "새 파일 추가"}
-                </span>
-                <span className="mt-1 block text-[11px] text-[var(--surface-muted-foreground)]">
-                  PDF를 선택하거나 이 영역에 끌어놓기 · 최대
-                  {` ${TRADE_DOCUMENT_MAX_UPLOAD_FILES}개 · 파일당 ${TRADE_DOCUMENT_MAX_UPLOAD_MB}MB`}
-                </span>
-              </span>
-              {uploadProgress ? (
-                <span className="ml-auto flex min-w-44 items-center gap-2 text-[11px] font-medium text-[var(--file-drop-foreground)]">
-                  <LabeledProgress
-                    width={96}
-                    showPercentage={false}
-                    aria-label="파일 업로드 진행률"
-                    value={
-                      (uploadProgress.completed / uploadProgress.total) * 100
-                    }
-                  />
-                  {uploadProgress.completed}/{uploadProgress.total}
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      setCancelUploadOpen(true)
-                    }}
-                  >
-                    취소
-                  </Button>
-                </span>
-              ) : (
-                <span className="ml-auto flex items-center gap-1.5">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label="이메일에서 문서 찾기"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      setMailOpen(true)
-                    }}
-                  >
-                    <Mail data-icon="inline-start" />
-                    <span className="hidden lg:inline">이메일에서 찾기</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label="폴더에서 PDF 선택"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      folderInputRef.current?.click()
-                    }}
-                  >
-                    <FileText data-icon="inline-start" />
-                    <span className="hidden lg:inline">폴더 선택</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label="PDF 파일 선택"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      fileDropZoneRef.current?.open()
-                    }}
-                  >
-                    <Upload data-icon="inline-start" />
-                    <span className="hidden lg:inline">파일 선택</span>
-                  </Button>
-                </span>
-              )}
-            </FileDropZone>
-          ) : addPanelOpen && !uploadProgress ? (
-            <FileDropZone
-              ref={fileDropZoneRef}
-              accept="application/pdf,.pdf"
-              multiple
-              label="파일을 끌어놓아 추가"
-              instructions={`PDF 최대 ${TRADE_DOCUMENT_MAX_UPLOAD_FILES}개 · 파일당 ${TRADE_DOCUMENT_MAX_UPLOAD_MB}MB`}
-              onFiles={acceptFiles}
-              className="min-h-16 flex-row justify-start gap-3 px-4 py-3 text-left"
-            >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-[var(--r-md)] border border-[var(--surface-border)] bg-[var(--surface-background)] text-[var(--file-drop-foreground)]">
-                <Upload />
-              </span>
-              <span className="min-w-0 text-[var(--surface-foreground)]">
-                <span className="block text-xs font-semibold">
-                  파일을 끌어놓아 추가
-                </span>
-                <span className="mt-1 block text-[11px] text-[var(--surface-muted-foreground)]">
-                  PDF 최대 {TRADE_DOCUMENT_MAX_UPLOAD_FILES}개 · 파일당{" "}
-                  {TRADE_DOCUMENT_MAX_UPLOAD_MB}MB
-                </span>
-              </span>
-              <span className="ml-auto flex items-center gap-1.5">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    fileDropZoneRef.current?.open()
-                  }}
-                >
-                  파일 선택
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label="파일 추가 영역 닫기"
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    setAddPanelOpen(false)
-                  }}
-                >
-                  <X />
-                </Button>
-              </span>
-            </FileDropZone>
+            </div>
+          ) : null}
+          {documents.length === 0 && !uploadProgress ? (
+            <div className="rounded-[var(--r-md)] border border-dashed border-[var(--surface-border)] px-4 py-5 text-center text-xs text-[var(--surface-muted-foreground)]">
+              파일 추가 버튼에서 문서를 추가해 주세요.
+            </div>
           ) : uploadProgress ? (
             <div className="flex min-h-11 items-center gap-3 rounded-[var(--r-md)] border border-[var(--surface-border)] bg-[var(--surface-background)] px-3 py-2 text-xs">
               <LoaderCircle className="size-4 animate-spin text-primary" />
@@ -4432,37 +4259,6 @@ function HorizontalDocumentTray({
               </Button>
             </div>
           ) : null}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="application/pdf,.pdf"
-            multiple
-            hidden
-            onChange={(event) => {
-              if (!uploadProgress && event.target.files) {
-                acceptFiles(Array.from(event.target.files))
-              }
-              event.target.value = ""
-            }}
-          />
-          <input
-            ref={(node) => {
-              folderInputRef.current = node
-              node?.setAttribute("webkitdirectory", "")
-              node?.setAttribute("directory", "")
-            }}
-            type="file"
-            accept="application/pdf,.pdf"
-            multiple
-            hidden
-            onChange={(event) => {
-              if (!uploadProgress && event.target.files) {
-                acceptFiles(Array.from(event.target.files))
-              }
-              event.target.value = ""
-            }}
-          />
-
           {mailOpen ? (
             <EmailForwardQueue
               onClose={() => setMailOpen(false)}
@@ -4480,83 +4276,84 @@ function HorizontalDocumentTray({
 
           {documents.length > 0 ? (
             <>
-              <div className="mt-2.5 flex flex-wrap items-center gap-2 px-1">
-                <div className="mr-2 text-xs font-semibold">
-                  검토·배정 대기 문서{" "}
-                  <span className="ml-1 font-normal text-muted-foreground">
-                    {documents.length}개
-                  </span>
-                </div>
-                <span className="text-[11px] text-muted-foreground">
-                  PDF를 이 목록에 끌어놓아 추가
-                </span>
+              <div
+                className={cn(
+                  "flex flex-wrap items-center gap-2 px-1",
+                  (uploadProgress || mailOpen || uploadNotice) &&
+                    "mt-4 border-t border-[var(--surface-border)] pt-3"
+                )}
+              >
                 <BusinessListToolbar aria-label="대기 문서 필터">
                   <BusinessFilterField label="상태">
-                  <Select
-                    value={filter}
-                    onValueChange={(value) =>
-                      setFilter(value as DocumentTrayFilter)
-                    }
-                  >
-                    <SelectTrigger
-                      size="sm"
-                      className="w-32"
-                      aria-label="상태 필터"
+                    <Select
+                      value={filter}
+                      onValueChange={(value) =>
+                        setFilter(value as DocumentTrayFilter)
+                      }
                     >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent align="end">
-                      <SelectItem value="all">전체</SelectItem>
-                      <SelectItem value="processing">처리 중</SelectItem>
-                      <SelectItem value="review">확인 필요</SelectItem>
-                      <SelectItem value="failed">처리 실패</SelectItem>
-                    </SelectContent>
-                  </Select>
+                      <SelectTrigger
+                        size="sm"
+                        className="w-32"
+                        aria-label="상태 필터"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent align="end">
+                        <SelectItem value="all">전체</SelectItem>
+                        <SelectItem value="processing">처리 중</SelectItem>
+                        <SelectItem value="review">확인 필요</SelectItem>
+                        <SelectItem value="failed">처리 실패</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </BusinessFilterField>
                   <BusinessFilterField label="문서 유형">
-                  <Select
-                    value={typeFilter}
-                    onValueChange={(value) =>
-                      setTypeFilter(value as UploadDocumentType | "all")
-                    }
-                  >
-                    <SelectTrigger
-                      size="sm"
-                      className="w-40"
-                      aria-label="문서 유형 필터"
+                    <Select
+                      value={typeFilter}
+                      onValueChange={(value) =>
+                        setTypeFilter(value as UploadDocumentType | "all")
+                      }
                     >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent align="end">
-                      <SelectItem value="all">전체</SelectItem>
-                      {availableDocumentTypes.map((documentType) => (
-                        <SelectItem key={documentType} value={documentType}>
-                          {uploadDocumentTypeLabel(documentType)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      <SelectTrigger
+                        size="sm"
+                        className="w-40"
+                        aria-label="문서 유형 필터"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent align="end">
+                        <SelectItem value="all">전체</SelectItem>
+                        {availableDocumentTypes.map((documentType) => (
+                          <SelectItem key={documentType} value={documentType}>
+                            {uploadDocumentTypeLabel(documentType)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </BusinessFilterField>
                   <BusinessFilterField label="정렬">
-                  <Select
-                    value={sort}
-                    onValueChange={(value) =>
-                      setSort(value as DocumentQueueSort)
-                    }
-                  >
-                    <SelectTrigger size="sm" className="w-40" aria-label="정렬">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent align="end">
-                      <SelectItem value="recent">최근 업로드 순</SelectItem>
-                      <SelectItem value="oldest">오래된 업로드 순</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Select
+                      value={sort}
+                      onValueChange={(value) =>
+                        setSort(value as DocumentQueueSort)
+                      }
+                    >
+                      <SelectTrigger
+                        size="sm"
+                        className="w-40"
+                        aria-label="정렬"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent align="end">
+                        <SelectItem value="recent">최근 업로드 순</SelectItem>
+                        <SelectItem value="oldest">오래된 업로드 순</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </BusinessFilterField>
                 </BusinessListToolbar>
               </div>
 
-              <div className="field-scrollbar mt-2 max-h-52 overflow-auto rounded-[var(--r-md)] ring-1 ring-[var(--table-border)]">
+              <div className="field-scrollbar mt-2 max-h-[min(62svh,34rem)] overflow-auto rounded-[var(--r-md)] ring-1 ring-[var(--table-border)]">
                 <Table className="min-w-[780px]">
                   <TableHeader className="sticky top-0 z-10">
                     <TableRow>
@@ -4587,13 +4384,11 @@ function HorizontalDocumentTray({
                         tabIndex={0}
                         className="cursor-pointer outline-none focus-visible:[box-shadow:var(--shadow-keyboard-focus)]"
                         onClick={() => {
-                          setAddPanelOpen(false)
                           onSelect(index)
                         }}
                         onKeyDown={(event) => {
                           if (event.key === "Enter" || event.key === " ") {
                             event.preventDefault()
-                            setAddPanelOpen(false)
                             onSelect(index)
                           }
                         }}
@@ -4675,6 +4470,9 @@ function HorizontalDocumentTray({
                     ) : null}
                   </TableBody>
                 </Table>
+              </div>
+              <div className="px-1 pt-2 text-xs text-[var(--table-caption-foreground)]">
+                전체 {filteredDocuments.length}건
               </div>
             </>
           ) : null}
@@ -5529,7 +5327,6 @@ function PendingUploadDocumentsTable({
                 >
                   업로드 문서
                 </h2>
-                <ToneBadge tone="warning">{documents.length}건</ToneBadge>
               </div>
               <p className="mt-1 text-xs text-[var(--surface-muted-foreground)]">
                 업로드한 문서의 처리 상태를 확인하세요.
@@ -5537,7 +5334,6 @@ function PendingUploadDocumentsTable({
             </div>
             <BusinessListToolbar
               aria-label="업로드 문서 필터"
-              result={`${filteredDocuments.length}건 표시 중`}
             >
               <BusinessFilterField label="상태">
                 <Select
@@ -5772,6 +5568,8 @@ function BeforeUploadState({
   onDismissDuplicateUpload: () => void
 }) {
   const fileDropZoneRef = useRef<FileDropZoneRef | null>(null)
+  const folderInputRef = useRef<HTMLInputElement | null>(null)
+  const [mailOpen, setMailOpen] = useState(false)
 
   return (
     <div className="h-full min-h-0 overflow-y-auto bg-background">
@@ -5783,14 +5581,26 @@ function BeforeUploadState({
           description="PDF를 올리고 추출값을 검토한 뒤, 연결할 거래와 반영 내용을 확인하세요."
           align="center"
         />
-        <ol aria-label="문서 처리 순서" className="mx-auto mt-4 flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
-          {["파일 올리기", "추출값 검토", "거래 연결·확정"].map((title, index) => (
-            <li key={title} className="flex items-center gap-2">
-              {index > 0 && <ChevronRight className="mr-2 size-3 text-muted-foreground/60" aria-hidden="true" />}
-              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">{index + 1}</span>
-              <span>{title}</span>
-            </li>
-          ))}
+        <ol
+          aria-label="문서 처리 순서"
+          className="mx-auto mt-4 flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground"
+        >
+          {["파일 올리기", "추출값 검토", "거래 연결·확정"].map(
+            (title, index) => (
+              <li key={title} className="flex items-center gap-2">
+                {index > 0 && (
+                  <ChevronRight
+                    className="mr-2 size-3 text-muted-foreground/60"
+                    aria-hidden="true"
+                  />
+                )}
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
+                  {index + 1}
+                </span>
+                <span>{title}</span>
+              </li>
+            )
+          )}
         </ol>
         <div className="mx-auto mt-5 w-full max-w-5xl">
           <Card className="w-full bg-[var(--surface-background)]!" size="sm">
@@ -5811,6 +5621,7 @@ function BeforeUploadState({
                 aria-label="PDF 파일 선택 또는 끌어놓기"
                 label="파일을 끌어다 놓으세요"
                 instructions={`PDF 최대 ${TRADE_DOCUMENT_MAX_UPLOAD_FILES}개, 파일당 ${TRADE_DOCUMENT_MAX_UPLOAD_MB}MB`}
+                clickToSelect
                 onFiles={onFilesSelected}
                 className="min-h-36 flex-row gap-3 bg-[var(--surface-background)] px-4 text-left"
               >
@@ -5828,6 +5639,29 @@ function BeforeUploadState({
                   </span>
                 </span>
               </FileDropZone>
+              {mailOpen ? (
+                <EmailForwardQueue
+                  onClose={() => setMailOpen(false)}
+                  onImportFiles={onFilesSelected}
+                />
+              ) : null}
+              <input
+                ref={(node) => {
+                  folderInputRef.current = node
+                  node?.setAttribute("webkitdirectory", "")
+                  node?.setAttribute("directory", "")
+                }}
+                type="file"
+                accept="application/pdf,.pdf"
+                multiple
+                hidden
+                onChange={(event) => {
+                  if (event.target.files) {
+                    onFilesSelected(Array.from(event.target.files))
+                  }
+                  event.target.value = ""
+                }}
+              />
               {uploadNotice ? (
                 <Alert className="mt-3" variant="default">
                   <AlertDescription className="text-xs">
@@ -5835,8 +5669,29 @@ function BeforeUploadState({
                   </AlertDescription>
                 </Alert>
               ) : null}
-              <div className="mt-3 flex justify-end">
-                <Button onClick={() => fileDropZoneRef.current?.open()}>
+              <div className="mt-3 flex flex-wrap justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setMailOpen(true)}
+                >
+                  <Mail data-icon="inline-start" /> 이메일에서 찾기
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => folderInputRef.current?.click()}
+                >
+                  <FileText data-icon="inline-start" /> 폴더 선택
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileDropZoneRef.current?.open()}
+                >
                   <Upload data-icon="inline-start" /> 파일 선택
                 </Button>
               </div>
@@ -9292,12 +9147,15 @@ function CreateScreen({
             description="유형을 선택하고 문서 만들기를 누르면 작성을 시작합니다."
             align="center"
           />
-          {relatedDeal ? <div className="mt-4"><RelatedDealNotice deal={relatedDeal} /></div> : null}
+          {relatedDeal ? (
+            <div className="mt-4">
+              <RelatedDealNotice deal={relatedDeal} />
+            </div>
+          ) : null}
+          <section className="mt-5 space-y-5 pb-8">
+            <TemplateStrip onResult={openUnifiedWorkbench} />
+          </section>
         </div>
-
-        <section className="mx-auto w-full max-w-ecoya-wide-xl shrink-0 space-y-5 px-5 pb-8 sm:px-6 xl:px-8">
-          <TemplateStrip onResult={openUnifiedWorkbench} />
-        </section>
       </div>
     )
   }
@@ -9326,50 +9184,54 @@ function CreateScreen({
 
         <section>
           {hasGeneratedDocuments ? (
-            <Card>
-              <Tabs value={documentListTab} onValueChange={setDocumentListTab}>
-                <BusinessListToolbar
-                  className="border-b px-4 py-3"
-                  aria-label="만든 문서 검색 필터"
-                  search={
-                    <BusinessFilterSearch
-                      label="만든 문서 검색"
-                      placeholder="문서번호, 거래처, 상태 검색"
-                      value={documentSearch}
-                      onValueChange={setDocumentSearch}
-                    />
-                  }
-                  result={`${documentTabs.find((tab) => tab.value === documentListTab)?.docs.length ?? 0}건 표시 중`}
+            <>
+              <Card>
+                <Tabs
+                  value={documentListTab}
+                  onValueChange={setDocumentListTab}
                 >
-                  <TabsList aria-label="만든 문서 상태">
-                    {documentTabs.map((tab) => (
-                      <TabsTrigger key={tab.value} value={tab.value}>
-                        {tab.label} {tab.docs.length}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </BusinessListToolbar>
-                {documentTabs.map(({ value, docs }) => (
-                  <TabsContent
-                    key={value as string}
-                    value={value as string}
-                    className="m-0"
-                  >
-                    <CardContent data-layout="flush-table" className="p-0">
-                      <RecentDocumentsTable
-                        docs={docs as GeneratedDraft[]}
-                        onResult={onResult}
-                        onDelete={handleDeleteCreatedDocument}
-                        onDuplicate={handleDuplicateCreatedDocument}
-                        role={role}
-                        currentAccountId={currentAccount.id}
-                        flush
+                  <BusinessListToolbar
+                    className="border-b px-4 py-3"
+                    aria-label="만든 문서 검색 필터"
+                    search={
+                      <BusinessFilterSearch
+                        label="만든 문서 검색"
+                        placeholder="문서번호, 거래처, 상태 검색"
+                        value={documentSearch}
+                        onValueChange={setDocumentSearch}
                       />
-                    </CardContent>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </Card>
+                    }
+                  >
+                    <TabsList aria-label="만든 문서 상태">
+                      {documentTabs.map((tab) => (
+                        <TabsTrigger key={tab.value} value={tab.value}>
+                          {tab.label} {tab.docs.length}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </BusinessListToolbar>
+                  {documentTabs.map(({ value, docs }) => (
+                    <TabsContent
+                      key={value as string}
+                      value={value as string}
+                      className="m-0"
+                    >
+                      <CardContent data-layout="flush-table" className="p-0">
+                        <RecentDocumentsTable
+                          docs={docs as GeneratedDraft[]}
+                          onResult={onResult}
+                          onDelete={handleDeleteCreatedDocument}
+                          onDuplicate={handleDuplicateCreatedDocument}
+                          role={role}
+                          currentAccountId={currentAccount.id}
+                          flush
+                        />
+                      </CardContent>
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              </Card>
+            </>
           ) : (
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 xl:grid-cols-3">
               {templates.map(([kind, title, desc, usage]) => (
