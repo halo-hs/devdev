@@ -8213,11 +8213,6 @@ function TemplateStrip({ onResult }: {
   const viewportRef = useRef<HTMLDivElement>(null)
   const [scrollState, setScrollState] = useState({ previous: false, next: false })
   useEffect(() => {
-    if (!visibleTemplates.some(([kind]) => kind === selectedCode)) {
-      setSelectedCode(visibleTemplates[0]?.[0] ?? "")
-    }
-  }, [direction, selectedCode, visibleTemplates])
-  useEffect(() => {
     const viewport = viewportRef.current
     if (!viewport) return
     const update = () => setScrollState({
@@ -8246,7 +8241,16 @@ function TemplateStrip({ onResult }: {
         <div className="flex items-center gap-2">
           <Tabs
             value={direction}
-            onValueChange={(value) => setDirection(value as "purchase" | "sales")}
+            onValueChange={(value) => {
+              const nextDirection = value as "purchase" | "sales"
+              const nextTemplates = templates.filter(([kind]) =>
+                templateDirections[kind].some(
+                  (availableDirection) => availableDirection === nextDirection
+                )
+              )
+              setDirection(nextDirection)
+              setSelectedCode(nextTemplates[0]?.[0] ?? "")
+            }}
           >
             <TabsList aria-label="거래 방향">
               <TabsTrigger value="purchase">매입</TabsTrigger>
