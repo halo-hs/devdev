@@ -9299,7 +9299,6 @@ function CreateScreen({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <ToneBadge tone="blue">{kind}</ToneBadge>
-                    <ToneBadge tone="success">시작 가능</ToneBadge>
                   </div>
                   <div className="mt-4 text-base font-semibold tracking-normal">
                     {title}
@@ -9309,8 +9308,6 @@ function CreateScreen({
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     <ToneBadge tone="neutral">{usage}</ToneBadge>
-                    <ToneBadge tone="success">거래값</ToneBadge>
-                    <ToneBadge tone="blue">업로드값</ToneBadge>
                   </div>
                   <div className="mt-4 flex items-center justify-between gap-3">
                     <span className="h-1 w-10 rounded-full bg-primary/50 transition group-hover:w-16" />
