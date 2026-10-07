@@ -17,6 +17,8 @@ import {
   FileText,
   Fingerprint,
   Link2,
+  Pencil,
+  Plus,
   RefreshCcw,
   RotateCcw,
   Search,
@@ -1515,22 +1517,28 @@ const salesContacts = [
     name: "Anna Keller",
     company: "ACME GmbH",
     email: "a.keller@acme.example",
-    stage: "제안 검토",
+    phone: "+49 40 555 0182",
+    status: "활성",
     deals: 2,
+    stageCounts: ["계약 1", "선적 1"],
   },
   {
     name: "Kenji Sato",
     company: "Sakura Logistics",
     email: "k.sato@sakura.example",
-    stage: "협상",
+    phone: "+81 3 5550 1204",
+    status: "활성",
     deals: 1,
+    stageCounts: ["통관 1"],
   },
   {
     name: "Mia Chen",
     company: "HMM Green",
     email: "mia@hmmgreen.example",
-    stage: "신규",
+    phone: "+82 2 555 0147",
+    status: "활성",
     deals: 0,
+    stageCounts: [],
   },
 ]
 
@@ -1542,10 +1550,16 @@ export function SalesPrototype() {
       title="연락처·파이프라인"
       description="연락처를 선택해 현재 단계, 관련 Deal과 읽기 전용 활동 이력을 한 화면에서 확인합니다."
       actions={
-        <Button size="sm" variant="outline">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm">
+            <Plus data-icon="inline-start" />
+            연락처 추가
+          </Button>
+          <Button size="sm" variant="outline">
           <RefreshCcw data-icon="inline-start" />
           새로고침
-        </Button>
+          </Button>
+        </div>
       }
     >
       <div className="grid min-h-[620px] overflow-hidden rounded-lg border lg:grid-cols-[340px_minmax(0,1fr)]">
@@ -1568,13 +1582,13 @@ export function SalesPrototype() {
               >
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-medium">{contact.name}</p>
-                  <Badge variant="outline">{contact.stage}</Badge>
+                  <Badge variant="outline">{contact.status}</Badge>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {contact.company}
                 </p>
                 <p className="mt-1 truncate text-xs text-muted-foreground">
-                  {contact.email}
+                  {contact.email} · {contact.phone}
                 </p>
               </button>
             ))}
@@ -1585,36 +1599,57 @@ export function SalesPrototype() {
             <div>
               <p className="text-xs text-muted-foreground">선택 연락처</p>
               <h2 className="mt-1 text-xl font-semibold">{selected.name}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {selected.company} · {selected.stage}
-              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                <span>{selected.company}</span>
+                <Badge variant="outline">{selected.status}</Badge>
+                <span>{selected.phone}</span>
+              </div>
             </div>
-            <Badge variant="secondary">관련 Deal {selected.deals}건</Badge>
+            <div className="flex items-center gap-2">
+              <div className="flex flex-wrap justify-end gap-1">
+                <Badge variant="secondary">관련 Deal {selected.deals}건</Badge>
+                {selected.stageCounts.map((count) => (
+                  <Badge key={count} variant="outline">{count}</Badge>
+                ))}
+              </div>
+              <Button size="icon" variant="ghost" aria-label="연락처 수정">
+                <Pencil className="size-4" />
+              </Button>
+            </div>
           </div>
           <div className="mt-6 grid gap-6 xl:grid-cols-2">
             <div>
               <SectionHeading
                 title="관련 Deal"
-                description="완전한 연락처→Deal 생성 전환은 아직 근거가 없어 제공하지 않습니다."
+                description="이 연락처와 연결된 거래입니다. 거래를 누르면 상세로 이동합니다."
               />
               <div className="mt-3 grid gap-2">
                 {selected.deals === 0 ? (
                   <Notice title="관련 Deal이 없습니다">
-                    현재 연락처 단계는 유지됩니다.
+                    연결된 거래가 생기면 여기에 표시됩니다.
                   </Notice>
                 ) : (
                   [
-                    "DL-260708-01 · 2,400,000.00 USD",
-                    "DL-260629-04 · 166,000.00 USD",
+                    { id: "DL-260708-01", amount: "2,400,000.00 USD", stage: "계약", owner: "김민지", risk: 1 },
+                    { id: "DL-260629-04", amount: "166,000.00 USD", stage: "선적", owner: "박준호", risk: 0 },
                   ]
                     .slice(0, selected.deals)
                     .map((deal) => (
                       <button
-                        key={deal}
-                        className="flex items-center justify-between rounded-lg border p-3 text-left hover:bg-muted"
+                        key={deal.id}
+                        className="flex items-center justify-between gap-3 rounded-lg border p-3 text-left hover:bg-muted"
                       >
-                        <span className="text-sm font-medium">{deal}</span>
-                        <ChevronRight className="size-4" />
+                        <span className="min-w-0">
+                          <span className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                            <span>{deal.id}</span>
+                            <Badge variant="outline">{deal.stage}</Badge>
+                            {deal.risk > 0 && <Badge variant="destructive">리스크 {deal.risk}건</Badge>}
+                          </span>
+                          <span className="mt-1 block text-xs text-muted-foreground">
+                            받을 원금 {deal.amount} · 담당자 {deal.owner}
+                          </span>
+                        </span>
+                        <ChevronRight className="size-4 shrink-0" />
                       </button>
                     ))
                 )}
@@ -1623,23 +1658,35 @@ export function SalesPrototype() {
             <div>
               <SectionHeading
                 title="활동 이력"
-                description="파이프라인 응답의 읽기 전용 사건입니다."
+                description="연결된 거래에서 일어난 최근 일입니다."
               />
               <div className="mt-3 border-y">
                 {[
-                  "견적서 전달 · 07.31 16:20",
-                  "연락처 단계 변경 · 07.30 11:02",
-                  "Deal 연결 · 07.29 09:14",
+                  { type: "견적서 전달", time: "07.31 16:20", description: "견적서를 고객에게 전달했습니다.", deal: "DL-260708-01" },
+                  { type: "연락처 업데이트", time: "07.30 11:02", description: "전화번호와 담당 범위를 업데이트했습니다.", deal: "DL-260708-01" },
+                  { type: "Deal 연결", time: "07.29 09:14", description: "연락처를 거래 담당자로 연결했습니다.", deal: "DL-260629-04" },
                 ].map((event) => (
                   <div
-                    key={event}
+                    key={`${event.type}-${event.time}`}
                     className="flex gap-3 border-b py-3 text-sm last:border-b-0"
                   >
                     <Clock3 className="mt-0.5 size-4 text-muted-foreground" />
-                    <span>{event}</span>
+                    <div className="min-w-0">
+                      <p>{event.type} · {event.time}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{event.description}</p>
+                      <button className="mt-1 text-xs font-medium text-primary hover:underline">{event.deal} 거래 보기</button>
+                    </div>
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+          <div className="mt-6 flex items-center justify-between border-t pt-4 text-xs text-muted-foreground">
+            <span>연락처 3명 중 1–3명</span>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" disabled><ArrowLeft data-icon="inline-start" /> 이전</Button>
+              <span>1페이지</span>
+              <Button size="sm" variant="outline" disabled>다음 <ArrowRight data-icon="inline-end" /></Button>
             </div>
           </div>
         </section>
