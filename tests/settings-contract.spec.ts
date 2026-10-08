@@ -350,7 +350,7 @@ test("mobile members use cards, retain seat actions and fit the viewport", async
   await expect(page.getByRole("region", { name: "Trade OS 구독" })).toBeVisible()
   await expect(page.getByRole("region", { name: "SNAP 구독" })).toBeVisible()
   await expect(page.getByRole("button", { name: "시트 관리", exact: true })).toHaveCount(1)
-  await expect(page.getByRole("button", { name: "업그레이드", exact: true })).toHaveCount(1)
+  await expect(page.getByRole("button", { name: "구독 변경", exact: true })).toHaveCount(1)
   await expect(page.getByRole("region", { name: "Trade OS 구독" })).toContainText("구독 시작 2026.09.01")
   await page.getByRole("button", { name: "시트 관리", exact: true }).click()
   await expect(page.getByRole("region", { name: "Trade OS 구독" })).toBeVisible()

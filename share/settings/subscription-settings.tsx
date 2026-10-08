@@ -818,10 +818,10 @@ export function ProductsSubscriptions({
   planInitiallyOpen?: boolean
 }) {
   const { members, capacity, requests, setRequests } = useSettingsDemo()
-  const [expanded, setExpanded] = useState<{ placement: "subscription" | "offer"; id: "erp" | "snap" | "bundle" } | null>(() => {
+  const [expanded, setExpanded] = useState<{ placement: "subscription" | "offer"; id: "erp" | "snap" | "bundle"; intent: "plan" | "seats" } | null>(() => {
     if (!planInitiallyOpen) return null
     const product = new URLSearchParams(window.location.search).get("product")
-    return { placement: "subscription", id: product === "erp" || product === "snap" ? product : subscriptionKind === "bundle" ? "bundle" : products[0] ?? "erp" }
+    return { placement: "subscription", id: product === "erp" || product === "snap" ? product : subscriptionKind === "bundle" ? "bundle" : products[0] ?? "erp", intent: "seats" }
   })
   const [plan, setPlan] = useState<"erp" | "snap" | "bundle">(() => {
     const product = new URLSearchParams(window.location.search).get("product")
@@ -837,6 +837,7 @@ export function ProductsSubscriptions({
   const [rejectId, setRejectId] = useState<string | null>(null)
   const selectedProducts: ProductEntitlement[] =
     plan === "bundle" ? ["erp", "snap"] : [plan]
+  const isBundle = subscriptionKind === "bundle" && products.includes("erp") && products.includes("snap")
   const purchasedCapacity = (product: ProductEntitlement) =>
     products.includes(product) ? capacity[product] : 0
   const assigned = Math.max(
@@ -847,7 +848,9 @@ export function ProductsSubscriptions({
   )
   const count = Number(quantity)
   const invalid = !Number.isSafeInteger(count) || count < 5 || count < assigned
-  const unchanged = plan !== "bundle" && count === purchasedCapacity(plan)
+  const unchanged = plan === "bundle"
+    ? isBundle && count === capacity.erp && count === capacity.snap
+    : products.includes(plan) && count === purchasedCapacity(plan)
   const visibleRequests = requests.filter((request) =>
     role === "owner"
       ? request.kind === "capacity"
@@ -860,7 +863,6 @@ export function ProductsSubscriptions({
     { id: "snap", title: "SNAP", description: "현장 기록·증거·리포트를 관리합니다." },
     { id: "bundle", title: "Trade OS + SNAP", description: "두 제품을 하나의 Bundle로 이용합니다." },
   ] as const
-  const isBundle = subscriptionKind === "bundle" && products.includes("erp") && products.includes("snap")
   const subscriptions: { id: "erp" | "snap" | "bundle"; items: ProductEntitlement[] }[] = isBundle
     ? [{ id: "bundle", items: ["erp", "snap"] }]
     : products.map((product) => ({ id: product, items: [product] }))
@@ -879,12 +881,12 @@ export function ProductsSubscriptions({
     snap: { startedAt: "2026.09.15", renewsAt: "2026.10.15" },
     bundle: { startedAt: "2026.09.01", renewsAt: "2026.11.01" },
   } as const
-  const openOffer = (nextPlan: typeof plan, placement: "subscription" | "offer" = "subscription") => {
+  const openOffer = (nextPlan: typeof plan, placement: "subscription" | "offer" = "subscription", intent: "plan" | "seats" = "plan") => {
     setPlan(nextPlan)
     setQuantity(String(nextPlan === "bundle"
       ? Math.max(5, ...products.map((product) => capacity[product]))
       : products.includes(nextPlan) ? capacity[nextPlan] : 5))
-    setExpanded({ placement, id: nextPlan })
+    setExpanded({ placement, id: nextPlan, intent })
   }
   const planEditor = expanded && role !== "member" ? (
         <section className={expanded.placement === "offer" ? "w-full rounded-xl border bg-background p-5 sm:p-6" : "w-full"}>
@@ -892,11 +894,11 @@ export function ProductsSubscriptions({
             <header className="space-y-2">
               <h2 className="text-xl font-semibold">
                 {role === "owner"
-                  ? expanded.placement === "offer" ? "플랜 선택" : existingPaidPlan ? "구독·시트 변경" : "구독 시작"
+                  ? expanded.intent === "seats" ? "시트 변경" : expanded.placement === "offer" ? "플랜 선택" : existingPaidPlan ? "구독 변경" : "구독 시작"
                   : "좌석 증설 요청"}
               </h2>
               <p className="text-sm text-muted-foreground">
-                변경할 상품과 시트 수를 선택하세요. 입력만으로 구독이나 사용자 배정은 변경되지 않습니다.
+                {expanded.intent === "seats" ? "변경할 구독과 시트 수를 선택하세요." : "변경할 상품과 시트 수를 선택하세요."} 입력만으로 구독이나 사용자 배정은 변경되지 않습니다.
               </p>
             </header>
             <div className="grid gap-5 sm:grid-cols-2">
@@ -914,9 +916,13 @@ export function ProductsSubscriptions({
                     setMessage("")
                   }}
                 >
-                  <option value="erp">Trade OS 단독</option>
-                  <option value="snap">SNAP 단독</option>
-                  <option value="bundle">Trade OS + SNAP Bundle</option>
+                  {expanded.intent === "seats" ? subscriptions.filter(({ id }) => statusOf(id) === "paid_active").map(({ id }) => (
+                    <option key={id} value={id}>{id === "bundle" ? "Trade OS + SNAP Bundle" : `${names[id]} 단독`}</option>
+                  )) : <>
+                    <option value="erp">Trade OS 단독</option>
+                    <option value="snap">SNAP 단독</option>
+                    <option value="bundle">Trade OS + SNAP Bundle</option>
+                  </>}
                 </select>
               </label>
               <label className="grid content-start gap-2 text-sm">
@@ -947,7 +953,7 @@ export function ProductsSubscriptions({
               </p>
             )}
             {!invalid && unchanged && (
-              <p className="text-sm text-muted-foreground">현재 구매 수와 같습니다. 변경할 시트 수를 입력해 주세요.</p>
+              <p className="text-sm text-muted-foreground">{expanded.intent === "seats" ? "현재 구매 수와 같습니다. 변경할 시트 수를 입력해 주세요." : "현재 구독과 같습니다. 다른 상품을 선택하거나 시트 수를 변경해 주세요."}</p>
             )}
             <div className="grid gap-4 rounded-lg border bg-muted/20 p-4 sm:grid-cols-2 sm:p-5" aria-label="변경 내용">
               <div>
@@ -1030,17 +1036,18 @@ export function ProductsSubscriptions({
             <h2 className="font-semibold">내 플랜</h2>
             <p className="mt-1 text-sm text-muted-foreground">제품별 이용 상태와 시트 현황을 확인합니다.</p>
           </div>
-          {role !== "member" && <div className="flex flex-wrap gap-2">
-            {role === "owner" && products.length === 2 && !isBundle && subscriptions.some(({ id }) => statusOf(id) === "paid_active") && (
-              <Button variant="outline" size="sm" onClick={() => openOffer("bundle")}>업그레이드</Button>
+          {role !== "member" && <div className="ml-auto flex flex-wrap justify-end gap-2">
+            {role === "owner" && (
+              <Button variant="outline" size="sm" aria-expanded={expanded?.placement === "subscription" && expanded.intent === "plan"} onClick={() => openOffer(isBundle ? "bundle" : subscriptions[0]?.id ?? "erp")}>구독 변경</Button>
             )}
             {manageableSubscription && (
-              <Button variant="outline" size="sm" aria-expanded={expanded?.placement === "subscription"} onClick={() => openOffer(manageableSubscription.id)}>
+              <Button variant="outline" size="sm" aria-expanded={expanded?.placement === "subscription" && expanded.intent === "seats"} onClick={() => openOffer(manageableSubscription.id, "subscription", "seats")}>
                 {role === "owner" ? "시트 관리" : "증설 요청"}
               </Button>
             )}
           </div>}
         </div>
+        {expanded?.placement === "subscription" && <div className="border-b p-4 sm:p-5">{planEditor}</div>}
         <div className="divide-y px-5">
           {subscriptions.map((subscription) => {
             const status = statusOf(subscription.id)
@@ -1071,7 +1078,7 @@ export function ProductsSubscriptions({
                     const available = Math.max(0, capacity[product] - assigned)
                     const mySeat = members.find((member) => member.id === role)?.[product]
                     return <div key={product} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 text-sm" role="region" aria-label={`${names[product]} 이용 상태`}>
-                      <span className="text-muted-foreground">{subscription.id === "bundle" ? `${names[product]} · ` : ""}접근 가능 · 내 시트 {mySeat ? "배정됨" : "미배정"}</span>
+                      <span className="text-muted-foreground">{subscription.id === "bundle" ? `${names[product]} · ` : ""}내 계정: 시트 {mySeat ? "배정됨" : "없음"}</span>
                       {role !== "member" && <span className="flex flex-wrap gap-x-4 tabular-nums"><span>구매 {capacity[product]}</span><span>배정 {assigned}</span><span>남음 {available}</span></span>}
                     </div>
                   })}
@@ -1080,7 +1087,6 @@ export function ProductsSubscriptions({
             )
           })}
         </div>
-        {expanded?.placement === "subscription" && <div className="border-t p-4 sm:p-5">{planEditor}</div>}
         {role === "member" && (
           <div className="border-t px-5 py-4">
             <Button variant="outline" onClick={() => {
@@ -1092,7 +1098,7 @@ export function ProductsSubscriptions({
               if (!requests.some((r) => r.kind === "access" && r.product === product && r.memberId === "member" && r.status === "pending"))
                 setRequests((current) => [...current, { id: crypto.randomUUID(), memberId: "member", product, kind: "access", requester: role, status: "pending" }])
               setMessage("ADMIN에게 제품 접근을 요청했어요.")
-            }}>제품 접근 요청</Button>
+            }} className="ml-auto flex">제품 접근 요청</Button>
           </div>
         )}
       </section>}
@@ -1108,7 +1114,7 @@ export function ProductsSubscriptions({
               <p className="mt-2 flex-1 text-sm text-muted-foreground">{offer.description}</p>
               <p className="mt-3 text-xs text-muted-foreground">{statusLabels[subscriptionStates[offer.id] ?? "trial_not_started"]}</p>
               {role === "owner" ? (
-                <Button className="mt-4 self-start" variant="outline" size="sm" aria-expanded={expanded?.placement === "offer" && expanded.id === offer.id} onClick={() => openOffer(offer.id, "offer")}>
+                <Button className="mt-4 self-end" variant="outline" size="sm" aria-expanded={expanded?.placement === "offer" && expanded.id === offer.id} onClick={() => openOffer(offer.id, "offer")}>
                   {offer.id === "bundle" && subscriptions.some(({ id }) => statusOf(id) === "paid_active") ? "업그레이드" : "플랜 보기"}
                 </Button>
               ) : (
@@ -1159,7 +1165,7 @@ export function ProductsSubscriptions({
                   : "배정됨"}
             </p>
             {request.status === "pending" && (
-              <div className="flex gap-2">
+              <div className="ml-auto flex gap-2">
                 {role === "member" ? (
                   <Button
                     variant="outline"
@@ -1211,7 +1217,7 @@ export function ProductsSubscriptions({
             <p className="mt-4 text-sm">금액·다음 결제일: 확인 필요</p>
           ) : null}
           <Button
-            className="mt-4"
+            className="mt-4 ml-auto flex"
             variant="outline"
             onClick={() =>
               setMessage(

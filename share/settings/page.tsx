@@ -197,8 +197,8 @@ function PageHeading({
 }) {
   return (
     <header className="mb-7 flex items-start justify-between gap-5 border-b pb-6">
-      <div className="min-w-0">
-        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+      <div className="min-w-0 flex-1">
+        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
         <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground">
           {description}
         </p>
@@ -223,9 +223,9 @@ function SettingsSection({
     <section className="space-y-3">
       <div className="flex items-end justify-between gap-4 px-0.5">
         <div>
-          <h2 className="text-sm font-semibold">{title}</h2>
+        <h2 className="text-base font-semibold">{title}</h2>
           {description ? (
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            <p className="mt-1 text-sm leading-5 text-muted-foreground">
               {description}
             </p>
           ) : null}
@@ -239,10 +239,32 @@ function SettingsSection({
   )
 }
 
+function SettingRow({
+  label,
+  description,
+  children,
+  inlineControl = false,
+}: {
+  label: string
+  description?: string
+  children: ReactNode
+  inlineControl?: boolean
+}) {
+  return (
+    <div className={`grid gap-3 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 md:grid-cols-[minmax(0,1fr)_minmax(220px,320px)] md:items-center md:gap-8 ${inlineControl ? "grid-cols-[minmax(0,1fr)_auto] items-center" : ""}`}>
+      <div className="min-w-0">
+        <p className="text-sm font-medium">{label}</p>
+        {description ? <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p> : null}
+      </div>
+      <div className="min-w-0 md:justify-self-end md:w-full">{children}</div>
+    </div>
+  )
+}
+
 function SaveRow({ label = "변경사항 저장" }: { label?: string }) {
   const [saved, setSaved] = useState(false)
   return (
-    <div className="mt-5 flex items-center gap-3">
+    <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t pt-5">
       <Button onClick={() => setSaved(true)}>{label}</Button>
       {saved ? (
         <span className="flex items-center gap-1 text-xs text-emerald-700">
@@ -250,15 +272,6 @@ function SaveRow({ label = "변경사항 저장" }: { label?: string }) {
         </span>
       ) : null}
     </div>
-  )
-}
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label className="grid gap-1.5 text-sm">
-      <span className="text-xs font-medium">{label}</span>
-      {children}
-    </label>
   )
 }
 
@@ -274,8 +287,7 @@ function BrandColorPicker({
   const [color, setColor] = useState(initialColor)
   const pickerColor = /^#[0-9a-fA-F]{6}$/.test(color) ? color : initialColor
   return (
-    <Field label={label}>
-      <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2">
         <Input
           type="color"
           aria-label={`${label} 선택`}
@@ -290,8 +302,7 @@ function BrandColorPicker({
           readOnly={disabled}
           onChange={(event) => setColor(event.target.value)}
         />
-      </div>
-    </Field>
+    </div>
   )
 }
 
@@ -304,25 +315,21 @@ function AccountPage() {
       />
       <div className="space-y-7">
         <SettingsSection title="내 계정">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="이름">
-              <Input defaultValue="조민영" readOnly />
-            </Field>
-            <Field label="로그인 이메일">
-              <Input defaultValue="minyoung@ecoya.app" readOnly />
-            </Field>
+          <div>
+            <SettingRow label="이름"><Input aria-label="이름" defaultValue="조민영" readOnly /></SettingRow>
+            <SettingRow label="로그인 이메일"><Input aria-label="로그인 이메일" defaultValue="minyoung@ecoya.app" readOnly /></SettingRow>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
             업무 시간대와 기본 언어는 각 제품의 조직 설정에서 관리합니다.
           </p>
         </SettingsSection>
         <SettingsSection title="로그인 보안">
-          <Button
-            variant="outline"
-            onClick={() => window.location.assign("/password-recovery")}
-          >
-            비밀번호 변경
-          </Button>
+          <SettingRow label="비밀번호" description="로그인 비밀번호를 변경합니다." inlineControl>
+            <div className="flex justify-end"><Button
+              variant="outline"
+              onClick={() => window.location.assign("/password-recovery")}
+            >비밀번호 변경</Button></div>
+          </SettingRow>
         </SettingsSection>
       </div>
     </div>
@@ -341,37 +348,15 @@ function OrganizationPage({ role }: { role: SettingsRole }) {
         title="기본 정보"
         description="조직 원본 정보는 모든 활성 멤버가 보고 OWNER만 변경합니다."
       >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="법정 이름">
-            <Input
-              defaultValue="Hanbit Trading Co., Ltd."
-              readOnly={!editable}
-            />
-          </Field>
-          <Field label="표시 이름">
-            <Input defaultValue="한빛무역" readOnly={!editable} />
-          </Field>
-          <Field label="사업자·세무 식별값">
-            <Input defaultValue="120-88-260708" readOnly={!editable} />
-          </Field>
-          <Field label="대표 이메일">
-            <Input defaultValue="trade@hanbit.example" readOnly={!editable} />
-          </Field>
-          <Field label="대표 연락처">
-            <Input defaultValue="+82 2 2607 0801" readOnly={!editable} />
-          </Field>
-          <Field label="국가·주소">
-            <Input
-              defaultValue="대한민국 · 서울특별시 중구"
-              readOnly={!editable}
-            />
-          </Field>
-          <Field label="기본 locale">
-            <Input defaultValue="ko-KR" readOnly={!editable} />
-          </Field>
-          <Field label="기본 시간대">
-            <Input defaultValue="Asia/Seoul" readOnly={!editable} />
-          </Field>
+        <div>
+          <SettingRow label="법정 이름"><Input aria-label="법정 이름" defaultValue="Hanbit Trading Co., Ltd." readOnly={!editable} /></SettingRow>
+          <SettingRow label="표시 이름"><Input aria-label="표시 이름" defaultValue="한빛무역" readOnly={!editable} /></SettingRow>
+          <SettingRow label="사업자·세무 식별값"><Input aria-label="사업자·세무 식별값" defaultValue="120-88-260708" readOnly={!editable} /></SettingRow>
+          <SettingRow label="대표 이메일"><Input aria-label="대표 이메일" defaultValue="trade@hanbit.example" readOnly={!editable} /></SettingRow>
+          <SettingRow label="대표 연락처"><Input aria-label="대표 연락처" defaultValue="+82 2 2607 0801" readOnly={!editable} /></SettingRow>
+          <SettingRow label="국가·주소"><Input aria-label="국가·주소" defaultValue="대한민국 · 서울특별시 중구" readOnly={!editable} /></SettingRow>
+          <SettingRow label="기본 locale"><Input aria-label="기본 locale" defaultValue="ko-KR" readOnly={!editable} /></SettingRow>
+          <SettingRow label="기본 시간대"><Input aria-label="기본 시간대" defaultValue="Asia/Seoul" readOnly={!editable} /></SettingRow>
         </div>
         {editable ? (
           <SaveRow label="조직 정보 저장" />
@@ -399,22 +384,11 @@ function TradeDefaultsPage({ role }: { role: SettingsRole }) {
           title="문서 브랜딩"
           description="Organization 원본 정보와 별도로 저장됩니다."
         >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="문서 표시 이름">
-              <Input defaultValue="ECOYA Demo Co." readOnly={!editable} />
-            </Field>
-            <BrandColorPicker label="승인 색상" initialColor="#0B3971" disabled={!editable} />
-            <Field label="법적 footer">
-              <Input
-                defaultValue="ECOYA Trade OS generated document"
-                readOnly={!editable}
-              />
-            </Field>
-            <Field label="승인 로고">
-              <Button variant="outline" disabled={!editable}>
-                <Upload /> 파일 선택
-              </Button>
-            </Field>
+          <div>
+            <SettingRow label="문서 표시 이름"><Input aria-label="문서 표시 이름" defaultValue="ECOYA Demo Co." readOnly={!editable} /></SettingRow>
+            <SettingRow label="승인 색상"><BrandColorPicker label="승인 색상" initialColor="#0B3971" disabled={!editable} /></SettingRow>
+            <SettingRow label="법적 footer"><Input aria-label="법적 footer" defaultValue="ECOYA Trade OS generated document" readOnly={!editable} /></SettingRow>
+            <SettingRow label="승인 로고" inlineControl><div className="flex justify-end"><Button variant="outline" disabled={!editable}><Upload /> 파일 선택</Button></div></SettingRow>
           </div>
           {editable ? <SaveRow label="브랜딩 저장" /> : null}
         </SettingsSection>
@@ -422,24 +396,12 @@ function TradeDefaultsPage({ role }: { role: SettingsRole }) {
           title="업무용 지급 정보"
           description="계좌 원문은 표시하지 않으며 변경에는 재인증이 필요합니다."
         >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <div className="text-xs text-muted-foreground">
-                은행·계좌 명의
-              </div>
-              <div className="mt-1 text-sm font-medium">
-                DBS Bank · ECOYA Demo Co.
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">통화·계좌</div>
-              <div className="mt-1 text-sm font-medium">USD · •••• 0708</div>
-            </div>
-          </div>
-          <div className="mt-5">
-            <Button variant="outline" disabled={!editable}>
-              재인증 후 변경
-            </Button>
+          <div>
+            <SettingRow label="은행·계좌 명의"><p className="text-sm font-medium md:text-right">DBS Bank · ECOYA Demo Co.</p></SettingRow>
+            <SettingRow label="통화·계좌"><p className="text-sm font-medium md:text-right">USD · •••• 0708</p></SettingRow>
+            <SettingRow label="지급 정보 변경" description="변경하려면 다시 인증해야 합니다." inlineControl>
+              <div className="flex justify-end"><Button variant="outline" disabled={!editable}>재인증 후 변경</Button></div>
+            </SettingRow>
           </div>
         </SettingsSection>
       </div>
@@ -459,20 +421,15 @@ function EmailPage() {
         title="전용 수신 주소"
         description="주소 복사는 문서 수신·분석 성공을 의미하지 않습니다."
       >
-        <div className="flex flex-col gap-3 rounded-xl bg-muted/35 p-5 sm:flex-row sm:items-center">
-          <code className="min-w-0 flex-1 truncate text-sm">
-            hanbit-••••@inbound.ecoya.app
-          </code>
-          <Button variant="outline" onClick={() => setCopied(true)}>
-            <Copy /> 주소 복사
-          </Button>
-        </div>
+        <SettingRow label="수신 주소" description="PDF · 최대 10MB · 실제 주소는 로그와 캡처에서 마스킹됩니다.">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <code className="min-w-0 truncate text-sm">hanbit-••••@inbound.ecoya.app</code>
+            <Button variant="outline" onClick={() => setCopied(true)}><Copy /> 주소 복사</Button>
+          </div>
+        </SettingRow>
         {copied ? (
-          <p className="mt-3 text-xs text-emerald-700">주소를 복사했습니다.</p>
+          <p className="mt-3 text-right text-xs text-emerald-700">주소를 복사했습니다.</p>
         ) : null}
-        <p className="mt-4 text-xs text-muted-foreground">
-          PDF · 최대 10MB · 실제 주소는 로그와 캡처에서 마스킹됩니다.
-        </p>
       </SettingsSection>
     </div>
   )
@@ -553,7 +510,7 @@ function AliasesPage() {
                   {aliases}
                 </div>
               </div>
-              <Button variant="outline" size="sm">
+              <Button className="ml-auto" variant="outline" size="sm">
                 병합 영향 미리보기
               </Button>
             </div>
@@ -584,16 +541,15 @@ function AlertsPage() {
           title="수신 채널"
           description="채널 설정은 실제 알림 생성·전달·읽음 상태와 별개입니다."
         >
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div>
             {[
               ["app", "앱 알림"],
               ["email", "이메일"],
             ].map(([id, label]) => (
-              <label
-                key={id}
-                className="flex items-center gap-3 rounded-lg border p-4 text-sm"
-              >
+              <SettingRow key={id} label={label} inlineControl>
+                <div className="flex justify-end">
                 <Checkbox
+                  aria-label={label}
                   checked={channels[id as keyof typeof channels]}
                   onCheckedChange={(checked) =>
                     setChannels((value) => ({
@@ -602,8 +558,8 @@ function AlertsPage() {
                     }))
                   }
                 />
-                {label}
-              </label>
+                </div>
+              </SettingRow>
             ))}
           </div>
         </SettingsSection>
@@ -611,28 +567,27 @@ function AlertsPage() {
           title="알림 종류"
           description="현재 Organization · Trade OS · Asia/Seoul 기준"
         >
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div>
             {[
               ["approval", "승인 요청·반려"],
               ["document", "문서 분석·처리 실패"],
               ["risk", "거래 위험·불일치"],
               ["settlement", "정산 기한·입출금"],
             ].map(([id, label]) => (
-              <label
-                key={id}
-                className="flex items-center gap-3 rounded-lg border p-4 text-sm"
-              >
+              <SettingRow key={id} label={label} inlineControl>
+                <div className="flex justify-end">
                 <Checkbox
+                  aria-label={label}
                   checked={rules[id as keyof typeof rules]}
                   onCheckedChange={(checked) =>
                     setRules((value) => ({ ...value, [id]: checked === true }))
                   }
                 />
-                {label}
-              </label>
+                </div>
+              </SettingRow>
             ))}
           </div>
-          <div className="mt-5 flex items-center gap-3">
+          <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t pt-5">
             <Button onClick={() => setSaved(true)}>알림 설정 저장</Button>
             {saved ? (
               <span className="text-xs text-emerald-700">저장했습니다.</span>
@@ -676,18 +631,16 @@ function SnapSimplePage({
         action={<Badge variant="secondary">SNAP</Badge>}
       />
       <SettingsSection title="기본 설정">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={type === "localization" ? "기본 언어" : "표시 이름"}>
-            <Input
-              defaultValue={type === "localization" ? "한국어" : "ECOYA SNAP"}
-            />
-          </Field>
+        <div>
+          <SettingRow label={type === "localization" ? "기본 언어" : "표시 이름"}>
+            <Input aria-label={type === "localization" ? "기본 언어" : "표시 이름"} defaultValue={type === "localization" ? "한국어" : "ECOYA SNAP"} />
+          </SettingRow>
           {type === "branding" ? (
-            <BrandColorPicker label="브랜드 색상" initialColor="#0B3971" disabled={role === "member"} />
+            <SettingRow label="브랜드 색상"><BrandColorPicker label="브랜드 색상" initialColor="#0B3971" disabled={role === "member"} /></SettingRow>
           ) : (
-            <Field label={type === "operations" ? "전달 채널" : "시간대"}>
-              <Input defaultValue={type === "operations" ? "앱 링크 · 이메일" : "Asia/Seoul"} />
-            </Field>
+            <SettingRow label={type === "operations" ? "전달 채널" : "시간대"}>
+              <Input aria-label={type === "operations" ? "전달 채널" : "시간대"} defaultValue={type === "operations" ? "앱 링크 · 이메일" : "Asia/Seoul"} />
+            </SettingRow>
           )}
         </div>
         <SaveRow />
@@ -712,10 +665,10 @@ function SnapDataPage() {
       />
       <div className="space-y-7">
         <SettingsSection title="데이터 저장">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="데이터 거주 지역">
+          <div>
+            <SettingRow label="데이터 거주 지역">
               <Select defaultValue="kr">
-                <SelectTrigger>
+                <SelectTrigger aria-label="데이터 거주 지역" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -724,13 +677,8 @@ function SnapDataPage() {
                   <SelectItem value="eu">유럽 연합</SelectItem>
                 </SelectContent>
               </Select>
-            </Field>
-            <div className="rounded-lg bg-muted/35 p-4">
-              <div className="text-xs text-muted-foreground">
-                조직 저장 공간
-              </div>
-              <div className="mt-1 text-sm text-muted-foreground">실시간 저장량 조회가 연결되지 않았습니다.</div>
-            </div>
+            </SettingRow>
+            <SettingRow label="조직 저장 공간"><p className="text-sm text-muted-foreground md:text-right">실시간 저장량 조회가 연결되지 않았습니다.</p></SettingRow>
           </div>
         </SettingsSection>
         <SettingsSection
@@ -738,11 +686,9 @@ function SnapDataPage() {
           description="기존 법적 보존 의무보다 짧게 변경할 수 없습니다."
           action={<Badge variant="outline">일 단위</Badge>}
         >
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div>
             {rows.map(([label, value]) => (
-              <Field key={label} label={label}>
-                <Input type="number" min="1" defaultValue={value} />
-              </Field>
+              <SettingRow key={label} label={label}><Input aria-label={label} type="number" min="1" defaultValue={value} /></SettingRow>
             ))}
           </div>
           <SaveRow label="데이터 정책 저장" />
@@ -751,7 +697,7 @@ function SnapDataPage() {
           title="조직 데이터 및 감사 이력"
           description="삭제 요청과 파기 실행은 감사 로그에 남습니다."
         >
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
             <Button variant="outline">
               <Download /> 조직 데이터 내보내기
             </Button>
@@ -776,7 +722,7 @@ function SnapUsagePage({ role }: { role: SettingsRole }) {
         </p>
         {role === "owner" ? (
           <Button
-            className="mt-5"
+            className="mt-5 ml-auto flex"
             variant="outline"
             onClick={() => window.location.assign("/erp/settings?section=products")}
           >
@@ -804,7 +750,7 @@ function renderSection(
           description="현재 소속과 선택한 조직을 확인합니다."
         />
         <SettingsSection title="현재 조직">
-          <p className="font-medium">ECOYA Demo Co.</p>
+          <SettingRow label="조직 이름"><p className="text-sm font-medium md:text-right">ECOYA Demo Co.</p></SettingRow>
         </SettingsSection>
       </div>
     )
