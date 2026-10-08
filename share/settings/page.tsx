@@ -26,7 +26,7 @@ import { SidebarProfileMenu } from "@shared/components/sidebar-profile-menu"
 import { WorkspaceSwitcher } from "@shared/components/workspace-switcher"
 import { Badge } from "@shared/components/ui/badge"
 import { Button } from "@shared/components/ui/button"
-import { Card, CardContent } from "@shared/components/ui/card"
+import { Card, CardContent, CardHeader } from "@shared/components/ui/card"
 import { Checkbox } from "@shared/components/ui/checkbox"
 import { Input } from "@shared/components/ui/input"
 import {
@@ -341,6 +341,19 @@ function AccountPage() {
   )
 }
 
+function OrganizationSection({ title, id, children }: { title: string; id: string; children: ReactNode }) {
+  return (
+    <section aria-labelledby={id}>
+      <Card className="shadow-none">
+        <CardHeader className="border-b px-5 py-4 sm:px-6">
+          <h2 id={id} className="text-base font-semibold">{title}</h2>
+        </CardHeader>
+        <CardContent className="p-5 sm:p-6">{children}</CardContent>
+      </Card>
+    </section>
+  )
+}
+
 function OrganizationPage({ role, products }: { role: SettingsRole; products: readonly ProductEntitlement[] }) {
   const editable = role === "owner"
   const [country, setCountry] = useState("KR")
@@ -353,17 +366,15 @@ function OrganizationPage({ role, products }: { role: SettingsRole; products: re
   return (
     <div>
       <PageHeading title="조직 정보" description="현재 조직의 기본 정보와 주소, 언어를 관리합니다." />
-      <form onSubmit={event => { event.preventDefault(); if (editable) setSaveError("조직 정보를 저장할 수 없습니다. 잠시 후 다시 시도해 주세요. 입력한 내용은 유지됩니다.") }} className="space-y-8">
-        <section aria-labelledby="organization-basics">
-          <h2 id="organization-basics" className="mb-5 text-base font-semibold">기본 정보</h2>
+      <form onSubmit={event => { event.preventDefault(); if (editable) setSaveError("조직 정보를 저장할 수 없습니다. 잠시 후 다시 시도해 주세요. 입력한 내용은 유지됩니다.") }} className="space-y-6">
+        <OrganizationSection id="organization-basics" title="기본 정보">
           <SettingRow label="법정 이름"><Input data-guide-target="organization" aria-label="법정 이름" autoComplete="organization" defaultValue="Hanbit Trading Co., Ltd." readOnly={!editable} /></SettingRow>
           <SettingRow label="표시 이름"><Input aria-label="표시 이름" defaultValue="한빛무역" readOnly={!editable} /></SettingRow>
           <SettingRow label="사업자·세무 식별값"><Input aria-label="사업자·세무 식별값" defaultValue="120-88-260708" readOnly={!editable} /></SettingRow>
           <SettingRow label="대표 이메일"><Input aria-label="대표 이메일" type="email" autoComplete="email" defaultValue="trade@hanbit.example" readOnly={!editable} /></SettingRow>
           <SettingRow label="대표 연락처"><Input aria-label="대표 연락처" type="tel" autoComplete="tel" defaultValue="+82 2 2607 0801" readOnly={!editable} /></SettingRow>
-        </section>
-        <section aria-labelledby="organization-address" className="border-t pt-7">
-          <h2 id="organization-address" className="mb-5 text-base font-semibold">주소</h2>
+        </OrganizationSection>
+        <OrganizationSection id="organization-address" title="주소">
           <SettingRow label="국가·지역" description="국가명이나 국가 코드로 검색할 수 있습니다.">
             <SearchableSetting label="국가·지역" value={country} options={countryOptions} onChange={setCountry} disabled={!editable} />
           </SettingRow>
@@ -373,17 +384,16 @@ function OrganizationPage({ role, products }: { role: SettingsRole; products: re
           <SettingRow label={cityLabel}><Input aria-label={cityLabel} autoComplete="address-level2" defaultValue="중구" readOnly={!editable} /></SettingRow>
           <SettingRow label="기본 주소" description="도로명과 건물 번호를 입력하세요."><Input aria-label="기본 주소" autoComplete="address-line1" placeholder="도로명, 건물 번호" readOnly={!editable} /></SettingRow>
           <SettingRow label="상세 주소" description="동·층·호수 등 추가 주소를 입력하세요. (선택)"><Input aria-label="상세 주소" autoComplete="address-line2" placeholder="동, 층, 호수" readOnly={!editable} /></SettingRow>
-        </section>
-        <section aria-labelledby="organization-region" className="border-t pt-7">
-          <h2 id="organization-region" className="mb-5 text-base font-semibold">언어 및 시간대</h2>
+        </OrganizationSection>
+        <OrganizationSection id="organization-region" title="언어 및 시간대">
           <SettingRow label="기본 언어" description="개인의 언어 설정은 내 계정에서 관리합니다.">
             <SearchableSetting label="기본 언어" value={locale} options={locales} onChange={setLocale} disabled={!editable} />
           </SettingRow>
           <SettingRow label="기본 시간대" description="국가를 바꿔도 시간대는 유지됩니다.">
             <SearchableSetting label="기본 시간대" value={timezone} options={timeZoneOptions} onChange={setTimezone} disabled={!editable} />
           </SettingRow>
-        </section>
-        {editable ? <div className="flex flex-wrap items-center justify-end gap-3 border-t pt-5">
+        </OrganizationSection>
+        {editable ? <div className="flex flex-wrap items-center justify-end gap-3">
           {saveError ? <p role="alert" className="w-full text-sm text-destructive">{saveError}</p> : null}
           <Button type="submit">조직 정보 저장</Button>
         </div> : <p className="text-xs text-muted-foreground">조직 정보 변경은 Organization OWNER에게 요청하세요.</p>}
