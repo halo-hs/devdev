@@ -26,7 +26,7 @@ import { SidebarProfileMenu } from "@shared/components/sidebar-profile-menu"
 import { WorkspaceSwitcher } from "@shared/components/workspace-switcher"
 import { Badge } from "@shared/components/ui/badge"
 import { Button } from "@shared/components/ui/button"
-import { Card, CardContent, CardHeader } from "@shared/components/ui/card"
+import { Card, CardContent } from "@shared/components/ui/card"
 import { Checkbox } from "@shared/components/ui/checkbox"
 import { Input } from "@shared/components/ui/input"
 import {
@@ -343,11 +343,9 @@ function AccountPage() {
 
 function OrganizationSection({ title, id, children }: { title: string; id: string; children: ReactNode }) {
   return (
-    <section aria-labelledby={id}>
+    <section aria-labelledby={id} className="space-y-3">
+      <h2 id={id} className="text-base font-semibold">{title}</h2>
       <Card className="shadow-none">
-        <CardHeader className="border-b px-5 py-4 sm:px-6">
-          <h2 id={id} className="text-base font-semibold">{title}</h2>
-        </CardHeader>
         <CardContent className="p-5 sm:p-6">{children}</CardContent>
       </Card>
     </section>
