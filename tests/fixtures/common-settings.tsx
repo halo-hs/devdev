@@ -2,12 +2,16 @@ import { createRoot, type Root } from "react-dom/client"
 import {
   SettingsHubV2,
   type ProductEntitlement,
+  type SettingsRole,
 } from "../../share/settings/page"
 import { SidebarProvider } from "../../packages/shared-ui/src/components/ui/sidebar"
 import { TooltipProvider } from "../../packages/shared-ui/src/components/ui/tooltip"
 
 let root: Root | undefined
-export function renderSettings(products: ProductEntitlement[]) {
+export function renderSettings(
+  products: ProductEntitlement[],
+  role: SettingsRole = "owner"
+) {
   if (!root) {
     document.getElementById("root")?.remove()
     const host = document.createElement("div")
@@ -19,6 +23,7 @@ export function renderSettings(products: ProductEntitlement[]) {
       <SidebarProvider defaultOpen>
         <SettingsHubV2
           availableProducts={products}
+          role={role}
           workspaceId="ecoya"
           onNavigate={() => {}}
           onLogout={() => {}}

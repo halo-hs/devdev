@@ -19,29 +19,16 @@ import {
   SlidersHorizontal,
   Sparkles,
   Upload,
-  UserPlus,
-  WalletCards,
+  ExternalLink,
 } from "lucide-react"
 
 import { SidebarProfileMenu } from "@shared/components/sidebar-profile-menu"
-import {
-  CreditConversionPreview,
-  TrialSchedulePreview,
-} from "@auth/components/trial-preview"
 import { WorkspaceSwitcher } from "@shared/components/workspace-switcher"
 import { Badge } from "@shared/components/ui/badge"
 import { Button } from "@shared/components/ui/button"
 import { Card, CardContent } from "@shared/components/ui/card"
 import { Checkbox } from "@shared/components/ui/checkbox"
 import { Input } from "@shared/components/ui/input"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@shared/components/ui/dialog"
 import { Progress } from "@shared/components/ui/progress"
 import {
   Select,
@@ -65,6 +52,11 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@shared/components/ui/sidebar"
+import {
+  OrganizationMembers,
+  ProductsSubscriptions,
+  SettingsDemoProvider,
+} from "./subscription-settings"
 import type { WorkspaceKey } from "@shared/lib/workspaces"
 
 export type ProductEntitlement = "erp" | "snap"
@@ -103,35 +95,40 @@ type NavItem = {
 // Common SSOT 02-COMMON-IA: headings are non-interactive, menus one level deep.
 const navigation: Array<{ label: string; items: NavItem[] }> = [
   {
-    label: "설정 시작",
-    items: [{ id: "account", label: "일반", icon: CircleUserRound }],
+    label: "일반",
+    items: [
+      { id: "account", label: "내 계정", icon: CircleUserRound },
+      { id: "organizations", label: "소속 Organization", icon: Building2 },
+    ],
   },
   {
     label: "조직",
     items: [
       {
         id: "organization",
-        label: "조직 관리",
+        label: "조직 정보",
         icon: Building2,
-        keywords: ["회사", "멤버", "초대", "은행", "서명"],
+        keywords: ["회사", "사업자"],
       },
       {
-        id: "snap-data",
-        label: "데이터 관리",
-        icon: Database,
-        product: "snap",
+        id: "members",
+        label: "사용자 관리",
+        icon: CircleUserRound,
+        roles: ["owner", "admin"],
       },
+      { id: "products", label: "제품 및 구독", icon: CreditCard },
+      { id: "billing", label: "빌링", icon: ExternalLink, roles: ["owner"] },
     ],
   },
   {
-    label: "알림",
+    label: "Trade OS",
     items: [
-      { id: "trade-alerts", label: "ERP 알림", icon: Bell, product: "erp" },
-    ],
-  },
-  {
-    label: "ERP",
-    items: [
+      {
+        id: "trade-defaults",
+        label: "업무 기본 설정",
+        icon: SlidersHorizontal,
+        product: "erp",
+      },
       {
         id: "trade-email",
         label: "이메일로 문서 받기",
@@ -156,11 +153,24 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
         icon: Landmark,
         product: "erp",
       },
+      { id: "trade-alerts", label: "알림", icon: Bell, product: "erp" },
+      {
+        id: "trade-usage",
+        label: "AI 사용량",
+        icon: Sparkles,
+        product: "erp",
+      },
     ],
   },
   {
     label: "SNAP",
     items: [
+      {
+        id: "snap-operations",
+        label: "현장 운영",
+        icon: SlidersHorizontal,
+        product: "snap",
+      },
       { id: "snap-branding", label: "브랜딩", icon: Palette, product: "snap" },
       {
         id: "snap-localization",
@@ -169,32 +179,15 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
         product: "snap",
       },
       {
-        id: "snap-operations",
-        label: "현장 운영",
-        icon: SlidersHorizontal,
+        id: "snap-data",
+        label: "데이터 및 보존",
+        icon: Database,
         product: "snap",
-      },
-    ],
-  },
-  {
-    label: "사용량 및 청구",
-    items: [
-      {
-        id: "trade-usage",
-        label: "ERP AI 사용량",
-        icon: Sparkles,
-        product: "erp",
-      },
-      {
-        id: "billing",
-        label: "ERP 결제·구독",
-        icon: CreditCard,
-        product: "erp",
       },
       {
         id: "snap-usage",
-        label: "SNAP 크레딧·결제",
-        icon: WalletCards,
+        label: "사용량 및 기술 한도",
+        icon: Sparkles,
         product: "snap",
       },
     ],
@@ -211,7 +204,7 @@ function PageHeading({
   action?: ReactNode
 }) {
   return (
-    <header className="mb-7 flex items-start justify-between gap-5">
+    <header className="mb-7 flex items-start justify-between gap-5 border-b pb-6">
       <div className="min-w-0">
         <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
         <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground">
@@ -281,14 +274,11 @@ function AccountPage() {
   return (
     <div>
       <PageHeading
-        title="일반"
+        title="내 계정"
         description="내 계정 정보와 로그인 보안을 확인합니다."
       />
       <div className="space-y-7">
-        <SettingsSection
-          title="내 계정"
-          description="개인 설정 화면 미리보기입니다. 계정 정보 저장은 아직 연결되지 않았습니다."
-        >
+        <SettingsSection title="내 계정">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="이름">
               <Input defaultValue="조민영" readOnly />
@@ -319,13 +309,8 @@ function OrganizationPage({ role }: { role: SettingsRole }) {
   return (
     <div>
       <PageHeading
-        title="조직 관리"
-        description="현재 조직의 정보와 제품별 멤버·초대를 관리합니다."
-        action={
-          <Badge variant="secondary">
-            {editable ? "OWNER · 편집 가능" : "읽기 전용"}
-          </Badge>
-        }
+        title="조직 정보"
+        description="현재 조직의 기본 정보를 확인합니다. 멤버·초대는 사용자 관리에서 관리합니다."
       />
       <SettingsSection
         title="기본 정보"
@@ -371,275 +356,6 @@ function OrganizationPage({ role }: { role: SettingsRole }) {
           </p>
         )}
       </SettingsSection>
-    </div>
-  )
-}
-
-function MembersPage({ role }: { role: SettingsRole }) {
-  const owner = role === "owner"
-  const [invited, setInvited] = useState(false)
-  return (
-    <div>
-      <PageHeading
-        title="사용자 관리"
-        description="ERP 멤버와 초대를 관리합니다. SNAP 역할과 승인 상태는 SNAP 멤버 관리에서 확인하세요."
-        action={
-          <Button onClick={() => setInvited(true)}>
-            <UserPlus /> 멤버 초대
-          </Button>
-        }
-      />
-      <div className="space-y-7">
-        <SettingsSection
-          title="조직 멤버"
-          description={
-            owner
-              ? "OWNER는 역할과 제품 접근을 관리할 수 있습니다."
-              : "ADMIN은 MEMBER 범위만 관리할 수 있습니다."
-          }
-        >
-          <div className="grid gap-3">
-            {[
-              ["조민영", "minyoung@ecoya.app", "OWNER", "Trade OS", true],
-              ["김도현", "dohyun@ecoya.app", "ADMIN", "Trade OS", false],
-              ["박서윤", "seoyun@ecoya.app", "MEMBER", "Trade OS", false],
-            ].map(([name, email, memberRole, access, self]) => (
-              <div
-                key={String(email)}
-                className="grid items-center gap-3 rounded-lg border p-4 sm:grid-cols-[minmax(0,1fr)_140px_180px_auto]"
-              >
-                <div>
-                  <div className="font-medium">
-                    {name}
-                    {self ? (
-                      <Badge className="ml-2" variant="secondary">
-                        나
-                      </Badge>
-                    ) : null}
-                  </div>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    {email}
-                  </div>
-                </div>
-                <Select
-                  defaultValue={String(memberRole).toLowerCase()}
-                  disabled={
-                    Boolean(self) || (!owner && memberRole !== "MEMBER")
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="owner">OWNER</SelectItem>
-                    <SelectItem value="admin">ADMIN</SelectItem>
-                    <SelectItem value="member">MEMBER</SelectItem>
-                  </SelectContent>
-                </Select>
-                <span className="text-xs text-muted-foreground">{access}</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={
-                    Boolean(self) || (!owner && memberRole !== "MEMBER")
-                  }
-                >
-                  접근 관리
-                </Button>
-              </div>
-            ))}
-          </div>
-        </SettingsSection>
-        <SettingsSection
-          title="멤버 초대"
-          description="발송·수락·Membership 활성화는 서로 다른 상태입니다."
-        >
-          {invited ? (
-            <div className="mb-3 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">
-              새 초대가 대기 상태로 추가되었습니다.
-            </div>
-          ) : null}
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_140px_auto]">
-            <Input type="email" placeholder="member@company.com" />
-            <Select defaultValue="member">
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {owner ? <SelectItem value="admin">ADMIN</SelectItem> : null}
-                <SelectItem value="member">MEMBER</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={() => setInvited(true)}>초대 이메일 발송</Button>
-          </div>
-          <div className="mt-4 rounded-lg border p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="text-sm font-medium">finance@ecoya.app</div>
-                <div className="mt-1 text-xs text-muted-foreground">
-                  MEMBER · 대기 중 · 2026.09.15 만료
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline">
-                  링크 복사
-                </Button>
-                <Button size="sm" variant="outline">
-                  다시 보내기
-                </Button>
-                <Button size="sm" variant="ghost">
-                  취소
-                </Button>
-              </div>
-            </div>
-          </div>
-        </SettingsSection>
-      </div>
-    </div>
-  )
-}
-
-function BillingPreviewActions({ product }: { product: "erp" | "snap" }) {
-  const [action, setAction] = useState<"subscription" | "credits" | null>(null)
-  const [credits, setCredits] = useState("2000")
-  const [plan, setPlan] = useState("pro")
-  const [message, setMessage] = useState("")
-  return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        <Button variant="outline" onClick={() => setAction("subscription")}>
-          구독 관리
-        </Button>
-        {product === "snap" && (
-          <Button onClick={() => setAction("credits")}>크레딧 충전</Button>
-        )}
-      </div>
-      {message && (
-        <p role="status" className="text-sm text-primary">
-          {message}
-        </p>
-      )}
-      <Dialog
-        open={action !== null}
-        onOpenChange={(open) => {
-          if (!open) setAction(null)
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {action === "credits"
-                ? "SNAP 크레딧 충전"
-                : `${product === "erp" ? "ERP" : "SNAP"} 구독 관리`}
-            </DialogTitle>
-            <DialogDescription>
-              결제 화면 미리보기입니다. 실제 청구나 크레딧 지급은 발생하지
-              않습니다.
-            </DialogDescription>
-          </DialogHeader>
-          {action === "credits" ? (
-            <Field label="충전 크레딧">
-              <Input
-                type="number"
-                min="1"
-                step="1"
-                value={credits}
-                onChange={(event) => setCredits(event.target.value)}
-              />
-            </Field>
-          ) : (
-            <Field label="요금제">
-              <Select
-                value={plan}
-                onValueChange={(value) => value && setPlan(value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pro">Pro</SelectItem>
-                  <SelectItem value="enterprise">Enterprise</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAction(null)}>
-              취소
-            </Button>
-            <Button
-              disabled={
-                action === "credits" &&
-                (!Number.isSafeInteger(Number(credits)) || Number(credits) <= 0)
-              }
-              onClick={() => {
-                setMessage(
-                  action === "credits"
-                    ? `${Number(credits).toLocaleString("ko-KR")}크레딧 충전 · 결제 대기 (예시)`
-                    : `${plan === "pro" ? "Pro" : "Enterprise"} 구독 변경 · 결제 대기 (예시)`
-                )
-                setAction(null)
-              }}
-            >
-              결제 단계 확인
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  )
-}
-
-function BillingPage() {
-  return (
-    <div>
-      <PageHeading
-        title="ERP 결제·구독"
-        description="현재 Organization의 결제 상태와 Paddle 인보이스를 확인합니다."
-        action={<Badge variant="secondary">OWNER 전용</Badge>}
-      />
-      <div className="space-y-7">
-        <TrialSchedulePreview />
-        <SettingsSection
-          title="결제 상태"
-          description="외부 결제 화면을 열었다는 사실은 결제 완료를 뜻하지 않습니다."
-        >
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <div className="text-xs text-muted-foreground">Paddle 연결</div>
-              <div className="mt-1 font-medium">연결됨</div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">다음 결제일</div>
-              <div className="mt-1 font-medium">2026.10.01</div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">예정 금액</div>
-              <div className="mt-1 font-medium">240,000 KRW</div>
-            </div>
-          </div>
-          <div className="mt-5">
-            <BillingPreviewActions product="erp" />
-          </div>
-        </SettingsSection>
-        <SettingsSection title="인보이스">
-          <div className="grid gap-3">
-            {["2026년 9월 · 240,000 KRW", "2026년 8월 · 240,000 KRW"].map(
-              (row) => (
-                <div
-                  key={row}
-                  className="flex items-center justify-between rounded-lg border p-4"
-                >
-                  <span className="text-sm font-medium">{row}</span>
-                  <Button variant="outline" size="sm">
-                    <Download /> 내려받기
-                  </Button>
-                </div>
-              )
-            )}
-          </div>
-        </SettingsSection>
-      </div>
     </div>
   )
 }
@@ -837,7 +553,7 @@ function AlertsPage() {
   return (
     <div>
       <PageHeading
-        title="ERP 알림"
+        title="알림"
         description="Trade OS 업무 알림의 종류와 수신 채널을 설정합니다."
       />
       <div className="space-y-7">
@@ -951,7 +667,7 @@ function TradeUsagePage({ role }: { role: SettingsRole }) {
   return (
     <div>
       <PageHeading
-        title="ERP AI 사용량"
+        title="AI 사용량"
         description="현재 Organization의 Trade OS 집계 사용량입니다. 멤버별 활동이나 프롬프트 본문은 표시하지 않습니다."
         action={
           <Button variant="outline">
@@ -980,10 +696,10 @@ function TradeUsagePage({ role }: { role: SettingsRole }) {
             <Button
               variant="outline"
               onClick={() =>
-                window.location.assign("/erp/settings?section=billing")
+                window.location.assign("/erp/settings?section=products")
               }
             >
-              ERP 결제·구독 보기
+              제품 및 구독 보기
             </Button>
           </div>
         ) : (
@@ -992,9 +708,6 @@ function TradeUsagePage({ role }: { role: SettingsRole }) {
           </p>
         )}
       </SettingsSection>
-      <div className="mt-7">
-        <CreditConversionPreview />
-      </div>
     </div>
   )
 }
@@ -1071,7 +784,7 @@ function SnapDataPage() {
   return (
     <div>
       <PageHeading
-        title="데이터 관리"
+        title="데이터 및 보존"
         description="SNAP 데이터 거주 지역, 저장 공간, 보존·파기와 조직 데이터 작업을 관리합니다."
         action={<Badge variant="secondary">SNAP</Badge>}
       />
@@ -1132,7 +845,7 @@ function SnapUsagePage({ role }: { role: SettingsRole }) {
   return (
     <div>
       <PageHeading
-        title="SNAP 크레딧·결제"
+        title="사용량 및 기술 한도"
         description="현재 Organization의 SNAP 구독·체험별 사용량을 확인합니다."
         action={
           <Button variant="outline">
@@ -1145,7 +858,10 @@ function SnapUsagePage({ role }: { role: SettingsRole }) {
         description="사용량 조회 실패를 무료 또는 0으로 표시하지 않습니다."
       >
         <div className="grid gap-4 lg:grid-cols-2">
-          <TrialSchedulePreview />
+          <p className="text-sm text-muted-foreground">
+            저장량·AI·속도 제한은 비과금 기술 한도입니다. 구독과 구매 시트는
+            제품 및 구독에서 확인하세요.
+          </p>
           <UsageCard
             product="SNAP 리포트 보관"
             plan="포함 저장량"
@@ -1159,13 +875,17 @@ function SnapUsagePage({ role }: { role: SettingsRole }) {
         </div>
         {role === "owner" ? (
           <div className="mt-5">
-            <BillingPreviewActions product="snap" />
+            <Button
+              variant="outline"
+              onClick={() =>
+                window.location.assign("/erp/settings?section=products")
+              }
+            >
+              제품 및 구독 보기
+            </Button>
           </div>
         ) : null}
       </SettingsSection>
-      <div className="mt-7">
-        <CreditConversionPreview />
-      </div>
     </div>
   )
 }
@@ -1176,41 +896,32 @@ function renderSection(
   products: readonly ProductEntitlement[]
 ) {
   if (section === "account") return <AccountPage />
-  if (section === "organization")
+  if (section === "organizations")
     return (
-      <div className="space-y-10">
-        <OrganizationPage role={role} />
-        {products.includes("erp") && (
-          <>
-            <TradeDefaultsPage role={role} />
-            {role !== "member" && <MembersPage role={role} />}
-          </>
-        )}
-        {products.includes("snap") && (
-          <SettingsSection
-            title="SNAP 조직·멤버"
-            description="SNAP 역할, 가입 승인과 좌석은 SNAP 제품 정책을 따릅니다."
-          >
-            <Button
-              variant="outline"
-              onClick={() => window.location.assign("/workers")}
-            >
-              SNAP 멤버 관리
-            </Button>
-          </SettingsSection>
-        )}
+      <div>
+        <PageHeading
+          title="소속 Organization"
+          description="현재 소속과 선택한 조직을 확인합니다."
+        />
+        <SettingsSection title="현재 조직">
+          <p className="font-medium">ECOYA Demo Co.</p>
+        </SettingsSection>
       </div>
     )
-  if (section === "billing")
-    return role === "owner" ? (
-      <BillingPage />
-    ) : (
-      <div role="status">
-        <PageHeading
-          title="ERP 결제·구독"
-          description="결제 관리 권한이 없습니다. 조직 소유자에게 문의하세요."
-        />
-      </div>
+  if (section === "organization") return <OrganizationPage role={role} />
+  if (section === "trade-defaults") return <TradeDefaultsPage role={role} />
+  if (section === "members")
+    return <OrganizationMembers role={role} products={products} />
+  if (section === "products" || section === "billing")
+    return (
+      <ProductsSubscriptions
+        role={role}
+        products={products}
+        planInitiallyOpen={
+          new URLSearchParams(window.location.search).get("plan") === "1" &&
+          role !== "member"
+        }
+      />
     )
   if (section === "trade-email") return <EmailPage />
   if (section === "trade-counterparty-import")
@@ -1228,7 +939,7 @@ function renderSection(
   return <AccountPage />
 }
 
-export function SettingsHubV2({
+function SettingsHubContent({
   onNavigate,
   onLogout,
   workspaceId,
@@ -1267,10 +978,20 @@ export function SettingsHubV2({
     const candidate = new URLSearchParams(window.location.search).get(
       "section"
     ) as SectionId | null
-    return candidate && availableIds.includes(candidate) ? candidate : "account"
+    return candidate === "billing"
+      ? "products"
+      : candidate && availableIds.includes(candidate)
+        ? candidate
+        : "account"
   })()
   const [section, setSection] = useState<SectionId>(initialSection)
   const [query, setQuery] = useState("")
+  const [portalError, setPortalError] = useState(false)
+  const openBillingPortal = () => {
+    if (role !== "owner") return
+    // No server session issuer is configured in this UI prototype. Never open a static portal URL.
+    setPortalError(true)
+  }
   const effectiveSection = availableIds.includes(section) ? section : "account"
   const visibleGroups = groups
     .map((group) => ({
@@ -1299,7 +1020,11 @@ export function SettingsHubV2({
         "section"
       ) as SectionId | null
       setSection(
-        candidate && availableIds.includes(candidate) ? candidate : "account"
+        candidate === "billing"
+          ? "products"
+          : candidate && availableIds.includes(candidate)
+            ? candidate
+            : "account"
       )
     }
     window.addEventListener("popstate", handlePopState)
@@ -1307,7 +1032,7 @@ export function SettingsHubV2({
   }, [availableIds])
 
   return (
-    <div className="flex h-full min-h-0 min-w-0 flex-1 bg-[var(--surface-muted-background)]">
+    <div className="flex h-full min-h-0 min-w-0 flex-1 bg-background">
       <Sidebar
         collapsible="icon"
         className="settings-navigation top-0 h-svh! bg-background md:z-50"
@@ -1362,7 +1087,16 @@ export function SettingsHubV2({
                           <SidebarMenuButton
                             isActive={effectiveSection === item.id}
                             tooltip={item.label}
-                            onClick={() => selectSection(item.id)}
+                            onClick={() =>
+                              item.id === "billing"
+                                ? openBillingPortal()
+                                : selectSection(item.id)
+                            }
+                            aria-label={
+                              item.id === "billing"
+                                ? "빌링 (새 탭에서 열림)"
+                                : item.label
+                            }
                             aria-current={
                               effectiveSection === item.id ? "page" : undefined
                             }
@@ -1371,6 +1105,7 @@ export function SettingsHubV2({
                             <Icon />
                             <span className="group-data-[collapsible=icon]:hidden">
                               {item.label}
+                              {item.id === "billing" ? " ↗" : ""}
                             </span>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -1397,15 +1132,51 @@ export function SettingsHubV2({
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
-      <SidebarInset className="min-h-0 min-w-0 overflow-hidden bg-[var(--surface-muted-background)] md:pt-(--header-height)">
+      <SidebarInset className="min-h-0 min-w-0 overflow-hidden bg-background md:pt-(--header-height)">
         <div className="h-full min-h-0 overflow-y-auto">
-          <main className="w-full px-5 py-7 sm:px-7 xl:px-10 xl:py-9">
+          <div className="mx-auto w-full max-w-[1440px] px-5 py-7 sm:px-7 xl:px-10 xl:py-9">
+            {portalError && role === "owner" && (
+              <div
+                role="alert"
+                className="mb-5 rounded-lg border border-destructive/30 bg-background p-4 text-sm"
+              >
+                <p>
+                  빌링 포털에 연결하지 못했습니다. 현재 조직의 OWNER 권한·Paddle
+                  연결을 확인할 서버가 연결되어 있지 않습니다.
+                </p>
+                <Button
+                  className="mt-3"
+                  variant="outline"
+                  onClick={openBillingPortal}
+                >
+                  다시 열기
+                </Button>
+                <Button
+                  className="ml-2"
+                  variant="ghost"
+                  onClick={() => setPortalError(false)}
+                >
+                  닫기
+                </Button>
+              </div>
+            )}
             <div key={`${workspaceId}:${effectiveSection}`}>
               {renderSection(effectiveSection, role, availableProducts)}
             </div>
-          </main>
+          </div>
         </div>
       </SidebarInset>
     </div>
+  )
+}
+
+// Reset all demo data and pending feedback when organization or role changes.
+export function SettingsHubV2(props: Parameters<typeof SettingsHubContent>[0]) {
+  return (
+    <SettingsDemoProvider
+      key={`${props.workspaceId}:${props.role ?? "owner"}:${(props.availableProducts ?? ["erp", "snap"]).join(",")}`}
+    >
+      <SettingsHubContent {...props} />
+    </SettingsDemoProvider>
   )
 }
