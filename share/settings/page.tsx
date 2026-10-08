@@ -55,7 +55,7 @@ import {
   ProductsSubscriptions,
   SettingsDemoProvider,
 } from "./subscription-settings"
-import type { WorkspaceKey } from "@shared/lib/workspaces"
+import { workspaceOptions, type WorkspaceKey } from "@shared/lib/workspaces"
 
 export type ProductEntitlement = "erp" | "snap"
 export type SettingsRole = "owner" | "admin" | "member"
@@ -739,7 +739,8 @@ function renderSection(
   role: SettingsRole,
   products: readonly ProductEntitlement[],
   subscriptionKind: "separate" | "bundle",
-  subscriptionStates: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>
+  subscriptionStates: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>,
+  organizationName: string
 ) {
   if (section === "account") return <AccountPage />
   if (section === "organizations")
@@ -761,6 +762,7 @@ function renderSection(
   if (section === "products" || section === "billing")
     return (
       <ProductsSubscriptions
+        organizationName={organizationName}
         role={role}
         products={products}
         subscriptionKind={subscriptionKind}
@@ -1016,7 +1018,7 @@ function SettingsHubContent({
               </div>
             )}
             <div key={`${workspaceId}:${effectiveSection}`}>
-              {renderSection(effectiveSection, role, availableProducts, subscriptionKind, subscriptionStates)}
+              {renderSection(effectiveSection, role, availableProducts, subscriptionKind, subscriptionStates, workspaceOptions.find((workspace) => workspace.id === workspaceId)?.organizationName ?? "현재 조직")}
             </div>
           </div>
         </div>

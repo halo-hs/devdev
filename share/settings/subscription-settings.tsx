@@ -32,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@shared/components/ui/dropdown-menu"
 import type { ProductEntitlement, SettingsRole, SubscriptionDisplayStatus } from "./page"
+import { SubscriptionChangePanel, type SubscriptionChangeIntent } from "./subscription-change-panel"
 
 type Member = {
   id: string
@@ -810,47 +811,24 @@ export function ProductsSubscriptions({
   subscriptionKind = "separate",
   subscriptionStates = {},
   planInitiallyOpen = false,
+  organizationName,
 }: {
   role: SettingsRole
   products: readonly ProductEntitlement[]
   subscriptionKind?: "separate" | "bundle"
   subscriptionStates?: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>
   planInitiallyOpen?: boolean
+  organizationName: string
 }) {
   const { members, capacity, requests, setRequests } = useSettingsDemo()
-  const [expanded, setExpanded] = useState<{ placement: "subscription" | "offer"; id: "erp" | "snap" | "bundle"; intent: "plan" | "seats" } | null>(() => {
+  const isBundle = subscriptionKind === "bundle" && products.includes("erp") && products.includes("snap")
+  const [changeIntent, setChangeIntent] = useState<SubscriptionChangeIntent | null>(() => {
     if (!planInitiallyOpen) return null
     const product = new URLSearchParams(window.location.search).get("product")
-    return { placement: "subscription", id: product === "erp" || product === "snap" ? product : subscriptionKind === "bundle" ? "bundle" : products[0] ?? "erp", intent: "seats" }
-  })
-  const [plan, setPlan] = useState<"erp" | "snap" | "bundle">(() => {
-    const product = new URLSearchParams(window.location.search).get("product")
-    return product === "erp" || product === "snap" ? product : subscriptionKind === "bundle" ? "bundle" : products[0] ?? "erp"
-  })
-  const [quantity, setQuantity] = useState(() => {
-    const product = new URLSearchParams(window.location.search).get("product")
-    return String(product === "erp" || product === "snap"
-      ? products.includes(product) ? capacity[product] : 5
-      : Math.max(5, ...products.map((p) => capacity[p])))
+    return { kind: "seats", initialPlan: isBundle ? "bundle" : product === "erp" || product === "snap" ? product : products[0] }
   })
   const [message, setMessage] = useState("")
   const [rejectId, setRejectId] = useState<string | null>(null)
-  const selectedProducts: ProductEntitlement[] =
-    plan === "bundle" ? ["erp", "snap"] : [plan]
-  const isBundle = subscriptionKind === "bundle" && products.includes("erp") && products.includes("snap")
-  const purchasedCapacity = (product: ProductEntitlement) =>
-    products.includes(product) ? capacity[product] : 0
-  const assigned = Math.max(
-    0,
-    ...selectedProducts.map((p) =>
-      products.includes(p) ? members.filter((member) => member[p]).length : 0
-    )
-  )
-  const count = Number(quantity)
-  const invalid = !Number.isSafeInteger(count) || count < 5 || count < assigned
-  const unchanged = plan === "bundle"
-    ? isBundle && count === capacity.erp && count === capacity.snap
-    : products.includes(plan) && count === purchasedCapacity(plan)
   const visibleRequests = requests.filter((request) =>
     role === "owner"
       ? request.kind === "capacity"
@@ -872,153 +850,31 @@ export function ProductsSubscriptions({
     paid_active: "구독 중", cancel_scheduled: "해지 예정", payment_pending: "결제 대기",
     payment_verifying: "결제 확인 중", read_only: "읽기 전용",
   }
-  const existingPaidPlan = plan === "bundle"
-    ? isBundle && statusOf("bundle") === "paid_active"
-    : products.includes(plan) && statusOf(plan) === "paid_active"
-  const manageableSubscription = subscriptions.find(({ id }) => statusOf(id) === "paid_active")
+  const paidPlans = subscriptions.filter(({ id }) => statusOf(id) === "paid_active").map(({ id }) => id)
+  const manageableSubscription = paidPlans[0]
+  const closeChange = () => {
+    setChangeIntent(null)
+    const url = new URL(window.location.href)
+    url.searchParams.delete("plan")
+    window.history.replaceState(null, "", url)
+  }
+  const changePanel = changeIntent && role !== "member" && (changeIntent.kind === "plan" || paidPlans.length > 0) ? (
+    <SubscriptionChangePanel
+      key={`${changeIntent.kind}:${changeIntent.initialPlan ?? "choose"}`}
+      intent={changeIntent.kind === "seats" && !paidPlans.includes(changeIntent.initialPlan as typeof paidPlans[number]) ? { kind: "seats", initialPlan: paidPlans[0] } : changeIntent}
+      role={role}
+      organizationName={organizationName}
+      paidPlans={paidPlans}
+      capacity={capacity}
+      assigned={{ erp: members.filter((member) => member.erp).length, snap: members.filter((member) => member.snap).length }}
+      onClose={closeChange}
+    />
+  ) : null
   const subscriptionExamples = {
     erp: { startedAt: "2026.09.01", renewsAt: "2026.11.01" },
     snap: { startedAt: "2026.09.15", renewsAt: "2026.10.15" },
     bundle: { startedAt: "2026.09.01", renewsAt: "2026.11.01" },
   } as const
-  const openOffer = (nextPlan: typeof plan, placement: "subscription" | "offer" = "subscription", intent: "plan" | "seats" = "plan") => {
-    setPlan(nextPlan)
-    setQuantity(String(nextPlan === "bundle"
-      ? Math.max(5, ...products.map((product) => capacity[product]))
-      : products.includes(nextPlan) ? capacity[nextPlan] : 5))
-    setExpanded({ placement, id: nextPlan, intent })
-  }
-  const planEditor = expanded && role !== "member" ? (
-        <section className={expanded.placement === "offer" ? "w-full rounded-xl border bg-background p-5 sm:p-6" : "w-full"}>
-          <div className="grid gap-6">
-            <header className="space-y-2">
-              <h2 className="text-xl font-semibold">
-                {role === "owner"
-                  ? expanded.intent === "seats" ? "시트 변경" : expanded.placement === "offer" ? "플랜 선택" : existingPaidPlan ? "구독 변경" : "구독 시작"
-                  : "좌석 증설 요청"}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {expanded.intent === "seats" ? "변경할 구독과 시트 수를 선택하세요." : "변경할 상품과 시트 수를 선택하세요."} 입력만으로 구독이나 사용자 배정은 변경되지 않습니다.
-              </p>
-            </header>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <label className="grid content-start gap-2 text-sm">
-                상품
-                <select
-                  className={selectClass}
-                  value={plan}
-                  onChange={(event) => {
-                    const nextPlan = event.target.value as typeof plan
-                    setPlan(nextPlan)
-                    setQuantity(String(nextPlan === "bundle"
-                      ? Math.max(5, ...products.map((product) => capacity[product]))
-                      : Math.max(5, purchasedCapacity(nextPlan))))
-                    setMessage("")
-                  }}
-                >
-                  {expanded.intent === "seats" ? subscriptions.filter(({ id }) => statusOf(id) === "paid_active").map(({ id }) => (
-                    <option key={id} value={id}>{id === "bundle" ? "Trade OS + SNAP Bundle" : `${names[id]} 단독`}</option>
-                  )) : <>
-                    <option value="erp">Trade OS 단독</option>
-                    <option value="snap">SNAP 단독</option>
-                    <option value="bundle">Trade OS + SNAP Bundle</option>
-                  </>}
-                </select>
-              </label>
-              <label className="grid content-start gap-2 text-sm">
-                구매 시트 수
-                <Input
-                  type="number"
-                  min={Math.max(5, assigned)}
-                  step={1}
-                  value={quantity}
-                  onChange={(event) => {
-                    setQuantity(event.target.value)
-                    setMessage("")
-                  }}
-                />
-              </label>
-            </div>
-            {plan === "bundle" && (
-              <p className="text-sm">
-                두 단독 구독 중 큰 구매 수량을 기본값으로 제안합니다. Trade
-                OS·SNAP은 각각 {quantity || "—"}명이며 사용자 배정은 제품별로
-                독립적입니다.
-              </p>
-            )}
-            {invalid && (
-              <p role="alert" className="text-sm text-destructive">
-                최소 5명이며 각 제품의 배정 인원({assigned}명) 이상인 정수를
-                입력하세요. 감소 전 사용자 배정을 조정해 주세요.
-              </p>
-            )}
-            {!invalid && unchanged && (
-              <p className="text-sm text-muted-foreground">{expanded.intent === "seats" ? "현재 구매 수와 같습니다. 변경할 시트 수를 입력해 주세요." : "현재 구독과 같습니다. 다른 상품을 선택하거나 시트 수를 변경해 주세요."}</p>
-            )}
-            <div className="grid gap-4 rounded-lg border bg-muted/20 p-4 sm:grid-cols-2 sm:p-5" aria-label="변경 내용">
-              <div>
-                <p className="text-xs text-muted-foreground">구매 시트 변경</p>
-                <div className="mt-2 space-y-1">
-                  {selectedProducts.map((product) => (
-                    <p className="text-sm font-medium tabular-nums" key={product}>
-                      {names[product]} {purchasedCapacity(product)}명
-                      <span className="mx-1 text-muted-foreground">→</span>
-                      {invalid ? "—" : `${count}명`}
-                      {!invalid && count > purchasedCapacity(product) && (
-                        <span className="ml-2 text-xs text-muted-foreground">+{count - purchasedCapacity(product)}명</span>
-                      )}
-                    </p>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">적용 및 청구</p>
-                <p className="mt-1 text-sm font-medium">결제·구독 확인 후 시트 반영</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {existingPaidPlan && selectedProducts.some((product) => count > purchasedCapacity(product))
-                    ? "증설분은 다음 인보이스에 청구됩니다."
-                    : "변경 금액과 적용일은 서버에서 확인합니다."}
-                </p>
-                <p className="mt-3 text-xs text-muted-foreground">예상 금액·일할 금액·적용일</p>
-                <p className="mt-1 text-sm font-medium">서버 연결 후 자동 표시</p>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              시트 변경이 확인된 후 사용자 배정은 별도로 완료해야 합니다.
-            </p>
-            {role === "owner" && (
-              <p role="note" className="text-sm text-muted-foreground">
-                예상 금액을 불러올 수 없어 변경을 확정할 수 없습니다. 구독과 구매 시트는 그대로 유지됩니다.
-              </p>
-            )}
-            {message && (
-              <p role="status" className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
-                {message}
-              </p>
-            )}
-            <div className="flex flex-wrap justify-end gap-2 border-t pt-5">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setExpanded(null)
-                  setMessage("")
-                  const url = new URL(window.location.href)
-                  url.searchParams.delete("plan")
-                  window.history.replaceState(null, "", url)
-                }}
-              >
-                닫기
-              </Button>
-              <Button
-                disabled={role === "owner" || invalid || unchanged}
-                onClick={() => setMessage("서버에 연결되지 않아 요청을 보내지 못했습니다. 구매·요청은 변경되지 않았습니다.")}
-              >
-                {role === "owner" ? existingPaidPlan ? "변경 확정" : "구독 확정" : "OWNER에게 요청"}
-              </Button>
-            </div>
-          </div>
-        </section>
-  ) : null
   return (
     <div data-ui="products-subscriptions" className="w-full space-y-6">
       <div className="border-b pb-6">
@@ -1038,16 +894,16 @@ export function ProductsSubscriptions({
           </div>
           {role !== "member" && <div className="ml-auto flex flex-wrap justify-end gap-2">
             {role === "owner" && (
-              <Button variant="outline" size="sm" aria-expanded={expanded?.placement === "subscription" && expanded.intent === "plan"} onClick={() => openOffer(isBundle ? "bundle" : subscriptions[0]?.id ?? "erp")}>구독 변경</Button>
+              <Button variant="outline" size="sm" aria-haspopup="dialog" onClick={() => setChangeIntent({ kind: "plan" })}>구독 변경</Button>
             )}
             {manageableSubscription && (
-              <Button variant="outline" size="sm" aria-expanded={expanded?.placement === "subscription" && expanded.intent === "seats"} onClick={() => openOffer(manageableSubscription.id, "subscription", "seats")}>
+              <Button variant="outline" size="sm" aria-expanded={changeIntent?.kind === "seats"} onClick={() => setChangeIntent({ kind: "seats", initialPlan: manageableSubscription })}>
                 {role === "owner" ? "시트 관리" : "증설 요청"}
               </Button>
             )}
           </div>}
         </div>
-        {expanded?.placement === "subscription" && <div className="border-b p-4 sm:p-5">{planEditor}</div>}
+        {changeIntent?.kind === "seats" && changePanel && <div className="border-b p-4 sm:p-5">{changePanel}</div>}
         <div className="divide-y px-5">
           {subscriptions.map((subscription) => {
             const status = statusOf(subscription.id)
@@ -1060,7 +916,7 @@ export function ProductsSubscriptions({
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h3 className="text-sm font-semibold">{subscription.id === "bundle" ? "Trade OS + SNAP Bundle" : names[subscription.id]}</h3>
                   {role === "owner" && action && <Button variant="outline" size="sm" onClick={() => {
-                    if (action === "구독하기") openOffer(subscription.id)
+                    if (action === "구독하기") setChangeIntent({ kind: "plan", initialPlan: subscription.id })
                     else setMessage("서버 연결 후 현재 구독 상태를 확인하고 처리할 수 있습니다. 아직 변경되지 않았습니다.")
                   }}>{action}</Button>}
                 </div>
@@ -1114,7 +970,7 @@ export function ProductsSubscriptions({
               <p className="mt-2 flex-1 text-sm text-muted-foreground">{offer.description}</p>
               <p className="mt-3 text-xs text-muted-foreground">{statusLabels[subscriptionStates[offer.id] ?? "trial_not_started"]}</p>
               {role === "owner" ? (
-                <Button className="mt-4 self-end" variant="outline" size="sm" aria-expanded={expanded?.placement === "offer" && expanded.id === offer.id} onClick={() => openOffer(offer.id, "offer")}>
+                <Button className="mt-4 self-end" variant="outline" size="sm" aria-haspopup="dialog" onClick={() => setChangeIntent({ kind: "plan" })}>
                   {offer.id === "bundle" && subscriptions.some(({ id }) => statusOf(id) === "paid_active") ? "업그레이드" : "플랜 보기"}
                 </Button>
               ) : (
@@ -1123,8 +979,9 @@ export function ProductsSubscriptions({
             </article>
           ))}
         </div>
-        {expanded?.placement === "offer" && <div className="mt-4">{planEditor}</div>}
+
       </section>}
+      {changeIntent?.kind === "plan" && changePanel}
       {message && (
         <p role="status" className="text-sm text-primary">
           {message}
