@@ -334,6 +334,7 @@ function OrganizationPage({ role }: { role: SettingsRole }) {
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="법정 이름">
             <Input
+              data-guide-target="organization"
               defaultValue="Hanbit Trading Co., Ltd."
               readOnly={!editable}
             />
@@ -384,7 +385,7 @@ function MembersPage({ role }: { role: SettingsRole }) {
         title="사용자 관리"
         description="ERP 멤버와 초대를 관리합니다. SNAP 역할과 승인 상태는 SNAP 멤버 관리에서 확인하세요."
         action={
-          <Button onClick={() => setInvited(true)}>
+          <Button data-guide-target="invite" onClick={() => setInvited(true)}>
             <UserPlus /> 멤버 초대
           </Button>
         }
