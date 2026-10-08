@@ -2,7 +2,7 @@
 
 ## 통합 대상
 
-기준 main은 `38f5d8a954c4e92fc118430fb27605148dcf4bd9`다. 별도 브랜치 `release/restore-and-align-20261008`에서 열린 PR과 관련 로컬 수정만 통합했다. 기존 작업 트리는 유지했다.
+기준 main은 `38f5d8a954c4e92fc118430fb27605148dcf4bd9`다. 열린 PR과 관련 로컬 수정만 통합했으며, 제출 대상은 기존 [PR #40](https://github.com/halo-hs/devdev/pull/40)의 `docs/trade-link-first-delivery` 브랜치다. 기존 작업 트리는 유지했다.
 
 | PR | 포함한 리비전 | 반영 내용 |
 |---|---|---|
@@ -48,4 +48,4 @@
 
 ## 병합 규칙
 
-`main`은 PR과 다른 사람의 승인 1개가 필요하며 관리자에게도 적용된다. 직접 push, 보호 규칙 우회, 로컬 직접 Production 배포를 하지 않는다. 이 통합 PR 승인·검사 완료 후 main으로 병합하고, Git 연동 Production이 병합 커밋을 사용했는지 별도로 확인한다. PR 작성 또는 Preview 성공 자체는 운영 배포 완료가 아니다.
+`main`은 PR과 다른 사람의 승인 1개가 필요하며 관리자에게도 적용된다. 직접 push, 보호 규칙 우회, 로컬 직접 Production 배포를 하지 않는다. 기존 PR #40에 후속 커밋을 추가하며 중복 PR을 만들지 않는다. PR 승인·검사 완료 후 main으로 병합하고, Git 연동 Production이 병합 커밋을 사용했는지 별도로 확인한다. PR 작성 또는 Preview 성공 자체는 운영 배포 완료가 아니다.
