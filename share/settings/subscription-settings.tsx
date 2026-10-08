@@ -260,7 +260,6 @@ export function OrganizationMembers({
     enabled: boolean
   ) => {
     if (!canAssignSeat(member)) return
-    if (!enabled && member.id === role) return
     if (member[product] === enabled) return
     if (
       enabled &&
@@ -574,8 +573,7 @@ export function OrganizationMembers({
                       <span className="text-sm text-muted-foreground">
                         {member[product] ? "Standard 시트" : "할당되지 않음"}
                       </span>
-                    ) : !canAssignSeat(member) ||
-                      (member.id === role && member[product]) ? (
+                    ) : !canAssignSeat(member) ? (
                       <span className="text-sm text-muted-foreground">
                         {member[product] ? "Standard 시트" : "할당되지 않음"}
                       </span>
