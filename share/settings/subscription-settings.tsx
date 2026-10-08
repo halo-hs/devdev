@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import { createContext, useContext, useState, type ReactNode } from "react"
 import {
   Check,
@@ -375,6 +376,7 @@ export function OrganizationMembers({
         <Button
           variant="outline"
           onClick={() => setInviteOpen((value) => !value)}
+          data-guide-target="invite"
           aria-expanded={inviteOpen}
         >
           <UserPlus />
@@ -767,7 +769,7 @@ export function OrganizationMembers({
               onClick={() => {
                 if (!shortage) return
                 if (role === "owner") {
-                  window.location.assign(
+                  appLocation.assign(
                     `/erp/settings?section=products&plan=1&product=${shortage.product}`
                   )
                   return
@@ -824,7 +826,7 @@ export function ProductsSubscriptions({
   const isBundle = subscriptionKind === "bundle" && products.includes("erp") && products.includes("snap")
   const [changeIntent, setChangeIntent] = useState<SubscriptionChangeIntent | null>(() => {
     if (!planInitiallyOpen) return null
-    const product = new URLSearchParams(window.location.search).get("product")
+    const product = new URLSearchParams(appLocation.search).get("product")
     return { kind: "seats", initialPlan: isBundle ? "bundle" : product === "erp" || product === "snap" ? product : products[0] }
   })
   const [message, setMessage] = useState("")
@@ -854,7 +856,7 @@ export function ProductsSubscriptions({
   const manageableSubscription = paidPlans[0]
   const closeChange = () => {
     setChangeIntent(null)
-    const url = new URL(window.location.href)
+    const url = new URL(appLocation.href)
     url.searchParams.delete("plan")
     window.history.replaceState(null, "", url)
   }

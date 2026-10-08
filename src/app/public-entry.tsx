@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import { useEffect, useState, type ReactNode } from "react"
 import { ArrowRight, Building2, MapPin } from "lucide-react"
 import { Button } from "@shared/components/ui/button"
@@ -121,15 +122,15 @@ function FreeTrial({
 /** Public screens are isolated from the product shell and its data requests. */
 export function CommonEntry({ children }: { children: ReactNode }) {
   const [location, setLocation] = useState(
-    () => window.location.pathname + window.location.search
+    () => appLocation.pathname + appLocation.search
   )
   useEffect(() => {
     const sync = () =>
-      setLocation(window.location.pathname + window.location.search)
+      setLocation(appLocation.pathname + appLocation.search)
     window.addEventListener("popstate", sync)
     return () => window.removeEventListener("popstate", sync)
   }, [])
-  const url = new URL(location, window.location.origin)
+  const url = new URL(location, appLocation.origin)
   if (url.pathname === "/share" || url.pathname.startsWith("/share/")) {
     const token = url.pathname.slice("/share/".length).replace(/\/+$/, "")
     return <PublicSharePage key={location} token={token} search={url.search} />
@@ -188,7 +189,7 @@ export function CommonEntry({ children }: { children: ReactNode }) {
       resetSnapSessionAccessCache()
     }
     const usageRequested = url.searchParams.get("returnTo") === "usage"
-    window.location.assign(
+    appLocation.assign(
       usageRequested
         ? `/erp/settings?section=${product === "erp" ? "organization" : "snap-usage"}`
         : product === "erp"

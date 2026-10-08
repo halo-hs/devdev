@@ -1,3 +1,5 @@
+import { appLocation } from "@/app/app-location"
+import { StartGuideProvider, useStartGuide } from "@trade-os/onboarding/runtime"
 import { BusinessListToolbar, BusinessFilterSearch, BusinessFilterField } from "@shared/components/business-filters"
 import { FormField, FormFieldHeader } from "@shared/components/form-field"
 import { PageLoadingBoundary } from "@shared/components/page-loading-boundary"
@@ -2057,6 +2059,7 @@ function AppNav({
   isV2Workspace: boolean
   erpRole: ErpPreviewRole
 }) {
+  const startGuide = useStartGuide()
   const { isMobile, setOpenMobile, state: sidebarState } = useSidebar()
   const sidebarCollapsed = sidebarState === "collapsed"
   const navigate = (nextScreen: Screen) => {
@@ -2194,6 +2197,7 @@ function AppNav({
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {group.items.map(([label, Icon, key]) => {
+                      if (key === "onboarding" && startGuide?.complete) return null
                       if (key === "monitoring" && erpRole !== "owner") return null
                       const active =
                         key === screen ||
@@ -2211,6 +2215,7 @@ function AppNav({
                           >
                             <Icon />
                             <span>{label}</span>
+                            {key === "onboarding" && startGuide?.state && <span className="ml-auto text-xs">{startGuide.count}/{startGuide.total}</span>}
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       )
@@ -2767,7 +2772,7 @@ function TopBarUtilities({
           <Button
             variant="ghost"
             type="button"
-            onClick={() => window.location.reload()}
+            onClick={() => appLocation.reload()}
             className="h-auto w-full justify-start px-3 py-2"
           >
             <RefreshCw className="size-4" />
@@ -4599,6 +4604,7 @@ function InboxScreen({
     link: UploadDocumentDealLink
   ) => void
 }) {
+  const guide = useStartGuide()
   const initialUploadDocuments: RecentDocument[] = readUploadQueue().map(
     (document) => {
       document = { ...document, reviewedFields: readDocumentReview(document.name).fields }
@@ -4697,6 +4703,19 @@ function InboxScreen({
     setStep(initialStep ?? "compare")
     setMobilePane("fields")
   }, [initialDocumentName, initialStep, uploadDocuments])
+  useEffect(() => {
+    const anchor = guide?.state?.anchor
+    if (!anchor || anchor.stage !== "processing") return
+    const pending = uploadDocuments.find(document => document.name === anchor.documentId)
+    if (!pending || !["queued", "ocr"].includes(pending.stage)) return
+    const timer = window.setTimeout(() => {
+      const failed = /encrypted|password|fail/i.test(pending.name)
+      setUploadDocuments(current => current.map(document => document.name === pending.name ? { ...document, stage: failed ? "failed" : "field", status: failed ? "처리 실패" : "검토 대기", tone: failed ? "danger" : "warning" } : document))
+      if (!failed) guide?.record({ type: "document-created", documentId: pending.name, receipt: crypto.randomUUID() })
+      guide?.record({ type: "extraction", documentId: pending.name, stage: failed ? "failed" : "ready" })
+    }, 1000)
+    return () => window.clearTimeout(timer)
+  }, [guide, uploadDocuments])
   const selectedDocument = uploadDocuments[selectedIndex] ?? uploadDocuments[0] ?? recentDocuments[0]
   const selectedDocumentRef = useRef(selectedDocument)
   useEffect(() => { selectedDocumentRef.current = selectedDocument }, [selectedDocument])
@@ -4754,6 +4773,7 @@ function InboxScreen({
 
   const handlePdfReviewComplete = () => {
     if (isDealBlocked) return
+    guide?.record({ type: "reviewed", documentId: selectedDocument.name, receipt: crypto.randomUUID() })
     setUploadDocuments((current) =>
       current.map((document, index) =>
         index === selectedIndex
@@ -4783,6 +4803,7 @@ function InboxScreen({
       })
       if (!result.ok) { toast.error(result.error); return false }
       onDocumentDealLinked(documentName, { dealId, dealLabel })
+      guide?.record({ type: "linked", documentId: documentName, dealId, receipt: crypto.randomUUID() })
       setUploadDocuments((current) => current.map((document) => document.name === documentName
         ? { ...document, dealLabel, stage: "confirmed", status: "거래 연결 완료", tone: "success" }
         : document))
@@ -5011,6 +5032,7 @@ function InboxScreen({
       (document) => document.name
     )
     activeUploadCompletedRef.current = 0
+    guide?.record({ type: "upload-started", documentId: pendingDocuments[0].name })
     setUploadDocuments((current) => [...pendingDocuments, ...current])
     setHasFile(true)
     setSelectedIndex(0)
@@ -5030,6 +5052,8 @@ function InboxScreen({
       const currentFile = validFiles[completed]
       if (!currentFile) return
       const failed = /encrypted|password|fail/i.test(currentFile.name)
+      if (!failed) guide?.record({ type: "document-created", documentId: currentFile.name, receipt: crypto.randomUUID() })
+      guide?.record({ type: "extraction", documentId: currentFile.name, stage: failed ? "failed" : "ready" })
       if (failed) failedCount += 1
       setUploadDocuments((current) =>
         current.map((document) =>
@@ -5083,6 +5107,8 @@ function InboxScreen({
     const failed = !result.ok || /encrypted|password|fail/i.test(name)
     setUploadDocuments((current) => current.map((item) => item.name === name
       ? { ...item, stage: failed ? "failed" : "field", status: failed ? "처리 실패 · 파일 확인 필요" : "검토 대기", tone: failed ? "danger" : "warning" } : item))
+    if (!failed) guide?.record({ type: "document-created", documentId: name, receipt: crypto.randomUUID() })
+    guide?.record({ type: "extraction", documentId: name, stage: failed ? "failed" : "ready" })
     if (failed) toast.error("재추출하지 못했습니다. 잠금 해제 또는 원본 파일 확인 후 다시 올려 주세요.")
   }
   useEffect(
@@ -5146,6 +5172,12 @@ function InboxScreen({
   if (!hasFile) {
     return (
       <div className="h-full min-h-0 bg-background">
+        {guide?.state && !guide.state.anchor && (!guide.state.access || guide.state.access === "active") && <div className="flex flex-wrap items-center gap-3 border-b px-5 py-3 text-sm"><span className="text-muted-foreground">준비된 문서가 없다면 예시 발주서로 시작할 수 있습니다.</span><Button variant="outline" size="sm" onClick={async () => {
+          const { jsPDF } = await import("jspdf")
+          const pdf = new jsPDF()
+          pdf.text(["PURCHASE ORDER", "PO-2026-001", "Buyer: Hanbit Trading", "Aluminium scrap / 20 MT / USD 1,850 per MT", "Total: USD 37,000", "Delivery: 2026-11-01"], 20, 25)
+          await handleFilesSelected([new File([pdf.output("blob")], "PO_시작가이드_예시.pdf", { type: "application/pdf" })])
+        }}>예시 PDF 사용</Button></div>}
         <BeforeUploadState
           documents={uploadDocuments.map((document, index) => ({ document, index }))}
           onOpenDocument={(index) => {
@@ -5163,7 +5195,7 @@ function InboxScreen({
   }
 
   return (
-    <div className="flex h-[calc(100svh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-background">
+    <div data-guide-target={step === "deal" ? "connect" : undefined} tabIndex={-1} className="flex h-[calc(100svh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-background">
       <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-end gap-2 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-3 py-2 sm:px-4">
         <div className="mr-auto min-w-0">
           <h1 className="text-sm font-semibold">문서 올리기</h1>
@@ -5217,6 +5249,7 @@ function InboxScreen({
           </Button>
         ) : step === "compare" ? (
           <Button
+            data-guide-target="review"
             size="sm"
             disabled={isDealBlocked}
             title={
@@ -15988,8 +16021,8 @@ void CopyPolishOverlay
 function readCurrentSnapRoute(): SnapRouteMatch | null {
   if (typeof window === "undefined") return null
   const normalized = normalizeSnapLocation(
-    window.location.pathname,
-    window.location.search
+    appLocation.pathname,
+    appLocation.search
   )
   if (normalized.changed) {
     window.history.replaceState(
@@ -16003,10 +16036,10 @@ function readCurrentSnapRoute(): SnapRouteMatch | null {
 
 function readCurrentErpRoute(): ErpRouteMatch | null {
   if (typeof window === "undefined") return null
-  const canonical = canonicalErpLocation(window.location)
+  const canonical = canonicalErpLocation(appLocation)
   if (canonical)
     window.history.replaceState(window.history.state, "", canonical)
-  return matchErpRoute(window.location.pathname)
+  return matchErpRoute(appLocation.pathname)
 }
 
 export function App() {
@@ -16034,16 +16067,18 @@ export function App() {
     initialSnapRoute ? "snap" : "erp"
   )
   const [erpHomeVariant, setErpHomeVariant] = useState<"legacy" | "v2">(() =>
-    window.location.pathname === "/v2-home" ? "v2" : "legacy"
+    appLocation.pathname === "/v2-home" ? "v2" : "legacy"
   )
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 1280)
-  const [workspaceId, setWorkspaceId] = useState<WorkspaceKey>("ecoya")
+  const [workspaceId, setWorkspaceId] = useState<WorkspaceKey>(() => {
+    try { const stored = localStorage.getItem("ecoya.preview.workspace"); return workspaceOptions.find(item => item.id === stored)?.id ?? "ecoya" } catch { return "ecoya" }
+  })
   const [erpHomeRole, setErpHomeRole] = useState<ErpPreviewRole>(() => {
-    const role = new URLSearchParams(window.location.search).get("role")
+    const role = new URLSearchParams(appLocation.search).get("role")
     return role === "admin" || role === "member" ? role : "owner"
   })
   const homePreviewState = (() => {
-    const state = new URLSearchParams(window.location.search).get("state")
+    const state = new URLSearchParams(appLocation.search).get("state")
     return state === "empty" || state === "first-use" || state === "error"
       ? (state as HomePreviewState)
       : "default"
@@ -16111,7 +16146,7 @@ export function App() {
   const [createDealContext, setCreateDealContext] =
     useState<DealDocumentContext | null>(null)
   const [createEntryState, setCreateEntryState] = useState<"history" | "first">(
-    new URLSearchParams(window.location.search).get("state") === "first-use" ? "first" : "history"
+    new URLSearchParams(appLocation.search).get("state") === "first-use" ? "first" : "history"
   )
   const [createDeliveryMode, setCreateDeliveryMode] = useState(false)
   const [snapAccessRevision, setSnapAccessRevision] = useState(0)
@@ -16182,9 +16217,9 @@ export function App() {
       setErpRoute(nextErpRoute)
       setProduct("erp")
       setErpHomeVariant(
-        window.location.pathname === "/v2-home" ? "v2" : "legacy"
+        appLocation.pathname === "/v2-home" ? "v2" : "legacy"
       )
-      const nextRole = new URLSearchParams(window.location.search).get("role")
+      const nextRole = new URLSearchParams(appLocation.search).get("role")
       setErpHomeRole(
         nextRole === "admin" || nextRole === "member" ? nextRole : "owner"
       )
@@ -16239,11 +16274,11 @@ export function App() {
     options?: { replace?: boolean; params?: Record<string, string> }
   ) => {
     if (nextScreen === "SC-05" || nextScreen === "SC-06") {
-      window.location.assign(nextScreen === "SC-05" ? "/signup?product=snap" : "/login")
+      appLocation.assign(nextScreen === "SC-05" ? "/signup?product=snap" : "/login")
       return
     }
     const nextPath = pathForSnapScreen(nextScreen, options?.params)
-    const currentPath = `${window.location.pathname}${window.location.search}`
+    const currentPath = `${appLocation.pathname}${appLocation.search}`
     if (product === "snap" && currentPath === nextPath) return
 
     if (options?.replace) {
@@ -16282,7 +16317,7 @@ export function App() {
   useEffect(() => {
     const redirectPath = snapAccess.redirectPath
     if (!redirectPath || product !== "snap") return
-    if (`${window.location.pathname}${window.location.search}` === redirectPath)
+    if (`${appLocation.pathname}${appLocation.search}` === redirectPath)
       return
 
     const nextRoute = matchSnapRoute(redirectPath)
@@ -16306,12 +16341,12 @@ export function App() {
     replace = false
   ) => {
     const nextPath = pathForErpScreen(nextScreen, params)
-    const nextUrl = new URL(nextPath, window.location.origin)
+    const nextUrl = new URL(nextPath, appLocation.origin)
     if (erpHomeRole === "admin" || erpHomeRole === "member") {
       nextUrl.searchParams.set("role", erpHomeRole)
     }
     const nextLocation = `${nextUrl.pathname}${nextUrl.search}`
-    const currentLocation = `${window.location.pathname}${window.location.search}`
+    const currentLocation = `${appLocation.pathname}${appLocation.search}`
     if (nextLocation !== currentLocation) {
       window.history[replace ? "replaceState" : "pushState"](
         { product: "erp" },
@@ -16335,7 +16370,7 @@ export function App() {
   ) => {
     if (nextScreen === "tokens" || nextScreen === "billing") {
       const section = nextScreen === "billing" ? "products" : product === "snap" ? "snap-usage" : "organization"
-      window.location.assign(`/erp/settings?section=${section}`)
+      appLocation.assign(`/erp/settings?section=${section}`)
       return
     }
     if (nextScreen === "deal" && options?.dealId) {
@@ -16376,7 +16411,7 @@ export function App() {
   }
 
   const switchErpHomeRole = (nextRole: ErpPreviewRole) => {
-    const nextUrl = new URL(window.location.href)
+    const nextUrl = new URL(appLocation.href)
     if (nextRole === "admin" || nextRole === "member") {
       nextUrl.searchParams.set("role", nextRole)
     } else {
@@ -16418,6 +16453,7 @@ export function App() {
     )
     if (!nextWorkspace || nextWorkspace.id === workspaceId) return
 
+    try { localStorage.setItem("ecoya.preview.workspace", nextWorkspace.id) } catch { /* Keep current session usable. */ }
     setWorkspaceId(nextWorkspace.id)
     if (nextWorkspace.products[product]) return
 
@@ -16519,7 +16555,7 @@ export function App() {
           try {
             window.sessionStorage.setItem(
               "snap_return_to",
-              `${window.location.pathname}${window.location.search}`
+              `${appLocation.pathname}${appLocation.search}`
             )
           } catch {
             // Session storage is an enhancement; authentication still works without it.
@@ -16554,6 +16590,7 @@ export function App() {
     isThreePaneScreen || screen === "deal" || screen === "ask"
 
   return (
+    <StartGuideProvider key={workspaceId} scope={`preview-account:${workspaceId}`} role={erpHomeRole}>
     <SidebarProvider
       open={sidebarOpen}
       onOpenChange={setSidebarOpen}
@@ -16645,7 +16682,7 @@ export function App() {
                 >
                   <PageLoadingBoundary loading={screenLoading} pageKey={screenLoadingKey}>
                   {screen === "onboarding" ? (
-                    <OnboardingPrototype onNavigate={navigateTo} />
+                    <OnboardingPrototype onNavigate={navigateTo} role={erpHomeRole} />
                   ) : screen === "home" ? (
                     <V2HomePrototype
                       onNavigate={navigateTo}
@@ -16850,6 +16887,7 @@ export function App() {
         )}
       </div>
     </SidebarProvider>
+    </StartGuideProvider>
   )
 }
 

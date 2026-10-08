@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import {
   ArrowLeft,
@@ -327,7 +328,7 @@ function AccountPage() {
           <SettingRow label="비밀번호" description="로그인 비밀번호를 변경합니다." inlineControl>
             <div className="flex justify-end"><Button
               variant="outline"
-              onClick={() => window.location.assign("/password-recovery")}
+              onClick={() => appLocation.assign("/password-recovery")}
             >비밀번호 변경</Button></div>
           </SettingRow>
         </SettingsSection>
@@ -349,7 +350,7 @@ function OrganizationPage({ role }: { role: SettingsRole }) {
         description="조직 원본 정보는 모든 활성 멤버가 보고 OWNER만 변경합니다."
       >
         <div>
-          <SettingRow label="법정 이름"><Input aria-label="법정 이름" defaultValue="Hanbit Trading Co., Ltd." readOnly={!editable} /></SettingRow>
+          <SettingRow label="법정 이름"><Input data-guide-target="organization" aria-label="법정 이름" defaultValue="Hanbit Trading Co., Ltd." readOnly={!editable} /></SettingRow>
           <SettingRow label="표시 이름"><Input aria-label="표시 이름" defaultValue="한빛무역" readOnly={!editable} /></SettingRow>
           <SettingRow label="사업자·세무 식별값"><Input aria-label="사업자·세무 식별값" defaultValue="120-88-260708" readOnly={!editable} /></SettingRow>
           <SettingRow label="대표 이메일"><Input aria-label="대표 이메일" defaultValue="trade@hanbit.example" readOnly={!editable} /></SettingRow>
@@ -724,7 +725,7 @@ function SnapUsagePage({ role }: { role: SettingsRole }) {
           <Button
             className="mt-5 ml-auto flex"
             variant="outline"
-            onClick={() => window.location.assign("/erp/settings?section=products")}
+            onClick={() => appLocation.assign("/erp/settings?section=products")}
           >
             제품 및 구독 보기
           </Button>
@@ -768,7 +769,7 @@ function renderSection(
         subscriptionKind={subscriptionKind}
         subscriptionStates={subscriptionStates}
         planInitiallyOpen={
-          new URLSearchParams(window.location.search).get("plan") === "1" &&
+          new URLSearchParams(appLocation.search).get("plan") === "1" &&
           role !== "member"
         }
       />
@@ -828,7 +829,7 @@ function SettingsHubContent({
   )
   const initialSection = (() => {
     if (typeof window === "undefined") return "account" as SectionId
-    const candidate = new URLSearchParams(window.location.search).get(
+    const candidate = new URLSearchParams(appLocation.search).get(
       "section"
     ) as SectionId | null
     return candidate === "billing"
@@ -861,7 +862,7 @@ function SettingsHubContent({
   const selectSection = (next: SectionId) => {
     if (!availableIds.includes(next)) return
     setSection(next)
-    const url = new URL(window.location.href)
+    const url = new URL(appLocation.href)
     url.searchParams.set("section", next)
     window.history.pushState({ section: next }, "", url)
     if (isMobile) setOpenMobile(false)
@@ -869,7 +870,7 @@ function SettingsHubContent({
 
   useEffect(() => {
     const handlePopState = () => {
-      const candidate = new URLSearchParams(window.location.search).get(
+      const candidate = new URLSearchParams(appLocation.search).get(
         "section"
       ) as SectionId | null
       setSection(

@@ -1,8 +1,4 @@
-import {
-  BusinessListToolbar,
-  BusinessFilterSearch,
-  BusinessFilterSegments,
-} from "@shared/components/business-filters"
+import { Command, CommandInput } from "@ecoya/design-system/ui/command"
 import { useMemo, useState } from "react"
 import {
   AlertTriangle,
@@ -16,7 +12,6 @@ import {
 } from "lucide-react"
 
 import { Badge } from "@shared/components/ui/badge"
-import { BusinessPageHero } from "@shared/components/business-page-hero"
 import { Button } from "@shared/components/ui/button"
 import { Checkbox } from "@shared/components/ui/checkbox"
 import {
@@ -100,11 +95,6 @@ export function NotificationsPrototype({
     })
   }, [filter, query, readIds])
 
-  const groupedNotifications = ["오늘", "어제", "이번 주"].map((dateGroup) => ({
-    dateGroup,
-    items: visibleNotifications.filter((item) => item.dateGroup === dateGroup),
-  }))
-
   const visibleSelectedIds = visibleNotifications
     .filter((item) => selectedIds.has(item.id))
     .map((item) => item.id)
@@ -132,57 +122,43 @@ export function NotificationsPrototype({
       className="h-full overflow-y-auto bg-background"
     >
       <div className="w-full px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
-        <BusinessPageHero
-          eyebrow="업무 수신함"
-          title="알림"
-          description="승인 요청과 업무 변경, 확인이 필요한 예외를 한곳에서 관리합니다."
-          controls={
-            <BusinessListToolbar
-              aria-label="알림 검색 필터"
-              search={
-                <BusinessFilterSearch
-                  label="알림 검색"
-                  placeholder="제목 또는 거래 검색"
-                  value={query}
-                  onValueChange={setQuery}
-                />
-              }
-              result={`${visibleNotifications.length}건 표시 중`}
-            >
-              <BusinessFilterSegments
-                ariaLabel="알림 필터"
-                value={filter}
-                onChange={(value) => {
-                  setFilter(value as NotificationFilter)
-                  setSelectedIds(new Set())
-                }}
-                options={(
-                  [
-                    ["all", "모든 알림"],
-                    ["unread", "미확인"],
-                    ["approval", "승인 요청"],
-                    ["risk", "예외·위험"],
-                  ] as const
-                ).map(([id, label]) => ({
-                  id,
-                  label: `${label} ${counts[id]}`,
-                }))}
-              />
-            </BusinessListToolbar>
-          }
-          actions={
-            <Button
-              variant="outline"
-              type="button"
-              disabled={unreadCount === 0}
-              onClick={onMarkAllRead}
-            >
-              <CheckCheck data-icon="inline-start" /> 모두 읽음 처리
-            </Button>
-          }
-        />
+        <header className="flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-blue-700 to-blue-500 px-6 py-5 text-white sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight">알림</h1>
+            <p className="mt-2 text-sm text-white/90">
+              승인 요청과 업무 변경, 확인이 필요한 예외를 한곳에서 관리합니다.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            type="button"
+            disabled={unreadCount === 0}
+            className="bg-white text-foreground hover:bg-white/90"
+            onClick={onMarkAllRead}
+          >
+            <CheckCheck data-icon="inline-start" /> 모두 읽음 처리
+          </Button>
+        </header>
 
-        <div className="mt-6 min-w-0">
+        <div className="mt-4 grid min-w-0 items-start gap-4 lg:grid-cols-[216px_minmax(0,1fr)]">
+          <nav aria-label="알림 필터" className="grid grid-cols-2 gap-1 rounded-xl border bg-card p-2 shadow-sm lg:grid-cols-1">
+            {([
+              ["all", "모든 알림"],
+              ["unread", "미확인"],
+              ["approval", "승인 요청"],
+              ["risk", "예외·위험"],
+            ] as const).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={filter === id}
+                onClick={() => { setFilter(id); setSelectedIds(new Set()) }}
+                className={cn("flex min-h-12 items-center justify-between gap-3 rounded-lg px-4 text-sm", filter === id ? "bg-primary/5 font-semibold text-primary" : "text-foreground hover:bg-muted")}
+              >
+                <span>{label}</span><span>{counts[id]}</span>
+              </button>
+            ))}
+          </nav>
           <section
             aria-label="알림 목록"
             className="min-w-0 overflow-hidden rounded-[var(--ui-radius-panel)] border bg-[var(--surface-background)] shadow-[var(--ui-shadow-panel)]"
@@ -225,6 +201,11 @@ export function NotificationsPrototype({
                   </span>
                 )}
               </div>
+              <div className="w-full sm:ml-auto sm:w-72">
+                <Command shouldFilter={false} className="h-auto p-0">
+                  <CommandInput aria-label="알림 검색" placeholder="제목 또는 거래 검색" value={query} onValueChange={setQuery} />
+                </Command>
+              </div>
             </div>
 
             {visibleNotifications.length === 0 ? (
@@ -242,23 +223,16 @@ export function NotificationsPrototype({
                 </div>
               </div>
             ) : (
-              groupedNotifications.map(({ dateGroup, items }) =>
-                items.length > 0 ? (
-                  <div key={dateGroup}>
-                    <div className="border-b bg-muted/35 px-4 py-2 text-xs font-medium text-muted-foreground">
-                      {dateGroup}
-                    </div>
-                    <div className="divide-y">
-                      {items.map((item) => {
+              <div className="divide-y">
+                {visibleNotifications.map((item) => {
                         const unread = isUnread(item, readIds)
                         const meta = categoryMeta[item.category]
-                        const Icon = meta.icon
 
                         return (
                           <article
                             key={item.id}
                             className={cn(
-                              "group relative grid grid-cols-[auto_auto_minmax(0,1fr)] items-start gap-3 px-4 py-4 transition-colors sm:grid-cols-[auto_auto_minmax(0,1fr)_auto]",
+                              "group relative grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 px-4 py-4 transition-colors sm:grid-cols-[auto_minmax(0,1fr)_auto]",
                               unread
                                 ? "bg-primary/[0.035] hover:bg-primary/[0.065]"
                                 : "hover:bg-muted/45"
@@ -278,23 +252,15 @@ export function NotificationsPrototype({
                               aria-label={`${item.title} 선택`}
                               className="mt-2"
                             />
-                            <span
-                              className={cn(
-                                "mt-0.5 grid size-8 place-items-center rounded-full",
-                                meta.iconClassName
-                              )}
-                            >
-                              <Icon className="size-4" />
-                            </span>
                             <button
                               type="button"
                               onClick={() => onOpenDeal(item)}
-                              className="min-w-0 text-left outline-none after:absolute after:inset-y-0 after:right-0 after:left-12 focus-visible:after:ring-2 focus-visible:after:ring-ring focus-visible:after:ring-inset"
+                              className="min-w-0 space-y-1.5 text-left outline-none after:absolute after:inset-y-0 after:right-0 after:left-12 focus-visible:after:ring-2 focus-visible:after:ring-ring focus-visible:after:ring-inset"
                             >
-                              <span className="flex min-w-0 flex-wrap items-center gap-2">
+                              <span className="flex min-h-5 min-w-0 flex-wrap items-center gap-2 leading-5">
                                 <span
                                   className={cn(
-                                    "text-sm",
+                                    "text-sm leading-5",
                                     unread ? "font-semibold" : "font-medium"
                                   )}
                                 >
@@ -302,15 +268,15 @@ export function NotificationsPrototype({
                                 </span>
                                 <Badge
                                   variant="secondary"
-                                  className="h-5 border-0 px-1.5 text-[10px] font-medium"
+                                  className="inline-flex h-5 items-center border-0 px-1.5 text-[10px] font-medium leading-none"
                                 >
                                   {meta.label}
                                 </Badge>
                               </span>
-                              <span className="mt-1 block text-sm leading-5 text-muted-foreground">
+                              <span className="block text-sm leading-5 text-muted-foreground">
                                 {item.description}
                               </span>
-                              <span className="mt-2 flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
+                              <span className="flex min-h-4 flex-wrap items-center gap-x-2 text-xs leading-4 text-muted-foreground">
                                 <span className="font-medium text-foreground/75">
                                   {item.context}
                                 </span>
@@ -324,18 +290,15 @@ export function NotificationsPrototype({
                               type="button"
                               title={item.actionLabel}
                               aria-label={`${item.context} ${item.actionLabel}`}
-                              className="relative z-10 col-start-3 justify-self-end text-muted-foreground sm:col-start-4 sm:row-start-1"
+                              className="relative z-10 col-start-2 justify-self-end text-muted-foreground sm:col-start-3 sm:row-start-1"
                               onClick={() => onOpenDeal(item)}
                             >
                               <ChevronRight />
                             </Button>
                           </article>
                         )
-                      })}
-                    </div>
-                  </div>
-                ) : null
-              )
+                })}
+              </div>
             )}
           </section>
         </div>

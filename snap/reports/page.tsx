@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import {
   useCallback,
   useEffect,
@@ -852,7 +853,7 @@ export function SnapReportsPage({ navigate, routeSearch }: { navigate: SnapNavig
   const changeTab = (next: string) => {
     const value = next as ReportTab
     setTab(value)
-    const url = new URL(window.location.href)
+    const url = new URL(appLocation.href)
     url.searchParams.set("tab", value)
     window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}`)
   }
