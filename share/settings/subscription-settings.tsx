@@ -2,6 +2,7 @@ import { createContext, useContext, useState, type ReactNode } from "react"
 import {
   Check,
   ChevronDown,
+  Info,
   MoreHorizontal,
   Search,
   UserPlus,
@@ -10,6 +11,11 @@ import {
 import { Button } from "@shared/components/ui/button"
 import { Badge } from "@shared/components/ui/badge"
 import { Input } from "@shared/components/ui/input"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@ecoya/design-system/ui/alert"
 import {
   Dialog,
   DialogContent,
@@ -25,7 +31,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@shared/components/ui/dropdown-menu"
-import type { ProductEntitlement, SettingsRole } from "./page"
+import type { ProductEntitlement, SettingsRole, SubscriptionDisplayStatus } from "./page"
 
 type Member = {
   id: string
@@ -70,7 +76,7 @@ const initialMembers: Member[] = [
     snap: false,
   },
 ]
-function useDemoState() {
+function useDemoState(subscriptionKind: "separate" | "bundle") {
   const [members, setMembers] = useState(initialMembers)
   const [requests, setRequests] = useState<Request[]>([
     {
@@ -83,14 +89,14 @@ function useDemoState() {
     },
   ])
   // Purchased capacity is a fixture. UI assignment must never change purchased capacity.
-  const capacity = { erp: 8, snap: 5 }
+  const capacity = subscriptionKind === "bundle" ? { erp: 8, snap: 8 } : { erp: 8, snap: 5 }
   return { members, setMembers, requests, setRequests, capacity }
 }
 const SettingsDemoContext = createContext<ReturnType<
   typeof useDemoState
 > | null>(null)
-export function SettingsDemoProvider({ children }: { children: ReactNode }) {
-  const value = useDemoState()
+export function SettingsDemoProvider({ children, subscriptionKind = "separate" }: { children: ReactNode; subscriptionKind?: "separate" | "bundle" }) {
+  const value = useDemoState(subscriptionKind)
   return (
     <SettingsDemoContext.Provider value={value}>
       {children}
@@ -106,55 +112,73 @@ const selectClass =
   "h-9 w-full rounded-md border bg-background px-2 text-sm disabled:opacity-50"
 export function SeatSummary({
   products,
-  onAdd,
+  compact = false,
+  onManage,
+  manageLabel = "시트 관리",
 }: {
   products: readonly ProductEntitlement[]
-  onAdd?: (product: ProductEntitlement) => void
+  compact?: boolean
+  onManage?: () => void
+  manageLabel?: string
 }) {
   const { members, capacity } = useSettingsDemo()
+  if (compact) {
+    return (
+      <section aria-label="구독 시트" className="grid xl:grid-cols-2 xl:border-b">
+        {products.map((product, index) => {
+          const assigned = members.filter((member) => member[product]).length
+          const available = Math.max(0, capacity[product] - assigned)
+          return (
+            <div
+              key={product}
+              role="region"
+              aria-label={`${names[product]} 좌석`}
+              className={`flex flex-wrap items-center gap-x-3 gap-y-2 border-b py-3 xl:border-b-0 ${index > 0 ? "xl:border-l xl:pl-5" : "xl:pr-5"}`}
+            >
+              <strong className="min-w-18 text-sm font-medium">{names[product]}</strong>
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm whitespace-nowrap">
+                <span>구매 <b className="tabular-nums">{capacity[product]}</b></span>
+                <span>배정 <b className="tabular-nums">{assigned}</b></span>
+                <span>남음 <b className="tabular-nums">{available}</b></span>
+              </div>
+            </div>
+          )
+        })}
+      </section>
+    )
+  }
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      {products.map((product) => {
-        const assigned = members.filter((member) => member[product]).length
-        const available = Math.max(0, capacity[product] - assigned)
-        return (
-          <section
-            key={product}
-            className="rounded-xl border bg-background p-5"
-            aria-label={`${names[product]} 좌석`}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="font-medium">{names[product]}</h3>
-              <Badge variant="outline">Standard 시트</Badge>
-            </div>
-            {onAdd && (
-              <Button
-                className="mt-4"
-                variant="outline"
-                size="sm"
-                onClick={() => onAdd(product)}
+    <section aria-label="구독 시트" className="rounded-xl border bg-background">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
+        <div>
+          <h2 className="font-semibold">구독 시트</h2>
+          <p className="mt-1 text-sm text-muted-foreground">구매 수량과 실제 배정 인원을 구분해 확인합니다.</p>
+        </div>
+        {onManage && <Button variant="outline" size="sm" onClick={onManage}>{manageLabel}</Button>}
+      </div>
+      <div className="px-5">
+          <div className="hidden grid-cols-[minmax(8rem,1fr)_repeat(3,5rem)] gap-3 border-b py-3 text-xs text-muted-foreground sm:grid">
+            <span>제품</span><span>구매</span><span>배정</span><span>남음</span>
+          </div>
+          {products.map((product) => {
+            const assigned = members.filter((member) => member[product]).length
+            const available = Math.max(0, capacity[product] - assigned)
+            return (
+              <div
+                key={product}
+                role="region"
+                aria-label={`${names[product]} 좌석`}
+                className="flex flex-wrap gap-x-4 gap-y-1 border-b py-3 text-sm last:border-b-0 sm:grid sm:grid-cols-[minmax(8rem,1fr)_repeat(3,5rem)] sm:gap-3"
               >
-                {names[product]} 좌석 추가
-              </Button>
-            )}
-            <div className="mt-4 grid grid-cols-3 divide-x rounded-lg border bg-muted/20">
-              {[
-                ["전체", capacity[product]],
-                ["배정됨", assigned],
-                ["배정 가능", available],
-              ].map(([label, value]) => (
-                <div className="px-3 py-2.5" key={label}>
-                  <div className="text-xs text-muted-foreground">{label}</div>
-                  <div className="mt-1 text-lg font-semibold tabular-nums">
-                    {value}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )
-      })}
-    </div>
+                <strong className="basis-full font-medium sm:basis-auto">{names[product]}</strong>
+                <span className="tabular-nums"><span className="sm:hidden">구매 </span>{capacity[product]}</span>
+                <span className="tabular-nums"><span className="sm:hidden">배정 </span>{assigned}</span>
+                <span className="tabular-nums"><span className="sm:hidden">남음 </span>{available}</span>
+              </div>
+            )
+          })}
+      </div>
+    </section>
   )
 }
 
@@ -183,6 +207,7 @@ export function OrganizationMembers({
   const [inviteOpen, setInviteOpen] = useState(false)
   const [email, setEmail] = useState("")
   const [inviteRole, setInviteRole] = useState("member")
+  const [inviteSeatType, setInviteSeatType] = useState<"view" | "erp" | "snap" | "both">("view")
   const [inviteError, setInviteError] = useState("")
   if (role === "member")
     return <p role="status">사용자 관리 권한이 없습니다.</p>
@@ -218,6 +243,11 @@ export function OrganizationMembers({
         reviewedMembers.includes(member.id))
     )
   })
+  const requestedInviteProducts: ProductEntitlement[] =
+    inviteSeatType === "both" ? ["erp", "snap"] : inviteSeatType === "view" ? [] : [inviteSeatType]
+  const inviteSeatShortage = requestedInviteProducts.filter(
+    (product) => members.filter((member) => member[product]).length >= capacity[product]
+  )
   const assign = (
     member: Member,
     product: ProductEntitlement,
@@ -298,39 +328,30 @@ export function OrganizationMembers({
           SNAP App User는 이 조직 멤버 목록에 포함하지 않습니다.
         </p>
       </header>
-      <SeatSummary
-        products={products}
-        onAdd={
-          role === "owner"
-            ? (product) => {
-                window.location.assign(
-                  `/erp/settings?section=products&plan=1&product=${product}`
-                )
-              }
-            : undefined
-        }
-      />
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background p-4">
-        <div>
-          <p className="font-medium">
-            권한 요청 대기 {pendingAccessRequests.length}건
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            멤버의 제품 접근 요청은 해당 멤버 행에서 승인하거나 거절합니다.
-          </p>
+      <SeatSummary products={products} compact />
+      <Alert variant="blue" role="status">
+        <Info aria-hidden="true" />
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+          <div>
+            <AlertTitle>권한 요청 대기 {pendingAccessRequests.length}건</AlertTitle>
+            <AlertDescription>
+              멤버의 제품 접근 요청은 해당 멤버 행에서 승인하거나 거절합니다.
+            </AlertDescription>
+          </div>
+          {pendingAccessRequests.length > 0 || requestOnly ? (
+            <Button
+              variant={requestOnly ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => {
+                setRequestOnly((value) => !value)
+                setReviewedMembers([])
+              }}
+            >
+              {requestOnly ? "전체 멤버 보기" : "요청 확인"}
+            </Button>
+          ) : null}
         </div>
-        {pendingAccessRequests.length > 0 || requestOnly ? (
-          <Button
-            variant={requestOnly ? "secondary" : "outline"}
-            onClick={() => {
-              setRequestOnly((value) => !value)
-              setReviewedMembers([])
-            }}
-          >
-            {requestOnly ? "전체 멤버 보기" : "요청 확인"}
-          </Button>
-        ) : null}
-      </div>
+      </Alert>
       {message && (
         <p role="status" className="text-sm text-primary">
           {message}
@@ -371,32 +392,69 @@ export function OrganizationMembers({
             </div>
           </div>
           <form
-            className="mt-4 flex flex-wrap gap-3"
+            className="mt-4 grid gap-4 sm:grid-cols-2"
             onSubmit={(event) => {
               event.preventDefault()
               if (!email.trim()) return
               setInviteError("서버에 연결되지 않아 초대를 보내지 못했습니다.")
             }}
           >
-            <Input
-              className="min-w-48 flex-1"
-              type="email"
-              required
-              aria-label="초대 이메일"
-              placeholder="member@company.com"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-            <select
-              className={`${selectClass} max-w-36`}
-              aria-label="초대 역할"
-              value={inviteRole}
-              onChange={(event) => setInviteRole(event.target.value)}
-            >
-              {role === "owner" && <option value="admin">ADMIN</option>}
-              <option value="member">MEMBER</option>
-            </select>
-            <Button type="submit">초대 이메일 발송</Button>
+            <label className="grid gap-2 text-sm sm:col-span-2">
+              이메일
+              <Input
+                type="email"
+                required
+                aria-label="초대 이메일"
+                placeholder="member@company.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </label>
+            <label className="grid gap-2 text-sm">
+              조직 역할
+              <select
+                className={selectClass}
+                aria-label="초대 역할"
+                value={inviteRole}
+                onChange={(event) => setInviteRole(event.target.value)}
+              >
+                {role === "owner" && <option value="admin">ADMIN</option>}
+                <option value="member">MEMBER</option>
+              </select>
+            </label>
+            <label className="grid gap-2 text-sm">
+              시트 유형
+              <select
+                className={selectClass}
+                value={inviteSeatType}
+                onChange={(event) => {
+                  setInviteSeatType(event.target.value as typeof inviteSeatType)
+                  setInviteError("")
+                }}
+              >
+                <option value="view">View · 무료</option>
+                {products.includes("erp") && <option value="erp">Trade OS 시트</option>}
+                {products.includes("snap") && <option value="snap">SNAP 시트</option>}
+                {products.includes("erp") && products.includes("snap") && (
+                  <option value="both">Trade OS + SNAP 시트</option>
+                )}
+              </select>
+            </label>
+            <div className="rounded-lg border bg-muted/20 p-3 text-sm sm:col-span-2" role="status">
+              {inviteSeatType === "view" ? (
+                <p>View는 무료입니다. 초대 수락 시 제품 유료 시트를 사용하거나 추가 요금을 청구하지 않습니다.</p>
+              ) : inviteSeatShortage.length > 0 ? (
+                <p>
+                  {inviteSeatShortage.map((product) => names[product]).join("·")} 구매 시트가 부족합니다.
+                  OWNER 승인과 서버 금액 확인이 필요합니다. 추가 금액은 초대 수락일을 기준으로 계산합니다.
+                </p>
+              ) : (
+                <p>현재 구매된 시트 안에서 배정할 수 있습니다. 초대 수락 시 남은 시트를 다시 확인하며, 추가 구매가 필요하면 수락일 기준으로 금액을 계산합니다.</p>
+              )}
+            </div>
+            <div className="flex justify-end sm:col-span-2">
+              <Button type="submit">초대 이메일 발송</Button>
+            </div>
           </form>
           {inviteError && (
             <p role="alert" className="mt-3 text-sm text-destructive">
@@ -749,31 +807,47 @@ export function OrganizationMembers({
 export function ProductsSubscriptions({
   role,
   products,
+  subscriptionKind = "separate",
+  subscriptionStates = {},
   planInitiallyOpen = false,
 }: {
   role: SettingsRole
   products: readonly ProductEntitlement[]
+  subscriptionKind?: "separate" | "bundle"
+  subscriptionStates?: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>
   planInitiallyOpen?: boolean
 }) {
   const { members, capacity, requests, setRequests } = useSettingsDemo()
-  const [planOpen, setPlanOpen] = useState(planInitiallyOpen)
-  const [plan, setPlan] = useState(() => {
+  const [expanded, setExpanded] = useState<{ placement: "subscription" | "offer"; id: "erp" | "snap" | "bundle" } | null>(() => {
+    if (!planInitiallyOpen) return null
     const product = new URLSearchParams(window.location.search).get("product")
-    return product === "erp" || product === "snap" ? product : "bundle"
+    return { placement: "subscription", id: product === "erp" || product === "snap" ? product : subscriptionKind === "bundle" ? "bundle" : products[0] ?? "erp" }
   })
-  const [quantity, setQuantity] = useState(
-    String(Math.max(5, ...products.map((p) => capacity[p])))
-  )
+  const [plan, setPlan] = useState<"erp" | "snap" | "bundle">(() => {
+    const product = new URLSearchParams(window.location.search).get("product")
+    return product === "erp" || product === "snap" ? product : subscriptionKind === "bundle" ? "bundle" : products[0] ?? "erp"
+  })
+  const [quantity, setQuantity] = useState(() => {
+    const product = new URLSearchParams(window.location.search).get("product")
+    return String(product === "erp" || product === "snap"
+      ? products.includes(product) ? capacity[product] : 5
+      : Math.max(5, ...products.map((p) => capacity[p])))
+  })
   const [message, setMessage] = useState("")
   const [rejectId, setRejectId] = useState<string | null>(null)
   const selectedProducts: ProductEntitlement[] =
-    plan === "bundle" ? ["erp", "snap"] : [plan as ProductEntitlement]
+    plan === "bundle" ? ["erp", "snap"] : [plan]
+  const purchasedCapacity = (product: ProductEntitlement) =>
+    products.includes(product) ? capacity[product] : 0
   const assigned = Math.max(
     0,
-    ...selectedProducts.map((p) => members.filter((member) => member[p]).length)
+    ...selectedProducts.map((p) =>
+      products.includes(p) ? members.filter((member) => member[p]).length : 0
+    )
   )
   const count = Number(quantity)
   const invalid = !Number.isSafeInteger(count) || count < 5 || count < assigned
+  const unchanged = plan !== "bundle" && count === purchasedCapacity(plan)
   const visibleRequests = requests.filter((request) =>
     role === "owner"
       ? request.kind === "capacity"
@@ -781,47 +855,84 @@ export function ProductsSubscriptions({
         ? request.kind === "capacity" && request.requester === "admin"
         : request.memberId === "member" && request.kind === "access"
   )
-  if (planOpen && role !== "member")
-    return (
-      <div className="space-y-6">
-        <header className="border-b pb-6">
-          <h1 className="text-2xl font-semibold">제품 및 구독</h1>
-        </header>
-        <section className="rounded-xl border bg-background p-5 sm:p-6">
-          <div className="grid max-w-2xl gap-5">
+  const offers = [
+    { id: "erp", title: "Trade OS", description: "문서·거래·정산 업무를 관리합니다." },
+    { id: "snap", title: "SNAP", description: "현장 기록·증거·리포트를 관리합니다." },
+    { id: "bundle", title: "Trade OS + SNAP", description: "두 제품을 하나의 Bundle로 이용합니다." },
+  ] as const
+  const isBundle = subscriptionKind === "bundle" && products.includes("erp") && products.includes("snap")
+  const subscriptions: { id: "erp" | "snap" | "bundle"; items: ProductEntitlement[] }[] = isBundle
+    ? [{ id: "bundle", items: ["erp", "snap"] }]
+    : products.map((product) => ({ id: product, items: [product] }))
+  const statusOf = (id: "erp" | "snap" | "bundle") => subscriptionStates[id] ?? "paid_active"
+  const statusLabels: Record<SubscriptionDisplayStatus, string> = {
+    trial_not_started: "무료 체험 전", trial_active: "무료 체험 중", trial_expired: "체험 종료",
+    paid_active: "구독 중", cancel_scheduled: "해지 예정", payment_pending: "결제 대기",
+    payment_verifying: "결제 확인 중", read_only: "읽기 전용",
+  }
+  const existingPaidPlan = plan === "bundle"
+    ? isBundle && statusOf("bundle") === "paid_active"
+    : products.includes(plan) && statusOf(plan) === "paid_active"
+  const manageableSubscription = subscriptions.find(({ id }) => statusOf(id) === "paid_active")
+  const subscriptionExamples = {
+    erp: { startedAt: "2026.09.01", renewsAt: "2026.11.01" },
+    snap: { startedAt: "2026.09.15", renewsAt: "2026.10.15" },
+    bundle: { startedAt: "2026.09.01", renewsAt: "2026.11.01" },
+  } as const
+  const openOffer = (nextPlan: typeof plan, placement: "subscription" | "offer" = "subscription") => {
+    setPlan(nextPlan)
+    setQuantity(String(nextPlan === "bundle"
+      ? Math.max(5, ...products.map((product) => capacity[product]))
+      : products.includes(nextPlan) ? capacity[nextPlan] : 5))
+    setExpanded({ placement, id: nextPlan })
+  }
+  const planEditor = expanded && role !== "member" ? (
+        <section className={expanded.placement === "offer" ? "w-full rounded-xl border bg-background p-5 sm:p-6" : "w-full"}>
+          <div className="grid gap-6">
             <header className="space-y-2">
               <h2 className="text-xl font-semibold">
-                {role === "owner" ? "요금제 변경" : "좌석 증설 요청"}
+                {role === "owner"
+                  ? expanded.placement === "offer" ? "플랜 선택" : existingPaidPlan ? "구독·시트 변경" : "구독 시작"
+                  : "좌석 증설 요청"}
               </h2>
               <p className="text-sm text-muted-foreground">
-                수량 선택만으로 구매·배정이 변경되지 않습니다.
+                변경할 상품과 시트 수를 선택하세요. 입력만으로 구독이나 사용자 배정은 변경되지 않습니다.
               </p>
             </header>
-            <label className="grid gap-2 text-sm">
-              상품
-              <select
-                className={selectClass}
-                value={plan}
-                onChange={(event) => {
-                  setPlan(event.target.value)
-                  setMessage("")
-                }}
-              >
-                <option value="erp">Trade OS 단독</option>
-                <option value="snap">SNAP 단독</option>
-                <option value="bundle">Trade OS + SNAP Bundle</option>
-              </select>
-            </label>
-            <label className="grid gap-2 text-sm">
-              구매 시트 수
-              <Input
-                type="number"
-                min={Math.max(5, assigned)}
-                step={1}
-                value={quantity}
-                onChange={(event) => setQuantity(event.target.value)}
-              />
-            </label>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <label className="grid content-start gap-2 text-sm">
+                상품
+                <select
+                  className={selectClass}
+                  value={plan}
+                  onChange={(event) => {
+                    const nextPlan = event.target.value as typeof plan
+                    setPlan(nextPlan)
+                    setQuantity(String(nextPlan === "bundle"
+                      ? Math.max(5, ...products.map((product) => capacity[product]))
+                      : Math.max(5, purchasedCapacity(nextPlan))))
+                    setMessage("")
+                  }}
+                >
+                  <option value="erp">Trade OS 단독</option>
+                  <option value="snap">SNAP 단독</option>
+                  <option value="bundle">Trade OS + SNAP Bundle</option>
+                </select>
+              </label>
+              <label className="grid content-start gap-2 text-sm">
+                구매 시트 수
+                <Input
+                  type="number"
+                  min={Math.max(5, assigned)}
+                  step={1}
+                  value={quantity}
+                  onChange={(event) => {
+                    setQuantity(event.target.value)
+                    setMessage("")
+                  }}
+                />
+              </label>
+            </div>
             {plan === "bundle" && (
               <p className="text-sm">
                 두 단독 구독 중 큰 구매 수량을 기본값으로 제안합니다. Trade
@@ -835,14 +946,47 @@ export function ProductsSubscriptions({
                 입력하세요. 감소 전 사용자 배정을 조정해 주세요.
               </p>
             )}
+            {!invalid && unchanged && (
+              <p className="text-sm text-muted-foreground">현재 구매 수와 같습니다. 변경할 시트 수를 입력해 주세요.</p>
+            )}
+            <div className="grid gap-4 rounded-lg border bg-muted/20 p-4 sm:grid-cols-2 sm:p-5" aria-label="변경 내용">
+              <div>
+                <p className="text-xs text-muted-foreground">구매 시트 변경</p>
+                <div className="mt-2 space-y-1">
+                  {selectedProducts.map((product) => (
+                    <p className="text-sm font-medium tabular-nums" key={product}>
+                      {names[product]} {purchasedCapacity(product)}명
+                      <span className="mx-1 text-muted-foreground">→</span>
+                      {invalid ? "—" : `${count}명`}
+                      {!invalid && count > purchasedCapacity(product) && (
+                        <span className="ml-2 text-xs text-muted-foreground">+{count - purchasedCapacity(product)}명</span>
+                      )}
+                    </p>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">적용 및 청구</p>
+                <p className="mt-1 text-sm font-medium">결제·구독 확인 후 시트 반영</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {existingPaidPlan && selectedProducts.some((product) => count > purchasedCapacity(product))
+                    ? "증설분은 다음 인보이스에 청구됩니다."
+                    : "변경 금액과 적용일은 서버에서 확인합니다."}
+                </p>
+                <p className="mt-3 text-xs text-muted-foreground">예상 금액·일할 금액·적용일</p>
+                <p className="mt-1 text-sm font-medium">서버 연결 후 자동 표시</p>
+              </div>
+            </div>
             <p className="text-sm text-muted-foreground">
-              Paddle 예상 금액·일할 금액·적용일·다음 인보이스는 서버 연결 후
-              확인합니다. 기존 유료 구독 증설은 구독 변경 확인 후 시트에
-              반영되며, 증설분은 다음 인보이스에 청구됩니다. 사용자 배정은
-              별도로 완료해야 합니다.
+              시트 변경이 확인된 후 사용자 배정은 별도로 완료해야 합니다.
             </p>
+            {role === "owner" && (
+              <p role="note" className="text-sm text-muted-foreground">
+                예상 금액을 불러올 수 없어 변경을 확정할 수 없습니다. 구독과 구매 시트는 그대로 유지됩니다.
+              </p>
+            )}
             {message && (
-              <p role="status" className="text-sm">
+              <p role="status" className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
                 {message}
               </p>
             )}
@@ -850,7 +994,7 @@ export function ProductsSubscriptions({
               <Button
                 variant="outline"
                 onClick={() => {
-                  setPlanOpen(false)
+                  setExpanded(null)
                   setMessage("")
                   const url = new URL(window.location.href)
                   url.searchParams.delete("plan")
@@ -860,115 +1004,121 @@ export function ProductsSubscriptions({
                 닫기
               </Button>
               <Button
-                disabled={invalid}
-                onClick={() =>
-                  setMessage(
-                    "서버에 연결되지 않아 예상 금액을 확인할 수 없습니다. 구매·요청은 변경되지 않았습니다."
-                  )
-                }
+                disabled={role === "owner" || invalid || unchanged}
+                onClick={() => setMessage("서버에 연결되지 않아 요청을 보내지 못했습니다. 구매·요청은 변경되지 않았습니다.")}
               >
-                {role === "owner" ? "예상 금액 확인" : "OWNER에게 요청"}
+                {role === "owner" ? existingPaidPlan ? "변경 확정" : "구독 확정" : "OWNER에게 요청"}
               </Button>
             </div>
           </div>
         </section>
-        <Button
-          variant="outline"
-          onClick={() =>
-            window.location.assign("/erp/settings?section=members")
-          }
-        >
-          사용자 관리로 돌아가기
-        </Button>
-      </div>
-    )
+  ) : null
   return (
-    <div className="space-y-6">
+    <div data-ui="products-subscriptions" className="w-full space-y-6">
       <div className="border-b pb-6">
         <h1 className="text-2xl font-semibold">제품 및 구독</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          제품 상태와 구매 시트·사용자 배정을 구분해 확인합니다.
+          구독할 상품을 살펴보고 현재 제품 상태와 구매 시트를 관리합니다.
         </p>
         <p className="mt-2 text-xs text-muted-foreground" role="note">
-          표시된 구독·좌석 수는 화면 예시입니다. 실제 조직의 상태와 결제 결과는 서버 확인 후 표시됩니다.
+          구독 상태·날짜·좌석 수는 화면 예시입니다. 실제 조직의 상태와 결제 결과는 서버 확인 후 표시됩니다.
         </p>
       </div>
-      {role !== "member" && <SeatSummary products={products} />}
-      <section className="rounded-xl border bg-background p-5">
-        <h2 className="font-semibold">제품 상태</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {products.map((product) => (
-            <div key={product} className="rounded-lg border p-4">
-              <h3 className="font-medium">{names[product]}</h3>
-              <p className="mt-2 text-sm">구독 중</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {members.find((member) => member.id === role)?.[product]
-                  ? "Standard 시트"
-                  : "할당되지 않음"}
-              </p>
-              {role !== "member" &&
-                !members.find((member) => member.id === role)?.[product] && (
-                  <Button
-                    className="mt-3"
-                    variant="outline"
-                    onClick={() =>
-                      window.location.assign("/erp/settings?section=members")
-                    }
-                  >
-                    시트 배정
-                  </Button>
-                )}
-            </div>
+      {products.length > 0 && <section aria-label="내 플랜" className="rounded-xl border bg-background">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
+          <div>
+            <h2 className="font-semibold">내 플랜</h2>
+            <p className="mt-1 text-sm text-muted-foreground">제품별 이용 상태와 시트 현황을 확인합니다.</p>
+          </div>
+          {role !== "member" && <div className="flex flex-wrap gap-2">
+            {role === "owner" && products.length === 2 && !isBundle && subscriptions.some(({ id }) => statusOf(id) === "paid_active") && (
+              <Button variant="outline" size="sm" onClick={() => openOffer("bundle")}>업그레이드</Button>
+            )}
+            {manageableSubscription && (
+              <Button variant="outline" size="sm" aria-expanded={expanded?.placement === "subscription"} onClick={() => openOffer(manageableSubscription.id)}>
+                {role === "owner" ? "시트 관리" : "증설 요청"}
+              </Button>
+            )}
+          </div>}
+        </div>
+        <div className="divide-y px-5">
+          {subscriptions.map((subscription) => {
+            const status = statusOf(subscription.id)
+            const action = status === "trial_not_started" ? "무료 체험 시작"
+              : status === "trial_active" || status === "trial_expired" || status === "read_only" ? "구독하기"
+              : status === "cancel_scheduled" ? "예약 취소"
+              : status === "payment_pending" ? "다시 결제하기" : null
+            return (
+              <div key={subscription.id} className="py-4" role="region" aria-label={`${subscription.id === "bundle" ? "Trade OS + SNAP Bundle" : names[subscription.id]} 구독`}>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h3 className="text-sm font-semibold">{subscription.id === "bundle" ? "Trade OS + SNAP Bundle" : names[subscription.id]}</h3>
+                  {role === "owner" && action && <Button variant="outline" size="sm" onClick={() => {
+                    if (action === "구독하기") openOffer(subscription.id)
+                    else setMessage("서버 연결 후 현재 구독 상태를 확인하고 처리할 수 있습니다. 아직 변경되지 않았습니다.")
+                  }}>{action}</Button>}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                  <span>{subscription.id === "bundle" ? "번들 플랜" : "단독 플랜"}</span>
+                  <span>{statusLabels[status]}</span>
+                  {(status === "paid_active" || status === "cancel_scheduled") && <span>구독 시작 {subscriptionExamples[subscription.id].startedAt}</span>}
+                  {status === "paid_active" && <span>다음 갱신 {subscriptionExamples[subscription.id].renewsAt}</span>}
+                  {status === "cancel_scheduled" && <span>해지 예정 {subscriptionExamples[subscription.id].renewsAt}</span>}
+                  {status === "trial_active" && <span>체험 종료 {subscriptionExamples[subscription.id].renewsAt}</span>}
+                </div>
+                <div className="mt-2 grid gap-2">
+                  {subscription.items.map((product) => {
+                    const assigned = members.filter((member) => member[product]).length
+                    const available = Math.max(0, capacity[product] - assigned)
+                    const mySeat = members.find((member) => member.id === role)?.[product]
+                    return <div key={product} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 text-sm" role="region" aria-label={`${names[product]} 이용 상태`}>
+                      <span className="text-muted-foreground">{subscription.id === "bundle" ? `${names[product]} · ` : ""}접근 가능 · 내 시트 {mySeat ? "배정됨" : "미배정"}</span>
+                      {role !== "member" && <span className="flex flex-wrap gap-x-4 tabular-nums"><span>구매 {capacity[product]}</span><span>배정 {assigned}</span><span>남음 {available}</span></span>}
+                    </div>
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        {expanded?.placement === "subscription" && <div className="border-t p-4 sm:p-5">{planEditor}</div>}
+        {role === "member" && (
+          <div className="border-t px-5 py-4">
+            <Button variant="outline" onClick={() => {
+              const product = products.find((p) => !members.find((m) => m.id === "member")?.[p])
+              if (!product) {
+                setMessage("현재 제품에 모두 시트가 배정되어 있습니다.")
+                return
+              }
+              if (!requests.some((r) => r.kind === "access" && r.product === product && r.memberId === "member" && r.status === "pending"))
+                setRequests((current) => [...current, { id: crypto.randomUUID(), memberId: "member", product, kind: "access", requester: role, status: "pending" }])
+              setMessage("ADMIN에게 제품 접근을 요청했어요.")
+            }}>제품 접근 요청</Button>
+          </div>
+        )}
+      </section>}
+      {(products.length === 0 || products.length < 2) && <section aria-label="구독 상품" className="space-y-4">
+        <div>
+          <h2 className="font-semibold">{products.length === 0 ? "구독 상품" : "추가 가능한 상품"}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">필요한 제품을 선택하세요. 금액과 적용일은 구독을 확정하기 전에 확인합니다.</p>
+        </div>
+        <div className="grid gap-3 lg:grid-cols-3">
+          {offers.filter((offer) => offer.id === "bundle" || !products.includes(offer.id)).map((offer) => (
+            <article key={offer.id} className="flex flex-col rounded-xl border bg-background p-5">
+              <h3 className="font-medium">{offer.title}</h3>
+              <p className="mt-2 flex-1 text-sm text-muted-foreground">{offer.description}</p>
+              <p className="mt-3 text-xs text-muted-foreground">{statusLabels[subscriptionStates[offer.id] ?? "trial_not_started"]}</p>
+              {role === "owner" ? (
+                <Button className="mt-4 self-start" variant="outline" size="sm" aria-expanded={expanded?.placement === "offer" && expanded.id === offer.id} onClick={() => openOffer(offer.id, "offer")}>
+                  {offer.id === "bundle" && subscriptions.some(({ id }) => statusOf(id) === "paid_active") ? "업그레이드" : "플랜 보기"}
+                </Button>
+              ) : (
+                <p className="mt-4 text-xs text-muted-foreground">구독 변경은 OWNER가 관리합니다.</p>
+              )}
+            </article>
           ))}
         </div>
-        <div className="mt-4 flex gap-3">
-          {role === "owner" && (
-            <Button onClick={() => setPlanOpen(true)}>요금제 변경</Button>
-          )}
-          {role === "admin" && (
-            <Button variant="outline" onClick={() => setPlanOpen(true)}>
-              증설 요청
-            </Button>
-          )}
-          {role === "member" && (
-            <Button
-              variant="outline"
-              onClick={() => {
-                const product = products.find(
-                  (p) => !members.find((m) => m.id === "member")?.[p]
-                )
-                if (!product) {
-                  setMessage("현재 제품에 모두 시트가 배정되어 있습니다.")
-                  return
-                }
-                if (
-                  !requests.some(
-                    (r) =>
-                      r.kind === "access" &&
-                      r.product === product &&
-                      r.memberId === "member" &&
-                      r.status === "pending"
-                  )
-                )
-                  setRequests((current) => [
-                    ...current,
-                    {
-                      id: crypto.randomUUID(),
-                      memberId: "member",
-                      product,
-                      kind: "access",
-                      requester: role,
-                      status: "pending",
-                    },
-                  ])
-                setMessage("ADMIN에게 제품 접근을 요청했어요.")
-              }}
-            >
-              제품 접근 요청
-            </Button>
-          )}
-        </div>
-      </section>
+        {expanded?.placement === "offer" && <div className="mt-4">{planEditor}</div>}
+      </section>}
       {message && (
         <p role="status" className="text-sm text-primary">
           {message}

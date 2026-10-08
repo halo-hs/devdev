@@ -9167,6 +9167,11 @@ function CreateScreen({
     )
     setUnifiedWorkbenchOpen(true)
   }
+  const pageHeading = (
+    <header className="mb-6">
+      <h1 className="text-2xl font-semibold tracking-tight">문서 만들기</h1>
+    </header>
+  )
 
   if (unifiedWorkbenchOpen) {
     return (
@@ -9199,6 +9204,7 @@ function CreateScreen({
       <div className="flex h-full min-h-0 flex-col overflow-auto bg-background">
         <div className="mx-auto w-full max-w-ecoya-wide-xl shrink-0 px-5 pt-5 sm:px-6 sm:pt-6 xl:px-8">
           {relatedDeal ? <RelatedDealNotice deal={relatedDeal} /> : null}
+          {pageHeading}
           <section className="space-y-5 pb-8">
             <TemplateStrip onResult={openUnifiedWorkbench} />
           </section>
@@ -9211,6 +9217,7 @@ function CreateScreen({
     <div className="h-full min-h-0 overflow-auto bg-background">
       <section className="mx-auto w-full max-w-ecoya-wide-xl px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
         {relatedDeal ? <RelatedDealNotice deal={relatedDeal} compact /> : null}
+        {pageHeading}
 
         <section className="mb-7">
           <TemplateStrip onResult={openUnifiedWorkbench} />
@@ -16623,7 +16630,10 @@ export function App() {
             />
             <SidebarInset className="min-h-0 min-w-0 overflow-hidden">
               <main
-                className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+                className={cn(
+                  "min-h-0 flex-1 overflow-y-auto overscroll-contain",
+                  screen === "shipments" && "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                )}
                 aria-busy={screenLoading}
               >
                 <PageFrame

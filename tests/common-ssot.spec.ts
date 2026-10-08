@@ -162,7 +162,7 @@ test("entitlement changes hide product menus and product data immediately", asyn
   await render(["erp"])
   const nav = page.getByRole("navigation", { name: "설정 메뉴" })
   await expect(
-    nav.getByRole("button", { name: "알림", exact: true })
+    nav.getByRole("button", { name: "알림 설정", exact: true })
   ).toBeVisible()
   await expect(
     nav.getByRole("button", { name: "사용량 및 기술 한도", exact: true })
@@ -172,9 +172,9 @@ test("entitlement changes hide product menus and product data immediately", asyn
   )
   await render(["snap"])
   await expect(
-    nav.getByRole("button", { name: "알림", exact: true })
+    nav.getByRole("button", { name: "알림 설정", exact: true })
   ).toHaveCount(0)
-  await expect(nav.getByText("알림", { exact: true })).toHaveCount(0)
+  await expect(nav.getByText("알림 설정", { exact: true })).toHaveCount(0)
   await nav.getByRole("button", { name: "데이터 및 보존", exact: true }).click()
   await expect(page.getByRole("heading", { name: "데이터 저장" })).toBeVisible()
   await render(["erp"])
@@ -187,7 +187,7 @@ test("entitlement changes hide product menus and product data immediately", asyn
   await render(["erp", "snap"])
   await expect(nav.getByRole("button")).toHaveText([
     "내 계정", "소속 Organization", "조직 정보", "사용자 관리", "제품 및 구독", "빌링 ↗",
-    "업무 기본 설정", "이메일로 문서 받기", "거래처 일괄 등록", "거래 일괄 등록", "거래처 별칭 학습", "알림",
+    "업무 기본 설정", "이메일로 문서 받기", "거래처 일괄 등록", "거래 일괄 등록", "거래처 별칭 학습", "알림 설정",
     "현장 운영", "브랜딩", "지역화", "데이터 및 보존", "사용량 및 기술 한도",
   ])
 })

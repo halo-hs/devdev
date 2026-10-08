@@ -1,21 +1,24 @@
 import { expect, test, type Page } from "@playwright/test"
+import type { SubscriptionDisplayStatus } from "../share/settings/page"
 
 async function openSettings(
   page: Page,
   role = "owner",
   section = "members",
-  products = ["erp", "snap"]
+  products = ["erp", "snap"],
+  subscriptionKind: "separate" | "bundle" = "separate",
+  subscriptionStates: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>> = {}
 ) {
   await page.goto(`/login?section=${section}`)
   await page.evaluate(
-    async ({ role, products }) => {
+    async ({ role, products, subscriptionKind, subscriptionStates }) => {
       const path = "/tests/fixtures/common-settings.tsx"
       const fixture = await import(path)
-      fixture.renderSettings(products, role)
+      fixture.renderSettings(products, role, subscriptionKind, subscriptionStates)
     },
-    { role, products }
+    { role, products, subscriptionKind, subscriptionStates }
   )
-  await expect(page.locator("main")).toBeVisible()
+  await expect(page.locator("main").first()).toBeVisible()
 }
 
 function memberRow(page: Page, name: string) {
@@ -28,10 +31,32 @@ async function seatCounts(
   assigned: number,
   available: number
 ) {
+  const subscriptionSummary = page.getByRole("region", {
+    name: `${product} 이용 상태`,
+    exact: true,
+  })
+  if (await subscriptionSummary.count()) {
+    await expect(subscriptionSummary).toContainText(`구매 ${total}`)
+    await expect(subscriptionSummary).toContainText(`배정 ${assigned}`)
+    await expect(subscriptionSummary).toContainText(`남음 ${available}`)
+    return
+  }
   const summary = page.getByRole("region", {
     name: `${product} 좌석`,
     exact: true,
   })
+  if (await summary.getByText("전체", { exact: true }).count() === 0) {
+    if ((await summary.locator("span").first().textContent())?.includes("구매")) {
+      await expect(summary).toContainText(`구매 ${total}`)
+      await expect(summary).toContainText(`배정 ${assigned}`)
+      await expect(summary).toContainText(`남음 ${available}`)
+    } else {
+      await expect(summary.locator("span").nth(0)).toHaveText(String(total))
+      await expect(summary.locator("span").nth(1)).toHaveText(String(assigned))
+      await expect(summary.locator("span").nth(2)).toHaveText(String(available))
+    }
+    return
+  }
   await expect(
     summary.getByText("전체", { exact: true }).locator("..")
   ).toContainText(String(total))
@@ -42,6 +67,22 @@ async function seatCounts(
     summary.getByText("배정 가능", { exact: true }).locator("..")
   ).toContainText(String(available))
 }
+
+test("member invite starts with free View and offers active product seat types", async ({ page }) => {
+  await openSettings(page, "owner", "members", ["erp", "snap"])
+  await expect(page.getByRole("button", { name: "시트 추가" })).toHaveCount(0)
+  await page.getByRole("button", { name: "멤버 초대" }).click()
+  const seatType = page.getByLabel("시트 유형")
+  await expect(seatType).toHaveValue("view")
+  await expect(page.getByRole("status").filter({ hasText: "View는 무료입니다" })).toBeVisible()
+  await seatType.selectOption("both")
+  await expect(page.getByRole("status").filter({ hasText: "현재 구매된 시트" })).toBeVisible()
+  await openSettings(page, "admin", "members", ["erp"])
+  await page.getByRole("button", { name: "멤버 초대" }).click()
+  await expect(page.getByLabel("초대 역할")).toHaveValue("member")
+  await expect(page.getByLabel("시트 유형").locator('option[value="snap"]')).toHaveCount(0)
+  await expect(page.getByLabel("시트 유형").locator('option[value="both"]')).toHaveCount(0)
+})
 
 test("final settings IA separates organization, members and Trade OS defaults; direct links survive reload", async ({
   page,
@@ -71,6 +112,32 @@ test("final settings IA separates organization, members and Trade OS defaults; d
   ).toHaveCount(0)
   await expect(page.locator("body")).not.toContainText("OWNER · 편집 가능")
   await seatCounts(page, "SNAP", 5, 1, 4)
+})
+
+test("settings content centers forms and wider management pages at responsive maximums", async ({ page }) => {
+  for (const width of [1280, 1440]) {
+    await page.setViewportSize({ width, height: 900 })
+    await openSettings(page, "owner", "account")
+    const settingsWidth = await page.locator('[data-ui="settings-content"]').evaluate((element) => element.getBoundingClientRect().width)
+    expect(settingsWidth).toBe(960)
+
+    await page.getByRole("button", { name: "사용자 관리", exact: true }).click()
+    const membersWidth = await page.locator('[data-ui="settings-content"]').evaluate((element) => element.getBoundingClientRect().width)
+    expect(membersWidth).toBeGreaterThan(settingsWidth)
+    expect(membersWidth).toBeLessThanOrEqual(1120)
+
+    await page.getByRole("button", { name: "제품 및 구독", exact: true }).click()
+    const productsWidth = await page.locator('[data-ui="settings-content"]').evaluate((element) => element.getBoundingClientRect().width)
+    expect(productsWidth).toBeGreaterThan(settingsWidth)
+    expect(productsWidth).toBeLessThanOrEqual(1120)
+    if (width === 1440) expect(productsWidth).toBe(1120)
+  }
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  await openSettings(page, "owner", "account")
+  const mobileWidth = await page.locator('[data-ui="settings-content"]').evaluate((element) => element.getBoundingClientRect().width)
+  expect(mobileWidth).toBe(390)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
 })
 
 test("brand color picker and HEX value stay in sync with role access", async ({ page }) => {
@@ -217,26 +284,24 @@ test("billing, invitation, removal and global logout do not claim unconfirmed se
   await expect(memberRow(page, "박서윤")).toBeVisible()
 })
 
-test("plan changes use a page, enforce bundle capacity and never change purchased seats before provider confirmation", async ({
+test("plan changes show seat and billing context without an extra preview action", async ({
   page,
 }) => {
-  await openSettings(page, "owner", "products")
-  await page.getByRole("button", { name: "요금제 변경", exact: true }).click()
+  await page.goto("/erp/settings?section=products&plan=1&product=erp")
   await expect(page.getByRole("dialog")).toHaveCount(0)
   await expect(page.getByLabel("구매 시트 수")).toHaveValue("8")
   for (const invalid of ["4", "8.5"]) {
     await page.getByLabel("구매 시트 수").fill(invalid)
     await expect(
-      page.getByRole("button", { name: "예상 금액 확인", exact: true })
+      page.getByRole("button", { name: "변경 확정", exact: true })
     ).toBeDisabled()
   }
   await page.getByLabel("구매 시트 수").fill("9")
-  await page
-    .getByRole("button", { name: "예상 금액 확인", exact: true })
-    .click()
-  await expect(page.getByRole("status")).toContainText(
-    "구매·요청은 변경되지 않았습니다"
-  )
+  await expect(page.getByLabel("변경 내용")).toContainText("Trade OS 8명→9명")
+  await expect(page.getByLabel("변경 내용")).toContainText("다음 인보이스에 청구")
+  await expect(page.getByLabel("변경 내용")).toContainText("서버 연결 후 자동 표시")
+  await expect(page.getByRole("button", { name: "변경 확정", exact: true })).toBeDisabled()
+  await expect(page.getByRole("note").filter({ hasText: "예상 금액을 불러올 수 없어" })).toContainText("구매 시트는 그대로 유지됩니다")
   await page.getByRole("button", { name: "닫기", exact: true }).click()
   await seatCounts(page, "Trade OS", 8, 3, 5)
 })
@@ -266,7 +331,7 @@ test("mobile members use cards, retain seat actions and fit the viewport", async
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto("/erp/settings?section=members")
+  await openSettings(page, "owner", "members")
   await expect(
     page.getByRole("heading", { name: "사용자 관리", exact: true })
   ).toBeVisible()
@@ -279,4 +344,48 @@ test("mobile members use cards, retain seat actions and fit the viewport", async
   ).toBeLessThanOrEqual(390)
   const rect = await memberRow(page, "박서윤").boundingBox()
   expect(rect!.width).toBeLessThanOrEqual(390)
+  await openSettings(page, "owner", "products")
+  await expect(page.getByRole("region", { name: "내 플랜" })).toBeVisible()
+  await expect(page.getByRole("region", { name: "구독 상품" })).toHaveCount(0)
+  await expect(page.getByRole("region", { name: "Trade OS 구독" })).toBeVisible()
+  await expect(page.getByRole("region", { name: "SNAP 구독" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "시트 관리", exact: true })).toHaveCount(1)
+  await expect(page.getByRole("button", { name: "업그레이드", exact: true })).toHaveCount(1)
+  await expect(page.getByRole("region", { name: "Trade OS 구독" })).toContainText("구독 시작 2026.09.01")
+  await page.getByRole("button", { name: "시트 관리", exact: true }).click()
+  await expect(page.getByRole("region", { name: "Trade OS 구독" })).toBeVisible()
+  await expect(page.getByLabel("구매 시트 수")).toBeVisible()
+  await page.getByRole("button", { name: "닫기", exact: true }).click()
+  await expect(page.getByLabel("구매 시트 수")).toHaveCount(0)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
+})
+
+test("bundle is shown as one subscription with two independent product seats", async ({ page }) => {
+  await openSettings(page, "owner", "products", ["erp", "snap"], "bundle")
+  await expect(page.getByRole("region", { name: "Trade OS + SNAP Bundle 구독" })).toBeVisible()
+  await expect(page.getByRole("region", { name: "Trade OS 구독" })).toHaveCount(0)
+  await expect(page.getByRole("region", { name: "SNAP 구독" })).toHaveCount(0)
+  await expect(page.getByRole("region", { name: "Trade OS 이용 상태" })).toContainText("구매 8")
+  await expect(page.getByRole("region", { name: "SNAP 이용 상태" })).toContainText("구매 8")
+})
+
+test("plan actions follow the subscription state", async ({ page }) => {
+  await openSettings(page, "owner", "products", ["erp"], "separate", { erp: "trial_active" })
+  const plan = page.getByRole("region", { name: "Trade OS 구독" })
+  await expect(plan).toContainText("무료 체험 중")
+  await expect(plan.getByRole("button", { name: "구독하기" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "시트 관리" })).toHaveCount(0)
+  await plan.getByRole("button", { name: "구독하기" }).click()
+  await expect(page.getByLabel("구매 시트 수")).toBeVisible()
+  await expect(page.getByRole("button", { name: "구독 확정" })).toBeDisabled()
+  await expect(page.getByLabel("변경 내용")).not.toContainText("다음 인보이스에 청구")
+  await openSettings(page, "owner", "products", ["erp"], "separate", { erp: "payment_verifying" })
+  await expect(page.getByRole("region", { name: "Trade OS 구독" })).toContainText("결제 확인 중")
+  await expect(page.getByRole("button", { name: "다시 결제하기" })).toHaveCount(0)
+  await openSettings(page, "owner", "products", ["erp"], "separate", { erp: "payment_pending" })
+  await expect(page.getByRole("region", { name: "Trade OS 구독" }).getByRole("button", { name: "다시 결제하기" })).toBeVisible()
+  await openSettings(page, "owner", "products", ["erp"], "separate", { erp: "cancel_scheduled" })
+  await expect(page.getByRole("region", { name: "Trade OS 구독" }).getByRole("button", { name: "예약 취소" })).toBeVisible()
+  await openSettings(page, "owner", "products", ["erp"], "separate", { erp: "read_only" })
+  await expect(page.getByRole("region", { name: "Trade OS 구독" }).getByRole("button", { name: "구독하기" })).toBeVisible()
 })

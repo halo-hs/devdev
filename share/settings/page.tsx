@@ -59,6 +59,7 @@ import type { WorkspaceKey } from "@shared/lib/workspaces"
 
 export type ProductEntitlement = "erp" | "snap"
 export type SettingsRole = "owner" | "admin" | "member"
+export type SubscriptionDisplayStatus = "trial_not_started" | "trial_active" | "trial_expired" | "paid_active" | "cancel_scheduled" | "payment_pending" | "payment_verifying" | "read_only"
 type SettingsTarget = "home" | "tokens" | "billing"
 
 type SectionId =
@@ -150,7 +151,7 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
         icon: Landmark,
         product: "erp",
       },
-      { id: "trade-alerts", label: "알림", icon: Bell, product: "erp" },
+      { id: "trade-alerts", label: "알림 설정", icon: Bell, product: "erp" },
     ],
   },
   {
@@ -575,8 +576,8 @@ function AlertsPage() {
   return (
     <div>
       <PageHeading
-        title="알림"
-        description="Trade OS 업무 알림의 종류와 수신 채널을 설정합니다."
+        title="Trade OS 알림 설정"
+        description="Trade OS 업무 알림의 종류와 수신 채널을 설정합니다. SNAP 알림에는 적용되지 않습니다."
       />
       <div className="space-y-7">
         <SettingsSection
@@ -790,7 +791,9 @@ function SnapUsagePage({ role }: { role: SettingsRole }) {
 function renderSection(
   section: SectionId,
   role: SettingsRole,
-  products: readonly ProductEntitlement[]
+  products: readonly ProductEntitlement[],
+  subscriptionKind: "separate" | "bundle",
+  subscriptionStates: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>
 ) {
   if (section === "account") return <AccountPage />
   if (section === "organizations")
@@ -814,6 +817,8 @@ function renderSection(
       <ProductsSubscriptions
         role={role}
         products={products}
+        subscriptionKind={subscriptionKind}
+        subscriptionStates={subscriptionStates}
         planInitiallyOpen={
           new URLSearchParams(window.location.search).get("plan") === "1" &&
           role !== "member"
@@ -842,6 +847,8 @@ function SettingsHubContent({
   onWorkspaceChange,
   availableProducts = ["erp", "snap"],
   role = "owner",
+  subscriptionKind = "separate",
+  subscriptionStates = {},
 }: {
   onNavigate: (target: SettingsTarget) => void
   onLogout: () => void
@@ -849,6 +856,8 @@ function SettingsHubContent({
   onWorkspaceChange: (workspaceId: WorkspaceKey) => void
   availableProducts?: readonly ProductEntitlement[]
   role?: SettingsRole
+  subscriptionKind?: "separate" | "bundle"
+  subscriptionStates?: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>
 }) {
   const { isMobile, setOpenMobile, state: sidebarState } = useSidebar()
   const groups = useMemo(
@@ -1031,7 +1040,10 @@ function SettingsHubContent({
       </Sidebar>
       <SidebarInset className="min-h-0 min-w-0 overflow-hidden bg-background md:pt-(--header-height)">
         <div className="h-full min-h-0 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1440px] px-5 py-7 sm:px-7 xl:px-10 xl:py-9">
+          <div
+            data-ui="settings-content"
+            className={`mx-auto w-full px-5 py-7 sm:px-7 xl:px-10 xl:py-9 ${effectiveSection === "products" || effectiveSection === "members" ? "max-w-[1120px]" : "max-w-[960px]"}`}
+          >
             {portalError && role === "owner" && (
               <div
                 role="alert"
@@ -1058,7 +1070,7 @@ function SettingsHubContent({
               </div>
             )}
             <div key={`${workspaceId}:${effectiveSection}`}>
-              {renderSection(effectiveSection, role, availableProducts)}
+              {renderSection(effectiveSection, role, availableProducts, subscriptionKind, subscriptionStates)}
             </div>
           </div>
         </div>
@@ -1071,7 +1083,8 @@ function SettingsHubContent({
 export function SettingsHubV2(props: Parameters<typeof SettingsHubContent>[0]) {
   return (
     <SettingsDemoProvider
-      key={`${props.workspaceId}:${props.role ?? "owner"}:${(props.availableProducts ?? ["erp", "snap"]).join(",")}`}
+      key={`${props.workspaceId}:${props.role ?? "owner"}:${(props.availableProducts ?? ["erp", "snap"]).join(",")}:${props.subscriptionKind ?? "separate"}`}
+      subscriptionKind={props.subscriptionKind}
     >
       <SettingsHubContent {...props} />
     </SettingsDemoProvider>
