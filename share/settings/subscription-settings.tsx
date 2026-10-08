@@ -1049,14 +1049,17 @@ export function ProductsSubscriptions({
       </section>
       {role !== "member" && (
         <section className="rounded-xl border bg-background p-5">
-          <h2 className="font-semibold">금융 상태·인보이스</h2>
+          <h2 className="font-semibold">
+            {role === "owner" ? "금융 상태·인보이스" : "인보이스"}
+          </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             {role === "admin"
-              ? "허용된 조직 범위의 읽기 전용 정보입니다. "
-              : ""}
-            현재 조직의 금융 조회 권한과 Paddle 연결을 확인한 후 표시합니다.
+              ? "현재 조직의 인보이스 목록·상세·내려받기만 읽기 전용으로 제공합니다."
+              : "현재 조직의 금융 상태와 인보이스는 Paddle 연결을 확인한 후 표시합니다."}
           </p>
-          <p className="mt-4 text-sm">금액·다음 결제일: 확인 필요</p>
+          {role === "owner" ? (
+            <p className="mt-4 text-sm">금액·다음 결제일: 확인 필요</p>
+          ) : null}
           <Button
             className="mt-4"
             variant="outline"

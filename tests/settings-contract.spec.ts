@@ -135,8 +135,9 @@ test("admin can assign own unused seat, cannot revoke it or edit another admin r
     .click()
   await page.getByRole("button", { name: "제품 및 구독", exact: true }).click()
   await expect(
-    page.getByRole("heading", { name: "금융 상태·인보이스" })
+    page.getByRole("heading", { name: "인보이스", exact: true })
   ).toBeVisible()
+  await expect(page.getByText("금액·다음 결제일: 확인 필요")).toHaveCount(0)
   await expect(
     page.getByRole("button", { name: "요금제 변경", exact: true })
   ).toHaveCount(0)
