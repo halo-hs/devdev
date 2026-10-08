@@ -1,0 +1,204 @@
+{
+  "initialCloses": [
+    {
+      "id": "a0f4d578-e8ec-57ea-bdf8-7f55ceefebe0",
+      "period_start": "2026-08-01",
+      "period_end": "2026-08-31",
+      "timezone": "Asia/Seoul",
+      "closed_by": "940ff121-2c36-58fa-9c13-05870353ce22",
+      "closed_at": "2026-09-01T00:00:00Z",
+      "note": "8월 거래 정산 확인",
+      "reopened": true,
+      "reopened_at": "2026-09-02T00:00:00Z",
+      "reopened_by": "940ff121-2c36-58fa-9c13-05870353ce22",
+      "reopen_reason": "누락된 거래 반영"
+    }
+  ],
+  "fallbackPeriod": "2026-09",
+  "snapshots": {
+    "2026-08": {
+      "version": 7,
+      "functional_currency": "USD",
+      "params": {
+        "granularity": "month",
+        "from": "2026-08-01",
+        "to": "2026-08-31",
+        "timezone": "Asia/Seoul",
+        "counterparty_metric": "receivable",
+        "counterparty_limit": 10
+      },
+      "series": {
+        "period_start": "2026-08-01",
+        "period_end": "2026-08-31",
+        "by_currency": [
+          {
+            "currency": "USD",
+            "receivable_due": "420000",
+            "payable_due": "340000",
+            "received": "310000",
+            "paid_out": "278000",
+            "receivable_outstanding_end": "110000",
+            "payable_outstanding_end": "62000",
+            "overdue_receivable_end": "35000",
+            "overdue_rate_end": "0.3182",
+            "overdue_rate_status": "calculated"
+          }
+        ]
+      },
+      "counterparty_top": {
+        "from": "2026-08-01",
+        "to": "2026-08-31",
+        "metric": "receivable",
+        "items": [
+          {
+            "counterparty": "Indigo Commerce",
+            "currency": "USD",
+            "amount": "220000",
+            "deal_count": 2
+          },
+          {
+            "counterparty": "Futura Alloys",
+            "currency": "USD",
+            "amount": "120000",
+            "deal_count": 2
+          },
+          {
+            "counterparty": "Cedar Materials",
+            "currency": "USD",
+            "amount": "80000",
+            "deal_count": 2
+          }
+        ]
+      },
+      "schedules": {
+        "as_of": "2026-08-31",
+        "items": [
+          {
+            "schedule_id": "demo-2026-08-receivable",
+            "type": "receivable",
+            "currency": "USD",
+            "due_date": "2026-08-25",
+            "amount": "420000",
+            "adjustment_net": "0",
+            "written_off_total": "0",
+            "current_target": "420000",
+            "paid": "310000",
+            "outstanding": "110000"
+          },
+          {
+            "schedule_id": "demo-2026-08-payable",
+            "type": "payable",
+            "currency": "USD",
+            "due_date": "2026-08-28",
+            "amount": "340000",
+            "adjustment_net": "0",
+            "written_off_total": "0",
+            "current_target": "340000",
+            "paid": "278000",
+            "outstanding": "62000"
+          }
+        ]
+      },
+      "adjustments": {
+        "has_adjustments": false,
+        "events": []
+      },
+      "writeoffs": {
+        "has_writeoffs": false,
+        "events": []
+      }
+    },
+    "2026-09": {
+      "version": 7,
+      "functional_currency": "USD",
+      "params": {
+        "granularity": "month",
+        "from": "2026-09-01",
+        "to": "2026-09-30",
+        "timezone": "Asia/Seoul",
+        "counterparty_metric": "receivable",
+        "counterparty_limit": 10
+      },
+      "series": {
+        "period_start": "2026-09-01",
+        "period_end": "2026-09-30",
+        "by_currency": [
+          {
+            "currency": "USD",
+            "receivable_due": "783900",
+            "payable_due": "545000",
+            "received": "254100",
+            "paid_out": "254100",
+            "receivable_outstanding_end": "529800",
+            "payable_outstanding_end": "290900",
+            "overdue_receivable_end": "269200",
+            "overdue_rate_end": "0.5081",
+            "overdue_rate_status": "calculated"
+          }
+        ]
+      },
+      "counterparty_top": {
+        "from": "2026-09-01",
+        "to": "2026-09-30",
+        "metric": "receivable",
+        "items": [
+          {
+            "counterparty": "Indigo Commerce",
+            "currency": "USD",
+            "amount": "381000",
+            "deal_count": 2
+          },
+          {
+            "counterparty": "Futura Alloys",
+            "currency": "USD",
+            "amount": "241000",
+            "deal_count": 2
+          },
+          {
+            "counterparty": "Cedar Materials",
+            "currency": "USD",
+            "amount": "161900",
+            "deal_count": 2
+          }
+        ]
+      },
+      "schedules": {
+        "as_of": "2026-09-30",
+        "items": [
+          {
+            "schedule_id": "demo-2026-09-receivable",
+            "type": "receivable",
+            "currency": "USD",
+            "due_date": "2026-09-25",
+            "amount": "783900",
+            "adjustment_net": "0",
+            "written_off_total": "0",
+            "current_target": "783900",
+            "paid": "254100",
+            "outstanding": "529800"
+          },
+          {
+            "schedule_id": "demo-2026-09-payable",
+            "type": "payable",
+            "currency": "USD",
+            "due_date": "2026-09-28",
+            "amount": "545000",
+            "adjustment_net": "0",
+            "written_off_total": "0",
+            "current_target": "545000",
+            "paid": "254100",
+            "outstanding": "290900"
+          }
+        ]
+      },
+      "adjustments": {
+        "has_adjustments": false,
+        "events": []
+      },
+      "writeoffs": {
+        "has_writeoffs": false,
+        "events": []
+      }
+    }
+  }
+}

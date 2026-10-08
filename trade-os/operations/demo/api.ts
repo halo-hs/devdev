@@ -1,5 +1,6 @@
 import captured from './responses.json'
 import reportFixtures from './reports.json'
+import monthCloseFixtures from './month-closes.json'
 import { deals } from '@trade-os/lib/prototype-deals'
 import type { Shipment } from '../lib/api/shipments'
 import type { MonthClose, MonthCloseRequest, MonthCloseReopenRequest, MonthCloseSnapshotV1 } from '../lib/api/reports'
@@ -10,6 +11,7 @@ const responses = captured as Record<string, unknown>
 const copy = <T,>(value: T): T => structuredClone(value)
 const storageKey = 'ecoya:public-demo:shipment-overrides:v1'
 const monthClosesStorageKey = 'ecoya:public-demo:month-closes:v1'
+let monthClosesFallback: MonthClose[] | undefined
 const demoUser = '940ff121-2c36-58fa-9c13-05870353ce22'
 const demoOrg = '11111111-1111-4111-8111-111111111111'
 const baseDay = new Date().toISOString().slice(0, 10)
@@ -38,20 +40,30 @@ function shipments() {
   return seedShipments.map(row => ({ ...row, ...overrides[row.id] }))
 }
 function monthCloses(): MonthClose[] {
-  const seed = (responses['/erp/reports/month-closes?limit=24'] as { items: MonthClose[] }).items.map(row =>
+  const withSnapshot = (rows: MonthClose[]) => rows.map(row =>
     row.snapshot?.series ? row : { ...row, snapshot: demoMonthSnapshot(row.period_start.slice(0, 7)) }
   )
+  if (monthClosesFallback) return copy(monthClosesFallback)
   try {
     const stored = localStorage.getItem(monthClosesStorageKey)
     if (stored) {
       const rows: unknown = JSON.parse(stored)
-      if (Array.isArray(rows)) return rows as MonthClose[]
+      if (Array.isArray(rows) && rows.every(row =>
+        row && typeof row.id === 'string' && typeof row.period_start === 'string' &&
+        /^\d{4}-(0[1-9]|1[0-2])-01$/.test(row.period_start) && typeof row.closed_at === 'string'
+      )) return withSnapshot(rows as MonthClose[])
     }
   } catch { /* A corrupt demo cache starts fresh. */ }
-  return copy(seed)
+  return withSnapshot(copy(monthCloseFixtures.initialCloses))
 }
 function saveMonthCloses(rows: MonthClose[]) {
-  localStorage.setItem(monthClosesStorageKey, JSON.stringify(rows))
+  try {
+    localStorage.setItem(monthClosesStorageKey, JSON.stringify(rows))
+    monthClosesFallback = undefined
+  } catch {
+    // Preview actions still work for this session when browser storage is blocked.
+    monthClosesFallback = copy(rows)
+  }
 }
 function monthCloseError(status: number, code: string, message: string): never {
   throw new ApiError({ status, code, message })
@@ -66,13 +78,24 @@ function requestBody<T>(init?: RequestInit): T {
 }
 function demoMonthSnapshot(period: string): MonthCloseSnapshotV1 {
   const from = `${period}-01`, to = monthEnd(period)
-  const bundles = reportFixtures.bundles as Record<string, { series?: { body?: { periods?: Array<{ period_start: string; period_end: string; by_currency: NonNullable<MonthCloseSnapshotV1['series']>['by_currency'] }> } } }>
-  const capturedMonth = bundles['12/all']?.series?.body?.periods?.find(row => row.period_start === from && row.period_end === to)
+  const snapshots: Record<string, MonthCloseSnapshotV1> = monthCloseFixtures.snapshots
+  // These are synthetic preview fixtures. Clone once when closing and persist
+  // that copy; opening or reopening an existing close never recalculates it.
+  const snapshot = copy(snapshots[period] ?? snapshots[monthCloseFixtures.fallbackPeriod])
   return {
-    version: 1,
-    params: { granularity: 'month', from, to, timezone: 'Asia/Seoul', counterparty_metric: 'receivable', counterparty_limit: 10 },
-    series: { period_start: from, period_end: to, by_currency: capturedMonth?.by_currency ?? [] },
-    counterparty_top: { from, to, metric: 'receivable', items: [] },
+    ...snapshot,
+    params: { ...snapshot.params, from, to },
+    series: { ...snapshot.series, period_start: from, period_end: to },
+    counterparty_top: { ...snapshot.counterparty_top, from, to },
+    schedules: {
+      ...snapshot.schedules,
+      as_of: to,
+      items: snapshot.schedules?.items?.map((row, index) => ({
+        ...row,
+        schedule_id: `demo-${period}-${index + 1}`,
+        due_date: `${period}-${row.due_date.slice(8, 10)}`,
+      })),
+    },
   }
 }
 const identity = {
@@ -94,7 +117,7 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
     if (method === 'POST' && path === '/erp/reports/month-close') {
       const { period, note } = requestBody<MonthCloseRequest>(init)
       const currentPeriod = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 7)
-      if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(period) || period >= currentPeriod || (note?.length ?? 0) > 500) {
+      if (typeof period !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(period) || period >= currentPeriod || (note !== undefined && (typeof note !== 'string' || note.length > 500))) {
         monthCloseError(400, 'ERP_REPORTS_INVALID_MONTH_CLOSE', '마감 대상 월 또는 메모를 확인해주세요.')
       }
       const rows = monthCloses()
@@ -110,7 +133,7 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
       value = closed
     } else if (method === 'POST' && reopenMatch) {
       const { reason } = requestBody<MonthCloseReopenRequest>(init)
-      if (!reason?.trim() || reason.length > 500) monthCloseError(400, 'ERP_REPORTS_REOPEN_REASON_REQUIRED', '재개방 사유를 입력해주세요.')
+      if (typeof reason !== 'string' || !reason.trim() || reason.length > 500) monthCloseError(400, 'ERP_REPORTS_REOPEN_REASON_REQUIRED', '재개방 사유를 입력해주세요.')
       const rows = monthCloses()
       const existing = rows.find(row => row.id === reopenMatch[1])
       if (!existing) monthCloseError(404, 'ERP_REPORTS_MONTH_CLOSE_NOT_FOUND', '마감 내역을 찾을 수 없습니다.')

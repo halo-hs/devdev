@@ -2175,6 +2175,7 @@ function ReportsConnectedSession({
 
       {/* ── 마감 스냅샷 뷰 (동결 숫자 그대로 렌더 — 라이브 재계산 없음) ── */}
       <Dialog
+        className="max-w-[calc(100vw-2rem)]"
         cancelText={copy.closes.cancel}
         closeLabel={copy.closes.dialogCloseLabel}
         open={snapshotState.status !== "closed"}
