@@ -32,12 +32,12 @@ export function DealsFinanceTable({
       <TableHeader>
         <TableRow>
           {[
-            "거래 / 거래처",
+            "거래번호 / 거래처",
             "통화",
             "확정 매출송장",
             "확정 매입송장",
             "송장 기준 Trade Result",
-            "가산 원가 / 비용 반영 손익",
+            "가산 원가 · 비용 반영 손익",
             "적용 입출금",
             "현재 잔액",
             "상세",
@@ -101,7 +101,7 @@ export function DealsFinanceTable({
                     variant="outline"
                     onClick={() => onOpenDeal(deal.id)}
                   >
-                    거래 금융
+                    Deal 금융
                   </Button>
                 </TableCell>
               </TableRow>

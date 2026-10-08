@@ -37,10 +37,6 @@ export type MonitorLiveCopy = {
   unassigned: string;
   dataAsOf?: string;
   stale?: string;
-  // #711: shown instead of `stale` when meta.clockSkew is set -- data_as_of
-  // looked more than 5 minutes in the future relative to the best "now"
-  // available. Distinct copy so this reads as a clock problem, not staleness.
-  clockSkew?: string;
   unavailable?: string;
   flagCategories: {
     missingDoc: string;
@@ -73,7 +69,6 @@ export const DEFAULT_MONITOR_LIVE_COPY: MonitorLiveCopy = {
   unassigned: "Unassigned",
   dataAsOf: "Data as of {date} ({timezone})",
   stale: "stale",
-  clockSkew: "check your device clock",
   unavailable: "Unavailable",
   flagCategories: {
     missingDoc: "Missing document",
@@ -242,15 +237,6 @@ function formatAreaFreshness(
     return undefined;
   }
   const freshness = fill(copy.dataAsOf ?? "Data as of {date} ({timezone})", { date: formatted, timezone });
-  // #711: this used to compare `timestamp` against the CLIENT's nowMs and
-  // hide the whole caption when it looked more than 5 minutes in the
-  // future -- the same fail-closed client-clock judgement as
-  // validateMonitorAreaMeta, just suppressing a caption instead of dropping
-  // the area. meta.clockSkew is computed upstream (server Date header when
-  // reachable, else the local clock) once, in one place; trust it instead
-  // of re-deriving a second, independently-skewable judgement here, and
-  // show a distinguishable caveat rather than hiding the line.
-  if (meta.clockSkew) return `${freshness}\u00a0·\u00a0${copy.clockSkew ?? "clock skew"}`;
   return isMonitorAreaStale(meta, nowMs) ? `${freshness}\u00a0·\u00a0${copy.stale ?? "stale"}` : freshness;
 }
 

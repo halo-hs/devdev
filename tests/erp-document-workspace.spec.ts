@@ -50,7 +50,7 @@ test("mobile review switches to PDF and retains the entered field", async ({ pag
 test("create adds and deletes individual items without losing other rows", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 })
   await page.goto("/erp/documents/create")
-  await expect(page.getByRole("region", { name: "문서 폼 선택", exact: true }).getByRole("button", { name: "문서 만들기", exact: true })).toBeDisabled()
+  await expect(page.getByRole("region", { name: "문서 폼 선택", exact: true }).getByRole("button", { name: "문서 만들기", exact: true })).toBeEnabled()
   await page.getByRole("button", { name: /QT.*견적서/ }).click()
   await page.getByRole("region", { name: "문서 폼 선택", exact: true }).getByRole("button", { name: "문서 만들기", exact: true }).click()
   const first = page.getByRole("textbox", { name: "품목 1 품목명", exact: true })

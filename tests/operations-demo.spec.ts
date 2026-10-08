@@ -7,7 +7,7 @@ test('public demo loads all operations without calling the live API', async ({pa
   page.on('request',r=>{if(r.url().includes('/api/platform'))requests.push(r.url())})
   for (const route of ['shipments','monitor','settlement','reports','sales']) {
     await page.goto('/erp/'+route)
-    await expect(page.getByRole('note').filter({hasText:'예시 데이터'})).toBeVisible()
+    await expect(page.getByRole('note').filter({hasText:'예시 데이터'})).toHaveCount(0)
     await expect(page.locator('.reference-3030 h1')).toBeVisible()
     await expect(page.locator('.reference-3030')).not.toContainText('불러오지 못했습니다')
   }

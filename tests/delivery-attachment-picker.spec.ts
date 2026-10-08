@@ -6,12 +6,15 @@ for (const width of [1440, 390]) {
   }) => {
     await page.setViewportSize({ width: 1440, height: 1000 })
     await page.goto("/erp/documents/create/CI-2026-0703")
-    await page.getByRole("button", { name: "공유하기", exact: true }).click()
+    await page.getByRole("button", { name: "공유하기", exact: true }).first().click()
     await page.setViewportSize({ width, height: 900 })
     const share = page.getByRole("dialog", {
       name: "파일 공유하기",
       exact: true,
     })
+    await expect(share.getByLabel("받는 사람", { exact: true })).toHaveCount(0)
+    await share.getByRole("button", { name: "공유 링크 만들기", exact: true }).click()
+    await expect(share.getByRole("button", { name: "공유 링크 만들기", exact: true })).toHaveCount(0)
     const linkPosition = await share
       .getByRole("heading", { name: "공유 링크", exact: true })
       .evaluate((el) => (el as HTMLElement).offsetTop)
@@ -32,9 +35,9 @@ for (const width of [1440, 390]) {
     ).toBeGreaterThan(linkPosition)
     await expect(
       share
-        .getByRole("button", { name: "수신 화면 미리보기", exact: true })
+        .getByRole("button", { name: "새창", exact: true })
         .locator("svg")
-    ).toHaveClass(/lucide-external-link/)
+    ).toHaveClass(/lucide-maximize2/)
     await expect(
       picker.getByText("은행_입금확인서.pdf", { exact: true })
     ).toBeVisible()
@@ -55,7 +58,7 @@ for (const width of [1440, 390]) {
     await picker.getByText("PackingList_0707.pdf", { exact: true }).click()
     await expect(packing).toBeChecked()
     await expect(picker).toContainText("선택됨")
-    await expect(picker).toContainText("동봉 파일 1개")
+    await expect(picker).toContainText("동봉 파일 1/10개")
     await packing.press("Space")
     await expect(packing).not.toBeChecked()
     await packing.press("Space")
@@ -105,7 +108,7 @@ for (const width of [1440, 390]) {
       mimeType: "image/png",
       buffer: png,
     })
-    await expect(picker).toContainText("동봉 파일 1개")
+    await expect(picker).toContainText("동봉 파일 1/10개")
     await picker.getByRole("button", { name: "선택 완료", exact: true }).click()
     await share
       .getByRole("button", { name: "packing-photo.png 미리보기", exact: true })
@@ -131,7 +134,7 @@ for (const width of [1440, 390]) {
       true
     )
     const download = await share
-      .getByRole("button", { name: "전체 패키지 다운로드", exact: true })
+      .getByRole("button", { name: "패키지 내려받기", exact: true })
       .boundingBox()
     const file = await share
       .getByRole("button", { name: "packing-photo.png 미리보기", exact: true })
@@ -141,7 +144,7 @@ for (const width of [1440, 390]) {
       .getByRole("button", { name: "공유 창 닫기", exact: true })
       .click()
     await page.setViewportSize({ width: 1440, height: 1000 })
-    await page.getByRole("button", { name: "공유하기", exact: true }).click()
+    await page.getByRole("button", { name: "공유하기", exact: true }).first().click()
     await expect(
       share.getByRole("button", {
         name: "packing-photo.png 미리보기",

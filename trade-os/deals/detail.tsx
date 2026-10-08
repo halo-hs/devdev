@@ -2267,7 +2267,7 @@ function DealDocumentPanels({
       >
         <div className="rounded-lg border border-[var(--surface-border)] px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold">AI 거래 요약</h2>
+            <h2 className="text-sm font-semibold">딜 요약 브리프</h2>
             {aiQuestion}
           </div>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -2463,7 +2463,7 @@ function DealRecordSections({
       <div className="pb-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold">메모</h3>
+            <h3 className="text-sm font-semibold">노트</h3>
             <p className="mt-0.5 text-xs text-muted-foreground">
               업무자 간 공유 메모
             </p>
@@ -3566,9 +3566,9 @@ function DealHealthReference({
           ? "text-destructive"
           : "text-muted-foreground"
   return (
-    <section aria-label="거래 건강도와 서류 대조" className="px-4 py-4">
+    <section aria-label="딜 건강도와 서류 대조" className="px-4 py-4">
       <div className="flex items-end justify-between gap-3">
-        <h4 className="text-sm font-semibold">거래 건강도</h4>
+        <h4 className="text-sm font-semibold">딜 건강도</h4>
         <strong className="text-2xl font-semibold text-warning-foreground">
           72
         </strong>
@@ -3608,7 +3608,7 @@ function DealHealthReference({
       </div>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t pt-3">
         <div>
-          <h4 className="text-xs font-semibold">서류 대조 · 5-Way</h4>
+          <h4 className="text-xs font-semibold">서류 대조 (5-Way Match)</h4>
           <p className="mt-1 text-xs text-muted-foreground">
             서류 {documentSummary.connected}/{documentSummary.total}건 연결
           </p>
@@ -3620,10 +3620,9 @@ function DealHealthReference({
       <Dialog open={expanded} onOpenChange={setExpanded}>
         <DialogContent className="max-h-[85dvh] overflow-auto sm:max-w-4xl">
           <DialogHeader>
-            <DialogTitle>서류 대조 · 5-Way</DialogTitle>
+            <DialogTitle>서류 대조 (5-Way Match)</DialogTitle>
             <DialogDescription>
-              연결 문서에서 추출한 값을 비교합니다. 근거가 없는 항목은 일치로
-              판단하지 않습니다.
+              PO·송장·포장명세·B/L의 같은 항목 값이 서로 일치하는지 한눈에 대조합니다.
             </DialogDescription>
           </DialogHeader>
           <div className="overflow-x-auto">
@@ -5540,7 +5539,7 @@ function PeopleTab({
             <Separator />
             <section>
               <SectionHeading
-                title="연락처"
+                title="영업 담당자"
                 description="기존 연락처를 검색하거나 새 연락처를 만들어 연결합니다."
                 action={
                   canMutate(role) ? (
@@ -6275,7 +6274,7 @@ export function DealDetailScreen({
     <div
       ref={scrollViewportRef}
       data-deal-scroll-viewport
-      className="field-scrollbar h-full [scrollbar-gutter:stable] overflow-y-auto bg-background"
+      className="field-scrollbar relative h-full [scrollbar-gutter:stable] overflow-y-auto bg-background"
     >
       <DealHandoffProvider
         key={dealId}

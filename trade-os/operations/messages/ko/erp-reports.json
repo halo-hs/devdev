@@ -34,7 +34,8 @@
       "rangeMonths": "{count}개월",
       "currencyAria": "통화",
       "assigneeAria": "담당자 필터",
-      "assigneeAll": "전체 담당자"
+      "assigneeAll": "전체 담당자",
+      "filtersLabel": "결산 리포트 필터"
     },
     "kpi": {
       "receivableDue": "{period} 수취 예정 ({currency})",
@@ -57,9 +58,9 @@
       "gpExcludedBoth": "혼합 통화 {mixed}건·미기록 {incomplete}건 제외",
       "gpExcludedDirectionPending": "거래 방향 미확정 {count}건 제외",
       "gpExcludedCommerciallyInactive": "취소·보관 {count}건 제외",
-      "gpZeroCost": "부대비용 미입력 {count}건 — GP 과대 가능",
+      "gpZeroCost": "가산 부대비용 0원 {count}건 — GP 과대 가능",
       "gpExcludedUnknown": "제외 건수 확인 불가",
-      "gpZeroCostUnknown": "부대비용 입력 여부 확인 불가 — GP 과대 가능"
+      "gpZeroCostUnknown": "가산 부대비용 확인 불가 — GP 과대 가능"
     },
     "charts": {
       "planVsActual": {
@@ -72,7 +73,7 @@
       },
       "gp": {
         "title": "월별 예정 거래손익",
-        "sub": "최초 받을 일정 − 최초 줄 일정 − 가산 부대비용 · 동일 통화 딜 기준 · {currency}",
+        "sub": "최초 받을 일정 − 최초 줄 일정 − 가산 부대비용 · 동일 통화 딜 기준 · {currency} · 딜 전체는 마지막 수취 예정일이 속한 달에 집계",
         "aria": "월별 예정 거래손익 막대 차트",
         "gpLabel": "예정 거래손익",
         "marginLabel": "마진",
@@ -114,7 +115,7 @@
       "title": "고객사 Top 5",
       "sub": "최근 {months}개월 수취 예정 · {currency}",
       "gpLine": "GP {gp} · 마진 {margin}",
-      "gpUnavailable": "GP 산정 불가 (매입측 미기록)",
+      "gpUnavailable": "현재 조회에서 GP 확인 불가",
       "overdueAmount": "연체 {amount}",
       "statusLine": "{active}건 진행 중 · 선적 임박 {shipments}건 · 최근 문서 {documents}건",
       "statusEvidence": "{date} 기준 · 미수 {outstanding} · 연체 {overdue} · 다음 결제 {nextDue} · 마지막 활동 {lastActivity}",
@@ -124,7 +125,8 @@
       "noPermissionTitle": "조회 범위 밖입니다",
       "noPermissionBody": "거래처명과 마진은 소유자·관리자만 볼 수 있습니다. 회사 전체 직재 집계는 다른 카드에서 계속 확인할 수 있습니다.",
       "viewInSettlement": "정산에서 보기",
-      "viewInSettlementAria": "{counterparty} 정산에서 보기"
+      "viewInSettlementAria": "{counterparty} 정산에서 보기",
+      "subNoCurrency": "최근 {months}개월 수취 예정"
     },
     "closes": {
       "title": "월마감",
@@ -148,6 +150,9 @@
       "closedMeta": "{name} · {date} 마감",
       "empty": "아직 마감된 달이 없습니다.",
       "closeButton": "{period} 마감하기",
+      "recloseButton": "재마감",
+      "recloseDialogTitle": "{period} 재마감하기",
+      "recloseConfirm": "재마감하기",
       "controlsNote": "{period}은 진행 중 — {date}부터 마감 가능",
       "dialogTitle": "{period} 마감하기",
       "dialogBody": "{period}을 ECOYA 운영 스냅샷으로 동결합니다. 법정 회계나 총계정원장 마감이 아니며, 필요하면 오너·관리자가 사유를 입력해 재개방할 수 있습니다.",
@@ -195,8 +200,21 @@
         "functionalCurrency": "기능 통화: {currency}",
         "functionalCurrencyNotRecorded": "기능 통화: 기록되지 않음 (이전 마감)",
         "empty": "스냅샷에 집계된 데이터가 없습니다.",
-        "close": "닫기"
-      }
+        "close": "닫기",
+        "counterpartyRestricted": "거래처별 내역과 원천 기록(일정·조정·상각)은 오너·관리자만 볼 수 있습니다."
+      },
+      "counterSuffix": "자",
+      "errorValidation": "마감 요청을 처리할 수 없습니다. 메모를 확인하고 화면을 새로고침한 뒤 다시 시도하세요.",
+      "errorReauthRequired": "월마감에는 최근 재인증이 필요합니다. 다시 로그인한 후 재시도하세요."
+    },
+    "pagination": {
+      "navigation": "페이지 이동",
+      "previous": "이전 페이지",
+      "next": "다음 페이지",
+      "pageSize": "페이지당",
+      "page": "{page}페이지",
+      "pageSizeOption": "{size}개",
+      "total": "전체 {count}건"
     }
   }
 }

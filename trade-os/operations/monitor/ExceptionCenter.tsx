@@ -1,6 +1,6 @@
-import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 "use client";
 
+import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 import Link from "@trade-os/operations/compat/link";
 import { useEffect, useState } from "react";
 import { useMessages } from "@trade-os/operations/compat/intl";
@@ -10,6 +10,10 @@ import { Button } from "@trade-os/operations/components/ui/button";
 import { usePlatformAuth } from "@trade-os/operations/session/PlatformSessionContext";
 import { getExceptions, type ExceptionsResponse } from "@trade-os/operations/lib/api/exceptions";
 import { withRetry } from "@trade-os/operations/lib/api/retry";
+import { useLocaleTag } from "@trade-os/operations/i18n/useLocaleTag";
+import { riskDetailLine } from "@trade-os/operations/lib/deals/riskDetail";
+import { createRiskLabeler } from "@trade-os/operations/lib/deals/riskLabels";
+import { riskSeverityLabel } from "@trade-os/operations/lib/deals/riskSeverityLabels";
 
 import type { AppMessages } from "@trade-os/operations/i18n/messages";
 
@@ -30,6 +34,8 @@ const SEV_TONE: Record<string, string> = {
 export function ExceptionCenter() {
   const messages = useMessages() as AppMessages;
   const copy = messages.erpDeals.exceptionCenter;
+  const riskCopy = messages.erpDeals.detail.view.risk;
+  const localeTag = useLocaleTag();
   const { getIdToken } = usePlatformAuth();
   const [data, setData] = useState<ExceptionsResponse | null>(null);
   const [failed, setFailed] = useState(false);
@@ -88,8 +94,20 @@ export function ExceptionCenter() {
     );
   }
 
-  const riskLabel = (rt: string) => (copy.risks as Record<string, string>)[rt] ?? rt;
-  const sevLabel = (s: string) => (copy.severity as Record<string, string>)[s] ?? s;
+  const riskLabel = createRiskLabeler({
+    codes: data.items.map((row) => row.risk_type),
+    knownLabels: copy.risks,
+    unknownLabel: copy.unknownRisk,
+    unknownLabelNumbered: copy.unknownRiskNumbered,
+    unlistedLabel: copy.unlistedRisk,
+  });
+  const sevLabel = (s: string) => riskSeverityLabel(s, copy.severity, copy.severityFallback);
+  const sevTone = (s: string) => Object.hasOwn(SEV_TONE, s) ? SEV_TONE[s] : "text-text-primary";
+  const detailText = (detail: string | undefined) => riskDetailLine(detail, {
+    formatDays: (key, days) => riskCopy[key].replace("{days}", String(days)),
+    locale: localeTag,
+    differenceLabel: riskCopy.difference,
+  }) ?? "—";
 
   return (
     <section className="mt-6 rounded-lg border border-border-muted bg-surface-card p-4" data-component="ExceptionCenter">
@@ -124,11 +142,11 @@ export function ExceptionCenter() {
                       {e.deal_ref}
                     </Link>
                   </HostTableCell>
-                  <HostTableCell className={`px-2 py-1.5 font-medium ${SEV_TONE[e.severity] ?? "text-text-primary"}`}>
+                  <HostTableCell className={`px-2 py-1.5 font-medium ${sevTone(e.severity)}`}>
                     {riskLabel(e.risk_type)}
                     <span className="ml-1 font-normal text-text-muted">· {sevLabel(e.severity)}</span>
                   </HostTableCell>
-                  <HostTableCell className="px-2 py-1.5 text-text-muted">{e.detail || "—"}</HostTableCell>
+                  <HostTableCell className="px-2 py-1.5 text-text-muted">{detailText(e.detail)}</HostTableCell>
                 </HostTableRow>
               ))}
             </HostTableBody>

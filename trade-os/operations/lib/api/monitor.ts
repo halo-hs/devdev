@@ -186,16 +186,7 @@ export type MonitorAreaMeta = {
   timezone: string;
   request_id: string;
   stale: boolean;
-  // #711: true when data_as_of looked more than 5 minutes in the future
-  // relative to the best "now" available (the server's own Date response
-  // header when reachable, else the local clock). This used to reject the
-  // area outright ("data_as_of is too far in the future"), which meant a
-  // plain client/server clock skew rendered as a full backend outage on
-  // every area at once. It no longer rejects anything -- the data is still
-  // returned, this just lets a caller show a distinguishable caveat instead
-  // of a generic error. Optional so existing fixtures/snapshots that predate
-  // this field keep typechecking.
-  clockSkew?: boolean;
+
 };
 
 export type MonitorAreaUpdate = {
@@ -524,11 +515,9 @@ function parseUtcRfc3339(value: string): number | undefined {
   return Number.isFinite(timestamp) ? timestamp : undefined;
 }
 
-// #711: a Date response header, when present, is the server's own clock --
-// comparing data_as_of against it measures genuine payload staleness and is
-// immune to client clock skew. parseHttpDateHeader() reads it; monitor.ts's
-// callers fall back to the local clock when it is missing or unparseable
-// (same behaviour as before this fix, just no longer the only source).
+// The response's Date header (BFF server clock). Used only for the 15-minute
+// `stale` judgement; the 5-minute future rule below is measured against the
+// client receive time instead (FS-06, see validateMonitorAreaMeta).
 function parseHttpDateHeader(response: Response): number | undefined {
   const header = response.headers.get("date");
   if (!header) return undefined;
@@ -536,20 +525,19 @@ function parseHttpDateHeader(response: Response): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-// #711: this used to reject the whole area ("data_as_of is too far in the
-// future") whenever `Date.now()` -- the CLIENT's clock -- disagreed with the
-// backend's data_as_of by more than 5 minutes. Those two clocks have no
-// relationship: browser clocks drift, get set manually, or are stale after a
-// VM resumes. A plain client clock skew made every monitor area report
-// "unavailable" simultaneously, indistinguishable from a real backend
-// outage (see #711 for the CI reproduction: vi.useFakeTimers() stepping the
-// clock back 6 minutes between minting data_as_of and validating it
-// reproduces the identical failure). Fixed by (a) preferring serverNowMs --
-// the same response's own Date header -- over the client clock when
-// available, and (b) never failing closed on this specific check: a skew is
-// now a `clockSkew` flag on the returned meta, not a dropped area.
+const MONITOR_FUTURE_TOLERANCE_MS = 5 * 60 * 1000;
+const MONITOR_STALE_AFTER_MS = 15 * 60 * 1000;
+
+// FS-06 운영 감시 기준시각 — "클라이언트 수신 시각보다 5분 넘게 미래이면 새 성공으로 채택하지 않는다" (06-worklist-and-team-overview.md:95).
+// Owner decision D-3 (2026-10-02) follows that wording: the future check uses
+// the client receive time (`receivedAtMs`), not the BFF Date header, and a
+// rejected area fails like any other invalid metadata — the caller keeps that
+// area's last good value and its own as-of time. This replaces the #711
+// "accept and flag clockSkew" behaviour; a device clock far behind the server
+// therefore fails every area until the clock is corrected.
 function validateMonitorAreaMeta(
   envelope: MonitorAreaEnvelope,
+  receivedAtMs: number,
   serverNowMs?: number,
 ): { meta?: MonitorAreaMeta; error?: string } {
   if (typeof envelope.data_as_of !== "string" || envelope.data_as_of.trim() === "") {
@@ -571,16 +559,18 @@ function validateMonitorAreaMeta(
   }
   const requestId = envelope.request_id.trim();
 
-  const now = serverNowMs ?? Date.now();
-  const ageMs = now - timestamp;
+  if (timestamp - receivedAtMs > MONITOR_FUTURE_TOLERANCE_MS) {
+    return { error: "Future data_as_of" };
+  }
+
+  const now = serverNowMs ?? receivedAtMs;
 
   return {
     meta: {
       data_as_of: dataAsOf,
       timezone,
       request_id: requestId,
-      stale: ageMs > 15 * 60 * 1000,
-      clockSkew: ageMs < -5 * 60 * 1000,
+      stale: now - timestamp > MONITOR_STALE_AFTER_MS,
     },
   };
 }
@@ -601,14 +591,14 @@ export async function getMonitorSnapshot(
   const areaPromises = areas.map(async (area): Promise<MonitorAreaUpdate> => {
     try {
       let serverNowMs: number | undefined;
-      const envelope = readMonitorAreaEnvelope(
-        await monitorReaderFor(area, resolvedOptions)(getIdToken, {
-          onResponse: (response) => {
-            serverNowMs = parseHttpDateHeader(response);
-          },
-        }),
-      );
-      const validation = validateMonitorAreaMeta(envelope, serverNowMs);
+      const payload = await monitorReaderFor(area, resolvedOptions)(getIdToken, {
+        onResponse: (response) => {
+          serverNowMs = parseHttpDateHeader(response);
+        },
+      });
+      const receivedAtMs = Date.now();
+      const envelope = readMonitorAreaEnvelope(payload);
+      const validation = validateMonitorAreaMeta(envelope, receivedAtMs, serverNowMs);
       if (!validation.meta) {
         const update = { area, error: validation.error ?? "Invalid monitor area metadata" };
         onAreaSettled?.(update);

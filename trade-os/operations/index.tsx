@@ -1,4 +1,3 @@
-import { operationsDemo } from "./demo/mode"
 import { ReferenceDealDetail } from "./deals/ReferenceDealDetail"
 import { useEffect, useState } from "react"
 import { PlatformSessionProvider, useIdentity } from "./session/PlatformSessionContext"
@@ -30,7 +29,12 @@ function Body({ screen }: { screen: ReferenceOperationsScreen }) {
         <MonitorConnected
           canAccess={identity.role === "owner"}
           opsCopy={messages.erpCommon.platformNav.monitorOps}
-          bodyCopy={{ ...copy.screen, taskQueueEmpty: messages.erpCommon.platform.taskQueueEmpty }}
+          bodyCopy={{
+            ...copy.screen,
+            filtersLabel: copy.view.conditionsLabel,
+            throughputConfirms: copy.view.throughputConfirms,
+            taskQueueEmpty: messages.erpCommon.platform.taskQueueEmpty,
+          }}
           loadErrorLabel={messages.auth.loadError}
           retryLabel={messages.auth.retry}
           stateCopy={copy}
@@ -45,7 +49,9 @@ function Body({ screen }: { screen: ReferenceOperationsScreen }) {
     : screen === "settlement" ? messages.erpSettlement.settlement
     : messages.erpShipments.shipments
   const description = screen === "sales"
-    ? messages.erpSalesPerformance.cockpit.subtitleOrg
+    ? identity.role === "owner" || identity.role === "admin"
+      ? messages.erpSalesPerformance.cockpit.subtitleOrg
+      : messages.erpSalesPerformance.cockpit.subtitleMember
     : "subtitle" in copy ? copy.subtitle : undefined
   return <div className="reference-page-scroll">
     <div className="reference-content-width w-full space-y-6 px-7 py-6">
@@ -81,12 +87,11 @@ export function ReferenceOperations({ screen, dealId, onShipmentSummary }: { scr
       .catch((e: unknown) => { if (active) setError(e instanceof Error ? e.message : "3030 연결을 확인해 주세요.") })
     return () => { active = false }
   }, [attempt])
-  return <div className="reference-host" style={{ height: screen === "deal-shipments" ? "auto" : "100%", minHeight: 0, minWidth: 0 }}><div className="reference-3030" data-reference-screen={screen} style={{ height: screen === "deal-shipments" ? "auto" : "100%", minHeight: 0, minWidth: 0 }}>
+  return <div className="reference-host" style={{ minHeight: 0, minWidth: 0 }}><div className="reference-3030" data-reference-screen={screen} style={{ minHeight: 0, minWidth: 0 }}>
     {error ? <div role="alert" className="m-6 rounded-lg border p-6">
       <p>화면 데이터를 불러오지 못했습니다.</p><p>{error}</p>
       <button className="mt-3 underline" onClick={() => setAttempt(n => n + 1)}>다시 시도</button>
     </div> : session ? <PlatformSessionProvider {...session} getIdToken={getIdToken}>
-      {operationsDemo && screen !== "deal-shipments" ? <div role="note" className="px-7 pt-3 text-sm text-muted-foreground">예시 데이터 · 변경 사항은 이 브라우저에만 반영됩니다.</div> : null}
       {screen === "deal-shipments" && dealId ? <ShipmentsConnected key={dealId} copy={messages.erpShipments.shipments} dealId={dealId} onSummaryChange={onShipmentSummary} /> : screen === "deal" && dealId ? <ReferenceDealDetail key={dealId} dealId={dealId} /> : screen !== "deal" && screen !== "deal-shipments" ? <Body screen={screen} /> : null}
       <ToastHost closeLabel="닫기" />
     </PlatformSessionProvider> : <div className="p-6" role="status">화면 데이터를 불러오는 중입니다…</div>}

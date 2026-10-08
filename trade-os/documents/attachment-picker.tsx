@@ -18,6 +18,8 @@ export type DeliveryAttachment = {
   name: string
   source: string
   file?: File
+  kind?: string
+  sizeBytes?: number
 }
 
 const candidates = [
@@ -25,6 +27,8 @@ const candidates = [
     id: "att-packing-list",
     name: "PackingList_0707.pdf",
     source: "인박스",
+    kind: "포장명세서",
+    sizeBytes: 246_000,
     reason: "현재 거래와 일치",
     allowed: true,
   },
@@ -32,6 +36,8 @@ const candidates = [
     id: "att-bank",
     name: "은행_입금확인서.pdf",
     source: "인박스",
+    kind: "은행거래내역서",
+    sizeBytes: 412_000,
     reason: "은행 보안문서 · 첨부 불가",
     allowed: false,
   },
@@ -39,6 +45,8 @@ const candidates = [
     id: "att-other-deal",
     name: "PO_OtherDeal.pdf",
     source: "인박스",
+    kind: "구매주문서",
+    sizeBytes: 388_000,
     reason: "다른 거래 문서 · 첨부 불가",
     allowed: false,
   },
@@ -55,6 +63,9 @@ export function DeliveryAttachmentPicker({
   attachments: DeliveryAttachment[]
   onChange: (attachments: DeliveryAttachment[]) => void
 }) {
+  const MAX_ATTACHMENTS = 10
+  const MAX_FILE_BYTES = 10 * 1024 * 1024
+  const MAX_TOTAL_BYTES = 50 * 1024 * 1024
   const fileZone = useRef<FileDropZoneRef>(null)
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
@@ -83,9 +94,25 @@ export function DeliveryAttachmentPicker({
         setError("이미 동봉된 파일입니다.")
         return
       }
+      if (attachments.length >= MAX_ATTACHMENTS) {
+        setError(`첨부 파일은 본문을 제외하고 최대 ${MAX_ATTACHMENTS}개까지 추가할 수 있습니다.`)
+        return
+      }
+      if (file.size > MAX_FILE_BYTES) {
+        setError("파일당 최대 10 MiB까지 추가할 수 있습니다.")
+        return
+      }
+      const usedBytes = attachments.reduce(
+        (total, item) => total + (item.sizeBytes ?? item.file?.size ?? 0),
+        0
+      )
+      if (usedBytes + file.size > MAX_TOTAL_BYTES) {
+        setError("첨부 파일의 합계는 최대 50 MiB까지 추가할 수 있습니다.")
+        return
+      }
       onChange([
         ...attachments,
-        { id: crypto.randomUUID(), name: file.name, source: "내 컴퓨터", file },
+        { id: crypto.randomUUID(), name: file.name, source: "내 컴퓨터", file, sizeBytes: file.size },
       ])
     } catch {
       setError("파일을 읽지 못했습니다. 다시 선택하세요.")
@@ -162,6 +189,8 @@ export function DeliveryAttachmentPicker({
                                 id: item.id,
                                 name: item.name,
                                 source: item.source,
+                                kind: item.kind,
+                                sizeBytes: item.sizeBytes,
                               },
                             ]
                       )
@@ -191,7 +220,7 @@ export function DeliveryAttachmentPicker({
       </div>
       <div className="flex items-center justify-between border-t pt-3">
         <span className="text-xs text-muted-foreground">
-          동봉 파일 {attachments.length}개
+          동봉 파일 {attachments.length}/{MAX_ATTACHMENTS}개 · {((attachments.reduce((total, item) => total + (item.sizeBytes ?? item.file?.size ?? 0), 0)) / (1024 * 1024)).toFixed(1)}/50.0 MiB
         </span>
         <Button disabled={busy} onClick={() => onOpenChange(false)}>
           선택 완료

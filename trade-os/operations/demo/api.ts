@@ -2,11 +2,14 @@ import captured from './responses.json'
 import reportFixtures from './reports.json'
 import { deals } from '@trade-os/lib/prototype-deals'
 import type { Shipment } from '../lib/api/shipments'
+import type { MonthClose, MonthCloseRequest, MonthCloseReopenRequest, MonthCloseSnapshotV1 } from '../lib/api/reports'
+import { ApiError } from '../lib/api/client'
 
 // Sanitized development seed contracts, used only by the explicitly labelled demo.
 const responses = captured as Record<string, unknown>
 const copy = <T,>(value: T): T => structuredClone(value)
 const storageKey = 'ecoya:public-demo:shipment-overrides:v1'
+const monthClosesStorageKey = 'ecoya:public-demo:month-closes:v1'
 const demoUser = '940ff121-2c36-58fa-9c13-05870353ce22'
 const demoOrg = '11111111-1111-4111-8111-111111111111'
 const baseDay = new Date().toISOString().slice(0, 10)
@@ -34,6 +37,44 @@ function shipments() {
   try { overrides = JSON.parse(localStorage.getItem(storageKey) || '{}') } catch { /* A corrupt demo cache starts fresh. */ }
   return seedShipments.map(row => ({ ...row, ...overrides[row.id] }))
 }
+function monthCloses(): MonthClose[] {
+  const seed = (responses['/erp/reports/month-closes?limit=24'] as { items: MonthClose[] }).items.map(row =>
+    row.snapshot?.series ? row : { ...row, snapshot: demoMonthSnapshot(row.period_start.slice(0, 7)) }
+  )
+  try {
+    const stored = localStorage.getItem(monthClosesStorageKey)
+    if (stored) {
+      const rows: unknown = JSON.parse(stored)
+      if (Array.isArray(rows)) return rows as MonthClose[]
+    }
+  } catch { /* A corrupt demo cache starts fresh. */ }
+  return copy(seed)
+}
+function saveMonthCloses(rows: MonthClose[]) {
+  localStorage.setItem(monthClosesStorageKey, JSON.stringify(rows))
+}
+function monthCloseError(status: number, code: string, message: string): never {
+  throw new ApiError({ status, code, message })
+}
+function monthEnd(period: string) {
+  const [year, month] = period.split('-').map(Number)
+  return new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10)
+}
+function requestBody<T>(init?: RequestInit): T {
+  try { return JSON.parse(String(init?.body || '{}')) as T }
+  catch { return monthCloseError(400, 'INVALID_REQUEST', '요청 형식이 올바르지 않습니다.') }
+}
+function demoMonthSnapshot(period: string): MonthCloseSnapshotV1 {
+  const from = `${period}-01`, to = monthEnd(period)
+  const bundles = reportFixtures.bundles as Record<string, { series?: { body?: { periods?: Array<{ period_start: string; period_end: string; by_currency: NonNullable<MonthCloseSnapshotV1['series']>['by_currency'] }> } } }>
+  const capturedMonth = bundles['12/all']?.series?.body?.periods?.find(row => row.period_start === from && row.period_end === to)
+  return {
+    version: 1,
+    params: { granularity: 'month', from, to, timezone: 'Asia/Seoul', counterparty_metric: 'receivable', counterparty_limit: 10 },
+    series: { period_start: from, period_end: to, by_currency: capturedMonth?.by_currency ?? [] },
+    counterparty_top: { from, to, metric: 'receivable', items: [] },
+  }
+}
 const identity = {
   user_id: demoUser, account: { account_id: demoUser, email_verified: true }, current_organization_id: demoOrg,
   organizations: [{ organization_id: demoOrg, name: 'ECOYA Demo Co.', lifecycle_state: 'active', membership: { status: 'active', role: 'OWNER' } }],
@@ -49,7 +90,35 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
   let value: unknown
   if (method !== 'GET') {
     const match = path.match(/^\/trade\/shipments\/([^/]+)\/refresh-tracking$/)
-    if (method === 'POST' && match) {
+    const reopenMatch = path.match(/^\/erp\/reports\/month-closes\/([^/]+)\/reopen$/)
+    if (method === 'POST' && path === '/erp/reports/month-close') {
+      const { period, note } = requestBody<MonthCloseRequest>(init)
+      const currentPeriod = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 7)
+      if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(period) || period >= currentPeriod || (note?.length ?? 0) > 500) {
+        monthCloseError(400, 'ERP_REPORTS_INVALID_MONTH_CLOSE', '마감 대상 월 또는 메모를 확인해주세요.')
+      }
+      const rows = monthCloses()
+      const existing = rows.find(row => row.period_start.slice(0, 7) === period)
+      if (existing && !existing.reopened) monthCloseError(409, 'ERP_REPORTS_ALREADY_CLOSED', '이미 마감한 달입니다.')
+      const now = new Date().toISOString()
+      const closed: MonthClose = {
+        id: existing?.id ?? crypto.randomUUID(), period_start: `${period}-01`, period_end: monthEnd(period),
+        timezone: 'Asia/Seoul', closed_by: demoUser, closed_at: now, note: note?.trim() || null,
+        snapshot: demoMonthSnapshot(period), reopened: false, reopened_at: null, reopened_by: null, reopen_reason: null,
+      }
+      saveMonthCloses(existing ? rows.map(row => row.id === existing.id ? closed : row) : [closed, ...rows])
+      value = closed
+    } else if (method === 'POST' && reopenMatch) {
+      const { reason } = requestBody<MonthCloseReopenRequest>(init)
+      if (!reason?.trim() || reason.length > 500) monthCloseError(400, 'ERP_REPORTS_REOPEN_REASON_REQUIRED', '재개방 사유를 입력해주세요.')
+      const rows = monthCloses()
+      const existing = rows.find(row => row.id === reopenMatch[1])
+      if (!existing) monthCloseError(404, 'ERP_REPORTS_MONTH_CLOSE_NOT_FOUND', '마감 내역을 찾을 수 없습니다.')
+      if (existing.reopened) monthCloseError(409, 'ERP_REPORTS_ALREADY_REOPENED', '이미 재개방한 달입니다.')
+      const reopened: MonthClose = { ...existing, reopened: true, reopened_at: new Date().toISOString(), reopened_by: demoUser, reopen_reason: reason.trim() }
+      saveMonthCloses(rows.map(row => row.id === existing.id ? reopened : row))
+      value = reopened
+    } else if (method === 'POST' && match) {
       const current = shipments().find(row => row.id === match[1])
       if (!current) throw new Error('예시 선적을 찾을 수 없습니다.')
       const refreshed: Shipment = { ...current, eta: current.confirmed_eta || date(3), provider_eta: date(3), provider_fetched_at: new Date().toISOString(), last_carrier_sync_at: new Date().toISOString(), status: current.status === 'arrived' ? 'arrived' : 'loaded', source: 'carrier' }
@@ -60,6 +129,17 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
       value = { shipment: refreshed }
     } else throw new Error('예시 화면입니다. 실제 저장·발송은 실행되지 않습니다.')
   } else if (path === '/me') value = identity
+  else if (path === '/erp/reports/month-closes') {
+    const rows = monthCloses()
+      .filter(row => (!query.get('from') || row.period_start.slice(0, 7) >= query.get('from')!.slice(0, 7)) && (!query.get('to') || row.period_start.slice(0, 7) <= query.get('to')!.slice(0, 7)))
+      .sort((a, b) => b.period_start.localeCompare(a.period_start))
+    const offset = Math.max(0, Number(query.get('offset') || 0))
+    const limit = Math.max(1, Number(query.get('limit') || 50))
+    value = { items: rows.slice(offset, offset + limit) }
+  } else if (/^\/erp\/reports\/month-closes\/[^/]+$/.test(path)) {
+    value = monthCloses().find(row => row.id === path.split('/').pop())
+    if (!value) monthCloseError(404, 'ERP_REPORTS_MONTH_CLOSE_NOT_FOUND', '마감 내역을 찾을 수 없습니다.')
+  }
   else if (path === '/me/entitlements') value = {
     contract_version: 'demo-v1', organization_id: demoOrg, generated_at: new Date().toISOString(), tier: 'pro',
     products: { erp: { enabled: true }, snap: { enabled: true }, intelligence: { enabled: false } },

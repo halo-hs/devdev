@@ -37,7 +37,6 @@ import {
   Clock3,
   Copy,
   Download,
-  ExternalLink,
   FileCheck2,
   FileClock,
   FilePlus2,
@@ -147,7 +146,6 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
@@ -607,13 +605,20 @@ type DeliveryLink = {
   expires: string
   opens: number
   maxOpens: number
+  createdAt?: string
+  revokedAt?: string
+  revokeReason?: string
 }
 type EmailRecord = {
   id: number
   recipient: string
   subject: string
+  textBody?: string
   sentAt: string
   linkCount: number
+  status?: "requested" | "queued" | "sending" | "accepted" | "delivered" | "failed" | "cancelled"
+  attempts?: number
+  errorCode?: string
 }
 type UploadProgressState = {
   completed: number
@@ -652,8 +657,8 @@ const erpNavGroups = [
     label: "경영·성과",
     items: [
       ["운영 감시", Monitor, "monitoring"],
-      ["결산 리포트", ClipboardList, "reports", "Pro"],
-      ["영업 성과", History, "sales", "Pro"],
+      ["결산 리포트", ClipboardList, "reports"],
+      ["영업 성과", History, "sales"],
     ],
   },
 ] as const
@@ -734,6 +739,26 @@ const templates = [
   ["DN", "차변표", "관련 인보이스, 조정 금액, 통화, 사유", "DN-STD-1"],
   ["CN", "대변표", "관련 인보이스, 감액 금액, 통화, 사유", "CN-STD-1"],
 ] as const
+
+// The SSOT's public document type cards mark PO as purchase-only and the
+// remaining 12 types as usable for both purchase and sales flows. Keep that
+// direction metadata beside the source list so the tabs change the actual
+// available templates and their count, rather than only changing a label.
+const templateDirections = {
+  QT: ["purchase", "sales"],
+  PI: ["purchase", "sales"],
+  SC: ["purchase", "sales"],
+  PO: ["purchase"],
+  CI: ["purchase", "sales"],
+  PL: ["purchase", "sales"],
+  SI: ["purchase", "sales"],
+  BC: ["purchase", "sales"],
+  DLV: ["purchase", "sales"],
+  CO: ["purchase", "sales"],
+  SOA: ["purchase", "sales"],
+  DN: ["purchase", "sales"],
+  CN: ["purchase", "sales"],
+} as const
 
 const commonLineItemSlots: PrototypeSlot[] = [
   {
@@ -1362,7 +1387,7 @@ type GeneratedDraft = {
   type: string
   number: string
   party: string
-  status: "작성 중" | "승인 대기" | "승인 완료" | "반려" | "확정" | "발송됨"
+  status: "작성 중" | "승인 대기" | "승인 완료" | "반려" | "확정" | "전달 요청됨"
   tone: Tone
   readiness: string
   tab: "draft" | "confirmed" | "progress" | "sharing" | "done"
@@ -1490,7 +1515,7 @@ const generatedDrafts: GeneratedDraft[] = [
     party: "ACME GmbH",
     status: "확정",
     tone: "success",
-    readiness: "Magic Link 활성 · 미발송",
+    readiness: "공유 링크 활성 · 미발송",
     tab: "sharing",
     creatorName: "박서윤",
     creatorAccountId: "account-admin",
@@ -1505,10 +1530,10 @@ const generatedDrafts: GeneratedDraft[] = [
     type: "정산서",
     number: "SOA-2026-0629",
     party: "한빛무역",
-    status: "발송됨",
+    status: "확정",
     tone: "success",
-    readiness: "이메일 전달 완료",
-    tab: "done",
+    readiness: "이메일 요청 기록 · 전달 미확인",
+    tab: "sharing",
     creatorName: "김도현",
     creatorAccountId: "account-member",
     updated: "08.26 14:32",
@@ -2168,7 +2193,7 @@ function AppNav({
                 ) : null}
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {group.items.map(([label, Icon, key, plan]) => {
+                    {group.items.map(([label, Icon, key]) => {
                       if (key === "monitoring" && erpRole !== "owner") return null
                       const active =
                         key === screen ||
@@ -2187,11 +2212,6 @@ function AppNav({
                             <Icon />
                             <span>{label}</span>
                           </SidebarMenuButton>
-                          {plan ? (
-                            <SidebarMenuBadge className="bg-primary/10 text-[9px] font-semibold text-primary">
-                              {plan}
-                            </SidebarMenuBadge>
-                          ) : null}
                         </SidebarMenuItem>
                       )
                     })}
@@ -3932,7 +3952,7 @@ function matchesDocumentQueueStatus(
 }
 
 function uploadDocumentTypeLabel(documentType: UploadDocumentType) {
-  if (documentType === "UNK") return "유형 확인 필요"
+  if (documentType === "UNK") return "미확인 문서"
   if (documentType === "OTHER") return "기타 문서"
   return (
     manualUploadDocumentTypeOptions.find(
@@ -3956,18 +3976,16 @@ function uploadDocumentTypeCode(documentType: UploadDocumentType) {
 
 function UploadDocumentTypeMark({
   documentType,
-  pages,
   className,
 }: {
   documentType: UploadDocumentType
-  pages?: number
   className?: string
 }) {
   const unresolved = documentType === "UNK"
   return (
     <span
       className={cn(
-        "inline-flex size-9 shrink-0 flex-col items-center justify-center rounded-[var(--r-sm)] border bg-[var(--surface-background)] text-primary",
+        "inline-flex size-9 shrink-0 flex-row items-center justify-center gap-1 rounded-[var(--r-sm)] border bg-[var(--surface-background)] text-primary",
         unresolved && "border-dashed text-[var(--surface-muted-foreground)]",
         className
       )}
@@ -3977,11 +3995,6 @@ function UploadDocumentTypeMark({
       <span className="text-[9px] leading-none font-bold tracking-wide">
         {uploadDocumentTypeCode(documentType)}
       </span>
-      {pages ? (
-        <span className="mt-1 text-[8px] leading-none text-[var(--surface-muted-foreground)]">
-          {pages}p
-        </span>
-      ) : null}
     </span>
   )
 }
@@ -4013,12 +4026,10 @@ function HorizontalDocumentTray({
   expanded: boolean
   onExpandedChange: (expanded: boolean) => void
 }) {
-  const fileDropZoneRef = useRef<FileDropZoneRef | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const folderInputRef = useRef<HTMLInputElement | null>(null)
   const queueDragDepthRef = useRef(0)
   const [mailOpen, setMailOpen] = useState(false)
-  const [addPanelOpen, setAddPanelOpen] = useState(false)
   const [queueDragActive, setQueueDragActive] = useState(false)
   const [filter, setFilter] = useState<DocumentTrayFilter>("all")
   const [typeFilter, setTypeFilter] = useState<UploadDocumentType | "all">(
@@ -4055,14 +4066,12 @@ function HorizontalDocumentTray({
     )
 
   const handleExpandedChange = (nextExpanded: boolean) => {
-    if (!nextExpanded) setAddPanelOpen(false)
     onExpandedChange(nextExpanded)
   }
 
   const acceptFiles = (files: File[]) => {
     if (files.length === 0 || uploadProgress) return
     handleExpandedChange(true)
-    setAddPanelOpen(false)
     onFilesSelected(files)
   }
   const handleQueueDragEnter = (event: ReactDragEvent<HTMLDivElement>) => {
@@ -4108,7 +4117,7 @@ function HorizontalDocumentTray({
       onDrop={handleQueueDrop}
       className={cn(
         "shrink-0 transition-[box-shadow,background-color]",
-        expanded && "ring-[var(--control-selected-border)]",
+        !expanded && "border-0 shadow-none",
         queueDragActive &&
           "bg-[var(--control-selected-soft-background)] ring-2 ring-[var(--control-selected-border)]"
       )}
@@ -4128,72 +4137,54 @@ function HorizontalDocumentTray({
           }
         }}
       >
-        <div
-          className={cn(
-            "flex h-11 min-w-48 items-center justify-between rounded-[var(--r-md)] px-3 text-primary",
-            expanded && "bg-[var(--button-secondary-background)]"
-          )}
-        >
+        <div className="flex h-11 min-w-52 items-center gap-2 px-3 pr-4 text-primary">
           <span className="font-semibold">검토·배정 대기 문서</span>
-          <span className="ml-auto text-xs text-muted-foreground">
+          <span className="inline-flex size-6 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
             {documents.length}
           </span>
-          {expanded ? <ChevronUp /> : <ChevronDown />}
+          {expanded ? (
+            <ChevronUp className="ml-auto size-4" />
+          ) : (
+            <ChevronDown className="ml-auto size-4" />
+          )}
         </div>
 
         {selectedDocument ? (
-          <Item
-            variant="outline"
-            size="xs"
-            role="button"
-            tabIndex={0}
-            aria-label={`${selectedDocument.name} 문서 목록 ${expanded ? "닫기" : "열기"}`}
-            className="h-11 min-w-0 flex-1 cursor-pointer flex-nowrap border-[var(--control-selected-border)] bg-[var(--control-selected-soft-background)] text-left sm:max-w-[460px]"
-            onClick={(event) => {
-              event.stopPropagation()
-              handleExpandedChange(!expanded)
-            }}
-            onKeyDown={(event) => {
-              event.stopPropagation()
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault()
-                handleExpandedChange(!expanded)
-              }
-            }}
-          >
-            <ItemMedia className="shrink-0">
-              <UploadDocumentTypeMark
-                documentType={selectedDocument.documentType}
-                pages={selectedDocument.pages}
-                className="size-8"
-              />
-            </ItemMedia>
-            <ItemContent className="min-w-0 gap-0">
-              <ItemTitle className="block truncate text-xs font-semibold">
-                {selectedDocument.name}
-              </ItemTitle>
-              <ItemDescription className="mt-0.5 block truncate text-[11px]">
-                {uploadDocumentTypeLabel(selectedDocument.documentType)} ·{" "}
-                {selectedIndex + 1} / {documents.length}
-              </ItemDescription>
-            </ItemContent>
-            <ItemActions>
-              <ToneBadge tone={selectedDocument.tone}>
-                {selectedDocument.status}
-              </ToneBadge>
-            </ItemActions>
-          </Item>
+          <div className="ml-2 flex min-w-0 flex-1 items-center gap-2 pl-4 pr-1">
+            <UploadDocumentTypeMark
+              documentType={selectedDocument.documentType}
+              className="size-9"
+            />
+            <div className="min-w-0 flex-1 leading-tight">
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[var(--surface-foreground)]">
+                  {uploadDocumentTypeLabel(selectedDocument.documentType)}
+                </span>
+                <span className="shrink-0 text-[11px] text-[var(--surface-muted-foreground)]">
+                  · {selectedIndex + 1} / {documents.length}
+                </span>
+                <span
+                  className="min-w-0 truncate text-[10px] text-[var(--surface-muted-foreground)]"
+                  title={selectedDocument.name}
+                >
+                  · {selectedDocument.name}
+                </span>
+              </div>
+            </div>
+            <ToneBadge tone={selectedDocument.tone}>
+              {selectedDocument.status}
+            </ToneBadge>
+          </div>
         ) : null}
 
-        <div className="ml-auto hidden h-11 items-center gap-3 rounded-[var(--r-md)] border border-[var(--surface-border)] px-4 text-[11px] lg:flex">
-          <span className="font-semibold">오늘 처리할 서류</span>
-          <span className="text-[var(--surface-muted-foreground)]">
+        <div className="ml-auto flex h-11 items-center gap-2 pr-2 text-[11px]">
+          <span className="rounded-full bg-[var(--color-system-orange6)] px-2 py-1 text-[var(--color-orange-2)]">
             확인 대기 {reviewCount}
           </span>
-          <span className="text-[var(--color-blue-2)]">
+          <span className="rounded-full bg-[var(--color-system-blue6)] px-2 py-1 text-[var(--color-blue-2)]">
             AI 분석 중 {processingCount}
           </span>
-          <span className="text-[var(--color-red-2)]">
+          <span className="rounded-full bg-[var(--color-system-red6)] px-2 py-1 text-[var(--color-red-2)]">
             재업로드 필요 {failedCount}
           </span>
         </div>
@@ -4203,23 +4194,12 @@ function HorizontalDocumentTray({
           onClick={(event) => event.stopPropagation()}
           onKeyDown={(event) => event.stopPropagation()}
         >
-          <DropdownMenu
-            onOpenChange={(open) => {
-              if (open) {
-                handleExpandedChange(true)
-                setAddPanelOpen(true)
-              }
-            }}
-          >
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
                 size="sm"
                 aria-label="파일 추가 메뉴"
-                onClick={() => {
-                  handleExpandedChange(true)
-                  setAddPanelOpen(true)
-                }}
               >
                 <FilePlus2 data-icon="inline-start" />
                 파일 추가
@@ -4230,7 +4210,6 @@ function HorizontalDocumentTray({
               <DropdownMenuItem
                 onSelect={() => {
                   handleExpandedChange(true)
-                  setAddPanelOpen(false)
                   setMailOpen(true)
                 }}
               >
@@ -4238,8 +4217,6 @@ function HorizontalDocumentTray({
               </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => {
-                  handleExpandedChange(true)
-                  setAddPanelOpen(false)
                   folderInputRef.current?.click()
                 }}
               >
@@ -4247,8 +4224,6 @@ function HorizontalDocumentTray({
               </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => {
-                  handleExpandedChange(true)
-                  setAddPanelOpen(false)
                   fileInputRef.current?.click()
                 }}
               >
@@ -4259,156 +4234,51 @@ function HorizontalDocumentTray({
         </div>
       </div>
 
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/pdf,.pdf"
+        multiple
+        hidden
+        onChange={(event) => {
+          if (!uploadProgress && event.target.files) {
+            acceptFiles(Array.from(event.target.files))
+          }
+          event.target.value = ""
+        }}
+      />
+      <input
+        ref={(node) => {
+          folderInputRef.current = node
+          node?.setAttribute("webkitdirectory", "")
+          node?.setAttribute("directory", "")
+        }}
+        type="file"
+        accept="application/pdf,.pdf"
+        multiple
+        hidden
+        onChange={(event) => {
+          if (!uploadProgress && event.target.files) {
+            acceptFiles(Array.from(event.target.files))
+          }
+          event.target.value = ""
+        }}
+      />
+
       {expanded ? (
-        <CardContent className="border-t border-[var(--surface-border)] bg-[var(--surface-muted-background)] p-2.5">
-          <div className="mb-2 grid gap-2">
-            {duplicateUploadNotice ? (
+        <CardContent className="border-t border-[var(--surface-border)] bg-[var(--surface-background)] p-2.5">
+          {duplicateUploadNotice ? (
+            <div className="mb-2 grid gap-2">
               <DuplicateUploadAlert
                 notice={duplicateUploadNotice}
                 onDismiss={onDismissDuplicateUpload}
               />
-            ) : null}
-          </div>
-          {documents.length === 0 ? (
-            <FileDropZone
-              ref={fileDropZoneRef}
-              accept="application/pdf,.pdf"
-              multiple
-              clickToSelect={!uploadProgress}
-              label="새 파일 추가"
-              instructions={`PDF를 선택하거나 이 영역에 끌어놓기 · 최대 ${TRADE_DOCUMENT_MAX_UPLOAD_FILES}개 · 파일당 ${TRADE_DOCUMENT_MAX_UPLOAD_MB}MB`}
-              onFiles={(files) => {
-                if (!uploadProgress) acceptFiles(files)
-              }}
-              className="min-h-32 flex-row justify-start gap-3 px-4 py-5 text-left"
-            >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--r-md)] border border-[var(--surface-border)] bg-[var(--surface-background)] text-[var(--file-drop-foreground)]">
-                {uploadProgress ? (
-                  <LoaderCircle className="animate-spin" />
-                ) : (
-                  <Upload />
-                )}
-              </span>
-              <span className="min-w-0 text-[var(--surface-foreground)]">
-                <span className="block text-xs font-semibold">
-                  {uploadProgress ? "파일 업로드 중" : "새 파일 추가"}
-                </span>
-                <span className="mt-1 block text-[11px] text-[var(--surface-muted-foreground)]">
-                  PDF를 선택하거나 이 영역에 끌어놓기 · 최대
-                  {` ${TRADE_DOCUMENT_MAX_UPLOAD_FILES}개 · 파일당 ${TRADE_DOCUMENT_MAX_UPLOAD_MB}MB`}
-                </span>
-              </span>
-              {uploadProgress ? (
-                <span className="ml-auto flex min-w-44 items-center gap-2 text-[11px] font-medium text-[var(--file-drop-foreground)]">
-                  <LabeledProgress
-                    width={96}
-                    showPercentage={false}
-                    aria-label="파일 업로드 진행률"
-                    value={
-                      (uploadProgress.completed / uploadProgress.total) * 100
-                    }
-                  />
-                  {uploadProgress.completed}/{uploadProgress.total}
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      setCancelUploadOpen(true)
-                    }}
-                  >
-                    취소
-                  </Button>
-                </span>
-              ) : (
-                <span className="ml-auto flex items-center gap-1.5">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label="이메일에서 문서 찾기"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      setMailOpen(true)
-                    }}
-                  >
-                    <Mail data-icon="inline-start" />
-                    <span className="hidden lg:inline">이메일에서 찾기</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label="폴더에서 PDF 선택"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      folderInputRef.current?.click()
-                    }}
-                  >
-                    <FileText data-icon="inline-start" />
-                    <span className="hidden lg:inline">폴더 선택</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label="PDF 파일 선택"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      fileDropZoneRef.current?.open()
-                    }}
-                  >
-                    <Upload data-icon="inline-start" />
-                    <span className="hidden lg:inline">파일 선택</span>
-                  </Button>
-                </span>
-              )}
-            </FileDropZone>
-          ) : addPanelOpen && !uploadProgress ? (
-            <FileDropZone
-              ref={fileDropZoneRef}
-              accept="application/pdf,.pdf"
-              multiple
-              label="파일을 끌어놓아 추가"
-              instructions={`PDF 최대 ${TRADE_DOCUMENT_MAX_UPLOAD_FILES}개 · 파일당 ${TRADE_DOCUMENT_MAX_UPLOAD_MB}MB`}
-              onFiles={acceptFiles}
-              className="min-h-16 flex-row justify-start gap-3 px-4 py-3 text-left"
-            >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-[var(--r-md)] border border-[var(--surface-border)] bg-[var(--surface-background)] text-[var(--file-drop-foreground)]">
-                <Upload />
-              </span>
-              <span className="min-w-0 text-[var(--surface-foreground)]">
-                <span className="block text-xs font-semibold">
-                  파일을 끌어놓아 추가
-                </span>
-                <span className="mt-1 block text-[11px] text-[var(--surface-muted-foreground)]">
-                  PDF 최대 {TRADE_DOCUMENT_MAX_UPLOAD_FILES}개 · 파일당{" "}
-                  {TRADE_DOCUMENT_MAX_UPLOAD_MB}MB
-                </span>
-              </span>
-              <span className="ml-auto flex items-center gap-1.5">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    fileDropZoneRef.current?.open()
-                  }}
-                >
-                  파일 선택
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label="파일 추가 영역 닫기"
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    setAddPanelOpen(false)
-                  }}
-                >
-                  <X />
-                </Button>
-              </span>
-            </FileDropZone>
+            </div>
+          ) : null}
+          {documents.length === 0 && !uploadProgress ? (
+            <div className="rounded-[var(--r-md)] border border-dashed border-[var(--surface-border)] px-4 py-5 text-center text-xs text-[var(--surface-muted-foreground)]">
+              파일 추가 버튼에서 문서를 추가해 주세요.
+            </div>
           ) : uploadProgress ? (
             <div className="flex min-h-11 items-center gap-3 rounded-[var(--r-md)] border border-[var(--surface-border)] bg-[var(--surface-background)] px-3 py-2 text-xs">
               <LoaderCircle className="size-4 animate-spin text-primary" />
@@ -4432,37 +4302,6 @@ function HorizontalDocumentTray({
               </Button>
             </div>
           ) : null}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="application/pdf,.pdf"
-            multiple
-            hidden
-            onChange={(event) => {
-              if (!uploadProgress && event.target.files) {
-                acceptFiles(Array.from(event.target.files))
-              }
-              event.target.value = ""
-            }}
-          />
-          <input
-            ref={(node) => {
-              folderInputRef.current = node
-              node?.setAttribute("webkitdirectory", "")
-              node?.setAttribute("directory", "")
-            }}
-            type="file"
-            accept="application/pdf,.pdf"
-            multiple
-            hidden
-            onChange={(event) => {
-              if (!uploadProgress && event.target.files) {
-                acceptFiles(Array.from(event.target.files))
-              }
-              event.target.value = ""
-            }}
-          />
-
           {mailOpen ? (
             <EmailForwardQueue
               onClose={() => setMailOpen(false)}
@@ -4480,83 +4319,84 @@ function HorizontalDocumentTray({
 
           {documents.length > 0 ? (
             <>
-              <div className="mt-2.5 flex flex-wrap items-center gap-2 px-1">
-                <div className="mr-2 text-xs font-semibold">
-                  검토·배정 대기 문서{" "}
-                  <span className="ml-1 font-normal text-muted-foreground">
-                    {documents.length}개
-                  </span>
-                </div>
-                <span className="text-[11px] text-muted-foreground">
-                  PDF를 이 목록에 끌어놓아 추가
-                </span>
+              <div
+                className={cn(
+                  "flex flex-wrap items-center gap-2 px-1",
+                  (uploadProgress || mailOpen || uploadNotice) &&
+                    "mt-4 border-t border-[var(--surface-border)] pt-3"
+                )}
+              >
                 <BusinessListToolbar aria-label="대기 문서 필터">
                   <BusinessFilterField label="상태">
-                  <Select
-                    value={filter}
-                    onValueChange={(value) =>
-                      setFilter(value as DocumentTrayFilter)
-                    }
-                  >
-                    <SelectTrigger
-                      size="sm"
-                      className="w-32"
-                      aria-label="상태 필터"
+                    <Select
+                      value={filter}
+                      onValueChange={(value) =>
+                        setFilter(value as DocumentTrayFilter)
+                      }
                     >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent align="end">
-                      <SelectItem value="all">전체</SelectItem>
-                      <SelectItem value="processing">처리 중</SelectItem>
-                      <SelectItem value="review">확인 필요</SelectItem>
-                      <SelectItem value="failed">처리 실패</SelectItem>
-                    </SelectContent>
-                  </Select>
+                      <SelectTrigger
+                        size="sm"
+                        className="w-32"
+                        aria-label="상태 필터"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent align="end">
+                        <SelectItem value="all">전체</SelectItem>
+                        <SelectItem value="processing">처리 중</SelectItem>
+                        <SelectItem value="review">확인 필요</SelectItem>
+                        <SelectItem value="failed">처리 실패</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </BusinessFilterField>
                   <BusinessFilterField label="문서 유형">
-                  <Select
-                    value={typeFilter}
-                    onValueChange={(value) =>
-                      setTypeFilter(value as UploadDocumentType | "all")
-                    }
-                  >
-                    <SelectTrigger
-                      size="sm"
-                      className="w-40"
-                      aria-label="문서 유형 필터"
+                    <Select
+                      value={typeFilter}
+                      onValueChange={(value) =>
+                        setTypeFilter(value as UploadDocumentType | "all")
+                      }
                     >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent align="end">
-                      <SelectItem value="all">전체</SelectItem>
-                      {availableDocumentTypes.map((documentType) => (
-                        <SelectItem key={documentType} value={documentType}>
-                          {uploadDocumentTypeLabel(documentType)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      <SelectTrigger
+                        size="sm"
+                        className="w-40"
+                        aria-label="문서 유형 필터"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent align="end">
+                        <SelectItem value="all">전체</SelectItem>
+                        {availableDocumentTypes.map((documentType) => (
+                          <SelectItem key={documentType} value={documentType}>
+                            {uploadDocumentTypeLabel(documentType)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </BusinessFilterField>
                   <BusinessFilterField label="정렬">
-                  <Select
-                    value={sort}
-                    onValueChange={(value) =>
-                      setSort(value as DocumentQueueSort)
-                    }
-                  >
-                    <SelectTrigger size="sm" className="w-40" aria-label="정렬">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent align="end">
-                      <SelectItem value="recent">최근 업로드 순</SelectItem>
-                      <SelectItem value="oldest">오래된 업로드 순</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Select
+                      value={sort}
+                      onValueChange={(value) =>
+                        setSort(value as DocumentQueueSort)
+                      }
+                    >
+                      <SelectTrigger
+                        size="sm"
+                        className="w-40"
+                        aria-label="정렬"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent align="end">
+                        <SelectItem value="recent">최근 업로드 순</SelectItem>
+                        <SelectItem value="oldest">오래된 업로드 순</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </BusinessFilterField>
                 </BusinessListToolbar>
               </div>
 
-              <div className="field-scrollbar mt-2 max-h-52 overflow-auto rounded-[var(--r-md)] ring-1 ring-[var(--table-border)]">
+              <div className="field-scrollbar mt-2 max-h-[min(62svh,34rem)] overflow-auto rounded-[var(--r-md)] ring-1 ring-[var(--table-border)]">
                 <Table className="min-w-[780px]">
                   <TableHeader className="sticky top-0 z-10">
                     <TableRow>
@@ -4587,13 +4427,11 @@ function HorizontalDocumentTray({
                         tabIndex={0}
                         className="cursor-pointer outline-none focus-visible:[box-shadow:var(--shadow-keyboard-focus)]"
                         onClick={() => {
-                          setAddPanelOpen(false)
                           onSelect(index)
                         }}
                         onKeyDown={(event) => {
                           if (event.key === "Enter" || event.key === " ") {
                             event.preventDefault()
-                            setAddPanelOpen(false)
                             onSelect(index)
                           }
                         }}
@@ -4605,9 +4443,8 @@ function HorizontalDocumentTray({
                           <span className="flex min-w-0 items-center gap-2">
                             <UploadDocumentTypeMark
                               documentType={document.documentType}
-                              pages={document.pages}
                             />
-                            <span className="truncate text-xs font-semibold">
+                            <span className="flex min-w-0 items-center gap-1.5 truncate text-xs font-semibold">
                               {uploadDocumentTypeLabel(document.documentType)}
                             </span>
                           </span>
@@ -4675,6 +4512,9 @@ function HorizontalDocumentTray({
                     ) : null}
                   </TableBody>
                 </Table>
+              </div>
+              <div className="px-1 pt-2 text-xs text-[var(--table-caption-foreground)]">
+                전체 {filteredDocuments.length}건
               </div>
             </>
           ) : null}
@@ -5327,11 +5167,6 @@ function InboxScreen({
       <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-end gap-2 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-3 py-2 sm:px-4">
         <div className="mr-auto min-w-0">
           <h1 className="text-sm font-semibold">문서 올리기</h1>
-          <p className="truncate text-[11px] text-[var(--surface-muted-foreground)]">
-            {uploadDocumentTypeLabel(selectedDocument.documentType)} ·{" "}
-            {step === "deal" ? "거래 연결" : "항목 검토"} ·{" "}
-            {selectedDocument.name}
-          </p>
         </div>
         <DocumentBlockingAlerts errors={uploadErrors} checks={uploadChecks} />
         <AutoSaveStatus
@@ -5529,7 +5364,6 @@ function PendingUploadDocumentsTable({
                 >
                   업로드 문서
                 </h2>
-                <ToneBadge tone="warning">{documents.length}건</ToneBadge>
               </div>
               <p className="mt-1 text-xs text-[var(--surface-muted-foreground)]">
                 업로드한 문서의 처리 상태를 확인하세요.
@@ -5537,7 +5371,6 @@ function PendingUploadDocumentsTable({
             </div>
             <BusinessListToolbar
               aria-label="업로드 문서 필터"
-              result={`${filteredDocuments.length}건 표시 중`}
             >
               <BusinessFilterField label="상태">
                 <Select
@@ -5634,9 +5467,8 @@ function PendingUploadDocumentsTable({
                       <div className="flex min-w-0 items-center gap-2.5">
                         <UploadDocumentTypeMark
                           documentType={document.documentType}
-                          pages={document.pages}
                         />
-                        <span className="truncate text-sm font-semibold">
+                        <span className="flex min-w-0 items-center gap-1.5 truncate text-sm font-semibold">
                           {uploadDocumentTypeLabel(document.documentType)}
                         </span>
                       </div>
@@ -5772,6 +5604,8 @@ function BeforeUploadState({
   onDismissDuplicateUpload: () => void
 }) {
   const fileDropZoneRef = useRef<FileDropZoneRef | null>(null)
+  const folderInputRef = useRef<HTMLInputElement | null>(null)
+  const [mailOpen, setMailOpen] = useState(false)
 
   return (
     <div className="h-full min-h-0 overflow-y-auto bg-background">
@@ -5783,14 +5617,26 @@ function BeforeUploadState({
           description="PDF를 올리고 추출값을 검토한 뒤, 연결할 거래와 반영 내용을 확인하세요."
           align="center"
         />
-        <ol aria-label="문서 처리 순서" className="mx-auto mt-4 flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
-          {["파일 올리기", "추출값 검토", "거래 연결·확정"].map((title, index) => (
-            <li key={title} className="flex items-center gap-2">
-              {index > 0 && <ChevronRight className="mr-2 size-3 text-muted-foreground/60" aria-hidden="true" />}
-              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">{index + 1}</span>
-              <span>{title}</span>
-            </li>
-          ))}
+        <ol
+          aria-label="문서 처리 순서"
+          className="mx-auto mt-4 flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground"
+        >
+          {["파일 올리기", "추출값 검토", "거래 연결·확정"].map(
+            (title, index) => (
+              <li key={title} className="flex items-center gap-2">
+                {index > 0 && (
+                  <ChevronRight
+                    className="mr-2 size-3 text-muted-foreground/60"
+                    aria-hidden="true"
+                  />
+                )}
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
+                  {index + 1}
+                </span>
+                <span>{title}</span>
+              </li>
+            )
+          )}
         </ol>
         <div className="mx-auto mt-5 w-full max-w-5xl">
           <Card className="w-full bg-[var(--surface-background)]!" size="sm">
@@ -5811,6 +5657,7 @@ function BeforeUploadState({
                 aria-label="PDF 파일 선택 또는 끌어놓기"
                 label="파일을 끌어다 놓으세요"
                 instructions={`PDF 최대 ${TRADE_DOCUMENT_MAX_UPLOAD_FILES}개, 파일당 ${TRADE_DOCUMENT_MAX_UPLOAD_MB}MB`}
+                clickToSelect
                 onFiles={onFilesSelected}
                 className="min-h-36 flex-row gap-3 bg-[var(--surface-background)] px-4 text-left"
               >
@@ -5828,6 +5675,29 @@ function BeforeUploadState({
                   </span>
                 </span>
               </FileDropZone>
+              {mailOpen ? (
+                <EmailForwardQueue
+                  onClose={() => setMailOpen(false)}
+                  onImportFiles={onFilesSelected}
+                />
+              ) : null}
+              <input
+                ref={(node) => {
+                  folderInputRef.current = node
+                  node?.setAttribute("webkitdirectory", "")
+                  node?.setAttribute("directory", "")
+                }}
+                type="file"
+                accept="application/pdf,.pdf"
+                multiple
+                hidden
+                onChange={(event) => {
+                  if (event.target.files) {
+                    onFilesSelected(Array.from(event.target.files))
+                  }
+                  event.target.value = ""
+                }}
+              />
               {uploadNotice ? (
                 <Alert className="mt-3" variant="default">
                   <AlertDescription className="text-xs">
@@ -5835,8 +5705,29 @@ function BeforeUploadState({
                   </AlertDescription>
                 </Alert>
               ) : null}
-              <div className="mt-3 flex justify-end">
-                <Button onClick={() => fileDropZoneRef.current?.open()}>
+              <div className="mt-3 flex flex-wrap justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setMailOpen(true)}
+                >
+                  <Mail data-icon="inline-start" /> 이메일에서 찾기
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => folderInputRef.current?.click()}
+                >
+                  <FileText data-icon="inline-start" /> 폴더 선택
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileDropZoneRef.current?.open()}
+                >
                   <Upload data-icon="inline-start" /> 파일 선택
                 </Button>
               </div>
@@ -7792,9 +7683,9 @@ const generatedDraftReuseFacts: Record<string, string[]> = {
   "CI-2026-0708": ["은행 거절 전 점검", "거래 연결됨", "통화 USD"],
   "CI-2026-0712": ["은행 거절 전 점검", "거래처명 불일치", "확정 차단"],
   "CI-2026-0703": ["품목 Aluminium Scrap", "수량 20 MT", "통화 USD"],
-  "CI-2026-0704": ["Magic Link 활성", "이메일 전달 전", "거래 연결됨"],
+  "CI-2026-0704": ["공유 링크 활성", "이메일 전달 전", "거래 연결됨"],
   "QT-2026-0630": ["운임 Hamburg", "선사 HMM", "ETA 08.03"],
-  "SOA-2026-0629": ["정산 6월", "미수금 없음", "고객 전달 완료"],
+  "SOA-2026-0629": ["정산 6월", "미수금 없음", "고객 전달 요청"],
 }
 
 type DealDocumentContext = {
@@ -8330,7 +8221,11 @@ function RecentDocumentsTable({
 function TemplateStrip({ onResult }: {
   onResult: (mode?: CreateStartMode, templateCode?: string, options?: GeneratedDocumentOpenOptions) => void
 }) {
-  const [selectedCode, setSelectedCode] = useState<string | null>(null)
+  const [direction, setDirection] = useState<"purchase" | "sales">("purchase")
+  const [selectedCode, setSelectedCode] = useState<string>(templates[0][0])
+  const visibleTemplates = templates.filter(([kind]) =>
+    templateDirections[kind].some((availableDirection) => availableDirection === direction)
+  )
   const viewportRef = useRef<HTMLDivElement>(null)
   const [scrollState, setScrollState] = useState({ previous: false, next: false })
   useEffect(() => {
@@ -8360,19 +8255,37 @@ function TemplateStrip({ onResult }: {
     <section aria-label="문서 폼 선택" className="min-w-0">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
+          <Tabs
+            value={direction}
+            onValueChange={(value) => {
+              const nextDirection = value as "purchase" | "sales"
+              const nextTemplates = templates.filter(([kind]) =>
+                templateDirections[kind].some(
+                  (availableDirection) => availableDirection === nextDirection
+                )
+              )
+              setDirection(nextDirection)
+              setSelectedCode(nextTemplates[0]?.[0] ?? "")
+            }}
+          >
+            <TabsList aria-label="거래 방향">
+              <TabsTrigger value="purchase">매입</TabsTrigger>
+              <TabsTrigger value="sales">매출</TabsTrigger>
+            </TabsList>
+          </Tabs>
           <h2 className="text-base font-semibold">문서 유형 선택</h2>
-          <ToneBadge tone="neutral">{templates.length}개</ToneBadge>
+          <ToneBadge tone="neutral">{visibleTemplates.length}개</ToneBadge>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon-sm" aria-label="이전 문서 유형" disabled={!scrollState.previous} onClick={() => scroll(-1)}><ChevronLeft /></Button>
           <Button variant="outline" size="icon-sm" aria-label="다음 문서 유형" disabled={!scrollState.next} onClick={() => scroll(1)}><ChevronRight /></Button>
-          <Button size="sm" disabled={!selectedCode} onClick={() => selectedCode && onResult("template", selectedCode)}>
+          <Button size="sm" onClick={() => onResult("template", selectedCode)}>
             <FilePlus2 data-icon="inline-start" />문서 만들기
           </Button>
         </div>
       </div>
       <div ref={viewportRef} aria-label="문서 유형 목록" className="flex min-w-0 snap-x snap-proximity gap-3 overflow-x-auto overscroll-x-contain px-0.5 pt-0.5 pb-3">
-        {templates.map(([kind, title, description]) => {
+        {visibleTemplates.map(([kind, title, description]) => {
           const selected = selectedCode === kind
           return (
             <button key={kind} type="button" aria-pressed={selected}
@@ -8380,7 +8293,7 @@ function TemplateStrip({ onResult }: {
               className={cn("flex w-60 shrink-0 snap-start flex-col items-start rounded-lg border bg-card p-4 text-left transition hover:border-primary/60 focus-visible:outline-2 focus-visible:outline-primary", selected && "border-primary bg-primary/5 ring-1 ring-primary")}
             >
               <span className="flex w-full items-center justify-between gap-2"><ToneBadge tone="blue">{kind}</ToneBadge>{selected && <Check className="size-4 text-primary" />}</span>
-              <strong className="mt-2 text-sm">{title} <span className="text-xs font-normal text-muted-foreground">· {kind === "PO" ? "매입" : "매입·매출"}</span></strong>
+              <strong className="mt-2 text-sm">{title} <span className="text-xs font-normal text-muted-foreground">· {direction === "purchase" ? "매입" : "매출"}</span></strong>
               <span className="mt-1.5 text-xs leading-5 text-muted-foreground">{description}</span>
             </button>
           )
@@ -9284,20 +9197,12 @@ function CreateScreen({
   if (showInitialTemplateState) {
     return (
       <div className="flex h-full min-h-0 flex-col overflow-auto bg-background">
-        <div className="mx-auto w-full max-w-ecoya-wide-xl shrink-0 px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
-          <BusinessPageHero
-            variant="ai"
-            eyebrow="AI 문서 작성"
-            title="문서 만들기"
-            description="유형을 선택하고 문서 만들기를 누르면 작성을 시작합니다."
-            align="center"
-          />
-          {relatedDeal ? <div className="mt-4"><RelatedDealNotice deal={relatedDeal} /></div> : null}
+        <div className="mx-auto w-full max-w-ecoya-wide-xl shrink-0 px-5 pt-5 sm:px-6 sm:pt-6 xl:px-8">
+          {relatedDeal ? <RelatedDealNotice deal={relatedDeal} /> : null}
+          <section className="space-y-5 pb-8">
+            <TemplateStrip onResult={openUnifiedWorkbench} />
+          </section>
         </div>
-
-        <section className="mx-auto w-full max-w-ecoya-wide-xl shrink-0 space-y-5 px-5 pb-8 sm:px-6 xl:px-8">
-          <TemplateStrip onResult={openUnifiedWorkbench} />
-        </section>
       </div>
     )
   }
@@ -9305,20 +9210,7 @@ function CreateScreen({
   return (
     <div className="h-full min-h-0 overflow-auto bg-background">
       <section className="mx-auto w-full max-w-ecoya-wide-xl px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
-        <section className="mb-7">
-          <BusinessPageHero
-            variant="ai"
-            eyebrow="AI 문서 작성"
-            title="문서 만들기"
-            description="유형을 선택하고 문서 만들기를 누르면 작성을 시작합니다."
-            align="center"
-          />
-          {relatedDeal ? (
-            <div className="mt-4">
-              <RelatedDealNotice deal={relatedDeal} compact />
-            </div>
-          ) : null}
-        </section>
+        {relatedDeal ? <RelatedDealNotice deal={relatedDeal} compact /> : null}
 
         <section className="mb-7">
           <TemplateStrip onResult={openUnifiedWorkbench} />
@@ -9326,50 +9218,54 @@ function CreateScreen({
 
         <section>
           {hasGeneratedDocuments ? (
-            <Card>
-              <Tabs value={documentListTab} onValueChange={setDocumentListTab}>
-                <BusinessListToolbar
-                  className="border-b px-4 py-3"
-                  aria-label="만든 문서 검색 필터"
-                  search={
-                    <BusinessFilterSearch
-                      label="만든 문서 검색"
-                      placeholder="문서번호, 거래처, 상태 검색"
-                      value={documentSearch}
-                      onValueChange={setDocumentSearch}
-                    />
-                  }
-                  result={`${documentTabs.find((tab) => tab.value === documentListTab)?.docs.length ?? 0}건 표시 중`}
+            <>
+              <Card>
+                <Tabs
+                  value={documentListTab}
+                  onValueChange={setDocumentListTab}
                 >
-                  <TabsList aria-label="만든 문서 상태">
-                    {documentTabs.map((tab) => (
-                      <TabsTrigger key={tab.value} value={tab.value}>
-                        {tab.label} {tab.docs.length}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </BusinessListToolbar>
-                {documentTabs.map(({ value, docs }) => (
-                  <TabsContent
-                    key={value as string}
-                    value={value as string}
-                    className="m-0"
-                  >
-                    <CardContent data-layout="flush-table" className="p-0">
-                      <RecentDocumentsTable
-                        docs={docs as GeneratedDraft[]}
-                        onResult={onResult}
-                        onDelete={handleDeleteCreatedDocument}
-                        onDuplicate={handleDuplicateCreatedDocument}
-                        role={role}
-                        currentAccountId={currentAccount.id}
-                        flush
+                  <BusinessListToolbar
+                    className="border-b px-4 py-3"
+                    aria-label="만든 문서 검색 필터"
+                    search={
+                      <BusinessFilterSearch
+                        label="만든 문서 검색"
+                        placeholder="문서번호, 거래처, 상태 검색"
+                        value={documentSearch}
+                        onValueChange={setDocumentSearch}
                       />
-                    </CardContent>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </Card>
+                    }
+                  >
+                    <TabsList aria-label="만든 문서 상태">
+                      {documentTabs.map((tab) => (
+                        <TabsTrigger key={tab.value} value={tab.value}>
+                          {tab.label} {tab.docs.length}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </BusinessListToolbar>
+                  {documentTabs.map(({ value, docs }) => (
+                    <TabsContent
+                      key={value as string}
+                      value={value as string}
+                      className="m-0"
+                    >
+                      <CardContent data-layout="flush-table" className="p-0">
+                        <RecentDocumentsTable
+                          docs={docs as GeneratedDraft[]}
+                          onResult={onResult}
+                          onDelete={handleDeleteCreatedDocument}
+                          onDuplicate={handleDuplicateCreatedDocument}
+                          role={role}
+                          currentAccountId={currentAccount.id}
+                          flush
+                        />
+                      </CardContent>
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              </Card>
+            </>
           ) : (
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 xl:grid-cols-3">
               {templates.map(([kind, title, desc, usage]) => (
@@ -9379,7 +9275,6 @@ function CreateScreen({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <ToneBadge tone="blue">{kind}</ToneBadge>
-                    <ToneBadge tone="success">시작 가능</ToneBadge>
                   </div>
                   <div className="mt-4 text-base font-semibold tracking-normal">
                     {title}
@@ -9389,8 +9284,6 @@ function CreateScreen({
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     <ToneBadge tone="neutral">{usage}</ToneBadge>
-                    <ToneBadge tone="success">거래값</ToneBadge>
-                    <ToneBadge tone="blue">업로드값</ToneBadge>
                   </div>
                   <div className="mt-4 flex items-center justify-between gap-3">
                     <span className="h-1 w-10 rounded-full bg-primary/50 transition group-hover:w-16" />
@@ -9735,7 +9628,7 @@ function DocumentStepPage({
 
         <div className="rounded-lg border bg-background p-4">
           <div className="flex items-center justify-between gap-3">
-            <div className="font-medium text-foreground">Magic Link 만들기</div>
+            <div className="font-medium text-foreground">공유 링크 만들기</div>
             <ToneBadge tone={magicLinkCount > 0 ? "success" : "neutral"}>
               생성된 링크 {magicLinkCount}개
             </ToneBadge>
@@ -9785,7 +9678,7 @@ function DocumentStepPage({
               onOpenSharePanel()
             }}
           >
-            <Send data-icon="inline-start" /> Magic Link 생성
+            <Send data-icon="inline-start" /> 공유 링크 만들기
           </Button>
         </div>
       </section>
@@ -10393,7 +10286,7 @@ function DocumentCreateWorkbench({
           </div>
           <div className="flex flex-wrap justify-end gap-2">
             <ToneBadge tone={activeMagicLinkCount > 0 ? "success" : "neutral"}>
-              Magic Link{" "}
+              공유 링크{" "}
               {activeMagicLinkCount > 0 ? `${activeMagicLinkCount}개` : "없음"}
             </ToneBadge>
             <ToneBadge tone={emailRecords.length > 0 ? "success" : "neutral"}>
@@ -10537,11 +10430,13 @@ function ShareDeliveryPanel({
   magicLinks,
   emailRecords,
   onSendEmail,
+  onRetryEmail,
+  onCancelEmail,
   onCreateMagicLink,
   onRevokeMagicLink,
-  onDeleteMagicLink,
   onClose,
   templateCode,
+  documentNumber,
   relatedDeal,
   initialAttachments,
   onAttachmentsChange,
@@ -10555,11 +10450,13 @@ function ShareDeliveryPanel({
     textBody: string
     shareLinkId: string
   }) => Promise<boolean>
+  onRetryEmail?: (record: EmailRecord) => Promise<boolean>
+  onCancelEmail?: (id: number) => void
   onCreateMagicLink: (settings: { expires: string; maxOpens: number }) => void
-  onRevokeMagicLink: (id: number) => void
-  onDeleteMagicLink: (id: number) => void
+  onRevokeMagicLink: (id: number, reason?: string) => void
   onClose: () => void
   templateCode: string
+  documentNumber: string
   relatedDeal: DealDocumentContext | null
   initialAttachments?: readonly DeliveryAttachment[]
   onAttachmentsChange: (attachments: DeliveryAttachment[]) => void
@@ -10580,21 +10477,65 @@ function ShareDeliveryPanel({
   const [maxOpens, setMaxOpens] = useState("10")
   const linkSettingsValid = Boolean(expires) && Number.isInteger(Number(maxOpens)) && Number(maxOpens) > 0
   const [isSending, setIsSending] = useState(false)
+  const [revokeTarget, setRevokeTarget] = useState<DeliveryLink | null>(null)
+  const [revokeReason, setRevokeReason] = useState("")
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
   const [attachmentPickerOpen, setAttachmentPickerOpen] = useState(false)
   const [attachments, setAttachments] = useState<DeliveryAttachment[]>(() =>
     initialAttachments
       ? [...initialAttachments]
-      : [{ id: "att-1", name: "인보이스_2607_003.pdf", source: "인박스" }]
+      : [{ id: "att-1", name: "인보이스_2607_003.pdf", source: "인박스", kind: "인보이스", sizeBytes: 310_000 }]
   )
   useEffect(() => { onAttachmentsChange(attachments) }, [attachments, onAttachmentsChange])
   const [previewAttachment, setPreviewAttachment] = useState<{ name: string; blob: Blob; sample: boolean } | null>(null)
   const activeMagicLinkCount = magicLinks.filter(
     (link) => link.status === "active"
   ).length
+  const linkSlotOccupied = magicLinks.some((link) => link.status !== "revoked")
   const activeLinks = magicLinks.filter((link) => link.status === "active")
   const emailLink = activeLinks.at(-1)
+  const deliveryHistorySummary = emailRecords.at(0)?.status === "failed"
+    ? "전달 실패"
+    : emailRecords.at(0)?.status === "delivered"
+      ? "전달 완료"
+      : "전달 전"
+  const formatLinkStatus = (status: DeliveryLink["status"]) =>
+    status === "active"
+      ? "활성"
+      : status === "revoked"
+        ? "철회"
+        : status === "expired"
+          ? "만료"
+          : "한도 도달"
+  const currentLink = magicLinks.find((link) => link.status !== "revoked") ?? magicLinks.at(-1)
+  const statusLabel = (status: EmailRecord["status"] = "requested") =>
+    status === "queued"
+      ? "전송 요청됨"
+      : status === "sending"
+        ? "전송 중"
+        : status === "accepted"
+          ? "발송됨"
+          : status === "delivered"
+            ? "전달됨"
+            : status === "failed"
+              ? "전송 실패"
+              : status === "cancelled"
+                ? "취소됨"
+                : "전송 요청됨"
+  const attachmentKind = (attachment: DeliveryAttachment) =>
+    attachment.kind ?? "기타 첨부"
+  const attachmentMeta = (attachment: DeliveryAttachment) => {
+    const bytes = attachment.sizeBytes ?? attachment.file?.size
+    return bytes
+      ? `${attachment.source} · ${(bytes / (1024 * 1024)).toFixed(1)} MiB`
+      : attachment.source
+  }
+  const attachmentTotalBytes = attachments.reduce(
+    (total, attachment) => total + (attachment.sizeBytes ?? attachment.file?.size ?? 0),
+    0
+  )
   const handleCopyLink = (link: DeliveryLink) => {
-    const url = `https://ecoya.app/share/${templateCode.toLowerCase()}-2026-0708-${link.id}`
+    const url = `https://ecoya.app/share/${documentNumber.toLowerCase()}-${link.id}`
     void navigator.clipboard?.writeText(url)
     setCopiedLinkId(link.id)
     window.setTimeout(() => setCopiedLinkId(null), 1200)
@@ -10605,9 +10546,6 @@ function ShareDeliveryPanel({
         <div className="flex min-w-0 items-start gap-3">
           <div className="min-w-0">
             <div className="text-sm font-semibold">파일 공유하기</div>
-            <div className="mt-1 text-xs leading-5 text-muted-foreground">
-              확정한 PDF와 동봉 파일을 묶어 링크 또는 이메일로 공유합니다.
-            </div>
           </div>
         </div>
         <Button variant="ghost" size="sm" className="shrink-0" onClick={onClose}>
@@ -10643,8 +10581,11 @@ function ShareDeliveryPanel({
                 <h3 className="flex items-center gap-2 text-sm font-semibold">
                   동봉할 파일 <span className="text-primary">{attachments.length + 1}개</span>
                 </h3>
+                <span className="text-xs text-muted-foreground">
+                  첨부 {attachments.length}/10개 · {(attachmentTotalBytes / (1024 * 1024)).toFixed(1)}/50.0 MiB
+                </span>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => window.print()}><Download data-icon="inline-start" /> 전체 패키지 다운로드</Button>
+                  <Button variant="outline" size="sm" onClick={() => window.print()}><Download data-icon="inline-start" /> 패키지 내려받기</Button>
                 </div>
               </div>
               <div className="overflow-hidden rounded-xl border bg-background">
@@ -10674,8 +10615,11 @@ function ShareDeliveryPanel({
                   <li className="flex items-center gap-3 rounded-lg border bg-background p-3 shadow-sm">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"><FileText className="size-5" /></span>
                     <div className="min-w-0 flex-1">
-                      <p className="break-all text-sm font-semibold text-foreground">{templateCode}-2026-0708.pdf</p>
-                      <div className="mt-1"><ToneBadge tone="success">본문 PDF</ToneBadge></div>
+                      <p className="break-all text-sm font-semibold text-foreground">{documentNumber}.pdf</p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <ToneBadge tone="success">확정</ToneBadge>
+                        <span>버전 1 · 최종 PDF</span>
+                      </div>
                     </div>
                     <Button variant="ghost" size="icon-sm" className="shrink-0" aria-label="본문 PDF 다운로드" onClick={() => window.print()}>
                       <Download className="size-4" />
@@ -10689,8 +10633,8 @@ function ShareDeliveryPanel({
                           {attachment.name}
                         </button>
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                          <ToneBadge tone="neutral">첨부</ToneBadge>
-                          <span>{attachment.source}</span>
+                          <ToneBadge tone="neutral">{attachmentKind(attachment)}</ToneBadge>
+                          <span>{attachmentMeta(attachment)}</span>
                         </div>
                       </div>
                       <Button variant="ghost" size="icon-sm" className="shrink-0 text-muted-foreground hover:text-destructive" aria-label={`${attachment.name} 동봉 해제`} title="동봉 해제" onClick={() => setAttachments((current) => current.filter((item) => item.id !== attachment.id))}>
@@ -10707,27 +10651,18 @@ function ShareDeliveryPanel({
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-sm font-semibold">공유 링크</h3>
-                  <ToneBadge tone={activeMagicLinkCount > 0 ? "success" : "warning"}>
-                    {activeMagicLinkCount > 0 ? `${activeMagicLinkCount}개 활성` : "미생성"}
+                  <ToneBadge tone={!currentLink ? "neutral" : currentLink.status === "active" ? "success" : currentLink.status === "revoked" ? "danger" : "warning"}>
+                    {currentLink ? formatLinkStatus(currentLink.status) : "미생성"}
                   </ToneBadge>
                 </div>
-                <Button variant="ghost" size="sm" className="h-8 shrink-0 px-2 text-xs text-primary" onClick={() => window.open("/share/preview", "_blank", "noopener,noreferrer")}>
-                  <ExternalLink className="size-3.5" /> 수신 화면 미리보기
-                </Button>
               </div>
               {magicLinks.length > 0 ? (
                 <div className="grid gap-2">
                   {magicLinks.map((link, index) => {
-                    const linkUrl = `https://ecoya.app/share/${templateCode.toLowerCase()}-2026-0708-${link.id}`
-                    const linkActive = link.status === "active"
-                    const linkStatus =
-                      link.status === "active"
-                        ? "활성"
-                        : link.status === "revoked"
-                          ? "철회됨"
-                          : link.status === "expired"
-                            ? "만료"
-                            : "열람 초과"
+                    const linkUrl = `https://ecoya.app/share/${documentNumber.toLowerCase()}-${link.id}`
+                    const linkUsable = link.status === "active"
+                    const linkRevocable = link.status !== "revoked"
+                    const linkStatus = formatLinkStatus(link.status)
                     return (
                       <div
                         key={link.id}
@@ -10735,11 +10670,11 @@ function ShareDeliveryPanel({
                       >
                         <div className="flex items-center justify-between gap-3">
                           <span className="font-semibold">
-                            ACME GmbH 링크 {index + 1}
+                            공유 링크 {index + 1}
                           </span>
                           <ToneBadge
                             tone={
-                              linkActive
+                              linkUsable
                                 ? "success"
                                 : link.status === "revoked"
                                   ? "neutral"
@@ -10756,11 +10691,11 @@ function ShareDeliveryPanel({
                           {link.opens}/{link.maxOpens}회 열람 · {link.expires}{" "}
                           만료
                         </div>
-                        <div className="mt-3 grid grid-cols-4 gap-2">
+                        <div className="mt-3 grid grid-cols-3 gap-2">
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={!linkActive}
+                            disabled={!linkUsable}
                             onClick={() => handleCopyLink(link)}
                           >
                             {copiedLinkId === link.id ? (
@@ -10776,7 +10711,7 @@ function ShareDeliveryPanel({
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={!linkActive}
+                            disabled={!linkUsable}
                             onClick={() =>
                               window.open(
                                 linkUrl,
@@ -10790,26 +10725,22 @@ function ShareDeliveryPanel({
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={!linkActive}
-                            onClick={() => onRevokeMagicLink(link.id)}
+                            disabled={!linkRevocable}
+                            onClick={() => {
+                              setRevokeTarget(link)
+                              setRevokeReason("")
+                            }}
                           >
                             철회
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onDeleteMagicLink(link.id)}
-                          >
-                            <Trash2 data-icon="inline-start" /> 삭제
                           </Button>
                         </div>
                       </div>
                     )
                   })}
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-xs text-muted-foreground">링크를 만들어 고객에게 전달하세요.</p>
+              ) : null}
+              {activeMagicLinkCount === 0 ? (
+                <div className={cn("space-y-3", magicLinks.length > 0 && "mt-3")}>
                   <details className="group rounded-md bg-muted/30 px-3 py-2">
                     <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 text-xs [&::-webkit-details-marker]:hidden">
                       <span>링크 설정 · {expires.replaceAll("-", ".")} 만료 · 최대 {maxOpens}회</span>
@@ -10826,20 +10757,20 @@ function ShareDeliveryPanel({
                       </label>
                     </div>
                   </details>
-                  <Button className="w-full" disabled={!relatedDeal || !linkSettingsValid} onClick={() => onCreateMagicLink({ expires: expires.replaceAll("-", "."), maxOpens: Number(maxOpens) })}>
+                  <Button className="w-full" disabled={!relatedDeal || !linkSettingsValid || linkSlotOccupied} onClick={() => onCreateMagicLink({ expires: expires.replaceAll("-", "."), maxOpens: Number(maxOpens) })}>
                     <Link2 data-icon="inline-start" /> 공유 링크 만들기
                   </Button>
                 </div>
-              )}
+              ) : null}
             </div>
 
-            <details className="group border-t pt-4">
+            {emailLink ? <details className="group border-t pt-4">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-1 [&::-webkit-details-marker]:hidden">
                 <span className="inline-flex items-center gap-2 text-sm font-semibold"><Mail className="size-4" /> 이메일로도 보내기 <span className="text-xs font-normal text-muted-foreground">선택</span></span>
                 <ChevronDown className="size-4 group-open:rotate-180" />
               </summary>
               <div className="pt-3">
-              <div className="grid gap-2">
+                <div className="grid gap-2">
                 <FormField label="받는 사람" htmlFor="share-email-recipient">
                   <Input id="share-email-recipient" type="email" className="h-10 bg-background" value={recipient} onChange={(event) => setRecipient(event.target.value)} />
                 </FormField>
@@ -10849,64 +10780,82 @@ function ShareDeliveryPanel({
                 <FormField label="이메일 내용" htmlFor="share-email-body">
                   <Textarea id="share-email-body" aria-label="이메일 내용" className="min-h-28 resize-none bg-background text-xs leading-5" value={textBody} onChange={(event) => setTextBody(event.target.value)} />
                 </FormField>
+                </div>
+                <div className="mt-3 rounded-md border bg-background p-3 text-xs">
+                  <div className="font-medium">이메일에 포함될 공유 링크</div>
+                  <div className="mt-2 text-muted-foreground">
+                    {`https://ecoya.app/share/${documentNumber.toLowerCase()}-${emailLink.id}`}
+                  </div>
+                </div>
+                <Button
+                  className="mt-3 w-full"
+                  disabled={
+                    !recipient.trim() ||
+                    !subject.trim() ||
+                    isSending
+                  }
+                  onClick={async () => {
+                    setIsSending(true)
+                    const sent = await onSendEmail({
+                      linkCount: 1,
+                      recipient,
+                      subject,
+                      textBody,
+                      shareLinkId: String(emailLink.id),
+                    })
+                    setIsSending(false)
+                    if (sent) setDeliveryMode("history")
+                  }}
+                >
+                  {isSending ? (
+                    <LoaderCircle
+                      className="animate-spin"
+                      data-icon="inline-start"
+                    />
+                  ) : (
+                    <Mail data-icon="inline-start" />
+                  )}
+                  {isSending ? "보내는 중" : "이메일 보내기"}
+                </Button>
               </div>
-              <div className="mt-3 rounded-md border bg-background p-3 text-xs">
-                <div className="font-medium">이메일에 포함될 Magic Link</div>
-                <div className="mt-2 text-muted-foreground">
-                  {emailLink
-                    ? `https://ecoya.app/share/${templateCode.toLowerCase()}-2026-0708-${emailLink.id}`
-                    : "먼저 Magic Link를 생성해야 이메일을 보낼 수 있습니다."}
+            </details> : (
+              <div className="border-t pt-4">
+                <div className="inline-flex items-center gap-2 text-sm font-semibold">
+                  <Mail className="size-4" /> 이메일로도 보내기 <span className="text-xs font-normal text-muted-foreground">선택</span>
                 </div>
               </div>
-              <Button
-                className="mt-3 w-full"
-                disabled={
-                  !emailLink ||
-                  !recipient.trim() ||
-                  !subject.trim() ||
-                  isSending
-                }
-                onClick={async () => {
-                  if (!emailLink) return
-                  setIsSending(true)
-                  const sent = await onSendEmail({
-                    linkCount: 1,
-                    recipient,
-                    subject,
-                    textBody,
-                    shareLinkId: String(emailLink.id),
-                  })
-                  setIsSending(false)
-                  if (sent) setDeliveryMode("history")
-                }}
-              >
-                {isSending ? (
-                  <LoaderCircle
-                    className="animate-spin"
-                    data-icon="inline-start"
-                  />
-                ) : (
-                  <Mail data-icon="inline-start" />
-                )}
-                {isSending ? "요청 중" : "발송 요청 기록"}
-              </Button>
-              </div>
-            </details>
+            )}
           </div>
         ) : (
           <div className="grid gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-background px-4 py-3">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <span>고객 전달 상태</span>
+                <ToneBadge tone={deliveryHistorySummary === "전달 실패" ? "danger" : deliveryHistorySummary === "전달 완료" ? "success" : "neutral"}>
+                  {deliveryHistorySummary}
+                </ToneBadge>
+              </div>
+              <Button variant="outline" size="xs" onClick={() => setHistoryRefreshKey((value) => value + 1)}>
+                <RefreshCw data-icon="inline-start" /> 새로고침
+              </Button>
+            </div>
+            <div key={historyRefreshKey} className="grid gap-3">
             {[
               ...magicLinks.map((link) => ({
                 id: `link-${link.id}`,
-                title: `Magic Link ${link.id}`,
-                meta: `${link.status === "active" ? "활성" : "철회됨"} · ${link.expires} 만료`,
-                tone: link.status === "active" ? "success" : "neutral",
+                title: `공유 링크 ${link.id}`,
+                meta: `${formatLinkStatus(link.status)} · ${link.expires} 만료${link.revokeReason ? ` · 사유: ${link.revokeReason}` : ""}`,
+                tone: link.status === "active" ? "success" : link.status === "revoked" ? "neutral" : "warning",
+                badge: formatLinkStatus(link.status),
+                email: undefined,
               })),
               ...emailRecords.map((email) => ({
                 id: `email-${email.id}`,
-                title: `이메일 발송 요청 · ${email.recipient}`,
-                meta: `요청 시각 ${email.sentAt} · Magic Link ${email.linkCount}개 포함 · 실제 발송·수신 미확인`,
-                tone: "blue",
+                title: `이메일 요청 · ${email.recipient.replace(/(^.).*(@.*$)/, "$1***$2")}`,
+                meta: `요청 시각 ${email.sentAt} · 공유 링크 ${email.linkCount}개 포함 · ${email.attempts ?? 1}차 시도`,
+                tone: email.status === "failed" ? "danger" : email.status === "delivered" ? "success" : "blue",
+                badge: statusLabel(email.status),
+                email,
               })),
             ].map((item) => (
               <div
@@ -10918,23 +10867,81 @@ function ShareDeliveryPanel({
                     {item.title}
                   </div>
                   <ToneBadge tone={item.tone as Tone}>
-                    {item.tone === "success" ? "완료" : "기록"}
+                    {item.badge}
                   </ToneBadge>
                 </div>
                 <div className="mt-2 text-xs text-muted-foreground">
                   {item.meta}
                 </div>
+                {item.email ? (
+                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
+                    <span className="text-[11px] text-muted-foreground">시도 {item.email.attempts ?? 1}회</span>
+                    {item.email.status === "requested" || item.email.status === "queued" ? (
+                      <Button variant="outline" size="xs" onClick={() => onCancelEmail?.(item.email!.id)}>
+                        요청 취소
+                      </Button>
+                    ) : null}
+                    {item.email.status === "failed" ? (
+                      <Button variant="outline" size="xs" onClick={() => void onRetryEmail?.(item.email!)}>
+                        다시 보내기
+                      </Button>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             ))}
             {magicLinks.length + emailRecords.length === 0 ? (
               <div className="rounded-lg border bg-background p-4 text-xs leading-5 text-muted-foreground">
-                아직 고객에게 전달한 내역이 없습니다.
+                전달 내역이 없습니다.
               </div>
             ) : null}
+            </div>
           </div>
         )}
       </div>
       {previewAttachment && <DeliveryAttachmentPreview {...previewAttachment} onClose={() => setPreviewAttachment(null)} />}
+      <AlertDialog
+        open={revokeTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRevokeTarget(null)
+            setRevokeReason("")
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>공유 링크 철회</AlertDialogTitle>
+            <AlertDialogDescription>
+              철회하면 접근이 차단되고 전달 내역과 감사 근거가 보존됩니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid gap-2">
+            <label htmlFor="share-link-revoke-reason" className="text-xs font-medium">철회 사유</label>
+            <Textarea
+              id="share-link-revoke-reason"
+              className="min-h-20 resize-none text-xs"
+              value={revokeReason}
+              onChange={(event) => setRevokeReason(event.target.value)}
+              placeholder="철회 사유를 입력하세요."
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!revokeReason.trim() || !revokeTarget}
+              onClick={() => {
+                if (!revokeTarget || !revokeReason.trim()) return
+                onRevokeMagicLink(revokeTarget.id, revokeReason.trim())
+                setRevokeTarget(null)
+                setRevokeReason("")
+              }}
+            >
+              철회
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   )
 }
@@ -10985,7 +10992,7 @@ function CustomerPreviewDialog({
               options={[
                 ["active", "활성 링크"],
                 ["expired", "만료"],
-                ["maxed", "열람 초과"],
+                ["maxed", "한도 도달"],
                 ["revoked", "철회"],
                 ["missing", "찾을 수 없음"],
               ]}
@@ -12397,7 +12404,7 @@ function DocumentSourceSetupStep({
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between gap-3 px-1 text-[11px] text-muted-foreground">
                     <span>문서함</span>
-                    <span>{selectedSources.size}/3</span>
+                    <span>{selectedSources.size}개 선택</span>
                   </div>
                   {draftSources.map((source) => {
                     const selected = selectedSources.has(source.title)
@@ -12846,6 +12853,7 @@ function buildDocumentReviewRows({
   templateCode,
   documentNumber = `${templateCode}-2026-0708`,
   activeLinkCount = 0,
+  linkSlotOccupied = false,
   deliveryRecordCount = 0,
   interactive = true,
   approvalEnabled = false,
@@ -12872,6 +12880,7 @@ function buildDocumentReviewRows({
   templateCode: string
   documentNumber?: string
   activeLinkCount?: number
+  linkSlotOccupied?: boolean
   deliveryRecordCount?: number
   interactive?: boolean
   approvalEnabled?: boolean
@@ -13054,6 +13063,8 @@ function buildDocumentReviewRows({
       value:
         activeLinkCount > 0
           ? `활성 링크 ${activeLinkCount}개`
+          : linkSlotOccupied
+            ? "기존 링크 철회 후 새 링크 가능"
           : !deliveryAllowed
             ? "고객 전달 권한 필요"
             : documentConfirmed
@@ -13062,6 +13073,8 @@ function buildDocumentReviewRows({
       state:
         activeLinkCount > 0
           ? "complete"
+          : linkSlotOccupied
+            ? "pending"
           : documentConfirmed && deliveryAllowed
             ? "pending"
             : "blocked",
@@ -13070,7 +13083,7 @@ function buildDocumentReviewRows({
       label: "전달·공유",
       value:
         deliveryRecordCount > 0
-          ? `전달 완료 ${deliveryRecordCount}건`
+          ? `전달 요청 ${deliveryRecordCount}건`
           : !deliveryAllowed
             ? "고객 전달 권한 필요"
             : activeLinkCount > 0
@@ -13078,7 +13091,7 @@ function buildDocumentReviewRows({
               : "공유 링크 생성 후 가능",
       state:
         deliveryRecordCount > 0
-          ? "complete"
+          ? "pending"
           : activeLinkCount > 0
             ? "pending"
             : "blocked",
@@ -13166,8 +13179,8 @@ function DocumentDiscrepancyPanel({
       </div>
 
       <p className="mt-1 text-[11px] text-muted-foreground">
-        AI가 연결 거래 {relatedDeal.id}의 서류 간 불일치(통화·금액·거래처·L/C)를
-        발송 전에 점검합니다.
+        연결 거래 {relatedDeal.id}의 서류 간 불일치(통화·금액·거래처·L/C)를
+        발송 전에 대조합니다. 불일치를 수정해야 다음 단계로 진행할 수 있습니다.
       </p>
 
       <div className="mt-2 overflow-hidden rounded-md border">
@@ -13711,8 +13724,8 @@ function DocumentReviewSharePanel({
   const applyLogoFiles = (files: File[]) => {
     const file = files[0]
     if (!file) return
-    if (!file.type.startsWith("image/")) {
-      setLogoError("PNG, JPG, SVG 이미지 파일만 사용할 수 있습니다.")
+    if (!(file.type === "image/png" || file.type === "image/jpeg")) {
+      setLogoError("PNG, JPG 이미지 파일만 사용할 수 있습니다.")
       return
     }
     if (file.size > 2 * 1024 * 1024) {
@@ -13919,10 +13932,10 @@ function DocumentReviewSharePanel({
                 ) : null}
                 {logoSourceMode === "file" || !organizationLogo ? (
                   <FileDropZone
-                    accept="image/png,image/jpeg,image/svg+xml,.png,.jpg,.jpeg,.svg"
+                    accept="image/png,image/jpeg,.png,.jpg,.jpeg"
                     aria-label="로고 파일 선택 또는 끌어놓기"
                     label="로고 파일 선택"
-                    instructions="PNG, JPG, SVG · 최대 2MB"
+                    instructions="PNG, JPG · 최대 2MB"
                     onFiles={applyLogoFiles}
                     className={cn(
                       "min-h-10 flex-row justify-start gap-2 border-solid bg-background px-2.5 py-1.5 text-left",
@@ -13939,7 +13952,7 @@ function DocumentReviewSharePanel({
                           : "로고 파일 선택"}
                       </span>
                       <span className="shrink-0 text-[11px] text-muted-foreground">
-                        PNG, JPG, SVG · 최대 2MB
+                        PNG, JPG · 최대 2MB
                       </span>
                     </span>
                     {documentStyle.logo?.source === "file" ? (
@@ -14018,6 +14031,15 @@ function DocumentReviewSharePanel({
                         />
                       )
                     )}
+                    <label className="relative size-6 cursor-pointer overflow-hidden rounded-full border-2 border-background shadow-sm ring-offset-1" aria-label="강조색 직접 선택">
+                      <input
+                        type="color"
+                        value={documentStyle.accent}
+                        onChange={(event) => onStyleChange({ ...documentStyle, accent: event.target.value })}
+                        className="absolute inset-0 size-full cursor-pointer opacity-0"
+                      />
+                      <span className="absolute inset-0 rounded-full border border-dashed border-muted-foreground/60 bg-[conic-gradient(from_0deg,#ef4444,#f59e0b,#22c55e,#06b6d4,#3b82f6,#a855f7,#ef4444)]" />
+                    </label>
                   </div>
                 </div>
               </div>
@@ -14491,9 +14513,6 @@ function DocumentReviewSharePanel({
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => window.open("/share/preview", "_blank", "noopener,noreferrer")}>
-                      <ExternalLink className="size-3.5" /> 수신 화면 미리보기
-                    </Button>
                     <ToneBadge tone={activeLink ? "success" : "warning"}>
                       {activeLink ? "활성" : "미생성"}
                     </ToneBadge>
@@ -14604,7 +14623,6 @@ function DocumentConfirmedSummaryPanel({
   documentStyle,
   activeLinkCount,
   deliveryRecordCount,
-  deliveryCompleted,
   activeLink,
   latestEmail,
   relatedDeal,
@@ -14622,7 +14640,6 @@ function DocumentConfirmedSummaryPanel({
   documentStyle: DocumentStyle
   activeLinkCount: number
   deliveryRecordCount: number
-  deliveryCompleted: boolean
   activeLink: DeliveryLink | null
   latestEmail: EmailRecord | null
   relatedDeal: DealDocumentContext | null
@@ -14637,7 +14654,21 @@ function DocumentConfirmedSummaryPanel({
   const lastDecisionEvent = approvalEvents.findLast(
     (event) => event.type === "approve" || event.type === "reject"
   )
-  const linkCreated = activeLinkCount > 0 && !deliveryCompleted
+  const linkStatusLabel = !activeLink
+    ? "미생성"
+    : activeLink.status === "active"
+      ? "활성"
+      : activeLink.status === "expired"
+        ? "만료"
+        : activeLink.status === "maxed"
+        ? "한도 도달"
+        : "철회"
+  const latestDeliveryStatus = latestEmail?.status === "failed"
+    ? "전달 실패"
+    : latestEmail?.status === "delivered"
+      ? "전달 완료"
+      : "전달 전"
+  const latestRecipient = latestEmail?.recipient.replace(/(^.).*(@.*$)/, "$1***$2")
   const completedReviewRows = buildDocumentReviewRows({
     missingRequiredCount: 0,
     documentStyle,
@@ -14656,6 +14687,7 @@ function DocumentConfirmedSummaryPanel({
     templateCode,
     documentNumber,
     activeLinkCount,
+    linkSlotOccupied: Boolean(activeLink && activeLink.status !== "revoked"),
     deliveryRecordCount,
     interactive: false,
     deliveryAllowed,
@@ -14682,30 +14714,12 @@ function DocumentConfirmedSummaryPanel({
     <aside className="flex h-full min-h-0 flex-col bg-[var(--surface-background)]">
       <div className="flex min-h-16 shrink-0 items-center justify-between gap-3 border-b border-[var(--surface-border)] px-4 py-2.5 sm:px-5">
         <div className="min-w-0">
-          <div className="text-[11px] font-medium text-[var(--surface-muted-foreground)]">
-            {deliveryCompleted
-              ? "공유 완료"
-              : linkCreated
-                ? "공유 준비"
-                : "문서 완료"}
-          </div>
+          <div className="text-[11px] font-medium text-[var(--surface-muted-foreground)]">문서</div>
           <div className="mt-1 flex items-center gap-2">
             <h2 className="truncate text-sm font-semibold">
-              {deliveryCompleted
-                ? "전달 및 공유 완료"
-                : linkCreated
-                  ? "공유 링크 생성됨"
-                  : deliveryAllowed
-                    ? "확정 및 전달 준비"
-                    : "확정 문서"}
+              확정 문서
             </h2>
-            <ToneBadge tone="success">
-              {deliveryCompleted
-                ? "공유됨"
-                : linkCreated
-                  ? "전달 전"
-                  : "확정됨"}
-            </ToneBadge>
+            <ToneBadge tone="success">확정</ToneBadge>
           </div>
         </div>
       </div>
@@ -14717,22 +14731,7 @@ function DocumentConfirmedSummaryPanel({
                 <Check className="size-4" />
               </span>
               <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold">
-                  {deliveryCompleted
-                    ? "문서 공유가 완료되었습니다"
-                    : linkCreated
-                      ? "공유 링크가 생성되었습니다"
-                      : "문서가 확정되었습니다"}
-                </div>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                  {deliveryCompleted
-                    ? "Magic Link와 이메일 전달 내역을 확인하거나 추가로 공유할 수 있습니다."
-                    : linkCreated
-                      ? "링크 생성은 완료됐지만 아직 전달 전입니다. 공유 관리에서 이메일로 보내거나 링크를 전달하세요."
-                      : deliveryAllowed
-                        ? "문서와 PDF는 더 이상 수정할 수 없습니다. 상단 공유에서 링크를 만들거나 이메일로 보낼 수 있습니다."
-                        : "문서와 PDF는 더 이상 수정할 수 없습니다. 고객 전달은 별도 권한이 있는 구성원만 실행할 수 있습니다."}
-                </p>
+                <div className="text-sm font-semibold">문서가 확정되었습니다</div>
               </div>
               {deliveryAllowed ? (
                 <Button
@@ -14742,7 +14741,7 @@ function DocumentConfirmedSummaryPanel({
                   onClick={onOpenShare}
                 >
                   <Send data-icon="inline-start" />
-                  {deliveryCompleted ? "공유 관리" : "공유하기"}
+                  공유하기
                 </Button>
               ) : null}
             </div>
@@ -14753,7 +14752,7 @@ function DocumentConfirmedSummaryPanel({
               <div className="text-sm font-semibold">공유 현황</div>
               {deliveryAllowed ? (
                 <Button variant="ghost" size="xs" onClick={onOpenShare}>
-                  관리
+                  공유하기
                   <ChevronRight data-icon="inline-end" />
                 </Button>
               ) : null}
@@ -14762,31 +14761,27 @@ function DocumentConfirmedSummaryPanel({
               <div className="min-w-0 px-3 py-3 sm:border-r">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium">공유 링크</span>
-                  <ToneBadge tone={activeLink ? "success" : "neutral"}>
-                    {activeLink ? "활성" : "미생성"}
+                  <ToneBadge tone={!activeLink ? "neutral" : activeLink.status === "active" ? "success" : activeLink.status === "revoked" ? "danger" : "warning"}>
+                    {linkStatusLabel}
                   </ToneBadge>
                 </div>
                 <div className="mt-2 truncate text-[11px] text-muted-foreground">
                   {activeLink
                     ? `${activeLink.expires} 만료 · ${activeLink.opens}/${activeLink.maxOpens}회 열람`
-                    : deliveryAllowed
-                      ? "문서당 링크 1개를 만들 수 있습니다."
-                      : "고객 전달 권한이 있는 구성원이 링크를 만들 수 있습니다."}
+                    : ""}
                 </div>
               </div>
               <div className="min-w-0 border-t px-3 py-3 sm:border-t-0">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium">최근 전달</span>
-                  <ToneBadge tone={latestEmail ? "success" : "neutral"}>
-                    {latestEmail ? "완료" : "전달 전"}
+                  <ToneBadge tone={latestDeliveryStatus === "전달 실패" ? "danger" : latestDeliveryStatus === "전달 완료" ? "success" : "neutral"}>
+                    {latestDeliveryStatus}
                   </ToneBadge>
                 </div>
                 <div className="mt-2 truncate text-[11px] text-muted-foreground">
                   {latestEmail
-                    ? `${latestEmail.recipient} · ${latestEmail.sentAt}`
-                    : deliveryAllowed
-                      ? "링크를 전달하거나 이메일을 보내면 기록됩니다."
-                      : "전달 이력이 없습니다."}
+                    ? `${latestRecipient} · ${latestEmail.sentAt}`
+                    : ""}
                 </div>
               </div>
             </div>
@@ -14796,11 +14791,7 @@ function DocumentConfirmedSummaryPanel({
             <div className="flex items-center justify-between gap-3">
               <div className="text-sm font-semibold">문서 진행 상태</div>
               <ToneBadge tone="success">
-                {deliveryCompleted
-                  ? "공유 완료"
-                  : linkCreated
-                    ? "링크 생성됨"
-                    : "문서 확정"}
+                확정
               </ToneBadge>
             </div>
             <div className="mt-2 overflow-hidden rounded-md border bg-background">
@@ -14871,7 +14862,7 @@ function ResultScreen({
   dealConnectionRestricted?: boolean
 }) {
   const [templateCode, setTemplateCode] = useState(initialTemplateCode)
-  const [deliveryAttachments, setDeliveryAttachments] = useState<DeliveryAttachment[]>(() => initialDeliveryAttachments ? [...initialDeliveryAttachments] : [{ id: "att-1", name: "인보이스_2607_003.pdf", source: "인박스" }])
+  const [deliveryAttachments, setDeliveryAttachments] = useState<DeliveryAttachment[]>(() => initialDeliveryAttachments ? [...initialDeliveryAttachments] : [{ id: "att-1", name: "인보이스_2607_003.pdf", source: "인박스", kind: "인보이스", sizeBytes: 310_000 }])
   const templateSelected = Boolean(
     templateCode && templateSchemas[templateCode]
   )
@@ -15002,6 +14993,7 @@ function ResultScreen({
             expires: "2026.08.31",
             opens: 3,
             maxOpens: 10,
+            createdAt: "2026.08.28 14:20",
           },
         ]
       : []
@@ -15015,6 +15007,8 @@ function ResultScreen({
             subject: `[ECOYA] ${templateTitle} 전달`,
             sentAt: "2026.08.28 14:32",
             linkCount: 1,
+            status: "requested",
+            attempts: 1,
           },
         ]
       : []
@@ -15305,11 +15299,12 @@ function ResultScreen({
   }
   const createMagicLink = (settings?: { expires: string; maxOpens: number }) => {
     if (!deliveryAllowed) return
-    if (magicLinks.some((link) => link.status === "active")) {
-      toast.info("이 문서에는 이미 활성 공유 링크가 있습니다.")
+    if (magicLinks.some((link) => link.status !== "revoked")) {
+      toast.info("기존 공유 링크를 철회한 뒤 새 링크를 만들 수 있습니다.")
       return
     }
     setMagicLinks((links) => [
+      ...links,
       {
         id: (links.at(-1)?.id ?? 0) + 1,
         recipient: selectedDeal?.party ?? "ACME GmbH",
@@ -15317,9 +15312,10 @@ function ResultScreen({
         expires: settings?.expires ?? "2026.08.31",
         opens: 0,
         maxOpens: settings?.maxOpens ?? 10,
+        createdAt: new Date().toLocaleString("ko-KR"),
       },
     ])
-    toast.success("Magic Link를 만들었습니다.")
+    toast.success("공유 링크를 만들었습니다.")
   }
   const preparePdf = () => {
     if (!draftReady) return
@@ -15367,12 +15363,30 @@ function ResultScreen({
         id: records.length + 1,
         recipient,
         subject,
+        textBody,
         sentAt: new Date(result.updatedAt).toLocaleString("ko-KR"),
         linkCount,
+        status: "requested",
+        attempts: 1,
       },
       ...records,
     ])
     return true
+  }
+  const retryEmail = async (record: EmailRecord) =>
+    sendEmail({
+      linkCount: record.linkCount,
+      recipient: record.recipient,
+      subject: record.subject,
+      textBody: record.textBody ?? "",
+      shareLinkId: String(magicLinks.find((link) => link.status === "active")?.id ?? ""),
+    })
+  const cancelEmail = (id: number) => {
+    setEmailRecords((records) =>
+      records.map((record) =>
+        record.id === id ? { ...record, status: "cancelled" } : record
+      )
+    )
   }
 
   const openCreateField = (target: ReviewFocusTarget) => {
@@ -15410,6 +15424,11 @@ function ResultScreen({
     <DocumentSourceSetupStep
       templateCode={templateCode}
       onTemplateChange={(code) => {
+        if (code === templateCode) return
+        const confirmed = window.confirm(
+          "문서 유형을 바꾸면 현재 입력값이 초기화되고 새 초안으로 다시 시작합니다. 계속할까요?"
+        )
+        if (!confirmed) return
         setTemplateCode(code)
         setPdfPrepared(false)
         markDocumentChanged()
@@ -15427,7 +15446,7 @@ function ResultScreen({
         setSelectedSources((current) => {
           const next = new Set(current)
           if (next.has(title)) next.delete(title)
-          else if (next.size < 3) next.add(title)
+          else next.add(title)
           return next
         })
         setPdfPrepared(false)
@@ -15537,8 +15556,7 @@ function ResultScreen({
         magicLinks.filter((link) => link.status === "active").length
       }
       deliveryRecordCount={emailRecords.length}
-      deliveryCompleted={emailRecords.length > 0}
-      activeLink={magicLinks.find((link) => link.status === "active") ?? null}
+      activeLink={magicLinks.find((link) => link.status !== "revoked") ?? magicLinks.at(-1) ?? null}
       latestEmail={emailRecords.at(0) ?? null}
       relatedDeal={selectedDeal}
       dealConnectionRestricted={dealConnectionRestricted}
@@ -15916,27 +15934,32 @@ function ResultScreen({
         >
           <SheetHeader className="sr-only">
             <SheetTitle>파일 공유하기</SheetTitle>
-            <SheetDescription>
-              확정한 PDF를 링크 또는 이메일로 공유합니다.
-            </SheetDescription>
+            <SheetDescription>파일 공유하기</SheetDescription>
           </SheetHeader>
           <ShareDeliveryPanel
             magicLinks={magicLinks}
             emailRecords={emailRecords}
             onSendEmail={sendEmail}
+            onRetryEmail={retryEmail}
+            onCancelEmail={cancelEmail}
             onCreateMagicLink={createMagicLink}
-            onRevokeMagicLink={(id) =>
+            onRevokeMagicLink={(id, reason) =>
               setMagicLinks((links) =>
                 links.map((link) =>
-                  link.id === id ? { ...link, status: "revoked" } : link
+                  link.id === id
+                    ? {
+                        ...link,
+                        status: "revoked",
+                        revokedAt: new Date().toLocaleString("ko-KR"),
+                        revokeReason: reason,
+                      }
+                    : link
                 )
               )
             }
-            onDeleteMagicLink={(id) =>
-              setMagicLinks((links) => links.filter((link) => link.id !== id))
-            }
             onClose={() => setSharePanelOpen(false)}
             templateCode={templateCode}
+            documentNumber={documentNumber}
             relatedDeal={selectedDeal}
             initialAttachments={deliveryAttachments}
             onAttachmentsChange={setDeliveryAttachments}
@@ -16044,10 +16067,7 @@ export function App() {
   const [readNotificationIds, setReadNotificationIds] = useState<Set<number>>(
     new Set()
   )
-  const [openDeliveryOnResult, setOpenDeliveryOnResult] = useState(
-    initialGeneratedDocument?.tab === "sharing" ||
-      initialGeneratedDocument?.tab === "done"
-  )
+  const [openDeliveryOnResult, setOpenDeliveryOnResult] = useState(false)
   const [openConfirmedOnResult, setOpenConfirmedOnResult] = useState(
     Boolean(
       initialGeneratedDocument &&
@@ -16172,10 +16192,7 @@ export function App() {
         )
         setResultDocumentNumber(documentNumber)
         setSelectedTemplateCode(documentNumber.split("-")[0] ?? "SC")
-        setOpenDeliveryOnResult(
-          generatedDocument?.tab === "sharing" ||
-            generatedDocument?.tab === "done"
-        )
+        setOpenDeliveryOnResult(false)
         setOpenConfirmedOnResult(
           Boolean(
             generatedDocument &&

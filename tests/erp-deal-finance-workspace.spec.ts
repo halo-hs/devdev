@@ -95,7 +95,7 @@ test("list has source amounts and finance view with retained search and direct d
   await expect(table).toContainText("EUR 18,000.00")
   await expect(table).not.toContainText("ACME")
   await table
-    .getByRole("button", { name: "거래 금융", exact: true })
+    .getByRole("button", { name: "Deal 금융", exact: true })
     .first()
     .click()
   await expect(page.locator("#deal-finance")).toBeVisible()
@@ -150,7 +150,7 @@ test("document creation starts with templates and upload describes explicit conf
 }) => {
   await page.goto("/erp/documents/create?state=first-use")
   await expect(
-    page.getByRole("heading", { name: "문서 만들기", exact: true })
+    page.getByRole("heading", { name: "문서 유형 선택", exact: true })
   ).toBeVisible()
   await expect(page.getByRole("textbox")).toHaveCount(0)
   await expect(
@@ -197,7 +197,7 @@ test("operational menus render and shipment chips preserve empty-state filtering
   page,
 }) => {
   for (const [route, title] of [
-    ["shipments", "선적"],
+    ["shipments", "배송 추적"],
     ["settlement", "정산"],
     ["monitoring", "운영 감시"],
     ["reports", "결산 리포트"],
@@ -220,27 +220,24 @@ test("operational menus render and shipment chips preserve empty-state filtering
       0
     )
     if (route === "settlement") {
-      await expect(
-        page.getByRole("combobox", { name: "정산 상태 필터" })
-      ).toBeVisible()
+      await expect(page.getByRole("combobox", { name: "통화", exact: true })).toBeVisible()
     } else {
-      await expect(
-        page.locator('[data-slot="business-page-filters"], [data-slot="analytics-filter-bar"], [role="group"][aria-label="선적 상태"]').first()
-      ).toBeVisible()
+      const controls = { shipments: "shipments-controls", monitoring: "monitor-filters", reports: "reports-controls", sales: "salesperf-controls" }[route]
+      await expect(page.locator(`[data-ui="${controls}"]`)).toBeVisible()
     }
   }
   await page.goto("/erp/shipments")
-  const chips = page.getByRole("group", { name: "선적 상태" })
-  await chips.getByRole("button", { name: /^지연/ }).click()
-  await expect(chips.getByRole("button", { name: /^지연/ })).toHaveAttribute(
-    "aria-pressed",
+  const chips = page.locator('[data-ui="shipments-list-controls"]')
+  await chips.getByRole("tab", { name: /^지연/ }).click()
+  await expect(chips.getByRole("tab", { name: /^지연/ })).toHaveAttribute(
+    "aria-selected",
     "true"
   )
   await page
-    .getByPlaceholder("거래번호·거래명·B/L·컨테이너·항구·선박 검색")
+    .getByRole("searchbox")
     .fill("no-such-shipment")
   await expect(
-    page.getByText("검색 조건에 맞는 선적이 없습니다.", { exact: true })
+    page.getByText("선택한 조건에 맞는 선적이 없습니다.", { exact: true })
   ).toBeVisible()
 })
 

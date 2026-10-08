@@ -1,12 +1,11 @@
 {
   "meta": {
-    "description": "ECOYA ERP 영업 성과 — 내 수취 예정·송장 기준 거래손익·미수·진행 딜과 거래처 상태."
+    "description": "ECOYA ERP 영업 성과 — 내 수취 예정·예정 거래손익·미수·진행 딜과 거래처 상태."
   },
   "cockpit": {
     "title": "영업 성과",
     "proBadge": "PRO",
-    "subtitleSelf": "내 수취 예정·송장 기준 거래손익·미수·진행 딜과 내 거래처 상태를 한 화면에서 봅니다.",
-    "subtitleOrg": "조직 전체의 수취 예정·송장 기준 거래손익·미수·진행 딜을 보고, 담당자별로 좁혀 봅니다.",
+    "subtitleOrg": "조직 전체의 수취 예정·예정 거래손익·미수·진행 딜을 보고, 담당자별로 좁혀 봅니다.",
     "loading": "영업 성과 데이터를 불러오는 중…",
     "errorTitle": "영업 성과를 불러오지 못했습니다",
     "loadFailed": "영업 성과 데이터를 불러오지 못했습니다.",
@@ -14,7 +13,6 @@
     "directoryErrorTitle": "담당자 정보를 불러오지 못했습니다",
     "directoryLoadFailed": "담당자 정보를 불러오지 못했습니다.",
     "directoryRetry": "담당자 정보 다시 시도",
-    "refreshErrorTitle": "선택한 조건으로 새로고침하지 못했습니다",
     "emptyTitle": "아직 표시할 영업 성과 데이터가 없습니다",
     "emptyBody": "거래와 정산 일정이 쌓이면 내 숫자와 거래처 상태가 여기에 표시됩니다.",
     "upgradeTitle": "영업 성과는 Pro 플랜에서 제공됩니다",
@@ -33,13 +31,14 @@
       "assigneeAll": "전체 담당자",
       "scopeSelf": "내 딜 기준",
       "scopeOrg": "조직 전체 기준",
-      "scopePerson": "{name} 담당 기준"
+      "scopePerson": "{name} 담당 기준",
+      "filtersLabel": "영업 성과 필터"
     },
     "kpi": {
       "revenue": "{period} 수취 예정 ({currency})",
       "revenueSub": "수금 적용 {received} · 수취 예정 중 {ratio}",
       "revenueNoPlan": "수금 적용 {received}",
-      "gp": "{period} 송장 기준 거래손익 · GP ({currency})",
+      "gp": "{period} 예정 거래손익 ({currency})",
       "gpMargin": "마진 {margin}",
       "outstanding": "미수 잔액 ({currency})",
       "overdueAmount": "연체 {amount}",
@@ -54,14 +53,20 @@
       "gpExcludedBoth": "혼합 통화 {mixed}건·미기록 {incomplete}건 제외",
       "gpExcludedDirectionPending": "거래 방향 미확정 {count}건 제외",
       "gpExcludedCommerciallyInactive": "취소·보관 {count}건 제외",
-      "gpZeroCost": "부대비용 미입력 {count}건 — GP 과대 가능",
+      "gpZeroCost": "가산 부대비용 0원 {count}건 — GP 과대 가능",
       "gpExcludedUnknown": "제외 건수 확인 불가",
-      "gpZeroCostUnknown": "부대비용 입력 여부 확인 불가 — GP 과대 가능"
+      "gpZeroCostUnknown": "가산 부대비용 확인 불가 — GP 과대 가능",
+      "payableDue": "{period} 지급 예정 ({currency})",
+      "payableSub": "지급 적용 {paid}",
+      "outstandingBasis": "미수 잔액 {amount}",
+      "overdueItems": "기한 초과",
+      "pendingValue": "준비 중",
+      "pendingNote": "회사 전체 집계를 준비하고 있습니다"
     },
     "gpTrend": {
-      "title": "월별 송장 기준 거래손익 추세",
-      "sub": "매출송장 − 매입송장 − 부대비용 · 동일 통화 딜 기준 · {currency}",
-      "aria": "월별 송장 기준 거래손익 막대 차트",
+      "title": "월별 예정 거래손익 추세",
+      "sub": "최초 받을 돈 일정 − 최초 줄 돈 일정 − 가산 부대비용 · 동일 통화 딜 기준 · {currency} · 딜 전체는 마지막 수취 예정일이 속한 달에 집계",
+      "aria": "월별 예정 거래손익 막대 차트",
       "gpLabel": "GP",
       "marginLabel": "마진",
       "excludedMixed": "현재 조회 범위에서 혼합 통화 딜 {count}건 제외",
@@ -86,7 +91,6 @@
     },
     "table": {
       "title": "거래처 상태",
-      "subSelf": "내 거래처 · 주의가 필요한 순서",
       "subOrg": "주의가 필요한 순서",
       "asOf": "{date} 기준",
       "truncated": "주의 필요 순 상위 {count}개 행만 표시됩니다",
@@ -103,7 +107,17 @@
         "activeDeals": "진행 딜"
       },
       "none": "—",
-      "empty": "이 범위에 표시할 거래처가 없습니다."
+      "empty": "이 범위에 표시할 거래처가 없습니다.",
+      "memberRestricted": "거래처별 상태와 성과는 Owner 또는 관리자만 볼 수 있습니다. 위 숫자는 회사 전체 집계입니다."
+    },
+    "subtitleMember": "회사 전체의 수취 예정·지급 예정·수금 적용·미수 잔액을 집계로 봅니다.",
+    "emptyBodyMember": "거래와 정산 일정이 쌓이면 회사 전체 집계가 여기에 표시됩니다.",
+    "memberTrend": {
+      "title": "월별 수취 예정·수금 적용",
+      "sub": "회사 전체 집계 · 월별 · {currency}",
+      "aria": "월별 수취 예정 대비 수금 적용 막대 차트",
+      "planned": "수취 예정",
+      "received": "수금 적용"
     }
   }
 }

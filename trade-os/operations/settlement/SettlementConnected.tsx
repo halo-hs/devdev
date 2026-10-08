@@ -1609,6 +1609,7 @@ export function SettlementConnected({ copy, renderHeader }: { copy: SettlementCo
           currentUserId={identity.user_id}
           initialDrill={initialDrill}
           financeFacts={financeFacts}
+          financeFactsScope={financeFactsLoad.status === "ready" ? financeFactsLoad.data.scope : undefined}
           financeFactsComplete={financeFactsComplete}
           financeFactsLoading={financeFactsLoad.status === "loading"}
           financeFactsUnavailable={financeFactsLoad.status === "error"}
@@ -1655,6 +1656,7 @@ function SettlementView({
   currentUserId,
   initialDrill,
   financeFacts,
+  financeFactsScope,
   financeFactsComplete,
   financeFactsLoading,
   financeFactsUnavailable,
@@ -1693,6 +1695,7 @@ function SettlementView({
   currentUserId: string;
   initialDrill: SettlementDrillTarget | null;
   financeFacts: TradeFinanceFact[];
+  financeFactsScope?: TradeFinanceFactsResponse["scope"];
   financeFactsComplete: boolean;
   financeFactsLoading: boolean;
   financeFactsUnavailable: boolean;
@@ -2758,12 +2761,18 @@ function SettlementView({
     if (!canFinalize || uncompleting) return;
     setUncompleting(scheduleId);
     try {
-      await uncompleteSchedule(getIdToken, scheduleId);
+      const reverted = await uncompleteSchedule(getIdToken, scheduleId);
       // The clicked button unmounts when the reload flips the row back to
       // scheduled — register the same focus fallback the record-save flow
       // uses so keyboard focus lands on the row's new action, not <body>.
       pendingFocusRef.current = { scheduleId, button: trigger };
-      onRecordStatus(copy.ledger.uncompleted);
+      onRecordStatus(
+        reverted?.status === "pending"
+          ? copy.ledger.uncompletedPending
+          : reverted?.status === "overdue"
+            ? copy.ledger.uncompletedOverdue
+            : copy.ledger.uncompleted,
+      );
       onReload();
     } catch (error) {
       setUncompleting(null);
@@ -3594,7 +3603,9 @@ function SettlementView({
                         <div className="flex flex-wrap items-center gap-1">
                           {e.closure_type ? (
                             <span className="rounded-full bg-surface-muted px-2 py-0.5 text-label-12 text-text-disabled">
-                              {copy.ledger.statusClosed} · {e.closure_type.replace(/_/g, " ")}
+                              {copy.ledger.statusClosed} · {Object.hasOwn(copy.ledger.closeTypes, e.closure_type)
+                                ? copy.ledger.closeTypes[e.closure_type as keyof typeof copy.ledger.closeTypes]
+                                : copy.ledger.closeTypeUnknown}
                             </span>
                           ) : (
                             <span
@@ -4261,6 +4272,9 @@ function SettlementView({
       {/* Accounting-handoff prep (invoice-basis estimated deal result) comes after AR/AP timing —
           collecting/paying cash is the daily-operations task this page leads
           with; result-evidence readiness is a secondary, less time-sensitive concern. */}
+      {financeFactsScope === "assigned_or_shared" ? (
+        <InfoBox className="mb-4" title={copy.financeFacts.scopeAssignedOrShared} tone="neutral" />
+      ) : null}
       {financeFactsUnavailable ? (
         <InfoBox
           action={
