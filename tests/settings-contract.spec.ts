@@ -80,6 +80,7 @@ test("member invite starts with free View and offers active product seat types",
   await openSettings(page, "admin", "members", ["erp"])
   await page.getByRole("button", { name: "멤버 초대" }).click()
   await expect(page.getByLabel("초대 역할")).toHaveValue("member")
+  await expect(page.getByLabel("초대 역할").locator("option")).toHaveText(["MEMBER"])
   await expect(page.getByLabel("시트 유형").locator('option[value="snap"]')).toHaveCount(0)
   await expect(page.getByLabel("시트 유형").locator('option[value="both"]')).toHaveCount(0)
 })
@@ -182,14 +183,29 @@ test("approval keeps the reviewed member visible and updates seat counts without
   await expect(memberRow(page, "조민영")).toBeVisible()
 })
 
-test("admin can assign own unused seat, cannot revoke it or edit another admin role, and reads invoices", async ({
+test("last owner has a fixed role without alternative options and only owner sees billing", async ({ page }) => {
+  for (const role of ["owner", "admin"]) {
+    await openSettings(page, role)
+    const owner = memberRow(page, "조민영")
+    await expect(owner.getByLabel("조민영 역할", { exact: true })).toHaveText("OWNER")
+    await expect(owner.getByRole("combobox")).toHaveCount(0)
+    await expect(owner.getByText("마지막 오너 · 역할 변경 불가", { exact: true })).toBeVisible()
+    await expect(owner.getByRole("button", { name: "조민영 더보기" })).toHaveCount(0)
+    await expect(page.getByRole("button", { name: "빌링 (새 탭에서 열림)", exact: true })).toHaveCount(role === "owner" ? 1 : 0)
+    await page.getByLabel("이름 또는 이메일 검색", { exact: true }).fill("조민영")
+    await expect(owner.getByText("마지막 오너 · 역할 변경 불가", { exact: true })).toBeVisible()
+  }
+})
+
+test("admin can assign own and member seats, cannot revoke own seat or edit roles, and reads invoices", async ({
   page,
 }) => {
   await openSettings(page, "admin")
   await expect(
     page.getByRole("button", { name: "빌링 (새 탭에서 열림)" })
   ).toHaveCount(0)
-  await expect(page.getByLabel("박서윤 역할", { exact: true })).toBeDisabled()
+  await expect(page.getByLabel("박서윤 역할", { exact: true })).toHaveText("MEMBER")
+  await expect(memberRow(page, "박서윤").getByRole("combobox")).toHaveCount(0)
   await expect(page.getByRole("button", { name: "조민영 더보기" })).toHaveCount(
     0
   )
@@ -202,8 +218,9 @@ test("admin can assign own unused seat, cannot revoke it or edit another admin r
     page.getByRole("button", { name: "김도현 SNAP", exact: true })
   ).toHaveCount(0)
   await memberRow(page, "박서윤")
-    .getByRole("button", { name: "거절", exact: true })
+    .getByRole("button", { name: "승인", exact: true })
     .click()
+  await seatCounts(page, "SNAP", 5, 3, 2)
   await page.getByRole("button", { name: "제품 및 구독", exact: true }).click()
   await expect(
     page.getByRole("heading", { name: "인보이스", exact: true })
@@ -212,7 +229,7 @@ test("admin can assign own unused seat, cannot revoke it or edit another admin r
   await expect(
     page.getByRole("button", { name: "요금제 변경", exact: true })
   ).toHaveCount(0)
-  await seatCounts(page, "SNAP", 5, 2, 3)
+  await seatCounts(page, "SNAP", 5, 3, 2)
 })
 
 test("member cannot enter user management or see invoices and can cancel own access request", async ({
