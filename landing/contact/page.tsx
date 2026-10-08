@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import { useEffect, useState, type FormEvent } from "react"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@shared/components/ui/button"
@@ -9,7 +10,7 @@ import { useT } from "../shared/locale"
 
 export function ContactLanding() {
   const t = useT()
-  const initialProduct = new URLSearchParams(window.location.search).get(
+  const initialProduct = new URLSearchParams(appLocation.search).get(
     "product"
   )
   const [product, setProduct] = useState(
@@ -82,7 +83,7 @@ export function ContactLanding() {
       "",
       t("개인정보 수집·이용 동의: 동의함"),
     ].join("\n")
-    window.location.href = `mailto:contact@ecoya.kr?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    appLocation.href = `mailto:contact@ecoya.kr?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     setEmailOpened(true)
   }
   return (

@@ -1,3 +1,4 @@
+import { hostedUrl } from "@/app/app-location"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import {
   Activity,
@@ -1002,7 +1003,7 @@ function SnapTaskDetailPage({ navigate, routeParams }: SnapTaskWorkspaceProps) {
         ? `/upload/${token}`
         : `/work/${token}`)
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}${path}`)
+      await navigator.clipboard.writeText(hostedUrl(path))
       const copiedKey = token || path
       setCopiedToken(copiedKey)
       window.setTimeout(() => {

@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import { StartGuideProvider, useStartGuide } from "@trade-os/onboarding/runtime"
 import { BusinessListToolbar, BusinessFilterSearch, BusinessFilterField } from "@shared/components/business-filters"
 import { FormField, FormFieldHeader } from "@shared/components/form-field"
@@ -2771,7 +2772,7 @@ function TopBarUtilities({
           <Button
             variant="ghost"
             type="button"
-            onClick={() => window.location.reload()}
+            onClick={() => appLocation.reload()}
             className="h-auto w-full justify-start px-3 py-2"
           >
             <RefreshCw className="size-4" />
@@ -16013,8 +16014,8 @@ void CopyPolishOverlay
 function readCurrentSnapRoute(): SnapRouteMatch | null {
   if (typeof window === "undefined") return null
   const normalized = normalizeSnapLocation(
-    window.location.pathname,
-    window.location.search
+    appLocation.pathname,
+    appLocation.search
   )
   if (normalized.changed) {
     window.history.replaceState(
@@ -16028,10 +16029,10 @@ function readCurrentSnapRoute(): SnapRouteMatch | null {
 
 function readCurrentErpRoute(): ErpRouteMatch | null {
   if (typeof window === "undefined") return null
-  const canonical = canonicalErpLocation(window.location)
+  const canonical = canonicalErpLocation(appLocation)
   if (canonical)
     window.history.replaceState(window.history.state, "", canonical)
-  return matchErpRoute(window.location.pathname)
+  return matchErpRoute(appLocation.pathname)
 }
 
 export function App() {
@@ -16059,18 +16060,18 @@ export function App() {
     initialSnapRoute ? "snap" : "erp"
   )
   const [erpHomeVariant, setErpHomeVariant] = useState<"legacy" | "v2">(() =>
-    window.location.pathname === "/v2-home" ? "v2" : "legacy"
+    appLocation.pathname === "/v2-home" ? "v2" : "legacy"
   )
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 1280)
   const [workspaceId, setWorkspaceId] = useState<WorkspaceKey>(() => {
     try { const stored = localStorage.getItem("ecoya.preview.workspace"); return workspaceOptions.find(item => item.id === stored)?.id ?? "ecoya" } catch { return "ecoya" }
   })
   const [erpHomeRole, setErpHomeRole] = useState<ErpPreviewRole>(() => {
-    const role = new URLSearchParams(window.location.search).get("role")
+    const role = new URLSearchParams(appLocation.search).get("role")
     return role === "admin" || role === "member" ? role : "owner"
   })
   const homePreviewState = (() => {
-    const state = new URLSearchParams(window.location.search).get("state")
+    const state = new URLSearchParams(appLocation.search).get("state")
     return state === "empty" || state === "first-use" || state === "error"
       ? (state as HomePreviewState)
       : "default"
@@ -16138,7 +16139,7 @@ export function App() {
   const [createDealContext, setCreateDealContext] =
     useState<DealDocumentContext | null>(null)
   const [createEntryState, setCreateEntryState] = useState<"history" | "first">(
-    new URLSearchParams(window.location.search).get("state") === "first-use" ? "first" : "history"
+    new URLSearchParams(appLocation.search).get("state") === "first-use" ? "first" : "history"
   )
   const [createDeliveryMode, setCreateDeliveryMode] = useState(false)
   const [snapAccessRevision, setSnapAccessRevision] = useState(0)
@@ -16209,9 +16210,9 @@ export function App() {
       setErpRoute(nextErpRoute)
       setProduct("erp")
       setErpHomeVariant(
-        window.location.pathname === "/v2-home" ? "v2" : "legacy"
+        appLocation.pathname === "/v2-home" ? "v2" : "legacy"
       )
-      const nextRole = new URLSearchParams(window.location.search).get("role")
+      const nextRole = new URLSearchParams(appLocation.search).get("role")
       setErpHomeRole(
         nextRole === "admin" || nextRole === "member" ? nextRole : "owner"
       )
@@ -16266,11 +16267,11 @@ export function App() {
     options?: { replace?: boolean; params?: Record<string, string> }
   ) => {
     if (nextScreen === "SC-05" || nextScreen === "SC-06") {
-      window.location.assign(nextScreen === "SC-05" ? "/signup?product=snap" : "/login")
+      appLocation.assign(nextScreen === "SC-05" ? "/signup?product=snap" : "/login")
       return
     }
     const nextPath = pathForSnapScreen(nextScreen, options?.params)
-    const currentPath = `${window.location.pathname}${window.location.search}`
+    const currentPath = `${appLocation.pathname}${appLocation.search}`
     if (product === "snap" && currentPath === nextPath) return
 
     if (options?.replace) {
@@ -16309,7 +16310,7 @@ export function App() {
   useEffect(() => {
     const redirectPath = snapAccess.redirectPath
     if (!redirectPath || product !== "snap") return
-    if (`${window.location.pathname}${window.location.search}` === redirectPath)
+    if (`${appLocation.pathname}${appLocation.search}` === redirectPath)
       return
 
     const nextRoute = matchSnapRoute(redirectPath)
@@ -16333,12 +16334,12 @@ export function App() {
     replace = false
   ) => {
     const nextPath = pathForErpScreen(nextScreen, params)
-    const nextUrl = new URL(nextPath, window.location.origin)
+    const nextUrl = new URL(nextPath, appLocation.origin)
     if (erpHomeRole === "admin" || erpHomeRole === "member") {
       nextUrl.searchParams.set("role", erpHomeRole)
     }
     const nextLocation = `${nextUrl.pathname}${nextUrl.search}`
-    const currentLocation = `${window.location.pathname}${window.location.search}`
+    const currentLocation = `${appLocation.pathname}${appLocation.search}`
     if (nextLocation !== currentLocation) {
       window.history[replace ? "replaceState" : "pushState"](
         { product: "erp" },
@@ -16362,7 +16363,7 @@ export function App() {
   ) => {
     if (nextScreen === "tokens" || nextScreen === "billing") {
       const section = product === "snap" ? "snap-usage" : nextScreen === "tokens" ? "trade-usage" : "billing"
-      window.location.assign(`/erp/settings?section=${section}`)
+      appLocation.assign(`/erp/settings?section=${section}`)
       return
     }
     if (nextScreen === "deal" && options?.dealId) {
@@ -16403,7 +16404,7 @@ export function App() {
   }
 
   const switchErpHomeRole = (nextRole: ErpPreviewRole) => {
-    const nextUrl = new URL(window.location.href)
+    const nextUrl = new URL(appLocation.href)
     if (nextRole === "admin" || nextRole === "member") {
       nextUrl.searchParams.set("role", nextRole)
     } else {
@@ -16547,7 +16548,7 @@ export function App() {
           try {
             window.sessionStorage.setItem(
               "snap_return_to",
-              `${window.location.pathname}${window.location.search}`
+              `${appLocation.pathname}${appLocation.search}`
             )
           } catch {
             // Session storage is an enhancement; authentication still works without it.

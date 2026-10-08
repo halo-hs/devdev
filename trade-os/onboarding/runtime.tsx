@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import {
   createContext,
   useCallback,
@@ -179,16 +180,16 @@ export function StartGuideProvider({
         setLoaded({ key, state: null, error: true })
         return
       }
-      const url = new URL(path, location.origin)
+      const url = new URL(path, appLocation.origin)
       url.searchParams.set("guide", intent.token)
       url.searchParams.set("role", role)
-      window.location.assign(url.pathname + url.search)
+      appLocation.assign(url.pathname + url.search)
     },
     [state, error, role, scope, key]
   )
   useEffect(() => {
     if (pendingIntent.current === undefined) {
-      const url = new URL(location.href)
+      const url = new URL(appLocation.href)
       const token = url.searchParams.get("guide")
       pendingIntent.current = null
       if (!token) return
@@ -214,7 +215,7 @@ export function StartGuideProvider({
       intent.scope !== scope ||
       intent.expires < Date.now() ||
       !applicableItems(role).includes(intent.item) ||
-      new URL(intent.path, location.origin).pathname !== location.pathname
+      new URL(intent.path, appLocation.origin).pathname !== appLocation.pathname
     )
       return
     let current: GuideState
@@ -224,12 +225,12 @@ export function StartGuideProvider({
       return
     }
     if (current.access && current.access !== "active") return
-    if (destination(intent.item, current).split("?")[0] !== location.pathname)
+    if (destination(intent.item, current).split("?")[0] !== appLocation.pathname)
       return
-    const initialPath = location.pathname
+    const initialPath = appLocation.pathname
     let tries = 0
     const timer = window.setInterval(() => {
-      if (++tries > 60 || location.pathname !== initialPath) {
+      if (++tries > 60 || appLocation.pathname !== initialPath) {
         clearInterval(timer)
         return
       }

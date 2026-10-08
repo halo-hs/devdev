@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import { useState } from "react"
 import {
   CircleHelp,
@@ -124,12 +125,12 @@ export function SidebarProfileMenu({
                       이용 가이드
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => window.location.assign("/legal/terms")}
+                      onClick={() => appLocation.assign("/legal/terms")}
                     >
                       이용 약관
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => window.location.assign("/legal/privacy")}
+                      onClick={() => appLocation.assign("/legal/privacy")}
                     >
                       개인정보 처리방침
                     </DropdownMenuItem>
@@ -274,12 +275,12 @@ export function SidebarProfileMenu({
             이용 가이드
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => window.location.assign("/legal/terms")}
+            onClick={() => appLocation.assign("/legal/terms")}
           >
             이용 약관
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => window.location.assign("/legal/privacy")}
+            onClick={() => appLocation.assign("/legal/privacy")}
           >
             개인정보 처리방침
           </DropdownMenuItem>

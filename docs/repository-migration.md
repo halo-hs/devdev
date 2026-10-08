@@ -42,7 +42,7 @@ npm run typecheck
 - GitHub Actions workflow 및 별도 GitHub 배포 토큰: 필요 없음
 - `postbuild`는 배포 결과에 섞인 로컬 참고 원본·환경변수·도구 파일을 제거합니다.
 
-직접 연동이 기본입니다. 별도 미리보기 배포가 필요한 개발자는 기존 `npm run deploy:preview`를 사용할 수 있습니다. GitHub Pages나 도메인/DNS 변경은 필요하지 않습니다.
+2026-10-08 변경: Cloudflare는 main만 배포하고 브랜치 미리보기는 중지합니다. 미리보기는 GitHub Pages로 이전했습니다. 기존 수동 deploy 명령은 제거했습니다. [현재 배포 안내](deployment-preview.md)를 확인하세요.
 
 ## 이전 범위
 

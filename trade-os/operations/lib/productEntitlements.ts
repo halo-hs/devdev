@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 /**
  * Product entitlement gate — API-first (Wave 7) with env fallback (Wave 6).
  * SSOT: _ssot/ECOYA_PLATFORM_ENTITLEMENT_AND_EXPOSURE.md Part A.
@@ -104,7 +105,7 @@ export function buildIntelligenceEmbedUrl(baseUrl: string, context?: Intelligenc
     return baseUrl;
   }
   try {
-    const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost";
+    const origin = typeof window !== "undefined" ? appLocation.origin : "http://localhost";
     const url = new URL(baseUrl, origin);
     if (context.organizationId) {
       url.searchParams.set("org_id", context.organizationId);
@@ -180,8 +181,8 @@ export function isInAppIntelPath(url: string): boolean {
   if (url.startsWith("/")) return true;
   if (typeof window === "undefined") return false;
   try {
-    const parsed = new URL(url, window.location.origin);
-    return parsed.origin === window.location.origin;
+    const parsed = new URL(url, appLocation.origin);
+    return parsed.origin === appLocation.origin;
   } catch {
     return false;
   }
@@ -190,7 +191,7 @@ export function isInAppIntelPath(url: string): boolean {
 export function normalizeInAppIntelPath(url: string): string {
   if (url.startsWith("/")) return url;
   try {
-    const parsed = new URL(url, typeof window !== "undefined" ? window.location.origin : "http://localhost");
+    const parsed = new URL(url, typeof window !== "undefined" ? appLocation.origin : "http://localhost");
     return `${parsed.pathname}${parsed.search}${parsed.hash}`;
   } catch {
     return url;
@@ -210,7 +211,7 @@ export function navigateToIntelligence(
     if (options?.push) {
       options.push(href);
     } else if (typeof window !== "undefined") {
-      window.location.assign(href);
+      appLocation.assign(href);
     }
     return;
   }
