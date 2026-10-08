@@ -1,5 +1,5 @@
-import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 "use client";
+import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField, BusinessFilterSelect } from "@shared/components/business-filters";
 
 import { useLocale } from "@trade-os/operations/compat/intl";
@@ -30,6 +30,7 @@ import {
   gpKpiBasisText,
   gpKpiCautionText,
   gpWindowExclusion,
+  seriesForCurrency,
 } from "@trade-os/operations/reports/reportsData";
 // erp-v2-adapt: begin — QA-1352 shares the four-cause notice and entitlement classifier.
 import { InsightsGateNotice } from "@trade-os/operations/shared/InsightsGateNotice";
@@ -71,6 +72,7 @@ import {
   latestSeriesKpi,
   overdueFromStatus,
 } from "./salesPerfData";
+import { MemberSettlementTrendCard } from "./MemberSettlementTrendCard";
 
 import type { AppMessages } from "@trade-os/operations/i18n/messages";
 
@@ -80,7 +82,6 @@ export type SalesPerfCopy = BaseSalesPerfCopy & {
   directoryErrorTitle?: string;
   directoryLoadFailed?: string;
   directoryRetry?: string;
-  refreshErrorTitle?: string;
   kpi: BaseSalesPerfCopy["kpi"] & {
     activeDealsLimitedSub?: string;
     overdueAmountLimited?: string;
@@ -112,8 +113,8 @@ function computeSalesPerformanceRange(
 
 type ReadyData = {
   series: SettlementSeriesResponse;
-  gp: GPSeriesResponse;
-  status: CounterpartyStatusResponse;
+  gp: GPSeriesResponse | null;
+  status: CounterpartyStatusResponse | null;
   /** 담당자별 GP — 오너/관리자 org 전체 뷰에서만 fetch(그 외 null). */
   byAssignee: AssigneeGPResponse | null;
   rangeMonths: SalesPerformanceRangeMonths;
@@ -153,6 +154,17 @@ function replaceTokens(template: string, tokens: Record<string, string>): string
     out = out.replaceAll(`{${key}}`, value);
   }
   return out;
+}
+
+function validateSeriesBootstrapTo(series: SettlementSeriesResponse): string {
+  const { from, to } = series;
+  if (!isRealISODate(from) || !isRealISODate(to) || from > to) {
+    throw new Error("Invalid Settlement Series bootstrap dates");
+  }
+  if (from !== computeSalesPerformanceRange(to, 12).from) {
+    throw new Error("Invalid Settlement Series bootstrap date");
+  }
+  return to;
 }
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -251,7 +263,6 @@ export function SalesPerformanceConnected({
       role={role}
       rangeMonths={rangeMonths}
       renderHeader={renderHeader}
-      userId={identity.user_id}
     />
   );
 }
@@ -265,14 +276,12 @@ function SalesPerformanceIdentityScope({
   orgId,
   rangeMonths,
   role,
-  userId,
 }: SalesPerformanceConnectedProps & {
   activeIdentityScopeRef: { current: string };
   identityScopeKey: string;
   onRangeMonthsChange: (months: SalesPerformanceRangeMonths) => void;
   orgId: string;
   rangeMonths: SalesPerformanceRangeMonths;
-  userId: string;
 }) {
   const { getIdToken } = usePlatformSession();
   // erp-v2-adapt: begin — QA-1352 removes the lossy entitlement-projection read.
@@ -473,15 +482,39 @@ function SalesPerformanceIdentityScope({
     }
 
     void (async (): Promise<ReadyData> => {
-      // member 콕핏: 시리즈 엔드포인트는 FILTER 의미론(assignee 없음 = 조직
-      // 전체 — B3 결산 화면의 계약)이라, "내 숫자"가 되려면 본인 user_id 를
-      // 명시적으로 보내야 한다(적대 리뷰: 조직 전체 수치가 '내 딜 기준'
-      // 라벨을 달던 버그). BE 는 member 의 assignee 를 어차피 본인으로
-      // 강제하므로(fail-closed) 이 값은 스코프 지정이지 권한 확대가 아니다.
-      const assignee = isManager ? (assigneeFilter ?? undefined) : userId;
+      // Member 콕핏은 서버가 허용한 회사 전체 settlement-series만 읽는다.
+      // GP·거래처 상태·담당자 디렉터리를 호출하면 원본의 Member 권한 경계를
+      // 흐리거나 403을 빈 화면으로 바꿀 수 있으므로 이 분기에서 요청 자체를 생략한다.
+      if (!isManager) {
+        const anchor = mountDateAnchorRef.current;
+        let from: string;
+        let to: string;
+        if (anchor === null) {
+          const bootstrap = await requestForEvent(() =>
+            getSettlementSeries({ granularity: "month" }, getIdToken),
+          );
+          const bootstrapTo = validateSeriesBootstrapTo(bootstrap);
+          mountDateAnchorRef.current = bootstrapTo;
+          if (rangeMonths === 12) {
+            return {
+              series: bootstrap,
+              gp: null,
+              status: null,
+              byAssignee: null,
+              rangeMonths,
+            };
+          }
+          ({ from, to } = computeSalesPerformanceRange(bootstrapTo, rangeMonths));
+        } else {
+          ({ from, to } = computeSalesPerformanceRange(anchor, rangeMonths));
+        }
+        const series = await requestForEvent(() =>
+          getSettlementSeries({ granularity: "month", from, to }, getIdToken),
+        );
+        return { series, gp: null, status: null, byAssignee: null, rangeMonths };
+      }
 
-      // 담당자 이름 해석은 보고서 요청과 별도로 복구한다. member 뷰는 필터도
-      // 랭킹도 없어 목록이 불필요하다(관리자 API 호출 회피).
+      const assignee = assigneeFilter ?? undefined;
 
       const scopedParams = assignee ? { assignee } : {};
       const anchor = mountDateAnchorRef.current;
@@ -627,7 +660,7 @@ function SalesPerformanceIdentityScope({
         );
       });
   // erp-v2-adapt: begin — QA-1352 removes the obsolete projection dependency with its short circuit.
-  }, [activeIdentityScopeRef, assigneeFilter, getIdToken, identityScopeKey, isManager, orgId, rangeMonths, userId]);
+  }, [activeIdentityScopeRef, assigneeFilter, getIdToken, identityScopeKey, isManager, orgId, rangeMonths]);
   // erp-v2-adapt: end
 
   useEffect(() => {
@@ -696,7 +729,7 @@ function SalesPerformanceIdentityScope({
 
   // ── ready 파생 데이터 ──
   const data = state.status === "ready" ? state.data : null;
-  const statusItems = useMemo(() => data?.status.items ?? [], [data]);
+  const statusItems = useMemo(() => data?.status?.items ?? [], [data]);
   const statusItemChunks = useMemo(
     () =>
       Array.from(
@@ -748,6 +781,10 @@ function SalesPerformanceIdentityScope({
     () => (data && currency ? gpForCurrency(data.gp, currency) : []),
     [currency, data],
   );
+  const memberTrendPoints = useMemo(
+    () => (!isManager && data?.series && currency ? seriesForCurrency(data.series, currency) : []),
+    [currency, data, isManager],
+  );
   const gpKpi = useMemo(() => computeGpKpi(gpPoints), [gpPoints]);
   const dealsSummary = useMemo(() => activeDealsSummary(statusItems), [statusItems]);
   // 연체 KPI 는 테이블과 같은 "오늘 기준"(status as-of) — overdueFromStatus 주석.
@@ -759,6 +796,8 @@ function SalesPerformanceIdentityScope({
     () => (data?.byAssignee && currency ? assigneeGpRows(data.byAssignee, currency) : []),
     [currency, data],
   );
+  const showMemberTrend = !isManager && memberTrendPoints.length > 0;
+  const showManagerGp = isManager && data?.gp != null;
 
   // ── 상태 화면 ──
   // erp-v2-adapt: begin — QA-1352 keeps plan, subscription, billing, and role guidance distinct.
@@ -814,17 +853,17 @@ function SalesPerformanceIdentityScope({
     memberDirectory.status === "ready" ? memberDirectory.members : [];
   const currencyLabel = currency ?? "";
 
-  // 스코프 라벨은 BE 의 실효 에코(assignee)로 판정 — member 는 필터를 보내지
-  // 않아도 본인 uuid 가 에코된다(본인 고정을 화면이 그대로 말해 준다).
-  const effectiveAssignee = data?.status.assignee ?? null;
-  const scopeText =
-    effectiveAssignee == null
-      ? copy.controls.scopeOrg
-      : isManager
-        ? replaceTokens(copy.controls.scopePerson, {
-            name: assigneeLabel(effectiveAssignee, members, copy.byAssignee.unassigned),
-          })
-        : copy.controls.scopeSelf;
+  // Member는 회사 전체 settlement-series의 실효 조회 범위를 표시한다.
+  const effectiveAssignee = isManager
+    ? data?.status?.assignee ?? null
+    : data?.series?.assignee ?? null;
+  const scopeText = effectiveAssignee == null
+    ? copy.controls.scopeOrg
+    : isManager
+      ? replaceTokens(copy.controls.scopePerson, {
+          name: assigneeLabel(effectiveAssignee, members, copy.byAssignee.unassigned),
+        })
+    : copy.controls.scopeSelf;
 
   const assigneeOptions = [
     { value: ASSIGNEE_ALL, label: copy.controls.assigneeAll },
@@ -843,7 +882,7 @@ function SalesPerformanceIdentityScope({
   const gpKpiBasis = gpKpiBasisText(gpKpi.latest, copy.kpi);
   const gpKpiCaution = gpKpiCautionText(gpKpi.latest, copy.kpi);
   const empty = currencies.length === 0 && statusItems.length === 0;
-  const showByAssignee = data?.byAssignee != null;
+  const showByAssignee = isManager && data?.byAssignee != null;
   const statusLimitReached = statusItems.length >= STATUS_FETCH_LIMIT;
   const statusLimitText = replaceTokens(copy.table.truncated, {
     count: String(STATUS_FETCH_LIMIT),
@@ -890,7 +929,8 @@ function SalesPerformanceIdentityScope({
   };
 
   const summary = !empty ? (
-<div
+    isManager ? (
+      <div
             className="grid grid-cols-4 gap-3 max-lg:grid-cols-2 max-sm:grid-cols-1"
             data-ui="salesperf-kpis"
           >
@@ -967,12 +1007,66 @@ function SalesPerformanceIdentityScope({
               }}
             />
           </div>
+      ) : (
+        <div
+          className="grid grid-cols-4 gap-3 max-lg:grid-cols-2 max-sm:grid-cols-1"
+          data-ui="salesperf-kpis"
+        >
+          <KpiTile
+            label={copy.kpi.activeDeals}
+            value={copy.kpi.pendingValue ?? "준비 중"}
+            delta={{ text: copy.kpi.pendingNote ?? "회사 전체 집계를 준비하고 있습니다", tone: "flat" }}
+          />
+          <KpiTile
+            label={replaceTokens(copy.kpi.revenue, { period: kpiPeriodLabel, currency: currencyLabel })}
+            value={seriesKpi ? fmtAmount(seriesKpi.planned) : "—"}
+            basis={
+              seriesKpi
+                ? replaceTokens(copy.kpi.outstandingBasis ?? "미수 잔액 {amount}", {
+                    amount: fmtAmount(seriesKpi.outstandingEnd),
+                  })
+                : null
+            }
+            delta={
+              seriesKpi
+                ? {
+                    text:
+                      seriesKpi.receivedRatioPctTenths != null
+                        ? replaceTokens(copy.kpi.revenueSub, {
+                            received: fmtAmount(seriesKpi.received),
+                            ratio: fmtTenthsPct(seriesKpi.receivedRatioPctTenths),
+                          })
+                        : replaceTokens(copy.kpi.revenueNoPlan, { received: fmtAmount(seriesKpi.received) }),
+                    tone: "flat",
+                  }
+                : null
+            }
+          />
+          <KpiTile
+            label={replaceTokens(copy.kpi.payableDue ?? "{period} 지급 예정 ({currency})", {
+              period: kpiPeriodLabel,
+              currency: currencyLabel,
+            })}
+            value={seriesKpi ? fmtAmount(seriesKpi.payableDue) : "—"}
+            delta={
+              seriesKpi
+                ? { text: replaceTokens(copy.kpi.payableSub ?? "지급 적용 {paid}", { paid: fmtAmount(seriesKpi.paidOut) }), tone: "flat" }
+                : null
+            }
+          />
+          <KpiTile
+            label={copy.kpi.overdueItems ?? "기한 초과"}
+            value={copy.kpi.pendingValue ?? "준비 중"}
+            delta={{ text: copy.kpi.pendingNote ?? "회사 전체 집계를 준비하고 있습니다", tone: "flat" }}
+          />
+        </div>
+      )
   ) : undefined;
 
   const controls = (
     <BusinessListToolbar
       data-ui="salesperf-controls"
-      aria-label="영업 성과 필터"
+      aria-label={copy.controls.filtersLabel}
       result={
         <span
           className="text-label-12 text-text-disabled"
@@ -1076,7 +1170,7 @@ function SalesPerformanceIdentityScope({
         >
           <InfoBox
             tone="risk"
-            title={copy.refreshErrorTitle ?? copy.errorTitle}
+            title={copy.errorTitle}
             description={state.refreshError.message}
           />
           <Button
@@ -1101,14 +1195,30 @@ function SalesPerformanceIdentityScope({
         </div>
       ) : null}
       {empty ? (
-        <InfoBox tone="neutral" title={copy.emptyTitle} description={copy.emptyBody} />
+        <InfoBox
+          tone="neutral"
+          title={copy.emptyTitle}
+          description={isManager ? copy.emptyBody : (copy.emptyBodyMember ?? copy.emptyBody)}
+        />
       ) : (
         <>
           {/* ── 상단 내 숫자 (D10: 월 매출·손익·미수·진행 딜) ── */}
           {!renderHeader && summary}
 
+          {showMemberTrend ? (
+            <MemberSettlementTrendCard
+              axisLabel={axisLabel}
+              copy={copy}
+              currencyLabel={currencyLabel}
+              fmtAmount={fmtAmount}
+              fmtCompact={fmtCompact}
+              points={memberTrendPoints}
+              yearMonth={yearMonth}
+            />
+          ) : null}
+
           {/* ── GP: 내 월별 추세 + (org 전체 뷰) 담당자별 랭킹 ── */}
-          <div
+          {showManagerGp ? <div
             className={cx(
               "grid items-start gap-4 max-lg:grid-cols-1",
               showByAssignee ? "grid-cols-[minmax(0,1.9fr)_minmax(0,1.1fr)]" : "grid-cols-1",
@@ -1238,20 +1348,21 @@ function SalesPerformanceIdentityScope({
                 )}
               </ReportCard>
             ) : null}
-          </div>
+          </div> : null}
 
           {/* ── 하단 거래처 상태 테이블 (D10) — 서버 순서 = 주의 필요 순, 재정렬 금지 ── */}
-          <ReportCard
-            title={copy.table.title}
-            sub={
-              <>
-                {isManager ? copy.table.subOrg : copy.table.subSelf}
-                {data ? <> · {replaceTokens(copy.table.asOf, { date: monthDay(data.status.as_of) })}</> : null}
-                {/* BE 클램프 상한에 닿으면 절단 가능성 고지 — 숫자가 전체처럼 읽히지 않게. */}
-                {statusLimitReached ? <> · {statusLimitText}</> : null}
-              </>
-            }
-          >
+          {isManager ? (
+            <ReportCard
+              title={copy.table.title}
+              sub={
+                <>
+                  {copy.table.subOrg}
+                  {data?.status ? <> · {replaceTokens(copy.table.asOf, { date: monthDay(data.status.as_of) })}</> : null}
+                  {/* BE 클램프 상한에 닿으면 절단 가능성 고지 — 숫자가 전체처럼 읽히지 않게. */}
+                  {statusLimitReached ? <> · {statusLimitText}</> : null}
+                </>
+              }
+            >
             {statusItems.length === 0 ? (
               <p className="mt-3 text-body-13 text-text-muted">{copy.table.empty}</p>
             ) : (
@@ -1358,7 +1469,15 @@ function SalesPerformanceIdentityScope({
                 </div>
               </div>
             )}
-          </ReportCard>
+            </ReportCard>
+          ) : (
+            <InfoBox
+              data-ui="salesperf-status-forbidden"
+              tone="neutral"
+              title={copy.table.title}
+              description={copy.table.memberRestricted}
+            />
+          )}
         </>
       )}
     </div>

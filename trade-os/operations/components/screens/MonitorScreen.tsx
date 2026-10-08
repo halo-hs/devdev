@@ -81,10 +81,12 @@ type MonitorBodyCopy = {
   throughputDesc: string;
   throughputOwner: string;
   throughputUploads: string;
+  throughputConfirms: string;
   throughputRate: string;
   throughputEmpty: string;
   filterSchedule: string;
   filterQty: string;
+  filtersLabel: string;
   // SC-13 KPI·상태·처리량 구역의 "기간·수량 필터, 새로고침".
   periodLabel: string;
   periodCurrent: string;
@@ -145,10 +147,12 @@ const DEFAULT_MONITOR_BODY_COPY: MonitorBodyCopy = {
   throughputDesc: "Bars by date + counts by owner",
   throughputOwner: "Owner",
   throughputUploads: "Uploads",
+  throughputConfirms: "Confirms",
   throughputRate: "Completion rate",
   throughputEmpty: "No completed confirms to show yet.",
   filterSchedule: "Schedule",
   filterQty: "Quantity",
+  filtersLabel: "Monitor filters",
   periodLabel: "Period",
   periodCurrent: "This week",
   periodLast: "Last week",
@@ -203,7 +207,7 @@ function buildThroughputColumns(copy: MonitorBodyCopy): DataTableColumn<Throughp
   return [
     { key: "owner", header: copy.throughputOwner, align: "left", sort: "inactive", render: (row) => row.owner },
     { key: "uploads", header: copy.throughputUploads, align: "center", render: (row) => row.uploads },
-    { key: "confirms", header: "Confirm", align: "center", render: (row) => row.confirms },
+    { key: "confirms", header: copy.throughputConfirms, align: "center", render: (row) => row.confirms },
     { key: "rate", header: copy.throughputRate, align: "center", render: (row) => row.rate },
   ];
 }
@@ -223,7 +227,7 @@ const blockedItems: TaskQueueItem[] = [
     serviceLabel: "P0",
     serviceTone: "danger",
     title: "PO_240518_K2HK.pdf",
-    meta: "GLOB Trading · Confirm 대기",
+    meta: "GLOB Trading · 확정 대기",
     dueLabel: "25h",
     dueTone: "today",
   },
@@ -241,7 +245,7 @@ const blockedItems: TaskQueueItem[] = [
 /** ops 정본은 BLOCKED 행 meta 어순/시간이 default와 다름 (monitor-ops.html:95,100); 3행은 동일. */
 const opsBlockedItems: TaskQueueItem[] = blockedItems.map((item) => {
   if (item.id === "blocked-bl") return { ...item, meta: "업로드 후 24h 미처리 · 한빛 로지스" };
-  if (item.id === "blocked-po") return { ...item, meta: "Confirm 대기 · GLOB Trading" };
+  if (item.id === "blocked-po") return { ...item, meta: "확정 대기 · GLOB Trading" };
   return item;
 });
 
@@ -308,9 +312,9 @@ const pendingItems: TaskQueueItem[] = [
     id: "pending-d2",
     serviceLabel: "D-2",
     serviceTone: "warning",
-    title: "BL 미Confirm · ETD 임박",
+    title: "BL 미확정 · ETD 임박",
     meta: "INV-250514-077 · $5,230",
-    dueLabel: "미Confirm",
+    dueLabel: "미확정",
     dueTone: "soon",
   },
 ];
@@ -407,7 +411,7 @@ function MonitorFilters({
   return (
     <BusinessListToolbar
       data-ui="monitor-filters"
-      aria-label="운영 감시 필터"
+      aria-label={copy.filtersLabel}
       actions={
         onRefresh ? (
           <Button

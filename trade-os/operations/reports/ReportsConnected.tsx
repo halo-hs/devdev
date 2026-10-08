@@ -1,5 +1,5 @@
-import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 "use client";
+import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField, BusinessFilterSelect } from "@shared/components/business-filters";
 
 import { Segmented } from "@trade-os/operations/components/SegmentedControl";
@@ -409,6 +409,7 @@ function ReportsConnectedSession({
 
   // ── 월마감 액션 상태 ──
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
+  const [reclosePeriod, setReclosePeriod] = useState<string | null>(null);
   const [closeNote, setCloseNote] = useState("");
   const [closeSubmitting, setCloseSubmitting] = useState(false);
   const [closeError, setCloseError] = useState<string | null>(null);
@@ -812,11 +813,12 @@ function ReportsConnectedSession({
   // 조직 업무 TZ(응답 에코) 기준 "오늘" — 진행 중 달/마감 제안 판정 축.
   const orgToday = trustedOrgTodayISO(settlementSeries?.timezone);
   const closedPeriods = useMemo(
-    () => new Set(closesData.map((close) => monthPeriodOf(close.period_start))),
+    () => new Set(closesData.filter((close) => !close.reopened).map((close) => monthPeriodOf(close.period_start))),
     [closesData],
   );
   const closableProposal =
     orgToday && closesState.status === "ready" ? nextClosablePeriod(orgToday, closedPeriods) : null;
+  const closeDialogPeriod = reclosePeriod ?? closableProposal;
   const canCloseMonth = isManager;
   const inProgressPeriod = orgToday ? currentMonthPeriod(orgToday) : "—";
   const closableFromLabel = orgToday ? monthDay(firstOfNextMonthISO(orgToday)) : "—";
@@ -1022,25 +1024,26 @@ function ReportsConnectedSession({
   };
 
   const submitClose = async () => {
-    if (!closableProposal || closeSubmitting) return;
+    if (!closeDialogPeriod || closeSubmitting) return;
     const sessionId = sessionEventId.current;
     setCloseSubmitting(true);
     setCloseError(null);
     try {
       await closeMonth(
-        { period: closableProposal, ...(closeNote.trim() ? { note: closeNote.trim() } : {}) },
+        { period: closeDialogPeriod, ...(closeNote.trim() ? { note: closeNote.trim() } : {}) },
         getIdToken,
       );
       if (sessionEventId.current !== sessionId) return;
       setCloseDialogOpen(false);
+      setReclosePeriod(null);
       setCloseNote("");
-      announceToast(replaceTokens(copy.closes.successToast, { period: closableProposal }));
+      announceToast(replaceTokens(copy.closes.successToast, { period: closeDialogPeriod }));
       await refreshCloses(sessionId).catch(() => {});
     } catch (err) {
       if (sessionEventId.current !== sessionId) return;
       if (err instanceof ApiError) {
         if (err.status === 409 || err.code === "ERP_REPORTS_ALREADY_CLOSED") {
-          setCloseError(replaceTokens(copy.closes.errorAlreadyClosed, { period: closableProposal }));
+          setCloseError(replaceTokens(copy.closes.errorAlreadyClosed, { period: closeDialogPeriod }));
         } else if (err.status === 403) {
           setCloseError(copy.closes.errorRoleForbidden);
         } else if (err.status === 400) {
@@ -1348,7 +1351,7 @@ function ReportsConnectedSession({
   const controls = (
     <BusinessListToolbar
       data-ui="reports-controls"
-      aria-label="결산 리포트 필터"
+      aria-label={copy.controls.filtersLabel}
       actions={
         <>
           {settlementState.status !== "error" ? (
@@ -1371,6 +1374,7 @@ function ReportsConnectedSession({
               data-ui="reports-close-button"
               onClick={() => {
                 setCloseError(null)
+                setReclosePeriod(null)
                 setCloseDialogOpen(true)
               }}
               size="md"
@@ -2040,6 +2044,22 @@ function ReportsConnectedSession({
                               {close.reopened ? copy.closes.reopened : copy.closes.frozen}
                             </span>
                           </button>
+                          {canCloseMonth && close.reopened ? (
+                            <Button
+                              aria-label={`${monthPeriodOf(close.period_start)} ${copy.closes.recloseButton}`}
+                              data-ui="reports-reclose-button"
+                              onClick={() => {
+                                setCloseError(null);
+                                setReclosePeriod(monthPeriodOf(close.period_start));
+                                setCloseDialogOpen(true);
+                              }}
+                              size="sm"
+                              type="button"
+                              variant="tertiary"
+                            >
+                              {copy.closes.recloseButton}
+                            </Button>
+                          ) : null}
                           {canCloseMonth && !close.reopened ? (
                             <Button
                               aria-label={replaceTokens(copy.closes.reopenDialogTitle, {
@@ -2068,22 +2088,28 @@ function ReportsConnectedSession({
           </div>
 
       {/* ── 월마감 확인 다이얼로그 ── */}
-      {closableProposal ? (
+      {closeDialogPeriod ? (
         <Dialog
           className="max-w-[calc(100vw-2rem)]"
           closeLabel={copy.closes.dialogCloseLabel}
           open={closeDialogOpen}
-          onOpenChange={setCloseDialogOpen}
-          title={replaceTokens(copy.closes.dialogTitle, { period: closableProposal })}
-          okText={copy.closes.confirm}
+          onOpenChange={(open) => {
+            setCloseDialogOpen(open);
+            if (!open) setReclosePeriod(null);
+          }}
+          title={replaceTokens(reclosePeriod ? copy.closes.recloseDialogTitle : copy.closes.dialogTitle, { period: closeDialogPeriod })}
+          okText={reclosePeriod ? copy.closes.recloseConfirm : copy.closes.confirm}
           cancelText={copy.closes.cancel}
           onOk={() => void submitClose()}
-          onCancel={() => setCloseDialogOpen(false)}
+          onCancel={() => {
+            setCloseDialogOpen(false);
+            setReclosePeriod(null);
+          }}
           width={440}
         >
           <div className="flex flex-col gap-3">
             <p className="text-body-14 text-ecoya-gray-3">
-              {replaceTokens(copy.closes.dialogBody, { period: closableProposal })}
+              {replaceTokens(copy.closes.dialogBody, { period: closeDialogPeriod })}
             </p>
             <label className="flex flex-col gap-1 text-label-12 text-text-secondary">
               {copy.closes.noteLabel}

@@ -57,30 +57,32 @@ function GpGrid({
   const span = maxV - minV || BigInt(1);
   return (
     <>
-      {ticks.map((tick) => {
-        const y = CHART_PAD.t + ih - chartRatio(tick - minV, span) * ih;
-        return (
-          <g key={tick.toString()}>
-            <line
-              x1={CHART_PAD.l}
-              x2={width - CHART_PAD.r}
-              y1={y}
-              y2={y}
-              stroke={tick === BigInt(0) ? CHART_COLORS.gridStrong : CHART_COLORS.grid}
-              strokeWidth={1}
-            />
-            <text
-              x={CHART_PAD.l - 6}
-              y={y + 4}
-              textAnchor="end"
-              fontSize="var(--text-body-10)"
-              fill={CHART_COLORS.axisText}
-            >
-              {format(tick)}
-            </text>
-          </g>
-        );
-      })}
+      {ticks
+        .filter((tick, index, all) => index === 0 || tick !== all[index - 1])
+        .map((tick) => {
+          const y = CHART_PAD.t + ih - chartRatio(tick - minV, span) * ih;
+          return (
+            <g key={tick.toString()}>
+              <line
+                x1={CHART_PAD.l}
+                x2={width - CHART_PAD.r}
+                y1={y}
+                y2={y}
+                stroke={tick === BigInt(0) ? CHART_COLORS.gridStrong : CHART_COLORS.grid}
+                strokeWidth={1}
+              />
+              <text
+                x={CHART_PAD.l - 6}
+                y={y + 4}
+                textAnchor="end"
+                fontSize="var(--text-body-10)"
+                fill={CHART_COLORS.axisText}
+              >
+                {format(tick)}
+              </text>
+            </g>
+          );
+        })}
     </>
   );
 }

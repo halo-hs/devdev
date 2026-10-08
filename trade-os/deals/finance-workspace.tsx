@@ -173,13 +173,13 @@ export function DealFinanceWorkspace({
   }
   return (
     <div className="space-y-7" data-testid="deal-finance-workspace">
-      <section aria-label="거래 경제" className="border-b pb-5">
+      <section aria-label="거래 경제 (Deal Economics)" className="border-b pb-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-1">
-            <h3 className="text-base font-semibold">거래 경제</h3>
+            <h3 className="text-base font-semibold">거래 경제 (Deal Economics)</h3>
             <FinanceHelp label="거래 손익 계산 기준">
               <p>
-                확정 매출송장 − 확정 매입송장 − 가산 원가 = 비용 반영 예상손익
+                매출송장 금액 − 매입송장 금액 = 송장 기준 매매차익 · 매매차익 − 등록 부대비용 = 예상 거래손익
               </p>
               <p>
                 통화별로 계산하며 가격 포함 원가는 다시 차감하지 않습니다. 송장
@@ -194,7 +194,7 @@ export function DealFinanceWorkspace({
           </div>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          송장 금액에 원가를 반영한 예상손익입니다.
+          이 Deal에 연결된 확정 Commercial Invoice + 등록 부대비용 + 지급 적용 내역 기준입니다. B/L은 선적 근거이며 금액 원천이 아닙니다.
         </p>
         <div aria-live="polite" className="mt-4 space-y-3">
           {previewFacts.map((fact) => {
@@ -218,11 +218,11 @@ export function DealFinanceWorkspace({
                 </div>
                 <dl className="grid grid-cols-2 gap-4 xl:grid-cols-5">
                   {[
-                    ["매출측 송장", money.invoiceSales],
-                    ["매입측 송장", money.invoicePurchases],
-                    ["송장 차익", money.tradeResult],
-                    ["가산 원가", money.costs],
-                    ["비용 반영 예상손익", money.adjustedResult],
+                    ["매출송장 금액", money.invoiceSales],
+                    ["매입송장 금액", money.invoicePurchases],
+                    ["송장 기준 매매차익", money.tradeResult],
+                    ["등록 부대비용", money.costs],
+                    ["예상 거래손익", money.adjustedResult],
                   ].map(([label, value]) => (
                     <div key={label}>
                       <dt className="text-xs text-muted-foreground">{label}</dt>
@@ -237,16 +237,16 @@ export function DealFinanceWorkspace({
           })}
           {!previewFacts.length && (
             <p className="py-2 text-sm text-muted-foreground">
-              확정 송장이 없어 손익을 계산할 수 없습니다.
+              통화별 송장 금액과 예상 거래손익은 확정 상업송장이 연결되면 표시됩니다.
             </p>
           )}
         </div>
       </section>
 
       <section aria-label="원가 관리">
-        <h3 className="text-base font-semibold">원가</h3>
+        <h3 className="text-base font-semibold">원가 입력</h3>
         <p className="mt-1 text-xs text-muted-foreground">
-          운임·관세·보험 등 부대비용을 입력합니다.
+          착륙원가(운임·관세·보험 등)를 입력해 마진 그림을 완성하세요.
         </p>
         {canWrite && (
           <form
@@ -262,7 +262,7 @@ export function DealFinanceWorkspace({
               className="grid items-end gap-3 sm:grid-cols-2 @min-[860px]:grid-cols-[100px_140px_80px_110px_minmax(140px,1fr)_auto]"
             >
               <label className="grid min-w-0 gap-1.5 text-sm">
-                <span>원가 유형</span>
+                <span>항목</span>
                 <Select
                   value={draft.type}
                   onValueChange={(value) =>
@@ -320,7 +320,7 @@ export function DealFinanceWorkspace({
                 </Select>
               </label>
               <label className="grid min-w-0 gap-1.5 text-sm">
-                <span>반영 기준</span>
+                <span>기준</span>
                 <Select
                   value={draft.basis}
                   onValueChange={(value) =>
@@ -335,7 +335,7 @@ export function DealFinanceWorkspace({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="additive">가산</SelectItem>
-                    <SelectItem value="already_in_price">가격 포함</SelectItem>
+                    <SelectItem value="already_in_price">가격포함</SelectItem>
                   </SelectContent>
                 </Select>
               </label>
@@ -386,7 +386,7 @@ export function DealFinanceWorkspace({
                 {[
                   "유형 / 근거",
                   "금액",
-                  "반영 기준",
+                  "기준",
                   "손익 차감액",
                   "메모",
                   "관리",
@@ -408,7 +408,7 @@ export function DealFinanceWorkspace({
                     {exactFinanceMoney(cost.amount, cost.currency)}
                   </TableCell>
                   <TableCell>
-                    {cost.basis === "additive" ? "가산" : "가격 포함"}
+                    {cost.basis === "additive" ? "가산" : "가격포함"}
                   </TableCell>
                   <TableCell className="tabular-nums">
                     {exactFinanceMoney(
@@ -516,9 +516,9 @@ export function DealFinanceWorkspace({
                 "통화",
                 "확정 매출송장",
                 "확정 매입송장",
-                "송장 차익",
-                "가산 원가",
-                "비용 반영 예상손익",
+                "송장 기준 매매차익",
+                "등록 부대비용",
+                "예상 거래손익",
                 "현재 받을 돈",
                 "현재 줄 돈",
               ].map((label) => (

@@ -1072,7 +1072,7 @@ export function DealsScreen({
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[21%]">
-                    거래번호 / 설명 · 거래처
+                    거래번호 / 거래처
                   </TableHead>
                   <TableHead className="w-[13%]">품목 / 주문 이행</TableHead>
                   <TableHead className="w-[13%]">기준 금액 / 출처</TableHead>

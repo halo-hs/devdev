@@ -435,6 +435,8 @@ export type TradeFinanceFactsResponse = {
   facts: TradeFinanceFact[];
   /** False only when the client safety cap stopped an org-wide sweep early. */
   complete?: boolean;
+  /** Server-applied read scope; an absent value must not be inferred from role. */
+  scope?: "organization" | "assigned_or_shared" | (string & {});
 };
 
 export type DealEconomicsResponse = {
@@ -942,8 +944,8 @@ export async function getSettlementLedger(
 export async function uncompleteSchedule(
   getIdToken: () => Promise<string>,
   scheduleId: string,
-): Promise<void> {
-  await apiRequest<unknown>(
+): Promise<{ status?: unknown } | null> {
+  return apiRequest<{ status?: unknown } | null>(
     apiPath(`/erp/payment-schedules/${encodeURIComponent(scheduleId)}/uncomplete`),
     {
       baseUrl: apiBaseUrl(),
@@ -1074,6 +1076,7 @@ export function getAllTradeFinanceFacts(
   const sweep = (async () => {
     try {
       const byKey = new Map<string, TradeFinanceFact>();
+      let scope: TradeFinanceFactsResponse["scope"];
       for (let page = 0; page < FINANCE_FACTS_MAX_PAGES; page += 1) {
         const qs = new URLSearchParams({
           limit: String(FINANCE_FACTS_PAGE_LIMIT),
@@ -1102,16 +1105,17 @@ export function getAllTradeFinanceFacts(
         );
         // Null-safe; dedupe on the (deal_id, currency) fact grain in case a
         // row repeats across a moving page boundary.
+        if (page === 0) scope = response?.scope;
         const facts = response?.facts ?? [];
         for (const fact of facts) byKey.set(`${fact.deal_id ?? ""}|${fact.currency}`, fact);
         if (facts.length < FINANCE_FACTS_PAGE_LIMIT) {
-          return { facts: [...byKey.values()] };
+          return { scope, facts: [...byKey.values()] };
         }
       }
       console.warn(
         `getAllTradeFinanceFacts: page cap reached (${FINANCE_FACTS_MAX_PAGES} pages × ${FINANCE_FACTS_PAGE_LIMIT}); fact snapshot is truncated`,
       );
-      return { complete: false, facts: [...byKey.values()] };
+      return { scope, complete: false, facts: [...byKey.values()] };
     } finally {
       inflightFactSweeps?.delete(sweepKey);
     }

@@ -208,7 +208,6 @@ import {
   type HomePreviewState,
 } from "@trade-os/home/page"
 import { ReferenceOperations } from "@trade-os/operations/index"
-import { SalesPrototype } from "@trade-os/extended-screens"
 import { NotificationsPrototype } from "@share/notifications/page"
 import { notifications, type NotificationDealTarget } from "@share/notifications/data"
 import {
@@ -8285,20 +8284,6 @@ function TemplateStrip({ onResult }: {
           </Button>
         </div>
       </div>
-      <Tabs
-        value={direction}
-        onValueChange={(value) => {
-          const nextDirection = value as "purchase" | "sales"
-          setDirection(nextDirection)
-          setSelectedCode(nextDirection === "purchase" ? "PO" : "QT")
-        }}
-        className="mb-3"
-      >
-        <TabsList aria-label="문서 거래 방향">
-          <TabsTrigger value="sales">매출</TabsTrigger>
-          <TabsTrigger value="purchase">매입</TabsTrigger>
-        </TabsList>
-      </Tabs>
       <div ref={viewportRef} aria-label="문서 유형 목록" className="flex min-w-0 snap-x snap-proximity gap-3 overflow-x-auto overscroll-x-contain px-0.5 pt-0.5 pb-3">
         {visibleTemplates.map(([kind, title, description]) => {
           const selected = selectedCode === kind
@@ -16785,7 +16770,7 @@ export function App() {
                   ) : screen === "reports" ? (
                     <ReferenceOperations screen="reports" />
                   ) : screen === "sales" ? (
-                    <SalesPrototype />
+                    <ReferenceOperations screen="sales" />
                   ) : screen === "notifications" ? (
                     <NotificationsPrototype
                       readIds={readNotificationIds}

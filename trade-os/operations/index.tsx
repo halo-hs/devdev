@@ -29,7 +29,12 @@ function Body({ screen }: { screen: ReferenceOperationsScreen }) {
         <MonitorConnected
           canAccess={identity.role === "owner"}
           opsCopy={messages.erpCommon.platformNav.monitorOps}
-          bodyCopy={{ ...copy.screen, taskQueueEmpty: messages.erpCommon.platform.taskQueueEmpty }}
+          bodyCopy={{
+            ...copy.screen,
+            filtersLabel: copy.view.conditionsLabel,
+            throughputConfirms: copy.view.throughputConfirms,
+            taskQueueEmpty: messages.erpCommon.platform.taskQueueEmpty,
+          }}
           loadErrorLabel={messages.auth.loadError}
           retryLabel={messages.auth.retry}
           stateCopy={copy}
@@ -44,7 +49,9 @@ function Body({ screen }: { screen: ReferenceOperationsScreen }) {
     : screen === "settlement" ? messages.erpSettlement.settlement
     : messages.erpShipments.shipments
   const description = screen === "sales"
-    ? messages.erpSalesPerformance.cockpit.subtitleOrg
+    ? identity.role === "owner" || identity.role === "admin"
+      ? messages.erpSalesPerformance.cockpit.subtitleOrg
+      : messages.erpSalesPerformance.cockpit.subtitleMember
     : "subtitle" in copy ? copy.subtitle : undefined
   return <div className="reference-page-scroll">
     <div className="reference-content-width w-full space-y-6 px-7 py-6">

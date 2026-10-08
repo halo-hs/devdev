@@ -20,7 +20,11 @@
       "price_variance": "단가 차이",
       "amount_mismatch": "금액 불일치",
       "ci_qty_mismatch": "송장 수량 불일치"
-    }
+    },
+    "severityFallback": "리스크",
+    "unknownRisk": "기타 확인 항목",
+    "unknownRiskNumbered": "기타 확인 항목 {n}",
+    "unlistedRisk": "지난 확인 항목"
   },
   "deals": {
     "title": "거래",
@@ -317,6 +321,12 @@
         "settled": "정산",
         "archived": "보관됨",
         "cancelled": "취소됨"
+      },
+      "columns": {
+        "dealCounterparty": "거래번호 / 거래처"
+      },
+      "financeTable": {
+        "costAdjusted": "가산 원가 · 비용 반영 손익"
       }
     }
   },
@@ -645,7 +655,9 @@
           "price_variance": "단가 편차",
           "amount_mismatch": "금액 불일치",
           "ci_qty_mismatch": "송장수량 불일치"
-        }
+        },
+        "detailDaysLate": "{days}일 지연",
+        "detailDaysEarly": "{days}일 빠름"
       },
       "snap": {
         "title": "SNAP",
@@ -958,8 +970,14 @@
         "sourceNeedsReview": "재검토",
         "revision": "리비전",
         "asOf": "기준 시각",
-        "sourceKind": { "received": "수신", "generated": "발행" },
-        "scope": { "deal": "거래", "shipment": "선적" },
+        "sourceKind": {
+          "received": "수신",
+          "generated": "발행"
+        },
+        "scope": {
+          "deal": "거래",
+          "shipment": "선적"
+        },
         "state": {
           "not_applicable": "해당 없음",
           "review_required": "재검토 필요",
@@ -1228,10 +1246,31 @@
           "order": "Order 생명주기",
           "fulfillment": "수량 이행",
           "settlement": "정산",
-          "dealLabels": { "contract": "계약", "shipment": "선적", "customs": "통관", "settled": "정산 완료", "archived": "보관됨", "cancelled": "취소됨" },
-          "orderLabels": { "open": "진행 중", "closed": "종료", "short_closed": "미달 마감", "cancelled": "취소" },
-          "fulfillmentLabels": { "open": "선적 대기", "fulfilled": "수량 이행 완료", "over_shipped": "초과 선적" },
-          "settlementLabels": { "pending_definition": "정의 대기", "not_applicable": "해당 없음", "in_progress": "진행 중", "settled": "정산 완료" }
+          "dealLabels": {
+            "contract": "계약",
+            "shipment": "선적",
+            "customs": "통관",
+            "settled": "정산 완료",
+            "archived": "보관됨",
+            "cancelled": "취소됨"
+          },
+          "orderLabels": {
+            "open": "진행 중",
+            "closed": "종료",
+            "short_closed": "미달 마감",
+            "cancelled": "취소"
+          },
+          "fulfillmentLabels": {
+            "open": "선적 대기",
+            "fulfilled": "수량 이행 완료",
+            "over_shipped": "초과 선적"
+          },
+          "settlementLabels": {
+            "pending_definition": "정의 대기",
+            "not_applicable": "해당 없음",
+            "in_progress": "진행 중",
+            "settled": "정산 완료"
+          }
         },
         "quantity": {
           "title": "주문 수량 근거",
@@ -1257,7 +1296,11 @@
         },
         "evidence": {
           "title": "정본 문서 근거",
-          "states": { "complete": "확정", "partial": "검토 필요", "missing": "누락" }
+          "states": {
+            "complete": "확정",
+            "partial": "검토 필요",
+            "missing": "누락"
+          }
         },
         "nextActions": {
           "title": "권장 다음 작업",

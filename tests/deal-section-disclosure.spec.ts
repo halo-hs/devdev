@@ -33,7 +33,7 @@ test("all work sections are rendered and shortcuts stay in the common right rail
   await expect(
     rail.getByRole("region", { name: "거래 요약 지표" })
   ).toHaveCount(1)
-  await expect(rail).toContainText("거래 건강도")
+  await expect(rail).toContainText("딜 건강도")
   await expect(page.locator("#deal-records-main")).toContainText(
     "7월 15일까지 B/L 원본 요청"
   )

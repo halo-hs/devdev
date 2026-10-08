@@ -33,7 +33,9 @@ import type {
 export type CockpitSeriesKpi = {
   periodStart: string;
   planned: AmountCell;
+  payableDue: AmountCell;
   received: AmountCell;
+  paidOut: AmountCell;
   /** AR 적용액 / 수취 예정 % (예정 0 이면 null). */
   receivedRatioPctTenths: bigint | null;
   outstandingEnd: AmountCell;
@@ -52,7 +54,9 @@ export function latestSeriesKpi(
   return {
     periodStart: latest.period_start,
     planned,
+    payableDue: amountCell(row?.payable_due ?? "0"),
     received,
+    paidOut: amountCell(row?.paid_out ?? "0"),
     receivedRatioPctTenths:
       planned.valid && received.valid
         ? roundedPercentage(received.scaled, planned.scaled)

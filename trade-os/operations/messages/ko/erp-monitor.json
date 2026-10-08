@@ -22,7 +22,7 @@
       "overdueServiceLabel": "미수",
       "overdueTitle": "미수금",
       "priceServiceLabel": "단가",
-      "priceTitle": "단가 편차",
+      "priceTitle": "단가 차이",
       "scheduleServiceLabel": "일정",
       "scheduleTitle": "일정 지연",
       "qtyServiceLabel": "수량",
@@ -34,14 +34,17 @@
       "unassigned": "미할당",
       "dataAsOf": "{date} 기준 데이터 ({timezone})",
       "stale": "오래됨",
-      "clockSkew": "기기 시계를 확인하세요",
       "unavailable": "사용 불가",
       "flagCategories": {
         "missingDoc": "서류 누락",
         "paymentOverdue": "결제 지연",
         "docMismatch": "서류 불일치",
         "fallback": "플래그"
-      }
+      },
+      "p0TitleNoDocType": "{hours}h 미처리",
+      "p0TitleAgeUnknown": "{docType} · {hours} 미처리",
+      "p0TitleNoDocTypeAgeUnknown": "{hours} 미처리",
+      "flagCreatedAt": "{date} ({timezone})"
     },
     "screen": {
       "titleDefault": "운영 감시",
@@ -99,6 +102,59 @@
       "success": "플래그를 확인 처리했습니다.",
       "already": "이미 확인된 항목입니다. 목록에서 제거했습니다.",
       "error": "확인 처리하지 못했습니다. 잠시 후 다시 시도해 주세요."
+    },
+    "gate": {
+      "upgradeTitle": "운영 감시는 Pro 플랜에서 제공됩니다",
+      "upgradeBody": "팀 처리량·막힌 작업·리스크·플래그 감시는 Pro 플랜 기능입니다. 설정 → 결제에서 플랜을 업그레이드하세요.",
+      "subscriptionTitle": "운영 감시를 사용하려면 구독이 필요합니다",
+      "subscriptionBody": "현재 활성 구독이 없습니다. 설정 → 결제에서 구독 상태를 확인하세요.",
+      "billingTitle": "결제 상태를 확인해 주세요",
+      "billingBody": "결제 상태가 해결될 때까지 운영 감시를 사용할 수 없습니다. 설정 → 결제에서 상태를 확인하세요.",
+      "roleTitle": "운영 감시 접근 권한이 없습니다",
+      "roleBody": "현재 역할로는 이 워크스페이스의 운영 감시를 볼 수 없습니다."
+    },
+    "exceptionCenterLoadError": "예외 센터를 불러오지 못했습니다.",
+    "view": {
+      "conditionsLabel": "조회 조건",
+      "actionsLabel": "운영 감시 바로가기",
+      "actionsUnavailable": "아직 제공되지 않는 기능입니다",
+      "status": {
+        "red": "긴급 조치 필요 — P0 미처리 {count}건",
+        "yellow": "확인 필요 — 리스크 {risks}건 · 미확인 플래그 {flags}건",
+        "green": "정상 운영 중"
+      },
+      "areas": {
+        "kpi": "KPI",
+        "status": "긴급 상태",
+        "risks": "리스크",
+        "pending": "대기 액션",
+        "blockedP0": "막힌 작업 (P0)",
+        "blockedP1": "막힌 작업 (P1)",
+        "throughput": "완료율 드릴다운"
+      },
+      "partialReasons": {
+        "failed": "조회 실패",
+        "settlement": "연체 받을 돈 집계 조회 실패"
+      },
+      "partialLastKnown": "마지막 정상값 표시 중",
+      "partialItem": "{area} — {reason}",
+      "queueListLabel": "{title} 목록",
+      "blockedAsOf": "{priority} · {asOf}",
+      "throughputDaysLabel": "날짜별 업로드·확정",
+      "throughputDayConfirmed": "확정 {count}",
+      "throughputDayUploaded": "업로드 {count}",
+      "throughputConfirms": "확정",
+      "throughputOwnersTitle": "담당자별 처리",
+      "opsRiskFallback": "리스크",
+      "pagination": {
+        "navigation": "{table} 페이지",
+        "previous": "이전 페이지",
+        "next": "다음 페이지",
+        "pageSize": "페이지당",
+        "page": "{page}페이지",
+        "pageSizeOption": "{size}개",
+        "total": "전체 {count}건"
+      }
     }
   }
 }
