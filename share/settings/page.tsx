@@ -15,35 +15,20 @@ import {
   Landmark,
   Mail,
   Palette,
-  RefreshCw,
   Search,
   SlidersHorizontal,
   Sparkles,
   Upload,
-  UserPlus,
-  WalletCards,
+  ExternalLink,
 } from "lucide-react"
 
 import { SidebarProfileMenu } from "@shared/components/sidebar-profile-menu"
-import {
-  CreditConversionPreview,
-  TrialSchedulePreview,
-} from "@auth/components/trial-preview"
 import { WorkspaceSwitcher } from "@shared/components/workspace-switcher"
 import { Badge } from "@shared/components/ui/badge"
 import { Button } from "@shared/components/ui/button"
 import { Card, CardContent } from "@shared/components/ui/card"
 import { Checkbox } from "@shared/components/ui/checkbox"
 import { Input } from "@shared/components/ui/input"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@shared/components/ui/dialog"
-import { Progress } from "@shared/components/ui/progress"
 import {
   Select,
   SelectContent,
@@ -66,14 +51,23 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@shared/components/ui/sidebar"
-import type { WorkspaceKey } from "@shared/lib/workspaces"
+import {
+  OrganizationMembers,
+  ProductsSubscriptions,
+  SettingsDemoProvider,
+} from "./subscription-settings"
+import { PersonalCreditUsage } from "./personal-credit-usage"
+import { SearchableSetting, countryOptions, languageOptions, timeZoneOptions } from "./region-controls"
+import { workspaceOptions, type WorkspaceKey } from "@shared/lib/workspaces"
 
 export type ProductEntitlement = "erp" | "snap"
 export type SettingsRole = "owner" | "admin" | "member"
+export type SubscriptionDisplayStatus = "trial_not_started" | "trial_active" | "trial_expired" | "paid_active" | "cancel_scheduled" | "payment_pending" | "payment_verifying" | "read_only"
 type SettingsTarget = "home" | "tokens" | "billing"
 
 type SectionId =
   | "account"
+  | "credits"
   | "organizations"
   | "organization"
   | "members"
@@ -85,7 +79,6 @@ type SectionId =
   | "trade-deal-import"
   | "trade-aliases"
   | "trade-alerts"
-  | "trade-usage"
   | "snap-operations"
   | "snap-branding"
   | "snap-localization"
@@ -104,35 +97,41 @@ type NavItem = {
 // Common SSOT 02-COMMON-IA: headings are non-interactive, menus one level deep.
 const navigation: Array<{ label: string; items: NavItem[] }> = [
   {
-    label: "설정 시작",
-    items: [{ id: "account", label: "일반", icon: CircleUserRound }],
+    label: "일반",
+    items: [
+      { id: "account", label: "내 계정", icon: CircleUserRound },
+      { id: "credits", label: "내 크레딧 사용량", icon: Sparkles, keywords: ["토큰", "개인", "사용량"] },
+      { id: "organizations", label: "소속 Organization", icon: Building2 },
+    ],
   },
   {
     label: "조직",
     items: [
       {
         id: "organization",
-        label: "조직 관리",
+        label: "조직 정보",
         icon: Building2,
-        keywords: ["회사", "멤버", "초대", "은행", "서명"],
+        keywords: ["회사", "사업자"],
       },
       {
-        id: "snap-data",
-        label: "데이터 관리",
-        icon: Database,
-        product: "snap",
+        id: "members",
+        label: "사용자 관리",
+        icon: CircleUserRound,
+        roles: ["owner", "admin"],
       },
+      { id: "products", label: "제품 및 구독", icon: CreditCard },
+      { id: "billing", label: "빌링", icon: ExternalLink, roles: ["owner"] },
     ],
   },
   {
-    label: "알림",
+    label: "Trade OS",
     items: [
-      { id: "trade-alerts", label: "ERP 알림", icon: Bell, product: "erp" },
-    ],
-  },
-  {
-    label: "ERP",
-    items: [
+      {
+        id: "trade-defaults",
+        label: "업무 기본 설정",
+        icon: SlidersHorizontal,
+        product: "erp",
+      },
       {
         id: "trade-email",
         label: "이메일로 문서 받기",
@@ -157,11 +156,18 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
         icon: Landmark,
         product: "erp",
       },
+      { id: "trade-alerts", label: "알림 설정", icon: Bell, product: "erp" },
     ],
   },
   {
     label: "SNAP",
     items: [
+      {
+        id: "snap-operations",
+        label: "현장 운영",
+        icon: SlidersHorizontal,
+        product: "snap",
+      },
       { id: "snap-branding", label: "브랜딩", icon: Palette, product: "snap" },
       {
         id: "snap-localization",
@@ -170,32 +176,15 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
         product: "snap",
       },
       {
-        id: "snap-operations",
-        label: "현장 운영",
-        icon: SlidersHorizontal,
+        id: "snap-data",
+        label: "데이터 및 보존",
+        icon: Database,
         product: "snap",
-      },
-    ],
-  },
-  {
-    label: "사용량 및 청구",
-    items: [
-      {
-        id: "trade-usage",
-        label: "ERP AI 사용량",
-        icon: Sparkles,
-        product: "erp",
-      },
-      {
-        id: "billing",
-        label: "ERP 결제·구독",
-        icon: CreditCard,
-        product: "erp",
       },
       {
         id: "snap-usage",
-        label: "SNAP 크레딧·결제",
-        icon: WalletCards,
+        label: "사용량 및 기술 한도",
+        icon: Sparkles,
         product: "snap",
       },
     ],
@@ -212,9 +201,9 @@ function PageHeading({
   action?: ReactNode
 }) {
   return (
-    <header className="mb-7 flex items-start justify-between gap-5">
-      <div className="min-w-0">
-        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+    <header className="mb-7 flex items-start justify-between gap-5 border-b pb-6">
+      <div className="min-w-0 flex-1">
+        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
         <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground">
           {description}
         </p>
@@ -239,9 +228,9 @@ function SettingsSection({
     <section className="space-y-3">
       <div className="flex items-end justify-between gap-4 px-0.5">
         <div>
-          <h2 className="text-sm font-semibold">{title}</h2>
+        <h2 className="text-base font-semibold">{title}</h2>
           {description ? (
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            <p className="mt-1 text-sm leading-5 text-muted-foreground">
               {description}
             </p>
           ) : null}
@@ -255,10 +244,32 @@ function SettingsSection({
   )
 }
 
+function SettingRow({
+  label,
+  description,
+  children,
+  inlineControl = false,
+}: {
+  label: string
+  description?: string
+  children: ReactNode
+  inlineControl?: boolean
+}) {
+  return (
+    <div className={`grid gap-3 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 md:grid-cols-[minmax(0,1fr)_minmax(220px,320px)] md:items-center md:gap-8 ${inlineControl ? "grid-cols-[minmax(0,1fr)_auto] items-center" : ""}`}>
+      <div className="min-w-0">
+        <p className="text-sm font-medium">{label}</p>
+        {description ? <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p> : null}
+      </div>
+      <div className="min-w-0 md:justify-self-end md:w-full">{children}</div>
+    </div>
+  )
+}
+
 function SaveRow({ label = "변경사항 저장" }: { label?: string }) {
   const [saved, setSaved] = useState(false)
   return (
-    <div className="mt-5 flex items-center gap-3">
+    <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t pt-5">
       <Button onClick={() => setSaved(true)}>{label}</Button>
       {saved ? (
         <span className="flex items-center gap-1 text-xs text-emerald-700">
@@ -269,12 +280,34 @@ function SaveRow({ label = "변경사항 저장" }: { label?: string }) {
   )
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function BrandColorPicker({
+  label,
+  initialColor,
+  disabled = false,
+}: {
+  label: string
+  initialColor: string
+  disabled?: boolean
+}) {
+  const [color, setColor] = useState(initialColor)
+  const pickerColor = /^#[0-9a-fA-F]{6}$/.test(color) ? color : initialColor
   return (
-    <label className="grid gap-1.5 text-sm">
-      <span className="text-xs font-medium">{label}</span>
-      {children}
-    </label>
+    <div className="flex items-center gap-2">
+        <Input
+          type="color"
+          aria-label={`${label} 선택`}
+          className="h-10 w-14 shrink-0 cursor-pointer p-1"
+          value={pickerColor}
+          disabled={disabled}
+          onChange={(event) => setColor(event.target.value)}
+        />
+        <Input
+          aria-label={`${label} 코드`}
+          value={color}
+          readOnly={disabled}
+          onChange={(event) => setColor(event.target.value)}
+        />
+    </div>
   )
 }
 
@@ -282,366 +315,79 @@ function AccountPage() {
   return (
     <div>
       <PageHeading
-        title="일반"
+        title="내 계정"
         description="내 계정 정보와 로그인 보안을 확인합니다."
       />
       <div className="space-y-7">
-        <SettingsSection
-          title="내 계정"
-          description="개인 설정 화면 미리보기입니다. 계정 정보 저장은 아직 연결되지 않았습니다."
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="이름">
-              <Input defaultValue="조민영" readOnly />
-            </Field>
-            <Field label="로그인 이메일">
-              <Input defaultValue="minyoung@ecoya.app" readOnly />
-            </Field>
+        <SettingsSection title="내 계정">
+          <div>
+            <SettingRow label="이름"><Input aria-label="이름" defaultValue="조민영" readOnly /></SettingRow>
+            <SettingRow label="로그인 이메일"><Input aria-label="로그인 이메일" defaultValue="minyoung@ecoya.app" readOnly /></SettingRow>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
             업무 시간대와 기본 언어는 각 제품의 조직 설정에서 관리합니다.
           </p>
         </SettingsSection>
         <SettingsSection title="로그인 보안">
-          <Button
-            variant="outline"
-            onClick={() => appLocation.assign("/password-recovery")}
-          >
-            비밀번호 변경
-          </Button>
+          <SettingRow label="비밀번호" description="로그인 비밀번호를 변경합니다." inlineControl>
+            <div className="flex justify-end"><Button
+              variant="outline"
+              onClick={() => appLocation.assign("/password-recovery")}
+            >비밀번호 변경</Button></div>
+          </SettingRow>
         </SettingsSection>
       </div>
     </div>
   )
 }
 
-function OrganizationPage({ role }: { role: SettingsRole }) {
+function OrganizationPage({ role, products }: { role: SettingsRole; products: readonly ProductEntitlement[] }) {
   const editable = role === "owner"
+  const [country, setCountry] = useState("KR")
+  const [locale, setLocale] = useState("ko-KR")
+  const [timezone, setTimezone] = useState("Asia/Seoul")
+  const [saveError, setSaveError] = useState("")
+  const locales = products.includes("erp") ? languageOptions : languageOptions.filter(option => ["ko-KR", "en-US", "ja-JP"].includes(option.value))
+  const regionLabel = country === "KR" ? "시·도" : country === "JP" ? "도도부현" : "주·지역"
+  const cityLabel = country === "KR" ? "시·군·구" : "도시"
   return (
     <div>
-      <PageHeading
-        title="조직 관리"
-        description="현재 조직의 정보와 제품별 멤버·초대를 관리합니다."
-        action={
-          <Badge variant="secondary">
-            {editable ? "OWNER · 편집 가능" : "읽기 전용"}
-          </Badge>
-        }
-      />
-      <SettingsSection
-        title="기본 정보"
-        description="조직 원본 정보는 모든 활성 멤버가 보고 OWNER만 변경합니다."
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="법정 이름">
-            <Input
-              data-guide-target="organization"
-              defaultValue="Hanbit Trading Co., Ltd."
-              readOnly={!editable}
-            />
-          </Field>
-          <Field label="표시 이름">
-            <Input defaultValue="한빛무역" readOnly={!editable} />
-          </Field>
-          <Field label="사업자·세무 식별값">
-            <Input defaultValue="120-88-260708" readOnly={!editable} />
-          </Field>
-          <Field label="대표 이메일">
-            <Input defaultValue="trade@hanbit.example" readOnly={!editable} />
-          </Field>
-          <Field label="대표 연락처">
-            <Input defaultValue="+82 2 2607 0801" readOnly={!editable} />
-          </Field>
-          <Field label="국가·주소">
-            <Input
-              defaultValue="대한민국 · 서울특별시 중구"
-              readOnly={!editable}
-            />
-          </Field>
-          <Field label="기본 locale">
-            <Input defaultValue="ko-KR" readOnly={!editable} />
-          </Field>
-          <Field label="기본 시간대">
-            <Input defaultValue="Asia/Seoul" readOnly={!editable} />
-          </Field>
-        </div>
-        {editable ? (
-          <SaveRow label="조직 정보 저장" />
-        ) : (
-          <p className="mt-5 text-xs text-muted-foreground">
-            조직 정보 변경은 Organization OWNER에게 요청하세요.
-          </p>
-        )}
-      </SettingsSection>
-    </div>
-  )
-}
-
-function MembersPage({ role }: { role: SettingsRole }) {
-  const owner = role === "owner"
-  const [invited, setInvited] = useState(false)
-  return (
-    <div>
-      <PageHeading
-        title="사용자 관리"
-        description="ERP 멤버와 초대를 관리합니다. SNAP 역할과 승인 상태는 SNAP 멤버 관리에서 확인하세요."
-        action={
-          <Button data-guide-target="invite" onClick={() => setInvited(true)}>
-            <UserPlus /> 멤버 초대
-          </Button>
-        }
-      />
-      <div className="space-y-7">
-        <SettingsSection
-          title="조직 멤버"
-          description={
-            owner
-              ? "OWNER는 역할과 제품 접근을 관리할 수 있습니다."
-              : "ADMIN은 MEMBER 범위만 관리할 수 있습니다."
-          }
-        >
-          <div className="grid gap-3">
-            {[
-              ["조민영", "minyoung@ecoya.app", "OWNER", "Trade OS", true],
-              ["김도현", "dohyun@ecoya.app", "ADMIN", "Trade OS", false],
-              ["박서윤", "seoyun@ecoya.app", "MEMBER", "Trade OS", false],
-            ].map(([name, email, memberRole, access, self]) => (
-              <div
-                key={String(email)}
-                className="grid items-center gap-3 rounded-lg border p-4 sm:grid-cols-[minmax(0,1fr)_140px_180px_auto]"
-              >
-                <div>
-                  <div className="font-medium">
-                    {name}
-                    {self ? (
-                      <Badge className="ml-2" variant="secondary">
-                        나
-                      </Badge>
-                    ) : null}
-                  </div>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    {email}
-                  </div>
-                </div>
-                <Select
-                  defaultValue={String(memberRole).toLowerCase()}
-                  disabled={
-                    Boolean(self) || (!owner && memberRole !== "MEMBER")
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="owner">OWNER</SelectItem>
-                    <SelectItem value="admin">ADMIN</SelectItem>
-                    <SelectItem value="member">MEMBER</SelectItem>
-                  </SelectContent>
-                </Select>
-                <span className="text-xs text-muted-foreground">{access}</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={
-                    Boolean(self) || (!owner && memberRole !== "MEMBER")
-                  }
-                >
-                  접근 관리
-                </Button>
-              </div>
-            ))}
-          </div>
-        </SettingsSection>
-        <SettingsSection
-          title="멤버 초대"
-          description="발송·수락·Membership 활성화는 서로 다른 상태입니다."
-        >
-          {invited ? (
-            <div className="mb-3 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">
-              새 초대가 대기 상태로 추가되었습니다.
-            </div>
-          ) : null}
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_140px_auto]">
-            <Input type="email" placeholder="member@company.com" />
-            <Select defaultValue="member">
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {owner ? <SelectItem value="admin">ADMIN</SelectItem> : null}
-                <SelectItem value="member">MEMBER</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={() => setInvited(true)}>초대 이메일 발송</Button>
-          </div>
-          <div className="mt-4 rounded-lg border p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="text-sm font-medium">finance@ecoya.app</div>
-                <div className="mt-1 text-xs text-muted-foreground">
-                  MEMBER · 대기 중 · 2026.09.15 만료
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline">
-                  링크 복사
-                </Button>
-                <Button size="sm" variant="outline">
-                  다시 보내기
-                </Button>
-                <Button size="sm" variant="ghost">
-                  취소
-                </Button>
-              </div>
-            </div>
-          </div>
-        </SettingsSection>
-      </div>
-    </div>
-  )
-}
-
-function BillingPreviewActions({ product }: { product: "erp" | "snap" }) {
-  const [action, setAction] = useState<"subscription" | "credits" | null>(null)
-  const [credits, setCredits] = useState("2000")
-  const [plan, setPlan] = useState("pro")
-  const [message, setMessage] = useState("")
-  return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        <Button variant="outline" onClick={() => setAction("subscription")}>
-          구독 관리
-        </Button>
-        {product === "snap" && (
-          <Button onClick={() => setAction("credits")}>크레딧 충전</Button>
-        )}
-      </div>
-      {message && (
-        <p role="status" className="text-sm text-primary">
-          {message}
-        </p>
-      )}
-      <Dialog
-        open={action !== null}
-        onOpenChange={(open) => {
-          if (!open) setAction(null)
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {action === "credits"
-                ? "SNAP 크레딧 충전"
-                : `${product === "erp" ? "ERP" : "SNAP"} 구독 관리`}
-            </DialogTitle>
-            <DialogDescription>
-              결제 화면 미리보기입니다. 실제 청구나 크레딧 지급은 발생하지
-              않습니다.
-            </DialogDescription>
-          </DialogHeader>
-          {action === "credits" ? (
-            <Field label="충전 크레딧">
-              <Input
-                type="number"
-                min="1"
-                step="1"
-                value={credits}
-                onChange={(event) => setCredits(event.target.value)}
-              />
-            </Field>
-          ) : (
-            <Field label="요금제">
-              <Select
-                value={plan}
-                onValueChange={(value) => value && setPlan(value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pro">Pro</SelectItem>
-                  <SelectItem value="enterprise">Enterprise</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAction(null)}>
-              취소
-            </Button>
-            <Button
-              disabled={
-                action === "credits" &&
-                (!Number.isSafeInteger(Number(credits)) || Number(credits) <= 0)
-              }
-              onClick={() => {
-                setMessage(
-                  action === "credits"
-                    ? `${Number(credits).toLocaleString("ko-KR")}크레딧 충전 · 결제 대기 (예시)`
-                    : `${plan === "pro" ? "Pro" : "Enterprise"} 구독 변경 · 결제 대기 (예시)`
-                )
-                setAction(null)
-              }}
-            >
-              결제 단계 확인
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  )
-}
-
-function BillingPage() {
-  return (
-    <div>
-      <PageHeading
-        title="ERP 결제·구독"
-        description="현재 Organization의 결제 상태와 Paddle 인보이스를 확인합니다."
-        action={<Badge variant="secondary">OWNER 전용</Badge>}
-      />
-      <div className="space-y-7">
-        <TrialSchedulePreview />
-        <SettingsSection
-          title="결제 상태"
-          description="외부 결제 화면을 열었다는 사실은 결제 완료를 뜻하지 않습니다."
-        >
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <div className="text-xs text-muted-foreground">Paddle 연결</div>
-              <div className="mt-1 font-medium">연결됨</div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">다음 결제일</div>
-              <div className="mt-1 font-medium">2026.10.01</div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">예정 금액</div>
-              <div className="mt-1 font-medium">240,000 KRW</div>
-            </div>
-          </div>
-          <div className="mt-5">
-            <BillingPreviewActions product="erp" />
-          </div>
-        </SettingsSection>
-        <SettingsSection title="인보이스">
-          <div className="grid gap-3">
-            {["2026년 9월 · 240,000 KRW", "2026년 8월 · 240,000 KRW"].map(
-              (row) => (
-                <div
-                  key={row}
-                  className="flex items-center justify-between rounded-lg border p-4"
-                >
-                  <span className="text-sm font-medium">{row}</span>
-                  <Button variant="outline" size="sm">
-                    <Download /> 내려받기
-                  </Button>
-                </div>
-              )
-            )}
-          </div>
-        </SettingsSection>
-      </div>
+      <PageHeading title="조직 정보" description="현재 조직의 기본 정보와 주소, 언어를 관리합니다." />
+      <form onSubmit={event => { event.preventDefault(); if (editable) setSaveError("조직 정보를 저장할 수 없습니다. 잠시 후 다시 시도해 주세요. 입력한 내용은 유지됩니다.") }} className="space-y-8">
+        <section aria-labelledby="organization-basics">
+          <h2 id="organization-basics" className="mb-5 text-base font-semibold">기본 정보</h2>
+          <SettingRow label="법정 이름"><Input data-guide-target="organization" aria-label="법정 이름" autoComplete="organization" defaultValue="Hanbit Trading Co., Ltd." readOnly={!editable} /></SettingRow>
+          <SettingRow label="표시 이름"><Input aria-label="표시 이름" defaultValue="한빛무역" readOnly={!editable} /></SettingRow>
+          <SettingRow label="사업자·세무 식별값"><Input aria-label="사업자·세무 식별값" defaultValue="120-88-260708" readOnly={!editable} /></SettingRow>
+          <SettingRow label="대표 이메일"><Input aria-label="대표 이메일" type="email" autoComplete="email" defaultValue="trade@hanbit.example" readOnly={!editable} /></SettingRow>
+          <SettingRow label="대표 연락처"><Input aria-label="대표 연락처" type="tel" autoComplete="tel" defaultValue="+82 2 2607 0801" readOnly={!editable} /></SettingRow>
+        </section>
+        <section aria-labelledby="organization-address" className="border-t pt-7">
+          <h2 id="organization-address" className="mb-5 text-base font-semibold">주소</h2>
+          <SettingRow label="국가·지역" description="국가명이나 국가 코드로 검색할 수 있습니다.">
+            <SearchableSetting label="국가·지역" value={country} options={countryOptions} onChange={setCountry} disabled={!editable} />
+          </SettingRow>
+          {country !== "KR" ? <p role="status" className="py-3 text-xs text-muted-foreground">국가를 변경했습니다. 기존 주소와 우편번호가 새 국가에 맞는지 확인해 주세요.</p> : null}
+          <SettingRow label="우편번호"><Input aria-label="우편번호" autoComplete="postal-code" placeholder={country === "US" ? "예: 10001" : country === "JP" ? "예: 100-0001" : "우편번호"} readOnly={!editable} /></SettingRow>
+          <SettingRow label={regionLabel}><Input aria-label={regionLabel} autoComplete="address-level1" defaultValue="서울특별시" readOnly={!editable} /></SettingRow>
+          <SettingRow label={cityLabel}><Input aria-label={cityLabel} autoComplete="address-level2" defaultValue="중구" readOnly={!editable} /></SettingRow>
+          <SettingRow label="기본 주소" description="도로명과 건물 번호를 입력하세요."><Input aria-label="기본 주소" autoComplete="address-line1" placeholder="도로명, 건물 번호" readOnly={!editable} /></SettingRow>
+          <SettingRow label="상세 주소" description="동·층·호수 등 추가 주소를 입력하세요. (선택)"><Input aria-label="상세 주소" autoComplete="address-line2" placeholder="동, 층, 호수" readOnly={!editable} /></SettingRow>
+        </section>
+        <section aria-labelledby="organization-region" className="border-t pt-7">
+          <h2 id="organization-region" className="mb-5 text-base font-semibold">언어 및 시간대</h2>
+          <SettingRow label="기본 언어" description="개인의 언어 설정은 내 계정에서 관리합니다.">
+            <SearchableSetting label="기본 언어" value={locale} options={locales} onChange={setLocale} disabled={!editable} />
+          </SettingRow>
+          <SettingRow label="기본 시간대" description="국가를 바꿔도 시간대는 유지됩니다.">
+            <SearchableSetting label="기본 시간대" value={timezone} options={timeZoneOptions} onChange={setTimezone} disabled={!editable} />
+          </SettingRow>
+        </section>
+        {editable ? <div className="flex flex-wrap items-center justify-end gap-3 border-t pt-5">
+          {saveError ? <p role="alert" className="w-full text-sm text-destructive">{saveError}</p> : null}
+          <Button type="submit">조직 정보 저장</Button>
+        </div> : <p className="text-xs text-muted-foreground">조직 정보 변경은 Organization OWNER에게 요청하세요.</p>}
+      </form>
     </div>
   )
 }
@@ -660,24 +406,11 @@ function TradeDefaultsPage({ role }: { role: SettingsRole }) {
           title="문서 브랜딩"
           description="Organization 원본 정보와 별도로 저장됩니다."
         >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="문서 표시 이름">
-              <Input defaultValue="ECOYA Demo Co." readOnly={!editable} />
-            </Field>
-            <Field label="승인 색상">
-              <Input defaultValue="#0B3971" readOnly={!editable} />
-            </Field>
-            <Field label="법적 footer">
-              <Input
-                defaultValue="ECOYA Trade OS generated document"
-                readOnly={!editable}
-              />
-            </Field>
-            <Field label="승인 로고">
-              <Button variant="outline" disabled={!editable}>
-                <Upload /> 파일 선택
-              </Button>
-            </Field>
+          <div>
+            <SettingRow label="문서 표시 이름"><Input aria-label="문서 표시 이름" defaultValue="ECOYA Demo Co." readOnly={!editable} /></SettingRow>
+            <SettingRow label="승인 색상"><BrandColorPicker label="승인 색상" initialColor="#0B3971" disabled={!editable} /></SettingRow>
+            <SettingRow label="법적 footer"><Input aria-label="법적 footer" defaultValue="ECOYA Trade OS generated document" readOnly={!editable} /></SettingRow>
+            <SettingRow label="승인 로고" inlineControl><div className="flex justify-end"><Button variant="outline" disabled={!editable}><Upload /> 파일 선택</Button></div></SettingRow>
           </div>
           {editable ? <SaveRow label="브랜딩 저장" /> : null}
         </SettingsSection>
@@ -685,24 +418,12 @@ function TradeDefaultsPage({ role }: { role: SettingsRole }) {
           title="업무용 지급 정보"
           description="계좌 원문은 표시하지 않으며 변경에는 재인증이 필요합니다."
         >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <div className="text-xs text-muted-foreground">
-                은행·계좌 명의
-              </div>
-              <div className="mt-1 text-sm font-medium">
-                DBS Bank · ECOYA Demo Co.
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">통화·계좌</div>
-              <div className="mt-1 text-sm font-medium">USD · •••• 0708</div>
-            </div>
-          </div>
-          <div className="mt-5">
-            <Button variant="outline" disabled={!editable}>
-              재인증 후 변경
-            </Button>
+          <div>
+            <SettingRow label="은행·계좌 명의"><p className="text-sm font-medium md:text-right">DBS Bank · ECOYA Demo Co.</p></SettingRow>
+            <SettingRow label="통화·계좌"><p className="text-sm font-medium md:text-right">USD · •••• 0708</p></SettingRow>
+            <SettingRow label="지급 정보 변경" description="변경하려면 다시 인증해야 합니다." inlineControl>
+              <div className="flex justify-end"><Button variant="outline" disabled={!editable}>재인증 후 변경</Button></div>
+            </SettingRow>
           </div>
         </SettingsSection>
       </div>
@@ -722,20 +443,15 @@ function EmailPage() {
         title="전용 수신 주소"
         description="주소 복사는 문서 수신·분석 성공을 의미하지 않습니다."
       >
-        <div className="flex flex-col gap-3 rounded-xl bg-muted/35 p-5 sm:flex-row sm:items-center">
-          <code className="min-w-0 flex-1 truncate text-sm">
-            hanbit-••••@inbound.ecoya.app
-          </code>
-          <Button variant="outline" onClick={() => setCopied(true)}>
-            <Copy /> 주소 복사
-          </Button>
-        </div>
+        <SettingRow label="수신 주소" description="PDF · 최대 10MB · 실제 주소는 로그와 캡처에서 마스킹됩니다.">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <code className="min-w-0 truncate text-sm">hanbit-••••@inbound.ecoya.app</code>
+            <Button variant="outline" onClick={() => setCopied(true)}><Copy /> 주소 복사</Button>
+          </div>
+        </SettingRow>
         {copied ? (
-          <p className="mt-3 text-xs text-emerald-700">주소를 복사했습니다.</p>
+          <p className="mt-3 text-right text-xs text-emerald-700">주소를 복사했습니다.</p>
         ) : null}
-        <p className="mt-4 text-xs text-muted-foreground">
-          PDF · 최대 10MB · 실제 주소는 로그와 캡처에서 마스킹됩니다.
-        </p>
       </SettingsSection>
     </div>
   )
@@ -800,29 +516,23 @@ function AliasesPage() {
         description="문서에서 읽은 거래처 표현을 기준 거래처에 연결하고 중복 후보를 검토합니다."
         action={<Button>별칭 추가</Button>}
       />
-      <SettingsSection title="기준 거래처와 별칭">
-        <div className="grid gap-3">
+      <section aria-label="기준 거래처와 별칭">
+        <h2 className="mb-3 text-base font-semibold">기준 거래처와 별칭</h2>
+        <ul className="divide-y border-y">
           {[
             ["ACME GmbH", "ACME · ACME Germany · ACME GMBH"],
             ["KATAMAN ASIA-PACIFIC PTE LTD", "KATAMAN · Kataman APAC"],
           ].map(([name, aliases]) => (
-            <div
-              key={name}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4"
-            >
-              <div>
-                <div className="text-sm font-medium">{name}</div>
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {aliases}
-                </div>
+            <li key={name} className="flex flex-wrap items-center gap-x-6 gap-y-3 py-5">
+              <div className="min-w-0 flex-1 basis-60">
+                <h3 className="text-sm font-medium break-words">{name}</h3>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground break-words">{aliases}</p>
               </div>
-              <Button variant="outline" size="sm">
-                병합 영향 미리보기
-              </Button>
-            </div>
+              <Button className="ml-auto" variant="outline" size="sm">병합 영향 미리보기</Button>
+            </li>
           ))}
-        </div>
-      </SettingsSection>
+        </ul>
+      </section>
     </div>
   )
 }
@@ -839,24 +549,23 @@ function AlertsPage() {
   return (
     <div>
       <PageHeading
-        title="ERP 알림"
-        description="Trade OS 업무 알림의 종류와 수신 채널을 설정합니다."
+        title="Trade OS 알림 설정"
+        description="Trade OS 업무 알림의 종류와 수신 채널을 설정합니다. SNAP 알림에는 적용되지 않습니다."
       />
       <div className="space-y-7">
         <SettingsSection
           title="수신 채널"
           description="채널 설정은 실제 알림 생성·전달·읽음 상태와 별개입니다."
         >
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div>
             {[
               ["app", "앱 알림"],
               ["email", "이메일"],
             ].map(([id, label]) => (
-              <label
-                key={id}
-                className="flex items-center gap-3 rounded-lg border p-4 text-sm"
-              >
+              <SettingRow key={id} label={label} inlineControl>
+                <div className="flex justify-end">
                 <Checkbox
+                  aria-label={label}
                   checked={channels[id as keyof typeof channels]}
                   onCheckedChange={(checked) =>
                     setChannels((value) => ({
@@ -865,8 +574,8 @@ function AlertsPage() {
                     }))
                   }
                 />
-                {label}
-              </label>
+                </div>
+              </SettingRow>
             ))}
           </div>
         </SettingsSection>
@@ -874,28 +583,27 @@ function AlertsPage() {
           title="알림 종류"
           description="현재 Organization · Trade OS · Asia/Seoul 기준"
         >
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div>
             {[
               ["approval", "승인 요청·반려"],
               ["document", "문서 분석·처리 실패"],
               ["risk", "거래 위험·불일치"],
               ["settlement", "정산 기한·입출금"],
             ].map(([id, label]) => (
-              <label
-                key={id}
-                className="flex items-center gap-3 rounded-lg border p-4 text-sm"
-              >
+              <SettingRow key={id} label={label} inlineControl>
+                <div className="flex justify-end">
                 <Checkbox
+                  aria-label={label}
                   checked={rules[id as keyof typeof rules]}
                   onCheckedChange={(checked) =>
                     setRules((value) => ({ ...value, [id]: checked === true }))
                   }
                 />
-                {label}
-              </label>
+                </div>
+              </SettingRow>
             ))}
           </div>
-          <div className="mt-5 flex items-center gap-3">
+          <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t pt-5">
             <Button onClick={() => setSaved(true)}>알림 설정 저장</Button>
             {saved ? (
               <span className="text-xs text-emerald-700">저장했습니다.</span>
@@ -907,105 +615,17 @@ function AlertsPage() {
   )
 }
 
-function UsageCard({
-  product,
-  plan,
-  state,
-  used,
-  limit,
-  unit,
-  reset,
-  percent,
-}: {
-  product: string
-  plan: string
-  state: string
-  used: string
-  limit: string
-  unit: string
-  reset: string
-  percent: number
-}) {
-  return (
-    <div className="rounded-xl border p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="font-semibold">{product}</div>
-          <div className="mt-1 text-xs text-muted-foreground">{plan}</div>
-        </div>
-        <Badge variant="secondary">{state}</Badge>
-      </div>
-      <div className="mt-6 flex items-end justify-between gap-3">
-        <div>
-          <span className="text-2xl font-semibold tabular-nums">{used}</span>
-          <span className="ml-1 text-sm text-muted-foreground">
-            / {limit} {unit}
-          </span>
-        </div>
-        <span className="text-xs text-muted-foreground">{reset}</span>
-      </div>
-      <Progress value={percent} className="mt-3" />
-    </div>
-  )
-}
-
-function TradeUsagePage({ role }: { role: SettingsRole }) {
-  return (
-    <div>
-      <PageHeading
-        title="ERP AI 사용량"
-        description="현재 Organization의 Trade OS 집계 사용량입니다. 멤버별 활동이나 프롬프트 본문은 표시하지 않습니다."
-        action={
-          <Button variant="outline">
-            <RefreshCw /> 새로고침
-          </Button>
-        }
-      />
-      <SettingsSection
-        title="구독별 사용량"
-        description="2026.09.08 16:20 기준"
-      >
-        <div className="grid gap-4 lg:grid-cols-2">
-          <UsageCard
-            product="ECOYA Trade OS"
-            plan="Pro"
-            state="구독 중"
-            used="684K"
-            limit="1.2M"
-            unit="tokens"
-            reset="23일 후 갱신"
-            percent={57}
-          />
-        </div>
-        {role === "owner" ? (
-          <div className="mt-5">
-            <Button
-              variant="outline"
-              onClick={() =>
-                appLocation.assign("/erp/settings?section=billing")
-              }
-            >
-              ERP 결제·구독 보기
-            </Button>
-          </div>
-        ) : (
-          <p className="mt-5 text-xs text-muted-foreground">
-            구독 변경은 Organization OWNER가 할 수 있습니다.
-          </p>
-        )}
-      </SettingsSection>
-      <div className="mt-7">
-        <CreditConversionPreview />
-      </div>
-    </div>
-  )
-}
-
 function SnapSimplePage({
   type,
+  role,
 }: {
   type: "operations" | "branding" | "localization"
+  role: SettingsRole
 }) {
+  const [channels, setChannels] = useState({ app: true, email: true })
+  const [channelError, setChannelError] = useState("")
+  const [locale, setLocale] = useState("ko-KR")
+  const [timezone, setTimezone] = useState("Asia/Seoul")
   const content =
     type === "operations"
       ? {
@@ -1031,33 +651,28 @@ function SnapSimplePage({
         action={<Badge variant="secondary">SNAP</Badge>}
       />
       <SettingsSection title="기본 설정">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={type === "localization" ? "기본 언어" : "표시 이름"}>
-            <Input
-              defaultValue={type === "localization" ? "한국어" : "ECOYA SNAP"}
-            />
-          </Field>
-          <Field
-            label={
-              type === "operations"
-                ? "전달 채널"
-                : type === "branding"
-                  ? "브랜드 색상"
-                  : "시간대"
-            }
-          >
-            <Input
-              defaultValue={
-                type === "operations"
-                  ? "앱 링크 · 이메일"
-                  : type === "branding"
-                    ? "#0B3971"
-                    : "Asia/Seoul"
-              }
-            />
-          </Field>
+        <div>
+          <SettingRow label={type === "localization" ? "기본 언어" : "표시 이름"}>
+            {type === "localization" ? <SearchableSetting label="기본 언어" value={locale} options={languageOptions.filter(option => ["ko-KR", "en-US", "ja-JP"].includes(option.value))} onChange={setLocale} disabled={role === "member"} /> : <Input aria-label="표시 이름" defaultValue="ECOYA SNAP" readOnly={role === "member"} />}
+          </SettingRow>
+          {type === "branding" ? (
+            <SettingRow label="브랜드 색상"><BrandColorPicker label="브랜드 색상" initialColor="#0B3971" disabled={role === "member"} /></SettingRow>
+          ) : type === "operations" ? (
+            <SettingRow label="전달 채널" description="업무 결과를 전달할 채널을 선택하세요.">
+              <div role="group" aria-label="전달 채널" className="flex flex-wrap gap-x-6 gap-y-3 md:justify-end">
+                {([["app", "앱 링크"], ["email", "이메일"]] as const).map(([key, label]) => <label key={key} className="flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox aria-label={label} disabled={role === "member"} checked={channels[key]} onCheckedChange={checked => { setChannels(current => ({ ...current, [key]: checked === true })); setChannelError("") }} />{label}
+                </label>)}
+              </div>
+            </SettingRow>
+          ) : (
+            <SettingRow label="시간대"><SearchableSetting label="시간대" value={timezone} options={timeZoneOptions} onChange={setTimezone} disabled={role === "member"} /></SettingRow>
+          )}
         </div>
-        <SaveRow />
+        {type !== "branding" ? role !== "member" ? <div className="mt-5 flex flex-wrap justify-end gap-3 border-t pt-5">
+          {channelError ? <p role="alert" className="w-full text-sm text-destructive">{channelError}</p> : null}
+          <Button onClick={() => setChannelError(type === "operations" ? "전달 설정을 저장할 수 없습니다. 잠시 후 다시 시도해 주세요. 선택한 채널은 유지됩니다." : "지역화 설정을 저장할 수 없습니다. 잠시 후 다시 시도해 주세요. 선택한 언어와 시간대는 유지됩니다.")}>변경사항 저장</Button>
+        </div> : <p className="mt-5 text-xs text-muted-foreground">설정 변경은 관리자에게 요청하세요.</p> : <SaveRow />}
       </SettingsSection>
     </div>
   )
@@ -1073,16 +688,16 @@ function SnapDataPage() {
   return (
     <div>
       <PageHeading
-        title="데이터 관리"
+        title="데이터 및 보존"
         description="SNAP 데이터 거주 지역, 저장 공간, 보존·파기와 조직 데이터 작업을 관리합니다."
         action={<Badge variant="secondary">SNAP</Badge>}
       />
       <div className="space-y-7">
         <SettingsSection title="데이터 저장">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="데이터 거주 지역">
+          <div>
+            <SettingRow label="데이터 거주 지역">
               <Select defaultValue="kr">
-                <SelectTrigger>
+                <SelectTrigger aria-label="데이터 거주 지역" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1091,13 +706,8 @@ function SnapDataPage() {
                   <SelectItem value="eu">유럽 연합</SelectItem>
                 </SelectContent>
               </Select>
-            </Field>
-            <div className="rounded-lg bg-muted/35 p-4">
-              <div className="text-xs text-muted-foreground">
-                조직 저장 공간
-              </div>
-              <div className="mt-1 text-xl font-semibold">18.4 GB / 100 GB</div>
-            </div>
+            </SettingRow>
+            <SettingRow label="조직 저장 공간"><p className="text-sm text-muted-foreground md:text-right">실시간 저장량 조회가 연결되지 않았습니다.</p></SettingRow>
           </div>
         </SettingsSection>
         <SettingsSection
@@ -1105,11 +715,9 @@ function SnapDataPage() {
           description="기존 법적 보존 의무보다 짧게 변경할 수 없습니다."
           action={<Badge variant="outline">일 단위</Badge>}
         >
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div>
             {rows.map(([label, value]) => (
-              <Field key={label} label={label}>
-                <Input type="number" min="1" defaultValue={value} />
-              </Field>
+              <SettingRow key={label} label={label}><Input aria-label={label} type="number" min="1" defaultValue={value} /></SettingRow>
             ))}
           </div>
           <SaveRow label="데이터 정책 저장" />
@@ -1118,7 +726,7 @@ function SnapDataPage() {
           title="조직 데이터 및 감사 이력"
           description="삭제 요청과 파기 실행은 감사 로그에 남습니다."
         >
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
             <Button variant="outline">
               <Download /> 조직 데이터 내보내기
             </Button>
@@ -1134,40 +742,23 @@ function SnapUsagePage({ role }: { role: SettingsRole }) {
   return (
     <div>
       <PageHeading
-        title="SNAP 크레딧·결제"
-        description="현재 Organization의 SNAP 구독·체험별 사용량을 확인합니다."
-        action={
-          <Button variant="outline">
-            <RefreshCw /> 새로고침
-          </Button>
-        }
+        title="사용량 및 기술 한도"
+        description="저장량·AI·속도 제한은 결제 잔액이 아닌 비과금 기술 한도입니다."
       />
-      <SettingsSection
-        title="구독별 사용량"
-        description="사용량 조회 실패를 무료 또는 0으로 표시하지 않습니다."
-      >
-        <div className="grid gap-4 lg:grid-cols-2">
-          <TrialSchedulePreview />
-          <UsageCard
-            product="SNAP 리포트 보관"
-            plan="포함 저장량"
-            state="구독 중"
-            used="18.4"
-            limit="100"
-            unit="GB"
-            reset="매월 갱신"
-            percent={18.4}
-          />
-        </div>
+      <SettingsSection title="현재 사용량">
+        <p className="text-sm text-muted-foreground" role="status">
+          현재 조직의 실시간 사용량이 연결되지 않았습니다. 조회할 수 없는 수치를 0이나 무료로 표시하지 않습니다.
+        </p>
         {role === "owner" ? (
-          <div className="mt-5">
-            <BillingPreviewActions product="snap" />
-          </div>
+          <Button
+            className="mt-5 ml-auto flex"
+            variant="outline"
+            onClick={() => appLocation.assign("/erp/settings?section=products")}
+          >
+            제품 및 구독 보기
+          </Button>
         ) : null}
       </SettingsSection>
-      <div className="mt-7">
-        <CreditConversionPreview />
-      </div>
     </div>
   )
 }
@@ -1175,44 +766,42 @@ function SnapUsagePage({ role }: { role: SettingsRole }) {
 function renderSection(
   section: SectionId,
   role: SettingsRole,
-  products: readonly ProductEntitlement[]
+  products: readonly ProductEntitlement[],
+  subscriptionKind: "separate" | "bundle",
+  subscriptionStates: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>,
+  organizationName: string
 ) {
   if (section === "account") return <AccountPage />
-  if (section === "organization")
+  if (section === "credits") return <PersonalCreditUsage />
+  if (section === "organizations")
     return (
-      <div className="space-y-10">
-        <OrganizationPage role={role} />
-        {products.includes("erp") && (
-          <>
-            <TradeDefaultsPage role={role} />
-            {role !== "member" && <MembersPage role={role} />}
-          </>
-        )}
-        {products.includes("snap") && (
-          <SettingsSection
-            title="SNAP 조직·멤버"
-            description="SNAP 역할, 가입 승인과 좌석은 SNAP 제품 정책을 따릅니다."
-          >
-            <Button
-              variant="outline"
-              onClick={() => appLocation.assign("/workers")}
-            >
-              SNAP 멤버 관리
-            </Button>
-          </SettingsSection>
-        )}
+      <div>
+        <PageHeading
+          title="소속 Organization"
+          description="현재 소속과 선택한 조직을 확인합니다."
+        />
+        <SettingsSection title="현재 조직">
+          <SettingRow label="조직 이름"><p className="text-sm font-medium md:text-right">ECOYA Demo Co.</p></SettingRow>
+        </SettingsSection>
       </div>
     )
-  if (section === "billing")
-    return role === "owner" ? (
-      <BillingPage />
-    ) : (
-      <div role="status">
-        <PageHeading
-          title="ERP 결제·구독"
-          description="결제 관리 권한이 없습니다. 조직 소유자에게 문의하세요."
-        />
-      </div>
+  if (section === "organization") return <OrganizationPage role={role} products={products} />
+  if (section === "trade-defaults") return <TradeDefaultsPage role={role} />
+  if (section === "members")
+    return <OrganizationMembers role={role} products={products} />
+  if (section === "products" || section === "billing")
+    return (
+      <ProductsSubscriptions
+        organizationName={organizationName}
+        role={role}
+        products={products}
+        subscriptionKind={subscriptionKind}
+        subscriptionStates={subscriptionStates}
+        planInitiallyOpen={
+          new URLSearchParams(appLocation.search).get("plan") === "1" &&
+          role !== "member"
+        }
+      />
     )
   if (section === "trade-email") return <EmailPage />
   if (section === "trade-counterparty-import")
@@ -1220,23 +809,24 @@ function renderSection(
   if (section === "trade-deal-import") return <ImportPage kind="deal" />
   if (section === "trade-aliases") return <AliasesPage />
   if (section === "trade-alerts") return <AlertsPage />
-  if (section === "trade-usage") return <TradeUsagePage role={role} />
-  if (section === "snap-operations") return <SnapSimplePage type="operations" />
-  if (section === "snap-branding") return <SnapSimplePage type="branding" />
+  if (section === "snap-operations") return <SnapSimplePage type="operations" role={role} />
+  if (section === "snap-branding") return <SnapSimplePage type="branding" role={role} />
   if (section === "snap-localization")
-    return <SnapSimplePage type="localization" />
+    return <SnapSimplePage type="localization" role={role} />
   if (section === "snap-data") return <SnapDataPage />
   if (section === "snap-usage") return <SnapUsagePage role={role} />
   return <AccountPage />
 }
 
-export function SettingsHubV2({
+function SettingsHubContent({
   onNavigate,
   onLogout,
   workspaceId,
   onWorkspaceChange,
   availableProducts = ["erp", "snap"],
   role = "owner",
+  subscriptionKind = "separate",
+  subscriptionStates = {},
 }: {
   onNavigate: (target: SettingsTarget) => void
   onLogout: () => void
@@ -1244,6 +834,8 @@ export function SettingsHubV2({
   onWorkspaceChange: (workspaceId: WorkspaceKey) => void
   availableProducts?: readonly ProductEntitlement[]
   role?: SettingsRole
+  subscriptionKind?: "separate" | "bundle"
+  subscriptionStates?: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>
 }) {
   const { isMobile, setOpenMobile, state: sidebarState } = useSidebar()
   const groups = useMemo(
@@ -1266,13 +858,22 @@ export function SettingsHubV2({
   )
   const initialSection = (() => {
     if (typeof window === "undefined") return "account" as SectionId
-    const candidate = new URLSearchParams(appLocation.search).get(
-      "section"
-    ) as SectionId | null
-    return candidate && availableIds.includes(candidate) ? candidate : "account"
+    const requested = new URLSearchParams(appLocation.search).get("section")
+    const candidate = (requested === "trade-usage" ? "credits" : requested) as SectionId | null
+    return candidate === "billing"
+      ? "products"
+      : candidate && availableIds.includes(candidate)
+        ? candidate
+        : "account"
   })()
   const [section, setSection] = useState<SectionId>(initialSection)
   const [query, setQuery] = useState("")
+  const [portalError, setPortalError] = useState(false)
+  const openBillingPortal = () => {
+    if (role !== "owner") return
+    // No server session issuer is configured in this UI prototype. Never open a static portal URL.
+    setPortalError(true)
+  }
   const effectiveSection = availableIds.includes(section) ? section : "account"
   const visibleGroups = groups
     .map((group) => ({
@@ -1297,11 +898,14 @@ export function SettingsHubV2({
 
   useEffect(() => {
     const handlePopState = () => {
-      const candidate = new URLSearchParams(appLocation.search).get(
-        "section"
-      ) as SectionId | null
+      const requested = new URLSearchParams(appLocation.search).get("section")
+      const candidate = (requested === "trade-usage" ? "credits" : requested) as SectionId | null
       setSection(
-        candidate && availableIds.includes(candidate) ? candidate : "account"
+        candidate === "billing"
+          ? "products"
+          : candidate && availableIds.includes(candidate)
+            ? candidate
+            : "account"
       )
     }
     window.addEventListener("popstate", handlePopState)
@@ -1309,7 +913,7 @@ export function SettingsHubV2({
   }, [availableIds])
 
   return (
-    <div className="flex h-full min-h-0 min-w-0 flex-1 bg-[var(--surface-muted-background)]">
+    <div className="flex h-full min-h-0 min-w-0 flex-1 bg-background">
       <Sidebar
         collapsible="icon"
         className="settings-navigation top-0 h-svh! bg-background md:z-50"
@@ -1364,7 +968,16 @@ export function SettingsHubV2({
                           <SidebarMenuButton
                             isActive={effectiveSection === item.id}
                             tooltip={item.label}
-                            onClick={() => selectSection(item.id)}
+                            onClick={() =>
+                              item.id === "billing"
+                                ? openBillingPortal()
+                                : selectSection(item.id)
+                            }
+                            aria-label={
+                              item.id === "billing"
+                                ? "빌링 (새 탭에서 열림)"
+                                : item.label
+                            }
                             aria-current={
                               effectiveSection === item.id ? "page" : undefined
                             }
@@ -1373,6 +986,7 @@ export function SettingsHubV2({
                             <Icon />
                             <span className="group-data-[collapsible=icon]:hidden">
                               {item.label}
+                              {item.id === "billing" ? " ↗" : ""}
                             </span>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -1394,20 +1008,61 @@ export function SettingsHubV2({
             <SidebarProfileMenu
               onSettings={() => selectSection("account")}
               onLogout={onLogout}
+              showProductSummary={false}
             />
           </SidebarMenu>
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
-      <SidebarInset className="min-h-0 min-w-0 overflow-hidden bg-[var(--surface-muted-background)] md:pt-(--header-height)">
+      <SidebarInset className="min-h-0 min-w-0 overflow-hidden bg-background md:pt-(--header-height)">
         <div className="h-full min-h-0 overflow-y-auto">
-          <main className="w-full px-5 py-7 sm:px-7 xl:px-10 xl:py-9">
+          <div
+            data-ui="settings-content"
+            className={`mx-auto w-full px-5 py-7 sm:px-7 xl:px-10 xl:py-9 ${effectiveSection === "products" || effectiveSection === "members" ? "max-w-[1120px]" : "max-w-[960px]"}`}
+          >
+            {portalError && role === "owner" && (
+              <div
+                role="alert"
+                className="mb-5 rounded-lg border border-destructive/30 bg-background p-4 text-sm"
+              >
+                <p>
+                  빌링 포털에 연결하지 못했습니다. 현재 조직의 OWNER 권한·Paddle
+                  연결을 확인할 서버가 연결되어 있지 않습니다.
+                </p>
+                <Button
+                  className="mt-3"
+                  variant="outline"
+                  onClick={openBillingPortal}
+                >
+                  다시 열기
+                </Button>
+                <Button
+                  className="ml-2"
+                  variant="ghost"
+                  onClick={() => setPortalError(false)}
+                >
+                  닫기
+                </Button>
+              </div>
+            )}
             <div key={`${workspaceId}:${effectiveSection}`}>
-              {renderSection(effectiveSection, role, availableProducts)}
+              {renderSection(effectiveSection, role, availableProducts, subscriptionKind, subscriptionStates, workspaceOptions.find((workspace) => workspace.id === workspaceId)?.organizationName ?? "현재 조직")}
             </div>
-          </main>
+          </div>
         </div>
       </SidebarInset>
     </div>
+  )
+}
+
+// Reset all demo data and pending feedback when organization or role changes.
+export function SettingsHubV2(props: Parameters<typeof SettingsHubContent>[0]) {
+  return (
+    <SettingsDemoProvider
+      key={`${props.workspaceId}:${props.role ?? "owner"}:${(props.availableProducts ?? ["erp", "snap"]).join(",")}:${props.subscriptionKind ?? "separate"}`}
+      subscriptionKind={props.subscriptionKind}
+    >
+      <SettingsHubContent {...props} />
+    </SettingsDemoProvider>
   )
 }

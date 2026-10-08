@@ -71,8 +71,8 @@ const guides: Record<
   },
 }
 function destination(item: GuideItem, state: GuideState) {
-  if (item === "C1" || item === "C2")
-    return "/erp/settings?section=organization"
+  if (item === "C1") return "/erp/settings?section=organization"
+  if (item === "C2") return "/erp/settings?section=members"
   if (item === "T4") return "/erp/home"
   if (!state.anchor) return "/erp/documents/upload"
   return `/erp/documents/upload/${encodeURIComponent(state.anchor.documentId)}/${item === "T3" ? "connect" : "review"}`

@@ -34,9 +34,9 @@ test("public header and footer links navigate, and usage continues after login",
   await page.locator('input[type="password"]').fill("ecoya")
   await page.getByRole("button", { name: "로그인", exact: true }).click()
   await page.getByRole("button", { name: "ERP 열기" }).click()
-  await expect(page).toHaveURL(/section=trade-usage/)
+  await expect(page).toHaveURL(/section=organization/)
   await expect(
-    page.getByRole("heading", { name: "ERP AI 사용량", exact: true })
+    page.getByRole("heading", { name: "조직 정보", exact: true })
   ).toBeVisible()
 })
 
@@ -63,8 +63,9 @@ test("public login clears rejected credentials and offers recovery without produ
 
 test("trial opens signup with account validation before organization setup", async ({ page }) => {
   await page.goto("/free-trial")
-  await page.getByLabel("토큰 수", { exact: true }).fill("1500")
-  await expect(page.locator("output")).toHaveText("3,000크레딧")
+  await expect(page.getByText("30일").first()).toBeVisible()
+  await expect(page.getByText("최대 3명").first()).toBeVisible()
+  await expect(page.getByText("크레딧")).toHaveCount(0)
   await page.getByRole("button", { name: "SNAP 가입하기" }).click()
   await expect(page.getByLabel("조직명", { exact: true })).toHaveCount(0)
   await fillSignup(page, "secret")
@@ -126,35 +127,26 @@ test("billing legacy URLs stay inside settings and member cannot view invoices",
 }) => {
   await page.goto("/erp/settings/billing?role=member")
   await expect(page).toHaveURL(/\/erp\/settings\?role=member&section=billing/)
-  await expect(page.getByRole("status")).toContainText(
-    "결제 관리 권한이 없습니다"
-  )
+  await expect(page.getByRole("heading", { name: "제품 및 구독", exact: true })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "금융 상태·인보이스" })).toHaveCount(0)
   await expect(page.getByText("240,000 KRW", { exact: true })).toHaveCount(0)
   await page.goto("/erp/settings/token-usage")
-  await expect(
-    page.getByRole("heading", { name: "ERP AI 사용량", exact: true })
-  ).toBeVisible()
+  await expect(page).toHaveURL(/section=credits/)
+  await expect(page.getByRole("heading", { name: "내 크레딧 사용량", exact: true })).toBeVisible()
+  await page.goto("/erp/settings?section=trade-usage")
+  await expect(page).toHaveURL(/section=credits/)
   await expect(
     page.getByRole("navigation", { name: "설정 메뉴" })
   ).toBeVisible()
 })
 
-test("SNAP credit purchase previews pending payment inside settings", async ({
-  page,
-}) => {
+test("SNAP usage directs commercial changes to common product subscriptions", async ({ page }) => {
   await page.goto("/erp/settings?section=snap-usage")
-  await page.getByRole("button", { name: "크레딧 충전", exact: true }).click()
-  const dialog = page.getByRole("dialog")
-  await dialog.getByLabel("충전 크레딧", { exact: true }).fill("-1")
-  await expect(
-    dialog.getByRole("button", { name: "결제 단계 확인" })
-  ).toBeDisabled()
-  await dialog.getByLabel("충전 크레딧", { exact: true }).fill("3000")
-  await dialog.getByRole("button", { name: "결제 단계 확인" }).click()
-  await expect(
-    page.getByText("3,000크레딧 충전 · 결제 대기 (예시)")
-  ).toBeVisible()
-  await expect(page).toHaveURL(/section=snap-usage/)
+  await expect(page.getByRole("button", { name: "크레딧 충전", exact: true })).toHaveCount(0)
+  await expect(page.getByText("18.4", { exact: true })).toHaveCount(0)
+  await page.getByRole("button", { name: "제품 및 구독 보기", exact: true }).click()
+  await expect(page).toHaveURL(/section=products/)
+  await expect(page.getByRole("heading", { name: "제품 및 구독", exact: true })).toBeVisible()
 })
 
 test("entitlement changes hide product menus and product data immediately", async ({
@@ -170,43 +162,32 @@ test("entitlement changes hide product menus and product data immediately", asyn
   await render(["erp"])
   const nav = page.getByRole("navigation", { name: "설정 메뉴" })
   await expect(
-    nav.getByRole("button", { name: "ERP 알림", exact: true })
+    nav.getByRole("button", { name: "알림 설정", exact: true })
   ).toBeVisible()
   await expect(
-    nav.getByRole("button", { name: "SNAP 크레딧·결제", exact: true })
+    nav.getByRole("button", { name: "사용량 및 기술 한도", exact: true })
   ).toHaveCount(0)
   await expect(page.getByRole("heading", { name: "데이터 저장" })).toHaveCount(
     0
   )
   await render(["snap"])
   await expect(
-    nav.getByRole("button", { name: "ERP 알림", exact: true })
+    nav.getByRole("button", { name: "알림 설정", exact: true })
   ).toHaveCount(0)
-  await expect(nav.getByText("알림", { exact: true })).toHaveCount(0)
-  await nav.getByRole("button", { name: "데이터 관리", exact: true }).click()
+  await expect(nav.getByText("알림 설정", { exact: true })).toHaveCount(0)
+  await nav.getByRole("button", { name: "데이터 및 보존", exact: true }).click()
   await expect(page.getByRole("heading", { name: "데이터 저장" })).toBeVisible()
   await render(["erp"])
   await expect(page.getByRole("heading", { name: "데이터 저장" })).toHaveCount(
     0
   )
   await expect(
-    page.getByRole("heading", { name: "일반", exact: true })
+    page.getByRole("heading", { name: "내 계정", exact: true, level: 1 })
   ).toBeVisible()
   await render(["erp", "snap"])
   await expect(nav.getByRole("button")).toHaveText([
-    "일반",
-    "조직 관리",
-    "데이터 관리",
-    "ERP 알림",
-    "이메일로 문서 받기",
-    "거래처 일괄 등록",
-    "거래 일괄 등록",
-    "거래처 별칭 학습",
-    "브랜딩",
-    "지역화",
-    "현장 운영",
-    "ERP AI 사용량",
-    "ERP 결제·구독",
-    "SNAP 크레딧·결제",
+    "내 계정", "소속 Organization", "조직 정보", "사용자 관리", "제품 및 구독", "빌링 ↗",
+    "업무 기본 설정", "이메일로 문서 받기", "거래처 일괄 등록", "거래 일괄 등록", "거래처 별칭 학습", "알림 설정",
+    "현장 운영", "브랜딩", "지역화", "데이터 및 보존", "사용량 및 기술 한도",
   ])
 })

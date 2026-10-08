@@ -3,8 +3,6 @@ import { useEffect, useState, type ReactNode } from "react"
 import { ArrowRight, Building2, MapPin } from "lucide-react"
 import { Button } from "@shared/components/ui/button"
 import { CommonPublicLayout } from "@auth/layout"
-import { CreditConversionPreview } from "@auth/components/trial-preview"
-import { trialPreview } from "@auth/lib/trial-preview"
 import {
   Card,
   CardContent,
@@ -96,11 +94,9 @@ function FreeTrial({
             <CardContent className="space-y-5">
               <dl className="grid grid-cols-2 gap-y-3 text-sm">
                 <dt className="text-muted-foreground">체험 기간</dt>
-                <dd>기본 {trialPreview.days}일</dd>
-                <dt className="text-muted-foreground">체험 일정</dt>
-                <dd>관리자가 조정 가능</dd>
-                <dt className="text-muted-foreground">총 제공 크레딧</dt>
-                <dd>별도 설정 예정</dd>
+                <dd>30일</dd>
+                <dt className="text-muted-foreground">체험 좌석</dt>
+                <dd>최대 3명</dd>
               </dl>
               <Button className="w-full" onClick={() => onSelect(product)}>
                 {product === "erp" ? "Trade OS" : "SNAP"} 가입하기{" "}
@@ -111,11 +107,8 @@ function FreeTrial({
         ))}
       </div>
       <p role="status" className="mt-6 text-sm leading-6 text-muted-foreground">
-        기본 체험 기간은 14일이며 관리자가 체험 일정을 조정할 수 있습니다.
+        체험은 조직에서 제품별로 한 번 시작할 수 있습니다. 카드 등록과 자동 결제는 필요하지 않습니다.
       </p>
-      <div className="mt-6">
-        <CreditConversionPreview />
-      </div>
       <a
         className="mt-5 inline-block text-sm text-primary underline underline-offset-4"
         href="/login"
@@ -198,7 +191,7 @@ export function CommonEntry({ children }: { children: ReactNode }) {
     const usageRequested = url.searchParams.get("returnTo") === "usage"
     appLocation.assign(
       usageRequested
-        ? `/erp/settings?section=${product === "erp" ? "trade-usage" : "snap-usage"}`
+        ? `/erp/settings?section=${product === "erp" ? "organization" : "snap-usage"}`
         : product === "erp"
           ? "/erp/home"
           : "/dashboard"
