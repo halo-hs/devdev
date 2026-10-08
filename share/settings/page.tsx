@@ -56,6 +56,8 @@ import {
   ProductsSubscriptions,
   SettingsDemoProvider,
 } from "./subscription-settings"
+import { PersonalCreditUsage } from "./personal-credit-usage"
+import { SearchableSetting, countryOptions, languageOptions, timeZoneOptions } from "./region-controls"
 import { workspaceOptions, type WorkspaceKey } from "@shared/lib/workspaces"
 
 export type ProductEntitlement = "erp" | "snap"
@@ -65,6 +67,7 @@ type SettingsTarget = "home" | "tokens" | "billing"
 
 type SectionId =
   | "account"
+  | "credits"
   | "organizations"
   | "organization"
   | "members"
@@ -97,6 +100,7 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
     label: "일반",
     items: [
       { id: "account", label: "내 계정", icon: CircleUserRound },
+      { id: "credits", label: "내 크레딧 사용량", icon: Sparkles, keywords: ["토큰", "개인", "사용량"] },
       { id: "organizations", label: "소속 Organization", icon: Building2 },
     ],
   },
@@ -337,36 +341,53 @@ function AccountPage() {
   )
 }
 
-function OrganizationPage({ role }: { role: SettingsRole }) {
+function OrganizationPage({ role, products }: { role: SettingsRole; products: readonly ProductEntitlement[] }) {
   const editable = role === "owner"
+  const [country, setCountry] = useState("KR")
+  const [locale, setLocale] = useState("ko-KR")
+  const [timezone, setTimezone] = useState("Asia/Seoul")
+  const [saveError, setSaveError] = useState("")
+  const locales = products.includes("erp") ? languageOptions : languageOptions.filter(option => ["ko-KR", "en-US", "ja-JP"].includes(option.value))
+  const regionLabel = country === "KR" ? "시·도" : country === "JP" ? "도도부현" : "주·지역"
+  const cityLabel = country === "KR" ? "시·군·구" : "도시"
   return (
     <div>
-      <PageHeading
-        title="조직 정보"
-        description="현재 조직의 기본 정보를 확인합니다. 멤버·초대는 사용자 관리에서 관리합니다."
-      />
-      <SettingsSection
-        title="기본 정보"
-        description="조직 원본 정보는 모든 활성 멤버가 보고 OWNER만 변경합니다."
-      >
-        <div>
-          <SettingRow label="법정 이름"><Input data-guide-target="organization" aria-label="법정 이름" defaultValue="Hanbit Trading Co., Ltd." readOnly={!editable} /></SettingRow>
+      <PageHeading title="조직 정보" description="현재 조직의 기본 정보와 주소, 언어를 관리합니다." />
+      <form onSubmit={event => { event.preventDefault(); if (editable) setSaveError("조직 정보를 저장할 수 없습니다. 잠시 후 다시 시도해 주세요. 입력한 내용은 유지됩니다.") }} className="space-y-8">
+        <section aria-labelledby="organization-basics">
+          <h2 id="organization-basics" className="mb-5 text-base font-semibold">기본 정보</h2>
+          <SettingRow label="법정 이름"><Input data-guide-target="organization" aria-label="법정 이름" autoComplete="organization" defaultValue="Hanbit Trading Co., Ltd." readOnly={!editable} /></SettingRow>
           <SettingRow label="표시 이름"><Input aria-label="표시 이름" defaultValue="한빛무역" readOnly={!editable} /></SettingRow>
           <SettingRow label="사업자·세무 식별값"><Input aria-label="사업자·세무 식별값" defaultValue="120-88-260708" readOnly={!editable} /></SettingRow>
-          <SettingRow label="대표 이메일"><Input aria-label="대표 이메일" defaultValue="trade@hanbit.example" readOnly={!editable} /></SettingRow>
-          <SettingRow label="대표 연락처"><Input aria-label="대표 연락처" defaultValue="+82 2 2607 0801" readOnly={!editable} /></SettingRow>
-          <SettingRow label="국가·주소"><Input aria-label="국가·주소" defaultValue="대한민국 · 서울특별시 중구" readOnly={!editable} /></SettingRow>
-          <SettingRow label="기본 locale"><Input aria-label="기본 locale" defaultValue="ko-KR" readOnly={!editable} /></SettingRow>
-          <SettingRow label="기본 시간대"><Input aria-label="기본 시간대" defaultValue="Asia/Seoul" readOnly={!editable} /></SettingRow>
-        </div>
-        {editable ? (
-          <SaveRow label="조직 정보 저장" />
-        ) : (
-          <p className="mt-5 text-xs text-muted-foreground">
-            조직 정보 변경은 Organization OWNER에게 요청하세요.
-          </p>
-        )}
-      </SettingsSection>
+          <SettingRow label="대표 이메일"><Input aria-label="대표 이메일" type="email" autoComplete="email" defaultValue="trade@hanbit.example" readOnly={!editable} /></SettingRow>
+          <SettingRow label="대표 연락처"><Input aria-label="대표 연락처" type="tel" autoComplete="tel" defaultValue="+82 2 2607 0801" readOnly={!editable} /></SettingRow>
+        </section>
+        <section aria-labelledby="organization-address" className="border-t pt-7">
+          <h2 id="organization-address" className="mb-5 text-base font-semibold">주소</h2>
+          <SettingRow label="국가·지역" description="국가명이나 국가 코드로 검색할 수 있습니다.">
+            <SearchableSetting label="국가·지역" value={country} options={countryOptions} onChange={setCountry} disabled={!editable} />
+          </SettingRow>
+          {country !== "KR" ? <p role="status" className="py-3 text-xs text-muted-foreground">국가를 변경했습니다. 기존 주소와 우편번호가 새 국가에 맞는지 확인해 주세요.</p> : null}
+          <SettingRow label="우편번호"><Input aria-label="우편번호" autoComplete="postal-code" placeholder={country === "US" ? "예: 10001" : country === "JP" ? "예: 100-0001" : "우편번호"} readOnly={!editable} /></SettingRow>
+          <SettingRow label={regionLabel}><Input aria-label={regionLabel} autoComplete="address-level1" defaultValue="서울특별시" readOnly={!editable} /></SettingRow>
+          <SettingRow label={cityLabel}><Input aria-label={cityLabel} autoComplete="address-level2" defaultValue="중구" readOnly={!editable} /></SettingRow>
+          <SettingRow label="기본 주소" description="도로명과 건물 번호를 입력하세요."><Input aria-label="기본 주소" autoComplete="address-line1" placeholder="도로명, 건물 번호" readOnly={!editable} /></SettingRow>
+          <SettingRow label="상세 주소" description="동·층·호수 등 추가 주소를 입력하세요. (선택)"><Input aria-label="상세 주소" autoComplete="address-line2" placeholder="동, 층, 호수" readOnly={!editable} /></SettingRow>
+        </section>
+        <section aria-labelledby="organization-region" className="border-t pt-7">
+          <h2 id="organization-region" className="mb-5 text-base font-semibold">언어 및 시간대</h2>
+          <SettingRow label="기본 언어" description="개인의 언어 설정은 내 계정에서 관리합니다.">
+            <SearchableSetting label="기본 언어" value={locale} options={locales} onChange={setLocale} disabled={!editable} />
+          </SettingRow>
+          <SettingRow label="기본 시간대" description="국가를 바꿔도 시간대는 유지됩니다.">
+            <SearchableSetting label="기본 시간대" value={timezone} options={timeZoneOptions} onChange={setTimezone} disabled={!editable} />
+          </SettingRow>
+        </section>
+        {editable ? <div className="flex flex-wrap items-center justify-end gap-3 border-t pt-5">
+          {saveError ? <p role="alert" className="w-full text-sm text-destructive">{saveError}</p> : null}
+          <Button type="submit">조직 정보 저장</Button>
+        </div> : <p className="text-xs text-muted-foreground">조직 정보 변경은 Organization OWNER에게 요청하세요.</p>}
+      </form>
     </div>
   )
 }
@@ -495,29 +516,23 @@ function AliasesPage() {
         description="문서에서 읽은 거래처 표현을 기준 거래처에 연결하고 중복 후보를 검토합니다."
         action={<Button>별칭 추가</Button>}
       />
-      <SettingsSection title="기준 거래처와 별칭">
-        <div className="grid gap-3">
+      <section aria-label="기준 거래처와 별칭">
+        <h2 className="mb-3 text-base font-semibold">기준 거래처와 별칭</h2>
+        <ul className="divide-y border-y">
           {[
             ["ACME GmbH", "ACME · ACME Germany · ACME GMBH"],
             ["KATAMAN ASIA-PACIFIC PTE LTD", "KATAMAN · Kataman APAC"],
           ].map(([name, aliases]) => (
-            <div
-              key={name}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4"
-            >
-              <div>
-                <div className="text-sm font-medium">{name}</div>
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {aliases}
-                </div>
+            <li key={name} className="flex flex-wrap items-center gap-x-6 gap-y-3 py-5">
+              <div className="min-w-0 flex-1 basis-60">
+                <h3 className="text-sm font-medium break-words">{name}</h3>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground break-words">{aliases}</p>
               </div>
-              <Button className="ml-auto" variant="outline" size="sm">
-                병합 영향 미리보기
-              </Button>
-            </div>
+              <Button className="ml-auto" variant="outline" size="sm">병합 영향 미리보기</Button>
+            </li>
           ))}
-        </div>
-      </SettingsSection>
+        </ul>
+      </section>
     </div>
   )
 }
@@ -607,6 +622,10 @@ function SnapSimplePage({
   type: "operations" | "branding" | "localization"
   role: SettingsRole
 }) {
+  const [channels, setChannels] = useState({ app: true, email: true })
+  const [channelError, setChannelError] = useState("")
+  const [locale, setLocale] = useState("ko-KR")
+  const [timezone, setTimezone] = useState("Asia/Seoul")
   const content =
     type === "operations"
       ? {
@@ -634,17 +653,26 @@ function SnapSimplePage({
       <SettingsSection title="기본 설정">
         <div>
           <SettingRow label={type === "localization" ? "기본 언어" : "표시 이름"}>
-            <Input aria-label={type === "localization" ? "기본 언어" : "표시 이름"} defaultValue={type === "localization" ? "한국어" : "ECOYA SNAP"} />
+            {type === "localization" ? <SearchableSetting label="기본 언어" value={locale} options={languageOptions.filter(option => ["ko-KR", "en-US", "ja-JP"].includes(option.value))} onChange={setLocale} disabled={role === "member"} /> : <Input aria-label="표시 이름" defaultValue="ECOYA SNAP" readOnly={role === "member"} />}
           </SettingRow>
           {type === "branding" ? (
             <SettingRow label="브랜드 색상"><BrandColorPicker label="브랜드 색상" initialColor="#0B3971" disabled={role === "member"} /></SettingRow>
-          ) : (
-            <SettingRow label={type === "operations" ? "전달 채널" : "시간대"}>
-              <Input aria-label={type === "operations" ? "전달 채널" : "시간대"} defaultValue={type === "operations" ? "앱 링크 · 이메일" : "Asia/Seoul"} />
+          ) : type === "operations" ? (
+            <SettingRow label="전달 채널" description="업무 결과를 전달할 채널을 선택하세요.">
+              <div role="group" aria-label="전달 채널" className="flex flex-wrap gap-x-6 gap-y-3 md:justify-end">
+                {([["app", "앱 링크"], ["email", "이메일"]] as const).map(([key, label]) => <label key={key} className="flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox aria-label={label} disabled={role === "member"} checked={channels[key]} onCheckedChange={checked => { setChannels(current => ({ ...current, [key]: checked === true })); setChannelError("") }} />{label}
+                </label>)}
+              </div>
             </SettingRow>
+          ) : (
+            <SettingRow label="시간대"><SearchableSetting label="시간대" value={timezone} options={timeZoneOptions} onChange={setTimezone} disabled={role === "member"} /></SettingRow>
           )}
         </div>
-        <SaveRow />
+        {type !== "branding" ? role !== "member" ? <div className="mt-5 flex flex-wrap justify-end gap-3 border-t pt-5">
+          {channelError ? <p role="alert" className="w-full text-sm text-destructive">{channelError}</p> : null}
+          <Button onClick={() => setChannelError(type === "operations" ? "전달 설정을 저장할 수 없습니다. 잠시 후 다시 시도해 주세요. 선택한 채널은 유지됩니다." : "지역화 설정을 저장할 수 없습니다. 잠시 후 다시 시도해 주세요. 선택한 언어와 시간대는 유지됩니다.")}>변경사항 저장</Button>
+        </div> : <p className="mt-5 text-xs text-muted-foreground">설정 변경은 관리자에게 요청하세요.</p> : <SaveRow />}
       </SettingsSection>
     </div>
   )
@@ -744,6 +772,7 @@ function renderSection(
   organizationName: string
 ) {
   if (section === "account") return <AccountPage />
+  if (section === "credits") return <PersonalCreditUsage />
   if (section === "organizations")
     return (
       <div>
@@ -756,7 +785,7 @@ function renderSection(
         </SettingsSection>
       </div>
     )
-  if (section === "organization") return <OrganizationPage role={role} />
+  if (section === "organization") return <OrganizationPage role={role} products={products} />
   if (section === "trade-defaults") return <TradeDefaultsPage role={role} />
   if (section === "members")
     return <OrganizationMembers role={role} products={products} />
@@ -829,9 +858,8 @@ function SettingsHubContent({
   )
   const initialSection = (() => {
     if (typeof window === "undefined") return "account" as SectionId
-    const candidate = new URLSearchParams(appLocation.search).get(
-      "section"
-    ) as SectionId | null
+    const requested = new URLSearchParams(appLocation.search).get("section")
+    const candidate = (requested === "trade-usage" ? "credits" : requested) as SectionId | null
     return candidate === "billing"
       ? "products"
       : candidate && availableIds.includes(candidate)
@@ -870,9 +898,8 @@ function SettingsHubContent({
 
   useEffect(() => {
     const handlePopState = () => {
-      const candidate = new URLSearchParams(appLocation.search).get(
-        "section"
-      ) as SectionId | null
+      const requested = new URLSearchParams(appLocation.search).get("section")
+      const candidate = (requested === "trade-usage" ? "credits" : requested) as SectionId | null
       setSection(
         candidate === "billing"
           ? "products"

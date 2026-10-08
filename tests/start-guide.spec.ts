@@ -128,6 +128,7 @@ test("sample PDF starts and resumes the same document without manually completin
   }
   await page.getByRole("button", { name: "내 PDF 선택", exact: true }).click()
   await page.getByRole("button", { name: "예시 PDF 사용" }).click()
+  await expect(page).toHaveURL(/PO_.*\/review/)
   await expect
     .poll(async () =>
       page.evaluate(

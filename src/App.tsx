@@ -16369,7 +16369,7 @@ export function App() {
     }
   ) => {
     if (nextScreen === "tokens" || nextScreen === "billing") {
-      const section = nextScreen === "billing" ? "products" : product === "snap" ? "snap-usage" : "organization"
+      const section = nextScreen === "billing" ? "products" : "credits"
       appLocation.assign(`/erp/settings?section=${section}`)
       return
     }

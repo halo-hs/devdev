@@ -131,10 +131,10 @@ test("billing legacy URLs stay inside settings and member cannot view invoices",
   await expect(page.getByRole("heading", { name: "금융 상태·인보이스" })).toHaveCount(0)
   await expect(page.getByText("240,000 KRW", { exact: true })).toHaveCount(0)
   await page.goto("/erp/settings/token-usage")
-  await expect(page).toHaveURL(/section=organization/)
-  await expect(page.getByRole("heading", { name: "조직 정보", exact: true })).toBeVisible()
+  await expect(page).toHaveURL(/section=credits/)
+  await expect(page.getByRole("heading", { name: "내 크레딧 사용량", exact: true })).toBeVisible()
   await page.goto("/erp/settings?section=trade-usage")
-  await expect(page).toHaveURL(/section=organization/)
+  await expect(page).toHaveURL(/section=credits/)
   await expect(
     page.getByRole("navigation", { name: "설정 메뉴" })
   ).toBeVisible()
