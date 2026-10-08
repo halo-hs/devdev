@@ -53,7 +53,8 @@
 - Cloudflare의 브랜치 미리보기는 비활성화합니다. main 이외 브랜치는 Cloudflare에 배포하지 않습니다.
 - GitHub Pages 공용 미리보기: `https://halo-hs.github.io/devdev/`. 작업 브랜치 push 시 `.github/workflows/github-pages-preview.yml`이 갱신합니다.
 - 로컬 실행은 `npm run dev`만 사용합니다. 로컬 실행을 위해 PR을 만들거나 push·배포하지 않습니다.
-- 배포 운영 방법은 [미리보기와 운영 배포](docs/deployment-preview.md)를 따릅니다.
+- `doc/`와 `docs/`는 로컬 문서 전용이며 Git에 올리지 않습니다. `git add -f`로 강제 추가하지 않습니다.
+- 상세 배포 메모는 로컬 `docs/deployment-preview.md`를 참고합니다.
 
 ## GitHub 변경 제출 규칙
 
