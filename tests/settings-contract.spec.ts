@@ -197,7 +197,7 @@ test("last owner has a fixed role without alternative options and only owner see
   }
 })
 
-test("admin can assign own and member seats, cannot revoke own seat or edit roles, and reads invoices", async ({
+test("admin can change own and member seats without editing roles and reads invoices", async ({
   page,
 }) => {
   await openSettings(page, "admin")
@@ -214,9 +214,12 @@ test("admin can assign own and member seats, cannot revoke own seat or edit role
     .getByRole("menuitem", { name: "Standard 시트 배정", exact: true })
     .click()
   await seatCounts(page, "SNAP", 5, 2, 3)
-  await expect(
-    page.getByRole("button", { name: "김도현 SNAP", exact: true })
-  ).toHaveCount(0)
+  await page.getByRole("button", { name: "김도현 SNAP", exact: true }).click()
+  await page.getByRole("menuitem", { name: "시트 회수", exact: true }).click()
+  await seatCounts(page, "SNAP", 5, 1, 4)
+  await expect(page.getByLabel("김도현 역할", { exact: true })).toHaveText("ADMIN")
+  await page.getByRole("button", { name: "김도현 SNAP", exact: true }).click()
+  await page.getByRole("menuitem", { name: "Standard 시트 배정", exact: true }).click()
   await memberRow(page, "박서윤")
     .getByRole("button", { name: "승인", exact: true })
     .click()
@@ -230,6 +233,26 @@ test("admin can assign own and member seats, cannot revoke own seat or edit role
     page.getByRole("button", { name: "요금제 변경", exact: true })
   ).toHaveCount(0)
   await seatCounts(page, "SNAP", 5, 3, 2)
+})
+
+test("last owner can release and reassign own product seats while keeping role and billing access", async ({ page }) => {
+  await openSettings(page, "owner")
+  const owner = memberRow(page, "조민영")
+  for (const [product, total, assigned] of [["Trade OS", 8, 3], ["SNAP", 5, 1]] as const) {
+    await owner.getByRole("button", { name: `조민영 ${product}`, exact: true }).click()
+    await page.getByRole("menuitem", { name: "시트 회수", exact: true }).click()
+    await expect(owner.getByRole("button", { name: `조민영 ${product}`, exact: true })).toHaveText("할당되지 않음")
+    await seatCounts(page, product, total, assigned - 1, total - assigned + 1)
+  }
+  await expect(owner.getByLabel("조민영 역할", { exact: true })).toHaveText("OWNER")
+  await expect(owner.getByRole("combobox")).toHaveCount(0)
+  await expect(owner.getByRole("button", { name: "조민영 더보기" })).toHaveCount(0)
+  await expect(page.getByRole("button", { name: "빌링 (새 탭에서 열림)", exact: true })).toBeVisible()
+  for (const [product, total, assigned] of [["Trade OS", 8, 3], ["SNAP", 5, 1]] as const) {
+    await owner.getByRole("button", { name: `조민영 ${product}`, exact: true }).click()
+    await page.getByRole("menuitem", { name: "Standard 시트 배정", exact: true }).click()
+    await seatCounts(page, product, total, assigned, total - assigned)
+  }
 })
 
 test("member cannot enter user management or see invoices and can cancel own access request", async ({
