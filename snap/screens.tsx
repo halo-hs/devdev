@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import { CommonPublicLayout } from "@auth/layout"
 import {
   useEffect,
@@ -3379,7 +3380,7 @@ function LinkPrototype({ screen, navigate, routeParams }: PrototypeScreenProps) 
                   disabled={publicLinkBusy}
                   onClick={
                     publicLinkState === "error"
-                      ? () => window.location.reload()
+                      ? () => appLocation.reload()
                       : requestNewPublicLink
                   }
                 >

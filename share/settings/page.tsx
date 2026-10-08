@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import {
   ArrowLeft,
@@ -304,7 +305,7 @@ function AccountPage() {
         <SettingsSection title="로그인 보안">
           <Button
             variant="outline"
-            onClick={() => window.location.assign("/password-recovery")}
+            onClick={() => appLocation.assign("/password-recovery")}
           >
             비밀번호 변경
           </Button>
@@ -334,6 +335,7 @@ function OrganizationPage({ role }: { role: SettingsRole }) {
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="법정 이름">
             <Input
+              data-guide-target="organization"
               defaultValue="Hanbit Trading Co., Ltd."
               readOnly={!editable}
             />
@@ -384,7 +386,7 @@ function MembersPage({ role }: { role: SettingsRole }) {
         title="사용자 관리"
         description="ERP 멤버와 초대를 관리합니다. SNAP 역할과 승인 상태는 SNAP 멤버 관리에서 확인하세요."
         action={
-          <Button onClick={() => setInvited(true)}>
+          <Button data-guide-target="invite" onClick={() => setInvited(true)}>
             <UserPlus /> 멤버 초대
           </Button>
         }
@@ -980,7 +982,7 @@ function TradeUsagePage({ role }: { role: SettingsRole }) {
             <Button
               variant="outline"
               onClick={() =>
-                window.location.assign("/erp/settings?section=billing")
+                appLocation.assign("/erp/settings?section=billing")
               }
             >
               ERP 결제·구독 보기
@@ -1193,7 +1195,7 @@ function renderSection(
           >
             <Button
               variant="outline"
-              onClick={() => window.location.assign("/workers")}
+              onClick={() => appLocation.assign("/workers")}
             >
               SNAP 멤버 관리
             </Button>
@@ -1264,7 +1266,7 @@ export function SettingsHubV2({
   )
   const initialSection = (() => {
     if (typeof window === "undefined") return "account" as SectionId
-    const candidate = new URLSearchParams(window.location.search).get(
+    const candidate = new URLSearchParams(appLocation.search).get(
       "section"
     ) as SectionId | null
     return candidate && availableIds.includes(candidate) ? candidate : "account"
@@ -1287,7 +1289,7 @@ export function SettingsHubV2({
   const selectSection = (next: SectionId) => {
     if (!availableIds.includes(next)) return
     setSection(next)
-    const url = new URL(window.location.href)
+    const url = new URL(appLocation.href)
     url.searchParams.set("section", next)
     window.history.pushState({ section: next }, "", url)
     if (isMobile) setOpenMobile(false)
@@ -1295,7 +1297,7 @@ export function SettingsHubV2({
 
   useEffect(() => {
     const handlePopState = () => {
-      const candidate = new URLSearchParams(window.location.search).get(
+      const candidate = new URLSearchParams(appLocation.search).get(
         "section"
       ) as SectionId | null
       setSection(

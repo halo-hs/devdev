@@ -1,3 +1,4 @@
+import { useStartGuide } from "@trade-os/onboarding/runtime"
 import { useRef, useState } from "react"
 import {
   FilePlus2,
@@ -34,9 +35,16 @@ export function PlatformHomeOverview({
   role: "owner" | "member"
   empty?: boolean
 }) {
+  const guide = useStartGuide()
+  const guideAnchor = guide?.state?.trade.T3 && !guide.state.trade.T4 && (!guide.state.access || guide.state.access === "active") ? guide.state.anchor : undefined
+  const [guideAnswer, setGuideAnswer] = useState<{ id: string; dealId: string; documentId: string; question: string } | null>(null)
   const [query, setQuery] = useState("")
   const input = useRef<HTMLTextAreaElement>(null)
   const submit = () => {
+    if (query.trim() && guideAnchor?.dealId) {
+      setGuideAnswer({ id: crypto.randomUUID(), dealId: guideAnchor.dealId, documentId: guideAnchor.documentId, question: query.trim() })
+      return
+    }
     if (query.trim())
       onNavigate("ask", { question: query.trim(), submit: true })
   }
@@ -55,6 +63,7 @@ export function PlatformHomeOverview({
           <h2 id="home-question-title" className="text-base font-semibold">
             무엇이든 물어보세요
           </h2>
+          {guideAnchor?.dealId && <p className="mt-2 text-sm">질문할 거래: {guideAnchor.dealId} · {guideAnchor.documentId}</p>}
           <form
             className="mt-3 space-y-3"
             onSubmit={(event) => {
@@ -66,6 +75,7 @@ export function PlatformHomeOverview({
               ref={input}
               rows={3}
               aria-label="AI에게 질문"
+              data-guide-target="question"
               placeholder="예: 이번 주 받을 돈이 가장 큰 거래처는?"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -114,6 +124,16 @@ export function PlatformHomeOverview({
             </div>
           </form>
         </section>
+        {guideAnswer && guideAnswer.dealId === guide?.state?.anchor?.dealId && (!guide.state.access || guide.state.access === "active") && (
+          <section aria-label="거래 질문 답변" className="rounded-xl border bg-card p-5">
+            <p className="text-xs text-muted-foreground">예시 답변 · {guideAnswer.dealId}</p>
+            <h2 className="mt-2 font-semibold">{guideAnswer.question}</h2>
+            <p className="mt-3 text-sm leading-6">이 거래에는 검토를 마친 문서 {guideAnswer.documentId}가 연결되어 있습니다. 거래를 확정하기 전에 확인한 문서의 품목·수량·단가와 납기를 기준으로 후속 업무를 진행할 수 있습니다.</p>
+            <a className="mt-3 block text-sm text-primary underline" href={`/erp/documents/upload/${encodeURIComponent(guideAnswer.documentId)}/review`}>근거 문서: {guideAnswer.documentId}</a>
+            {guide?.state?.trade.T4 ? <p role="status" className="mt-4 text-sm font-medium">답변 근거를 확인했습니다.</p> : <Button className="mt-4" onClick={() => guide?.record({ type: "answer-confirmed", dealId: guideAnswer.dealId, answerId: guideAnswer.id, sourceDealIds: [guideAnswer.dealId], receipt: crypto.randomUUID() })}>답변과 근거 확인 완료</Button>}
+          </section>
+        )}
+
         <nav
           aria-label="업무 바로가기"
           className="flex items-center gap-3 overflow-x-auto py-1"
