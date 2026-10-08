@@ -889,6 +889,9 @@ export function ProductsSubscriptions({
         <p className="mt-2 text-sm text-muted-foreground">
           제품 상태와 구매 시트·사용자 배정을 구분해 확인합니다.
         </p>
+        <p className="mt-2 text-xs text-muted-foreground" role="note">
+          표시된 구독·좌석 수는 화면 예시입니다. 실제 조직의 상태와 결제 결과는 서버 확인 후 표시됩니다.
+        </p>
       </div>
       {role !== "member" && <SeatSummary products={products} />}
       <section className="rounded-xl border bg-background p-5">

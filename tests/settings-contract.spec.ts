@@ -69,6 +69,22 @@ test("final settings IA separates organization, members and Trade OS defaults; d
   await seatCounts(page, "SNAP", 5, 1, 4)
 })
 
+test("brand color picker and HEX value stay in sync with role access", async ({ page }) => {
+  await openSettings(page, "owner", "trade-defaults")
+  await page.getByLabel("승인 색상 선택", { exact: true }).fill("#b45280")
+  await expect(page.getByLabel("승인 색상 코드", { exact: true })).toHaveValue("#b45280")
+  await page.getByRole("button", { name: "브랜딩", exact: true }).click()
+  await page.getByLabel("브랜드 색상 코드", { exact: true }).fill("#12aabc")
+  await expect(page.getByLabel("브랜드 색상 선택", { exact: true })).toHaveValue("#12aabc")
+  await openSettings(page, "member", "trade-defaults")
+  await expect(page.getByLabel("승인 색상 선택", { exact: true })).toBeDisabled()
+  await page.getByRole("button", { name: "브랜딩", exact: true }).click()
+  await expect(page.getByLabel("브랜드 색상 선택", { exact: true })).toBeDisabled()
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect(page.getByLabel("브랜드 색상 코드", { exact: true })).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
+})
+
 test("approval keeps the reviewed member visible and updates seat counts without changing purchase capacity", async ({
   page,
 }) => {

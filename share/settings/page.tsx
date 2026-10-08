@@ -14,7 +14,6 @@ import {
   Landmark,
   Mail,
   Palette,
-  RefreshCw,
   Search,
   SlidersHorizontal,
   Sparkles,
@@ -29,7 +28,6 @@ import { Button } from "@shared/components/ui/button"
 import { Card, CardContent } from "@shared/components/ui/card"
 import { Checkbox } from "@shared/components/ui/checkbox"
 import { Input } from "@shared/components/ui/input"
-import { Progress } from "@shared/components/ui/progress"
 import {
   Select,
   SelectContent,
@@ -76,7 +74,6 @@ type SectionId =
   | "trade-deal-import"
   | "trade-aliases"
   | "trade-alerts"
-  | "trade-usage"
   | "snap-operations"
   | "snap-branding"
   | "snap-localization"
@@ -154,12 +151,6 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
         product: "erp",
       },
       { id: "trade-alerts", label: "알림", icon: Bell, product: "erp" },
-      {
-        id: "trade-usage",
-        label: "AI 사용량",
-        icon: Sparkles,
-        product: "erp",
-      },
     ],
   },
   {
@@ -267,6 +258,39 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
       <span className="text-xs font-medium">{label}</span>
       {children}
     </label>
+  )
+}
+
+function BrandColorPicker({
+  label,
+  initialColor,
+  disabled = false,
+}: {
+  label: string
+  initialColor: string
+  disabled?: boolean
+}) {
+  const [color, setColor] = useState(initialColor)
+  const pickerColor = /^#[0-9a-fA-F]{6}$/.test(color) ? color : initialColor
+  return (
+    <Field label={label}>
+      <div className="flex items-center gap-2">
+        <Input
+          type="color"
+          aria-label={`${label} 선택`}
+          className="h-10 w-14 shrink-0 cursor-pointer p-1"
+          value={pickerColor}
+          disabled={disabled}
+          onChange={(event) => setColor(event.target.value)}
+        />
+        <Input
+          aria-label={`${label} 코드`}
+          value={color}
+          readOnly={disabled}
+          onChange={(event) => setColor(event.target.value)}
+        />
+      </div>
+    </Field>
   )
 }
 
@@ -378,9 +402,7 @@ function TradeDefaultsPage({ role }: { role: SettingsRole }) {
             <Field label="문서 표시 이름">
               <Input defaultValue="ECOYA Demo Co." readOnly={!editable} />
             </Field>
-            <Field label="승인 색상">
-              <Input defaultValue="#0B3971" readOnly={!editable} />
-            </Field>
+            <BrandColorPicker label="승인 색상" initialColor="#0B3971" disabled={!editable} />
             <Field label="법적 footer">
               <Input
                 defaultValue="ECOYA Trade OS generated document"
@@ -621,101 +643,12 @@ function AlertsPage() {
   )
 }
 
-function UsageCard({
-  product,
-  plan,
-  state,
-  used,
-  limit,
-  unit,
-  reset,
-  percent,
-}: {
-  product: string
-  plan: string
-  state: string
-  used: string
-  limit: string
-  unit: string
-  reset: string
-  percent: number
-}) {
-  return (
-    <div className="rounded-xl border p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="font-semibold">{product}</div>
-          <div className="mt-1 text-xs text-muted-foreground">{plan}</div>
-        </div>
-        <Badge variant="secondary">{state}</Badge>
-      </div>
-      <div className="mt-6 flex items-end justify-between gap-3">
-        <div>
-          <span className="text-2xl font-semibold tabular-nums">{used}</span>
-          <span className="ml-1 text-sm text-muted-foreground">
-            / {limit} {unit}
-          </span>
-        </div>
-        <span className="text-xs text-muted-foreground">{reset}</span>
-      </div>
-      <Progress value={percent} className="mt-3" />
-    </div>
-  )
-}
-
-function TradeUsagePage({ role }: { role: SettingsRole }) {
-  return (
-    <div>
-      <PageHeading
-        title="AI 사용량"
-        description="현재 Organization의 Trade OS 집계 사용량입니다. 멤버별 활동이나 프롬프트 본문은 표시하지 않습니다."
-        action={
-          <Button variant="outline">
-            <RefreshCw /> 새로고침
-          </Button>
-        }
-      />
-      <SettingsSection
-        title="구독별 사용량"
-        description="2026.09.08 16:20 기준"
-      >
-        <div className="grid gap-4 lg:grid-cols-2">
-          <UsageCard
-            product="ECOYA Trade OS"
-            plan="Pro"
-            state="구독 중"
-            used="684K"
-            limit="1.2M"
-            unit="tokens"
-            reset="23일 후 갱신"
-            percent={57}
-          />
-        </div>
-        {role === "owner" ? (
-          <div className="mt-5">
-            <Button
-              variant="outline"
-              onClick={() =>
-                window.location.assign("/erp/settings?section=products")
-              }
-            >
-              제품 및 구독 보기
-            </Button>
-          </div>
-        ) : (
-          <p className="mt-5 text-xs text-muted-foreground">
-            구독 변경은 Organization OWNER가 할 수 있습니다.
-          </p>
-        )}
-      </SettingsSection>
-    </div>
-  )
-}
-
 function SnapSimplePage({
   type,
+  role,
 }: {
   type: "operations" | "branding" | "localization"
+  role: SettingsRole
 }) {
   const content =
     type === "operations"
@@ -748,25 +681,13 @@ function SnapSimplePage({
               defaultValue={type === "localization" ? "한국어" : "ECOYA SNAP"}
             />
           </Field>
-          <Field
-            label={
-              type === "operations"
-                ? "전달 채널"
-                : type === "branding"
-                  ? "브랜드 색상"
-                  : "시간대"
-            }
-          >
-            <Input
-              defaultValue={
-                type === "operations"
-                  ? "앱 링크 · 이메일"
-                  : type === "branding"
-                    ? "#0B3971"
-                    : "Asia/Seoul"
-              }
-            />
-          </Field>
+          {type === "branding" ? (
+            <BrandColorPicker label="브랜드 색상" initialColor="#0B3971" disabled={role === "member"} />
+          ) : (
+            <Field label={type === "operations" ? "전달 채널" : "시간대"}>
+              <Input defaultValue={type === "operations" ? "앱 링크 · 이메일" : "Asia/Seoul"} />
+            </Field>
+          )}
         </div>
         <SaveRow />
       </SettingsSection>
@@ -807,7 +728,7 @@ function SnapDataPage() {
               <div className="text-xs text-muted-foreground">
                 조직 저장 공간
               </div>
-              <div className="mt-1 text-xl font-semibold">18.4 GB / 100 GB</div>
+              <div className="mt-1 text-sm text-muted-foreground">실시간 저장량 조회가 연결되지 않았습니다.</div>
             </div>
           </div>
         </SettingsSection>
@@ -846,44 +767,20 @@ function SnapUsagePage({ role }: { role: SettingsRole }) {
     <div>
       <PageHeading
         title="사용량 및 기술 한도"
-        description="현재 Organization의 SNAP 구독·체험별 사용량을 확인합니다."
-        action={
-          <Button variant="outline">
-            <RefreshCw /> 새로고침
-          </Button>
-        }
+        description="저장량·AI·속도 제한은 결제 잔액이 아닌 비과금 기술 한도입니다."
       />
-      <SettingsSection
-        title="구독별 사용량"
-        description="사용량 조회 실패를 무료 또는 0으로 표시하지 않습니다."
-      >
-        <div className="grid gap-4 lg:grid-cols-2">
-          <p className="text-sm text-muted-foreground">
-            저장량·AI·속도 제한은 비과금 기술 한도입니다. 구독과 구매 시트는
-            제품 및 구독에서 확인하세요.
-          </p>
-          <UsageCard
-            product="SNAP 리포트 보관"
-            plan="포함 저장량"
-            state="구독 중"
-            used="18.4"
-            limit="100"
-            unit="GB"
-            reset="매월 갱신"
-            percent={18.4}
-          />
-        </div>
+      <SettingsSection title="현재 사용량">
+        <p className="text-sm text-muted-foreground" role="status">
+          현재 조직의 실시간 사용량이 연결되지 않았습니다. 조회할 수 없는 수치를 0이나 무료로 표시하지 않습니다.
+        </p>
         {role === "owner" ? (
-          <div className="mt-5">
-            <Button
-              variant="outline"
-              onClick={() =>
-                window.location.assign("/erp/settings?section=products")
-              }
-            >
-              제품 및 구독 보기
-            </Button>
-          </div>
+          <Button
+            className="mt-5"
+            variant="outline"
+            onClick={() => window.location.assign("/erp/settings?section=products")}
+          >
+            제품 및 구독 보기
+          </Button>
         ) : null}
       </SettingsSection>
     </div>
@@ -929,11 +826,10 @@ function renderSection(
   if (section === "trade-deal-import") return <ImportPage kind="deal" />
   if (section === "trade-aliases") return <AliasesPage />
   if (section === "trade-alerts") return <AlertsPage />
-  if (section === "trade-usage") return <TradeUsagePage role={role} />
-  if (section === "snap-operations") return <SnapSimplePage type="operations" />
-  if (section === "snap-branding") return <SnapSimplePage type="branding" />
+  if (section === "snap-operations") return <SnapSimplePage type="operations" role={role} />
+  if (section === "snap-branding") return <SnapSimplePage type="branding" role={role} />
   if (section === "snap-localization")
-    return <SnapSimplePage type="localization" />
+    return <SnapSimplePage type="localization" role={role} />
   if (section === "snap-data") return <SnapDataPage />
   if (section === "snap-usage") return <SnapUsagePage role={role} />
   return <AccountPage />

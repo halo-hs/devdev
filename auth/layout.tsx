@@ -300,7 +300,7 @@ export function AccountGuide({ variant }: { variant: AuthLayoutVariant }) {
               href="/free-trial"
               className="mt-8 flex min-h-12 w-full items-center justify-between gap-3 rounded-lg bg-white px-5 py-3 text-base font-semibold text-[#1c3d61] shadow-sm transition-colors hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
             >
-              14일 무료체험 알아보기{" "}
+              30일 무료체험 알아보기{" "}
               <ArrowUpRight className="size-4" aria-hidden="true" />
             </a>
           </div>
@@ -339,7 +339,7 @@ export function AccountGuide({ variant }: { variant: AuthLayoutVariant }) {
                 처음 이용하시나요?
               </p>
               <p className="mt-2 text-base leading-7 text-indigo-100">
-                14일 무료체험으로 시작해보세요.
+                30일 무료체험으로 시작해보세요.
               </p>
               <a
                 href="/free-trial"

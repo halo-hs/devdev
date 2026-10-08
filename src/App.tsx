@@ -16327,7 +16327,7 @@ export function App() {
     }
   ) => {
     if (nextScreen === "tokens" || nextScreen === "billing") {
-      const section = product === "snap" ? "snap-usage" : nextScreen === "tokens" ? "trade-usage" : "billing"
+      const section = nextScreen === "billing" ? "products" : product === "snap" ? "snap-usage" : "organization"
       window.location.assign(`/erp/settings?section=${section}`)
       return
     }
