@@ -6,27 +6,25 @@
   --ecoya-hero-gradient-small: var(--reference-hero-background);
   font-family: var(--ecoya-font-sans);
 }
-.reference-3030 .reference-page-scroll { height: 100%; min-height: 0; overflow: auto; background: var(--ecoya-gray-12); }
-.reference-3030 .reference-monitor-shell { display: grid; height: 100%; min-height: 0; grid-template-columns: minmax(0, 1fr); background: var(--ecoya-gray-12); }
-@media (max-width: 1279px) {
-  .reference-3030 .reference-monitor-shell { grid-template-columns: minmax(0, 1fr); }
+/* The host main owns page scrolling. Tables keep their horizontal overflow. */
+.reference-3030 .reference-page-scroll { min-height: 0; background: var(--ecoya-gray-12); }
+.reference-3030 .reference-monitor-shell { display: grid; min-height: 0; grid-template-columns: minmax(0, 1fr); background: var(--ecoya-gray-12); }
+.reference-3030 .reference-monitor-shell [data-component="MonitorConnected"],
+.reference-3030 .reference-monitor-shell [data-layout="dashboard"],
+.reference-3030 .reference-monitor-shell [data-layout="dashboard"] > div:has(> [data-ui="dashboard-body"]) {
+  height: auto;
+  overflow: visible;
 }
-@media (max-width: 639px) {
-  .reference-3030 .reference-monitor-shell { overflow: auto; }
+.reference-3030 .reference-monitor-shell [data-layout="dashboard"] > div:has(> [data-ui="dashboard-body"]) {
+  flex: none;
 }
 
-/* Each operational queue fills the content width; long lists scroll within it. */
+/* Queue length follows the existing count filter and scrolls with the page. */
 .reference-3030 .monitor-operation-columns {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 16px;
-}
-.reference-3030 .monitor-operation-columns > [data-ui="section-panel"] > [data-ui="section-panel-content"] {
-  max-height: 400px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-gutter: stable;
 }
 .reference-3030 .monitor-operation-columns [data-ui="section-panel-content"] > [data-ui="section-panel"] {
   border: 0;

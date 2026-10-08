@@ -126,6 +126,9 @@ for(const route of ['monitor','reports','sales-performance','settlement','shipme
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
     const root=page.locator('[data-reference-screen]')
     await expect(root).toBeVisible()
-    expect(await root.evaluate(el=>[...el.querySelectorAll('*')].some(node=>node.scrollHeight>node.clientHeight && ['auto','scroll'].includes(getComputedStyle(node).overflowY)))).toBe(true)
+    expect(await root.evaluate(el=>{
+      const main=el.closest('main')!
+      return main.scrollHeight>main.clientHeight && getComputedStyle(main).overflowY==='auto'
+    })).toBe(true)
   })
 }
