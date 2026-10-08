@@ -37,6 +37,7 @@ export function SidebarProfileMenu({
   product = "erp",
   workspaceName = "ECOYA Demo Co.",
   billingPlan = "Pro",
+  showProductSummary = true,
 }: {
   onSettings: () => void
   onUsage?: () => void
@@ -45,6 +46,7 @@ export function SidebarProfileMenu({
   product?: "erp" | "snap"
   workspaceName?: string
   billingPlan?: string
+  showProductSummary?: boolean
 }) {
   const { state: sidebarState } = useSidebar()
   const [language, setLanguage] = useState("ko-KR")
@@ -140,7 +142,7 @@ export function SidebarProfileMenu({
           ) : null}
           <DropdownMenuSeparator />
 
-          <div className="space-y-2 px-2">
+          {showProductSummary ? <div className="space-y-2 px-2">
             {productPlans.map(({ name, plan }) => {
               const isProductFree = plan.trim().toLowerCase() === "free"
               const usageLabel = isProductFree
@@ -192,7 +194,7 @@ export function SidebarProfileMenu({
                 </div>
               )
             })}
-          </div>
+          </div> : null}
 
           <DropdownMenuSeparator />
           <DropdownMenuSub>

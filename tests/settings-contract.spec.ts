@@ -50,6 +50,10 @@ test("final settings IA separates organization, members and Trade OS defaults; d
   await expect(
     page.getByRole("heading", { name: "조직 정보", exact: true })
   ).toBeVisible()
+  await page.getByRole("button", { name: "프로필 메뉴" }).click()
+  await expect(page.getByText("10회 남음")).toHaveCount(0)
+  await expect(page.getByText("7일 남음")).toHaveCount(0)
+  await page.keyboard.press("Escape")
   await expect(
     page.getByRole("heading", { name: "사용자 관리", exact: true })
   ).toHaveCount(0)

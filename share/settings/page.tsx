@@ -1023,6 +1023,7 @@ function SettingsHubContent({
             <SidebarProfileMenu
               onSettings={() => selectSection("account")}
               onLogout={onLogout}
+              showProductSummary={false}
             />
           </SidebarMenu>
         </SidebarFooter>
