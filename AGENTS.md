@@ -87,7 +87,7 @@ git push -u origin HEAD
 gh pr create --base main
 ```
 
-Pull Request가 검토·승인되고 필요한 검사를 통과한 뒤에만 `main`에 병합합니다. `main`에 대한 force push, 보호 규칙 우회, 로컬에서의 직접 배포를 하지 않습니다. 병합된 `main`만 Cloudflare Pages 배포 대상입니다.
+Pull Request의 필요한 검사와 충돌 여부를 확인한 뒤 `main`에 병합합니다. 쓰기 권한이 있는 리뷰어가 없어도 병합할 수 있습니다. 사용자 결정(2026-10-08)에 따라 리뷰 승인만이 병합을 막는 경우 관리자 병합(`gh pr merge --admin`)을 허용합니다. 검사 실패나 충돌을 무시하는 권한은 아닙니다. `main` force push와 로컬 직접 배포는 하지 않습니다. 병합된 `main`만 Cloudflare Pages 배포 대상입니다.
 
 ## 병합 후 브랜치 정리
 
