@@ -215,8 +215,12 @@ export function OrganizationMembers({
     return <p role="status">사용자 관리 권한이 없습니다.</p>
   const canManageMember = (member: Member) =>
     member.id !== role && (role === "owner" || member.role === "member")
+  const ownerCount = members.filter((member) => member.role === "owner").length
+  const isLastOwner = (member: Member) => member.role === "owner" && ownerCount <= 1
   const canChangeRole = (member: Member) =>
-    role === "owner" && canManageMember(member)
+    role === "owner" && canManageMember(member) && !isLastOwner(member)
+  const canRemoveMember = (member: Member) =>
+    canManageMember(member) && !isLastOwner(member)
   const canAssignSeat = (member: Member) =>
     member.id === role
       ? role === "owner" || role === "admin"
@@ -525,12 +529,12 @@ export function OrganizationMembers({
                   <span className="mb-1 block text-xs text-muted-foreground lg:hidden">
                     조직 역할
                   </span>
-                  <select
+                  {canChangeRole(member) ? <select
                     aria-label={`${member.name} 역할`}
                     className={selectClass}
                     value={member.role}
-                    disabled={!canChangeRole(member)}
                     onChange={(event) => {
+                      if (!canChangeRole(member)) return
                       const next = event.target.value as SettingsRole
                       if (next === "owner") {
                         setMessage(
@@ -551,7 +555,12 @@ export function OrganizationMembers({
                     <option value="owner">OWNER</option>
                     <option value="admin">ADMIN</option>
                     <option value="member">MEMBER</option>
-                  </select>
+                  </select> : (
+                    <div>
+                      <span aria-label={`${member.name} 역할`} className="font-medium">{member.role.toUpperCase()}</span>
+                      {isLastOwner(member) && <p className="mt-1 text-xs text-muted-foreground">마지막 오너 · 역할 변경 불가</p>}
+                    </div>
+                  )}
                 </td>
                 {products.map((product) => (
                   <td className="min-w-0 p-2 lg:p-4" key={product}>
@@ -680,7 +689,9 @@ export function OrganizationMembers({
                           모든 곳에서 로그아웃
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                          disabled={!canRemoveMember(member)}
                           onClick={() => {
+                            if (!canRemoveMember(member)) return
                             setError("")
                             setConfirmation({ member, action: "remove" })
                           }}
