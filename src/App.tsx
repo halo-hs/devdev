@@ -208,6 +208,7 @@ import {
   type HomePreviewState,
 } from "@trade-os/home/page"
 import { ReferenceOperations } from "@trade-os/operations/index"
+import { SalesPrototype } from "@trade-os/extended-screens"
 import { NotificationsPrototype } from "@share/notifications/page"
 import { notifications, type NotificationDealTarget } from "@share/notifications/data"
 import {
@@ -8284,6 +8285,20 @@ function TemplateStrip({ onResult }: {
           </Button>
         </div>
       </div>
+      <Tabs
+        value={direction}
+        onValueChange={(value) => {
+          const nextDirection = value as "purchase" | "sales"
+          setDirection(nextDirection)
+          setSelectedCode(nextDirection === "purchase" ? "PO" : "QT")
+        }}
+        className="mb-3"
+      >
+        <TabsList aria-label="문서 거래 방향">
+          <TabsTrigger value="sales">매출</TabsTrigger>
+          <TabsTrigger value="purchase">매입</TabsTrigger>
+        </TabsList>
+      </Tabs>
       <div ref={viewportRef} aria-label="문서 유형 목록" className="flex min-w-0 snap-x snap-proximity gap-3 overflow-x-auto overscroll-x-contain px-0.5 pt-0.5 pb-3">
         {visibleTemplates.map(([kind, title, description]) => {
           const selected = selectedCode === kind
@@ -8293,7 +8308,7 @@ function TemplateStrip({ onResult }: {
               className={cn("flex w-60 shrink-0 snap-start flex-col items-start rounded-lg border bg-card p-4 text-left transition hover:border-primary/60 focus-visible:outline-2 focus-visible:outline-primary", selected && "border-primary bg-primary/5 ring-1 ring-primary")}
             >
               <span className="flex w-full items-center justify-between gap-2"><ToneBadge tone="blue">{kind}</ToneBadge>{selected && <Check className="size-4 text-primary" />}</span>
-              <strong className="mt-2 text-sm">{title} <span className="text-xs font-normal text-muted-foreground">· {kind === "PO" ? "매입" : "매입·매출"}</span></strong>
+              <strong className="mt-2 text-sm">{title} <span className="text-xs font-normal text-muted-foreground">· {direction === "purchase" ? "매입" : "매출"}</span></strong>
               <span className="mt-1.5 text-xs leading-5 text-muted-foreground">{description}</span>
             </button>
           )
@@ -9197,20 +9212,9 @@ function CreateScreen({
   if (showInitialTemplateState) {
     return (
       <div className="flex h-full min-h-0 flex-col overflow-auto bg-background">
-        <div className="mx-auto w-full max-w-ecoya-wide-xl shrink-0 px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
-          <BusinessPageHero
-            variant="ai"
-            eyebrow="AI 문서 작성"
-            title="문서 만들기"
-            description="유형을 선택하고 문서 만들기를 누르면 작성을 시작합니다."
-            align="center"
-          />
-          {relatedDeal ? (
-            <div className="mt-4">
-              <RelatedDealNotice deal={relatedDeal} />
-            </div>
-          ) : null}
-          <section className="mt-5 space-y-5 pb-8">
+        <div className="mx-auto w-full max-w-ecoya-wide-xl shrink-0 px-5 pt-5 sm:px-6 sm:pt-6 xl:px-8">
+          {relatedDeal ? <RelatedDealNotice deal={relatedDeal} /> : null}
+          <section className="space-y-5 pb-8">
             <TemplateStrip onResult={openUnifiedWorkbench} />
           </section>
         </div>
@@ -9221,20 +9225,7 @@ function CreateScreen({
   return (
     <div className="h-full min-h-0 overflow-auto bg-background">
       <section className="mx-auto w-full max-w-ecoya-wide-xl px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
-        <section className="mb-7">
-          <BusinessPageHero
-            variant="ai"
-            eyebrow="AI 문서 작성"
-            title="문서 만들기"
-            description="유형을 선택하고 문서 만들기를 누르면 작성을 시작합니다."
-            align="center"
-          />
-          {relatedDeal ? (
-            <div className="mt-4">
-              <RelatedDealNotice deal={relatedDeal} compact />
-            </div>
-          ) : null}
-        </section>
+        {relatedDeal ? <RelatedDealNotice deal={relatedDeal} compact /> : null}
 
         <section className="mb-7">
           <TemplateStrip onResult={openUnifiedWorkbench} />
@@ -12428,7 +12419,7 @@ function DocumentSourceSetupStep({
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between gap-3 px-1 text-[11px] text-muted-foreground">
                     <span>문서함</span>
-                    <span>{selectedSources.size}/3</span>
+                    <span>{selectedSources.size}개 선택</span>
                   </div>
                   {draftSources.map((source) => {
                     const selected = selectedSources.has(source.title)
@@ -13203,8 +13194,8 @@ function DocumentDiscrepancyPanel({
       </div>
 
       <p className="mt-1 text-[11px] text-muted-foreground">
-        AI가 연결 거래 {relatedDeal.id}의 서류 간 불일치(통화·금액·거래처·L/C)를
-        발송 전에 점검합니다.
+        연결 거래 {relatedDeal.id}의 서류 간 불일치(통화·금액·거래처·L/C)를
+        발송 전에 대조합니다. 불일치를 수정해야 다음 단계로 진행할 수 있습니다.
       </p>
 
       <div className="mt-2 overflow-hidden rounded-md border">
@@ -13748,8 +13739,8 @@ function DocumentReviewSharePanel({
   const applyLogoFiles = (files: File[]) => {
     const file = files[0]
     if (!file) return
-    if (!file.type.startsWith("image/")) {
-      setLogoError("PNG, JPG, SVG 이미지 파일만 사용할 수 있습니다.")
+    if (!(file.type === "image/png" || file.type === "image/jpeg")) {
+      setLogoError("PNG, JPG 이미지 파일만 사용할 수 있습니다.")
       return
     }
     if (file.size > 2 * 1024 * 1024) {
@@ -13956,10 +13947,10 @@ function DocumentReviewSharePanel({
                 ) : null}
                 {logoSourceMode === "file" || !organizationLogo ? (
                   <FileDropZone
-                    accept="image/png,image/jpeg,image/svg+xml,.png,.jpg,.jpeg,.svg"
+                    accept="image/png,image/jpeg,.png,.jpg,.jpeg"
                     aria-label="로고 파일 선택 또는 끌어놓기"
                     label="로고 파일 선택"
-                    instructions="PNG, JPG, SVG · 최대 2MB"
+                    instructions="PNG, JPG · 최대 2MB"
                     onFiles={applyLogoFiles}
                     className={cn(
                       "min-h-10 flex-row justify-start gap-2 border-solid bg-background px-2.5 py-1.5 text-left",
@@ -13976,7 +13967,7 @@ function DocumentReviewSharePanel({
                           : "로고 파일 선택"}
                       </span>
                       <span className="shrink-0 text-[11px] text-muted-foreground">
-                        PNG, JPG, SVG · 최대 2MB
+                        PNG, JPG · 최대 2MB
                       </span>
                     </span>
                     {documentStyle.logo?.source === "file" ? (
@@ -14055,6 +14046,15 @@ function DocumentReviewSharePanel({
                         />
                       )
                     )}
+                    <label className="relative size-6 cursor-pointer overflow-hidden rounded-full border-2 border-background shadow-sm ring-offset-1" aria-label="강조색 직접 선택">
+                      <input
+                        type="color"
+                        value={documentStyle.accent}
+                        onChange={(event) => onStyleChange({ ...documentStyle, accent: event.target.value })}
+                        className="absolute inset-0 size-full cursor-pointer opacity-0"
+                      />
+                      <span className="absolute inset-0 rounded-full border border-dashed border-muted-foreground/60 bg-[conic-gradient(from_0deg,#ef4444,#f59e0b,#22c55e,#06b6d4,#3b82f6,#a855f7,#ef4444)]" />
+                    </label>
                   </div>
                 </div>
               </div>
@@ -15439,6 +15439,11 @@ function ResultScreen({
     <DocumentSourceSetupStep
       templateCode={templateCode}
       onTemplateChange={(code) => {
+        if (code === templateCode) return
+        const confirmed = window.confirm(
+          "문서 유형을 바꾸면 현재 입력값이 초기화되고 새 초안으로 다시 시작합니다. 계속할까요?"
+        )
+        if (!confirmed) return
         setTemplateCode(code)
         setPdfPrepared(false)
         markDocumentChanged()
@@ -15456,7 +15461,7 @@ function ResultScreen({
         setSelectedSources((current) => {
           const next = new Set(current)
           if (next.has(title)) next.delete(title)
-          else if (next.size < 3) next.add(title)
+          else next.add(title)
           return next
         })
         setPdfPrepared(false)
@@ -16780,7 +16785,7 @@ export function App() {
                   ) : screen === "reports" ? (
                     <ReferenceOperations screen="reports" />
                   ) : screen === "sales" ? (
-                    <ReferenceOperations screen="sales" />
+                    <SalesPrototype />
                   ) : screen === "notifications" ? (
                     <NotificationsPrototype
                       readIds={readNotificationIds}
