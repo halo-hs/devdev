@@ -70,10 +70,10 @@ export function LocaleToggle() {
   const selectedOption = localeOptions.find((option) => option.value === locale)
   return (
     <label className="ecoya-locale-select">
-      <Languages aria-hidden="true" />
+      <Languages size={17} aria-hidden="true" />
       <span aria-hidden="true">{selectedOption?.label ?? "한국어"}</span>
       <select
-        aria-label="언어 선택"
+        aria-label={locale === "en" ? "Select language" : "언어 선택"}
         value={locale}
         onChange={(event) => setLocale(event.target.value as Locale)}
       >
@@ -83,7 +83,7 @@ export function LocaleToggle() {
           </option>
         ))}
       </select>
-      <ChevronDown aria-hidden="true" />
+      <ChevronDown size={15} aria-hidden="true" />
     </label>
   )
 }
