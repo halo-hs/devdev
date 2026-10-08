@@ -16635,7 +16635,7 @@ export function App() {
                 >
                   <PageLoadingBoundary loading={screenLoading} pageKey={screenLoadingKey}>
                   {screen === "onboarding" ? (
-                    <OnboardingPrototype onNavigate={navigateTo} />
+                    <OnboardingPrototype onNavigate={navigateTo} role={erpHomeRole} />
                   ) : screen === "home" ? (
                     <V2HomePrototype
                       onNavigate={navigateTo}
