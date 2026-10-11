@@ -1,3 +1,7 @@
+import { DealRefreshContext, useDealRefresh, useDealRefreshController } from "@trade-os/deals/deal-refresh"
+import { PostWriteRefreshNotice } from "@trade-os/components/post-write-refresh-notice"
+import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, type DealDocumentRecord } from "@trade-os/lib/deal-document-actions"
+import { DealDocumentActions } from "@trade-os/deals/document-actions"
 import { ReferenceOperations } from "@trade-os/operations"
 import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@shared/components/form-field"
 import {
@@ -295,62 +299,6 @@ async function requireMutation(
   return result
 }
 
-const documents = [
-  {
-    code: "PO",
-    type: "발주서",
-    file: "PO-260704-18.pdf",
-    status: "보유",
-    source: "수신",
-  },
-  {
-    code: "SC",
-    type: "판매계약서",
-    file: "SC-2026-0708.pdf",
-    status: "발행",
-    source: "발행",
-  },
-  {
-    code: "CI",
-    type: "상업송장",
-    file: "Invoice_HB-2607-003.pdf",
-    status: "보유",
-    source: "수신",
-  },
-  {
-    code: "PL",
-    type: "포장명세서",
-    file: "PackingList_0707.pdf",
-    status: "보유",
-    source: "수신",
-  },
-  { code: "BL", type: "선하증권", file: "", status: "미비", source: "-" },
-]
-
-const supplementaryDocuments = [
-  {
-    code: "CO",
-    type: "원산지증명서",
-    file: "Certificate_Origin_0708.pdf",
-    status: "보유",
-    source: "수신",
-  },
-  {
-    code: "IC",
-    type: "보험증권",
-    file: "Cargo_Insurance_0708.pdf",
-    status: "보유",
-    source: "수신",
-  },
-  {
-    code: "QC",
-    type: "검사성적서",
-    file: "Inspection_Report_0706.pdf",
-    status: "검토",
-    source: "업로드",
-  },
-]
-
 const detectDealDocumentCode = (fileName: string) => {
   const normalized = fileName.toLowerCase()
   const matchers: Array<[string, RegExp]> = [
@@ -366,7 +314,14 @@ const detectDealDocumentCode = (fileName: string) => {
   return matchers.find(([, pattern]) => pattern.test(normalized))?.[0] ?? null
 }
 
-type DocumentSlot = (typeof documents)[number]
+type DocumentSlot = (typeof documents)[number] & { documentId?: string; erpDocumentId?: string; documentState?: DealDocumentRecord["state"]; revision?: number; fileDataUrl?: string }
+const documentKey = (document: DocumentSlot) => document.documentId ?? document.code
+const documentSlot = (record: DealDocumentRecord): DocumentSlot => ({
+  code: record.code, type: record.type, file: record.file, source: "업로드",
+  status: record.state === "needs_type" ? "유형 확인 필요" : record.state === "needs_review" ? "검토" : record.state === "processing" ? "분석 중" : "보유",
+  documentId: record.id, erpDocumentId: record.erpDocumentId, documentState: record.state,
+  revision: record.revision, fileDataUrl: record.fileDataUrl,
+})
 
 const dealDeliveryAttachmentOptions = [
   ...documents,
@@ -394,11 +349,11 @@ function ImportantDealDocumentsPanel({
           const isMissing = !document.file
           const isManual = document.status === "원본 미첨부"
           const isNew = document.code === "PO"
-          const isSelected = selected.code === document.code
+          const isSelected = documentKey(selected) === documentKey(document)
 
           return (
             <button
-              key={document.code}
+              key={documentKey(document)}
               type="button"
               className={cn(
                 "flex h-10 min-w-0 items-center gap-2 rounded-[var(--r-sm)] border px-2.5 text-left transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
@@ -2583,83 +2538,16 @@ function DealRecordSections({
   )
 }
 
-const dealDocumentPreviews: Record<
-  string,
-  { title: string; fields: [string, string][] }
-> = {
-  PO: {
-    title: "PURCHASE ORDER",
-    fields: [
-      ["Buyer", "ECOYA Demo Co."],
-      ["Seller", "KATAMAN ASIA-PACIFIC PTE LTD"],
-      ["Amount", "2,400,000 USD"],
-      ["Incoterms", "CIF Incheon"],
-    ],
-  },
-  SC: {
-    title: "SALES CONTRACT",
-    fields: [
-      ["Contract No.", "SC-2026-0708"],
-      ["Buyer", "ECOYA Demo Co."],
-      ["Seller", "KATAMAN ASIA-PACIFIC PTE LTD"],
-      ["Payment", "T/T 30 days"],
-    ],
-  },
-  CI: {
-    title: "COMMERCIAL INVOICE",
-    fields: [
-      ["Invoice No.", "INV-2026-0703"],
-      ["Buyer", "HRM Corporation"],
-      ["Amount", "2,566,000 USD"],
-      ["Payment", "T/T 30 days"],
-    ],
-  },
-  PL: {
-    title: "PACKING LIST",
-    fields: [
-      ["Packing No.", "PL-2026-0707"],
-      ["Quantity", "16 MT"],
-      ["Packages", "20 bundles"],
-      ["Gross Weight", "16,480 KG"],
-    ],
-  },
-  CO: {
-    title: "CERTIFICATE OF ORIGIN",
-    fields: [
-      ["Exporter", "KATAMAN ASIA-PACIFIC PTE LTD"],
-      ["Country", "Singapore"],
-      ["Goods", "Aluminium Scrap"],
-      ["Reference", "CO-2026-0708"],
-    ],
-  },
-  IC: {
-    title: "CARGO INSURANCE",
-    fields: [
-      ["Insured", "ECOYA Demo Co."],
-      ["Vessel", "HMM Green"],
-      ["Coverage", "2,400,000 USD"],
-      ["Policy", "IC-2026-0708"],
-    ],
-  },
-  QC: {
-    title: "INSPECTION REPORT",
-    fields: [
-      ["Inspector", "SGS Singapore"],
-      ["Goods", "Aluminium Scrap"],
-      ["Quantity", "16 MT"],
-      ["Result", "Review required"],
-    ],
-  },
-}
-
 function DealPdf({
   slot,
   fieldSummary,
+  actions,
   canUnlink,
   onUnlink,
 }: {
   slot: DocumentSlot
   fieldSummary: string
+  actions?: ReactNode
   canUnlink: boolean
   onUnlink: () => void
 }) {
@@ -2680,7 +2568,7 @@ function DealPdf({
     setDownloading(true)
     await wait(350)
     const a = document.createElement("a")
-    a.href = URL.createObjectURL(
+    a.href = slot.fileDataUrl ?? URL.createObjectURL(
       new Blob([`ECOYA sample document: ${file}`], { type: "application/pdf" })
     )
     a.download = file
@@ -2698,7 +2586,7 @@ function DealPdf({
       aria-modal={fullscreen ? "true" : undefined}
       aria-label={fullscreen ? `${slot.type} 전체 화면 미리보기` : undefined}
     >
-      <div className="flex min-h-14 shrink-0 items-center justify-between gap-3 border-b border-[var(--surface-border)] bg-background px-3 py-2">
+      <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--surface-border)] bg-background px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
           <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[9px] font-semibold text-[var(--color-red-2)]">
             PDF
@@ -2710,7 +2598,7 @@ function DealPdf({
             </span>
           </span>
         </div>
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
           <StatusBadge
             tone={
               slot.status === "검토"
@@ -2733,6 +2621,7 @@ function DealPdf({
               거래 연결 해제
             </Button>
           ) : null}
+          {actions}
           <PdfViewerToolbar
             zoom={zoom}
             onZoomChange={setZoom}
@@ -2743,7 +2632,9 @@ function DealPdf({
           />
         </div>
       </div>
-      <PannablePdfViewport zoom={zoom} className="min-h-0 flex-1 px-4 pb-20">
+      {slot.fileDataUrl ? (
+        <iframe title={`${file} 원본 PDF`} src={slot.fileDataUrl} className="min-h-[600px] w-full flex-1 border-0" />
+      ) : <PannablePdfViewport zoom={zoom} className="min-h-0 flex-1 px-4 pb-20">
         <div
           className="mx-auto mt-4 aspect-[.72] max-h-[760px] w-[min(90%,560px)] origin-top border bg-background p-8 shadow-sm"
           style={{
@@ -2769,7 +2660,7 @@ function DealPdf({
             </div>
           ))}
         </div>
-      </PannablePdfViewport>
+      </PannablePdfViewport>}
       <PdfFloatingControls
         page={page}
         pageCount={2}
@@ -3336,33 +3227,41 @@ function DealVerificationPanels({
   onRiskDismiss: () => void
   onOpenDocuments: () => void
 }) {
+  const refresh = useDealRefresh()
   const [riskOpen, setRiskOpen] = useState(false)
   const [riskSaving, setRiskSaving] = useState(false)
   const [reason, setReason] = useState("within_tolerance")
   const [note, setNote] = useState("")
   const verificationIssues = dealReviewNotices(riskDismissed)
   const dismissRisk = async () => {
-    if (riskSaving || (reason === "other" && !note.trim())) return
+    if (!canMutate(role) || riskSaving || (reason === "other" && !note.trim())) return
     setRiskSaving(true)
+    const receipt = refresh.beginWrite()
+    let accepted = false
     try {
-      await requireMutation(
-        prototypeBackend.deals.dismissRisk({
+      const result = await prototypeBackend.deals.dismissRisk({
           dealId,
           riskKey: "amount_quantity_mismatch",
           reason,
           note: note.trim() || undefined,
-        }),
-        "리스크를 허용 처리했습니다."
-      )
+        })
+      accepted = result.ok
+      if (!refresh.isCurrent(receipt)) return
+      if (!result.ok) throw new Error(result.error)
+      toast.success("리스크를 허용 처리했습니다.")
       onRiskDismiss()
       addAudit("리스크 허용", reason === "other" ? note.trim() : reason)
       setRiskOpen(false)
+    } catch (error) {
+      if (refresh.isCurrent(receipt)) toast.error(error instanceof Error ? error.message : "리스크를 처리하지 못했습니다.")
     } finally {
-      setRiskSaving(false)
+      refresh.finishWrite(receipt, accepted)
+      if (refresh.isCurrent(receipt)) setRiskSaving(false)
     }
   }
   return (
     <DetailCard>
+      <PostWriteRefreshNotice failure={refresh.failure} busy={refresh.busy} onRetry={() => void refresh.refresh()} />
       <section>
         <SectionHeading
           title="확인할 항목"
@@ -3631,7 +3530,7 @@ function DealHealthReference({
                 <tr className="border-b">
                   <th className="p-2">항목</th>
                   {documentSummary.documents.map((document) => (
-                    <th key={document.code} className="p-2">
+                    <th key={documentKey(document)} className="p-2">
                       {document.type}
                       <span className="block font-normal text-muted-foreground">
                         {document.code}
@@ -3716,10 +3615,10 @@ function DealDocumentBundleRail({
           </div>
           {filteredDocuments.length ? (
             filteredDocuments.map((document) => {
-              const isSelected = selected.code === document.code
+              const isSelected = documentKey(selected) === documentKey(document)
               return (
                 <Button
-                  key={document.code}
+                  key={documentKey(document)}
                   variant="ghost"
                   className={cn(
                     "grid h-auto w-full grid-cols-[38px_minmax(0,1fr)_90px] items-center gap-2 rounded-none border-b border-[var(--table-border)] px-2.5 py-2 text-left font-normal text-foreground last:border-b-0 hover:text-foreground",
@@ -3895,6 +3794,9 @@ function DocumentsTab({
   failedPanel: Tab | null
   onRetry: () => void
 }) {
+  const refresh = useDealRefresh()
+  const [documentRecords, setDocumentRecords] = useState(() => listDealDocuments(dealId))
+  const [movedDocument, setMovedDocument] = useState<DealDocumentRecord | null>(null)
   const primaryDocumentCode = profile.direction === "sales" ? "SC" : "PO"
   const orderedImportantDocuments = useMemo(
     () =>
@@ -3905,10 +3807,11 @@ function DocumentsTab({
       }),
     [primaryDocumentCode]
   )
-  const [selected, setSelected] = useState(
-    documents.find((document) => document.code === primaryDocumentCode) ??
-      documents[0]
-  )
+  const [selected, setSelected] = useState<DocumentSlot>(() => {
+    const uploaded = documentRecords.find(record => record.originCode === primaryDocumentCode && record.originDealId === dealId)
+    const base = documents.find(document => document.code === primaryDocumentCode) ?? documents[0]
+    return uploaded ? documentSlot(uploaded) : base.source === "발행" ? base : { ...base, file: "", status: "미비" }
+  })
   const [dealFields, setDealFields] = useState(() =>
     initialDealFields.map((field) => ({
       ...field,
@@ -4007,7 +3910,7 @@ function DocumentsTab({
   const [missingDocumentPrompt, setMissingDocumentPrompt] =
     useState<DocumentSlot | null>(null)
   const [confirmUnlink, setConfirmUnlink] = useState(false)
-  const visibleImportantDocuments = useMemo(
+  const visibleImportantDocuments = useMemo<DocumentSlot[]>(
     () =>
       orderedImportantDocuments.map((item) => {
         const linkedFile = linkedDocuments[item.code]
@@ -4019,15 +3922,16 @@ function DocumentsTab({
             source: "업로드",
           }
         }
-        return unlinked.includes(item.code)
-          ? { ...item, file: "", status: "미비", source: "-" }
-          : item
+        if (unlinked.includes(item.code)) return { ...item, file: "", status: "미비", source: "-" }
+        if (item.source === "발행") return item
+        const record = documentRecords.find(record => record.originDealId === dealId && record.originCode === item.code)
+        return record ? documentSlot(record) : { ...item, file: "", status: "미비", source: "-" }
       }),
-    [orderedImportantDocuments, linkedDocuments, unlinked]
+    [orderedImportantDocuments, linkedDocuments, unlinked, documentRecords, dealId]
   )
-  const visibleSupplementaryDocuments = supplementaryDocuments.filter(
-    (item) => !unlinked.includes(item.code)
-  )
+  const visibleSupplementaryDocuments = documentRecords
+    .filter(record => (record.originDealId !== dealId || !documents.some(slot => slot.code === record.originCode)) && !unlinked.includes(record.id))
+    .map(documentSlot)
   const connectedImportantCount = visibleImportantDocuments.filter(
     (item) => item.file
   ).length
@@ -4050,6 +3954,18 @@ function DocumentsTab({
     ...visibleImportantDocuments.filter((item) => item.file),
     ...visibleSupplementaryDocuments,
   ]
+  const selectedRecord = documentRecords.find(record => record.id === selected.documentId)
+  const handleDocumentChanged = (record: DealDocumentRecord, action: string) => {
+    setDocumentRecords(current => [...current.filter(item => item.id !== record.id), ...(record.dealId === dealId ? [record] : [])])
+    addAudit(action, `${record.file}${record.dealId !== dealId ? ` → ${record.dealId}` : ""}`)
+    if (record.dealId === dealId) setSelected(current => current.documentId === record.id ? documentSlot(record) : current)
+    else {
+      setMovedDocument(record)
+      setSelected(current => current.documentId === record.id
+        ? selectableDocuments.find(item => item.documentId !== record.id) ?? { ...current, file: "", status: "미비" }
+        : current)
+    }
+  }
   const selectedFieldSet = initialDocumentFields[selected.code]
   const readTargetValue = (target: string) => {
     const [kind, first, second] = target.split(":")
@@ -4075,6 +3991,23 @@ function DocumentsTab({
       )
     )
   }
+  useEffect(() => {
+    const data = refresh.data
+    if (!data) return
+    setDocumentRecords(data.documents)
+    setSelected(current => {
+      if (unlinked.includes(current.code) || (current.documentId && unlinked.includes(current.documentId)) || linkedDocuments[current.code]) return current
+      const record = data.documents.find(item => item.id === current.documentId)
+      return record ? documentSlot(record) : current
+    })
+    for (const field of data.deal.fields) {
+      if (!field.target.startsWith("field:") && !/^item:\d+:[A-Za-z]+$/.test(field.target)) continue
+      if (pendingEditsRef.current.has(field.target) || editSessionsRef.current.has(field.target)) continue
+      if (field.version < (fieldVersionsRef.current.get(field.target) ?? 0)) continue
+      fieldVersionsRef.current.set(field.target, field.version)
+      applyTargetValue(field.target, field.value)
+    }
+  }, [refresh.data])
   const recordCommittedEdit = (target: string, finalValue: string) => {
     const session = editSessionsRef.current.get(target)
     if (!session || session.before === finalValue) {
@@ -4088,6 +4021,7 @@ function DocumentsTab({
     editSessionsRef.current.delete(target)
   }
   const flushPendingEdits = async (targets?: string[]): Promise<boolean> => {
+    if (!canMutate(role)) return false
     if (saveInFlightRef.current) {
       const previousSaved = await saveInFlightRef.current
       if (!previousSaved) return false
@@ -4100,6 +4034,8 @@ function DocumentsTab({
     if (!edits.length) return true
 
     setSaveState("saving")
+    const receipt = refresh.beginWrite()
+    let accepted = false
     const request = (async () => {
       try {
         const [results] = await Promise.all([
@@ -4112,14 +4048,17 @@ function DocumentsTab({
                 value: edit.value,
                 baseVersion: edit.baseVersion,
                 actor: currentEditorName,
-              }),
+              }).catch(() => null),
             }))
           ),
           new Promise<void>((resolve) => window.setTimeout(resolve, 800)),
         ])
 
+        accepted = results.some(({ result }) => result?.ok)
+        if (!refresh.isCurrent(receipt)) return false
         let failed = false
         for (const { edit, result } of results) {
+          if (!result) { failed = true; continue }
           if (!result.ok) {
             failed = true
             const session = editSessionsRef.current.get(edit.target)
@@ -4153,8 +4092,10 @@ function DocumentsTab({
         setSaveState(pendingEditsRef.current.size ? "pending" : "saved")
         return true
       } catch {
-        setSaveState("error")
+        if (refresh.isCurrent(receipt)) setSaveState("error")
         return false
+      } finally {
+        refresh.finishWrite(receipt, accepted)
       }
     })()
     saveInFlightRef.current = request
@@ -4237,34 +4178,43 @@ function DocumentsTab({
       visibleImportantDocuments.find((document) => !document.file)?.code ??
       selected.code
     const code = requestedCode ?? detectedCode ?? fallbackCode
-    await requireMutation(
-      prototypeBackend.deals.createDocument({
-        dealId,
-        documentCode: code,
-        method: "file",
-        fileName: file.name,
-      }),
-      "문서를 거래에 추가했습니다."
-    )
-    const baseDocument = [...documents, ...supplementaryDocuments].find(
-      (document) => document.code === code
-    )
-    if (!baseDocument) return
+    if (!canMutate(role)) return
+    const receipt = refresh.beginWrite()
+    let accepted = false
+    try {
+      const result = await prototypeBackend.deals.createDocument({
+          dealId,
+          documentCode: code,
+          method: "file",
+          fileName: file.name,
+        })
+      accepted = result.ok
+      if (!refresh.isCurrent(receipt)) return
+      if (!result.ok) throw new Error(result.error)
+      toast.success("문서를 거래에 추가했습니다.")
+      const baseDocument = [...documents, ...supplementaryDocuments].find(
+        (document) => document.code === code
+      )
+      if (!baseDocument) return
 
-    setUnlinked((items) => items.filter((itemCode) => itemCode !== code))
-    setLinkedDocuments((items) => ({ ...items, [code]: file.name }))
-    setSelected({
-      ...baseDocument,
-      file: file.name,
-      status: "분석 중",
-      source: "업로드",
-    })
-    addAudit("문서 추가", `${code} · ${file.name}`)
-    // A B/L starts shipment work; CI alone does not decide between contract
-    // review and payment work. That decision remains with nextWork.
-    if (code === "BL" && plan.states.fulfillment === "planned")
-      onStartWork("fulfillment")
+      setUnlinked((items) => items.filter((itemCode) => itemCode !== code))
+      setLinkedDocuments((items) => ({ ...items, [code]: file.name }))
+      setSelected({
+        ...baseDocument,
+        file: file.name,
+        status: "분석 중",
+        source: "업로드",
+      })
+      addAudit("문서 추가", `${code} · ${file.name}`)
+      // A B/L starts shipment work; CI alone does not decide between contract
+      // review and payment work. That decision remains with nextWork.
+      if (code === "BL" && plan.states.fulfillment === "planned")
+        onStartWork("fulfillment")
+    } catch (error) {
+      if (refresh.isCurrent(receipt)) toast.error(error instanceof Error ? error.message : "문서를 추가하지 못했습니다.")
+    } finally { refresh.finishWrite(receipt, accepted) }
   }
+
   return (
     <div className="min-w-0">
       <DealDocumentPanels
@@ -4283,13 +4233,13 @@ function DocumentsTab({
           >
             {visibleImportantDocuments.map((document) => (
               <button
-                key={document.code}
+                key={documentKey(document)}
                 type="button"
                 aria-label={`${document.type} ${document.file ? "보유" : "미비"}`}
-                aria-pressed={selected.code === document.code}
+                aria-pressed={documentKey(selected) === documentKey(document)}
                 className={cn(
                   "flex min-h-8 items-center gap-1.5 rounded-md px-2 text-xs",
-                  selected.code === document.code
+                  documentKey(selected) === documentKey(document)
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted"
                 )}
@@ -4337,6 +4287,9 @@ function DocumentsTab({
               documentOpen && "xl:h-full xl:overflow-y-auto"
             )}
           >
+            {documentOpen && <div className={refresh.failure ? "mb-4" : ""}>
+              <PostWriteRefreshNotice failure={refresh.failure} busy={refresh.busy} onRetry={() => void refresh.refresh()} />
+            </div>}
             <SectionHeading
               title={`${directionLabels[profile.direction]} 거래 상세`}
               action={
@@ -4525,10 +4478,10 @@ function DocumentsTab({
                 >
                   {visibleImportantDocuments.map((document) => {
                     const isMissing = !document.file
-                    const isSelected = selected.code === document.code
+                    const isSelected = documentKey(selected) === documentKey(document)
                     return (
                       <button
-                        key={document.code}
+                        key={documentKey(document)}
                         type="button"
                         className={cn(
                           "flex h-7 shrink-0 items-center gap-1 rounded-[var(--r-sm)] px-2 text-[10px] font-medium whitespace-nowrap transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
@@ -4634,6 +4587,9 @@ function DocumentsTab({
                 />
               </div>
             ) : null}
+            {movedDocument && <p role="status" className="my-2 rounded-md bg-muted px-3 py-2 text-xs">
+              {movedDocument.file} 서류를 이동했습니다. <a href={`/erp/deals/${movedDocument.dealId}`} className="font-medium text-primary underline">이동한 거래 보기</a>
+            </p>}
             <div className="mt-2">
               {!selected.file ? (
                 <div className="flex min-w-0 items-center gap-2 border-y border-[var(--surface-border)] px-1 py-2.5">
@@ -4687,6 +4643,12 @@ function DocumentsTab({
                       ? `${selectedFieldSet.fields.length}/${selectedFieldSet.total} 필드`
                       : "필드 분석 중"
                   }
+                  actions={selectedRecord && <DealDocumentActions
+                    key={selectedRecord.id}
+                    document={selectedRecord}
+                    canWrite={canMutate(role)}
+                    onChanged={handleDocumentChanged}
+                  />}
                   canUnlink={canMutate(role)}
                   onUnlink={() => setConfirmUnlink(true)}
                 />
@@ -4747,20 +4709,28 @@ function DocumentsTab({
           destructive
           onClose={() => setConfirmUnlink(false)}
           onConfirm={async () => {
-            await requireMutation(
-              prototypeBackend.deals.unlinkDocument({
-                dealId,
-                documentId: selected.file || selected.code,
-              }),
-              "문서 연결을 해제했습니다."
-            )
-            setUnlinked((items) => [...items, selected.code])
-            addAudit("문서 연결 해제", selected.file)
-            setConfirmUnlink(false)
-            const next = selectableDocuments.find(
-              (item) => item.code !== selected.code
-            )
-            if (next) setSelected(next)
+            if (!canMutate(role)) return
+            const receipt = refresh.beginWrite()
+            let accepted = false
+            try {
+              const result = await prototypeBackend.deals.unlinkDocument({
+                  dealId,
+                  documentId: selected.file || selected.code,
+                })
+              accepted = result.ok
+              if (!refresh.isCurrent(receipt)) return
+              if (!result.ok) throw new Error(result.error)
+              toast.success("문서 연결을 해제했습니다.")
+              setUnlinked((items) => [...items, selected.code, documentKey(selected)])
+              addAudit("문서 연결 해제", selected.file)
+              setConfirmUnlink(false)
+              const next = selectableDocuments.find(
+                (item) => documentKey(item) !== documentKey(selected)
+              )
+              setSelected(current => documentKey(current) === documentKey(selected)
+                ? next ?? { ...current, file: "", status: "미비", documentId: undefined }
+                : current)
+            } finally { refresh.finishWrite(receipt, accepted) }
           }}
         />
       ) : null}
@@ -4783,6 +4753,7 @@ function FulfillmentTab({
   onEditUnitPrice: () => void
   shipmentContent?: ReactNode
 }) {
+  const refresh = useDealRefresh()
   const [lifecycle, setLifecycle] = useState<OrderState>(() => dealFixtures.find((deal) => deal.id === dealId)?.orderLifecycle ?? "open")
   const [action, setAction] = useState<OrderAction>(null)
   const [reason, setReason] = useState("")
@@ -4887,38 +4858,43 @@ function FulfillmentTab({
     cancelled: "취소됨",
   }
   const finish = async () => {
-    if (!action) return
-    await requireMutation(
-      prototypeBackend.deals.orderAction({
-        dealId,
-        action,
-        reason: reason.trim() || undefined,
-      }),
-      "주문 상태를 변경했습니다."
-    )
-    if (action === "close") setLifecycle("closed")
-    if (action === "short_close") setLifecycle("short_closed")
-    if (action === "cancel") setLifecycle("cancelled")
-    if (action === "reopen") setLifecycle("open")
-    addAudit("주문 상태 변경", `${action} ${reason}`.trim())
-    const actionLabels: Record<Exclude<OrderAction, null>, string> = {
-      close: "완료 마감",
-      short_close: "미달 마감",
-      cancel: "주문 취소",
-      reopen: "주문 재오픈",
-    }
-    setOrderEvents((items) => [
-      {
-        id: Date.now(),
-        action: actionLabels[action],
-        detail: reason.trim(),
-        actor: "조민영",
-        time: "방금",
-      },
-      ...items,
-    ])
-    setAction(null)
-    setReason("")
+    if (!action || !canMutate(role)) return
+    const receipt = refresh.beginWrite()
+    let accepted = false
+    try {
+      const result = await prototypeBackend.deals.orderAction({
+          dealId,
+          action,
+          reason: reason.trim() || undefined,
+        })
+      accepted = result.ok
+      if (!refresh.isCurrent(receipt)) return
+      if (!result.ok) throw new Error(result.error)
+      toast.success("주문 상태를 변경했습니다.")
+      if (action === "close") setLifecycle("closed")
+      if (action === "short_close") setLifecycle("short_closed")
+      if (action === "cancel") setLifecycle("cancelled")
+      if (action === "reopen") setLifecycle("open")
+      addAudit("주문 상태 변경", `${action} ${reason}`.trim())
+      const actionLabels: Record<Exclude<OrderAction, null>, string> = {
+        close: "완료 마감",
+        short_close: "미달 마감",
+        cancel: "주문 취소",
+        reopen: "주문 재오픈",
+      }
+      setOrderEvents((items) => [
+        {
+          id: Date.now(),
+          action: actionLabels[action],
+          detail: reason.trim(),
+          actor: "조민영",
+          time: "방금",
+        },
+        ...items,
+      ])
+      setAction(null)
+      setReason("")
+    } finally { refresh.finishWrite(receipt, accepted) }
   }
   return (
     <>
@@ -5967,7 +5943,9 @@ export function DealDetailScreen({
   const [issueNote, setIssueNote] = useState("")
   const [deleted, setDeleted] = useState(false)
   const [failedPanel, setFailedPanel] = useState<Tab | null>(null)
-  const [refreshing, setRefreshing] = useState(false)
+  const refresh = useDealRefreshController(dealId, role)
+  const refreshing = refresh.busy
+  const [savingAssignee, setSavingAssignee] = useState(false)
   const [notes, setNotes] = useState<DealNoteItem[]>([
     {
       id: 1,
@@ -5983,6 +5961,19 @@ export function DealDetailScreen({
     },
   ])
   const [riskDismissed, setRiskDismissed] = useState(false)
+  useEffect(() => {
+    const data = refresh.data?.deal
+    if (!data) return
+    setCurrentDealId(data.displayId)
+    if (data.title !== undefined) setDealTitle(data.title)
+    if (data.assigneeId !== undefined) setAssignee(data.assigneeId ?? "미배정")
+    setRiskDismissed(data.riskDismissed)
+  }, [refresh.data])
+  useEffect(() => {
+    setSavingDealId(false)
+    setSavingAssignee(false)
+    setEditingDealId(false)
+  }, [role])
   const [verificationOpen, setVerificationOpen] = useState(false)
   const [reviewFocusId, setReviewFocusId] =
     useState<DealReviewNotice["id"]>("account_change")
@@ -6184,9 +6175,6 @@ export function DealDetailScreen({
     setNotes((items) => items.filter((item) => item.id !== noteId))
     addAudit("노트 삭제", target?.body ?? String(noteId))
   }
-  const showFeedback = (message: string) => {
-    toast.info(message)
-  }
   const dealIdCandidate = dealIdDraft.trim()
   const dealIdIsValid = /^[A-Za-z0-9][A-Za-z0-9._/-]{2,39}$/.test(
     dealIdCandidate
@@ -6198,6 +6186,7 @@ export function DealDetailScreen({
     const dealIdChanged = dealIdCandidate !== currentDealId
     const dealTitleChanged = dealTitleCandidate !== dealTitle
     if (
+      !canMutate(role) ||
       !dealIdIsValid ||
       !dealTitleIsValid ||
       (!dealIdChanged && !dealTitleChanged) ||
@@ -6209,15 +6198,18 @@ export function DealDetailScreen({
     const previousDealId = currentDealId
     const previousDealTitle = dealTitle
     setSavingDealId(true)
+    const receipt = refresh.beginWrite()
+    let accepted = false
     try {
-      await requireMutation(
-        prototypeBackend.deals.updateIdentity({
+      const result = await prototypeBackend.deals.updateIdentity({
           dealId,
           nextDealId: dealIdCandidate,
           title: dealTitleCandidate,
-        }),
-        "거래 기본정보를 저장했습니다."
-      )
+        })
+      accepted = result.ok
+      if (!refresh.isCurrent(receipt)) return
+      if (!result.ok) throw new Error(result.error)
+      toast.success("거래 기본정보를 저장했습니다.")
       setCurrentDealId(dealIdCandidate)
       setDealTitle(dealTitleCandidate)
       setEditingDealId(false)
@@ -6234,11 +6226,20 @@ export function DealDetailScreen({
           .filter(Boolean)
           .join(" · ")
       )
+    } catch (error) {
+      if (refresh.isCurrent(receipt)) toast.error(error instanceof Error ? error.message : "거래 기본정보를 저장하지 못했습니다.")
     } finally {
-      setSavingDealId(false)
+      refresh.finishWrite(receipt, accepted)
+      if (refresh.isCurrent(receipt)) setSavingDealId(false)
     }
   }
-  if (!exists)
+  if (refresh.failure === 403) return <div className="grid h-full place-items-center bg-background">
+    <div className="text-center"><h1 className="text-xl font-semibold">이 거래에 접근할 수 없습니다</h1>
+      <p className="mt-2 text-sm text-muted-foreground">접근 권한을 확인해 주세요.</p>
+      <Button className="mt-4" onClick={onBack}>목록으로</Button>
+    </div>
+  </div>
+  if (!exists || refresh.failure === 404)
     return (
       <div className="grid h-full place-items-center bg-background">
         <div className="text-center">
@@ -6287,6 +6288,7 @@ export function DealDetailScreen({
         addAudit={addAudit}
         onOpenSettlement={onOpenSettlement}
       >
+        <DealRefreshContext.Provider value={refresh}>
         <div className="min-w-0">
           <div
             ref={stickyHeaderRef}
@@ -6317,6 +6319,7 @@ export function DealDetailScreen({
                         autoFocus
                         className="h-8 w-44 text-sm font-semibold"
                         value={dealIdDraft}
+                        disabled={savingDealId || !canMutate(role)}
                         aria-label="거래번호"
                         aria-invalid={Boolean(dealIdDraft) && !dealIdIsValid}
                         onChange={(event) => setDealIdDraft(event.target.value)}
@@ -6413,6 +6416,7 @@ export function DealDetailScreen({
                     <Input
                       className="h-7 w-[min(320px,46vw)] text-xs"
                       value={dealTitleDraft}
+                      disabled={savingDealId || !canMutate(role)}
                       maxLength={80}
                       aria-label="거래 구분명"
                       aria-invalid={
@@ -6441,10 +6445,8 @@ export function DealDetailScreen({
                     size="sm"
                     className="h-auto shrink-0 gap-1 p-0 text-[11px] text-[var(--surface-muted-foreground)] shadow-none"
                     disabled={refreshing}
-                    onClick={() => {
-                      setRefreshing(true)
-                      window.setTimeout(() => setRefreshing(false), 700)
-                    }}
+                    aria-label="거래 다시 불러오기"
+                    onClick={() => void refresh.refresh()}
                   >
                     <RefreshCw
                       className={cn("size-3", refreshing && "animate-spin")}
@@ -6739,6 +6741,9 @@ export function DealDetailScreen({
             />
           </section>
           <div className="w-full px-4 py-4 sm:px-6 xl:px-8">
+            {!documentOpen && <div className={refresh.failure ? "mb-4" : ""}>
+              <PostWriteRefreshNotice failure={refresh.failure} busy={refresh.busy} onRetry={() => void refresh.refresh()} />
+            </div>}
             <div
               inert={documentOpen}
               aria-hidden={documentOpen || undefined}
@@ -6943,7 +6948,7 @@ export function DealDetailScreen({
               <DealVerificationPanels
                 riskDismissed={riskDismissed}
                 onRiskDismiss={() => setRiskDismissed(true)}
-                dealId={currentDealId}
+                dealId={dealId}
                 role={role}
                 addAudit={addAudit}
                 onOpenDocuments={() => {
@@ -6954,6 +6959,7 @@ export function DealDetailScreen({
             </div>
           </SheetContent>
         </Sheet>
+        </DealRefreshContext.Provider>
       </DealHandoffProvider>
       {workspaceActionsTarget
         ? createPortal(
@@ -6961,22 +6967,29 @@ export function DealDetailScreen({
               <SimpleSelect
                 className="h-8 w-auto min-w-28"
                 value={assignee}
-                disabled={!canMutate(role)}
+                disabled={!canMutate(role) || savingAssignee}
                 ariaLabel="거래 담당자"
                 onValueChange={async (next) => {
-                  showFeedback("담당자 저장 중…")
+                  if (!canMutate(role) || savingAssignee) return
+                  const receipt = refresh.beginWrite()
+                  let accepted = false
+                  setSavingAssignee(true)
                   try {
-                    await requireMutation(
-                      prototypeBackend.deals.setAssignee({
-                        dealId: currentDealId,
-                        assigneeId: next === "미배정" ? null : next,
-                      }),
-                      "담당자를 저장했습니다."
-                    )
+                    const result = await prototypeBackend.deals.setAssignee({
+                      dealId,
+                      assigneeId: next === "미배정" ? null : next,
+                    })
+                    accepted = result.ok
+                    if (!refresh.isCurrent(receipt)) return
+                    if (!result.ok) throw new Error(result.error)
                     setAssignee(next)
                     addAudit("담당자 변경", next)
+                    toast.success("담당자를 저장했습니다.")
+                  } catch (error) {
+                    if (refresh.isCurrent(receipt)) toast.error(error instanceof Error ? error.message : "담당자를 저장하지 못했습니다.")
                   } finally {
-                    showFeedback("")
+                    refresh.finishWrite(receipt, accepted)
+                    if (refresh.isCurrent(receipt)) setSavingAssignee(false)
                   }
                 }}
                 options={["조민영", "박서윤", "김도현", "미배정"]}
@@ -7019,17 +7032,23 @@ export function DealDetailScreen({
           canConfirm={Boolean(issueNote.trim())}
           onClose={() => setDialog(null)}
           onConfirm={async () => {
-            await requireMutation(
-              prototypeBackend.deals.createFlag({
-                dealId: currentDealId,
-                type: issueType,
-                note: issueNote.trim(),
-              }),
-              "이슈를 등록했습니다."
-            )
-            addAudit("이슈 플래그", `${issueType} · ${issueNote.trim()}`)
-            setDialog(null)
-            setIssueNote("")
+            if (!canMutate(role)) return
+            const receipt = refresh.beginWrite()
+            let accepted = false
+            try {
+              const result = await prototypeBackend.deals.createFlag({
+                  dealId,
+                  type: issueType,
+                  note: issueNote.trim(),
+                })
+              accepted = result.ok
+              if (!refresh.isCurrent(receipt)) return
+              if (!result.ok) throw new Error(result.error)
+              toast.success("이슈를 등록했습니다.")
+              addAudit("이슈 플래그", `${issueType} · ${issueNote.trim()}`)
+              setDialog(null)
+              setIssueNote("")
+            } finally { refresh.finishWrite(receipt, accepted) }
           }}
         >
           <Field label="이슈 유형">

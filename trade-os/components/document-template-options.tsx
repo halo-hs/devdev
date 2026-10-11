@@ -1,4 +1,5 @@
 import { Check, Search } from "lucide-react"
+import type { ReactNode } from "react"
 
 import { Button } from "@shared/components/ui/button"
 import { Input } from "@shared/components/ui/input"
@@ -19,6 +20,7 @@ export function DocumentTemplateOptions({
   onQueryChange,
   onSelect,
   autoFocus = false,
+  searchPrefix,
 }: {
   templates: readonly DocumentTemplateOption[]
   selectedCode?: string
@@ -26,6 +28,7 @@ export function DocumentTemplateOptions({
   onQueryChange: (value: string) => void
   onSelect: (code: string) => void
   autoFocus?: boolean
+  searchPrefix?: ReactNode
 }) {
   const visibleTemplates = templates.filter(([code, title, description]) =>
     [code, title, description].some((value) =>
@@ -35,16 +38,19 @@ export function DocumentTemplateOptions({
 
   return (
     <>
-      <div className="relative">
-        <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          autoFocus={autoFocus}
-          className="h-8 pl-8 text-xs"
-          value={query}
-          onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="견적서, 계약서, 인보이스 검색"
-          aria-label="문서 유형 검색"
-        />
+      <div className="flex items-center gap-2">
+        {searchPrefix}
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            autoFocus={autoFocus}
+            className="h-8 pl-8 text-xs"
+            value={query}
+            onChange={(event) => onQueryChange(event.target.value)}
+            placeholder={searchPrefix ? "문서 유형 검색" : "견적서, 계약서, 인보이스 검색"}
+            aria-label="문서 유형 검색"
+          />
+        </div>
       </div>
       <ScrollArea className="mt-2 max-h-[min(440px,60svh)]">
         <div className="space-y-1">

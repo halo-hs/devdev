@@ -4,6 +4,16 @@ import { normalizeDecimalInput, formatScaledDecimal } from "./money"
 // Preview adapter contract mirrored from develop-local@7bc36be0 and its
 // pinned backend 8f5cfcfd. Saving reviewed fields never commits a document.
 export type ReviewedField = { value: string; unit?: string }
+export type DocumentConnectionEvent = {
+  action: "linked" | "relinked" | "unlinked"
+  fromDealId?: string
+  dealId?: string
+  dealLabel?: string
+  actorLabel: string
+  occurredAt: string
+  reason?: string
+  evidence: string[]
+}
 export type DocumentReviewState = {
   revision: number
   fields: Record<string, ReviewedField>
@@ -11,6 +21,9 @@ export type DocumentReviewState = {
   dealId?: string
   documentType?: string
   idempotencyKey?: string
+  connectionKnown?: boolean
+  dealLabel?: string
+  connectionHistory?: DocumentConnectionEvent[]
 }
 export type BankSchedule = {
   id: string
@@ -148,6 +161,8 @@ export function confirmDocumentReview(input: {
   documentType: string
   expectedRevision: number
   idempotencyKey: string
+  dealLabel?: string
+  evidence?: string[]
 }): DocumentReviewState {
   const current = readDocumentReview(input.id)
   if (current.status === "committed") {
@@ -159,6 +174,10 @@ export function confirmDocumentReview(input: {
     throw new Error("이미 확정된 문서입니다. 연결된 거래를 확인해 주세요.")
   }
   if (!input.dealId) throw new Error("연결할 거래를 선택해 주세요.")
+  if (!current.connectionKnown) {
+    const legacy = JSON.parse(localStorage.getItem("ecoya-prototype-upload-document-deal-links") ?? "{}")
+    if (legacy[input.id]?.dealId) throw new Error("이미 연결된 문서입니다. 연결 변경에서 처리해 주세요.")
+  }
   if (current.revision !== input.expectedRevision)
     throw new Error(
       "문서가 변경되었습니다. 최신 값을 확인하고 다시 연결해 주세요."
@@ -170,6 +189,14 @@ export function confirmDocumentReview(input: {
     documentType: input.documentType === "C/O" ? "CO" : input.documentType,
     idempotencyKey: input.idempotencyKey,
     revision: current.revision + 1,
+    connectionKnown: true,
+    dealLabel: input.dealLabel ?? input.dealId,
+    connectionHistory: [...(current.connectionHistory ?? []), {
+      action: "linked", dealId: input.dealId, dealLabel: input.dealLabel,
+      // The preview has no authenticated identity. The HTTP adapter must use
+      // server audit data; never attribute historical links to this actor.
+      actorLabel: "나", occurredAt: new Date().toISOString(), evidence: input.evidence ?? [],
+    }],
   }
   localStorage.setItem(reviewPrefix + input.id, JSON.stringify(next))
   return next

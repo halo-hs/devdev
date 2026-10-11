@@ -28,6 +28,52 @@ for (const width of [1440, 390]) {
   })
 }
 
+test("document type popup carries direction and only resets fields after confirmation", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await page.goto("/erp/documents/create")
+  const strip = page.getByRole("region", { name: "문서 폼 선택", exact: true })
+  await strip.getByRole("tab", { name: "매출", exact: true }).click()
+  await strip.getByRole("button", { name: "문서 만들기", exact: true }).click()
+  const documentHeading = page.getByRole("heading", { name: "문서 만들기", exact: true }).locator("..")
+  await expect(documentHeading.getByText("매출", { exact: true })).toBeVisible()
+  const item = page.getByRole("textbox", { name: "품목 1 품목명", exact: true })
+  await item.fill("유지할 입력값")
+  const trigger = page.getByRole("button", { name: "문서 유형", exact: true })
+  const popup = page.getByRole("dialog", { name: "문서 유형 선택", exact: true })
+  const direction = popup.getByRole("combobox", { name: "문서 방향", exact: true })
+  await trigger.click()
+  await expect(direction).toHaveText("매출")
+  await expect(popup.getByRole("button", { name: /PO.*발주서/ })).toHaveCount(0)
+  await direction.click()
+  await page.getByRole("option", { name: "매입", exact: true }).click()
+  await expect(popup.getByRole("button", { name: /PO.*발주서/ })).toBeVisible()
+  // Changing the filter alone must not discard the current draft.
+  await page.keyboard.press("Escape")
+  await expect(item).toHaveValue("유지할 입력값")
+  await expect(documentHeading.getByText("매출", { exact: true })).toBeVisible()
+  await trigger.click()
+  await expect(direction).toHaveText("매출")
+  await direction.click()
+  await page.getByRole("option", { name: "매입", exact: true }).click()
+  const quotation = popup.getByRole("button", { name: /QT.*견적서/ })
+  page.once("dialog", (dialog) => dialog.dismiss())
+  await quotation.click()
+  await expect(popup).toBeVisible()
+  await expect(item).toHaveValue("유지할 입력값")
+  // The same type in a different direction is a new draft too.
+  page.once("dialog", async (dialog) => {
+    expect(dialog.message()).toContain("문서 방향을 바꾸면")
+    await dialog.accept()
+  })
+  await quotation.click()
+  await expect(popup).toBeHidden()
+  await expect(item).toHaveValue("")
+  await expect(documentHeading.getByText("매입", { exact: true })).toBeVisible()
+  await trigger.click()
+  await expect(direction).toHaveText("매입")
+  await expect(popup.getByRole("button", { name: /PO.*발주서/ })).toBeVisible()
+})
+
 for (const [filename, label, status] of [
   ["인보이스_중복확인_0918.pdf", "CI · 상업송장", "중복 확인 필요"],
   ["스캔문서_유형확인_0918.pdf", "미확인 문서", "유형 확인 필요"],

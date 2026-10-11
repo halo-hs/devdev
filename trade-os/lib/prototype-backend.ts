@@ -1,4 +1,7 @@
 import { saveDocumentReview, confirmDocumentReview, recordBankCash, type ReviewedField, type BankCashInput } from "./erp-document-workflow"
+import type { GeneratedDocumentMetadata } from "./generated-document-metadata"
+import { documentCandidates, getDocumentConnection, previewConnectionChange, changeDocumentConnection } from "./document-deal-connection"
+import { availableDocumentTypes, availableMoveDeals, previewDocumentMove, reclassifyDealDocument, replaceDealDocument, moveDealDocument, completeDealDocumentReview, listDealDocuments } from "./deal-document-actions"
 
 /**
  * Mutation boundary mirrored from the original ERP API clients.
@@ -32,6 +35,8 @@ export type DealCreateInput = {
   direction: "sales" | "purchase"
   amount: string
   currency: string
+  /** Preview checkpoint: recover a created Deal when document linking fails. */
+  sourceDocumentId?: string
 }
 
 export type CreatedDealRecord = DealCreateInput
@@ -231,6 +236,8 @@ export type ImportResult =
 const latency = 450
 const renamedDealIds = new Map<string, string>()
 const updatedDealTitles = new Map<string, string>()
+const dealAssignees = new Map<string, string | null>()
+const dismissedDealRisks = new Set<string>()
 const CREATED_DEALS_STORAGE_KEY = "ecoya-prototype-created-deals"
 
 function readCreatedDeals(): CreatedDealRecord[] {
@@ -327,7 +334,23 @@ async function patchDealField(
 }
 
 export const prototypeBackend = {
+  // Local screen adapter; production clients must enforce Deal permission and
+  // return server-owned type catalogs, impact previews and atomic relink results.
+  dealDocuments: {
+    list: async (dealId: string) => listDealDocuments(dealId, true),
+    listTypes: async () => availableDocumentTypes(),
+    listMoveTargets: async (sourceId: string) => availableMoveDeals(sourceId),
+    previewMove: async (...args: Parameters<typeof previewDocumentMove>) => previewDocumentMove(...args),
+    reclassify: async (...args: Parameters<typeof reclassifyDealDocument>) => reclassifyDealDocument(...args),
+    replace: replaceDealDocument,
+    move: async (...args: Parameters<typeof moveDealDocument>) => moveDealDocument(...args),
+    completeReview: completeDealDocumentReview,
+  },
   tradeDocuments: {
+    listCandidates: async <T extends Parameters<typeof documentCandidates>[0][number]>(deals: T[], facts: Parameters<typeof documentCandidates>[1]) => documentCandidates(deals, facts),
+    getConnection: async (...args: Parameters<typeof getDocumentConnection>) => getDocumentConnection(...args),
+    previewConnectionChange: async (...args: Parameters<typeof previewConnectionChange>) => previewConnectionChange(...args),
+    changeConnection: async (...args: Parameters<typeof changeDocumentConnection>) => changeDocumentConnection(...args),
     saveFields: async ({ id, fields }: { id: string; fields: Record<string, ReviewedField> }): Promise<MutationResult> => {
       await new Promise((resolve) => setTimeout(resolve, latency))
       try {
@@ -362,7 +385,9 @@ export const prototypeBackend = {
     unassignFromDeal: ({ id }: EntityMutationInput) => localMutation(id),
   },
   generatedDocuments: {
-    saveDraft: ({ id }: EntityMutationInput) => localMutation(id),
+    // The demo adapter currently returns only a timestamp. An HTTP adapter may
+    // provide the original document response; never fabricate its audit fields.
+    saveDraft: async ({ id }: EntityMutationInput): Promise<MutationResult & { document?: GeneratedDocumentMetadata }> => localMutation(id),
     create: ({ id }: EntityMutationInput) => localMutation(id),
     duplicate: ({ id }: EntityMutationInput) => localMutation(id),
     archiveWithShareLinks: ({ id }: EntityMutationInput) => localMutation(id),
@@ -377,6 +402,22 @@ export const prototypeBackend = {
       localMutation(`counterparty:${name}`),
   },
   deals: {
+    // Local read boundary for the preview. A real GET /trade/deals/:id must
+    // supply authenticated, recalculated data; these values are only accepted
+    // local edits, never invented finance/risk calculations.
+    read: async (dealId: string) => {
+      await new Promise(resolve => setTimeout(resolve, latency))
+      return {
+        displayId: renamedDealIds.get(dealId) ?? dealId,
+        title: updatedDealTitles.get(dealId),
+        assigneeId: dealAssignees.get(dealId),
+        riskDismissed: dismissedDealRisks.has(dealId),
+        fields: [...dealFieldVersions.entries()]
+          .filter(([key]) => key.startsWith(`${dealId}:`))
+          .map(([key, field]) => ({ target: key.slice(dealId.length + 1), ...field })),
+      }
+    },
+    listCreated: readCreatedDeals,
     getNextId: () => nextCreatedDealId(),
     getCreated: (dealId: string) =>
       readCreatedDeals().find((deal) => deal.id === dealId) ?? null,
@@ -386,7 +427,13 @@ export const prototypeBackend = {
         const current = readCreatedDeals().filter(
           (deal) => deal.id !== result.id
         )
-        writeCreatedDeals([...current, { ...input, id: result.id }])
+        if (input.sourceDocumentId) {
+          try {
+            localStorage.setItem(CREATED_DEALS_STORAGE_KEY, JSON.stringify([...current, { ...input, id: result.id }]))
+          } catch {
+            return { ok: false as const, error: "새 거래를 저장하지 못했습니다. 다시 시도해 주세요." }
+          }
+        } else writeCreatedDeals([...current, { ...input, id: result.id }])
       }
       return result
     },
@@ -408,13 +455,15 @@ export const prototypeBackend = {
     },
     restore: (dealId: string) => localMutation(dealId),
     archive: (dealId: string) => localMutation(dealId),
-    setAssignee: (input: DealAssigneeInput) => {
-      void input
-      return localMutation(input.dealId)
+    setAssignee: async (input: DealAssigneeInput) => {
+      const result = await localMutation(input.dealId)
+      if (result.ok) dealAssignees.set(input.dealId, input.assigneeId)
+      return result
     },
-    dismissRisk: (input: DealRiskInput) => {
-      void input
-      return localMutation(input.dealId)
+    dismissRisk: async (input: DealRiskInput) => {
+      const result = await localMutation(input.dealId)
+      if (result.ok) dismissedDealRisks.add(input.dealId)
+      return result
     },
     updateFields: (input: DealFieldsInput) => {
       void input
