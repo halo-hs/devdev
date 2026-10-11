@@ -1,3 +1,6 @@
+import { DocumentConnectionSummary, DocumentConnectionChangeDialog } from "@trade-os/components/document-connection-summary"
+import { type DocumentConnection, type DocumentDealLink, type CandidateEvidence } from "@trade-os/lib/document-deal-connection"
+import { dealDocumentPreviews, dealDocumentFromReviewUrl, type DealDocumentRecord } from "@trade-os/lib/deal-document-actions"
 import { appLocation } from "@/app/app-location"
 import { StartGuideProvider, useStartGuide } from "@trade-os/onboarding/runtime"
 import { BusinessListToolbar, BusinessFilterSearch, BusinessFilterField } from "@shared/components/business-filters"
@@ -74,6 +77,8 @@ import { DocumentBlockingAlerts, type DocumentBlockingIssue } from "@trade-os/co
 import { AutoSaveStatus } from "@shared/components/auto-save-status"
 import { BusinessPageHero } from "@shared/components/business-page-hero"
 import { DocumentTemplateOptions } from "@trade-os/components/document-template-options"
+import { DocumentSaveSummary } from "@trade-os/components/document-save-summary"
+import { generatedDocumentStatusLabel, type GeneratedDocumentMetadata } from "@trade-os/lib/generated-document-metadata"
 import { Checkbox } from "@shared/components/ui/checkbox"
 import {
   Combobox,
@@ -390,6 +395,7 @@ type DocumentStageKey =
   "field" | "ocr" | "confirmed" | "queued" | "excluded" | "failed" | "duplicate"
 type UploadDocumentType =
   | "UNK"
+  | "QC"
   | "BL"
   | "PO"
   | "CI"
@@ -407,6 +413,7 @@ type UploadDocumentType =
 type CreateDetailStep = "setup" | "editor" | "share"
 type DocumentCreateWorkspaceStep = "source" | "fields" | "editor"
 type CreateStartMode = "generated" | "template"
+type DocumentDirection = "purchase" | "sales"
 type GeneratedDocumentDestination =
   "editor" | "confirmed" | "share" | "link-created" | "shared"
 type GeneratedDocumentOpenOptions = {
@@ -430,6 +437,8 @@ type RecentDocument = {
   pdfReviewCompleted?: boolean
   reviewedFields?: Record<string, ReviewedField>
   contentHash?: string
+  dealDocumentId?: string
+  fileDataUrl?: string
   retryCount?: number
 }
 type UploadDocumentDealLink = {
@@ -1384,6 +1393,7 @@ const templateMeta = (code: string) =>
   templates.find(([kind]) => kind === code) ?? templates[2]
 
 type GeneratedDraft = {
+  documentMetadata?: GeneratedDocumentMetadata
   dealId: string
   title: string
   type: string
@@ -1676,6 +1686,7 @@ const manualUploadDocumentTypeOptions: ReadonlyArray<{
   { value: "FREIGHT_INVOICE", label: "운임 인보이스" },
   { value: "CUSTOMS_DECLARATION", label: "관세신고서" },
   { value: "INSURANCE_CERTIFICATE", label: "보험증권" },
+  { value: "QC", label: "검사성적서" },
 ]
 
 function inferUploadDocumentType(fileName: string): UploadDocumentType {
@@ -4007,6 +4018,7 @@ function UploadDocumentTypeMark({
 function HorizontalDocumentTray({
   documents,
   selectedIndex,
+  currentDocument,
   onSelect,
   onDelete,
   onFilesSelected,
@@ -4020,6 +4032,7 @@ function HorizontalDocumentTray({
 }: {
   documents: RecentDocument[]
   selectedIndex: number
+  currentDocument?: RecentDocument
   onSelect: (index: number) => void
   onDelete: (index: number) => void
   onFilesSelected: (files: File[]) => void
@@ -4044,7 +4057,7 @@ function HorizontalDocumentTray({
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null)
   const [cancelUploadOpen, setCancelUploadOpen] = useState(false)
-  const selectedDocument = documents[selectedIndex] ?? documents[0]
+  const selectedDocument = currentDocument ?? documents[selectedIndex] ?? documents[0]
   const processingCount = documents.filter((document) =>
     ["ocr", "queued"].includes(document.stage)
   ).length
@@ -4132,7 +4145,7 @@ function HorizontalDocumentTray({
         tabIndex={0}
         aria-label="검토·배정 대기 문서 목록"
         aria-expanded={expanded}
-        className="flex min-h-14 cursor-pointer items-center gap-2 p-2 outline-none hover:bg-muted/20 focus-visible:[box-shadow:var(--shadow-keyboard-focus)]"
+        className="flex min-h-14 cursor-pointer flex-wrap items-center gap-2 p-2 xl:flex-nowrap outline-none hover:bg-muted/20 focus-visible:[box-shadow:var(--shadow-keyboard-focus)]"
         onClick={() => handleExpandedChange(!expanded)}
         onKeyDown={(event) => {
           if (event.target !== event.currentTarget) return
@@ -4142,7 +4155,7 @@ function HorizontalDocumentTray({
           }
         }}
       >
-        <div className="flex h-11 min-w-52 items-center gap-2 px-3 pr-4 text-primary">
+        <div className="order-0 flex h-11 min-w-0 flex-1 items-center gap-2 px-3 pr-4 text-primary xl:min-w-52 xl:flex-none">
           <span className="font-semibold">검토·배정 대기 문서</span>
           <span className="inline-flex size-6 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
             {documents.length}
@@ -4155,7 +4168,7 @@ function HorizontalDocumentTray({
         </div>
 
         {selectedDocument ? (
-          <div className="ml-2 flex min-w-0 flex-1 items-center gap-2 pl-4 pr-1">
+          <div className="order-2 flex min-w-0 w-full items-center gap-2 px-3 pb-2 xl:order-none xl:ml-2 xl:w-auto xl:flex-1 xl:pb-0 xl:pl-4 xl:pr-1">
             <UploadDocumentTypeMark
               documentType={selectedDocument.documentType}
               className="size-9"
@@ -4166,7 +4179,7 @@ function HorizontalDocumentTray({
                   {uploadDocumentTypeLabel(selectedDocument.documentType)}
                 </span>
                 <span className="shrink-0 text-[11px] text-[var(--surface-muted-foreground)]">
-                  · {selectedIndex + 1} / {documents.length}
+                  {selectedIndex >= 0 ? `· ${selectedIndex + 1} / ${documents.length}` : "· 연결 완료"}
                 </span>
                 <span
                   className="min-w-0 truncate text-[10px] text-[var(--surface-muted-foreground)]"
@@ -4182,7 +4195,7 @@ function HorizontalDocumentTray({
           </div>
         ) : null}
 
-        <div className="ml-auto flex h-11 items-center gap-2 pr-2 text-[11px]">
+        <div className="ml-auto hidden h-11 shrink-0 items-center gap-2 whitespace-nowrap pr-2 text-[11px] xl:flex">
           <span className="rounded-full bg-[var(--color-system-orange6)] px-2 py-1 text-[var(--color-orange-2)]">
             확인 대기 {reviewCount}
           </span>
@@ -4601,14 +4614,33 @@ function InboxScreen({
   linkedDealsByDocument: UploadDocumentDealLinks
   onDocumentDealLinked: (
     documentName: string,
-    link: UploadDocumentDealLink
+    link: UploadDocumentDealLink | null
   ) => void
 }) {
   const guide = useStartGuide()
-  const initialUploadDocuments: RecentDocument[] = readUploadQueue().map(
+  const [dealReviewDocument] = useState<DealDocumentRecord | null>(() => dealDocumentFromReviewUrl())
+  const dealReviewRequested = new URLSearchParams(window.location.search).get("from") === "deal"
+  const reviewMatches = (document: RecentDocument) => dealReviewDocument
+    ? document.dealDocumentId === dealReviewDocument.id
+    : document.name === initialDocumentName
+  const reviewCode = dealReviewDocument?.code === "CO" ? "C/O" : dealReviewDocument?.code === "IC" ? "INSURANCE_CERTIFICATE" : dealReviewDocument?.code
+  const reviewEntry: RecentDocument | null = dealReviewDocument ? {
+    name: dealReviewDocument.file, uploadedAt: "거래 서류", dealDocumentId: dealReviewDocument.id,
+    documentType: (manualUploadDocumentTypeOptions.some(option => option.value === reviewCode) ? reviewCode : "UNK") as UploadDocumentType,
+    fileDataUrl: dealReviewDocument.fileDataUrl,
+    status: "검토 대기", tone: "warning", stage: "field", pdfReviewCompleted: false,
+    reviewedFields: readDocumentReview(`${dealReviewDocument.id}:${dealReviewDocument.revision}`).fields,
+  } : null
+  const queue = readUploadQueue().filter(document => !dealReviewDocument || document.dealDocumentId !== dealReviewDocument.id)
+  const initialUploadDocuments: RecentDocument[] = (reviewEntry ? [reviewEntry, ...queue] : queue).map(
     (document) => {
-      document = { ...document, reviewedFields: readDocumentReview(document.name).fields }
-      const link = linkedDealsByDocument[document.name]
+      if (reviewEntry && document.dealDocumentId === reviewEntry.dealDocumentId) return document
+      const review = readDocumentReview(document.name)
+      document = { ...document, reviewedFields: review.fields }
+      const link = review.connectionKnown || review.dealId
+        ? review.dealId ? { dealId: review.dealId, dealLabel: review.dealLabel ?? review.dealId } : null
+        : linkedDealsByDocument[document.name]
+      if (review.connectionKnown && !link) document = { ...document, dealLabel: undefined, stage: "field", status: "거래 연결 필요", tone: "warning" }
       const opensConnectedStep =
         initialStep === "deal" && document.name === initialDocumentName
       return link
@@ -4632,7 +4664,7 @@ function InboxScreen({
   )
   const initialDocumentIndex = initialDocumentName
     ? initialUploadDocuments.findIndex(
-        (document) => document.name === initialDocumentName
+        reviewMatches
       )
     : -1
   const initialSelectedDocument =
@@ -4650,7 +4682,7 @@ function InboxScreen({
     () => initialUploadDocuments
   )
   useEffect(() => {
-    try { localStorage.setItem(UPLOAD_QUEUE_STORAGE_KEY, JSON.stringify(uploadDocuments)); localStorage.setItem(UPLOAD_STATUS_SEEDS_KEY, "applied") } catch { /* Current session remains usable. */ }
+    try { localStorage.setItem(UPLOAD_QUEUE_STORAGE_KEY, JSON.stringify(uploadDocuments.filter(document => !document.dealDocumentId))); localStorage.setItem(UPLOAD_STATUS_SEEDS_KEY, "applied") } catch { /* Current session remains usable. */ }
   }, [uploadDocuments])
   const [autoSaving, setAutoSaving] = useState(false)
   const [autoSavePending, setAutoSavePending] = useState(false)
@@ -4740,10 +4772,7 @@ function InboxScreen({
   const pendingUploadDocuments = uploadDocuments
     .map((document, index) => ({ document, index }))
     .filter(({ document }) => document.stage !== "confirmed")
-  const pendingSelectedIndex = Math.max(
-    0,
-    pendingUploadDocuments.findIndex(({ index }) => index === selectedIndex)
-  )
+  const pendingSelectedIndex = pendingUploadDocuments.findIndex(({ index }) => index === selectedIndex)
   const isTypeUnresolved = isUploadDocumentTypeUnresolved(selectedDocument)
   const pdfReviewCompleted =
     selectedDocument.pdfReviewCompleted === true ||
@@ -4773,6 +4802,14 @@ function InboxScreen({
 
   const handlePdfReviewComplete = () => {
     if (isDealBlocked) return
+    if (dealReviewDocument && selectedDocument.dealDocumentId === dealReviewDocument.id) {
+      try {
+        prototypeBackend.dealDocuments.completeReview(dealReviewDocument)
+        toast.success("원문 검토를 완료했습니다.")
+        onOpenDeal(dealReviewDocument.dealId!)
+      } catch (error) { toast.error(error instanceof Error ? error.message : "검토 상태를 저장하지 못했습니다.") }
+      return
+    }
     guide?.record({ type: "reviewed", documentId: selectedDocument.name, receipt: crypto.randomUUID() })
     setUploadDocuments((current) =>
       current.map((document, index) =>
@@ -4791,13 +4828,13 @@ function InboxScreen({
     setMobilePane("fields")
     toast.success("연결할 거래를 선택해 주세요.")
   }
-  const handleDealLink = async (dealId: string, dealLabel: string, bankCash?: Omit<BankCashInput, "sourceDocumentId" | "idempotencyKey">) => {
+  const handleDealLink = async (dealId: string, dealLabel: string, bankCash?: Omit<BankCashInput, "sourceDocumentId" | "idempotencyKey">, evidence?: string[]) => {
     if (linkingDocument || isDealBlocked) return false
     const documentName = selectedDocument.name
     setLinkingDocument(true)
     try {
       const result = await prototypeBackend.tradeDocuments.confirmTransition({
-        id: documentName, dealId, documentType: selectedDocument.documentType,
+        id: documentName, dealId, dealLabel, evidence, documentType: selectedDocument.documentType,
         expectedRevision: readDocumentReview(documentName).revision,
         idempotencyKey: crypto.randomUUID(),
       })
@@ -4825,6 +4862,12 @@ function InboxScreen({
     } finally {
       setLinkingDocument(false)
     }
+  }
+  const handleConnectionChanged = (connection: DocumentConnection) => {
+    onDocumentDealLinked(selectedDocument.name, connection.link)
+    setUploadDocuments(current => current.map(document => document.name === selectedDocument.name
+      ? { ...document, dealLabel: connection.link?.dealLabel, stage: connection.link ? "confirmed" : "field", status: connection.link ? "거래 연결 완료" : "거래 연결 필요", tone: connection.link ? "success" : "warning", pdfReviewCompleted: true }
+      : document))
   }
   const handleDraftDownload = async () => {
     if (!pdfReviewCompleted || downloadingDraft) return
@@ -4869,7 +4912,8 @@ function InboxScreen({
     const savingDocument = selectedDocumentRef.current
     const [result] = await Promise.all([
       prototypeBackend.tradeDocuments.saveFields({
-        id: savingDocument.name,
+        id: dealReviewDocument && savingDocument.dealDocumentId === dealReviewDocument.id
+          ? `${dealReviewDocument.id}:${dealReviewDocument.revision}` : savingDocument.name,
         fields: Object.fromEntries(resolvedReviewFields(savingDocument).map((field) => [field.key, { value: field.value, unit: field.unit }])) ,
       }),
       new Promise<void>((resolve) => window.setTimeout(resolve, 800)),
@@ -5169,6 +5213,9 @@ function InboxScreen({
     )
   }
 
+  if (dealReviewRequested && !dealReviewDocument) return (
+    <div className="p-6" role="alert"><h1 className="text-lg font-semibold">검토할 거래 서류를 찾을 수 없습니다.</h1><p className="mt-2 text-sm text-muted-foreground">서류의 거래 연결과 접근 권한을 확인한 뒤 다시 열어 주세요.</p><Button className="mt-4" variant="outline" onClick={() => onDocumentOpen?.(null)}>문서 목록으로</Button></div>
+  )
   if (!hasFile) {
     return (
       <div className="h-full min-h-0 bg-background">
@@ -5199,6 +5246,7 @@ function InboxScreen({
       <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-end gap-2 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-3 py-2 sm:px-4">
         <div className="mr-auto min-w-0">
           <h1 className="text-sm font-semibold">문서 올리기</h1>
+          {dealReviewDocument && <a href={`/erp/deals/${dealReviewDocument.dealId}`} className="text-xs text-primary underline">{dealReviewDocument.dealId} 거래로 돌아가기</a>}
         </div>
         <DocumentBlockingAlerts errors={uploadErrors} checks={uploadChecks} />
         <AutoSaveStatus
@@ -5263,7 +5311,7 @@ function InboxScreen({
               handlePdfReviewComplete()
             }}
           >
-            거래 연결
+            {dealReviewDocument && selectedDocument.dealDocumentId === dealReviewDocument.id ? "검토 완료 · 거래로 돌아가기" : "거래 연결"}
             <ChevronRight data-icon="inline-end" />
           </Button>
         ) : (
@@ -5289,6 +5337,7 @@ function InboxScreen({
         <HorizontalDocumentTray
           documents={pendingUploadDocuments.map(({ document }) => document)}
           selectedIndex={pendingSelectedIndex}
+          currentDocument={selectedDocument}
           onSelect={(index) => {
             const sourceIndex = pendingUploadDocuments[index]?.index
             if (sourceIndex === undefined) return
@@ -5322,6 +5371,7 @@ function InboxScreen({
             downloadingDraft={downloadingDraft}
             dealActionTarget={dealActionTarget}
             onLinkDeal={handleDealLink}
+            onConnectionChanged={handleConnectionChanged}
             onDownloadDraft={handleDraftDownload}
             onPdfReviewComplete={handlePdfReviewComplete}
             onReviewedFieldChange={handleReviewedFieldChange}
@@ -5955,6 +6005,7 @@ function DocumentReviewWorkspace({
   downloadingDraft,
   dealActionTarget,
   onLinkDeal,
+  onConnectionChanged,
   onDownloadDraft,
   onPdfReviewComplete,
   onReviewedFieldChange,
@@ -5971,7 +6022,8 @@ function DocumentReviewWorkspace({
   linkingDocument: boolean
   downloadingDraft: boolean
   dealActionTarget: HTMLElement | null
-  onLinkDeal: (dealId: string, dealLabel: string, bankCash?: Omit<BankCashInput, "sourceDocumentId" | "idempotencyKey">) => Promise<boolean>
+  onLinkDeal: (dealId: string, dealLabel: string, bankCash?: Omit<BankCashInput, "sourceDocumentId" | "idempotencyKey">, evidence?: string[]) => Promise<boolean>
+  onConnectionChanged: (connection: DocumentConnection) => void
   onDownloadDraft: () => void | Promise<void>
   onPdfReviewComplete: () => void
   onReviewedFieldChange: (key: string, patch: Partial<ReviewedField>) => void
@@ -6081,12 +6133,17 @@ function DocumentReviewWorkspace({
         <ChevronLeft data-icon="inline-start" />
         {step === "deal" ? "거래 연결" : "필드 검토"}
       </Button>
-      <DocumentStage
+      {document.fileDataUrl ? <iframe title={`${document.name} 원본 PDF`} src={document.fileDataUrl} className="min-h-[480px] w-full flex-1 border-0" /> : <DocumentStage
         downloadName={document.name}
+        previewContent={document.dealDocumentId ? <div className="p-6 text-sm">
+          <h2 className="mb-4 text-xl font-semibold">{dealDocumentPreviews[document.documentType]?.title ?? uploadDocumentTypeLabel(document.documentType)}</h2>
+          <p className="mb-6 break-all text-muted-foreground">{document.name}</p>
+          {(dealDocumentPreviews[document.documentType]?.fields ?? []).map(([label, value]) => <div key={label} className="flex justify-between gap-4 border-b py-3"><span>{label}</span><span>{value}</span></div>)}
+        </div> : undefined}
+        showAiDetection={document.dealDocumentId ? false : step === "compare" && !pdfReviewCompleted}
         reviewMode
         paperClassName="w-full max-w-none"
         canDownload={false}
-        showAiDetection={step === "compare" && !pdfReviewCompleted}
         reviewGate={{
           completed: pdfReviewCompleted,
           disabled: Boolean(dealBlocked),
@@ -6094,7 +6151,7 @@ function DocumentReviewWorkspace({
           onComplete: onPdfReviewComplete,
           onDownload: onDownloadDraft,
         }}
-      />
+      />}
     </section>
   )
 
@@ -6109,10 +6166,12 @@ function DocumentReviewWorkspace({
         key={document.name}
         document={document}
         linkedDealLabel={linkedDealLabel}
-        linking={linkingDocument || Boolean(dealBlocked)}
+        linking={linkingDocument}
+        linkBlocked={Boolean(dealBlocked)}
         actionPortalTarget={dealActionTarget}
         onShowPdf={isCompact ? () => onMobilePaneChange("preview") : undefined}
         onLinkDeal={onLinkDeal}
+        onConnectionChanged={onConnectionChanged}
       />
     </section>
   )
@@ -7031,16 +7090,20 @@ function DealConfirmPanel({
   document,
   linkedDealLabel,
   linking,
+  linkBlocked = false,
   actionPortalTarget,
   onShowPdf,
   onLinkDeal,
+  onConnectionChanged,
 }: {
   document: RecentDocument
   linkedDealLabel: string | null
   linking: boolean
+  linkBlocked?: boolean
   actionPortalTarget?: HTMLElement | null
   onShowPdf?: () => void
-  onLinkDeal: (dealId: string, dealLabel: string, bankCash?: Omit<BankCashInput, "sourceDocumentId" | "idempotencyKey">) => Promise<boolean>
+  onConnectionChanged?: (connection: DocumentConnection) => void
+  onLinkDeal: (dealId: string, dealLabel: string, bankCash?: Omit<BankCashInput, "sourceDocumentId" | "idempotencyKey">, evidence?: string[]) => Promise<boolean>
 }) {
   const documentReviewFields = resolvedReviewFields(document)
   const aiCounterpartyName =
@@ -7079,49 +7142,65 @@ function DealConfirmPanel({
     documentReviewFields.find((field) => field.key === "currency")?.value ??
     readAmountField?.unit?.split("/")[0] ??
     ""
-  const normalizeText = (value: string) => value.trim().toLowerCase()
-  const normalizeAmount = (value: string) => value.replace(/[^0-9.-]/g, "")
-  const aiRecommendedDealId = documentSourceDeals
-    .map((candidate) => ({
-      id: candidate.id,
-      score:
-        (readCounterparty &&
-        normalizeText(candidate.party) === normalizeText(readCounterparty)
-          ? 4
-          : 0) +
-        (readCurrency &&
-        normalizeText(candidate.currency) === normalizeText(readCurrency)
-          ? 2
-          : 0) +
-        (readAmountField?.value &&
-        normalizeAmount(candidate.amount) ===
-          normalizeAmount(readAmountField.value)
-          ? 3
-          : 0),
-    }))
-    .sort((a, b) => b.score - a.score)[0]
-  const recommendedDealId =
-    aiRecommendedDealId && aiRecommendedDealId.score > 0
-      ? aiRecommendedDealId.id
-      : null
+  const [connection, setConnection] = useState<DocumentConnection | null>(null)
+  const [connectionError, setConnectionError] = useState("")
+  const [connectionAttempt, setConnectionAttempt] = useState(0)
+  const [changingConnection, setChangingConnection] = useState(false)
+  const [changeDialog, setChangeDialog] = useState<{ target: DocumentDealLink | null; evidence: string[] } | null>(null)
+  const [loadedCandidates, setLoadedCandidates] = useState<(DocumentSourceDeal & CandidateEvidence)[]>([])
+  const [candidateAttempt, setCandidateAttempt] = useState(0)
+  const recommendedDealId = loadedCandidates.find(candidate => candidate.recommended)?.id ?? null
+  const activeLink = connection?.link ?? null
+  const connectionReady = Boolean(connection) && !connectionError
+  useEffect(() => {
+    let active = true
+    setConnectionError(""); setConnection(null)
+    const legacy = readUploadDocumentDealLinks()[document.name]
+    prototypeBackend.tradeDocuments.getConnection(document.name, legacy)
+      .then(value => {
+        if (!active) return
+        if (linkedDealLabel && !value.link && !value.connectionKnown) throw new Error("현재 연결의 거래 정보를 확인하지 못했습니다.")
+        setConnection(value)
+      })
+      .catch(error => { if (active) setConnectionError(error instanceof Error ? error.message : "현재 연결 정보를 불러오지 못했습니다.") })
+    return () => { active = false }
+  }, [document.name, connectionAttempt])
+  const [pendingCreatedDeal] = useState(() => {
+    const review = readDocumentReview(document.name)
+    return review.status !== "committed" && !review.connectionHistory?.length
+      ? prototypeBackend.deals.listCreated().find(deal => deal.sourceDocumentId === document.name) ?? null : null
+  })
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
-  const [newDealFormOpen, setNewDealFormOpen] = useState(false)
-  const [newDealName, setNewDealName] = useState(aiCounterpartyName)
+  const [newDealFormOpen, setNewDealFormOpen] = useState(Boolean(pendingCreatedDeal))
+  const [newDealName, setNewDealName] = useState(pendingCreatedDeal?.counterparty ?? aiCounterpartyName)
   const [newDealNumber, setNewDealNumber] = useState(() =>
-    prototypeBackend.deals.getNextId()
+    pendingCreatedDeal?.id ?? prototypeBackend.deals.getNextId()
   )
   const [recommendedNewDealNumber, setRecommendedNewDealNumber] =
     useState(newDealNumber)
   const [bankScheduleId, setBankScheduleId] = useState("")
   const [bankMatchAmount, setBankMatchAmount] = useState(readAmountField?.value ?? "")
   const [bankValueDate, setBankValueDate] = useState(() => new Date().toLocaleDateString("sv-SE"))
-  const [newDealDirection, setNewDealDirection] = useState<"sales" | "purchase" | "">("")
+  const [newDealDirection, setNewDealDirection] = useState<"sales" | "purchase" | "">(pendingCreatedDeal?.direction ?? "")
   const [candidateLoadState, setCandidateLoadState] = useState<
     "loading" | "ready" | "error"
-  >("ready")
+  >("loading")
+  useEffect(() => {
+    let active = true
+    setCandidateLoadState("loading")
+    const created: DocumentSourceDeal[] = prototypeBackend.deals.listCreated().map(deal => ({ id: deal.id, title: deal.title, party: deal.counterparty, amount: deal.amount, currency: deal.currency, item: "품목 미등록", stage: "신규 거래", tone: "neutral" }))
+    prototypeBackend.tradeDocuments.listCandidates([...documentSourceDeals, ...created], { counterparty: readCounterparty, amount: readAmountField?.value ?? "", currency: readCurrency })
+      .then(rows => { if (active) { setLoadedCandidates(rows); setCandidateLoadState("ready") } })
+      .catch(() => { if (active) setCandidateLoadState("error") })
+    return () => { active = false }
+  }, [document.name, readCounterparty, readAmountField?.value, readCurrency, candidateAttempt])
+  const [creatingDeal, setCreatingDeal] = useState(false)
+  const creatingRef = useRef(false)
+  const [createdDeal, setCreatedDeal] = useState<DocumentDealLink | null>(() => pendingCreatedDeal ? { dealId: pendingCreatedDeal.id, dealLabel: `${pendingCreatedDeal.id} · ${pendingCreatedDeal.counterparty}` } : null)
+  const createdCounterparty = useRef<string | null>(null)
   const normalizedQuery = searchQuery.trim().toLowerCase()
-  const candidates = documentSourceDeals
+  const candidates = loadedCandidates
     .filter((candidate) =>
       normalizedQuery
         ? [candidate.id, candidate.title, candidate.party, candidate.item].some(
@@ -7135,10 +7214,10 @@ function DealConfirmPanel({
       return 0
     })
   const selectedCandidate =
-    documentSourceDeals.find((candidate) => candidate.id === selectedDealId) ??
+    loadedCandidates.find((candidate) => candidate.id === selectedDealId) ??
     null
   const bankSchedules = eligibleBankSchedules(currentBankSchedules(), selectedDealId ?? "", readCurrency)
-  const bankMatchRequired = document.documentType === "BANK_STATEMENT" && Boolean(selectedCandidate) && !newDealFormOpen
+  const bankMatchRequired = !activeLink && document.documentType === "BANK_STATEMENT" && Boolean(selectedCandidate) && !newDealFormOpen
   const bankCashError = bankScheduleId && bankScheduleId !== "document-only"
     ? bankCashValidation({ scheduleId: bankScheduleId, amount: bankMatchAmount, currency: readCurrency, valueDate: bankValueDate }, bankSchedules)
     : null
@@ -7149,6 +7228,7 @@ function DealConfirmPanel({
     newDealName.trim().length > 0 &&
     newDealNumber.trim().length > 0 && Boolean(newDealDirection)
   const prepareNewDealForm = () => {
+    if (createdDeal) return
     const nextDealNumber = prototypeBackend.deals.getNextId()
     setSelectedDealId(null)
     setNewDealName(aiCounterpartyName)
@@ -7156,8 +7236,7 @@ function DealConfirmPanel({
     setNewDealNumber(nextDealNumber)
   }
   const retryCandidateLoad = () => {
-    setCandidateLoadState("loading")
-    window.setTimeout(() => setCandidateLoadState("ready"), 500)
+    setCandidateAttempt(value => value + 1)
   }
   const handleCandidateSelect = (candidate: DocumentSourceDeal) => {
     setNewDealFormOpen(false)
@@ -7168,12 +7247,22 @@ function DealConfirmPanel({
   }
 
   const handleLink = async () => {
-    if (linking) return
+    if (linking || creatingRef.current || !connectionReady) return
+    if (activeLink) {
+      if (!changingConnection || !selectedCandidate || selectedCandidate.id === activeLink.dealId) return
+      setChangeDialog({ target: { dealId: selectedCandidate.id, dealLabel: `${selectedCandidate.id} · ${selectedCandidate.party}` }, evidence: selectedCandidate.reasons.length ? selectedCandidate.reasons : ["직접 선택"] })
+      return
+    }
+    creatingRef.current = true; setCreatingDeal(true)
     try {
       if (newDealReady) {
+        if (createdDeal) {
+          await onLinkDeal(createdDeal.dealId, createdDeal.dealLabel, undefined, ["새 거래 생성 후 연결"])
+          return
+        }
         const counterpartyName = newDealName.trim()
         const newDealId = newDealNumber.trim()
-        if (!hasReadCounterparty) {
+        if (!hasReadCounterparty && createdCounterparty.current !== counterpartyName) {
           const counterpartyResult =
             await prototypeBackend.counterparties.create({
               name: counterpartyName,
@@ -7182,6 +7271,7 @@ function DealConfirmPanel({
             toast.error(counterpartyResult.error)
             return
           }
+          createdCounterparty.current = counterpartyName
         }
         const result = await prototypeBackend.deals.create({
           id: newDealId,
@@ -7190,12 +7280,16 @@ function DealConfirmPanel({
           direction: newDealDirection as "sales" | "purchase",
           amount: normalizeDecimalInput(readAmountField?.value ?? "0"),
           currency: readCurrency || "USD",
+          sourceDocumentId: document.name,
         })
         if (!result.ok) {
           toast.error(result.error)
           return
         }
-        await onLinkDeal(result.id, `${result.id} · ${counterpartyName}`)
+        const accepted = { dealId: result.id, dealLabel: `${result.id} · ${counterpartyName}` }
+        setCreatedDeal(accepted)
+        setCandidateAttempt(value => value + 1)
+        await onLinkDeal(accepted.dealId, accepted.dealLabel, undefined, ["새 거래 생성 후 연결"])
         return
       }
       if (!selectedCandidate || bankMatchIncomplete) return
@@ -7206,13 +7300,14 @@ function DealConfirmPanel({
           scheduleId: bankScheduleId, amount: normalizeDecimalInput(bankMatchAmount),
           currency: readCurrency, valueDate: bankValueDate,
         } : undefined,
+        selectedCandidate.reasons.length ? selectedCandidate.reasons : ["직접 선택"],
       )
     } catch {
       toast.error("거래 연결 중 오류가 발생했습니다. 다시 시도해 주세요.")
-    }
+    } finally { creatingRef.current = false; setCreatingDeal(false) }
   }
   const openConnectionRequirement = () => focusDocumentRequirement('[data-document-requirement="connection"]')
-  const connectionErrors: DocumentBlockingIssue[] = linkedDealLabel ? [] : [
+  const connectionErrors: DocumentBlockingIssue[] = activeLink && !changingConnection ? [] : [
     ...(bankCashError ? [{ key: "bank", label: bankCashError, onSelect: openConnectionRequirement }] : []),
     ...(newDealFormOpen ? [
       ...(!newDealName.trim() ? [{ key: "name", label: "거래처명 · 필수값 누락", onSelect: openConnectionRequirement }] : []),
@@ -7220,7 +7315,7 @@ function DealConfirmPanel({
       ...(!newDealDirection ? [{ key: "direction", label: "매입·매출 구분 선택", onSelect: openConnectionRequirement }] : []),
     ] : []),
   ]
-  const connectionChecks: DocumentBlockingIssue[] = linkedDealLabel ? [] : [
+  const connectionChecks: DocumentBlockingIssue[] = activeLink && !changingConnection ? [] : [
     ...(!selectedCandidate && !newDealFormOpen ? [{ key: "deal", label: "연결할 거래 선택", onSelect: openConnectionRequirement }] : []),
     ...(bankMatchRequired && !bankScheduleId ? [{ key: "schedule", label: "결제 일정 또는 서류만 연결 선택", onSelect: openConnectionRequirement }] : []),
   ]
@@ -7230,7 +7325,7 @@ function DealConfirmPanel({
     <Button
       size="sm"
       disabled={
-        Boolean(linkedDealLabel) ||
+        !connectionReady || (!activeLink && linkBlocked) || (Boolean(activeLink) && (!changingConnection || selectedDealId === activeLink?.dealId)) || creatingDeal ||
         candidateLoadState !== "ready" ||
         (!selectedCandidate && !newDealReady) ||
         bankMatchIncomplete ||
@@ -7238,17 +7333,19 @@ function DealConfirmPanel({
       }
       onClick={() => void handleLink()}
     >
-      {linking ? (
+      {linking || creatingDeal ? (
         <LoaderCircle className="animate-spin" data-icon="inline-start" />
       ) : null}
-      {linking
+      {linking || creatingDeal
         ? newDealReady
           ? hasReadCounterparty
             ? "거래 생성·연결 중"
             : "거래처·거래 생성 중"
           : "연결 중"
-        : linkedDealLabel
-          ? "거래 연결 완료"
+        : activeLink
+          ? changingConnection ? "연결 변경 확인" : "거래 연결 완료"
+          : createdDeal && newDealFormOpen
+            ? "생성한 거래에 연결 재시도"
           : newDealReady
             ? hasReadCounterparty
               ? "새 거래 생성·연결"
@@ -7292,19 +7389,12 @@ function DealConfirmPanel({
 
         <ScrollArea className="min-h-0 flex-1">
           <div data-document-requirement="connection" className="mx-auto w-full max-w-4xl space-y-5 p-6">
-            {linkedDealLabel ? (
-              <section className="flex items-center gap-3 rounded-lg border border-success/30 bg-success/5 px-4 py-3">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-success/10 text-success">
-                  <Check className="size-4" />
-                </span>
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold">연결된 거래</div>
-                  <div className="mt-1 truncate text-[11px] text-muted-foreground">
-                    {linkedDealLabel}
-                  </div>
-                </div>
-              </section>
-            ) : null}
+            {connectionError ? <Alert variant="destructive"><AlertTitle>현재 거래 연결을 불러오지 못했습니다</AlertTitle><AlertDescription>{connectionError}</AlertDescription><Button className="mt-3" size="sm" variant="outline" onClick={() => setConnectionAttempt(value => value + 1)}>현재 연결 다시 확인</Button></Alert>
+              : connection ? <DocumentConnectionSummary connection={connection} disabled={linking || candidateLoadState !== "ready" || !onConnectionChanged}
+                onChange={() => { setChangingConnection(true); setNewDealFormOpen(false); setSelectedDealId(null) }}
+                onUnlink={() => setChangeDialog({ target: null, evidence: [] })} />
+              : <p role="status" className="text-xs text-muted-foreground">현재 거래 연결을 확인하고 있습니다.</p>}
+            {changingConnection ? <div className="flex items-center justify-between gap-3 text-xs"><p>변경할 거래를 선택하세요. 확정하기 전까지 현재 연결이 유지됩니다.</p><Button size="sm" variant="ghost" onClick={() => setChangingConnection(false)}>변경 취소</Button></div> : null}
             {documentDealValues.length > 0 ? (
               <section className="rounded-lg border border-[var(--surface-border)] bg-background px-4 py-3">
                 <div className="flex items-center justify-between gap-3">
@@ -7351,8 +7441,8 @@ function DealConfirmPanel({
               </section>
             ) : null}
 
-            <section>
-              <div className="flex items-center justify-between gap-3">
+            {(!activeLink || changingConnection) && connectionReady ? <section>
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2 text-sm font-semibold">
                     <Building2 className="size-4 text-primary" />
@@ -7382,7 +7472,7 @@ function DealConfirmPanel({
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={candidateLoadState !== "ready"}
+                    disabled={candidateLoadState !== "ready" || Boolean(activeLink) || creatingDeal}
                     onClick={() => {
                       setNewDealFormOpen((current) => {
                         const next = !current
@@ -7430,7 +7520,7 @@ function DealConfirmPanel({
               ) : (
                 <>
                   {newDealFormOpen ? (
-                    <div className="mt-3 rounded-lg border border-primary/30 bg-background p-4">
+                    <fieldset disabled={Boolean(createdDeal) || creatingDeal} className="mt-3 rounded-lg border border-primary/30 bg-background p-4">
                       <div>
                         <div className="text-sm font-semibold">
                           {hasReadCounterparty
@@ -7494,10 +7584,11 @@ function DealConfirmPanel({
                           </div>
                         </Field>
                       </div>
-                    </div>
+                      {createdDeal ? <p role="status" className="mt-3 text-xs">{createdDeal.dealLabel} 거래는 생성되었습니다. 다시 시도하면 이 거래에 문서만 연결합니다.</p> : null}
+                    </fieldset>
                   ) : null}
 
-                  {documentSourceDeals.length === 0 ? (
+                  {loadedCandidates.length === 0 ? (
                     !newDealFormOpen ? (
                       <div className="mt-3 rounded-lg border border-dashed bg-background px-5 py-8 text-center">
                         <div className="text-sm font-semibold">
@@ -7551,9 +7642,10 @@ function DealConfirmPanel({
                               role="radio"
                               aria-checked={selected}
                               className={cn(
-                                "flex w-full items-center gap-3 border-b border-[var(--surface-border)] px-4 py-3 text-left last:border-b-0 hover:bg-muted/40",
+                                "flex w-full items-start gap-3 border-b border-[var(--surface-border)] px-4 py-3 text-left last:border-b-0 hover:bg-muted/40",
                                 selected && "bg-primary/5"
                               )}
+                              disabled={creatingDeal || linking || candidate.id === activeLink?.dealId}
                               onClick={() => handleCandidateSelect(candidate)}
                             >
                               <span
@@ -7580,9 +7672,14 @@ function DealConfirmPanel({
                                 <span className="mt-1 block truncate text-[11px] text-muted-foreground">
                                   {candidate.id} · {candidate.party}
                                 </span>
-                                <span className="mt-1 block truncate text-[11px] text-primary">
+                                <span className="mt-1 block text-[11px] text-primary">
                                   {candidate.item} · {candidate.amount}{" "}
                                   {candidate.currency}
+                                </span>
+                                <span className="mt-2 flex flex-wrap gap-1" aria-label="후보 일치 근거">
+                                  {(candidate.reasons.length ? candidate.reasons : ["일치 근거 없음 · 직접 선택 가능"]).map(reason => <span key={reason} className="rounded bg-muted px-1.5 py-1 text-[10px] text-muted-foreground">{reason}</span>)}
+                                  {candidate.ambiguous ? <span className="rounded bg-muted px-1.5 py-1 text-[10px] text-muted-foreground">동일 근거의 다른 후보 있음</span> : null}
+                                  {candidate.id === activeLink?.dealId ? <span className="text-[10px] font-medium">현재 연결</span> : null}
                                 </span>
                               </span>
                               {recommended ? (
@@ -7699,10 +7796,13 @@ function DealConfirmPanel({
                   )}
                 </>
               )}
-            </section>
+            </section> : null}
           </div>
         </ScrollArea>
       </div>
+      {changeDialog && connection ? <DocumentConnectionChangeDialog documentId={document.name} connection={connection} target={changeDialog.target} evidence={changeDialog.evidence} open
+        onClose={() => setChangeDialog(null)}
+        onApplied={accepted => { setConnection(accepted); setChangingConnection(false); setSelectedDealId(null); onConnectionChanged?.(accepted); toast.success(accepted.link ? "거래 연결을 변경했습니다." : "거래 연결을 해제했습니다.") }} /> : null}
     </>
   )
 }
@@ -8252,7 +8352,7 @@ function RecentDocumentsTable({
 }
 
 function TemplateStrip({ onResult }: {
-  onResult: (mode?: CreateStartMode, templateCode?: string, options?: GeneratedDocumentOpenOptions) => void
+  onResult: (mode?: CreateStartMode, templateCode?: string, direction?: DocumentDirection) => void
 }) {
   const [direction, setDirection] = useState<"purchase" | "sales">("purchase")
   const [selectedCode, setSelectedCode] = useState<string>(templates[0][0])
@@ -8312,7 +8412,7 @@ function TemplateStrip({ onResult }: {
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon-sm" aria-label="이전 문서 유형" disabled={!scrollState.previous} onClick={() => scroll(-1)}><ChevronLeft /></Button>
           <Button variant="outline" size="icon-sm" aria-label="다음 문서 유형" disabled={!scrollState.next} onClick={() => scroll(1)}><ChevronRight /></Button>
-          <Button size="sm" onClick={() => onResult("template", selectedCode)}>
+          <Button size="sm" onClick={() => onResult("template", selectedCode, direction)}>
             <FilePlus2 data-icon="inline-start" />문서 만들기
           </Button>
         </div>
@@ -9098,6 +9198,7 @@ function CreateScreen({
   const [workbenchTemplateCode, setWorkbenchTemplateCode] = useState(
     relatedDeal ? "QT" : "SC"
   )
+  const [workbenchDirection, setWorkbenchDirection] = useState<DocumentDirection | null>(null)
   const [structuredEditorOpen, setStructuredEditorOpen] = useState(false)
   const [createdDocuments, setCreatedDocuments] = useState<GeneratedDraft[]>(
     () => [...generatedDrafts]
@@ -9193,11 +9294,13 @@ function CreateScreen({
   }
   const openUnifiedWorkbench = (
     _mode?: CreateStartMode,
-    templateCode?: string
+    templateCode?: string,
+    direction?: DocumentDirection
   ) => {
     setWorkbenchTemplateCode(
       templateCode && templateSchemas[templateCode] ? templateCode : "SC"
     )
+    setWorkbenchDirection(direction ?? null)
     setUnifiedWorkbenchOpen(true)
   }
   const pageHeading = (
@@ -9210,6 +9313,7 @@ function CreateScreen({
     return (
       <ResultScreen
         initialTemplateCode={workbenchTemplateCode}
+        initialDirection={workbenchDirection}
         relatedDeal={relatedDeal}
         initialWorkspaceStep="source"
         role={role}
@@ -12200,6 +12304,7 @@ type DocumentSourceMode = "deal" | "files"
 
 function DocumentSourceSetupStep({
   templateCode,
+  direction,
   onTemplateChange,
   selectedDeal,
   onSelectDeal,
@@ -12213,7 +12318,8 @@ function DocumentSourceSetupStep({
   onApplySource,
 }: {
   templateCode: string
-  onTemplateChange: (code: string) => void
+  direction: DocumentDirection | null
+  onTemplateChange: (code: string, direction: DocumentDirection | null) => boolean
   selectedDeal: DealDocumentContext | null
   onSelectDeal: (deal: DealDocumentContext) => void
   sourceMode: DocumentSourceMode
@@ -12228,7 +12334,11 @@ function DocumentSourceSetupStep({
   const selectedTemplate =
     templates.find(([code]) => code === templateCode) ?? null
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false)
+  const [pickerDirection, setPickerDirection] = useState(direction)
   const [templateQuery, setTemplateQuery] = useState("")
+  const availableTemplates = templates.filter(([code]) =>
+    !pickerDirection || templateDirections[code].some((value) => value === pickerDirection)
+  )
   const [dealQuery, setDealQuery] = useState("")
   const selectedSourceDetails = draftSources.filter((source) =>
     selectedSources.has(source.title)
@@ -12310,6 +12420,7 @@ function DocumentSourceSetupStep({
                 open={templatePickerOpen}
                 onOpenChange={(open) => {
                   setTemplatePickerOpen(open)
+                  if (open) setPickerDirection(direction)
                   if (!open) setTemplateQuery("")
                 }}
               >
@@ -12320,6 +12431,7 @@ function DocumentSourceSetupStep({
                 </PopoverTrigger>
                 <PopoverContent
                   align="end"
+                  aria-label="문서 유형 선택"
                   className="w-[min(420px,calc(100vw-2rem))] gap-0 p-0"
                 >
                   <div className="border-b p-3">
@@ -12329,12 +12441,26 @@ function DocumentSourceSetupStep({
                     </p>
                     <div className="mt-3">
                       <DocumentTemplateOptions
-                        templates={templates}
-                        selectedCode={templateCode}
+                        searchPrefix={
+                          <Select
+                            value={pickerDirection ?? ""}
+                            onValueChange={(value) => setPickerDirection(value as DocumentDirection)}
+                          >
+                            <SelectTrigger size="sm" className="h-8 w-24 shrink-0 text-xs" aria-label="문서 방향">
+                              <SelectValue placeholder="방향 선택" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="purchase">매입</SelectItem>
+                              <SelectItem value="sales">매출</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        }
+                        templates={availableTemplates}
+                        selectedCode={pickerDirection === direction ? templateCode : undefined}
                         query={templateQuery}
                         onQueryChange={setTemplateQuery}
                         onSelect={(code) => {
-                          onTemplateChange(code)
+                          if (!onTemplateChange(code, pickerDirection)) return
                           setTemplatePickerOpen(false)
                           setTemplateQuery("")
                         }}
@@ -13816,7 +13942,7 @@ function DocumentReviewSharePanel({
               {documentConfirmed ? "링크·이메일로 보내기" : "검토·확정"}
             </h2>
             <ToneBadge tone={documentConfirmed ? "success" : "warning"}>
-              {documentConfirmed ? "확정됨" : "초안"}
+              {documentConfirmed ? "확정" : "작성 중"}
             </ToneBadge>
           </div>
           {!documentConfirmed ? (
@@ -14873,6 +14999,7 @@ function DocumentConfirmedSummaryPanel({
 
 function ResultScreen({
   initialTemplateCode,
+  initialDirection = null,
   initialDocumentNumber,
   approvalPreviewState = "live",
   initialDocumentConfirmed = false,
@@ -14887,6 +15014,7 @@ function ResultScreen({
   dealConnectionRestricted = false,
 }: {
   initialTemplateCode: string
+  initialDirection?: DocumentDirection | null
   initialDocumentNumber?: string | null
   approvalPreviewState?: DocumentApprovalPreviewState
   initialDocumentConfirmed?: boolean
@@ -14902,6 +15030,7 @@ function ResultScreen({
   dealConnectionRestricted?: boolean
 }) {
   const [templateCode, setTemplateCode] = useState(initialTemplateCode)
+  const [documentDirection, setDocumentDirection] = useState(initialDirection)
   const [deliveryAttachments, setDeliveryAttachments] = useState<DeliveryAttachment[]>(() => initialDeliveryAttachments ? [...initialDeliveryAttachments] : [{ id: "att-1", name: "인보이스_2607_003.pdf", source: "인박스", kind: "인보이스", sizeBytes: 310_000 }])
   const templateSelected = Boolean(
     templateCode && templateSchemas[templateCode]
@@ -14910,7 +15039,14 @@ function ResultScreen({
     ? templateMeta(templateCode)[1]
     : "문서 종류 미선택"
   const documentNumber = initialDocumentNumber ?? `${templateCode}-2026-0708`
+  const initialDraft = initialDocumentNumber
+    ? generatedDrafts.find((draft) => draft.number === initialDocumentNumber)
+    : undefined
+  const [savedMetadata, setSavedMetadata] = useState<GeneratedDocumentMetadata | null>(
+    () => initialDraft?.documentMetadata ?? null
+  )
   const confirmedAtStart =
+    savedMetadata?.status === "confirmed" || savedMetadata?.status === "sent" ||
     initialDocumentConfirmed ||
     initialSharePanelOpen ||
     initialLinkCreated ||
@@ -14932,6 +15068,7 @@ function ResultScreen({
     logo: organizationDefaultDocumentLogo,
   })
   const [documentConfirmed, setDocumentConfirmed] = useState(confirmedAtStart)
+  const documentStatusLabel = generatedDocumentStatusLabel(savedMetadata?.status, documentConfirmed)
   const isMobile = useIsCompactWorkspace()
   const [workspaceStep, setWorkspaceStep] =
     useState<DocumentCreateWorkspaceStep>(
@@ -15058,7 +15195,9 @@ function ResultScreen({
   )
   const [dealPickerOpen, setDealPickerOpen] = useState(false)
   const [saveState, setSaveState] = useState<DocumentSaveState>("saved")
-  const [lastSavedAt, setLastSavedAt] = useState(() => new Date())
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(
+    () => initialDraft?.documentMetadata?.updated_at ?? initialDraft?.updated ?? null
+  )
   const [documentRevision, setDocumentRevision] = useState(0)
   const [reviewedDocumentRevision, setReviewedDocumentRevision] = useState<
     number | null
@@ -15287,7 +15426,7 @@ function ResultScreen({
     setSaveState("saving")
     const request = Promise.all([
       prototypeBackend.generatedDocuments.saveDraft({
-        id: `${templateCode}-draft`,
+        id: documentNumber,
       }),
       new Promise<void>((resolve) => window.setTimeout(resolve, 800)),
     ])
@@ -15297,9 +15436,10 @@ function ResultScreen({
           return false
         }
         savedDraftRevisionRef.current = revision
+        setSavedMetadata(result.document ?? null)
+        setLastSavedAt(result.document?.updated_at ?? result.updatedAt)
         if (draftRevisionRef.current === revision) {
           setSaveState("saved")
-          setLastSavedAt(new Date(result.updatedAt))
         } else {
           setSaveState("unsaved")
         }
@@ -15314,7 +15454,7 @@ function ResultScreen({
       })
     draftSaveInFlightRef.current = request
     return request
-  }, [templateCode])
+  }, [documentNumber])
   useEffect(() => {
     if (saveState !== "unsaved") return
     const timer = window.setTimeout(() => void persistDocumentDraft(), 1000)
@@ -15360,8 +15500,6 @@ function ResultScreen({
   const preparePdf = () => {
     if (!draftReady) return
     const updatingExistingPdf = hasPreparedPdf
-    setSaveState("saved")
-    setLastSavedAt(new Date())
     setPdfPrepared(true)
     setHasPreparedPdf(true)
     setWorkspaceStep("editor")
@@ -15463,15 +15601,27 @@ function ResultScreen({
     <div data-document-requirement="source" data-create-source-panel tabIndex={-1} className="h-full min-h-0">
     <DocumentSourceSetupStep
       templateCode={templateCode}
-      onTemplateChange={(code) => {
-        if (code === templateCode) return
+      direction={documentDirection}
+      onTemplateChange={(code, direction) => {
+        if (code === templateCode && direction === documentDirection) return true
         const confirmed = window.confirm(
-          "문서 유형을 바꾸면 현재 입력값이 초기화되고 새 초안으로 다시 시작합니다. 계속할까요?"
+          direction !== documentDirection
+            ? "문서 방향을 바꾸면 현재 입력값이 초기화되고 새 초안으로 다시 시작합니다. 계속할까요?"
+            : "문서 유형을 바꾸면 현재 입력값이 초기화되고 새 초안으로 다시 시작합니다. 계속할까요?"
         )
-        if (!confirmed) return
+        if (!confirmed) return false
         setTemplateCode(code)
+        setDocumentDirection(direction)
+        setSavedMetadata(null)
+        setLastSavedAt(null)
+        setAppliedSourceKey("")
+        setAppliedSourceLabel("아직 반영된 내용 없음")
         setPdfPrepared(false)
+        setHasPreparedPdf(false)
+        setApprovalStatus("idle")
+        setApprovalEvents([])
         markDocumentChanged()
+        return true
       }}
       selectedDeal={selectedDeal}
       onSelectDeal={(deal) => {
@@ -15506,7 +15656,7 @@ function ResultScreen({
   const fieldsPanel = templateSelected ? (
     <div className="h-full min-h-0 [&>aside]:h-full [&>aside]:border-r-0">
       <CreateFieldReviewPanel
-        key={`${templateCode}:${appliedSourceKey}`}
+        key={`${templateCode}:${documentDirection}:${appliedSourceKey}`}
         itemFocusSignal={0}
         reviewFocusRequest={reviewFocusRequest}
         reviewIssueTargets={discrepancyIssueTargets}
@@ -15685,8 +15835,13 @@ function ResultScreen({
         <div className="mr-auto min-w-0">
           <div className="flex items-center gap-2">
             <h1 className="truncate text-sm font-semibold">문서 만들기</h1>
-            <ToneBadge tone={documentConfirmed ? "success" : "neutral"}>
-              {documentConfirmed ? "확정" : "초안"}
+            {documentDirection ? (
+              <ToneBadge tone="blue">
+                {documentDirection === "purchase" ? "매입" : "매출"}
+              </ToneBadge>
+            ) : null}
+            <ToneBadge tone={documentConfirmed ? "success" : "warning"}>
+              {documentStatusLabel}
             </ToneBadge>
           </div>
           <p className="truncate text-[11px] text-[var(--surface-muted-foreground)]">
@@ -15707,21 +15862,14 @@ function ResultScreen({
                 ? `${selectedDeal.id} 거래 선택됨`
                 : "거래 미연결"}
           </p>
+          <DocumentSaveSummary
+            state={saveState === "unsaved" ? "pending" : saveState}
+            savedAt={lastSavedAt}
+            metadata={savedMetadata}
+            confirmed={documentConfirmed}
+          />
         </div>
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-          <AutoSaveStatus
-            className="hidden lg:flex"
-            state={
-              saveState === "error"
-                ? "error"
-                : saveState === "unsaved"
-                  ? "pending"
-                  : saveState === "saving"
-                    ? "saving"
-                    : "saved"
-            }
-            savedAt={lastSavedAt}
-          />
           {saveState === "unsaved" ? (
             <Button
               type="button"
@@ -16700,12 +16848,16 @@ export function App() {
                       linkedDealsByDocument={uploadDocumentDealLinks}
                       onDocumentDealLinked={(documentName, link) => {
                         setUploadDocumentDealLinks((current) => {
-                          const next = { ...current, [documentName]: link }
+                          const next = { ...current }
+                          if (link) next[documentName] = link
+                          else delete next[documentName]
                           writeUploadDocumentDealLinks(next)
                           return next
                         })
                       }}
-                      onDocumentOpen={(documentName, detailStep = "compare") =>
+                      onDocumentOpen={(documentName, detailStep = "compare") => {
+                        const context = dealDocumentFromReviewUrl()
+                        if (context && context.file === documentName) return
                         updateErpLocation(
                           "inbox",
                           documentName
@@ -16716,7 +16868,7 @@ export function App() {
                               }
                             : {}
                         )
-                      }
+                      }}
                       onOpenDeal={(dealId) => {
                         setDealNotificationTarget(null)
                         setSelectedDealId(dealId)
