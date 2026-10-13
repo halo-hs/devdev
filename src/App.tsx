@@ -8430,8 +8430,8 @@ function TemplateStrip({ onResult }: {
             }}
           >
             <TabsList aria-label="거래 방향">
-              <TabsTrigger value="purchase">매입</TabsTrigger>
-              <TabsTrigger value="sales">매출</TabsTrigger>
+              <TabsTrigger value="purchase">구매</TabsTrigger>
+              <TabsTrigger value="sales">판매</TabsTrigger>
             </TabsList>
           </Tabs>
           <h2 className="text-base font-semibold">문서 유형 선택</h2>
@@ -8454,7 +8454,7 @@ function TemplateStrip({ onResult }: {
               className={cn("flex w-60 shrink-0 snap-start flex-col items-start rounded-lg border bg-card p-4 text-left transition hover:border-primary/60 focus-visible:outline-2 focus-visible:outline-primary", selected && "border-primary bg-primary/5 ring-1 ring-primary")}
             >
               <span className="flex w-full items-center justify-between gap-2"><ToneBadge tone="blue">{kind}</ToneBadge>{selected && <Check className="size-4 text-primary" />}</span>
-              <strong className="mt-2 text-sm">{title} <span className="text-xs font-normal text-muted-foreground">· {direction === "purchase" ? "매입" : "매출"}</span></strong>
+              <strong className="mt-2 text-sm">{title} <span className="text-xs font-normal text-muted-foreground">· {direction === "purchase" ? "구매" : "판매"}</span></strong>
               <span className="mt-1.5 text-xs leading-5 text-muted-foreground">{description}</span>
             </button>
           )
@@ -12375,7 +12375,7 @@ function DocumentSourceSetupStep({
       ? selectedSourceDetails
           .map(
             (source) =>
-              `[${source.direction === "purchase" ? "매입" : source.direction === "sales" ? "매출" : "방향 확인"}] ${source.title}`
+              `[${source.direction === "purchase" ? "구매" : source.direction === "sales" ? "판매" : "방향 확인"}] ${source.title}`
           )
           .join(" · ")
       : ""
@@ -12477,8 +12477,8 @@ function DocumentSourceSetupStep({
                               <SelectValue placeholder="방향 선택" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="purchase">매입</SelectItem>
-                              <SelectItem value="sales">매출</SelectItem>
+                              <SelectItem value="purchase">구매</SelectItem>
+                              <SelectItem value="sales">판매</SelectItem>
                             </SelectContent>
                           </Select>
                         }
@@ -12626,9 +12626,9 @@ function DocumentSourceSetupStep({
                               }
                             >
                               {source.direction === "sales"
-                                ? "매출"
+                                ? "판매"
                                 : source.direction === "purchase"
-                                  ? "매입"
+                                  ? "구매"
                                   : "방향 확인"}
                             </ToneBadge>
                             <strong className="truncate text-xs">
@@ -15881,7 +15881,7 @@ function ResultScreen({
             <h1 className="truncate text-sm font-semibold">문서 만들기</h1>
             {documentDirection ? (
               <ToneBadge tone="blue">
-                {documentDirection === "purchase" ? "매입" : "매출"}
+                {documentDirection === "purchase" ? "구매" : "판매"}
               </ToneBadge>
             ) : null}
             <ToneBadge tone={documentConfirmed ? "success" : "warning"}>
