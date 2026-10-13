@@ -43,7 +43,8 @@ test("document list shows one current label and separates stage lists while keep
   await page.goto("/erp/documents/create")
   const row = page.getByRole("row").filter({ hasText: "CI-2026-0918" })
   await expect(row).toContainText("승인 완료")
-  await expect(row.getByRole("cell").nth(2)).toHaveText("승인 완료")
+  await expect(row.getByRole("cell").nth(2).locator('[data-slot="badge"]')).toHaveText("승인 완료")
+  await expect(row.getByRole("cell").nth(2)).toContainText("승인 완료 · 최종 검토")
   await expect(row).not.toContainText("작성 중")
   await expect(row).not.toContainText("초안 PDF")
   await expect(row.getByRole("button", { name: /PDF 초안 보기/ })).toBeEnabled()
@@ -52,12 +53,14 @@ test("document list shows one current label and separates stage lists while keep
   await expect(unrequested).toContainText("작성 중")
   await expect(unrequested).not.toContainText("요청 전")
   await expect(unrequested).not.toContainText("PDF 미생성")
+  await expect(unrequested.getByRole("cell").nth(2)).toContainText("거래 연결 필요")
   await expect(unrequested.getByRole("button", { name: /PDF 미생성/ })).toBeDisabled()
 
   const confirmed = page.getByRole("row").filter({ hasText: "CI-2026-0703" })
   await expect(confirmed).toContainText("확정")
   await expect(confirmed).not.toContainText("승인 없음")
   await expect(confirmed).not.toContainText("최종 PDF")
+  await expect(confirmed.getByRole("cell").nth(2)).toContainText("전달 준비")
   await expect(confirmed.getByRole("button", { name: /최종 PDF 보기/ })).toBeEnabled()
   await expect(confirmed.getByRole("button", { name: "고객 전달", exact: true })).toBeEnabled()
 
@@ -78,7 +81,7 @@ test("document list shows one current label and separates stage lists while keep
     await expect(panel.locator("tbody tr")).toHaveCount(numbers.length)
     for (const number of numbers) {
       const cell = panel.getByRole("row").filter({ hasText: number }).getByRole("cell").nth(2)
-      await expect(cell).toHaveText(label)
+      await expect(cell.locator('[data-slot="badge"]')).toHaveText(label)
       await expect(cell.locator('[data-slot="badge"]')).toHaveCount(1)
     }
   }
@@ -93,10 +96,10 @@ test("document list shows one current label and separates stage lists while keep
   await row.getByRole("button", { name: "복제하여 수정", exact: true }).click()
   await page.getByRole("tab", { name: "작성 중 5", exact: true }).click()
   const duplicate = page.getByRole("row").filter({ hasText: "CI-2026-0083" })
-  await expect(duplicate.getByRole("cell").nth(2)).toHaveText("작성 중")
+  await expect(duplicate.getByRole("cell").nth(2).locator('[data-slot="badge"]')).toHaveText("작성 중")
   await expect(duplicate.getByRole("button", { name: /PDF 미생성/ })).toBeDisabled()
   await page.getByRole("tab", { name: "승인 완료 1", exact: true }).click()
-  await expect(row.getByRole("cell").nth(2)).toHaveText("승인 완료")
+  await expect(row.getByRole("cell").nth(2).locator('[data-slot="badge"]')).toHaveText("승인 완료")
 })
 
 test("next document opens the matching draft without confirming it", async ({
