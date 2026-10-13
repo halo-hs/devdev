@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test"
+import { getGeneratedDocumentListStage } from "../trade-os/lib/generated-document-list-stage"
 
 for (const view of ["운영", "금융"]) {
 test(`mobile ${view} empty table notice stays in the visible area while scrolling horizontally`, async ({
@@ -27,13 +28,23 @@ test(`mobile ${view} empty table notice stays in the visible area while scrollin
 })
 }
 
-test("document list keeps approval conditional and PDF stages in file actions", async ({
+test("document list advances past approval without automatically confirming or retaining old labels", () => {
+  expect(getGeneratedDocumentListStage({ status: "draft", approvalStatus: "approved" }).label).toBe("승인 완료")
+  for (const approvalStatus of ["none", "pending", "approved", "rejected"] as const) {
+    expect(getGeneratedDocumentListStage({ status: "confirmed", approvalStatus }).label).toBe("확정")
+    expect(getGeneratedDocumentListStage({ status: "sent", approvalStatus }).label).toBe("발송됨")
+  }
+  expect(getGeneratedDocumentListStage({ status: "draft", approvalStatus: "none" }).label).toBe("작성 중")
+})
+
+test("document list shows one current label and separates stage lists while keeping PDF actions", async ({
   page,
 }) => {
   await page.goto("/erp/documents/create")
   const row = page.getByRole("row").filter({ hasText: "CI-2026-0918" })
   await expect(row).toContainText("승인 완료")
-  await expect(row).toContainText("작성 중")
+  await expect(row.getByRole("cell").nth(2)).toHaveText("승인 완료")
+  await expect(row).not.toContainText("작성 중")
   await expect(row).not.toContainText("초안 PDF")
   await expect(row.getByRole("button", { name: /PDF 초안 보기/ })).toBeEnabled()
 
@@ -52,6 +63,40 @@ test("document list keeps approval conditional and PDF stages in file actions", 
 
   await expect(page.getByRole("row").filter({ hasText: "SC-2026-0918" })).toContainText("승인 대기")
   await expect(page.getByRole("row").filter({ hasText: "PO-2026-0918" })).toContainText("반려")
+
+  const stageLists = [
+    { label: "작성 중", numbers: ["SC-2026-0708", "CI-2026-0708", "CI-2026-0712", "QT-2026-0630"] },
+    { label: "승인 대기", numbers: ["SC-2026-0918"] },
+    { label: "반려", numbers: ["PO-2026-0918"] },
+    { label: "승인 완료", numbers: ["CI-2026-0918"] },
+    { label: "확정", numbers: ["CI-2026-0703", "CI-2026-0704", "SOA-2026-0629"] },
+    { label: "발송됨", numbers: [] },
+  ]
+  for (const { label, numbers } of stageLists) {
+    await page.getByRole("tab", { name: `${label} ${numbers.length}`, exact: true }).click()
+    const panel = page.getByRole("tabpanel")
+    await expect(panel.locator("tbody tr")).toHaveCount(numbers.length)
+    for (const number of numbers) {
+      const cell = panel.getByRole("row").filter({ hasText: number }).getByRole("cell").nth(2)
+      await expect(cell).toHaveText(label)
+      await expect(cell.locator('[data-slot="badge"]')).toHaveCount(1)
+    }
+  }
+  await expect(page.getByText("해당 상태의 최근 문서가 없습니다.")).toBeVisible()
+  await page.getByRole("tab", { name: "전체 10", exact: true }).click()
+  await page.getByRole("searchbox", { name: "만든 문서 검색", exact: true }).fill("작성 중")
+  await expect(page.getByRole("tab", { name: "전체 4", exact: true })).toBeVisible()
+  await expect(page.getByRole("tabpanel").locator("tbody tr")).toHaveCount(4)
+  await expect(page.getByRole("row").filter({ hasText: "CI-2026-0918" })).toHaveCount(0)
+  await page.getByRole("searchbox", { name: "만든 문서 검색", exact: true }).fill("")
+  await row.getByRole("button", { name: "상업송장 승인 완료 메뉴", exact: true }).click()
+  await row.getByRole("button", { name: "복제하여 수정", exact: true }).click()
+  await page.getByRole("tab", { name: "작성 중 5", exact: true }).click()
+  const duplicate = page.getByRole("row").filter({ hasText: "CI-2026-0083" })
+  await expect(duplicate.getByRole("cell").nth(2)).toHaveText("작성 중")
+  await expect(duplicate.getByRole("button", { name: /PDF 미생성/ })).toBeDisabled()
+  await page.getByRole("tab", { name: "승인 완료 1", exact: true }).click()
+  await expect(row.getByRole("cell").nth(2)).toHaveText("승인 완료")
 })
 
 test("next document opens the matching draft without confirming it", async ({
