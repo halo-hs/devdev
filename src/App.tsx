@@ -8176,20 +8176,15 @@ function RecentDocumentsTable({
                     <div className="mt-1"><ToneBadge tone="success">승인 완료</ToneBadge></div>
                   ) : draft.approvalPreviewState === "requester-rejected" ? (
                     <div className="mt-1"><ToneBadge tone="danger">반려</ToneBadge></div>
-                  ) : (
-                    <div className="mt-1"><ToneBadge tone="neutral">{draft.approvalRequirement === "required" ? "요청 전" : "승인 없음"}</ToneBadge></div>
+                  ) : null}
+                  {draft.readiness && (
+                    <div
+                      className="mt-1 truncate text-[11px] text-muted-foreground"
+                      title={draft.readiness}
+                    >
+                      {draft.readiness}
+                    </div>
                   )}
-                  <div className="mt-1">
-                    <ToneBadge tone={draft.pdfState === "final" ? "success" : draft.pdfState === "draft" ? "blue" : "neutral"}>
-                      {draft.pdfState === "none" ? "PDF 미생성" : draft.pdfState === "draft" ? "초안 PDF" : "최종 PDF"}
-                    </ToneBadge>
-                  </div>
-                  <div
-                    className="mt-1 truncate text-[11px] text-muted-foreground"
-                    title={draft.readiness}
-                  >
-                    {draft.readiness}
-                  </div>
                 </TableCell>
                 <TableCell className="truncate text-left">
                   <span
