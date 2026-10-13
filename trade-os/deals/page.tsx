@@ -996,7 +996,7 @@ export function DealsScreen({
             ? "송장·입출금은 누적 흐름, 받을 돈·줄 돈은 현재 잔액입니다. 통화별로 표시합니다."
             : "금액은 출처 문서 기준입니다. 근거가 없는 값은 —로 표시합니다."}
         </p>
-        <section>
+        <section className="[container-type:inline-size]">
           {view === "finance" ? (
             <DealsFinanceTable
               hasRecords={allDeals.length > 0}
@@ -1337,7 +1337,7 @@ export function DealsScreen({
                 ) : (
                   <TableRow>
                     <TableCell colSpan={8} className="p-0 whitespace-normal">
-                      <Empty className="min-h-40">
+                      <Empty className="sticky left-0 min-h-40 w-[100cqw] max-w-full">
                         <EmptyHeader>
                           <EmptyTitle>
                             {allDeals.length

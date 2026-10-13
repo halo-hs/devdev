@@ -22,6 +22,12 @@ export type Deal = {
   nextWork?: "documents" | "fulfillment" | "customs" | "finance"
   nextAction: string
   nextKind: "upload" | "create" | "confirm" | "deliver" | "reconcile"
+  nextDocument?: {
+    label: string
+    kind: "upload" | "create" | "confirm" | "deliver" | "reconcile"
+    templateCode: string
+    tone: "info" | "warning"
+  }
   remaining?: string
   overdue?: boolean
   shared?: boolean
@@ -48,6 +54,7 @@ export const deals: Deal[] = [
     nextWork: "fulfillment" as const,
     nextAction: "B/L 중량을 포장명세와 대조",
     nextKind: "reconcile",
+    nextDocument: { label: "선하증권 · 포장명세서", kind: "reconcile", templateCode: "BL", tone: "warning" },
     remaining: "4 MT",
   },
   {
@@ -69,6 +76,7 @@ export const deals: Deal[] = [
     nextWork: "documents" as const,
     nextAction: "판매계약서 승인 요청",
     nextKind: "confirm",
+    nextDocument: { label: "판매계약서", kind: "confirm", templateCode: "SC", tone: "info" },
   },
   {
     id: "DL-260704-02",
@@ -89,6 +97,7 @@ export const deals: Deal[] = [
     nextWork: "customs" as const,
     nextAction: "수입신고필증 업로드",
     nextKind: "upload",
+    nextDocument: { label: "수입신고필증", kind: "upload", templateCode: "IMPORT_DECLARATION", tone: "warning" },
     shared: true,
   },
   {
@@ -152,6 +161,7 @@ export const deals: Deal[] = [
     nextWork: "documents" as const,
     nextAction: "발주서 만들기",
     nextKind: "create",
+    nextDocument: { label: "발주서", kind: "create", templateCode: "PO", tone: "info" },
   },
   ...[
     {

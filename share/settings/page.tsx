@@ -1,3 +1,5 @@
+import { ApprovalPolicySettings } from "./legacy"
+import { AliasesPage } from "./aliases-page"
 import { appLocation } from "@/app/app-location"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import {
@@ -29,6 +31,7 @@ import { Button } from "@shared/components/ui/button"
 import { Card, CardContent } from "@shared/components/ui/card"
 import { Checkbox } from "@shared/components/ui/checkbox"
 import { Input } from "@shared/components/ui/input"
+import { Progress } from "@shared/components/ui/progress"
 import {
   Select,
   SelectContent,
@@ -57,6 +60,7 @@ import {
   SettingsDemoProvider,
 } from "./subscription-settings"
 import { PersonalCreditUsage } from "./personal-credit-usage"
+import { BrandLogoInput } from "./brand-logo-input"
 import { SearchableSetting, countryOptions, languageOptions, timeZoneOptions } from "./region-controls"
 import { workspaceOptions, type WorkspaceKey } from "@shared/lib/workspaces"
 
@@ -79,6 +83,7 @@ type SectionId =
   | "trade-deal-import"
   | "trade-aliases"
   | "trade-alerts"
+  | "approvals"
   | "snap-operations"
   | "snap-branding"
   | "snap-localization"
@@ -157,6 +162,7 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
         product: "erp",
       },
       { id: "trade-alerts", label: "알림 설정", icon: Bell, product: "erp" },
+      { id: "approvals", label: "결재 정책", icon: Check, product: "erp", roles: ["owner"] },
     ],
   },
   {
@@ -412,6 +418,7 @@ function OrganizationPage({ role, products }: { role: SettingsRole; products: re
 
 function TradeDefaultsPage({ role }: { role: SettingsRole }) {
   const editable = role !== "member"
+  const [brandingRevision, setBrandingRevision] = useState(0)
   return (
     <div>
       <PageHeading
@@ -428,9 +435,9 @@ function TradeDefaultsPage({ role }: { role: SettingsRole }) {
             <SettingRow label="문서 표시 이름"><Input aria-label="문서 표시 이름" defaultValue="ECOYA Demo Co." readOnly={!editable} /></SettingRow>
             <SettingRow label="승인 색상"><BrandColorPicker label="승인 색상" initialColor="#0B3971" disabled={!editable} /></SettingRow>
             <SettingRow label="법적 footer"><Input aria-label="법적 footer" defaultValue="ECOYA Trade OS generated document" readOnly={!editable} /></SettingRow>
-            <SettingRow label="승인 로고" inlineControl><div className="flex justify-end"><Button variant="outline" disabled={!editable}><Upload /> 파일 선택</Button></div></SettingRow>
+            <SettingRow label="승인 로고"><BrandLogoInput disabled={!editable} onChange={() => setBrandingRevision((value) => value + 1)} /></SettingRow>
           </div>
-          {editable ? <SaveRow label="브랜딩 저장" /> : null}
+          {editable ? <SaveRow key={brandingRevision} label="브랜딩 저장" /> : null}
         </SettingsSection>
         <SettingsSection
           title="업무용 지급 정보"
@@ -526,34 +533,6 @@ function ImportPage({ kind }: { kind: "counterparty" | "deal" }) {
   )
 }
 
-function AliasesPage() {
-  return (
-    <div>
-      <PageHeading
-        title="거래처 별칭 학습"
-        description="문서에서 읽은 거래처 표현을 기준 거래처에 연결하고 중복 후보를 검토합니다."
-        action={<Button>별칭 추가</Button>}
-      />
-      <section aria-label="기준 거래처와 별칭">
-        <h2 className="mb-3 text-base font-semibold">기준 거래처와 별칭</h2>
-        <ul className="divide-y border-y">
-          {[
-            ["ACME GmbH", "ACME · ACME Germany · ACME GMBH"],
-            ["KATAMAN ASIA-PACIFIC PTE LTD", "KATAMAN · Kataman APAC"],
-          ].map(([name, aliases]) => (
-            <li key={name} className="flex flex-wrap items-center gap-x-6 gap-y-3 py-5">
-              <div className="min-w-0 flex-1 basis-60">
-                <h3 className="text-sm font-medium break-words">{name}</h3>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground break-words">{aliases}</p>
-              </div>
-              <Button className="ml-auto" variant="outline" size="sm">병합 영향 미리보기</Button>
-            </li>
-          ))}
-        </ul>
-      </section>
-    </div>
-  )
-}
 
 function AlertsPage() {
   const [saved, setSaved] = useState(false)
@@ -757,6 +736,12 @@ function SnapDataPage() {
 }
 
 function SnapUsagePage({ role }: { role: SettingsRole }) {
+  // Display fixtures only. Technical limits remain server-owned and nonbilling.
+  const usageExamples = [
+    { label: "저장 공간", description: "사진·영상·문서의 저장 용량", used: 50, limit: 100, unit: "GB" },
+    { label: "AI 처리 요청", description: "이번 달 누적 요청", used: 500, limit: 1000, unit: "회" },
+    { label: "요청 속도", description: "최근 1분간 요청", used: 30, limit: 60, unit: "회/분" },
+  ]
   return (
     <div>
       <PageHeading
@@ -764,9 +749,35 @@ function SnapUsagePage({ role }: { role: SettingsRole }) {
         description="저장량·AI·속도 제한은 결제 잔액이 아닌 비과금 기술 한도입니다."
       />
       <SettingsSection title="현재 사용량">
-        <p className="text-sm text-muted-foreground" role="status">
-          현재 조직의 실시간 사용량이 연결되지 않았습니다. 조회할 수 없는 수치를 0이나 무료로 표시하지 않습니다.
-        </p>
+        <dl className="divide-y">
+          {usageExamples.map(({ label, description, used, limit, unit }) => {
+            const percentage = Math.round((used / limit) * 100)
+            return (
+              <div key={label} className="grid gap-4 py-6 first:pt-0 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:items-center sm:gap-10">
+                <dt>
+                  <p className="text-sm font-medium">{label}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+                </dt>
+                <dd className="min-w-0">
+                  <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2 text-sm">
+                    <span className="tabular-nums">
+                      <strong className="font-semibold">{used.toLocaleString("ko-KR")}</strong>
+                      <span className="text-muted-foreground"> / {limit.toLocaleString("ko-KR")} {unit}</span>
+                    </span>
+                    <span className="font-medium tabular-nums">{percentage}% 사용</span>
+                  </div>
+                  <Progress
+                    value={percentage}
+                    aria-label={`${label} 사용량`}
+                    aria-valuenow={percentage}
+                    aria-valuetext={`${percentage}% 사용`}
+                    className="h-1.5 [&_[data-slot=progress-indicator]]:bg-primary"
+                  />
+                </dd>
+              </div>
+            )
+          })}
+        </dl>
         {role === "owner" ? (
           <Button
             className="mt-5 ml-auto flex"
@@ -789,6 +800,15 @@ function renderSection(
   subscriptionStates: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>,
   organizationName: string
 ) {
+  if (section === "approvals") {
+    if (role !== "owner" || !products.includes("erp")) return (
+      <div role="alert" className="space-y-3 py-8">
+        <h1 className="text-xl font-semibold">결재 정책에 접근할 수 없습니다.</h1>
+        <p className="text-sm text-muted-foreground">현재 조직의 Trade OS를 이용하는 조직 소유자만 결재 정책을 관리할 수 있습니다.</p>
+      </div>
+    )
+    return <ApprovalPolicySettings />
+  }
   if (section === "account") return <AccountPage />
   if (section === "credits") return <PersonalCreditUsage />
   if (section === "organizations")
@@ -825,7 +845,7 @@ function renderSection(
   if (section === "trade-counterparty-import")
     return <ImportPage kind="counterparty" />
   if (section === "trade-deal-import") return <ImportPage kind="deal" />
-  if (section === "trade-aliases") return <AliasesPage />
+  if (section === "trade-aliases") return <AliasesPage role={role} />
   if (section === "trade-alerts") return <AlertsPage />
   if (section === "snap-operations") return <SnapSimplePage type="operations" role={role} />
   if (section === "snap-branding") return <SnapSimplePage type="branding" role={role} />
@@ -880,7 +900,7 @@ function SettingsHubContent({
     const candidate = (requested === "trade-usage" ? "credits" : requested) as SectionId | null
     return candidate === "billing"
       ? "products"
-      : candidate && availableIds.includes(candidate)
+      : candidate && (candidate === "approvals" || availableIds.includes(candidate))
         ? candidate
         : "account"
   })()
@@ -892,7 +912,7 @@ function SettingsHubContent({
     // No server session issuer is configured in this UI prototype. Never open a static portal URL.
     setPortalError(true)
   }
-  const effectiveSection = availableIds.includes(section) ? section : "account"
+  const effectiveSection = section === "approvals" || availableIds.includes(section) ? section : "account"
   const visibleGroups = groups
     .map((group) => ({
       ...group,
@@ -921,7 +941,7 @@ function SettingsHubContent({
       setSection(
         candidate === "billing"
           ? "products"
-          : candidate && availableIds.includes(candidate)
+          : candidate && (candidate === "approvals" || availableIds.includes(candidate))
             ? candidate
             : "account"
       )

@@ -1,3 +1,4 @@
+import { SnapEvidenceWorkspace } from "./components/snap-evidence-workspace"
 import {
   readBankCashRecords,
   bankScheduleFixtures,
@@ -38,7 +39,7 @@ import {
   Loader2,
   MessageSquare,
   Paperclip,
-  PanelRight,
+  MessageSquareText,
   Plus,
   RefreshCw,
   RotateCcw,
@@ -1749,13 +1750,14 @@ export function AskPrototype({
 
       <Sheet open={mobileHistoryOpen} onOpenChange={setMobileHistoryOpen}>
         <SheetContent
+          id="ai-conversation-list-mobile"
           side="right"
           showCloseButton={false}
           overlayClassName="top-14"
           className="top-14! bottom-0! h-auto! w-[300px] gap-0 p-0 lg:hidden"
         >
           <div className="sr-only">
-            <SheetTitle>대화 기록</SheetTitle>
+            <SheetTitle>대화 목록</SheetTitle>
             <SheetDescription>
               이전 업무 질문을 검색하고 다시 엽니다.
             </SheetDescription>
@@ -1772,7 +1774,7 @@ export function AskPrototype({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="대화 기록 닫기"
+                aria-label="대화 목록 닫기"
               >
                 <X />
               </Button>
@@ -1858,22 +1860,26 @@ export function AskPrototype({
               variant="ghost"
               size="icon-sm"
               className="lg:hidden"
-              aria-label="대화 기록 열기"
-              title="대화 기록 열기"
+              aria-controls="ai-conversation-list-mobile"
+              aria-expanded={mobileHistoryOpen}
+              aria-label="대화 목록 열기"
+              title="대화 목록 열기"
               onClick={() => setMobileHistoryOpen(true)}
             >
-              <PanelRight />
+              <MessageSquareText />
             </Button>
             {!historyOpen ? (
               <Button
                 variant="ghost"
                 size="icon-sm"
                 className="hidden lg:inline-flex"
-                aria-label="대화 기록 열기"
-                title="대화 기록 열기"
+                aria-controls="ai-conversation-list"
+                aria-expanded={historyOpen}
+                aria-label="대화 목록 열기"
+                title="대화 목록 열기"
                 onClick={() => setHistoryOpen(true)}
               >
-                <PanelRight />
+                <MessageSquareText />
               </Button>
             ) : null}
           </div>
@@ -1993,15 +1999,16 @@ export function AskPrototype({
           "hidden min-h-0 w-72 shrink-0 flex-col border-l border-[var(--surface-border)] bg-[var(--surface-background)] lg:flex xl:w-80",
           !historyOpen && "lg:hidden"
         )}
-        aria-label="대화 기록"
+        id="ai-conversation-list"
+        aria-label="대화 목록"
       >
         <div className="flex h-14 shrink-0 items-center justify-between border-b border-[var(--surface-border)] px-4">
-          <span className="text-sm font-semibold">대화 기록</span>
+          <span className="text-sm font-semibold">대화 목록</span>
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label="대화 기록 닫기"
-            title="대화 기록 닫기"
+            aria-label="대화 목록 닫기"
+            title="대화 목록 닫기"
             onClick={() => setHistoryOpen(false)}
           >
             <X />
@@ -6340,29 +6347,7 @@ export function SnapEvidencePrototype({
         </Button>
       }
     >
-      <ContentPanel>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[
-            ["HMMU 7820194", "8장", "DL-260708-01"],
-            ["ONEU 1083275", "3장", "미배정"],
-            ["COSU 2214870", "5장", "DL-260701-04"],
-            ["MSCU 8425510", "0장", "근거 조회 실패"],
-          ].map(([container, count, target]) => (
-            <Button
-              variant="ghost"
-              key={container}
-              onClick={() => target.startsWith("DL") && onNavigate("deal", { dealId: target })}
-              className="h-auto justify-start rounded-none border p-4 text-left font-normal hover:border-primary hover:bg-primary/5"
-            >
-              <FileCheck2 className="size-5 text-primary" />
-              <div className="mt-4 font-medium">{container}</div>
-              <div className="mt-1 text-sm text-muted-foreground">
-                현장 사진 {count} · {target}
-              </div>
-            </Button>
-          ))}
-        </div>
-      </ContentPanel>
+      <SnapEvidenceWorkspace onDeal={dealId => onNavigate("deal", { dealId })} />
     </Page>
   )
 }

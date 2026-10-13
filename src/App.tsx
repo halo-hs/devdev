@@ -1,3 +1,4 @@
+import { SnapStartGuidePage, useSnapStartGuide } from "@snap/onboarding/start-guide"
 import { DocumentConnectionSummary, DocumentConnectionChangeDialog } from "@trade-os/components/document-connection-summary"
 import { type DocumentConnection, type DocumentDealLink, type CandidateEvidence } from "@trade-os/lib/document-deal-connection"
 import { dealDocumentPreviews, dealDocumentFromReviewUrl, type DealDocumentRecord } from "@trade-os/lib/deal-document-actions"
@@ -529,7 +530,7 @@ type DocumentApprovalPreviewState =
   | "admin-pending"
 type DocumentApprovalEvent = {
   id: number
-  type: "request" | "approve" | "reject"
+  type: "request" | "approve" | "reject" | "invalidate" | "edit"
   actor: string
   actorRole: "작성자" | "Owner" | "Admin"
   occurredAt: string
@@ -593,6 +594,7 @@ type DocumentLogo = {
   dataUrl?: string
 }
 type DocumentStyle = {
+  archetype: "table" | "letter" | "spec" | "formal"
   fontStyle: "sans" | "serif"
   accent: string
   logo: DocumentLogo | null
@@ -1409,6 +1411,7 @@ type GeneratedDraft = {
   memberCanAccessDeal: boolean
   memberCanDeliver: boolean
   pdfState: "none" | "draft" | "final"
+  approvalRequirement: "required" | "none"
   approvalPreviewState?: DocumentApprovalPreviewState
 }
 
@@ -1418,6 +1421,7 @@ const generatedDrafts: GeneratedDraft[] = [
     number: "SC-2026-0918", party: "ACME GmbH", status: "작성 중", tone: "neutral",
     readiness: "승인자 검토 중", tab: "draft", creatorName: "조민영", creatorAccountId: "account-owner",
     updated: "오늘 10:00", memberCanAccessDeal: true, memberCanDeliver: true, pdfState: "draft",
+    approvalRequirement: "required",
     approvalPreviewState: "requester-pending",
   },
   {
@@ -1425,6 +1429,7 @@ const generatedDrafts: GeneratedDraft[] = [
     number: "CI-2026-0918", party: "ACME GmbH", status: "작성 중", tone: "neutral",
     readiness: "승인 완료 · 최종 검토", tab: "draft", creatorName: "조민영", creatorAccountId: "account-owner",
     updated: "오늘 10:00", memberCanAccessDeal: true, memberCanDeliver: true, pdfState: "draft",
+    approvalRequirement: "required",
     approvalPreviewState: "requester-approved",
   },
   {
@@ -1432,6 +1437,7 @@ const generatedDrafts: GeneratedDraft[] = [
     number: "PO-2026-0918", party: "ACME GmbH", status: "작성 중", tone: "neutral",
     readiness: "결제조건 보완 후 재요청", tab: "draft", creatorName: "조민영", creatorAccountId: "account-owner",
     updated: "오늘 10:00", memberCanAccessDeal: true, memberCanDeliver: true, pdfState: "draft",
+    approvalRequirement: "required",
     approvalPreviewState: "requester-rejected",
   },
   {
@@ -1450,6 +1456,7 @@ const generatedDrafts: GeneratedDraft[] = [
     memberCanAccessDeal: false,
     memberCanDeliver: false,
     pdfState: "none",
+    approvalRequirement: "required",
   },
   {
     dealId: "DL-260708-08",
@@ -1467,6 +1474,7 @@ const generatedDrafts: GeneratedDraft[] = [
     memberCanAccessDeal: true,
     memberCanDeliver: true,
     pdfState: "draft",
+    approvalRequirement: "required",
   },
   {
     dealId: "DL-260708-01",
@@ -1484,6 +1492,7 @@ const generatedDrafts: GeneratedDraft[] = [
     memberCanAccessDeal: true,
     memberCanDeliver: true,
     pdfState: "draft",
+    approvalRequirement: "required",
   },
   {
     dealId: "DL-260708-01",
@@ -1501,6 +1510,7 @@ const generatedDrafts: GeneratedDraft[] = [
     memberCanAccessDeal: false,
     memberCanDeliver: false,
     pdfState: "final",
+    approvalRequirement: "none",
   },
   {
     dealId: "DL-260625-07",
@@ -1518,6 +1528,7 @@ const generatedDrafts: GeneratedDraft[] = [
     memberCanAccessDeal: false,
     memberCanDeliver: false,
     pdfState: "none",
+    approvalRequirement: "required",
   },
   {
     dealId: "DL-260708-01",
@@ -1535,6 +1546,7 @@ const generatedDrafts: GeneratedDraft[] = [
     memberCanAccessDeal: true,
     memberCanDeliver: true,
     pdfState: "final",
+    approvalRequirement: "none",
   },
   {
     dealId: "DL-260701-09",
@@ -1552,6 +1564,7 @@ const generatedDrafts: GeneratedDraft[] = [
     memberCanAccessDeal: true,
     memberCanDeliver: true,
     pdfState: "final",
+    approvalRequirement: "none",
   },
 ]
 
@@ -2071,8 +2084,21 @@ function AppNav({
   erpRole: ErpPreviewRole
 }) {
   const startGuide = useStartGuide()
+  const snapStartGuide = useSnapStartGuide(`preview-account:${workspaceId}`)
+  const snapGuidePrivileged = snapRole === "owner" || snapRole === "manager"
+  const snapGuideCommonCount = snapGuidePrivileged ? [startGuide?.state?.common.C1, startGuide?.state?.common.C2].filter(Boolean).length : 0
+  const snapGuideCount = (["S1", "S2", "S3", "S4"] as const).filter(id => snapStartGuide.state?.completed[id]).length + snapGuideCommonCount
+  const snapGuideTotal = snapGuidePrivileged ? 6 : 4
+  const snapGuideReady = Boolean(snapStartGuide.state && (!snapGuidePrivileged || (startGuide?.state && !startGuide.error)))
   const { isMobile, setOpenMobile, state: sidebarState } = useSidebar()
   const sidebarCollapsed = sidebarState === "collapsed"
+  const canOpenSettings = product !== "snap" || Boolean(
+    snapRole && canAccessSnapRoute(getSnapRouteByScreen("SC-30")!, {
+      role: snapRole,
+      platformOps: false,
+      authenticated: true,
+    })
+  )
   const navigate = (nextScreen: Screen) => {
     setScreen(nextScreen)
     if (isMobile) setOpenMobile(false)
@@ -2214,7 +2240,8 @@ function AppNav({
                         key === screen ||
                         (key === "deals" &&
                           (screen === "deals" || screen === "deal")) ||
-                        (key === "create" && screen === "result")
+                        (key === "create" && screen === "result") ||
+                        (key === "shipments" && screen === "snap")
                       return (
                         <SidebarMenuItem key={label}>
                           <SidebarMenuButton
@@ -2238,6 +2265,7 @@ function AppNav({
           : snapNavGroups.map((group, groupIndex) => {
               const visibleItems = group.items.filter(([, , key]) => {
                 const definition = getSnapRouteByScreen(key)
+                if (key === "SC-10" && snapGuideReady && snapGuideCount === snapGuideTotal) return false
                 if (!definition || !snapRole) return false
                 return canAccessSnapRoute(definition, {
                   role: snapRole,
@@ -2273,6 +2301,7 @@ function AppNav({
                           >
                             <Icon />
                             <span>{label}</span>
+                            {key === "SC-10" && snapGuideReady && <span className="ml-auto text-xs">{snapGuideCount}/{snapGuideTotal}</span>}
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       ))}
@@ -2282,30 +2311,23 @@ function AppNav({
               )
             })}
       </SidebarContent>
-      {product !== "snap" ||
-      (snapRole &&
-        canAccessSnapRoute(getSnapRouteByScreen("SC-30")!, {
-          role: snapRole,
-          platformOps: false,
-          authenticated: true,
-        })) ? (
-        <SidebarFooter className="mt-auto min-h-16 shrink-0 border-t p-3">
-          <SidebarMenu>
-            <SidebarProfileMenu
-              onSettings={openSettings}
-              onUsage={() => navigate("tokens")}
-              onBilling={() => navigate("billing")}
-              onLogout={() => {
-                onLogout()
-                if (isMobile) setOpenMobile(false)
-              }}
-              workspaceName={currentWorkspace.name}
-              billingPlan={currentWorkspace.billingPlan}
-              product={product}
-            />
-          </SidebarMenu>
-        </SidebarFooter>
-      ) : null}
+      <SidebarFooter className="mt-auto min-h-16 shrink-0 border-t p-3">
+        <SidebarMenu>
+          <SidebarProfileMenu
+            onSettings={canOpenSettings ? openSettings : undefined}
+            onUsage={canOpenSettings ? () => navigate("tokens") : undefined}
+            onBilling={canOpenSettings ? () => navigate("billing") : undefined}
+            showProductSummary={canOpenSettings}
+            onLogout={() => {
+              onLogout()
+              if (isMobile) setOpenMobile(false)
+            }}
+            workspaceName={currentWorkspace.name}
+            billingPlan={currentWorkspace.billingPlan}
+            product={product}
+          />
+        </SidebarMenu>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )
@@ -2830,6 +2852,7 @@ function DocumentPaper({
   templateCode = "SC",
   accent = "#166dd7",
   fontStyle = "sans",
+  archetype = "table",
   logo,
   className,
 }: {
@@ -2837,6 +2860,7 @@ function DocumentPaper({
   templateCode?: string
   accent?: string
   fontStyle?: "sans" | "serif"
+  archetype?: DocumentStyle["archetype"]
   logo?: DocumentLogo | null
   className?: string
 }) {
@@ -2847,13 +2871,14 @@ function DocumentPaper({
   return (
     <div
       data-document-paper
+      data-archetype={archetype}
       className={cn(
         "relative mx-auto aspect-[0.72] w-[min(94%,520px)] max-w-[520px] rounded-[3px] border bg-white px-6 py-8 shadow-[0_20px_54px_rgb(31_41_55/0.10)] xl:px-10 xl:py-9",
         fontStyle === "serif" && "font-serif",
         className
       )}
     >
-      <div className="flex items-start justify-between gap-8">
+      <div className={cn("flex items-start justify-between gap-8", archetype === "formal" && "border-2 p-4", archetype === "letter" && "border-b pb-4")}>
         <div>
           <div
             className="text-[11px] font-semibold tracking-[0.14em] uppercase"
@@ -2888,12 +2913,12 @@ function DocumentPaper({
 
       <Separator className="my-7" />
 
-      <div className="grid grid-cols-2 gap-x-4 gap-y-5 text-xs xl:gap-x-8">
+      <div className={cn("grid gap-x-4 text-xs xl:gap-x-8", archetype === "letter" || archetype === "formal" ? "grid-cols-1 gap-y-2" : "grid-cols-2 gap-y-5", archetype === "spec" && "gap-y-1 border-y py-2")}>
         {result ? (
-          previewSlots.map((slot) => (
+          previewSlots.map((slot, index) => (
             <PaperField
               key={slot.key}
-              label={slot.label}
+              label={archetype === "letter" || archetype === "formal" ? `${index + 1}. ${slot.label}` : slot.label}
               value={displayValueForSlot(slot)}
             />
           ))
@@ -2994,6 +3019,7 @@ function DocumentStage({
   downloadName,
   accent,
   fontStyle,
+  archetype,
   logo,
   reviewMode = false,
   canDownload = true,
@@ -3013,6 +3039,7 @@ function DocumentStage({
   downloadName?: string
   accent?: string
   fontStyle?: "sans" | "serif"
+  archetype?: DocumentStyle["archetype"]
   logo?: DocumentLogo | null
   reviewMode?: boolean
   canDownload?: boolean
@@ -3164,6 +3191,7 @@ function DocumentStage({
                   templateCode={templateCode}
                   accent={accent}
                   fontStyle={fontStyle}
+                  archetype={archetype}
                   logo={logo}
                   className={paperClassName}
                 />
@@ -6091,10 +6119,6 @@ function DocumentReviewWorkspace({
                 mode={step === "deal" ? "deal" : "compare"}
                 documentType={document.documentType}
                 onAutoSave={onAutoSave}
-                onShowSource={() => {
-                  onMobilePaneChange("preview")
-                  window.requestAnimationFrame(() => window.document.querySelector<HTMLElement>('[aria-label="PDF 원문"]')?.focus())
-                }}
                 reviewedFields={document.reviewedFields}
                 onReviewedFieldChange={onReviewedFieldChange}
               />
@@ -6692,9 +6716,7 @@ function OcrFieldReviewList({
   onAutoSave,
   reviewedFields,
   onReviewedFieldChange,
-  onShowSource,
 }: {
-  onShowSource: () => void
   mode: "compare" | "deal"
   documentType: RecentDocument["documentType"]
   onAutoSave: (phase?: "pending" | "commit") => void
@@ -6729,7 +6751,6 @@ function OcrFieldReviewList({
               htmlFor={`upload-field-${field.key}`}
               label={field.label}
               badge={<ToneBadge tone={field.tone}>{field.status}</ToneBadge>}
-              sourceAction={<Button type="button" variant="ghost" size="xs" onClick={onShowSource} aria-label={`${field.label} 원본 보기`}>원본 보기 <FileText className="size-3" /></Button>}
               message={`${field.confidence} · ${field.comment}`}
               messageId={`upload-field-${field.key}-message`}
               tone={danger ? "danger" : warning ? "warning" : "neutral"}
@@ -8040,12 +8061,12 @@ function RecentDocumentsTable({
       <Table className="min-w-[1040px] table-fixed">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[30%] text-left">문서</TableHead>
+            <TableHead className="w-[27%] text-left">문서</TableHead>
             <TableHead className="w-[15%] text-left">Deal</TableHead>
-            <TableHead className="w-[10%]">상태</TableHead>
+            <TableHead className="w-[16%]">상태</TableHead>
             <TableHead className="w-[13%] text-left">생성자</TableHead>
             <TableHead className="w-[12%] text-left">수정</TableHead>
-            <TableHead className="w-[20%] text-right">작업</TableHead>
+            <TableHead className="w-[17%] text-right">작업</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -8147,7 +8168,7 @@ function RecentDocumentsTable({
                     <span className="text-xs">미연결</span>
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="whitespace-normal">
                   <ToneBadge tone={draft.tone}>{draft.status}</ToneBadge>
                   {draft.approvalPreviewState === "requester-pending" ? (
                     <div className="mt-1"><ToneBadge tone="warning">승인 대기</ToneBadge></div>
@@ -8155,7 +8176,14 @@ function RecentDocumentsTable({
                     <div className="mt-1"><ToneBadge tone="success">승인 완료</ToneBadge></div>
                   ) : draft.approvalPreviewState === "requester-rejected" ? (
                     <div className="mt-1"><ToneBadge tone="danger">반려</ToneBadge></div>
-                  ) : null}
+                  ) : (
+                    <div className="mt-1"><ToneBadge tone="neutral">{draft.approvalRequirement === "required" ? "요청 전" : "승인 없음"}</ToneBadge></div>
+                  )}
+                  <div className="mt-1">
+                    <ToneBadge tone={draft.pdfState === "final" ? "success" : draft.pdfState === "draft" ? "blue" : "neutral"}>
+                      {draft.pdfState === "none" ? "PDF 미생성" : draft.pdfState === "draft" ? "초안 PDF" : "최종 PDF"}
+                    </ToneBadge>
+                  </div>
                   <div
                     className="mt-1 truncate text-[11px] text-muted-foreground"
                     title={draft.readiness}
@@ -9282,6 +9310,7 @@ function CreateScreen({
       tab: "draft",
       pdfState: "none",
       approvalPreviewState: "live",
+      approvalRequirement: "required",
       creatorName: currentAccount.name,
       creatorAccountId: currentAccount.id,
       updated: "방금 전",
@@ -10447,6 +10476,7 @@ function DocumentCreateWorkbench({
               templateCode={templateCode}
               accent={documentStyle.accent}
               fontStyle={documentStyle.fontStyle}
+          archetype={documentStyle.archetype}
               logo={documentStyle.logo}
             />
           </div>
@@ -11459,7 +11489,6 @@ function CreateFieldReviewPanel({
   templateCode,
   sourceLabel = "등록된 원본",
   startBlank = false,
-  onShowSource,
 }: {
   itemFocusSignal: number
   reviewFocusRequest: ReviewFocusRequest | null
@@ -11471,7 +11500,6 @@ function CreateFieldReviewPanel({
   templateCode: string
   sourceLabel?: string
   startBlank?: boolean
-  onShowSource: () => void
 }) {
   const panelRef = useRef<HTMLElement | null>(null)
   const itemEditorRef = useRef<HTMLDivElement | null>(null)
@@ -11889,7 +11917,6 @@ function CreateFieldReviewPanel({
                         : row.status}
                   </ToneBadge>
                 }
-                sourceAction={!startBlank ? <Button type="button" variant="ghost" size="xs" onClick={onShowSource} aria-label={`${row.label} 원본 보기`}>원본 보기 <FileText className="size-3" /></Button> : undefined}
                 message={reviewIssueKeys.has(row.key) ? "문서의 값과 비교해 주세요." : undefined}
                 messageId={`create-field-${row.key}-message`}
                 tone={reviewIssueKeys.has(row.key) ? "danger" : "neutral"}
@@ -13498,6 +13525,7 @@ function DocumentReviewSharePanel({
   )
   const activeLinks = magicLinks.filter((link) => link.status === "active")
   const activeLink = activeLinks.at(-1)
+  const approvalInvalidated = approvalStatus === "idle" && approvalEvents.at(-1)?.type === "invalidate"
   const approvalRequested = approvalStatus === "requested"
   const approvalDone = approvalStatus === "approved"
   const approvalRejected = approvalStatus === "rejected"
@@ -13934,7 +13962,7 @@ function DocumentReviewSharePanel({
   }
 
   return (
-    <aside className="flex h-full min-h-0 flex-col bg-[var(--surface-background)]">
+    <aside className="flex h-full min-h-0 min-w-0 flex-col bg-[var(--surface-background)]">
       <div className="flex min-h-16 shrink-0 items-center justify-between gap-3 border-b border-[var(--surface-border)] px-4 py-2.5 sm:px-5">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -13978,7 +14006,7 @@ function DocumentReviewSharePanel({
         ) : null}
       </div>
 
-      <ScrollArea className="min-h-0 flex-1">
+      <ScrollArea className="min-h-0 min-w-0 flex-1 [&_[data-slot=scroll-area-viewport]>div]:!block">
         {!documentConfirmed ? (
           <div className="flex flex-col gap-7 p-4 sm:p-5">
             <Alert
@@ -14042,6 +14070,7 @@ function DocumentReviewSharePanel({
 
             <section className="order-2 rounded-md border bg-background p-3">
               <div className="text-sm font-semibold">문서 형태</div>
+              <label className="mt-3 flex flex-wrap items-center gap-2 text-xs"><span className="w-16 shrink-0 font-medium text-muted-foreground">문서 구성</span><select aria-label="문서 구성" className="h-8 min-w-0 flex-1 rounded-md border bg-background px-2" value={documentStyle.archetype} onChange={event => onStyleChange({ ...documentStyle, archetype: event.target.value as DocumentStyle["archetype"] })}>{[["table", "테이블형"], ["letter", "번호조항 레터"], ["spec", "컴팩트 확인서"], ["formal", "정식 계약서"]].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
               <div className="mt-2">
                 {organizationLogo ? (
                   <div className="flex flex-wrap items-center gap-2">
@@ -14248,6 +14277,8 @@ function DocumentReviewSharePanel({
                   <ToneBadge tone="danger">반려</ToneBadge>
                 ) : null}
               </div>
+
+              {approvalInvalidated && <div role="status" className="mt-3 rounded-md bg-warning/10 px-3 py-2 text-xs leading-5"><ToneBadge tone="warning">승인 무효</ToneBadge><p className="mt-1">내용이 바뀌어 이전 승인 요청이 무효가 되었습니다. 변경한 내용을 검토한 후 승인을 다시 요청하세요.</p></div>}
 
               {approvalStatus === "idle" && approvalChoice === "request" ? (
                 <div className="mt-3">
@@ -14557,7 +14588,7 @@ function DocumentReviewSharePanel({
                         event.type === "request" &&
                         approvalEvents
                           .slice(0, index)
-                          .some((previous) => previous.type === "reject")
+                          .some((previous) => previous.type === "request")
                       return (
                         <div
                           key={event.id}
@@ -14569,14 +14600,14 @@ function DocumentReviewSharePanel({
                                 ? "success"
                                 : event.type === "reject"
                                   ? "danger"
-                                  : "blue"
+                                  : event.type === "invalidate" ? "warning" : event.type === "edit" ? "neutral" : "blue"
                             }
                           >
                             {event.type === "approve"
                               ? "승인"
                               : event.type === "reject"
                                 ? "반려"
-                                : isRetryRequest
+                                : event.type === "invalidate" ? "승인 무효" : event.type === "edit" ? "수정" : isRetryRequest
                                   ? "재요청"
                                   : "요청"}
                           </ToneBadge>
@@ -14593,7 +14624,7 @@ function DocumentReviewSharePanel({
                                   .join(", ")}`
                               : event.type === "approve"
                                 ? "승인 처리 완료"
-                                : `반려 사유 · ${event.reason ?? "사유 없음"}`}
+                                : event.type === "reject" ? `반려 사유 · ${event.reason ?? "사유 없음"}` : event.reason}
                           </span>
                         </div>
                       )
@@ -15063,6 +15094,7 @@ function ResultScreen({
           ? "requested"
           : "idle"
   const [documentStyle, setDocumentStyle] = useState<DocumentStyle>({
+    archetype: "table",
     fontStyle: "sans",
     accent: "#166dd7",
     logo: organizationDefaultDocumentLogo,
@@ -15217,7 +15249,22 @@ function ResultScreen({
         ? 1
         : 0
   )
-  const markDocumentChanged = useCallback(() => {
+  const approvalStatusRef = useRef(approvalStatus)
+  const markDocumentChanged = useCallback((newDraft = false) => {
+    const previousApproval = approvalStatusRef.current
+    if (newDraft) approvalStatusRef.current = "idle"
+    else if (previousApproval !== "idle") {
+      approvalStatusRef.current = "idle"
+      setApprovalStatus("idle")
+      const occurredAt = formatApprovalDateTime()
+      const editId = ++approvalEventSequenceRef.current
+      const invalidateId = ++approvalEventSequenceRef.current
+      setApprovalEvents(events => [
+        ...events,
+        { id: editId, type: "edit", actor: "조민영", actorRole: "작성자", occurredAt, reason: "문서 내용 또는 구성이 변경되었습니다." },
+        ...(previousApproval === "requested" || previousApproval === "approved" ? [{ id: invalidateId, type: "invalidate" as const, actor: "조민영", actorRole: "작성자" as const, occurredAt, reason: "내용 변경으로 이전 승인이 무효가 되었습니다." }] : []),
+      ])
+    }
     draftRevisionRef.current += 1
     setDocumentRevision((revision) => revision + 1)
     setSaveState("unsaved")
@@ -15227,10 +15274,7 @@ function ResultScreen({
     const replacingDeal = Boolean(previousDeal && previousDeal.id !== deal.id)
     setSelectedDeal(deal)
     setDealPickerOpen(false)
-    if (replacingDeal && approvalChoice === "request") {
-      setApprovalStatus("idle")
-      setApprovalEvents([])
-    }
+    if (!previousDeal || replacingDeal) markDocumentChanged()
     toast.success(
       replacingDeal
         ? `${previousDeal?.id}에서 ${deal.id} 거래로 변경했습니다.`
@@ -15303,6 +15347,7 @@ function ResultScreen({
   }
   const handleRequestApproval = () => {
     if (approvalChoice !== "request" || selectedApproverIds.length === 0) return
+    approvalStatusRef.current = "requested"
     setApprovalStatus("requested")
     appendApprovalEvent("request", "조민영", "작성자")
     toast.success(
@@ -15315,6 +15360,7 @@ function ResultScreen({
       !selectedApproverIds.includes(approver.id)
     )
       return
+    approvalStatusRef.current = "approved"
     setApprovalStatus("approved")
     appendApprovalEvent("approve", approver.name, approver.role)
     toast.success("승인이 완료되었습니다. 문서를 확정할 수 있습니다.")
@@ -15326,6 +15372,7 @@ function ResultScreen({
       !reason.trim()
     )
       return
+    approvalStatusRef.current = "rejected"
     setApprovalStatus("rejected")
     appendApprovalEvent("reject", approver.name, approver.role, reason.trim())
     toast.error("문서가 반려되었습니다. 사유를 확인하고 재요청하세요.")
@@ -15620,7 +15667,7 @@ function ResultScreen({
         setHasPreparedPdf(false)
         setApprovalStatus("idle")
         setApprovalEvents([])
-        markDocumentChanged()
+        markDocumentChanged(true)
         return true
       }}
       selectedDeal={selectedDeal}
@@ -15663,10 +15710,6 @@ function ResultScreen({
         templateCode={templateCode}
         sourceLabel={appliedSourceLabel}
         startBlank={!appliedSourceKey}
-        onShowSource={() => {
-          setMobilePane("left")
-          window.requestAnimationFrame(() => window.document.querySelector<HTMLElement>('[data-create-source-panel]')?.focus())
-        }}
         onItemCountChange={handleItemCountChange}
         onRequiredMissingChange={handleRequiredMissingChange}
         onComparisonFactsChange={handleComparisonFactsChange}
@@ -15725,6 +15768,7 @@ function ResultScreen({
           templateCode={templateCode}
           accent={documentStyle.accent}
           fontStyle={documentStyle.fontStyle}
+          archetype={documentStyle.archetype}
           logo={documentStyle.logo}
           downloadName={`${documentNumber}-${
             documentConfirmed ? "FINAL" : "DRAFT"
@@ -16685,6 +16729,23 @@ export function App() {
     navigateTo("create")
   }
 
+  const openDealDocumentReview = (documentNumber: string) => {
+    const selectedDocument = getGeneratedDocumentsForDeal(selectedDealId).find((document) => document.number === documentNumber)
+    if (!selectedDocument) return
+    setResultDeliveryAttachments([])
+    setSelectedTemplateCode(selectedDocument.number.split("-")[0])
+    setResultDocumentNumber(selectedDocument.number)
+    setResultMemberCanDeliver(selectedDocument.memberCanDeliver)
+    setResultDealConnectionRestricted(false)
+    setResultInitialWorkspaceStep("editor")
+    setOpenDeliveryOnResult(false)
+    setOpenConfirmedOnResult(false)
+    setOpenLinkCreatedOnResult(false)
+    setOpenSharedOnResult(false)
+    setResultDealContext(getDealDocumentContext(selectedDealId))
+    navigateTo("result", { documentNumber })
+  }
+
   const standaloneSnap =
     product === "snap" &&
     snapRoute !== null &&
@@ -16957,6 +17018,7 @@ export function App() {
                       onCreateDocument={openDealDocumentCreate}
                       onUpload={() => navigateTo("inbox")}
                       onDeliver={openDealDocumentDelivery}
+                      onReviewDocument={openDealDocumentReview}
                       onOpenSettlement={() => navigateTo("settlement")}
                       workspaceActionsTarget={dealHeaderActionsTarget}
                     />
@@ -17004,6 +17066,8 @@ export function App() {
                     <BillingPrototype onNavigate={navigateTo} />
                   ) : screen === "tokens" ? (
                     <TokenUsagePrototype onNavigate={navigateTo} />
+                  ) : screen === "snap-platform" && snapScreen === "SC-10" ? (
+                    <SnapStartGuidePage scope={`preview-account:${workspaceId}`} role={snapAccess.role} />
                   ) : screen === "snap-platform" ? (
                     <SnapProductPrototype
                       screen={snapScreen}

@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test"
 const invoice = `/erp/documents/upload/${encodeURIComponent("인보이스_2607_003.pdf")}/review`
 
 for (const width of [390, 1440]) {
-  test(`review labels, statuses and source controls stay above inputs at ${width}px`, async ({
+  test(`review fields omit source buttons and keep PDF access at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 1000 })
@@ -18,28 +18,26 @@ for (const width of [390, 1440]) {
       const header = box('[data-slot="form-field-header"]')
       const control = box("input")
       const message = box('[data-slot="form-field-message"]')
-      const source = box('[data-slot="form-field-source"]')
-      const rightAligned = Math.abs(source.right - header.right) < 2
       return {
-        rightAligned,
         inputBelow: control.top >= header.bottom,
         messageBelow: message.top >= control.bottom,
         overflow: node.scrollWidth > node.clientWidth + 1,
       }
     })
     expect(geometry).toEqual({
-      rightAligned: true,
       inputBelow: true,
       messageBelow: true,
       overflow: false,
     })
-    await field
-      .getByRole("button", { name: "Buyer 원본 보기", exact: true })
-      .click()
-    await expect(page.getByRole("region", { name: "PDF 원문" })).toBeVisible()
+    await expect(fields.getByRole("button", { name: /원본 보기/ })).toHaveCount(0)
+    await expect(fields.locator('[data-slot="form-field-source"]')).toHaveCount(0)
     if (width < 768) {
+      await fields.getByRole("button", { name: "PDF 보기", exact: true }).click()
+      await expect(page.getByRole("region", { name: "PDF 원문" })).toBeVisible()
       await expect(fields).toBeHidden()
       await page.getByRole("button", { name: "필드 검토", exact: true }).click()
+    } else {
+      await expect(page.getByRole("region", { name: "PDF 원문" })).toBeVisible()
     }
     await expect(input).toHaveValue("검토 거래처")
   })
@@ -87,7 +85,6 @@ test("creation omits missing sources, then opens explicit candidate controls aft
   await page.getByRole("button", { name: /거래값 사용/ }).click()
   await expect(input).toHaveValue(originalValue)
   await expect(page.getByRole("button", { name: /거래값 사용/ })).toHaveCount(0)
-  expect(await field.locator('[data-slot="form-field-actions"]').evaluate(node => [...node.children].map(child => child.getAttribute('data-slot')))).toEqual(['form-field-candidates', 'form-field-source'])
-  await field.getByRole("button", { name: /원본 보기/ }).click()
-  await expect(page.locator('[data-create-source-panel]')).toBeFocused()
+  expect(await field.locator('[data-slot="form-field-actions"]').evaluate(node => [...node.children].map(child => child.getAttribute('data-slot')))).toEqual(['form-field-candidates'])
+  await expect(page.getByRole("button", { name: /원본 보기/ })).toHaveCount(0)
 })

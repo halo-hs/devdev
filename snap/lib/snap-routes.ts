@@ -147,7 +147,7 @@ export const SNAP_ROUTE_DEFINITIONS: readonly SnapRouteDefinition[] = [
     screen: "SC-10",
     label: "처음 시작하기",
     breadcrumb: ["ECOYA SNAP", "처음 시작하기"],
-    roles: adminRoles,
+    roles: workspaceRoles,
     shell: "workspace",
   },
   {
