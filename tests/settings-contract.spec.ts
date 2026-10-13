@@ -157,6 +157,32 @@ test("brand color picker and HEX value stay in sync with role access", async ({ 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
 })
 
+test("branding logo previews raster files, rejects SVG content, and respects member access", async ({ page }) => {
+  await openSettings(page, "owner", "trade-defaults")
+  const input = page.getByLabel("문서 로고 파일", { exact: true })
+  const preview = page.getByRole("img", { name: "문서 로고 미리보기" })
+  await expect(input).toHaveAttribute("accept", ".png,.jpg,.jpeg,image/png,image/jpeg")
+  await input.setInputFiles("public/assets/logos/logo-ecoya-snap-color.png")
+  await expect(preview).toBeVisible()
+  await expect.poll(() => preview.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0)
+  const previousUrl = await preview.getAttribute("src")
+  for (const [name, mimeType] of [["logo.svg", "image/svg+xml"], ["logo.png", "image/png"]]) {
+    await input.setInputFiles({ name, mimeType, buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>') })
+    await expect(page.getByRole("alert")).toContainText("PNG")
+    await expect(preview).toHaveAttribute("src", previousUrl!)
+  }
+  await input.setInputFiles("public/snap-report/seal.jpg")
+  await expect(page.getByRole("alert")).toHaveCount(0)
+  await expect(preview).not.toHaveAttribute("src", previousUrl!)
+  await expect(preview).toBeVisible()
+  await page.getByRole("button", { name: "삭제", exact: true }).click()
+  await expect(preview).toHaveCount(0)
+  await expect(page.getByText("등록된 로고 없음")).toBeVisible()
+  await openSettings(page, "member", "trade-defaults")
+  await expect(page.getByLabel("문서 로고 파일", { exact: true })).toBeDisabled()
+  await expect(page.getByRole("button", { name: "파일 선택", exact: true })).toBeDisabled()
+})
+
 test("approval keeps the reviewed member visible and updates seat counts without changing purchase capacity", async ({
   page,
 }) => {
@@ -546,7 +572,14 @@ test("personal credit usage restores token routes for every role without organiz
     await expect(content).toContainText("SNAP")
     await expect(content).not.toContainText("현재 조직")
     await expect(content).not.toContainText("684K")
+    await expect(content).not.toContainText("디자인 확인용")
+    await expect(content.getByRole("progressbar")).toHaveCount(2)
+    for (const product of ["Trade OS", "SNAP"]) {
+      await expect(content.getByRole("progressbar", { name: `${product} 크레딧 사용량` })).toHaveAttribute("aria-valuenow", "50")
+    }
+    await content.getByLabel("조회 기간", { exact: true }).fill("2020-01")
     await expect(content.getByText("확인 필요", { exact: true })).toHaveCount(2)
+    await expect(content.getByRole("progressbar")).toHaveCount(0)
   }
 })
 

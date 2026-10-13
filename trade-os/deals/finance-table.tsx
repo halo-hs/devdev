@@ -111,7 +111,7 @@ export function DealsFinanceTable({
         {!deals.length && (
           <TableRow>
             <TableCell colSpan={9} className="whitespace-normal p-0">
-              <Empty className="min-h-40">
+              <Empty className="sticky left-0 min-h-40 w-[100cqw] max-w-full">
                 <EmptyHeader>
                   <EmptyTitle>{hasRecords ? "조건에 맞는 거래가 없습니다." : "등록된 거래가 없습니다."}</EmptyTitle>
                   <EmptyDescription>

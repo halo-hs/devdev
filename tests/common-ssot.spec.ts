@@ -142,6 +142,7 @@ test("billing legacy URLs stay inside settings and member cannot view invoices",
 
 test("SNAP usage directs commercial changes to common product subscriptions", async ({ page }) => {
   await page.goto("/erp/settings?section=snap-usage")
+  await expect(page.getByRole("progressbar")).toHaveCount(3)
   await expect(page.getByRole("button", { name: "크레딧 충전", exact: true })).toHaveCount(0)
   await expect(page.getByText("18.4", { exact: true })).toHaveCount(0)
   await page.getByRole("button", { name: "제품 및 구독 보기", exact: true }).click()

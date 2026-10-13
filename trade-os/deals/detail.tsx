@@ -4908,7 +4908,7 @@ function FulfillmentTab({
                 action={
                   <div className="flex flex-wrap items-center gap-2">
                     <DealContractTool />
-                    <StatusBadge tone={terminal ? "success" : "warning"}>
+                    <StatusBadge tone={lifecycle === "closed" ? "success" : lifecycle === "cancelled" ? "neutral" : "warning"}>
                       {labels[lifecycle]}
                     </StatusBadge>
                   </div>
@@ -5736,6 +5736,7 @@ export function DealDetailScreen({
   onCreateDocument,
   onUpload,
   onDeliver,
+  onReviewDocument,
   onOpenSettlement,
   workspaceActionsTarget,
 }: {
@@ -5748,6 +5749,7 @@ export function DealDetailScreen({
   onCreateDocument: (templateCode: string) => void
   onUpload: () => void
   onDeliver: (documentNumber: string, attachmentNames: string[]) => void
+  onReviewDocument: (documentNumber: string) => void
   onOpenSettlement: () => void
   workspaceActionsTarget?: HTMLElement | null
 }) {
@@ -5757,6 +5759,9 @@ export function DealDetailScreen({
   const profile =
     dealProfiles[dealId] ?? createdProfile ?? (fixture ? { ...fixture, direction: "purchase" as const } : dealProfiles["DL-260708-01"])
   const settled = fixture?.stage === "settled"
+  const nextDocument = !settled && fixture?.orderLifecycle !== "closed" && fixture?.orderLifecycle !== "cancelled" ? fixture?.nextDocument : undefined
+  const nextDraft = generatedDocuments.find((document) => document.number.startsWith(`${nextDocument?.templateCode}-`) && document.state === "draft")
+  const nextDeliverable = generatedDocuments.find((document) => document.number.startsWith(`${nextDocument?.templateCode}-`) && document.state !== "draft")
   const [mainInformation, setMainInformation] =
     useState<Pick<DealProfile, "counterparty" | "amount" | "currency">>(profile)
   const [documentSummary, setDocumentSummary] = useState<DealDocumentSummary>({
@@ -6733,6 +6738,23 @@ export function DealDetailScreen({
             data-deal-summary
             className="bg-background px-4 py-3 sm:px-6 xl:px-8"
           >
+            {nextDocument && (
+              <div data-next-document className={cn("mb-3 flex flex-wrap items-center gap-3 rounded-md border px-3 py-2.5 text-sm", nextDocument.tone === "warning" ? "border-warning/25 bg-warning/10" : "border-primary/15 bg-primary/5")}>
+                <div className="min-w-0 flex-1 basis-60 break-keep">
+                  <span className="font-semibold">다음 서류: {nextDocument.label}</span>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{{ upload: "PDF를 업로드하고 검토한 뒤 이 거래에 연결하세요.", create: "양식을 선택해 거래에 필요한 문서를 만드세요.", confirm: "문서 내용과 승인 상태를 검토한 뒤 확정하세요.", deliver: "확정한 문서를 고객에게 전달하세요.", reconcile: "포장명세서와 선하증권의 중량을 확인하세요." }[nextDocument.kind]}</p>
+                </div>
+                {canMutate(role) && (
+                  <Button size="sm" variant="outline" className="ml-auto bg-background" onClick={() => {
+                    if (nextDocument.kind === "upload") onUpload()
+                    else if (nextDocument.kind === "create") onCreateDocument(nextDocument.templateCode)
+                    else if (nextDocument.kind === "confirm" && nextDraft) onReviewDocument(nextDraft.number)
+                    else if (nextDocument.kind === "deliver" && nextDeliverable) onDeliver(nextDeliverable.number, [])
+                    else navigateSection(nextDocument.kind === "reconcile" ? "verification" : "documents")
+                  }}>진행하기<ArrowUpRight data-icon="inline-end" /></Button>
+                )}
+              </div>
+            )}
             <DealAssistBar
               notices={dealReviewNotices(riskDismissed)}
               missingFields={missingFields}

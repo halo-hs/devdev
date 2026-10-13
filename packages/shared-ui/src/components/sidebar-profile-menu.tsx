@@ -40,7 +40,7 @@ export function SidebarProfileMenu({
   billingPlan = "Pro",
   showProductSummary = true,
 }: {
-  onSettings: () => void
+  onSettings?: () => void
   onUsage?: () => void
   onBilling?: () => void
   onLogout: () => void
@@ -104,10 +104,10 @@ export function SidebarProfileMenu({
             <>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={onSettings}>
+                {onSettings ? <DropdownMenuItem onClick={onSettings}>
                   <Settings />
                   설정
-                </DropdownMenuItem>
+                </DropdownMenuItem> : null}
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <CircleHelp />
@@ -239,7 +239,7 @@ export function SidebarProfileMenu({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <SidebarMenuButton
+      {onSettings ? <SidebarMenuButton
         aria-label="설정"
         tooltip="설정"
         className="size-8 shrink-0 justify-center p-0 group-data-[collapsible=icon]:hidden"
@@ -247,7 +247,7 @@ export function SidebarProfileMenu({
       >
         <Settings />
         <span className="sr-only">설정</span>
-      </SidebarMenuButton>
+      </SidebarMenuButton> : null}
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
