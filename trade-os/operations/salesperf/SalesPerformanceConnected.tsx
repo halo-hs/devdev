@@ -853,7 +853,7 @@ function SalesPerformanceIdentityScope({
     memberDirectory.status === "ready" ? memberDirectory.members : [];
   const currencyLabel = currency ?? "";
 
-  // Member는 회사 전체 settlement-series의 실효 조회 범위를 표시한다.
+  // Member는 settlement-series의 담당자 필터를 사용하며, assignee 부재를 회사 전체 권한으로 해석하지 않는다.
   const effectiveAssignee = isManager
     ? data?.status?.assignee ?? null
     : data?.series?.assignee ?? null;
@@ -1015,7 +1015,7 @@ function SalesPerformanceIdentityScope({
           <KpiTile
             label={copy.kpi.activeDeals}
             value={copy.kpi.pendingValue ?? "준비 중"}
-            delta={{ text: copy.kpi.pendingNote ?? "회사 전체 집계를 준비하고 있습니다", tone: "flat" }}
+            delta={{ text: copy.kpi.pendingNote ?? "집계 정보를 준비하고 있습니다.", tone: "flat" }}
           />
           <KpiTile
             label={replaceTokens(copy.kpi.revenue, { period: kpiPeriodLabel, currency: currencyLabel })}
@@ -1057,7 +1057,7 @@ function SalesPerformanceIdentityScope({
           <KpiTile
             label={copy.kpi.overdueItems ?? "기한 초과"}
             value={copy.kpi.pendingValue ?? "준비 중"}
-            delta={{ text: copy.kpi.pendingNote ?? "회사 전체 집계를 준비하고 있습니다", tone: "flat" }}
+            delta={{ text: copy.kpi.pendingNote ?? "집계 정보를 준비하고 있습니다.", tone: "flat" }}
           />
         </div>
       )
