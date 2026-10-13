@@ -8182,6 +8182,14 @@ function RecentDocumentsTable({
                 </TableCell>
                 <TableCell className="whitespace-normal">
                   <ToneBadge tone={listStage.tone}>{listStage.label}</ToneBadge>
+                  {draft.readiness && (
+                    <div
+                      className="mt-1 truncate text-[11px] text-muted-foreground"
+                      title={draft.readiness}
+                    >
+                      {draft.readiness}
+                    </div>
+                  )}
                 </TableCell>
                 <TableCell className="truncate text-left">
                   <span
