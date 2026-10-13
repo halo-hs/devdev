@@ -5736,7 +5736,7 @@ function BeforeUploadState({
           variant="ai"
           eyebrow="AI 파일 올리기"
           title="문서 올리기"
-          description="PDF를 올리고 추출값을 검토한 뒤, 연결할 거래와 반영 내용을 확인하세요."
+          description="PDF를 올려 내용을 검토한 뒤, 거래를 선택하고 반영할 내용을 확인하세요."
           align="center"
         />
         <ol
