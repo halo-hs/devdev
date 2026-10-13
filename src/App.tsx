@@ -80,6 +80,7 @@ import { BusinessPageHero } from "@shared/components/business-page-hero"
 import { DocumentTemplateOptions } from "@trade-os/components/document-template-options"
 import { DocumentSaveSummary } from "@trade-os/components/document-save-summary"
 import { generatedDocumentStatusLabel, type GeneratedDocumentMetadata } from "@trade-os/lib/generated-document-metadata"
+import { generatedDocumentListStages, getGeneratedDocumentListStage } from "@trade-os/lib/generated-document-list-stage"
 import { Checkbox } from "@shared/components/ui/checkbox"
 import {
   Combobox,
@@ -1414,6 +1415,16 @@ type GeneratedDraft = {
   approvalRequirement: "required" | "none"
   approvalPreviewState?: DocumentApprovalPreviewState
 }
+
+const generatedDraftListStage = (draft: GeneratedDraft) =>
+  getGeneratedDocumentListStage({
+    status: draft.tab === "done" ? "sent" : draft.status === "확정" ? "confirmed" : "draft",
+    approvalStatus: draft.approvalRequirement === "none" ? "none"
+      : draft.approvalPreviewState === "requester-approved" ? "approved"
+      : draft.approvalPreviewState === "requester-rejected" ? "rejected"
+      : draft.approvalPreviewState?.endsWith("-pending") ? "pending"
+      : "none",
+  })
 
 const generatedDrafts: GeneratedDraft[] = [
   {
@@ -8083,6 +8094,7 @@ function RecentDocumentsTable({
             const actionDestination: GeneratedDocumentDestination =
               draft.tab === "confirmed" ? "share" : rowDestination
             const isDraft = draft.tab === "draft" || draft.tab === "progress"
+            const listStage = generatedDraftListStage(draft)
             const canOpenDeal = role !== "member" || draft.memberCanAccessDeal
             // Generated documents belong to the organization; Deal access is independent.
             const canDeliver = true
@@ -8169,22 +8181,7 @@ function RecentDocumentsTable({
                   )}
                 </TableCell>
                 <TableCell className="whitespace-normal">
-                  <ToneBadge tone={draft.tone}>{draft.status}</ToneBadge>
-                  {draft.approvalPreviewState === "requester-pending" ? (
-                    <div className="mt-1"><ToneBadge tone="warning">승인 대기</ToneBadge></div>
-                  ) : draft.approvalPreviewState === "requester-approved" ? (
-                    <div className="mt-1"><ToneBadge tone="success">승인 완료</ToneBadge></div>
-                  ) : draft.approvalPreviewState === "requester-rejected" ? (
-                    <div className="mt-1"><ToneBadge tone="danger">반려</ToneBadge></div>
-                  ) : null}
-                  {draft.readiness && (
-                    <div
-                      className="mt-1 truncate text-[11px] text-muted-foreground"
-                      title={draft.readiness}
-                    >
-                      {draft.readiness}
-                    </div>
-                  )}
+                  <ToneBadge tone={listStage.tone}>{listStage.label}</ToneBadge>
                 </TableCell>
                 <TableCell className="truncate text-left">
                   <span
@@ -9242,31 +9239,16 @@ function CreateScreen({
   const hasGeneratedDocuments =
     !showInitialTemplateState && visibleDocuments.length > 0
   const searchedDocuments = visibleDocuments.filter((draft) =>
-    [draft.title, draft.number, draft.party, draft.status].some((value) =>
+    [draft.title, draft.number, draft.party, generatedDraftListStage(draft).label].some((value) =>
       value.toLowerCase().includes(documentSearch.trim().toLowerCase())
     )
   )
   const documentTabs = [
     { value: "all", label: "전체", docs: searchedDocuments },
-    {
-      value: "draft",
-      label: "작성 중",
-      docs: searchedDocuments.filter(
-        (doc) => doc.tab === "draft" || doc.tab === "progress"
-      ),
-    },
-    {
-      value: "confirmed",
-      label: "확정",
-      docs: searchedDocuments.filter(
-        (doc) => doc.tab === "confirmed" || doc.tab === "sharing"
-      ),
-    },
-    {
-      value: "sent",
-      label: "발송됨",
-      docs: searchedDocuments.filter((doc) => doc.tab === "done"),
-    },
+    ...generatedDocumentListStages.map((stage) => ({
+      ...stage,
+      docs: searchedDocuments.filter((doc) => generatedDraftListStage(doc).value === stage.value),
+    })),
   ]
   const handleDeleteCreatedDocument = async (number: string) => {
     const result =
