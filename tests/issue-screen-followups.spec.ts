@@ -27,17 +27,31 @@ test(`mobile ${view} empty table notice stays in the visible area while scrollin
 })
 }
 
-test("document list separates approval and PDF states from draft status", async ({
+test("document list keeps approval conditional and PDF stages in file actions", async ({
   page,
 }) => {
   await page.goto("/erp/documents/create")
   const row = page.getByRole("row").filter({ hasText: "CI-2026-0918" })
   await expect(row).toContainText("승인 완료")
   await expect(row).toContainText("작성 중")
-  await expect(row).toContainText("초안 PDF")
-  await expect(
-    page.getByRole("row").filter({ hasText: "SC-2026-0708" })
-  ).toContainText("PDF 미생성")
+  await expect(row).not.toContainText("초안 PDF")
+  await expect(row.getByRole("button", { name: /PDF 초안 보기/ })).toBeEnabled()
+
+  const unrequested = page.getByRole("row").filter({ hasText: "SC-2026-0708" })
+  await expect(unrequested).toContainText("작성 중")
+  await expect(unrequested).not.toContainText("요청 전")
+  await expect(unrequested).not.toContainText("PDF 미생성")
+  await expect(unrequested.getByRole("button", { name: /PDF 미생성/ })).toBeDisabled()
+
+  const confirmed = page.getByRole("row").filter({ hasText: "CI-2026-0703" })
+  await expect(confirmed).toContainText("확정")
+  await expect(confirmed).not.toContainText("승인 없음")
+  await expect(confirmed).not.toContainText("최종 PDF")
+  await expect(confirmed.getByRole("button", { name: /최종 PDF 보기/ })).toBeEnabled()
+  await expect(confirmed.getByRole("button", { name: "고객 전달", exact: true })).toBeEnabled()
+
+  await expect(page.getByRole("row").filter({ hasText: "SC-2026-0918" })).toContainText("승인 대기")
+  await expect(page.getByRole("row").filter({ hasText: "PO-2026-0918" })).toContainText("반려")
 })
 
 test("next document opens the matching draft without confirming it", async ({
