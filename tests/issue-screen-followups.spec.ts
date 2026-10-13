@@ -106,7 +106,8 @@ test("next document opens the matching draft without confirming it", async ({
   page,
 }) => {
   await page.goto("/erp/deals/DL-260707-04")
-  const next = page.locator("[data-next-document]")
+  const next = page.locator("[data-deal-information-aside] [data-next-document]")
+  await expect(page.getByRole("region", { name: "거래 중요 알림" }).locator("[data-next-document]")).toHaveCount(0)
   await expect(next).toContainText("판매계약서")
   await next.getByRole("button", { name: "진행하기" }).click()
   await expect(page).toHaveURL(/SC-2026-0918/)

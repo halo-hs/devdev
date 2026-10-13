@@ -4908,7 +4908,7 @@ function FulfillmentTab({
                 action={
                   <div className="flex flex-wrap items-center gap-2">
                     <DealContractTool />
-                    <StatusBadge tone={lifecycle === "closed" ? "success" : lifecycle === "cancelled" ? "neutral" : "warning"}>
+                    <StatusBadge tone={lifecycle === "closed" || lifecycle === "short_closed" ? "success" : lifecycle === "cancelled" ? "neutral" : "warning"}>
                       {labels[lifecycle]}
                     </StatusBadge>
                   </div>
@@ -6738,23 +6738,6 @@ export function DealDetailScreen({
             data-deal-summary
             className="bg-background px-4 py-3 sm:px-6 xl:px-8"
           >
-            {nextDocument && (
-              <div data-next-document className={cn("mb-3 flex flex-wrap items-center gap-3 rounded-md border px-3 py-2.5 text-sm", nextDocument.tone === "warning" ? "border-warning/25 bg-warning/10" : "border-primary/15 bg-primary/5")}>
-                <div className="min-w-0 flex-1 basis-60 break-keep">
-                  <span className="font-semibold">다음 서류: {nextDocument.label}</span>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{{ upload: "PDF를 업로드하고 검토한 뒤 이 거래에 연결하세요.", create: "양식을 선택해 거래에 필요한 문서를 만드세요.", confirm: "문서 내용과 승인 상태를 검토한 뒤 확정하세요.", deliver: "확정한 문서를 고객에게 전달하세요.", reconcile: "포장명세서와 선하증권의 중량을 확인하세요." }[nextDocument.kind]}</p>
-                </div>
-                {canMutate(role) && (
-                  <Button size="sm" variant="outline" className="ml-auto bg-background" onClick={() => {
-                    if (nextDocument.kind === "upload") onUpload()
-                    else if (nextDocument.kind === "create") onCreateDocument(nextDocument.templateCode)
-                    else if (nextDocument.kind === "confirm" && nextDraft) onReviewDocument(nextDraft.number)
-                    else if (nextDocument.kind === "deliver" && nextDeliverable) onDeliver(nextDeliverable.number, [])
-                    else navigateSection(nextDocument.kind === "reconcile" ? "verification" : "documents")
-                  }}>진행하기<ArrowUpRight data-icon="inline-end" /></Button>
-                )}
-              </div>
-            )}
             <DealAssistBar
               notices={dealReviewNotices(riskDismissed)}
               missingFields={missingFields}
@@ -6902,26 +6885,44 @@ export function DealDetailScreen({
                         {directionLabels[profile.direction]}
                       </StatusBadge>
                     </div>
-                    <div className="rounded-md bg-primary/5 p-2">
-                      <span className="text-xs text-muted-foreground">
-                        다음 할 일
-                      </span>
-                      {plan.current ? (
-                        <a
-                          href={`#${workIds[plan.current]}`}
-                          aria-label="현재 업무로 이동"
-                          className="mt-1 flex w-full items-center justify-between gap-2 text-left text-xs font-medium text-primary"
-                          onClick={(event) => {
-                            event.preventDefault()
-                            navigateSection(plan.current!)
-                          }}
-                        >
-                          {plan.nextAction}
-                        </a>
-                      ) : (
-                        <p className="mt-1 text-xs">{plan.nextAction}</p>
-                      )}
-                    </div>
+                    {nextDocument ? (
+                      <div data-next-document className={cn("flex flex-col items-stretch gap-3 rounded-md border px-3 py-2.5 text-sm", nextDocument.tone === "warning" ? "border-warning/25 bg-warning/10" : "border-primary/15 bg-primary/5")}>
+                        <div className="min-w-0 break-keep">
+                          <span className="font-semibold">다음 서류: {nextDocument.label}</span>
+                          <p className="mt-0.5 text-xs text-muted-foreground">{{ upload: "PDF를 업로드하고 검토한 뒤 이 거래에 연결하세요.", create: "양식을 선택해 거래에 필요한 문서를 만드세요.", confirm: "문서 내용과 승인 상태를 검토한 뒤 확정하세요.", deliver: "확정한 문서를 고객에게 전달하세요.", reconcile: "포장명세서와 선하증권의 중량을 확인하세요." }[nextDocument.kind]}</p>
+                        </div>
+                        {canMutate(role) && (
+                          <Button size="sm" variant="outline" className="ml-auto bg-background" onClick={() => {
+                            if (nextDocument.kind === "upload") onUpload()
+                            else if (nextDocument.kind === "create") onCreateDocument(nextDocument.templateCode)
+                            else if (nextDocument.kind === "confirm" && nextDraft) onReviewDocument(nextDraft.number)
+                            else if (nextDocument.kind === "deliver" && nextDeliverable) onDeliver(nextDeliverable.number, [])
+                            else navigateSection(nextDocument.kind === "reconcile" ? "verification" : "documents")
+                          }}>진행하기<ArrowUpRight data-icon="inline-end" /></Button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="rounded-md bg-primary/5 p-2">
+                        <span className="text-xs text-muted-foreground">
+                          다음 할 일
+                        </span>
+                        {plan.current ? (
+                          <a
+                            href={`#${workIds[plan.current]}`}
+                            aria-label="현재 업무로 이동"
+                            className="mt-1 flex w-full items-center justify-between gap-2 text-left text-xs font-medium text-primary"
+                            onClick={(event) => {
+                              event.preventDefault()
+                              navigateSection(plan.current!)
+                            }}
+                          >
+                            {plan.nextAction}
+                          </a>
+                        ) : (
+                          <p className="mt-1 text-xs">{plan.nextAction}</p>
+                        )}
+                      </div>
+                    )}
                   </section>
                   <DealProgressNavigation
                     metrics={
