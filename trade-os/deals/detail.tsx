@@ -1232,20 +1232,23 @@ const initialDealLineItems: DealLineItem[] = [
 function StatusBadge({
   children,
   tone = "neutral",
+  outline = false,
 }: {
   children: ReactNode
   tone?: "neutral" | "blue" | "success" | "warning" | "danger"
+  outline?: boolean
 }) {
   return (
     <Badge
       variant="secondary"
       className={cn(
-        "h-5 rounded-full border-0 px-2 text-[11px] font-medium",
-        tone === "neutral" && "bg-muted text-muted-foreground",
-        tone === "blue" && "bg-primary/10 text-primary",
-        tone === "success" && "bg-success/10 text-success",
-        tone === "warning" && "bg-warning/10 text-warning-foreground",
-        tone === "danger" && "bg-destructive/10 text-destructive"
+        "h-5 rounded-full px-2 text-[11px] font-medium",
+        outline ? "border bg-transparent" : "border-0",
+        tone === "neutral" && (outline ? "border-muted-foreground/50 text-muted-foreground" : "bg-muted text-muted-foreground"),
+        tone === "blue" && (outline ? "border-primary/50 text-primary" : "bg-primary/10 text-primary"),
+        tone === "success" && (outline ? "border-success/50 text-success" : "bg-success/10 text-success"),
+        tone === "warning" && (outline ? "border-warning/50 text-warning-foreground" : "bg-warning/10 text-warning-foreground"),
+        tone === "danger" && (outline ? "border-destructive/50 text-destructive" : "bg-destructive/10 text-destructive")
       )}
     >
       {children}
@@ -6389,6 +6392,7 @@ export function DealDetailScreen({
                   </StatusBadge>}
                   <StatusBadge
                     tone={profile.direction === "sales" ? "success" : "blue"}
+                    outline
                   >
                     {directionLabels[profile.direction]}
                   </StatusBadge>
