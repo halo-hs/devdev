@@ -1337,8 +1337,8 @@ export function DealsScreen({
                 ) : (
                   <TableRow>
                     <TableCell colSpan={8} className="p-0 whitespace-normal">
-                      <Empty className="sticky left-0 min-h-40 w-[100cqw] max-w-full">
-                        <EmptyHeader>
+                      <Empty className="sticky left-0 min-h-40 w-[100cqw] max-w-full items-start text-left">
+                        <EmptyHeader className="items-start">
                           <EmptyTitle>
                             {allDeals.length
                               ? "조건에 맞는 거래가 없습니다."

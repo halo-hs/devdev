@@ -1,5 +1,20 @@
 import { expect, test } from "@playwright/test"
 
+test("empty deal table keeps its message visible and left aligned on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto("/erp/deals")
+  await page.getByRole("button", { name: "상세 필터", exact: true }).click()
+  await page.getByPlaceholder("거래명, 번호, 거래처, 품목 검색").fill("없는 거래 검색")
+  const message = page.getByText("조건에 맞는 거래가 없습니다.", { exact: true })
+  await page.getByRole("table", { name: "거래 업무표" }).evaluate(element => element.scrollIntoView({ block: "center", inline: "nearest" }))
+  await expect(message).toBeInViewport()
+  const bounds = await message.boundingBox()
+  expect(bounds).not.toBeNull()
+  expect(bounds!.x).toBeGreaterThanOrEqual(0)
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(390)
+  await expect(message.locator("..")).toHaveCSS("text-align", "left")
+})
+
 test("list filters ETA and counterparty together, updates counts and retains context in pipeline", async ({
   page,
 }) => {
