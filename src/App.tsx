@@ -13434,6 +13434,7 @@ function DocumentReviewSharePanel({
   onReject,
   templateCode,
   documentNumber,
+  documentDirection,
   documentStyle,
   organizationLogo,
   onStyleChange,
@@ -13471,6 +13472,7 @@ function DocumentReviewSharePanel({
   onReject: (approver: DocumentApprover, reason: string) => void
   templateCode: string
   documentNumber: string
+  documentDirection: DocumentDirection | null
   documentStyle: DocumentStyle
   organizationLogo: DocumentLogo | null
   onStyleChange: (style: DocumentStyle) => void
@@ -13960,7 +13962,7 @@ function DocumentReviewSharePanel({
           </div>
           {!documentConfirmed ? (
             <p className="mt-1 text-[11px] text-muted-foreground">
-              {templateTitle} · {documentNumber}.pdf
+              {templateTitle} · {documentNumber}.pdf · {documentDirection === "purchase" ? "구매" : documentDirection === "sales" ? "판매" : "방향 확인 필요"}
             </p>
           ) : null}
         </div>
@@ -15786,6 +15788,7 @@ function ResultScreen({
   ) : (
     <DocumentReviewSharePanel
       documentConfirmed={false}
+      documentDirection={documentDirection}
       qualityAcknowledged={qualityAcknowledged}
       onAcknowledgeQuality={handleDocumentReviewComplete}
       confirmationReady={confirmationReady}
