@@ -3,7 +3,7 @@ import { normalizeDecimalInput, formatScaledDecimal } from "./money"
 
 // Preview adapter contract mirrored from develop-local@7bc36be0 and its
 // pinned backend 8f5cfcfd. Saving reviewed fields never commits a document.
-export type ReviewedField = { value: string; unit?: string }
+export type ReviewedField = { value: string; unit?: string; userEdited?: boolean }
 export type DocumentConnectionEvent = {
   action: "linked" | "relinked" | "unlinked"
   fromDealId?: string
