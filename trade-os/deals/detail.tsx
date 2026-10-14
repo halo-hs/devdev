@@ -1,3 +1,4 @@
+import { Tooltip, TooltipTrigger, TooltipContent } from "@shared/components/ui/tooltip"
 import { DealRefreshContext, useDealRefresh, useDealRefreshController } from "@trade-os/deals/deal-refresh"
 import { PostWriteRefreshNotice } from "@trade-os/components/post-write-refresh-notice"
 import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, type DealDocumentRecord } from "@trade-os/lib/deal-document-actions"
@@ -36,6 +37,7 @@ import {
   FileSearch,
   GripVertical,
   Link2,
+  Unlink,
   LoaderCircle,
   MoreVertical,
   Pencil,
@@ -2602,24 +2604,16 @@ function DealPdf({
           <StatusBadge
             tone={
               slot.status === "검토"
-                ? "warning"
+                ? "blue"
                 : slot.status === "발행" || slot.status === "분석 중"
                   ? "blue"
                   : "success"
             }
           >
-            {slot.status}
+            {slot.status === "검토" ? "확인 전" : slot.status}
           </StatusBadge>
           {canUnlink ? (
-            <Button
-              variant="outline"
-              size="sm"
-              className="shrink-0"
-              onClick={onUnlink}
-            >
-              <Link2 data-icon="inline-start" />
-              거래 연결 해제
-            </Button>
+            <Tooltip><TooltipTrigger asChild><Button variant="outline" size="icon-sm" className="shrink-0" aria-label="거래 연결 해제" onClick={onUnlink}><Unlink /></Button></TooltipTrigger><TooltipContent>거래 연결 해제</TooltipContent></Tooltip>
           ) : null}
           {actions}
           <PdfViewerToolbar
@@ -4253,7 +4247,7 @@ function DocumentsTab({
                 <span
                   className={cn(
                     "size-1.5 rounded-full",
-                    document.file ? "bg-success" : "bg-warning"
+                    document.file ? document.status === "검토" || document.status === "유형 확인 필요" ? "border border-success bg-transparent" : "bg-success" : "bg-warning"
                   )}
                 />
                 {document.type}
@@ -4503,7 +4497,7 @@ function DocumentsTab({
                         <span
                           className={cn(
                             "size-1.5 rounded-full",
-                            isMissing ? "bg-warning" : "bg-success"
+                            isMissing ? "bg-warning" : document.status === "검토" || document.status === "유형 확인 필요" ? "border border-success bg-transparent" : "bg-success"
                           )}
                         />
                         <span>{document.type}</span>
@@ -4615,22 +4609,14 @@ function DocumentsTab({
                             : selected.status === "분석 중"
                               ? "blue"
                               : selected.status === "검토"
-                                ? "warning"
+                                ? "blue"
                                 : "success"
                     }
                   >
-                    {selected.status}
+                    {selected.status === "검토" ? "확인 전" : selected.status}
                   </StatusBadge>
                   {selected.file && canMutate(role) ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0"
-                      onClick={() => setConfirmUnlink(true)}
-                    >
-                      <Link2 data-icon="inline-start" />
-                      거래 연결 해제
-                    </Button>
+                    <Tooltip><TooltipTrigger asChild><Button variant="outline" size="icon-sm" className="shrink-0" aria-label="거래 연결 해제" onClick={() => setConfirmUnlink(true)}><Unlink /></Button></TooltipTrigger><TooltipContent>거래 연결 해제</TooltipContent></Tooltip>
                   ) : null}
                 </div>
               ) : null}

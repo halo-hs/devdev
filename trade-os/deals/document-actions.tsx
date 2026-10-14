@@ -1,12 +1,11 @@
 import { useDealRefresh } from "@trade-os/deals/deal-refresh"
 import { useEffect, useRef, useState } from "react"
-import { FileSearch, MoreVertical, RefreshCw, ArrowRightLeft, Tags } from "lucide-react"
+import { FileSearch, RefreshCw, ArrowRightLeft, Tags } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@shared/components/ui/button"
 import { Input } from "@shared/components/ui/input"
 import { Textarea } from "@shared/components/ui/textarea"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@shared/components/ui/dialog"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@shared/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shared/components/ui/select"
 import { prototypeBackend } from "@trade-os/lib/prototype-backend"
 import { dealDocumentReviewUrl, type DealDocumentRecord, type DocumentMovePreview } from "@trade-os/lib/deal-document-actions"
@@ -105,21 +104,12 @@ export function DealDocumentActions({ document, canWrite, onChanged }: {
     }
   }
   return <>
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button id={`document-actions-${document.id}`} variant="ghost" size="icon-sm" aria-label={`${document.type} 문서 작업`} disabled={busy}>
-          <MoreVertical />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52">
-        {document.state === "needs_review" && document.erpDocumentId && <DropdownMenuItem asChild>
-          <a href={dealDocumentReviewUrl(document)}><FileSearch />검토 화면 열기</a>
-        </DropdownMenuItem>}
-        {document.state === "needs_type" && <DropdownMenuItem onSelect={() => open("type")}><Tags />문서 유형 선택</DropdownMenuItem>}
-        <DropdownMenuItem disabled={processing} onSelect={() => open("replace")}><RefreshCw />파일 교체</DropdownMenuItem>
-        {document.state === "ready" && <DropdownMenuItem onSelect={() => open("move")}><ArrowRightLeft />다른 거래로 이동</DropdownMenuItem>}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex flex-wrap items-center gap-2" role="group" aria-label={`${document.type} 문서 작업`}>
+      {document.state === "needs_review" && document.erpDocumentId && <Button variant="outline" size="sm" asChild><a href={dealDocumentReviewUrl(document)}><FileSearch />검토 화면 열기</a></Button>}
+      {document.state === "needs_type" && <Button variant="outline" size="sm" disabled={busy} onClick={() => open("type")}><Tags />서류 종류 선택</Button>}
+      <Button id={`document-actions-${document.id}`} variant="outline" size="sm" disabled={busy || processing} onClick={() => open("replace")}><RefreshCw />파일 교체</Button>
+      {document.state === "ready" && <Button variant="outline" size="sm" disabled={busy} onClick={() => open("move")}><ArrowRightLeft />다른 거래로 이동</Button>}
+    </div>
     <Dialog open={Boolean(dialog)} onOpenChange={next => { if (!next && !busy) setDialog(null) }}>
       <DialogContent className="sm:max-w-lg" onInteractOutside={event => { if (busy) event.preventDefault() }} onCloseAutoFocus={event => {
         // An accepted replacement updates this record while the dialog closes.
