@@ -283,7 +283,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
             status: "ready",
             syncStatus: current.syncStatus,
             shipments: current.shipments.map((row) =>
-              row.id === shipmentId ? { ...row, ...shipment } : row,
+              row.id === shipmentId ? { ...row, ...shipment, snap_evidence_count: shipment.snap_evidence_count ?? row.snap_evidence_count } : row,
             ),
           };
         });
@@ -585,7 +585,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
       {editing ? <ShipmentConfirmationDialog shipment={editing} canWrite={canRefresh} copy={copy} returnFocus={() => editTrigger.current?.focus()} onReload={async () => { const result = await listAllShipments(getIdToken); const latest = result.shipments.find(row => row.id === editing.id); if (!latest) throw new Error("선적을 찾을 수 없습니다."); return latest; }} onClose={() => setEditing(null)} onSave={async (body) => {
         if (!canRefresh) throw new Error("수정 권한이 없습니다.");
         const { shipment } = await confirmShipment(getIdToken, editing.id, body);
-        setState(current => current.status === "ready" ? { ...current, shipments: current.shipments.map(row => row.id === shipment.id ? shipment : row) } : current);
+        setState(current => current.status === "ready" ? { ...current, shipments: current.shipments.map(row => row.id === shipment.id ? { ...row, ...shipment, snap_evidence_count: shipment.snap_evidence_count ?? row.snap_evidence_count } : row) } : current);
       }} /> : null}
     </div>
   );
