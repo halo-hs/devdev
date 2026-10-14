@@ -471,7 +471,7 @@ export function DealsScreen({
               "거래처",
               "단계",
               "담당자",
-              "기준 금액",
+              "참고 금액",
               "통화",
               "금액 출처",
               "미선적 잔량",
@@ -1075,7 +1075,7 @@ export function DealsScreen({
                     거래번호 / 거래처
                   </TableHead>
                   <TableHead className="w-[13%]">품목 / 주문 이행</TableHead>
-                  <TableHead className="w-[13%]">기준 금액 / 출처</TableHead>
+                  <TableHead className="w-[13%]">참고 금액</TableHead>
                   <TableHead className="w-[17%]">현재 금융</TableHead>
                   <TableHead className="w-[10%]">D-day / ETA</TableHead>
                   <TableHead className="w-[6%]">담당자</TableHead>
