@@ -17163,7 +17163,7 @@ export function App() {
                       }}
                     />
                   ) : screen === "counterparty" ? (
-                    <CounterpartyPrototype onNavigate={navigateTo} />
+                    <CounterpartyPrototype onNavigate={navigateTo} counterpartyId={erpRoute?.params.counterpartyId} role={erpHomeRole} />
                   ) : screen === "snap" ? (
                     <SnapEvidencePrototype onNavigate={navigateTo} />
                   ) : screen === "billing" ? (

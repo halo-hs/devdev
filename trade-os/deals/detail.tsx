@@ -6869,7 +6869,12 @@ export function DealDetailScreen({
                     aria-label="주요 거래 정보"
                     className="space-y-2 px-4 py-3"
                   >
-                    <p className="text-sm font-medium break-words">{mainInformation.counterparty}</p>
+                    <a
+                      href={`/erp/counterparties/${encodeURIComponent(mainInformation.counterparty)}`}
+                      className="inline-block text-sm font-medium text-primary break-words hover:underline"
+                    >
+                      {mainInformation.counterparty}
+                    </a>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <StatusBadge tone="blue">
                         {directionLabels[profile.direction]}
