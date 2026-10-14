@@ -14,6 +14,9 @@ export type Deal = {
   assignee: string
   amount: string
   currency: string
+  direction?: "purchase" | "sales"
+  dDayBasis?: "payment" | "eta" | "etd"
+  requiredDocsMissing?: number
   dday: string
   eta: string
   pending: number
@@ -37,6 +40,9 @@ export const deals: Deal[] = [
   ...statusPreviewDeals,
   {
     id: "DL-260708-01",
+    direction: "purchase",
+    requiredDocsMissing: 1,
+    dDayBasis: "eta",
     title: "7월 알루미늄 스크랩 수입",
     counterparty: "KATAMAN ASIA-PACIFIC PTE LTD",
     primaryItem: "알루미늄 스크랩",
@@ -59,6 +65,9 @@ export const deals: Deal[] = [
   },
   {
     id: "DL-260707-04",
+    direction: "sales",
+    requiredDocsMissing: 0,
+    dDayBasis: "payment",
     title: "ACME 7월 해상운송 계약",
     counterparty: "ACME GmbH",
     primaryItem: "해상운송 서비스",
@@ -80,6 +89,9 @@ export const deals: Deal[] = [
   },
   {
     id: "DL-260704-02",
+    direction: "purchase",
+    requiredDocsMissing: 1,
+    dDayBasis: "payment",
     title: "부산항 산업재 수입",
     counterparty: "Nordic Raw Materials AB",
     primaryItem: "산업용 원자재",
@@ -102,6 +114,8 @@ export const deals: Deal[] = [
   },
   {
     id: "DL-260701-09",
+    direction: "sales",
+    requiredDocsMissing: 0,
     title: "한빛 6월 정산 거래",
     counterparty: "Hanbit Trading Co.",
     primaryItem: "알루미늄 코일",
@@ -122,6 +136,9 @@ export const deals: Deal[] = [
   },
   {
     id: "DL-260629-03",
+    direction: "purchase",
+    requiredDocsMissing: 0,
+    dDayBasis: "payment",
     title: "싱가포르 구리 스크랩 매입",
     counterparty: "Meridian Metals Pte Ltd",
     primaryItem: "구리 스크랩",
@@ -144,6 +161,9 @@ export const deals: Deal[] = [
   },
   {
     id: "DL-260625-07",
+    direction: "purchase",
+    requiredDocsMissing: 0,
+    dDayBasis: "etd",
     title: "일본 내륙운송 발주",
     counterparty: "Sakura Logistics KK",
     primaryItem: "일본 내륙운송 서비스",
@@ -193,6 +213,9 @@ export const deals: Deal[] = [
     },
   ].map((item) => ({
     ...item,
+    direction: "sales" as const,
+    dDayBasis: "etd" as const,
+    requiredDocsMissing: 0,
     itemCount: 1,
     orderLifecycle: "open" as const,
     stage: "shipment" as const,
