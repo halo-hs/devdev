@@ -41,12 +41,13 @@ async function seedLinked(page: Page) {
   await expect(page.getByRole("region", { name: "현재 거래 연결" })).toContainText(source)
 }
 
-test("candidates explain exact matches without auto-linking; explicit selection persists evidence and actor/time", async ({ page }) => {
+test("candidate rows stay concise while selection persists evidence and actor/time", async ({ page }) => {
   await page.goto(path + "/connect")
   const candidate = page.getByRole("radio", { name: new RegExp(source) })
-  await expect(candidate).toContainText("거래처 일치 · ACME GmbH")
-  await expect(candidate).toContainText("금액·통화 일치 · 380,000 USD")
-  await expect(candidate).toContainText("동일 근거의 다른 후보 있음")
+  await expect(candidate).not.toContainText("거래처 일치 · ACME GmbH")
+  await expect(candidate).not.toContainText("금액·통화 일치 · 380,000 USD")
+  await expect(candidate).not.toContainText("동일 근거의 다른 후보 있음")
+  await expect(page.getByText("같은 근거를 충족하는 후보가 여러 건입니다. 거래를 직접 선택해 주세요.")).toBeVisible()
   expect(await state(page)).toBeNull()
   await candidate.click()
   expect(await state(page)).toBeNull()
@@ -60,6 +61,39 @@ test("candidates explain exact matches without auto-linking; explicit selection 
   expect(Number.isFinite(Date.parse(saved.connectionHistory[0].occurredAt))).toBe(true)
   await page.goto(path + "/connect")
   await expect(page.getByRole("region", { name: "현재 거래 연결" })).toContainText("연결 이력 1건")
+})
+
+test("upload started from a deal preselects that deal and allows another choice", async ({ page }) => {
+  await page.goto(`${path}/connect?fromDeal=${encodeURIComponent(source)}`)
+  await expect(page.getByText(`거래 상세에서 올린 문서입니다. ${source} 거래를 먼저 선택했습니다. 다른 거래도 선택할 수 있습니다.`)).toBeVisible()
+  await expect(page.getByRole("radio", { name: new RegExp(source) })).toHaveAttribute("aria-checked", "true")
+  await page.getByRole("radio", { name: new RegExp(target) }).click()
+  await expect(page.getByRole("radio", { name: new RegExp(target) })).toHaveAttribute("aria-checked", "true")
+  await expect(page.getByRole("radio", { name: new RegExp(source) })).toHaveAttribute("aria-checked", "false")
+})
+
+test("undo action returns to the connection impact check", async ({ page }) => {
+  await seedLinked(page)
+  await page.goto(`${path}/connect?undo=1`)
+  await expect(page.getByRole("dialog", { name: "거래 연결 해제" })).toBeVisible()
+  await expect(page.getByRole("dialog", { name: "거래 연결 해제" }).getByLabel("변경 사유")).toBeVisible()
+  expect(new URL(page.url()).searchParams.has("undo")).toBe(false)
+})
+
+test("freight document offers cost registration after connection", async ({ page }) => {
+  const freight = "운임_테스트.pdf"
+  await page.goto("/erp/documents")
+  await page.evaluate(name => localStorage.setItem("ecoya-prototype-upload-queue-v2", JSON.stringify([{
+    name, uploadedAt: "2026.10.14", status: "거래 연결 필요", tone: "warning", stage: "field",
+    documentType: "FREIGHT_INVOICE", pdfReviewCompleted: true,
+  }])), freight)
+  await page.goto(`/erp/documents/upload/${encodeURIComponent(freight)}/connect`)
+  await page.getByRole("radio", { name: new RegExp(source) }).click()
+  await page.getByRole("button", { name: "선택한 거래 연결", exact: true }).click()
+  const dialog = page.getByRole("dialog", { name: "비용 등록" })
+  await expect(dialog).toBeVisible()
+  await dialog.getByRole("button", { name: "나중에" }).click()
+  await page.waitForURL(`**/erp/deals/${source}`)
 })
 
 test("legacy link does not invent audit; relink failure preserves old link and reason; unlink persists after reload", async ({ page }) => {
