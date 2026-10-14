@@ -4,6 +4,7 @@ import { BusinessListToolbar, BusinessFilterSearch } from "@shared/components/bu
 import { RefreshCw, Pencil } from "lucide-react";
 import { ShipmentConfirmationDialog } from "./ShipmentConfirmationDialog";
 import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
+import { carrierTrackingAction } from "./carrierSites";
 import Link from "@trade-os/operations/compat/link";
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
@@ -508,6 +509,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                 const refreshing = refreshState.status === "pending" && refreshState.shipmentId === ship.id;
                 const refreshError = refreshState.status === "error" && refreshState.shipmentId === ship.id ? refreshState.message : null;
                 const fetchedAt = ship.provider_fetched_at || ship.last_carrier_sync_at;
+                const trackingAction = carrierTrackingAction(ship.carrier);
                 return (
                   <HostTableRow key={ship.id} data-shipment-id={ship.id} aria-busy={refreshing} data-refresh-state={refreshError ? "error" : refreshing ? "pending" : "ready"}>
                     <HostTableCell>
@@ -548,13 +550,25 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                       {delayed || arriving ? <div className="mt-1 text-body-13 text-text-muted">{copy.status[ship.status] ?? ship.status}</div> : null}
                     </HostTableCell>
                     <HostTableCell>
-                      {canRefresh ? <div className="flex gap-2">
-                        <HostButton title="추적 정보 갱신" aria-label={refreshing ? copy.refreshingTracking : copy.refreshTracking} disabled={refreshState.status === "pending"} onClick={() => void refreshTracking(ship.id)} size="sm" type="button" variant="outline">
-                          <RefreshCw aria-hidden="true" className={refreshing ? "size-4 animate-spin" : "size-4"} />{refreshing ? "갱신 중" : "갱신"}
-                        </HostButton>
-                        <HostButton title="일정 및 운송 상태 수정" aria-label="일정 및 운송 상태 수정" disabled={refreshState.status === "pending"} onClick={event => { editTrigger.current = event.currentTarget; setEditing(ship); }} size="sm" type="button" variant="outline"><Pencil aria-hidden="true" className="size-4" />수정</HostButton>
-                      </div> : <span className="text-body-13 text-text-muted">조회만 가능</span>}
+                      <div className="flex flex-wrap gap-2">
+                        {trackingAction.kind === "refresh" && canRefresh ? (
+                          <HostButton title="추적 정보 갱신" aria-label={refreshing ? copy.refreshingTracking : copy.refreshTracking} disabled={refreshState.status === "pending"} onClick={() => void refreshTracking(ship.id)} size="sm" type="button" variant="outline">
+                            <RefreshCw aria-hidden="true" className={refreshing ? "size-4 animate-spin" : "size-4"} />{refreshing ? "갱신 중" : "갱신"}
+                          </HostButton>
+                        ) : null}
+                        {trackingAction.kind === "site" ? (
+                          <HostButton variant="outline" size="sm" asChild><a href={trackingAction.href} target="_blank" rel="noopener noreferrer">선사 사이트 ↗</a></HostButton>
+                        ) : null}
+                        {canRefresh ? (
+                          <HostButton title="일정 및 운송 상태 수정" aria-label="일정 및 운송 상태 수정" disabled={refreshState.status === "pending"} onClick={event => { editTrigger.current = event.currentTarget; setEditing(ship); }} size="sm" type="button" variant="outline"><Pencil aria-hidden="true" className="size-4" />수정</HostButton>
+                        ) : null}
+                      </div>
+                      {trackingAction.kind === "unknown" ? <p className="mt-1 text-body-13 text-text-muted">선사 확인 필요</p> : null}
+                      {ship.tracking_health === "stale" || ship.tracking_health === "fetch_failed" ? (
+                        <p className={`mt-1 text-body-13 ${ship.tracking_health === "stale" ? "text-status-warning" : "text-status-danger"}`}>{ship.tracking_health === "stale" ? "조회 정보 오래됨" : "선사 조회 실패"}</p>
+                      ) : null}
                       {fetchedAt ? <p className="mt-1 text-body-13 text-text-muted">{copy.source.carrierAt.replace("{at}", formatDateTime(fetchedAt, dateTag))}</p> : null}
+                      {!fetchedAt && (ship.tracking_health === "stale" || ship.tracking_health === "fetch_failed") ? <p className="mt-1 text-body-13 text-text-muted">마지막 조회 기록 없음</p> : null}
                       {refreshError ? <p className="mt-1 text-body-13 text-status-danger" role="alert">{refreshError}</p> : null}
                     </HostTableCell>
                   </HostTableRow>
