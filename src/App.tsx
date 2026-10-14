@@ -432,6 +432,7 @@ type RecentDocument = {
   name: string
   uploadedAt: string
   pages?: number
+  sourcePages?: Record<string, number>
   dealLabel?: string
   status: string
   tone: Tone
@@ -1635,6 +1636,8 @@ const recentDocuments: RecentDocument[] = [
   },
   {
     name: "인보이스_2607_003.pdf",
+    // Explicit source locations for this two-page preview fixture only.
+    sourcePages: { buyer: 1, seller: 1, invoice_number: 1, invoice_date: 1, item_name: 1, quantity: 1 },
     uploadedAt: "2026.08.27 14:32",
     pages: 2,
     status: "검토 대기",
@@ -3042,6 +3045,7 @@ function DocumentStage({
   reviewGate,
   showAiDetection,
   pageCountOverride,
+  requestedPage,
   previewContent,
   paperClassName,
 }: {
@@ -3071,6 +3075,7 @@ function DocumentStage({
   }
   showAiDetection?: boolean
   pageCountOverride?: number
+  requestedPage?: { page: number }
   previewContent?: ReactNode | ((page: number, pageCount: number) => ReactNode)
   paperClassName?: string
 }) {
@@ -3080,6 +3085,9 @@ function DocumentStage({
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [pdfGenerating, setPdfGenerating] = useState(false)
   const pageCount = pageCountOverride ?? (reviewMode || result ? 2 : 1)
+  useEffect(() => {
+    if (requestedPage) setPage(Math.min(pageCount, Math.max(1, requestedPage.page)))
+  }, [requestedPage, pageCount])
   const aiDetectionVisible = showAiDetection ?? !result
   const controlsAtTop = controlsPlacement
     ? controlsPlacement === "top"
@@ -4798,7 +4806,7 @@ function InboxScreen({
     const document = selectedDocumentRef.current
     const original = reviewFieldsForDocument(document.documentType).find((field) => field.key === key)
     const current = document.reviewedFields?.[key] ?? { value: original?.value ?? "", unit: original?.unit }
-    const next = { ...document, pdfReviewCompleted: false, reviewedFields: { ...document.reviewedFields, [key]: { ...current, ...patch } } }
+    const next = { ...document, pdfReviewCompleted: false, reviewedFields: { ...document.reviewedFields, [key]: { ...current, ...patch, userEdited: true } } }
     selectedDocumentRef.current = next
     setUploadDocuments((documents) => documents.map((item) => item.name === document.name ? next : item))
   }
@@ -4962,7 +4970,7 @@ function InboxScreen({
       prototypeBackend.tradeDocuments.saveFields({
         id: dealReviewDocument && savingDocument.dealDocumentId === dealReviewDocument.id
           ? `${dealReviewDocument.id}:${dealReviewDocument.revision}` : savingDocument.name,
-        fields: Object.fromEntries(resolvedReviewFields(savingDocument).map((field) => [field.key, { value: field.value, unit: field.unit }])) ,
+        fields: Object.fromEntries(resolvedReviewFields(savingDocument).map((field) => [field.key, { value: field.value, unit: field.unit, userEdited: field.userEdited ?? false }])) ,
       }),
       new Promise<void>((resolve) => window.setTimeout(resolve, 800)),
     ])
@@ -5251,6 +5259,7 @@ function InboxScreen({
               ...document,
               documentType,
               reviewedFields: {},
+              sourcePages: undefined,
               stage: "field",
               status: "검토 대기",
               tone: "warning",
@@ -6093,6 +6102,14 @@ function DocumentReviewWorkspace({
 }) {
   const typeUnresolved = isUploadDocumentTypeUnresolved(document)
   const isCompact = useIsMobile()
+  const [requestedPage, setRequestedPage] = useState<{ page: number }>()
+  const previewRef = useRef<HTMLElement>(null)
+  useEffect(() => setRequestedPage(undefined), [document.name, document.documentType])
+  const showSourcePage = (page: number) => {
+    setRequestedPage({ page })
+    onMobilePaneChange("preview")
+    requestAnimationFrame(() => previewRef.current?.focus())
+  }
 
   const fieldsPanel = (
     <section
@@ -6152,6 +6169,8 @@ function DocumentReviewWorkspace({
                 documentType={document.documentType}
                 onAutoSave={onAutoSave}
                 reviewedFields={document.reviewedFields}
+                sourcePages={document.sourcePages}
+                onSourcePage={showSourcePage}
                 onReviewedFieldChange={onReviewedFieldChange}
               />
               <UploadFieldHistory />
@@ -6174,6 +6193,7 @@ function DocumentReviewWorkspace({
   const pdfPreviewPanel = (
     <section
       aria-label="PDF 원문"
+      ref={previewRef}
       tabIndex={-1}
       className={cn(
         "relative h-full min-h-0 flex-col overflow-hidden lg:flex",
@@ -6189,8 +6209,10 @@ function DocumentReviewWorkspace({
         <ChevronLeft data-icon="inline-start" />
         {step === "deal" ? "거래 연결" : "필드 검토"}
       </Button>
-      {document.fileDataUrl ? <iframe title={`${document.name} 원본 PDF`} src={document.fileDataUrl} className="min-h-[480px] w-full flex-1 border-0" /> : <DocumentStage
+      {document.fileDataUrl ? <iframe title={`${document.name} 원본 PDF`} src={requestedPage ? `${document.fileDataUrl}#page=${requestedPage.page}` : document.fileDataUrl} className="min-h-[480px] w-full flex-1 border-0" /> : <DocumentStage
         downloadName={document.name}
+        requestedPage={requestedPage}
+        pageCountOverride={document.pages}
         previewContent={document.dealDocumentId ? <div className="p-6 text-sm">
           <h2 className="mb-4 text-xl font-semibold">{dealDocumentPreviews[document.documentType]?.title ?? uploadDocumentTypeLabel(document.documentType)}</h2>
           <p className="mb-6 break-all text-muted-foreground">{document.name}</p>
@@ -6442,6 +6464,7 @@ type ReviewField = {
   unit?: string
   required?: boolean
   warningOnly?: boolean
+  userEdited?: boolean
 }
 
 function resolvedReviewFields(document: Pick<RecentDocument, "documentType" | "reviewedFields">): ReviewField[] {
@@ -6449,7 +6472,8 @@ function resolvedReviewFields(document: Pick<RecentDocument, "documentType" | "r
     const reviewed = document.reviewedFields?.[field.key]
     if (!reviewed) return field
     const missing = field.required && !reviewed.value.trim()
-    return { ...field, ...reviewed, tone: missing ? "danger" : "success", status: missing ? "누락" : "검토됨" }
+    const userEdited = reviewed.userEdited ?? (reviewed.value !== field.value || reviewed.unit !== field.unit)
+    return { ...field, ...reviewed, userEdited, confidence: userEdited ? "사용자 입력" : field.confidence, comment: userEdited ? "사용자가 직접 입력한 값입니다" : field.comment, tone: missing ? "danger" : "success", status: missing ? "누락" : "검토됨" }
   })
 }
 
@@ -6748,11 +6772,15 @@ function OcrFieldReviewList({
   documentType,
   onAutoSave,
   reviewedFields,
+  sourcePages,
+  onSourcePage,
   onReviewedFieldChange,
 }: {
   mode: "compare" | "deal"
   documentType: RecentDocument["documentType"]
   onAutoSave: (phase?: "pending" | "commit") => void
+  sourcePages?: Record<string, number>
+  onSourcePage: (page: number) => void
   reviewedFields?: Record<string, ReviewedField>
   onReviewedFieldChange: (key: string, patch: Partial<ReviewedField>) => void
 }) {
@@ -6784,7 +6812,12 @@ function OcrFieldReviewList({
               htmlFor={`upload-field-${field.key}`}
               label={field.label}
               badge={<ToneBadge tone={field.tone}>{field.status}</ToneBadge>}
-              message={`${field.confidence} · ${field.comment}`}
+              sourceAction={sourcePages?.[field.key] ? (
+                <Button variant="ghost" size="sm" onClick={() => onSourcePage(sourcePages[field.key])}>
+                  원본 보기 · {sourcePages[field.key]}쪽
+                </Button>
+              ) : undefined}
+              message={field.userEdited ? field.comment : `${field.confidence} · ${field.comment}`}
               messageId={`upload-field-${field.key}-message`}
               tone={danger ? "danger" : warning ? "warning" : "neutral"}
               className={cn(
