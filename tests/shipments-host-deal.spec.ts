@@ -172,3 +172,41 @@ test('tracking updates reach the existing deal shipment section and summary acro
   await expect(detail.getByRole('complementary', { name: '거래 현황' })).toContainText('2026-09-30')
   await detail.close()
 })
+
+for (const width of [1440, 390]) {
+  test(`shipment edit actions and status confirmation record ${width}`, async ({ page }) => {
+    await page.setViewportSize({width,height:900})
+    await mockShipmentSession(page)
+    let row = {...original, edit_token:'first', confirmed_status:'departed', confirmed_status_by:'담당자', confirmed_status_at:'2026-10-14T06:30:00Z'}
+    await page.route('**/__reference3030/api/platform/trade/shipments**', async route => {
+      if (route.request().method() === 'PATCH') {
+        expect(route.request().postDataJSON()).toEqual({expected_edit_token:'first',confirmed_status:'arrived'})
+        row = {...row,status:'arrived',confirmed_status:'arrived',edit_token:'second'}
+        await route.fulfill({json:{shipment:row}})
+      } else await route.fulfill({json:{shipments:[row],sync_status:'ok'}})
+    })
+    await page.goto('/erp/shipments')
+    const edit = page.getByRole('button',{name:'일정 및 운송 상태 수정',exact:true})
+    await expect(edit).toHaveText('수정')
+    await expect(page.getByRole('button',{name:'추적 정보 갱신',exact:true})).toHaveText('갱신')
+    await edit.click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('운송 상태 최근 확인: 담당자')
+    await dialog.screenshot({path:`/tmp/ship4-dialog-${width}.png`})
+    await dialog.getByRole('combobox').click()
+    await page.getByRole('option',{name:'도착',exact:true}).click()
+    await dialog.getByRole('button',{name:'변경사항 저장',exact:true}).click()
+    await expect(dialog).toHaveCount(0)
+    await expect(edit).toBeFocused()
+  })
+}
+
+test('read-only shipment shows status confirmation without date evidence', async ({page}) => {
+  await mockShipmentSession(page,false)
+  await page.route('**/trade/shipments**',route=>route.fulfill({json:{shipments:[{...original,eta:null,etd:null,confirmed_status:'departed',confirmed_status_by:'조회 가능한 담당자',confirmed_status_at:'2026-10-14T06:30:00Z'}]}}))
+  await page.goto('/erp/shipments')
+  await expect(page.getByRole('button',{name:'일정 및 운송 상태 수정'})).toHaveCount(0)
+  await expect(page.getByRole('button',{name:'추적 정보 갱신'})).toHaveCount(0)
+  await page.getByText('일정 근거',{exact:true}).click()
+  await expect(page.getByText(/운송 상태 최근 확인: 조회 가능한 담당자/)).toBeVisible()
+})

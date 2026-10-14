@@ -1,7 +1,7 @@
 import captured from './responses.json'
 import reportFixtures from './reports.json'
 import { deals } from '@trade-os/lib/prototype-deals'
-import type { Shipment } from '../lib/api/shipments'
+import type { Shipment, ShipmentConfirmation } from '../lib/api/shipments'
 import type { MonthClose, MonthCloseRequest, MonthCloseReopenRequest, MonthCloseSnapshotV1 } from '../lib/api/reports'
 import { ApiError } from '../lib/api/client'
 
@@ -29,6 +29,7 @@ const seedShipments: Shipment[] = Array.from({ length: 14 }, (_, index) => {
     carrier: index % 2 ? 'HMM' : 'MSC', vessel: index % 2 ? 'Demo Ocean' : 'Demo Pacific',
     pol: index % 2 ? 'SGSIN' : 'KRPUS', pod: index % 2 ? 'KRPUS' : 'DEHAM',
     etd: date(-10), eta: date(index === 0 ? -2 : index < 5 ? 2 : index),
+    edit_token: `shipment-${index}-initial`,
     status: index > 11 ? 'arrived' : 'departed', source: 'manual',
   }
 })
@@ -90,6 +91,7 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
   let value: unknown
   if (method !== 'GET') {
     const match = path.match(/^\/trade\/shipments\/([^/]+)\/refresh-tracking$/)
+    const confirmationMatch = path.match(/^\/trade\/shipments\/([^/]+)\/confirmation$/)
     const reopenMatch = path.match(/^\/erp\/reports\/month-closes\/([^/]+)\/reopen$/)
     if (method === 'POST' && path === '/erp/reports/month-close') {
       const { period, note } = requestBody<MonthCloseRequest>(init)
@@ -118,10 +120,30 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
       const reopened: MonthClose = { ...existing, reopened: true, reopened_at: new Date().toISOString(), reopened_by: demoUser, reopen_reason: reason.trim() }
       saveMonthCloses(rows.map(row => row.id === existing.id ? reopened : row))
       value = reopened
+    } else if (method === 'PATCH' && confirmationMatch) {
+      const current = shipments().find(row => row.id === confirmationMatch[1])
+      if (!current) throw new ApiError({status:404, code:'TRADE_SHIPMENT_NOT_FOUND', message:'선적을 찾을 수 없습니다.'})
+      const body = requestBody<ShipmentConfirmation>(init)
+      if (body.expected_edit_token !== current.edit_token) throw new ApiError({status:409, code:'TRADE_SHIPMENT_EDIT_CONFLICT', message:'다른 사용자가 수정했습니다.'})
+      const saved = {...current, edit_token: crypto.randomUUID()}
+      const now = new Date().toISOString()
+      for (const field of ['confirmed_eta', 'confirmed_etd'] as const) {
+        if (body[field] !== undefined) {
+          saved[field] = body[field]
+          saved[field === 'confirmed_eta' ? 'eta' : 'etd'] = body[field] ?? current[field === 'confirmed_eta' ? 'provider_eta' : 'provider_etd'] ?? null
+          saved.confirmed_by = 'ECOYA Demo'; saved.confirmed_at = now; saved.source = 'manual'
+        }
+      }
+      if (body.confirmed_status !== undefined) {
+        saved.status = body.confirmed_status || 'unknown'; saved.confirmed_status = body.confirmed_status
+        saved.confirmed_status_by = 'ECOYA Demo'; saved.confirmed_status_at = now
+      }
+      localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(shipments().map(row => [row.id, row.id === saved.id ? saved : row]))))
+      value = {shipment:saved}
     } else if (method === 'POST' && match) {
       const current = shipments().find(row => row.id === match[1])
       if (!current) throw new Error('예시 선적을 찾을 수 없습니다.')
-      const refreshed: Shipment = { ...current, eta: current.confirmed_eta || date(3), provider_eta: date(3), provider_fetched_at: new Date().toISOString(), last_carrier_sync_at: new Date().toISOString(), status: current.status === 'arrived' ? 'arrived' : 'loaded', source: 'carrier' }
+      const refreshed: Shipment = { ...current, eta: current.confirmed_eta || date(3), provider_eta: date(3), provider_fetched_at: new Date().toISOString(), last_carrier_sync_at: new Date().toISOString(), status: current.confirmed_status || (current.status === 'arrived' ? 'arrived' : 'loaded'), source: 'carrier' }
       // Store IDs and small synthetic records only. Other tabs re-read this same state.
       const saved = Object.fromEntries(shipments().map(row => [row.id, row]))
       saved[current.id] = refreshed

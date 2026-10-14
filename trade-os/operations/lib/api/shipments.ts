@@ -1,5 +1,5 @@
 import { publishShipmentUpdate } from "../shipmentUpdates";
-import { apiRequest, DEFAULT_PLATFORM_API_BASE_URL } from "./client";
+import { ApiError, apiRequest, DEFAULT_PLATFORM_API_BASE_URL } from "./client";
 import { withRetry } from "./retry";
 
 // M4/R-18 shipment tracking client. ECOYA does not track carriers itself — it
@@ -34,6 +34,10 @@ export type Shipment = {
   provider_fetched_at?: string | null;
   confirmed_eta?: string | null;
   confirmed_etd?: string | null;
+  edit_token?: string;
+  confirmed_status?: ShipmentStatus | null;
+  confirmed_status_at?: string | null;
+  confirmed_status_by?: string | null;
   confirmed_by?: string | null;
   confirmed_at?: string | null;
   status: ShipmentStatus;
@@ -216,4 +220,29 @@ export async function refreshShipmentTracking(
   );
   publishShipmentUpdate({ shipmentId: result.shipment.id, dealId: result.shipment.deal_id });
   return result;
+}
+
+export type ShipmentConfirmation = {
+  expected_edit_token: string;
+  confirmed_eta?: string | null;
+  confirmed_etd?: string | null;
+  confirmed_status?: ShipmentStatus | null;
+};
+
+export async function confirmShipment(
+  getIdToken: () => Promise<string>,
+  shipmentId: string,
+  body: ShipmentConfirmation,
+): Promise<{ shipment: Shipment }> {
+  const response = await apiRequest<{ shipment: Shipment }>(
+    apiPath(`/trade/shipments/${encodeURIComponent(shipmentId)}/confirmation`),
+    { baseUrl: apiBaseUrl(), getIdToken, init: { method: "PATCH", body: JSON.stringify(body) } },
+  );
+  if (!response?.shipment || response.shipment.id !== shipmentId || typeof response.shipment.edit_token !== "string" || !response.shipment.edit_token ||
+      !["unknown", "booked", "loaded", "departed", "arrived", "delivered"].includes(response.shipment.status) ||
+      !["document", "manual", "carrier"].includes(response.shipment.source)) {
+    throw new ApiError({ status: 502, code: "SHIPMENT_CONFIRMATION_INVALID_RESPONSE", message: "Invalid shipment confirmation response" });
+  }
+  publishShipmentUpdate({ shipmentId: response.shipment.id, dealId: response.shipment.deal_id });
+  return response;
 }

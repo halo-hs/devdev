@@ -1,6 +1,9 @@
 "use client";
 import { BusinessListToolbar, BusinessFilterSearch } from "@shared/components/business-filters";
 
+import { RefreshCw, Pencil } from "lucide-react";
+import { ShipmentConfirmationDialog } from "./ShipmentConfirmationDialog";
+import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
 import Link from "@trade-os/operations/compat/link";
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
@@ -13,6 +16,7 @@ import { Button } from "@trade-os/operations/components/ui/button";
 import { usePlatformSession } from "@trade-os/operations/session/PlatformSessionContext";
 import { ApiError } from "@trade-os/operations/lib/api/client";
 import {
+  confirmShipment,
   effectiveShipmentEta,
   effectiveShipmentEtd,
   listAllShipments,
@@ -102,6 +106,8 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
   const dateTag = useLocaleTag();
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [refreshState, setRefreshState] = useState<RefreshState>({ status: "idle" });
+  const editTrigger = useRef<HTMLButtonElement | null>(null);
+  const [editing, setEditing] = useState<Shipment | null>(null);
   const [q, setQ] = useState("");
   const [kind, setKind] = useState<FilterKind>("all");
   const tabsId = useId();
@@ -516,13 +522,14 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                     <HostTableCell>
                       <div className="tabular-nums">{effectiveEtd ? formatDate(effectiveEtd, dateTag) : "—"} / {effectiveEta ? formatDate(effectiveEta, dateTag) : "—"}</div>
                       <div className="mt-1 text-body-13 text-text-muted">{ship.confirmed_eta || ship.confirmed_etd ? "확정 일정 기준" : copy.source[ship.source]}{dday !== null ? ` · ${ddayLabel(dday)}` : ""}</div>
-                      {ship.confirmed_eta || ship.provider_eta || ship.confirmed_etd || ship.provider_etd ? (
+                      {ship.confirmed_eta || ship.provider_eta || ship.confirmed_etd || ship.provider_etd || ship.confirmed_status_at || ship.confirmed_status_by ? (
                         <details className="reference-shipment-date-details text-body-13 text-text-muted" data-ui="shipment-eta-basis">
                           <summary>일정 근거</summary>
                           {ship.confirmed_etd ? <p>확정 ETD {formatDate(ship.confirmed_etd, dateTag)}</p> : null}
                           {ship.confirmed_eta ? <p>확정 ETA {formatDate(ship.confirmed_eta, dateTag)}</p> : null}
                           {ship.provider_etd ? <p>선사 ETD {formatDate(ship.provider_etd, dateTag)}</p> : null}
                           {ship.provider_eta ? <p>선사 ETA {formatDate(ship.provider_eta, dateTag)}</p> : null}
+                          <ShipmentConfirmationRecord shipment={ship} />
                           {ship.confirmed_at ? <p>{copy.source.manualAt.replace("{at}", formatDateTime(ship.confirmed_at, dateTag))}</p> : null}
                           {ship.confirmed_by ? <p>{copy.source.manualBy.replace("{by}", ship.confirmed_by)}</p> : null}
                         </details>
@@ -541,9 +548,12 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                       {delayed || arriving ? <div className="mt-1 text-body-13 text-text-muted">{copy.status[ship.status] ?? ship.status}</div> : null}
                     </HostTableCell>
                     <HostTableCell>
-                      {canRefresh ? <HostButton aria-label={refreshing ? copy.refreshingTracking : copy.refreshTracking} disabled={refreshState.status === "pending"} onClick={() => void refreshTracking(ship.id)} size="sm" type="button" variant="outline">
-                        {refreshing ? copy.refreshingTracking : copy.refreshTracking}
-                      </HostButton> : <span className="text-body-13 text-text-muted">조회만 가능</span>}
+                      {canRefresh ? <div className="flex gap-2">
+                        <HostButton title="추적 정보 갱신" aria-label={refreshing ? copy.refreshingTracking : copy.refreshTracking} disabled={refreshState.status === "pending"} onClick={() => void refreshTracking(ship.id)} size="sm" type="button" variant="outline">
+                          <RefreshCw aria-hidden="true" className={refreshing ? "size-4 animate-spin" : "size-4"} />{refreshing ? "갱신 중" : "갱신"}
+                        </HostButton>
+                        <HostButton title="일정 및 운송 상태 수정" aria-label="일정 및 운송 상태 수정" disabled={refreshState.status === "pending"} onClick={event => { editTrigger.current = event.currentTarget; setEditing(ship); }} size="sm" type="button" variant="outline"><Pencil aria-hidden="true" className="size-4" />수정</HostButton>
+                      </div> : <span className="text-body-13 text-text-muted">조회만 가능</span>}
                       {fetchedAt ? <p className="mt-1 text-body-13 text-text-muted">{copy.source.carrierAt.replace("{at}", formatDateTime(fetchedAt, dateTag))}</p> : null}
                       {refreshError ? <p className="mt-1 text-body-13 text-status-danger" role="alert">{refreshError}</p> : null}
                     </HostTableCell>
@@ -556,6 +566,11 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
         ))
       )}
       </div>
+      {editing ? <ShipmentConfirmationDialog shipment={editing} canWrite={canRefresh} copy={copy} returnFocus={() => editTrigger.current?.focus()} onReload={async () => { const result = await listAllShipments(getIdToken); const latest = result.shipments.find(row => row.id === editing.id); if (!latest) throw new Error("선적을 찾을 수 없습니다."); return latest; }} onClose={() => setEditing(null)} onSave={async (body) => {
+        if (!canRefresh) throw new Error("수정 권한이 없습니다.");
+        const { shipment } = await confirmShipment(getIdToken, editing.id, body);
+        setState(current => current.status === "ready" ? { ...current, shipments: current.shipments.map(row => row.id === shipment.id ? shipment : row) } : current);
+      }} /> : null}
     </div>
   );
 }
