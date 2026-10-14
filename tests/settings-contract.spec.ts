@@ -578,6 +578,10 @@ test("AI usage keeps legacy routes and never invents Organization totals", async
     await content.getByLabel("조회 기간", { exact: true }).fill("2020-01")
     await expect(content.getByText("확인 필요", { exact: true })).toHaveCount(2)
   }
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto("/erp/settings?section=trade-usage")
+  await expect(page.getByRole("heading", { name: "AI 사용량", exact: true })).toBeVisible()
+  await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390)
 })
 
 test("SNAP localization only offers its supported languages and searchable timezones", async ({ page }) => {
