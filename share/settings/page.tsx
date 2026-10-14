@@ -210,7 +210,7 @@ function PageHeading({
     <header className="mb-7 flex items-start justify-between gap-5 border-b pb-6">
       <div className="min-w-0 flex-1">
         <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-        <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground">
+        <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground break-keep [overflow-wrap:anywhere]">
           {description}
         </p>
       </div>
@@ -236,7 +236,7 @@ function SettingsSection({
         <div>
         <h2 className="text-base font-semibold">{title}</h2>
           {description ? (
-            <p className="mt-1 text-sm leading-5 text-muted-foreground">
+            <p className="mt-1 text-sm leading-5 text-muted-foreground break-keep [overflow-wrap:anywhere]">
               {description}
             </p>
           ) : null}
@@ -265,7 +265,7 @@ function SettingRow({
     <div className={`grid gap-3 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 md:grid-cols-[minmax(0,1fr)_minmax(220px,320px)] md:items-center md:gap-8 ${inlineControl ? "grid-cols-[minmax(0,1fr)_auto] items-center" : ""}`}>
       <div className="min-w-0">
         <p className="text-sm font-medium">{label}</p>
-        {description ? <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p> : null}
+        {description ? <p className="mt-1 text-xs leading-5 text-muted-foreground break-keep [overflow-wrap:anywhere]">{description}</p> : null}
       </div>
       <div className="min-w-0 md:justify-self-end md:w-full">{children}</div>
     </div>
