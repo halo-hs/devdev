@@ -42,6 +42,7 @@ export type Shipment = {
   confirmed_at?: string | null;
   status: ShipmentStatus;
   tracking_provider?: string | null;
+  tracking_health?: "ok" | "stale" | "unsupported" | "fetch_failed" | (string & {});
   last_carrier_sync_at?: string | null;
   source: "document" | "manual" | "carrier";
   // Deal context (D2): real-world monitoring is per PO/Sales Contract — one
