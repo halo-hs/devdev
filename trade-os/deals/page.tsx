@@ -103,6 +103,15 @@ import {
 
 type DealsRole = "owner" | "admin" | "member"
 
+function dDayBasisLabel(basis: Deal["dDayBasis"]) {
+  switch (basis) {
+    case "payment": return "결제"
+    case "eta": return "ETA"
+    case "etd": return "ETD"
+    default: return ""
+  }
+}
+
 const stageLabels: Record<DealStage, string> = {
   contract: "계약",
   shipment: "선적",
@@ -475,6 +484,9 @@ export function DealsScreen({
               "통화",
               "금액 출처",
               "미선적 잔량",
+              "D-day",
+              "D-day 기준",
+              "ETA",
             ],
             ...filtered.map((deal) => {
               const ref = referenceAmount(deal.id)
@@ -488,6 +500,9 @@ export function DealsScreen({
                 ref?.currency ?? deal.currency,
                 ref?.document ?? "",
                 deal.remaining ?? "",
+                deal.dday,
+                dDayBasisLabel(deal.dDayBasis),
+                deal.eta.replaceAll(".", "-"),
               ]
             }),
           ]
@@ -1240,6 +1255,7 @@ export function DealsScreen({
                           >
                             {deal.dday}
                           </strong>
+                          {dDayBasisLabel(deal.dDayBasis) ? <span className="ml-1.5 text-xs text-muted-foreground">{dDayBasisLabel(deal.dDayBasis)}</span> : null}
                           <small className="mt-1 block text-muted-foreground">
                             ETA {deal.eta.replaceAll(".", "-")}
                           </small>
@@ -1267,6 +1283,8 @@ export function DealsScreen({
                                 : " 진행"}
                             </StatusBadge>
                             <div className="mt-1.5 space-y-1 text-xs text-muted-foreground">
+                              <p>{deal.direction === "sales" ? "매출" : deal.direction === "purchase" ? "매입" : "방향 확인 필요"}</p>
+                              {Boolean(deal.requiredDocsMissing) && <p className="text-warning-foreground">서류 미비 {deal.requiredDocsMissing}건</p>}
                               {dealStateDetails(deal).map((detail) => (
                                 <p key={detail}>{detail}</p>
                               ))}
@@ -1287,7 +1305,7 @@ export function DealsScreen({
                             </button>
                             {deal.risks.length > 0 && (
                               <small className="mt-1 block text-warning-foreground">
-                                {deal.risks
+                                리스크 {deal.risks.length}건 · {deal.risks
                                   .map((risk) => riskLabels[risk])
                                   .join(" · ")}
                               </small>
