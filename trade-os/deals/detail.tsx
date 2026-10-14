@@ -27,6 +27,7 @@ import { createPortal } from "react-dom"
 import { toast } from "sonner"
 import {
   AlertTriangle,
+  Archive,
   ArrowUpRight,
   Check,
   ChevronDown,
@@ -229,7 +230,7 @@ type DealNoteItem = {
   actor: string
   time: string
 }
-type DialogKind = "issue" | "delete" | null
+type DialogKind = "issue" | "archive" | null
 type OrderState = "open" | "closed" | "short_closed" | "cancelled"
 type OrderAction =
   "close" | "short_close" | "cancel" | "reopen" | null
@@ -5935,7 +5936,7 @@ export function DealDetailScreen({
   const [dialog, setDialog] = useState<DialogKind>(null)
   const [issueType, setIssueType] = useState("payment_risk")
   const [issueNote, setIssueNote] = useState("")
-  const [deleted, setDeleted] = useState(false)
+  const [archived, setArchived] = useState(false)
   const [failedPanel, setFailedPanel] = useState<Tab | null>(null)
   const refresh = useDealRefreshController(dealId, role)
   const refreshing = refresh.busy
@@ -6250,14 +6251,14 @@ export function DealDetailScreen({
         </div>
       </div>
     )
-  if (deleted)
+  if (archived)
     return (
       <div className="grid h-full place-items-center bg-background">
         <div className="text-center">
           <Check className="mx-auto size-8 text-success" />
-          <h1 className="mt-4 text-xl font-semibold">거래가 삭제되었습니다</h1>
+          <h1 className="mt-4 text-xl font-semibold">거래가 보관되었습니다</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            연결 문서는 삭제되지 않고 미배정 문서로 돌아갔습니다.
+            연결된 문서와 거래 이력은 유지됩니다.
           </p>
           <Button className="mt-4" onClick={onBack}>
             거래 목록으로
@@ -6710,12 +6711,11 @@ export function DealDetailScreen({
                   </DropdownMenuItem>
                   {role === "owner" ? (
                     <DropdownMenuItem
-                      variant="destructive"
                       disabled={settled}
-                      onClick={() => setDialog("delete")}
+                      onClick={() => setDialog("archive")}
                     >
-                      <Trash2 />
-                      {settled ? "정산 완료 거래 삭제 불가" : "거래 삭제"}
+                      <Archive />
+                      {settled ? "정산 완료 거래 보관 불가" : "보관"}
                     </DropdownMenuItem>
                   ) : null}
                 </DropdownMenuContent>
@@ -7091,19 +7091,18 @@ export function DealDetailScreen({
           </Field>
         </ActionDialog>
       ) : null}
-      {dialog === "delete" ? (
+      {dialog === "archive" ? (
         <ActionDialog
-          title="거래 삭제"
-          description="연결 문서는 삭제되지 않고 미배정 문서로 돌아갑니다. 거래의 대조·정산·공유 정보는 더 이상 표시되지 않습니다."
-          confirmLabel="거래 삭제"
-          destructive
+          title="이 거래를 보관할까요?"
+          description="진행 중인 목록에서 제외됩니다. 연결된 문서와 거래 이력은 유지되며, Owner가 보관된 거래 목록에서 복구할 수 있습니다."
+          confirmLabel="보관"
           onClose={() => setDialog(null)}
           onConfirm={async () => {
             await requireMutation(
               prototypeBackend.deals.archive(currentDealId),
-              "거래를 삭제했습니다."
+              "거래를 보관했습니다."
             )
-            setDeleted(true)
+            setArchived(true)
             setDialog(null)
           }}
         />
