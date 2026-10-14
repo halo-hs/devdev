@@ -2098,6 +2098,7 @@ const shipments = [
     status: "운송 중",
     tone: "blue" as Tone,
     evidence: 8,
+    evidenceCount: 3,
     documents: "B/L 확인",
   },
   {
@@ -2112,6 +2113,7 @@ const shipments = [
     status: "도착 임박",
     tone: "amber" as Tone,
     evidence: 3,
+    evidenceCount: 2,
     documents: "B/L 누락",
   },
   {
@@ -2126,6 +2128,7 @@ const shipments = [
     status: "지연",
     tone: "red" as Tone,
     evidence: 0,
+    evidenceCount: 0,
     documents: "증거 없음",
   },
   {
@@ -2140,6 +2143,7 @@ const shipments = [
     status: "도착",
     tone: "green" as Tone,
     evidence: 5,
+    evidenceCount: 2,
     documents: "서류 완료",
   },
   {
@@ -2154,6 +2158,7 @@ const shipments = [
     status: "운송 중",
     tone: "blue" as Tone,
     evidence: 6,
+    evidenceCount: 2,
     documents: "B/L 확인",
   },
   {
@@ -2168,6 +2173,7 @@ const shipments = [
     status: "운송 중",
     tone: "blue" as Tone,
     evidence: 4,
+    evidenceCount: 2,
     documents: "서류 완료",
   },
   {
@@ -2182,6 +2188,7 @@ const shipments = [
     status: "도착 임박",
     tone: "amber" as Tone,
     evidence: 2,
+    evidenceCount: 1,
     documents: "B/L 확인",
   },
   {
@@ -2196,6 +2203,7 @@ const shipments = [
     status: "운송 중",
     tone: "blue" as Tone,
     evidence: 0,
+    evidenceCount: 0,
     documents: "B/L 누락",
   },
   {
@@ -2210,6 +2218,7 @@ const shipments = [
     status: "운송 중",
     tone: "blue" as Tone,
     evidence: 7,
+    evidenceCount: 3,
     documents: "서류 완료",
   },
   {
@@ -2224,6 +2233,7 @@ const shipments = [
     status: "운송 중",
     tone: "blue" as Tone,
     evidence: 5,
+    evidenceCount: 2,
     documents: "B/L 확인",
   },
   {
@@ -2238,6 +2248,7 @@ const shipments = [
     status: "운송 중",
     tone: "blue" as Tone,
     evidence: 4,
+    evidenceCount: 2,
     documents: "B/L 확인",
   },
   {
@@ -2252,6 +2263,7 @@ const shipments = [
     status: "운송 중",
     tone: "blue" as Tone,
     evidence: 3,
+    evidenceCount: 2,
     documents: "서류 완료",
   },
   {
@@ -2266,6 +2278,7 @@ const shipments = [
     status: "도착 임박",
     tone: "amber" as Tone,
     evidence: 1,
+    evidenceCount: 1,
     documents: "B/L 확인",
   },
   {
@@ -2280,6 +2293,7 @@ const shipments = [
     status: "도착",
     tone: "green" as Tone,
     evidence: 6,
+    evidenceCount: 3,
     documents: "서류 완료",
   },
 ].map((row) => ({ ...row, reviewDocument: shipmentReviewSamples[row.bl] }))
@@ -2444,7 +2458,7 @@ export function ShipmentsPrototype({ onNavigate }: { onNavigate: Navigate }) {
                           className="mt-1"
                           onClick={() => onNavigate("snap")}
                         >
-                          SNAP {item.evidence}장
+                          SNAP {item.evidenceCount}건 · {item.evidence}장
                         </Button>
                       </TableCell>
                       <TableCell>

@@ -283,7 +283,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
             status: "ready",
             syncStatus: current.syncStatus,
             shipments: current.shipments.map((row) =>
-              row.id === shipmentId ? { ...row, ...shipment } : row,
+              row.id === shipmentId ? { ...row, ...shipment, snap_evidence_count: shipment.snap_evidence_count ?? row.snap_evidence_count } : row,
             ),
           };
         });
@@ -540,7 +540,9 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                     <HostTableCell>
                       <div className="text-body-13 text-text-muted">{ship.bl_number ? "B/L 번호 등록" : "B/L 번호 없음"}</div>
                       {shipEvidence ? <HostButton variant="outline" size="sm" asChild className="mt-1">
-                        <Link href="/erp/snap-evidence" title={shipEvidence.allocationLabel ? copy.evidenceAllocatedTo.replace("{label}", shipEvidence.allocationLabel) : undefined}>SNAP {shipEvidence.mediaCount}장</Link>
+                        <Link href="/erp/snap-evidence" title={shipEvidence.allocationLabel ? copy.evidenceAllocatedTo.replace("{label}", shipEvidence.allocationLabel) : undefined}>
+                          SNAP {ship.snap_evidence_count === undefined ? "" : `${ship.snap_evidence_count}건 · `}{shipEvidence.mediaCount}장
+                        </Link>
                       </HostButton> : <div className="mt-1 text-body-13 text-text-muted">증거 미확인</div>}
                     </HostTableCell>
                     <HostTableCell>
@@ -583,7 +585,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
       {editing ? <ShipmentConfirmationDialog shipment={editing} canWrite={canRefresh} copy={copy} returnFocus={() => editTrigger.current?.focus()} onReload={async () => { const result = await listAllShipments(getIdToken); const latest = result.shipments.find(row => row.id === editing.id); if (!latest) throw new Error("선적을 찾을 수 없습니다."); return latest; }} onClose={() => setEditing(null)} onSave={async (body) => {
         if (!canRefresh) throw new Error("수정 권한이 없습니다.");
         const { shipment } = await confirmShipment(getIdToken, editing.id, body);
-        setState(current => current.status === "ready" ? { ...current, shipments: current.shipments.map(row => row.id === shipment.id ? shipment : row) } : current);
+        setState(current => current.status === "ready" ? { ...current, shipments: current.shipments.map(row => row.id === shipment.id ? { ...row, ...shipment, snap_evidence_count: shipment.snap_evidence_count ?? row.snap_evidence_count } : row) } : current);
       }} /> : null}
     </div>
   );
