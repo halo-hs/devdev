@@ -43,8 +43,8 @@ const PLATFORM_ROUTE_ALIASES: Record<string, ErpRouteScreen> = {
 
 const PLATFORM_SETTINGS_SECTIONS: Record<string, string> = {
   "/erp/settings/billing": "billing",
-  "/erp/settings/tokens": "credits",
-  "/erp/settings/token-usage": "credits",
+  "/erp/settings/tokens": "trade-usage",
+  "/erp/settings/token-usage": "trade-usage",
   "/erp/settings/organization": "organization",
   "/erp/settings/alerts": "trade-alerts",
   "/erp/settings/email-forward": "trade-email",
@@ -129,9 +129,9 @@ export function canonicalErpLocation(location: {
   hash: string
 }) {
   const path = normalizePathname(location.pathname)
-  if (path === "/erp/settings" && new URLSearchParams(location.search).get("section") === "trade-usage") {
+  if (path === "/erp/settings" && new URLSearchParams(location.search).get("section") === "credits") {
     const search = new URLSearchParams(location.search)
-    search.set("section", "credits")
+    search.set("section", "trade-usage")
     return `/erp/settings?${search}`
   }
   const settingsSection = PLATFORM_SETTINGS_SECTIONS[path]
