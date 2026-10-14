@@ -15,7 +15,7 @@ export function DocumentConnectionSummary({ connection, onChange, onUnlink, disa
       <div className="min-w-0 flex-1">
         <h3 className="font-semibold">{connection.link ? "연결된 거래" : "연결된 거래 없음"}</h3>
         {connection.link ? <a className="mt-1.5 block break-words font-medium text-primary hover:underline" href={`/erp/deals/${encodeURIComponent(connection.link.dealId)}`}>{connection.link.dealLabel}</a> : null}
-        <p className="mt-1.5 text-muted-foreground">{latest
+        <p className="mt-1.5 text-muted-foreground">{connection.link ? "거래 방향 확인 필요 · " : ""}{latest
           ? `${latest.actorLabel} · ${new Date(latest.occurredAt).toLocaleString("ko-KR")} · ${latest.action === "unlinked" ? "연결 해제" : latest.action === "relinked" ? "연결 변경" : "연결"}`
           : connection.link ? "이전 연결의 처리자·시각은 기록되어 있지 않습니다." : "후보를 선택한 뒤 연결을 확정하세요."}</p>
       </div>

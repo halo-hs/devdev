@@ -74,6 +74,7 @@ import {
 } from "lucide-react"
 
 import { Button } from "@shared/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@shared/components/ui/dialog"
 import { DocumentBlockingAlerts, type DocumentBlockingIssue } from "@trade-os/components/document-blocking-alerts"
 import { AutoSaveStatus } from "@shared/components/auto-save-status"
 import { BusinessPageHero } from "@shared/components/business-page-hero"
@@ -4637,13 +4638,15 @@ function HorizontalDocumentTray({
 
 function InboxScreen({
   onOpenDeal,
+  originDealId,
   initialDocumentName,
   initialStep,
   onDocumentOpen,
   linkedDealsByDocument,
   onDocumentDealLinked,
 }: {
-  onOpenDeal: (dealId: string) => void
+  onOpenDeal: (dealId: string, focus?: "finance") => void
+  originDealId?: string | null
   initialDocumentName?: string
   initialStep?: UploadDetailStep
   onDocumentOpen?: (
@@ -4657,6 +4660,7 @@ function InboxScreen({
   ) => void
 }) {
   const guide = useStartGuide()
+  const [pendingCostDealId, setPendingCostDealId] = useState<string | null>(null)
   const [dealReviewDocument] = useState<DealDocumentRecord | null>(() => dealDocumentFromReviewUrl())
   const dealReviewRequested = new URLSearchParams(window.location.search).get("from") === "deal"
   const reviewMatches = (document: RecentDocument) => dealReviewDocument
@@ -4892,11 +4896,16 @@ function InboxScreen({
           toast.success("문서 확정과 현금 기록을 완료했습니다.")
         }
       } else {
-        toast.success(selectedDocument.documentType === "BANK_STATEMENT"
-          ? "서류만 연결했습니다. 현금은 정산에서 기록해 주세요." : "거래 연결을 완료했습니다.")
+        const isBankStatement = selectedDocument.documentType === "BANK_STATEMENT"
+        toast.success(isBankStatement
+          ? "서류만 연결했습니다. 현금은 정산에서 기록해 주세요." : "거래 연결을 완료했습니다.",
+          isBankStatement ? undefined : { action: { label: "되돌리기", onClick: () => appLocation.assign(`/erp/documents/upload/${encodeURIComponent(documentName)}/connect?undo=1`) } })
       }
-      setHasFile(false)
-      onOpenDeal(dealId)
+      if (["FREIGHT_INVOICE", "CUSTOMS_DECLARATION", "CUSTOMS_ENTRY"].includes(selectedDocument.documentType)) {
+        setPendingCostDealId(dealId)
+      } else {
+        onOpenDeal(dealId)
+      }
       return true
     } finally {
       setLinkingDocument(false)
@@ -5282,10 +5291,19 @@ function InboxScreen({
 
   return (
     <div data-guide-target={step === "deal" ? "connect" : undefined} tabIndex={-1} className="flex h-[calc(100svh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-background">
+      <Dialog open={Boolean(pendingCostDealId)} onOpenChange={open => { if (!open && pendingCostDealId) { onOpenDeal(pendingCostDealId); setPendingCostDealId(null) } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle>비용 등록</DialogTitle><DialogDescription>운임·통관 서류를 연결했습니다. 이 거래의 비용을 등록하시겠습니까?</DialogDescription></DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { if (pendingCostDealId) onOpenDeal(pendingCostDealId); setPendingCostDealId(null) }}>나중에</Button>
+            <Button onClick={() => { if (pendingCostDealId) onOpenDeal(pendingCostDealId, "finance"); setPendingCostDealId(null) }}>비용 등록하기</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-end gap-2 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-3 py-2 sm:px-4">
         <div className="mr-auto min-w-0">
           <h1 className="text-sm font-semibold">문서 올리기</h1>
-          {dealReviewDocument && <a href={`/erp/deals/${dealReviewDocument.dealId}`} className="text-xs text-primary underline">{dealReviewDocument.dealId} 거래로 돌아가기</a>}
+          {(dealReviewDocument?.dealId || originDealId) && <a href={`/erp/deals/${dealReviewDocument?.dealId ?? originDealId}`} className="text-xs text-primary underline">{dealReviewDocument?.dealId ?? originDealId} 거래로 돌아가기</a>}
         </div>
         <DocumentBlockingAlerts errors={uploadErrors} checks={uploadChecks} />
         <AutoSaveStatus
@@ -5401,6 +5419,7 @@ function InboxScreen({
         <PdfPanelWorkspaceCard>
           <DocumentReviewWorkspace
             document={selectedDocument}
+            originDealId={originDealId}
             step={step}
             onAutoSave={handleAutoSave}
             dealBlocked={isDealBlocked}
@@ -6035,6 +6054,7 @@ function InlinePdfCompare({
 
 function DocumentReviewWorkspace({
   document,
+  originDealId,
   step,
   onAutoSave,
   dealBlocked,
@@ -6053,6 +6073,7 @@ function DocumentReviewWorkspace({
   onMobilePaneChange,
 }: {
   document: RecentDocument
+  originDealId?: string | null
   step: UploadDetailStep
   onAutoSave: (phase?: "pending" | "commit") => void
   dealBlocked?: boolean
@@ -6200,6 +6221,7 @@ function DocumentReviewWorkspace({
       <DealConfirmPanel
         key={document.name}
         document={document}
+        originDealId={originDealId}
         linkedDealLabel={linkedDealLabel}
         linking={linkingDocument}
         linkBlocked={Boolean(dealBlocked)}
@@ -7120,6 +7142,7 @@ function SavingField({
 
 function DealConfirmPanel({
   document,
+  originDealId,
   linkedDealLabel,
   linking,
   linkBlocked = false,
@@ -7129,6 +7152,7 @@ function DealConfirmPanel({
   onConnectionChanged,
 }: {
   document: RecentDocument
+  originDealId?: string | null
   linkedDealLabel: string | null
   linking: boolean
   linkBlocked?: boolean
@@ -7179,6 +7203,13 @@ function DealConfirmPanel({
   const [connectionAttempt, setConnectionAttempt] = useState(0)
   const [changingConnection, setChangingConnection] = useState(false)
   const [changeDialog, setChangeDialog] = useState<{ target: DocumentDealLink | null; evidence: string[] } | null>(null)
+  useEffect(() => {
+    if (!connection?.link || new URLSearchParams(window.location.search).get("undo") !== "1") return
+    const url = new URL(window.location.href)
+    url.searchParams.delete("undo")
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}`)
+    setChangeDialog({ target: null, evidence: [] })
+  }, [connection?.link])
   const [loadedCandidates, setLoadedCandidates] = useState<(DocumentSourceDeal & CandidateEvidence)[]>([])
   const [candidateAttempt, setCandidateAttempt] = useState(0)
   const recommendedDealId = loadedCandidates.find(candidate => candidate.recommended)?.id ?? null
@@ -7227,6 +7258,12 @@ function DealConfirmPanel({
       .catch(() => { if (active) setCandidateLoadState("error") })
     return () => { active = false }
   }, [document.name, readCounterparty, readAmountField?.value, readCurrency, candidateAttempt])
+  useEffect(() => {
+    if (!originDealId || activeLink || candidateLoadState !== "ready") return
+    if (loadedCandidates.some(candidate => candidate.id === originDealId)) {
+      setSelectedDealId(current => current ?? originDealId)
+    }
+  }, [originDealId, activeLink, candidateLoadState, loadedCandidates])
   const [creatingDeal, setCreatingDeal] = useState(false)
   const creatingRef = useRef(false)
   const [createdDeal, setCreatedDeal] = useState<DocumentDealLink | null>(() => pendingCreatedDeal ? { dealId: pendingCreatedDeal.id, dealLabel: `${pendingCreatedDeal.id} · ${pendingCreatedDeal.counterparty}` } : null)
@@ -7248,6 +7285,12 @@ function DealConfirmPanel({
   const selectedCandidate =
     loadedCandidates.find((candidate) => candidate.id === selectedDealId) ??
     null
+  const ambiguousCandidates = loadedCandidates.filter((candidate) => candidate.ambiguous).length
+  const comparisonRows = selectedCandidate ? [
+    { label: "거래처", result: readCounterparty && readCounterparty.trim().toLowerCase() === selectedCandidate.party.trim().toLowerCase() ? "일치" : "확인 필요" },
+    { label: "금액", result: readAmountField?.value && readCurrency && normalizeDecimalInput(readAmountField.value) === normalizeDecimalInput(selectedCandidate.amount) && readCurrency.toUpperCase() === selectedCandidate.currency.toUpperCase() ? "일치" : "확인 필요" },
+    { label: "수량", result: "기준 수량 확인 필요" },
+  ] : []
   const bankSchedules = eligibleBankSchedules(currentBankSchedules(), selectedDealId ?? "", readCurrency)
   const bankMatchRequired = !activeLink && document.documentType === "BANK_STATEMENT" && Boolean(selectedCandidate) && !newDealFormOpen
   const bankCashError = bankScheduleId && bankScheduleId !== "document-only"
@@ -7426,6 +7469,16 @@ function DealConfirmPanel({
                 onChange={() => { setChangingConnection(true); setNewDealFormOpen(false); setSelectedDealId(null) }}
                 onUnlink={() => setChangeDialog({ target: null, evidence: [] })} />
               : <p role="status" className="text-xs text-muted-foreground">현재 거래 연결을 확인하고 있습니다.</p>}
+            {connectionReady && !activeLink ? <p className="text-xs text-muted-foreground">거래 방향 확인 필요</p> : null}
+            {originDealId && connectionReady && !activeLink ? (
+              <p className="text-xs text-muted-foreground">거래 상세에서 올린 문서입니다. {originDealId} 거래를 먼저 선택했습니다. 다른 거래도 선택할 수 있습니다.</p>
+            ) : null}
+            {document.documentType === "OTHER" ? (
+              <Alert className="border-[var(--color-orange-4)] bg-[var(--color-orange-5)]">
+                <AlertTriangle className="size-4" />
+                <AlertDescription className="text-xs">거래 서류가 아닐 수 있습니다. 문서 유형을 확인한 뒤 연결하세요.</AlertDescription>
+              </Alert>
+            ) : null}
             {changingConnection ? <div className="flex items-center justify-between gap-3 text-xs"><p>변경할 거래를 선택하세요. 확정하기 전까지 현재 연결이 유지됩니다.</p><Button size="sm" variant="ghost" onClick={() => setChangingConnection(false)}>변경 취소</Button></div> : null}
             {documentDealValues.length > 0 ? (
               <section className="rounded-lg border border-[var(--surface-border)] bg-background px-4 py-3">
@@ -7646,6 +7699,16 @@ function DealConfirmPanel({
                     ) : null
                   ) : (
                     <>
+                      {ambiguousCandidates > 1 || !recommendedDealId ? (
+                        <Alert className="mt-3 border-[var(--color-orange-4)] bg-[var(--color-orange-5)]">
+                          <AlertTriangle className="size-4" />
+                          <AlertDescription className="text-xs">
+                            {ambiguousCandidates > 1
+                              ? "같은 근거를 충족하는 후보가 여러 건입니다. 거래를 직접 선택해 주세요."
+                              : "AI 추천을 확정할 근거가 부족합니다. 거래를 직접 선택해 주세요."}
+                          </AlertDescription>
+                        </Alert>
+                      ) : null}
                       <div className="relative mt-3">
                         <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
@@ -7708,11 +7771,7 @@ function DealConfirmPanel({
                                   {candidate.item} · {candidate.amount}{" "}
                                   {candidate.currency}
                                 </span>
-                                <span className="mt-2 flex flex-wrap gap-1" aria-label="후보 일치 근거">
-                                  {(candidate.reasons.length ? candidate.reasons : ["일치 근거 없음 · 직접 선택 가능"]).map(reason => <span key={reason} className="rounded bg-muted px-1.5 py-1 text-[10px] text-muted-foreground">{reason}</span>)}
-                                  {candidate.ambiguous ? <span className="rounded bg-muted px-1.5 py-1 text-[10px] text-muted-foreground">동일 근거의 다른 후보 있음</span> : null}
-                                  {candidate.id === activeLink?.dealId ? <span className="text-[10px] font-medium">현재 연결</span> : null}
-                                </span>
+                                {candidate.id === activeLink?.dealId ? <span className="mt-2 block text-[10px] font-medium">현재 연결</span> : null}
                               </span>
                               {recommended ? (
                                 <span className="flex min-h-12 shrink-0 items-center gap-1.5 border-l border-[var(--surface-border)] pl-4 text-xs font-semibold text-primary">
@@ -7728,6 +7787,20 @@ function DealConfirmPanel({
                           </div>
                         ) : null}
                       </div>
+
+                      {selectedCandidate && document.documentType !== "BANK_STATEMENT" ? (
+                        <details className="mt-3 border-y py-3 text-xs">
+                          <summary className="cursor-pointer font-medium">서류 대조 보기</summary>
+                          <dl className="mt-2 divide-y">
+                            {comparisonRows.map((row) => (
+                              <div key={row.label} className="flex justify-between gap-4 py-2">
+                                <dt>{row.label}</dt>
+                                <dd className="text-muted-foreground">{row.result}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        </details>
+                      ) : null}
 
                       {selectedCandidate ? (
                         document.documentType === "BANK_STATEMENT" ? (
@@ -16280,6 +16353,9 @@ export function App() {
   const [selectedDealId, setSelectedDealId] = useState(
     initialErpRoute?.params.dealId ?? "DL-260708-01"
   )
+  const [uploadOriginDealId, setUploadOriginDealId] = useState<string | null>(() =>
+    new URLSearchParams(appLocation.search).get("fromDeal")
+  )
   const [uploadDocumentDealLinks, setUploadDocumentDealLinks] =
     useState<UploadDocumentDealLinks>(readUploadDocumentDealLinks)
   const [dealHeaderActionsTarget, setDealHeaderActionsTarget] =
@@ -16518,13 +16594,15 @@ export function App() {
   const updateErpLocation = (
     nextScreen: Exclude<Screen, "snap-platform">,
     params: ErpRouteMatch["params"] = {},
-    replace = false
+    replace = false,
+    originDealId: string | null = uploadOriginDealId
   ) => {
     const nextPath = pathForErpScreen(nextScreen, params)
     const nextUrl = new URL(nextPath, appLocation.origin)
     if (erpHomeRole === "admin" || erpHomeRole === "member") {
       nextUrl.searchParams.set("role", erpHomeRole)
     }
+    if (nextScreen === "inbox" && originDealId) nextUrl.searchParams.set("fromDeal", originDealId)
     const nextLocation = `${nextUrl.pathname}${nextUrl.search}`
     const currentLocation = `${appLocation.pathname}${appLocation.search}`
     if (nextLocation !== currentLocation) {
@@ -16545,6 +16623,7 @@ export function App() {
       dealId?: string
       documentName?: string
       documentNumber?: string
+      originDealId?: string
       replace?: boolean
     }
   ) => {
@@ -16556,6 +16635,7 @@ export function App() {
     if (nextScreen === "deal" && options?.dealId) {
       setSelectedDealId(options.dealId)
     }
+    setUploadOriginDealId(nextScreen === "inbox" ? options?.originDealId ?? null : null)
     if (nextScreen === "ask") {
       setPendingAskQuestion(options?.question ?? "")
       setPendingAskSubmit(Boolean(options?.submit && options?.question?.trim()))
@@ -16583,7 +16663,8 @@ export function App() {
           documentName: options?.documentName,
           documentNumber: options?.documentNumber,
         },
-        options?.replace
+        options?.replace,
+        nextScreen === "inbox" ? options?.originDealId ?? null : null
       )
     }
     setScreenLoading(true)
@@ -16888,6 +16969,7 @@ export function App() {
                     />
                   ) : screen === "inbox" ? (
                     <InboxScreen
+                      originDealId={uploadOriginDealId}
                       initialDocumentName={erpRoute?.params.documentName}
                       initialStep={
                         erpRoute?.params.uploadStep === "connect"
@@ -16918,8 +17000,9 @@ export function App() {
                             : {}
                         )
                       }}
-                      onOpenDeal={(dealId) => {
+                      onOpenDeal={(dealId, focus) => {
                         setDealNotificationTarget(null)
+                        if (focus === "finance") setDealNotificationTarget({ tab: "finance", sectionId: "deal-finance" })
                         setSelectedDealId(dealId)
                         navigateTo("deal", { dealId })
                       }}
@@ -17004,7 +17087,7 @@ export function App() {
                       )}
                       documentTemplates={templates}
                       onCreateDocument={openDealDocumentCreate}
-                      onUpload={() => navigateTo("inbox")}
+                      onUpload={() => navigateTo("inbox", { originDealId: selectedDealId })}
                       onDeliver={openDealDocumentDelivery}
                       onReviewDocument={openDealDocumentReview}
                       onOpenSettlement={() => navigateTo("settlement")}
