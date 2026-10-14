@@ -540,7 +540,9 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                     <HostTableCell>
                       <div className="text-body-13 text-text-muted">{ship.bl_number ? "B/L 번호 등록" : "B/L 번호 없음"}</div>
                       {shipEvidence ? <HostButton variant="outline" size="sm" asChild className="mt-1">
-                        <Link href="/erp/snap-evidence" title={shipEvidence.allocationLabel ? copy.evidenceAllocatedTo.replace("{label}", shipEvidence.allocationLabel) : undefined}>SNAP {shipEvidence.mediaCount}장</Link>
+                        <Link href="/erp/snap-evidence" title={shipEvidence.allocationLabel ? copy.evidenceAllocatedTo.replace("{label}", shipEvidence.allocationLabel) : undefined}>
+                          SNAP {ship.snap_evidence_count === undefined ? "" : `${ship.snap_evidence_count}건 · `}{shipEvidence.mediaCount}장
+                        </Link>
                       </HostButton> : <div className="mt-1 text-body-13 text-text-muted">증거 미확인</div>}
                     </HostTableCell>
                     <HostTableCell>

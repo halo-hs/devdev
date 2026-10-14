@@ -276,7 +276,7 @@ test("shipment empty search recovers and SNAP links open evidence", async ({ pag
   await expect(page.getByText("검색 조건에 맞는 선적이 없습니다.")).toBeVisible()
   await search.clear()
   await expect(page.getByText("검색 조건에 맞는 선적이 없습니다.")).toHaveCount(0)
-  await page.getByRole("button", { name: /^SNAP \d+장$/ }).first().click()
+  await page.getByRole("button", { name: /^SNAP (?:\d+건 · )?\d+장$/ }).first().click()
   await expect(page.getByRole("heading", { name: "SNAP 증거함", exact: true })).toBeVisible()
 })
 

@@ -53,6 +53,8 @@ export type Shipment = {
   // PO# for a buy deal. Surfaced so the board shows + filters B/Ls per contract.
   deal_sc_number?: string | null;
   deal_po_number?: string | null;
+  // Active SNAP evidence linked to this shipment, independent of photo count.
+  snap_evidence_count?: number;
 };
 
 type ShipmentEtaFields = Pick<Shipment, "eta" | "provider_eta" | "confirmed_eta">;
