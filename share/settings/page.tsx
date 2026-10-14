@@ -59,7 +59,7 @@ import {
   ProductsSubscriptions,
   SettingsDemoProvider,
 } from "./subscription-settings"
-import { PersonalCreditUsage } from "./personal-credit-usage"
+import { OrganizationAiUsage } from "./organization-ai-usage"
 import { BrandLogoInput } from "./brand-logo-input"
 import { SearchableSetting, countryOptions, languageOptions, timeZoneOptions } from "./region-controls"
 import { workspaceOptions, type WorkspaceKey } from "@shared/lib/workspaces"
@@ -71,7 +71,7 @@ type SettingsTarget = "home" | "tokens" | "billing"
 
 type SectionId =
   | "account"
-  | "credits"
+  | "trade-usage"
   | "organizations"
   | "organization"
   | "members"
@@ -105,7 +105,6 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
     label: "일반",
     items: [
       { id: "account", label: "내 계정", icon: CircleUserRound },
-      { id: "credits", label: "내 크레딧 사용량", icon: Sparkles, keywords: ["토큰", "개인", "사용량"] },
       { id: "organizations", label: "소속 Organization", icon: Building2 },
     ],
   },
@@ -161,6 +160,7 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
         icon: Landmark,
         product: "erp",
       },
+      { id: "trade-usage", label: "AI 사용량", icon: Sparkles, product: "erp", keywords: ["토큰", "사용량"] },
       { id: "trade-alerts", label: "알림 설정", icon: Bell, product: "erp" },
       { id: "approvals", label: "결재 정책", icon: Check, product: "erp", roles: ["owner"] },
     ],
@@ -810,7 +810,7 @@ function renderSection(
     return <ApprovalPolicySettings />
   }
   if (section === "account") return <AccountPage />
-  if (section === "credits") return <PersonalCreditUsage />
+  if (section === "trade-usage") return <OrganizationAiUsage organizationName={organizationName} />
   if (section === "organizations")
     return (
       <div>
@@ -897,7 +897,7 @@ function SettingsHubContent({
   const initialSection = (() => {
     if (typeof window === "undefined") return "account" as SectionId
     const requested = new URLSearchParams(appLocation.search).get("section")
-    const candidate = (requested === "trade-usage" ? "credits" : requested) as SectionId | null
+    const candidate = (requested === "credits" ? "trade-usage" : requested) as SectionId | null
     return candidate === "billing"
       ? "products"
       : candidate && (candidate === "approvals" || availableIds.includes(candidate))
@@ -937,7 +937,7 @@ function SettingsHubContent({
   useEffect(() => {
     const handlePopState = () => {
       const requested = new URLSearchParams(appLocation.search).get("section")
-      const candidate = (requested === "trade-usage" ? "credits" : requested) as SectionId | null
+      const candidate = (requested === "credits" ? "trade-usage" : requested) as SectionId | null
       setSection(
         candidate === "billing"
           ? "products"

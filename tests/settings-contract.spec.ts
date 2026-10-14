@@ -559,28 +559,29 @@ test("delivery channels are independent choices and preserve selections when sav
   await expect(page.getByRole("checkbox", { name: "이메일", exact: true })).toBeDisabled()
 })
 
-test("personal credit usage restores token routes for every role without organization totals", async ({ page }) => {
-  for (const path of ["/erp/settings/tokens", "/erp/settings/token-usage", "/erp/settings?section=trade-usage"]) {
+test("AI usage keeps legacy routes and never invents Organization totals", async ({ page }) => {
+  for (const path of ["/erp/settings/tokens", "/erp/settings/token-usage", "/erp/settings?section=trade-usage", "/erp/settings?section=credits"]) {
     await page.goto(path)
-    await expect(page.getByRole("heading", { name: "내 크레딧 사용량", exact: true })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "AI 사용량", exact: true })).toBeVisible()
   }
   for (const role of ["owner", "admin", "member"]) {
-    await openSettings(page, role, "credits", [])
-    await expect(page.getByRole("heading", { name: "내 크레딧 사용량", exact: true })).toBeVisible()
+    await openSettings(page, role, "trade-usage", ["erp"])
+    await expect(page.getByRole("heading", { name: "AI 사용량", exact: true })).toBeVisible()
     const content = page.locator('[data-ui="settings-content"]')
     await expect(content).toContainText("Trade OS")
     await expect(content).toContainText("SNAP")
-    await expect(content).not.toContainText("현재 조직")
+    await expect(content).toContainText("현재 조직")
     await expect(content).not.toContainText("684K")
-    await expect(content).not.toContainText("디자인 확인용")
-    await expect(content.getByRole("progressbar")).toHaveCount(2)
-    for (const product of ["Trade OS", "SNAP"]) {
-      await expect(content.getByRole("progressbar", { name: `${product} 크레딧 사용량` })).toHaveAttribute("aria-valuenow", "50")
-    }
+    await expect(content).not.toContainText("크레딧")
+    await expect(content.getByRole("progressbar")).toHaveCount(0)
+    await expect(content.getByText("확인 필요", { exact: true })).toHaveCount(2)
     await content.getByLabel("조회 기간", { exact: true }).fill("2020-01")
     await expect(content.getByText("확인 필요", { exact: true })).toHaveCount(2)
-    await expect(content.getByRole("progressbar")).toHaveCount(0)
   }
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto("/erp/settings?section=trade-usage")
+  await expect(page.getByRole("heading", { name: "AI 사용량", exact: true })).toBeVisible()
+  await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390)
 })
 
 test("SNAP localization only offers its supported languages and searchable timezones", async ({ page }) => {
