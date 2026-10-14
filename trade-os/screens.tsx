@@ -1,3 +1,4 @@
+import { CounterpartyWorkspace } from "@trade-os/counterparty-workspace"
 import { SnapEvidenceWorkspace } from "./components/snap-evidence-workspace"
 import {
   readBankCashRecords,
@@ -6260,76 +6261,10 @@ export function SettingsPrototype({
   )
 }
 
-export function CounterpartyPrototype({
-  onNavigate,
-}: {
-  onNavigate: Navigate
+export function CounterpartyPrototype({ onNavigate, counterpartyId, role }: {
+  onNavigate: Navigate; counterpartyId?: string; role?: string
 }) {
-  return (
-    <Page
-      title="ACME GmbH"
-      description="거래처별 거래, AR/AP, 결제 신뢰와 최근 활동을 확인합니다."
-      action={
-        <Button onClick={() => onNavigate("deals")}>관련 거래 보기</Button>
-      }
-    >
-      <SummaryMetricStrip
-        items={[
-          { label: "거래액", value: "420,000.00 USD" },
-          { label: "조정 GP", value: "82,000.00 USD" },
-          {
-            label: "미수",
-            value: "42,000.00 USD",
-            note: "오늘 만기",
-            tone: "red",
-          },
-          { label: "결제 신뢰", value: "B+", note: "평균 +3일", tone: "amber" },
-        ]}
-      />
-      <div className="mt-8 grid gap-8 lg:grid-cols-2">
-        <ContentPanel>
-          <SectionHeader title="관련 거래" />
-          <div className="divide-y">
-            {[
-              ["DL-260708-01", "7월 알루미늄 스크랩 수입", "서류 검증"],
-              ["DL-260625-03", "6월 해상운송 계약", "정산"],
-              ["DL-260512-08", "5월 원자재 수입", "완료"],
-            ].map(([id, title, status]) => (
-              <Button
-                variant="ghost"
-                key={id}
-                onClick={() => onNavigate("deal", { dealId: id })}
-                className="h-auto w-full justify-between rounded-none py-4 text-left font-normal"
-              >
-                <span>
-                  <span className="block text-sm font-medium">{title}</span>
-                  <span className="text-xs text-muted-foreground">{id}</span>
-                </span>
-                <Status tone={status === "완료" ? "green" : "blue"}>
-                  {status}
-                </Status>
-              </Button>
-            ))}
-          </div>
-        </ContentPanel>
-        <ContentPanel>
-          <SectionHeader title="최근 활동" />
-          <div className="divide-y text-sm">
-            {[
-              ["오늘 09:24", "인보이스 금액 필드 확인"],
-              ["어제 16:10", "42,000.00 USD 입금 예정 등록"],
-              ["07.10 11:40", "B/L 문서 연결"],
-            ].map(([time, event]) => (
-              <div key={time} className="flex gap-5 py-4">
-                <span className="w-24 text-muted-foreground">{time}</span>
-                <span>{event}</span>
-              </div>
-            ))}
-          </div>
-        </ContentPanel>
-      </div>
-    </Page>
-  )
+  return <CounterpartyWorkspace key={counterpartyId} id={counterpartyId} role={role} onDeal={dealId => onNavigate("deal", { dealId })} onSettlement={() => onNavigate("settlement")} />
 }
 
 export function SnapEvidencePrototype({
