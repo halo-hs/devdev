@@ -1,3 +1,7 @@
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shared/components/ui/tabs"
+import { counterpartyPreview } from "@trade-os/counterparty-workspace"
+import { listDealDocuments } from "@trade-os/lib/deal-document-actions"
+import { orderProgress } from "@trade-os/lib/deal-finance-workspace"
 import { SnapEvidenceWorkspace } from "./components/snap-evidence-workspace"
 import {
   readBankCashRecords,
@@ -12,7 +16,7 @@ import {
   salesCustomerSamples,
   salesMonthlySamples,
 } from "@trade-os/lib/erp-menu-samples"
-import { useRef, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import {
   Bar,
   BarChart,
@@ -191,7 +195,7 @@ function Page({
   heroSummary,
   children,
 }: {
-  title: string
+  title: ReactNode
   description: string
   eyebrow?: string
   action?: ReactNode
@@ -6260,76 +6264,64 @@ export function SettingsPrototype({
   )
 }
 
-export function CounterpartyPrototype({
-  onNavigate,
-}: {
-  onNavigate: Navigate
+export function CounterpartyPrototype({ onNavigate, counterpartyId = "acme", role }: {
+  onNavigate: Navigate; counterpartyId?: string; role?: string
 }) {
-  return (
-    <Page
-      title="ACME GmbH"
-      description="거래처별 거래, AR/AP, 결제 신뢰와 최근 활동을 확인합니다."
-      action={
-        <Button onClick={() => onNavigate("deals")}>관련 거래 보기</Button>
-      }
-    >
-      <SummaryMetricStrip
-        items={[
-          { label: "거래액", value: "420,000.00 USD" },
-          { label: "조정 GP", value: "82,000.00 USD" },
-          {
-            label: "미수",
-            value: "42,000.00 USD",
-            note: "오늘 만기",
-            tone: "red",
-          },
-          { label: "결제 신뢰", value: "B+", note: "평균 +3일", tone: "amber" },
-        ]}
-      />
-      <div className="mt-8 grid gap-8 lg:grid-cols-2">
-        <ContentPanel>
-          <SectionHeader title="관련 거래" />
-          <div className="divide-y">
-            {[
-              ["DL-260708-01", "7월 알루미늄 스크랩 수입", "서류 검증"],
-              ["DL-260625-03", "6월 해상운송 계약", "정산"],
-              ["DL-260512-08", "5월 원자재 수입", "완료"],
-            ].map(([id, title, status]) => (
-              <Button
-                variant="ghost"
-                key={id}
-                onClick={() => onNavigate("deal", { dealId: id })}
-                className="h-auto w-full justify-between rounded-none py-4 text-left font-normal"
-              >
-                <span>
-                  <span className="block text-sm font-medium">{title}</span>
-                  <span className="text-xs text-muted-foreground">{id}</span>
-                </span>
-                <Status tone={status === "완료" ? "green" : "blue"}>
-                  {status}
-                </Status>
-              </Button>
-            ))}
+  const [model, setModel] = useState<Awaited<ReturnType<typeof counterpartyPreview.read>>>(null)
+  const [loadState, setLoadState] = useState("loading")
+  const [attempt, setAttempt] = useState(0)
+  const [page, setPage] = useState(1)
+  const [currency, setCurrency] = useState("all")
+  useEffect(() => {
+    let active = true
+    setLoadState("loading"); setPage(1); setCurrency("all")
+    counterpartyPreview.read(counterpartyId).then(value => {
+      if (active) { setModel(value); setLoadState("ready") }
+    }).catch(() => { if (active) setLoadState("error") })
+    return () => { active = false }
+  }, [counterpartyId, attempt])
+  const stages = { contract: "계약", shipment: "선적", customs: "통관", settlement: "정산 중", settled: "정산 완료" }
+  const recentDocuments = model?.deals.flatMap(deal => listDealDocuments(deal.id).map(doc => ({ ...doc, linkedDealId: deal.id }))).slice(0, 5) ?? []
+  return <Page
+    title={<span className="flex flex-wrap items-center gap-2">{model?.name ?? "거래처 360"}{model?.role.split("·").map(label => <Badge key={label} variant="outline" className="border-white/40 text-white text-xs">{label}</Badge>)}</span>}
+    description="거래처별 거래, AR/AP, 결제 신뢰와 최근 서류를 확인합니다."
+    action={<><Button variant="outline" onClick={() => onNavigate("settlement")}>정산으로 돌아가기</Button><Button disabled={!model} onClick={() => document.getElementById("counterparty-deals")?.scrollIntoView({ behavior: "smooth" })}>관련 거래 보기</Button></>}
+  >
+    {loadState === "loading" ? <p role="status">거래처 정보를 불러오는 중입니다.</p> : loadState === "error" ? <div role="alert"><p>거래처 정보를 불러오지 못했습니다.</p><Button variant="outline" onClick={() => setAttempt(value => value + 1)}>다시 시도</Button></div> : !model ? <p>거래처를 찾을 수 없습니다.</p> : <>
+      {model.mergedFrom && <p role="status" className="mb-4 text-sm text-muted-foreground">‘{model.mergedFrom}’은 ‘{model.name}’으로 합쳐졌습니다.</p>}
+      <SummaryMetricStrip items={([['receivable', '받을 돈'], ['payable', '지급할 돈'], ['overdue', '연체'], ['trust', '결제 신뢰']] as const).map(([key, label]) => ({
+        label, tone: key === "overdue" ? "red" : key === "trust" ? "amber" : "neutral",
+        value: <span className="block space-y-1" role="region" aria-label={label}>{model.currencies.map(row => <span className="block" key={row.currency}>{role === "member" && key !== "trust" ? "확인 필요" : row[key]} <span className="text-xs font-normal text-muted-foreground">{row.currency}</span></span>)}</span>,
+      }))} />
+      <Tabs defaultValue="ops" key={counterpartyId} className="mt-8">
+        <TabsList aria-label="거래처 보기"><TabsTrigger value="ops">운영</TabsTrigger><TabsTrigger value="analytics">분석</TabsTrigger></TabsList>
+        <TabsContent value="analytics" className="mt-8"><ContentPanel><SectionHeader title="분석 준비 중" /><p className="text-sm text-muted-foreground">거래처 분석은 준비 중입니다.</p></ContentPanel></TabsContent>
+        <TabsContent value="ops" className="mt-8">
+          <div className="grid gap-8 lg:grid-cols-2">
+            <ContentPanel id="counterparty-deals" className="self-start">
+              <SectionHeader title="관련 거래" trailing={model.partial ? <Status tone="amber">부분 결과</Status> : undefined} />
+              {model.partial && <p className="mb-3 text-xs text-muted-foreground">일부 상세를 불러오지 못했습니다. 아래 목록이 전체 결과는 아닙니다.</p>}
+              <div className="divide-y">{model.deals.slice((page - 1) * 5, page * 5).map(deal => {
+                const quantity = orderProgress(deal.id)
+                return <Button variant="ghost" key={deal.id} onClick={() => onNavigate("deal", { dealId: deal.id })} className="h-auto w-full justify-between rounded-none py-4 text-left font-normal">
+                  <span className="min-w-0"><span className="block whitespace-normal text-sm font-medium">{deal.title}</span><span className="text-xs text-muted-foreground">{deal.id}</span><span className="block whitespace-normal text-xs text-muted-foreground">{quantity ? `선적 ${quantity.shipped}/${quantity.contracted} ${quantity.unit} · ` : ""}ETA {deal.eta}</span></span>
+                  <Status tone={deal.stage === "settled" ? "green" : "blue"}>{stages[deal.stage]}</Status>
+                </Button>
+              })}</div>
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-3 text-xs text-muted-foreground"><span>총 {model.deals.length}건{model.partial ? " · 조회된 범위" : ""}</span>{model.deals.length > 5 && <div className="flex items-center gap-2"><Button variant="ghost" size="sm" disabled={page === 1} onClick={() => setPage(value => value - 1)}>이전</Button><span>{page} / {Math.max(1, Math.ceil(model.deals.length / 5))}</span><Button variant="ghost" size="sm" disabled={page * 5 >= model.deals.length} onClick={() => setPage(value => value + 1)}>다음</Button></div>}</div>
+            </ContentPanel>
+            <ContentPanel><SectionHeader title="최근 서류" /><div className="divide-y text-sm">{recentDocuments.map(doc => <Button variant="ghost" key={doc.id} className="h-auto w-full justify-start rounded-none py-4 text-left font-normal" onClick={() => onNavigate("deal", { dealId: doc.linkedDealId })}><span className="min-w-0"><span className="block whitespace-normal">{doc.type} · {doc.file}</span><span className="text-xs text-muted-foreground">{doc.linkedDealId}</span></span></Button>)}</div></ContentPanel>
           </div>
-        </ContentPanel>
-        <ContentPanel>
-          <SectionHeader title="최근 활동" />
-          <div className="divide-y text-sm">
-            {[
-              ["오늘 09:24", "인보이스 금액 필드 확인"],
-              ["어제 16:10", "42,000.00 USD 입금 예정 등록"],
-              ["07.10 11:40", "B/L 문서 연결"],
-            ].map(([time, event]) => (
-              <div key={time} className="flex gap-5 py-4">
-                <span className="w-24 text-muted-foreground">{time}</span>
-                <span>{event}</span>
-              </div>
-            ))}
+          <div className="mt-8 grid gap-8 lg:grid-cols-2">
+            <ContentPanel><section aria-label="미결제 일정"><SectionHeader title="미결제 일정" trailing={<label className="flex items-center gap-2 text-xs">통화<select className="h-8 rounded-md border bg-background px-2" value={currency} onChange={event => setCurrency(event.target.value)}><option value="all">전체 통화</option>{model.currencies.map(row => <option key={row.currency}>{row.currency}</option>)}</select></label>} />
+            {role === "member" ? <p className="text-sm text-muted-foreground">조회 가능한 결제 일정의 근거를 확인해 주세요.</p> : <Table><TableHeader><TableRow><TableHead>거래번호</TableHead><TableHead>구분</TableHead><TableHead>예정일</TableHead><TableHead>미결제 금액</TableHead><TableHead>상태</TableHead></TableRow></TableHeader><TableBody>{model.schedules.filter(row => currency === "all" || row.currency === currency).map(row => <TableRow key={row.id}><TableCell><button className="text-primary" onClick={() => onNavigate("deal", { dealId: row.dealId })}>{row.dealId}</button></TableCell><TableCell>{row.direction}</TableCell><TableCell>{row.due}</TableCell><TableCell>{row.amount} {row.currency}</TableCell><TableCell>{row.overdue ? "연체" : "예정"}</TableCell></TableRow>)}{!model.schedules.some(row => currency === "all" || row.currency === currency) && <TableRow><TableCell colSpan={5}>조회된 미결제 일정이 없습니다.</TableCell></TableRow>}</TableBody></Table>}
+            </section></ContentPanel>
+            <ContentPanel><SectionHeader title="필요 서류" /><div className="divide-y text-sm">{model.deals.filter(deal => deal.nextDocument?.kind === "upload").map(deal => <Button variant="ghost" key={deal.id} className="h-auto w-full justify-start rounded-none py-4 text-left font-normal" onClick={() => onNavigate("deal", { dealId: deal.id })}><span>{deal.nextDocument?.label}<span className="block text-xs text-muted-foreground">{deal.id}</span></span></Button>)}{!model.deals.some(deal => deal.nextDocument?.kind === "upload") && <p className="text-sm text-muted-foreground">조회된 필요 서류가 없습니다.</p>}</div></ContentPanel>
           </div>
-        </ContentPanel>
-      </div>
-    </Page>
-  )
+        </TabsContent>
+      </Tabs>
+    </>}
+  </Page>
 }
 
 export function SnapEvidencePrototype({

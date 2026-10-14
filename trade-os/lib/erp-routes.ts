@@ -5,6 +5,7 @@ export type ErpRouteScreen = ErpMenuTarget | "result"
 export type ErpRouteMatch = {
   screen: ErpRouteScreen
   params: {
+    counterpartyId?: string
     dealId?: string
     documentName?: string
     documentNumber?: string
@@ -105,6 +106,9 @@ export function matchErpRoute(pathname: string): ErpRouteMatch | null {
     }
   }
 
+  const counterpartyDetail = normalized.match(/^\/erp\/counterparties\/([^/]+)$/)
+  if (counterpartyDetail) return { screen: "counterparty", params: { counterpartyId: decodePathSegment(counterpartyDetail[1]) } }
+
   const dealDetail = normalized.match(/^\/erp\/deals\/([^/]+)$/)
   if (dealDetail) {
     return {
@@ -153,6 +157,7 @@ export function pathForErpScreen(
   screen: ErpRouteScreen,
   params: ErpRouteMatch["params"] = {}
 ) {
+  if (screen === "counterparty" && params.counterpartyId) return `/erp/counterparties/${encodeURIComponent(params.counterpartyId)}`
   if (screen === "deal" && params.dealId) {
     return `/erp/deals/${encodeURIComponent(params.dealId)}`
   }
