@@ -10942,7 +10942,7 @@ function ShareDeliveryPanel({
                               linkUsable
                                 ? "success"
                                 : link.status === "revoked"
-                                  ? "neutral"
+                                  ? "danger"
                                   : "warning"
                             }
                           >
@@ -11110,7 +11110,7 @@ function ShareDeliveryPanel({
                 id: `link-${link.id}`,
                 title: `공유 링크 ${link.id}`,
                 meta: `${formatLinkStatus(link.status)} · ${link.expires} 만료${link.revokeReason ? ` · 사유: ${link.revokeReason}` : ""}`,
-                tone: link.status === "active" ? "success" : link.status === "revoked" ? "neutral" : "warning",
+                tone: link.status === "active" ? "success" : link.status === "revoked" ? "danger" : "warning",
                 badge: formatLinkStatus(link.status),
                 email: undefined,
               })),
