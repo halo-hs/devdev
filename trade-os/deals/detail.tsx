@@ -3829,6 +3829,15 @@ function DocumentsTab({
               : field.value,
     }))
   )
+  useEffect(() => {
+    setDealFields(current => current.map(field => {
+      if (field.key === "direction") return { ...field, value: directionLabels[profile.direction] }
+      const partyKey = profile.direction === "sales" ? "buyer" : profile.direction === "purchase" ? "seller" : null
+      return field.key === partyKey && !field.evidence.includes("조민영 · 직접 입력")
+        ? { ...field, value: profile.counterparty }
+        : field
+    }))
+  }, [profile.direction, profile.counterparty])
   const mainInformation = useMemo(
     () => ({
       counterparty:
