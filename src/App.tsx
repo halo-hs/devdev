@@ -7910,7 +7910,7 @@ function DealConfirmPanel({
                               </Field>
                               <Field className="gap-1.5">
                                 <FieldLabel className="text-[11px]">
-                                  입금일
+                                  입출금일
                                 </FieldLabel>
                                 <Input
                                   type="date"
