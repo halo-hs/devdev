@@ -1187,7 +1187,7 @@ function ReportsConnectedSession({
 <div
             className={cx(
               "grid gap-3 max-lg:grid-cols-2 max-sm:grid-cols-1",
-              showGp && gpKpi.latest ? "grid-cols-7" : "grid-cols-6",
+              showGp ? "grid-cols-7" : "grid-cols-6",
             )}
             data-ui="reports-kpis"
           >
@@ -1257,12 +1257,12 @@ function ReportsConnectedSession({
                   : null
               }
             />
-            {showGp && gpKpi.latest ? (
+            {showGp ? (
               <KpiTile
-                label={replaceTokens(copy.kpi.gp, { period: gpLatestLabel, currency: currencyLabel })}
-                value={fmtAmount(gpKpi.latest.gp)}
+                label={replaceTokens(copy.kpi.gp, { period: gpLatestLabel || latestLabel, currency: currencyLabel })}
+                value={gpState.status === "error" || !gpKpi.latest ? "—" : fmtAmount(gpKpi.latest.gp)}
                 delta={
-                  gpKpi.marginPermyriad != null
+                  gpState.status !== "error" && gpKpi.latest && gpKpi.marginPermyriad != null
                     ? {
                         text:
                           gpKpi.marginDeltaPermyriad != null
@@ -1285,8 +1285,9 @@ function ReportsConnectedSession({
                       }
                     : null
                 }
-                basis={gpBasisText}
-                caution={gpCautionText}
+                basis={gpState.status === "error" ? null : gpBasisText}
+                caution={gpState.status === "error" ? null : gpCautionText}
+                errorMessage={gpState.status === "error" ? copy.cardLoadFailed : null}
               />
             ) : null}
             <KpiTile
@@ -2267,12 +2268,14 @@ export function KpiTile({
   delta,
   basis,
   caution,
+  errorMessage,
 }: {
   label: string;
   value: string;
   delta: { text: string; tone: "up" | "bad" | "flat" } | null;
   basis?: string | null;
   caution?: string | null;
+  errorMessage?: string | null;
 }) {
   return (
     <div
@@ -2302,6 +2305,11 @@ export function KpiTile({
         <div className="mt-0.5 text-label-12 tabular-nums text-ecoya-system-orange-1" data-ui="reports-kpi-caution">
           {caution}
         </div>
+      ) : null}
+      {errorMessage ? (
+        <p className="mt-0.5 text-label-12 text-status-danger" data-ui="reports-kpi-error" role="status">
+          {errorMessage}
+        </p>
       ) : null}
     </div>
   );
