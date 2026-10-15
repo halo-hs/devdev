@@ -1336,14 +1336,13 @@ export function DealsScreen({
                               </DropdownMenuItem>
                               {canArchiveDeal ? (
                                 <DropdownMenuItem
-                                  className="text-destructive focus:text-destructive"
                                   onSelect={() => {
                                     setArchiveError("")
                                     setArchiveTarget(deal)
                                   }}
                                 >
-                                  <Trash2 className="size-4" />
-                                  삭제
+                                  <Archive className="size-4" />
+                                  보관
                                 </DropdownMenuItem>
                               ) : null}
                             </DropdownMenuContent>
@@ -1404,7 +1403,7 @@ export function DealsScreen({
             >
               <span className="flex items-center gap-2">
                 <Archive className="size-4" />
-                삭제된 거래 보기
+                보관된 거래 보기
                 <StatusBadge>{archivedDeals.length}</StatusBadge>
                 <StatusBadge>Owner</StatusBadge>
               </span>
@@ -1426,7 +1425,7 @@ export function DealsScreen({
                           {prototypeBackend.deals.getTitle(deal.id, deal.title)}
                         </strong>
                         <p className="mt-1 truncate text-xs text-muted-foreground">
-                          {deal.counterparty} · 삭제된 거래 · 이력 보존
+                          {deal.counterparty} · 보관된 거래 · 이력 보존
                         </p>
                       </div>
                       <Button
@@ -1473,7 +1472,7 @@ export function DealsScreen({
                   ))
                 ) : (
                   <p className="py-4 text-sm text-muted-foreground">
-                    삭제된 거래가 없습니다.
+                    보관된 거래가 없습니다.
                   </p>
                 )}
                 {restoreError ? (
@@ -1523,10 +1522,10 @@ export function DealsScreen({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>거래를 삭제할까요?</AlertDialogTitle>
+            <AlertDialogTitle>이 거래를 보관할까요?</AlertDialogTitle>
             <AlertDialogDescription>
-              현재 거래 목록과 집계에서 제외됩니다. 연결 문서와 처리 이력은
-              삭제하지 않으며, Owner가 삭제된 거래 목록에서 복구할 수 있습니다.
+              진행 중인 목록과 집계에서 제외됩니다. 연결된 문서와 거래 이력은
+              유지되며, Owner가 보관된 거래 목록에서 복구할 수 있습니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {archiveTarget ? (
@@ -1551,7 +1550,6 @@ export function DealsScreen({
               취소
             </AlertDialogCancel>
             <AlertDialogAction
-              variant="destructive"
               disabled={archivePending}
               onClick={(event) => {
                 event.preventDefault()
@@ -1567,7 +1565,7 @@ export function DealsScreen({
                   })
                   .catch(() => {
                     setArchiveError(
-                      "거래를 삭제하지 못했습니다. 현재 상태를 유지한 채 다시 시도해주세요."
+                      "거래를 보관하지 못했습니다. 현재 상태를 유지한 채 다시 시도해주세요."
                     )
                   })
                   .finally(() => setArchivePending(false))
@@ -1576,7 +1574,7 @@ export function DealsScreen({
               {archivePending ? (
                 <Loader2 className="animate-spin" data-icon="inline-start" />
               ) : null}
-              {archivePending ? "삭제 처리 중" : "삭제"}
+              {archivePending ? "보관 처리 중" : "보관"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -2738,9 +2736,9 @@ export function LegacyDealDetailScreen({
                   <AlertTriangle />
                   {issueFlagged ? "이슈 접수됨" : "이슈 플래그"}
                 </DropdownMenuItem>
-                <DropdownMenuItem variant="destructive">
-                  <Trash2 />
-                  거래 삭제
+                <DropdownMenuItem>
+                  <Archive />
+                  보관
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
