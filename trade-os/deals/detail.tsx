@@ -203,7 +203,7 @@ const stageEntryTab = (dealId: string): Tab => {
       : "overview"
 }
 
-type DealDirection = "sales" | "purchase"
+type DealDirection = "sales" | "purchase" | "direction_pending"
 type DealProfile = {
   title: string
   counterparty: string
@@ -288,6 +288,7 @@ const dealProfiles: Record<string, DealProfile> = {
 const directionLabels: Record<DealDirection, string> = {
   sales: "매출",
   purchase: "매입",
+  direction_pending: "방향 미정",
 }
 const wait = (ms = 550) =>
   new Promise<void>((resolve) => window.setTimeout(resolve, ms))
@@ -1642,14 +1643,14 @@ function requiredDealReviews(
       .filter(
         (field) =>
           groups.includes(field.group) &&
-          field.key !== (direction === "sales" ? "seller" : "buyer") &&
+          (direction === "direction_pending" || field.key !== (direction === "sales" ? "seller" : "buyer")) &&
           needsReview(field.match)
       )
       .map((field) => ({
         key: field.key,
         label:
           field.key === "amount_total"
-            ? `${directionLabels[direction]} 금액`
+            ? direction === "direction_pending" ? "거래 금액" : `${directionLabels[direction]} 금액`
             : field.label,
         group: field.group,
         issue: field.match === "누락" ? ("누락" as const) : ("불일치" as const),
@@ -2809,7 +2810,9 @@ function DealFieldsPanel({
   ]
   const normalizedQuery = query.trim().toLowerCase()
   const fieldLabelOverrides: Partial<Record<string, string>> =
-    profile.direction === "sales"
+    profile.direction === "direction_pending"
+      ? {}
+      : profile.direction === "sales"
       ? {
           buyer: "고객사",
           contract_number: "판매계약 번호",
@@ -2830,7 +2833,7 @@ function DealFieldsPanel({
           bank_account: "지급 계좌",
           payment_due: "지급 예정일",
         }
-  const hiddenPartyKey = profile.direction === "sales" ? "seller" : "buyer"
+  const hiddenPartyKey = profile.direction === "direction_pending" ? null : profile.direction === "sales" ? "seller" : "buyer"
   const directionalFields = fields
     .filter(
       (field) =>
@@ -2873,7 +2876,7 @@ function DealFieldsPanel({
       <section key="items" data-deal-items className="border-b pt-2 pb-5">
         <div className="flex items-center justify-between gap-3">
           <h4 className="text-base font-semibold">
-            {directionLabels[profile.direction]} 품목
+            {profile.direction === "direction_pending" ? "거래 품목" : `${directionLabels[profile.direction]} 품목`}
           </h4>
           {editable ? (
             <Button size="sm" variant="outline" onClick={onAddItem}>
@@ -2889,7 +2892,7 @@ function DealFieldsPanel({
         >
           <table
             className="block w-full text-left text-xs"
-            aria-label={`${directionLabels[profile.direction]} 품목`}
+            aria-label={profile.direction === "direction_pending" ? "거래 품목" : `${directionLabels[profile.direction]} 품목`}
           >
               {filteredItems.map((item) => {
                 const number =
@@ -3035,7 +3038,7 @@ function DealFieldsPanel({
                         {input("unitPrice", "단가")}
                       </td>
                       <td>
-                        <FormFieldHeader className="mb-2" label={`${directionLabels[profile.direction]} 금액`} />
+                        <FormFieldHeader className="mb-2" label={profile.direction === "direction_pending" ? "거래 금액" : `${directionLabels[profile.direction]} 금액`} />
                         <output aria-label={`품목 ${number} 금액`} className="flex min-h-8 items-center justify-end text-right font-semibold break-words tabular-nums">
                           {itemAmount(item)} {item.currency}
                         </output>
@@ -3106,7 +3109,7 @@ function DealFieldsPanel({
           {group === "결제 정보"
             ? profile.direction === "sales"
               ? "수금 정보"
-              : "지급 정보"
+              : profile.direction === "purchase" ? "지급 정보" : "결제 정보"
             : group}
         </h4>
         <div className="mt-3 grid min-w-0 gap-4 @min-[640px]/fields:grid-cols-2">
@@ -3155,7 +3158,7 @@ function DealFieldsPanel({
                 }}
                 type={field.inputType ?? "text"}
                 value={field.value}
-                disabled={!editable}
+                disabled={!editable || field.key === "direction"}
                 placeholder={`${field.label} 입력`}
                 aria-invalid={
                   field.match === "누락" || field.match === "확인 필요"
@@ -3795,7 +3798,7 @@ function DocumentsTab({
   const refresh = useDealRefresh()
   const [documentRecords, setDocumentRecords] = useState(() => listDealDocuments(dealId))
   const [movedDocument, setMovedDocument] = useState<DealDocumentRecord | null>(null)
-  const primaryDocumentCode = profile.direction === "sales" ? "SC" : "PO"
+  const primaryDocumentCode = profile.direction === "sales" ? "SC" : profile.direction === "purchase" ? "PO" : null
   const orderedImportantDocuments = useMemo(
     () =>
       [...documents].sort((left, right) => {
@@ -3814,7 +3817,9 @@ function DocumentsTab({
     initialDealFields.map((field) => ({
       ...field,
       value:
-        (field.key === "seller" && profile.direction === "purchase") ||
+        field.key === "direction"
+          ? directionLabels[profile.direction]
+          : (field.key === "seller" && profile.direction === "purchase") ||
         (field.key === "buyer" && profile.direction === "sales")
           ? profile.counterparty
           : field.key === "amount_total"
@@ -3827,7 +3832,7 @@ function DocumentsTab({
   const mainInformation = useMemo(
     () => ({
       counterparty:
-        dealFields.find(
+        profile.direction === "direction_pending" ? profile.counterparty : dealFields.find(
           (field) =>
             field.key === (profile.direction === "sales" ? "buyer" : "seller")
         )?.value ?? profile.counterparty,
@@ -4289,7 +4294,7 @@ function DocumentsTab({
               <PostWriteRefreshNotice failure={refresh.failure} busy={refresh.busy} onRetry={() => void refresh.refresh()} />
             </div>}
             <SectionHeading
-              title={`${directionLabels[profile.direction]} 거래 상세`}
+              title={profile.direction === "direction_pending" ? "거래 상세" : `${directionLabels[profile.direction]} 거래 상세`}
               action={
                 canMutate(role) ? (
                   <div className="flex items-center gap-2">
@@ -5746,8 +5751,11 @@ export function DealDetailScreen({
   const createdProfile = prototypeBackend.deals.getCreated(dealId)
   const fixture = dealFixtures.find((deal) => deal.id === dealId)
   const exists = Boolean(dealProfiles[dealId] || createdProfile || fixture)
-  const profile =
-    dealProfiles[dealId] ?? createdProfile ?? (fixture ? { ...fixture, direction: "purchase" as const } : dealProfiles["DL-260708-01"])
+  const [createdDirection, setCreatedDirection] = useState<DealDirection | null>(createdProfile?.direction ?? null)
+  const [savingDirection, setSavingDirection] = useState(false)
+  const profile = dealProfiles[dealId]
+    ?? (createdProfile ? { ...createdProfile, direction: createdDirection ?? createdProfile.direction } : null)
+    ?? (fixture ? { ...fixture, direction: "purchase" as const } : dealProfiles["DL-260708-01"])
   const settled = fixture?.stage === "settled"
   const nextDocument = !settled && fixture?.orderLifecycle !== "closed" && fixture?.orderLifecycle !== "cancelled" ? fixture?.nextDocument : undefined
   const nextDraft = generatedDocuments.find((document) => document.number.startsWith(`${nextDocument?.templateCode}-`) && document.state === "draft")
@@ -6392,11 +6400,26 @@ export function DealDetailScreen({
                     {fixture.orderLifecycle === "closed" ? "종결" : fixture.orderLifecycle === "cancelled" ? "취소" : "주문 미확인"}
                   </StatusBadge>}
                   <StatusBadge
-                    tone={profile.direction === "sales" ? "success" : "blue"}
+                    tone={profile.direction === "sales" ? "success" : profile.direction === "purchase" ? "blue" : "neutral"}
                     outline
                   >
                     {directionLabels[profile.direction]}
                   </StatusBadge>
+                  {createdProfile && profile.direction === "direction_pending" && canMutate(role) ? (
+                    <Select disabled={savingDirection} onValueChange={value => {
+                      if (value !== "sales" && value !== "purchase") return
+                      setSavingDirection(true)
+                      void prototypeBackend.deals.setCreatedDirection(dealId, value).then(result => {
+                        if (result.ok) {
+                          setCreatedDirection(value)
+                          toast.success("거래 방향을 저장했습니다.")
+                        } else toast.error(result.error)
+                      }).finally(() => setSavingDirection(false))
+                    }}>
+                      <SelectTrigger className="h-7 w-auto min-w-28 text-xs" aria-label="거래 방향 정하기"><SelectValue placeholder="방향 정하기" /></SelectTrigger>
+                      <SelectContent><SelectItem value="sales">매출</SelectItem><SelectItem value="purchase">매입</SelectItem></SelectContent>
+                    </Select>
+                  ) : null}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -6876,7 +6899,7 @@ export function DealDetailScreen({
                       {mainInformation.counterparty}
                     </a>
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <StatusBadge tone="blue">
+                      <StatusBadge tone={profile.direction === "direction_pending" ? "neutral" : "blue"}>
                         {directionLabels[profile.direction]}
                       </StatusBadge>
                     </div>
