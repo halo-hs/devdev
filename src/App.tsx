@@ -4,6 +4,7 @@ import { type DocumentConnection, type DocumentDealLink, type CandidateEvidence 
 import { dealDocumentPreviews, dealDocumentFromReviewUrl, type DealDocumentRecord } from "@trade-os/lib/deal-document-actions"
 import { appLocation } from "@/app/app-location"
 import { StartGuideProvider, useStartGuide } from "@trade-os/onboarding/runtime"
+import { SettingsDemoProvider, useTradeSeatAssigned } from "@share/settings/subscription-settings"
 import { BusinessListToolbar, BusinessFilterSearch, BusinessFilterField } from "@shared/components/business-filters"
 import { FormField, FormFieldHeader } from "@shared/components/form-field"
 import { PageLoadingBoundary } from "@shared/components/page-loading-boundary"
@@ -4645,6 +4646,7 @@ function HorizontalDocumentTray({
 }
 
 function InboxScreen({
+  role,
   onOpenDeal,
   originDealId,
   initialDocumentName,
@@ -4653,6 +4655,7 @@ function InboxScreen({
   linkedDealsByDocument,
   onDocumentDealLinked,
 }: {
+  role: "owner" | "admin" | "member"
   onOpenDeal: (dealId: string, focus?: "finance") => void
   originDealId?: string | null
   initialDocumentName?: string
@@ -4667,6 +4670,7 @@ function InboxScreen({
     link: UploadDocumentDealLink | null
   ) => void
 }) {
+  const tradeSeatAssigned = useTradeSeatAssigned(role)
   const guide = useStartGuide()
   const [pendingCostDealId, setPendingCostDealId] = useState<string | null>(null)
   const [dealReviewDocument] = useState<DealDocumentRecord | null>(() => dealDocumentFromReviewUrl())
@@ -4880,7 +4884,7 @@ function InboxScreen({
     toast.success("연결할 거래를 선택해 주세요.")
   }
   const handleDealLink = async (dealId: string, dealLabel: string, bankCash?: Omit<BankCashInput, "sourceDocumentId" | "idempotencyKey">, evidence?: string[]) => {
-    if (linkingDocument || isDealBlocked) return false
+    if (!tradeSeatAssigned || linkingDocument || isDealBlocked) return false
     const documentName = selectedDocument.name
     setLinkingDocument(true)
     try {
@@ -5435,6 +5439,7 @@ function InboxScreen({
             pdfReviewCompleted={pdfReviewCompleted}
             linkedDealLabel={linkedDealLabel}
             linkingDocument={linkingDocument}
+            tradeSeatAssigned={tradeSeatAssigned}
             downloadingDraft={downloadingDraft}
             dealActionTarget={dealActionTarget}
             onLinkDeal={handleDealLink}
@@ -6032,6 +6037,7 @@ function InlinePdfCompare({
           document={document}
           linkedDealLabel={document.dealLabel ?? null}
           linking={false}
+          tradeSeatAssigned
           onShowPdf={() => onMobilePaneChange("preview")}
           onLinkDeal={async () => false}
         />
@@ -6070,6 +6076,7 @@ function DocumentReviewWorkspace({
   pdfReviewCompleted,
   linkedDealLabel,
   linkingDocument,
+  tradeSeatAssigned,
   downloadingDraft,
   dealActionTarget,
   onLinkDeal,
@@ -6089,6 +6096,7 @@ function DocumentReviewWorkspace({
   pdfReviewCompleted: boolean
   linkedDealLabel: string | null
   linkingDocument: boolean
+  tradeSeatAssigned: boolean
   downloadingDraft: boolean
   dealActionTarget: HTMLElement | null
   onLinkDeal: (dealId: string, dealLabel: string, bankCash?: Omit<BankCashInput, "sourceDocumentId" | "idempotencyKey">, evidence?: string[]) => Promise<boolean>
@@ -6246,6 +6254,7 @@ function DocumentReviewWorkspace({
         originDealId={originDealId}
         linkedDealLabel={linkedDealLabel}
         linking={linkingDocument}
+        tradeSeatAssigned={tradeSeatAssigned}
         linkBlocked={Boolean(dealBlocked)}
         actionPortalTarget={dealActionTarget}
         onShowPdf={isCompact ? () => onMobilePaneChange("preview") : undefined}
@@ -7178,6 +7187,7 @@ function DealConfirmPanel({
   originDealId,
   linkedDealLabel,
   linking,
+  tradeSeatAssigned,
   linkBlocked = false,
   actionPortalTarget,
   onShowPdf,
@@ -7188,6 +7198,7 @@ function DealConfirmPanel({
   originDealId?: string | null
   linkedDealLabel: string | null
   linking: boolean
+  tradeSeatAssigned: boolean
   linkBlocked?: boolean
   actionPortalTarget?: HTMLElement | null
   onShowPdf?: () => void
@@ -7355,7 +7366,7 @@ function DealConfirmPanel({
   }
 
   const handleLink = async () => {
-    if (linking || creatingRef.current || !connectionReady) return
+    if (!tradeSeatAssigned || linking || creatingRef.current || !connectionReady) return
     if (activeLink) {
       if (!changingConnection || !selectedCandidate || selectedCandidate.id === activeLink.dealId) return
       setChangeDialog({ target: { dealId: selectedCandidate.id, dealLabel: `${selectedCandidate.id} · ${selectedCandidate.party}` }, evidence: selectedCandidate.reasons.length ? selectedCandidate.reasons : ["직접 선택"] })
@@ -7426,19 +7437,19 @@ function DealConfirmPanel({
     ...(!selectedCandidate && !newDealFormOpen ? [{ key: "deal", label: "연결할 거래 선택", onSelect: openConnectionRequirement }] : []),
     ...(bankMatchRequired && !bankScheduleId ? [{ key: "schedule", label: "결제 일정 또는 서류만 연결 선택", onSelect: openConnectionRequirement }] : []),
   ]
-  const primaryAction = (
-    <>
-    <DocumentBlockingAlerts errors={connectionErrors} checks={connectionChecks} />
+  const primaryButton = (
     <Button
       size="sm"
+      aria-disabled={!tradeSeatAssigned}
+      className={!tradeSeatAssigned ? "opacity-50" : undefined}
       disabled={
-        !connectionReady || (!activeLink && linkBlocked) || (Boolean(activeLink) && (!changingConnection || selectedDealId === activeLink?.dealId)) || creatingDeal ||
+        tradeSeatAssigned && (!connectionReady || (!activeLink && linkBlocked) || (Boolean(activeLink) && (!changingConnection || selectedDealId === activeLink?.dealId)) || creatingDeal ||
         candidateLoadState !== "ready" ||
         (!selectedCandidate && !newDealReady) ||
         bankMatchIncomplete ||
-        linking
+        linking)
       }
-      onClick={() => void handleLink()}
+      onClick={() => { if (tradeSeatAssigned) void handleLink() }}
     >
       {linking || creatingDeal ? (
         <LoaderCircle className="animate-spin" data-icon="inline-start" />
@@ -7461,6 +7472,16 @@ function DealConfirmPanel({
               ? "결제 일정 선택 필요"
               : "선택한 거래 연결"}
     </Button>
+  )
+  const primaryAction = (
+    <>
+    <DocumentBlockingAlerts errors={connectionErrors} checks={connectionChecks} />
+    {tradeSeatAssigned ? primaryButton : (
+      <Tooltip>
+        <TooltipTrigger asChild>{primaryButton}</TooltipTrigger>
+        <TooltipContent side="bottom">거래를 연결하려면 Trade 사용 권한이 필요해요</TooltipContent>
+      </Tooltip>
+    )}
     </>
   )
 
@@ -7497,10 +7518,11 @@ function DealConfirmPanel({
         <ScrollArea className="min-h-0 flex-1">
           <div data-document-requirement="connection" className="mx-auto w-full max-w-4xl space-y-5 p-6">
             {connectionError ? <Alert variant="destructive"><AlertTitle>현재 거래 연결을 불러오지 못했습니다</AlertTitle><AlertDescription>{connectionError}</AlertDescription><Button className="mt-3" size="sm" variant="outline" onClick={() => setConnectionAttempt(value => value + 1)}>현재 연결 다시 확인</Button></Alert>
-              : connection ? <DocumentConnectionSummary connection={connection} disabled={linking || candidateLoadState !== "ready" || !onConnectionChanged}
+              : connection ? <DocumentConnectionSummary connection={connection} disabled={!tradeSeatAssigned || linking || candidateLoadState !== "ready" || !onConnectionChanged}
                 onChange={() => { setChangingConnection(true); setNewDealFormOpen(false); setSelectedDealId(null) }}
                 onUnlink={() => setChangeDialog({ target: null, evidence: [] })} />
               : <p role="status" className="text-xs text-muted-foreground">현재 거래 연결을 확인하고 있습니다.</p>}
+            {!tradeSeatAssigned ? <p role="status" className="text-xs text-muted-foreground">Trade OS는 조회만 가능해요. 거래를 연결하려면 사용 권한이 필요합니다.</p> : null}
             {connectionReady && !activeLink ? <p className="text-xs text-muted-foreground">거래 방향 확인 필요</p> : null}
             {originDealId && connectionReady && !activeLink ? (
               <p className="text-xs text-muted-foreground">거래 상세에서 올린 문서입니다. {originDealId} 거래를 먼저 선택했습니다. 다른 거래도 선택할 수 있습니다.</p>
@@ -7589,7 +7611,7 @@ function DealConfirmPanel({
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={candidateLoadState !== "ready" || Boolean(activeLink) || creatingDeal}
+                    disabled={!tradeSeatAssigned || candidateLoadState !== "ready" || Boolean(activeLink) || creatingDeal}
                     onClick={() => {
                       setNewDealFormOpen((current) => {
                         const next = !current
@@ -7637,7 +7659,7 @@ function DealConfirmPanel({
               ) : (
                 <>
                   {newDealFormOpen ? (
-                    <fieldset disabled={Boolean(createdDeal) || creatingDeal} className="mt-3 rounded-lg border border-primary/30 bg-background p-4">
+                    <fieldset disabled={!tradeSeatAssigned || Boolean(createdDeal) || creatingDeal} className="mt-3 rounded-lg border border-primary/30 bg-background p-4">
                       <div>
                         <div className="text-sm font-semibold">
                           {hasReadCounterparty
@@ -7721,6 +7743,7 @@ function DealConfirmPanel({
                           variant="outline"
                           size="sm"
                           className="mt-4"
+                          disabled={!tradeSeatAssigned}
                           onClick={() => {
                             prepareNewDealForm()
                             setNewDealFormOpen(true)
@@ -7938,7 +7961,7 @@ function DealConfirmPanel({
           </div>
         </ScrollArea>
       </div>
-      {changeDialog && connection ? <DocumentConnectionChangeDialog documentId={document.name} connection={connection} target={changeDialog.target} evidence={changeDialog.evidence} open
+      {tradeSeatAssigned && changeDialog && connection ? <DocumentConnectionChangeDialog documentId={document.name} connection={connection} target={changeDialog.target} evidence={changeDialog.evidence} open
         onClose={() => setChangeDialog(null)}
         onApplied={accepted => { setConnection(accepted); setChangingConnection(false); setSelectedDealId(null); onConnectionChanged?.(accepted); toast.success(accepted.link ? "거래 연결을 변경했습니다." : "거래 연결을 해제했습니다.") }} /> : null}
     </>
@@ -16901,6 +16924,7 @@ export function App() {
     isThreePaneScreen || screen === "deal" || screen === "ask"
 
   return (
+    <SettingsDemoProvider key={workspaceId}>
     <StartGuideProvider key={workspaceId} scope={`preview-account:${workspaceId}`} role={erpHomeRole}>
     <SidebarProvider
       open={sidebarOpen}
@@ -17002,6 +17026,7 @@ export function App() {
                     />
                   ) : screen === "inbox" ? (
                     <InboxScreen
+                      role={erpHomeRole}
                       originDealId={uploadOriginDealId}
                       initialDocumentName={erpRoute?.params.documentName}
                       initialStep={
@@ -17208,6 +17233,7 @@ export function App() {
       </div>
     </SidebarProvider>
     </StartGuideProvider>
+    </SettingsDemoProvider>
   )
 }
 

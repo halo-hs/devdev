@@ -63,6 +63,31 @@ test("candidate rows stay concise while selection persists evidence and actor/ti
   await expect(page.getByRole("region", { name: "현재 거래 연결" })).toContainText("연결 이력 1건")
 })
 
+test("a member without a Trade OS seat can review candidates but cannot connect a deal", async ({ page }) => {
+  await page.goto("/erp/settings?section=members")
+  await page.getByRole("row", { name: "박서윤" }).getByRole("button", { name: "박서윤 Trade OS" }).click()
+  await page.getByRole("menuitem", { name: "시트 회수" }).click()
+  await expect(page.getByRole("row", { name: "박서윤" })).toContainText("할당되지 않음")
+
+  await page.evaluate(url => {
+    window.history.pushState({}, "", url)
+    window.dispatchEvent(new PopStateEvent("popstate"))
+  }, `${path}/connect?role=member`)
+
+  await expect(page.getByRole("radio", { name: new RegExp(source) })).toBeVisible()
+  await expect(page.getByText("Trade OS는 조회만 가능해요. 거래를 연결하려면 사용 권한이 필요합니다.")).toBeVisible()
+  const connect = page.getByRole("button", { name: "선택한 거래 연결", exact: true })
+  await expect(connect).toHaveAttribute("aria-disabled", "true")
+  await connect.hover()
+  await expect(page.getByRole("tooltip")).toContainText("거래를 연결하려면 Trade 사용 권한이 필요해요")
+  await page.getByRole("radio", { name: new RegExp(source) }).click()
+  const selectedAction = page.getByRole("button", { name: "결제 일정 선택 필요", exact: true })
+  await expect(selectedAction).toHaveAttribute("aria-disabled", "true")
+  await selectedAction.dispatchEvent("click")
+  expect(await state(page)).toBeNull()
+  await expect(page).toHaveURL(/\/connect/)
+})
+
 test("upload started from a deal preselects that deal and allows another choice", async ({ page }) => {
   await page.goto(`${path}/connect?fromDeal=${encodeURIComponent(source)}`)
   await expect(page.getByText(`거래 상세에서 올린 문서입니다. ${source} 거래를 먼저 선택했습니다. 다른 거래도 선택할 수 있습니다.`)).toBeVisible()
