@@ -131,7 +131,10 @@
     "closes": {
       "title": "월마감",
       "sub": "마감된 달의 숫자는 동결되어 다시 계산되지 않습니다",
-      "frozen": "동결됨",
+      "frozen": "마감 완료",
+      "notClosed": "미마감",
+      "closing": "마감 중",
+      "closeFailed": "마감 실패",
       "reopened": "재개방됨",
       "reopenedMeta": "{name} · {date} 재개방",
       "reopenReasonMeta": "사유: {reason}",

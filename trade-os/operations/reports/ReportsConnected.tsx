@@ -1,4 +1,5 @@
 "use client";
+import { Badge } from "@ecoya/design-system/ui/badge";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField, BusinessFilterSelect } from "@shared/components/business-filters";
 
@@ -1988,6 +1989,9 @@ function ReportsConnectedSession({
                       <span className="text-label-12">
                         {replaceTokens(copy.closes.inProgress, { date: closableFromLabel })}
                       </span>
+                      <Badge className="ml-auto" data-ui="reports-close-status" palette="orange" size="sm" tone="fill">
+                        {copy.closes.notClosed}
+                      </Badge>
                     </div>
                     {closesData.length === 0 ? (
                       <p className="text-body-13 text-text-muted">{copy.closes.empty}</p>
@@ -2032,17 +2036,10 @@ function ReportsConnectedSession({
                                 </span>
                               ) : null}
                             </span>
-                            {/* 재개방된 달은 숫자가 다시 움직인다 — `동결됨`이라고 말하면 안 된다. */}
-                            <span
-                              className={cx(
-                                "ml-auto shrink-0 rounded-full px-2.5 py-0.5 text-body-13 font-bold",
-                                close.reopened
-                                  ? "bg-status-warning-bg text-status-warning"
-                                  : "bg-ecoya-blue-9 text-ecoya-indigo",
-                              )}
-                            >
+                            {/* 재개방된 달은 숫자가 다시 움직인다 — 마감 완료로 표시하지 않는다. */}
+                            <Badge className="ml-auto" data-ui="reports-close-status" palette={close.reopened ? "orange" : "green"} size="sm" tone="fill">
                               {close.reopened ? copy.closes.reopened : copy.closes.frozen}
-                            </span>
+                            </Badge>
                           </button>
                           {canCloseMonth && close.reopened ? (
                             <Button
@@ -2122,9 +2119,17 @@ function ReportsConnectedSession({
               />
             </label>
             {closeError ? (
-              <p className="text-body-13 text-status-danger" role="alert" data-ui="reports-close-error">
-                {closeError}
-              </p>
+              <div className="flex flex-col items-start gap-1" role="alert" data-ui="reports-close-error">
+                <Badge palette="red" size="sm" tone="fill">
+                  {copy.closes.closeFailed}
+                </Badge>
+                <p className="text-body-13 text-status-danger">{closeError}</p>
+              </div>
+            ) : null}
+            {closeSubmitting ? (
+              <Badge data-ui="reports-close-submitting" palette="blue" role="status" size="sm" tone="fill">
+                {copy.closes.closing}
+              </Badge>
             ) : null}
           </div>
         </Dialog>
