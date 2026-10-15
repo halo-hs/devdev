@@ -7278,7 +7278,7 @@ function DealConfirmPanel({
   const [bankScheduleId, setBankScheduleId] = useState("")
   const [bankMatchAmount, setBankMatchAmount] = useState(readAmountField?.value ?? "")
   const [bankValueDate, setBankValueDate] = useState(() => new Date().toLocaleDateString("sv-SE"))
-  const [newDealDirection, setNewDealDirection] = useState<"sales" | "purchase" | "">(pendingCreatedDeal?.direction ?? "")
+  const [newDealDirection, setNewDealDirection] = useState<"sales" | "purchase" | "">(pendingCreatedDeal?.direction === "direction_pending" ? "" : pendingCreatedDeal?.direction ?? "")
   const [candidateLoadState, setCandidateLoadState] = useState<
     "loading" | "ready" | "error"
   >("loading")
@@ -7334,7 +7334,7 @@ function DealConfirmPanel({
   const newDealReady =
     newDealFormOpen &&
     newDealName.trim().length > 0 &&
-    newDealNumber.trim().length > 0 && Boolean(newDealDirection)
+    newDealNumber.trim().length > 0
   const prepareNewDealForm = () => {
     if (createdDeal) return
     const nextDealNumber = prototypeBackend.deals.getNextId()
@@ -7385,7 +7385,7 @@ function DealConfirmPanel({
           id: newDealId,
           title: `${counterpartyName} 신규 거래`,
           counterparty: counterpartyName,
-          direction: newDealDirection as "sales" | "purchase",
+          ...(newDealDirection ? { direction: newDealDirection } : {}),
           amount: normalizeDecimalInput(readAmountField?.value ?? "0"),
           currency: readCurrency || "USD",
           sourceDocumentId: document.name,
@@ -7420,7 +7420,6 @@ function DealConfirmPanel({
     ...(newDealFormOpen ? [
       ...(!newDealName.trim() ? [{ key: "name", label: "거래처명 · 필수값 누락", onSelect: openConnectionRequirement }] : []),
       ...(!newDealNumber.trim() ? [{ key: "number", label: "거래번호 · 필수값 누락", onSelect: openConnectionRequirement }] : []),
-      ...(!newDealDirection ? [{ key: "direction", label: "매입·매출 구분 선택", onSelect: openConnectionRequirement }] : []),
     ] : []),
   ]
   const connectionChecks: DocumentBlockingIssue[] = activeLink && !changingConnection ? [] : [
@@ -7653,10 +7652,11 @@ function DealConfirmPanel({
                       </div>
                       <Field className="mt-3 gap-1.5">
                         <FieldLabel className="text-xs">거래 방향</FieldLabel>
-                        <Select value={newDealDirection} onValueChange={(value) => { if (value === "sales" || value === "purchase") setNewDealDirection(value) }}>
-                          <SelectTrigger aria-label="새 거래 방향"><SelectValue placeholder="매출·매입을 확인해 주세요" /></SelectTrigger>
-                          <SelectContent><SelectItem value="sales">매출 · 받을 돈</SelectItem><SelectItem value="purchase">매입 · 보낼 돈</SelectItem></SelectContent>
+                        <Select value={newDealDirection || "direction_pending"} onValueChange={(value) => { if (value === "sales" || value === "purchase" || value === "direction_pending") setNewDealDirection(value === "direction_pending" ? "" : value) }}>
+                          <SelectTrigger aria-label="새 거래 방향"><SelectValue placeholder="거래 방향 선택" /></SelectTrigger>
+                          <SelectContent><SelectItem value="direction_pending">방향 미정</SelectItem><SelectItem value="sales">매출 · 받을 돈</SelectItem><SelectItem value="purchase">매입 · 보낼 돈</SelectItem></SelectContent>
                         </Select>
+                        <p className="text-xs text-muted-foreground">모르면 방향 미정으로 등록할 수 있습니다. 거래 상세에서 나중에 정할 수 있습니다.</p>
                       </Field>
                       <div className="mt-3 grid gap-3 sm:grid-cols-2">
                         <Field className="gap-1.5">

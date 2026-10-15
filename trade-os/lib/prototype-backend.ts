@@ -32,14 +32,16 @@ export type DealCreateInput = {
   id: string
   title: string
   counterparty: string
-  direction: "sales" | "purchase"
+  direction?: "sales" | "purchase"
   amount: string
   currency: string
   /** Preview checkpoint: recover a created Deal when document linking fails. */
   sourceDocumentId?: string
 }
 
-export type CreatedDealRecord = DealCreateInput
+export type CreatedDealRecord = Omit<DealCreateInput, "direction"> & {
+  direction: "sales" | "purchase" | "direction_pending"
+}
 
 export type CounterpartyCreateInput = {
   name: string
@@ -252,7 +254,7 @@ function readCreatedDeals(): CreatedDealRecord[] {
         typeof deal?.id === "string" &&
         typeof deal?.title === "string" &&
         typeof deal?.counterparty === "string" &&
-        (deal?.direction === "sales" || deal?.direction === "purchase") &&
+        (deal?.direction === "sales" || deal?.direction === "purchase" || deal?.direction === "direction_pending") &&
         typeof deal?.amount === "string" &&
         typeof deal?.currency === "string"
     )
@@ -427,14 +429,21 @@ export const prototypeBackend = {
         const current = readCreatedDeals().filter(
           (deal) => deal.id !== result.id
         )
+        const createdDeal: CreatedDealRecord = { ...input, id: result.id, direction: input.direction ?? "direction_pending" }
         if (input.sourceDocumentId) {
           try {
-            localStorage.setItem(CREATED_DEALS_STORAGE_KEY, JSON.stringify([...current, { ...input, id: result.id }]))
+            localStorage.setItem(CREATED_DEALS_STORAGE_KEY, JSON.stringify([...current, createdDeal]))
           } catch {
             return { ok: false as const, error: "새 거래를 저장하지 못했습니다. 다시 시도해 주세요." }
           }
-        } else writeCreatedDeals([...current, { ...input, id: result.id }])
+        } else writeCreatedDeals([...current, createdDeal])
       }
+      return result
+    },
+    setCreatedDirection: async (dealId: string, direction: "sales" | "purchase") => {
+      if (!readCreatedDeals().some(deal => deal.id === dealId)) return { ok: false as const, error: "거래를 찾을 수 없습니다." }
+      const result = await localMutation(dealId)
+      if (result.ok) writeCreatedDeals(readCreatedDeals().map(deal => deal.id === dealId ? { ...deal, direction } : deal))
       return result
     },
     getDisplayId: (dealId: string) => renamedDealIds.get(dealId) ?? dealId,
