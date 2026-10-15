@@ -71,6 +71,7 @@ test('carrier actions use verified sites without offering refresh for unsupporte
     { ...original, id: 'supported', carrier: 'HMM' },
     { ...original, id: 'site', carrier: 'MSC' },
     { ...original, id: 'unknown', carrier: 'Unidentified Ocean Line' },
+    { ...original, id: 'punctuation', carrier: 'Hapag.Lloyd' },
     { ...original, id: 'stale', carrier: 'Maersk', tracking_health: 'stale', last_carrier_sync_at: '2026-10-10T00:00:00Z' },
     { ...original, id: 'failed', carrier: 'Hapag-Lloyd', tracking_health: 'fetch_failed' },
   ] } }))
@@ -79,13 +80,14 @@ test('carrier actions use verified sites without offering refresh for unsupporte
   const supported = page.locator('[data-shipment-id="supported"]')
   const site = page.locator('[data-shipment-id="site"]')
   const unknown = page.locator('[data-shipment-id="unknown"]')
+  const punctuation = page.locator('[data-shipment-id="punctuation"]')
   const stale = page.locator('[data-shipment-id="stale"]')
   const failed = page.locator('[data-shipment-id="failed"]')
   await expect(supported.getByRole('link', { name: '선사 사이트 ↗' })).toHaveCount(0)
   await expect(site.getByRole('link', { name: '선사 사이트 ↗' })).toHaveAttribute('href', 'https://www.msc.com/en/track-a-shipment')
   await expect(site.getByRole('link', { name: '선사 사이트 ↗' })).toHaveAttribute('target', '_blank')
   await expect(unknown.getByRole('link', { name: '선사 사이트 ↗' })).toHaveCount(0)
-  await expect(unknown).toContainText('선사 확인 필요')
+  await expect(unknown).not.toContainText('선사 확인 필요')
   await expect(stale).toContainText('조회 정보 오래됨')
   await expect(failed).toContainText('선사 조회 실패')
   await expect(failed).toContainText('마지막 조회 기록 없음')
@@ -95,9 +97,12 @@ test('carrier actions use verified sites without offering refresh for unsupporte
   await mockShipmentSession(page, true)
   await page.reload()
   await expect(supported.getByRole('button', { name: '추적 정보 갱신' })).toBeVisible()
+  await expect(punctuation.getByRole('button', { name: '추적 정보 갱신' })).toBeVisible()
   await expect(site.getByRole('button', { name: '추적 정보 갱신' })).toHaveCount(0)
   await expect(site.getByRole('button', { name: '일정 및 운송 상태 수정' })).toBeVisible()
   await expect(unknown.getByRole('link', { name: '선사 사이트 ↗' })).toHaveCount(0)
+  await expect(unknown.getByRole('button', { name: '일정 및 운송 상태 수정' })).toBeVisible()
+  await expect(unknown.getByRole('button', { name: '추적 정보 갱신' })).toHaveCount(0)
 })
 
 test('operational widths and typography follow the host tokens on desktop and mobile', async ({ page }) => {
