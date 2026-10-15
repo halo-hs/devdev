@@ -565,7 +565,6 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                           <HostButton title="일정 및 운송 상태 수정" aria-label="일정 및 운송 상태 수정" disabled={refreshState.status === "pending"} onClick={event => { editTrigger.current = event.currentTarget; setEditing(ship); }} size="sm" type="button" variant="outline"><Pencil aria-hidden="true" className="size-4" />수정</HostButton>
                         ) : null}
                       </div>
-                      {trackingAction.kind === "unknown" ? <p className="mt-1 text-body-13 text-text-muted">선사 확인 필요</p> : null}
                       {ship.tracking_health === "stale" || ship.tracking_health === "fetch_failed" ? (
                         <p className={`mt-1 text-body-13 ${ship.tracking_health === "stale" ? "text-status-warning" : "text-status-danger"}`}>{ship.tracking_health === "stale" ? "조회 정보 오래됨" : "선사 조회 실패"}</p>
                       ) : null}
