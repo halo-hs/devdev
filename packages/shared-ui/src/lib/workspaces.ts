@@ -3,7 +3,7 @@ export type WorkspaceKey = "ecoya"
 
 type WorkspaceAccess = {
   label: string
-  billingPlan: string
+  statusLabel: string
 }
 
 export type WorkspaceOption = {
@@ -23,8 +23,8 @@ export const workspaceOptions: WorkspaceOption[] = [
     description: "문서·거래·현장 업무",
     billingPlan: "Pro",
     products: {
-      erp: { label: "Trade OS", billingPlan: "Pro" },
-      snap: { label: "SNAP", billingPlan: "Free" },
+      erp: { label: "Trade OS", statusLabel: "구독 중" },
+      snap: { label: "SNAP", statusLabel: "체험 가능" },
     },
   },
 ]

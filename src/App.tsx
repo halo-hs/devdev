@@ -2164,6 +2164,7 @@ function AppNav({
               <WorkspaceSwitcher
                 workspaceId={workspaceId}
                 onWorkspaceChange={onWorkspaceChange}
+                product={product}
                 textOnly
               />
             </div>
@@ -2199,6 +2200,7 @@ function AppNav({
               <WorkspaceSwitcher
                 workspaceId={workspaceId}
                 onWorkspaceChange={onWorkspaceChange}
+                product={product}
                 textOnly
               />
             </div>
@@ -2233,6 +2235,7 @@ function AppNav({
           <WorkspaceSwitcher
             workspaceId={workspaceId}
             onWorkspaceChange={onWorkspaceChange}
+            product={product}
           />
         </div>
       </SidebarHeader>
