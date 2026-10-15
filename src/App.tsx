@@ -14959,6 +14959,21 @@ function DocumentConfirmedSummaryPanel({
       ? "전달 완료"
       : "전달 전"
   const latestRecipient = latestEmail?.recipient.replace(/(^.).*(@.*$)/, "$1***$2")
+  const approvalSummaryRow: ReviewChecklistRow | null = approvalChoice === "request"
+    ? {
+        label: "승인",
+        value: approvalStatus === "approved"
+          ? lastDecisionEvent
+            ? `${lastDecisionEvent.actor} 승인 · ${lastDecisionEvent.occurredAt}`
+            : "승인 완료"
+          : approvalStatus === "rejected"
+            ? "반려"
+            : approvalStatus === "requested"
+              ? "승인 대기"
+              : "승인 요청 전",
+        state: approvalStatus === "approved" ? "complete" : approvalStatus === "rejected" ? "blocked" : "pending",
+      }
+    : null
   const completedReviewRows = buildDocumentReviewRows({
     missingRequiredCount: 0,
     documentStyle,
@@ -14981,7 +14996,8 @@ function DocumentConfirmedSummaryPanel({
     deliveryRecordCount,
     interactive: false,
     deliveryAllowed,
-  }).map((row) => {
+  }).filter((row) => row.label !== "품목 합계" && row.label !== "문서 모양").flatMap((row) => {
+    if (row.label === "문서 확정" && approvalSummaryRow) return [approvalSummaryRow, row]
     if (row.label !== "은행 거절 전 점검") return row
     if (discrepancyReview.errorCount > 0) {
       return {
