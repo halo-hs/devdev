@@ -14015,8 +14015,8 @@ function DocumentReviewSharePanel({
       setLogoError("PNG, JPG 이미지 파일만 사용할 수 있습니다.")
       return
     }
-    if (file.size > 2 * 1024 * 1024) {
-      setLogoError("로고 파일은 2MB 이하만 사용할 수 있습니다.")
+    if (file.size > 200 * 1024) {
+      setLogoError("로고 파일은 200KB 이하만 사용할 수 있습니다.")
       return
     }
     setLogoError("")
@@ -14223,7 +14223,7 @@ function DocumentReviewSharePanel({
                     accept="image/png,image/jpeg,.png,.jpg,.jpeg"
                     aria-label="로고 파일 선택 또는 끌어놓기"
                     label="로고 파일 선택"
-                    instructions="PNG, JPG · 최대 2MB"
+                    instructions="PNG, JPG · 최대 200KB"
                     onFiles={applyLogoFiles}
                     className={cn(
                       "min-h-10 flex-row justify-start gap-2 border-solid bg-background px-2.5 py-1.5 text-left",
@@ -14240,7 +14240,7 @@ function DocumentReviewSharePanel({
                           : "로고 파일 선택"}
                       </span>
                       <span className="shrink-0 text-[11px] text-muted-foreground">
-                        PNG, JPG · 최대 2MB
+                        PNG, JPG · 최대 200KB
                       </span>
                     </span>
                     {documentStyle.logo?.source === "file" ? (
