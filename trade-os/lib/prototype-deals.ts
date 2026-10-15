@@ -32,7 +32,7 @@ export type Deal = {
     tone: "info" | "warning"
   }
   remaining?: string
-  overdue?: boolean
+  overdueAr?: boolean
   shared?: boolean
 }
 
@@ -156,7 +156,7 @@ export const deals: Deal[] = [
     nextWork: "finance" as const,
     nextAction: "지연된 결제 일정 확인",
     nextKind: "reconcile",
-    overdue: true,
+    overdueAr: true,
     remaining: "8 MT",
   },
   {

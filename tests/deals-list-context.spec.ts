@@ -1,5 +1,25 @@
 import { expect, test } from "@playwright/test"
 
+test("deal summary uses shipment ETA and overdue receivables", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-07-28T12:00:00") })
+
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto("/erp/deals")
+
+    await expect(page.getByText("7일 안에 도착 예정")).toBeVisible()
+    await expect(page.getByText("받을 돈이 늦어진 거래")).toBeVisible()
+    const etaSummary = page.getByRole("button", { name: "도착 임박 거래 보기" })
+    await expect(etaSummary).toHaveText("1건")
+    await etaSummary.click()
+    await expect(page.getByRole("table", { name: "거래 업무표" })).toContainText("DL-260708-01")
+    await expect(page.getByRole("table", { name: "거래 업무표" })).not.toContainText("DL-260629-03")
+
+    await page.getByRole("button", { name: "연체 거래 보기" }).click()
+    await expect(page.getByRole("table", { name: "거래 업무표" })).toContainText("DL-260629-03")
+  }
+})
+
 test("deadline basis stays separate from ETA and status has one badge with supporting text", async ({ page }) => {
   await page.goto("/erp/deals")
   const table = page.getByRole("table", { name: "거래 업무표" })

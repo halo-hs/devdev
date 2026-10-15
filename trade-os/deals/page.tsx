@@ -287,8 +287,13 @@ function ddayOrder(value: string) {
 }
 
 function isDueSoon(deal: Deal) {
-  const days = ddayOrder(deal.dday)
-  return days >= 0 && days <= 3
+  if (deal.stage !== "shipment") return false
+  const eta = new Date(`${deal.eta.replaceAll(".", "-")}T00:00:00`)
+  if (Number.isNaN(eta.getTime())) return false
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const days = Math.round((eta.getTime() - today.getTime()) / 86_400_000)
+  return days >= 0 && days <= 7
 }
 
 export function DealsScreen({
@@ -367,7 +372,7 @@ export function DealsScreen({
       if (assignee === "mine" && deal.assignee !== "나") return false
       if (assignee === "unassigned" && deal.assignee !== "미배정") return false
       if (risk === "active" && deal.risks.length === 0) return false
-      if (ops === "overdue" && !deal.overdue) return false
+      if (ops === "overdue" && !deal.overdueAr) return false
       if (ops === "remaining" && !deal.remaining) return false
       if (ops === "doc_gap" && deal.pending === 0) return false
       if (ops === "eta" && !isDueSoon(deal)) return false
@@ -899,7 +904,7 @@ export function DealsScreen({
                       </button>
                     ),
                     tone: "warning",
-                    detail: "D-3 이내 도착 예정",
+                    detail: "7일 안에 도착 예정",
                   },
                   {
                     label: "연체",
@@ -911,11 +916,11 @@ export function DealsScreen({
                           setPage(1)
                         }}
                       >
-                        {filtered.filter((deal) => deal.overdue).length}건
+                        {filtered.filter((deal) => deal.overdueAr).length}건
                       </button>
                     ),
                     tone: "danger",
-                    detail: "기한이 지난 거래",
+                    detail: "받을 돈이 늦어진 거래",
                   },
                 ]}
               />
@@ -1941,7 +1946,7 @@ function OverviewTab({
               ["통관", deal.stage === "customs" ? "서류 접수" : "시작 전", ""],
               [
                 "정산",
-                deal.overdue ? "연체" : "예정",
+                deal.overdueAr ? "연체" : "예정",
                 `${deal.currency} ${deal.amount}`,
               ],
             ].map(([label, value, detail]) => (
