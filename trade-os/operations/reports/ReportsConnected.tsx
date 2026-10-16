@@ -1,7 +1,7 @@
 "use client";
 import { Badge } from "@ecoya/design-system/ui/badge";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
-import { BusinessListToolbar, BusinessFilterField, BusinessFilterSelect } from "@shared/components/business-filters";
+import { BusinessListToolbar, BusinessFilterField } from "@shared/components/business-filters";
 
 import { Segmented } from "@trade-os/operations/components/SegmentedControl";
 export { Segmented } from "@trade-os/operations/components/SegmentedControl";
@@ -1427,12 +1427,14 @@ function ReportsConnectedSession({
         />
       </BusinessFilterField>
       {currencies.length > 0 ? (
-        <BusinessFilterSelect
-          label={copy.controls.currencyAria}
-          options={currencies.map((ccy) => ({ value: ccy, label: ccy }))}
-          value={currency ?? ""}
-          onValueChange={setCurrencyChoice}
-        />
+        <BusinessFilterField label={copy.controls.currencyAria}>
+          <Segmented
+            ariaLabel={copy.controls.currencyAria}
+            options={currencies.map((ccy) => ({ id: ccy, label: ccy }))}
+            value={currency ?? ""}
+            onChange={setCurrencyChoice}
+          />
+        </BusinessFilterField>
       ) : null}
       {isManager ? (
         <BusinessFilterField
