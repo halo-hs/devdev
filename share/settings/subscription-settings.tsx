@@ -112,6 +112,13 @@ function useSettingsDemo() {
   if (!value) throw new Error("SettingsDemoProvider is required")
   return value
 }
+export function useTradeSeatAssigned(role: SettingsRole) {
+  const state = useContext(SettingsDemoContext)
+  return state?.members.find((member) => member.id === role)?.erp ?? true
+}
+export function useSettingsDemoPresent() {
+  return useContext(SettingsDemoContext) !== null
+}
 const selectClass =
   "h-9 w-full rounded-md border bg-background px-2 text-sm disabled:opacity-50"
 export function SeatSummary({

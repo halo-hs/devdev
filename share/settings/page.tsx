@@ -58,6 +58,7 @@ import {
   OrganizationMembers,
   ProductsSubscriptions,
   SettingsDemoProvider,
+  useSettingsDemoPresent,
 } from "./subscription-settings"
 import { OrganizationAiUsage } from "./organization-ai-usage"
 import { BrandLogoInput } from "./brand-logo-input"
@@ -1095,6 +1096,8 @@ function SettingsHubContent({
 
 // Reset all demo data and pending feedback when organization or role changes.
 export function SettingsHubV2(props: Parameters<typeof SettingsHubContent>[0]) {
+  const sharedDemo = useSettingsDemoPresent()
+  if (sharedDemo) return <SettingsHubContent {...props} />
   return (
     <SettingsDemoProvider
       key={`${props.workspaceId}:${props.role ?? "owner"}:${(props.availableProducts ?? ["erp", "snap"]).join(",")}:${props.subscriptionKind ?? "separate"}`}
