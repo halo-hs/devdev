@@ -1,7 +1,7 @@
 "use client";
 import { Badge } from "@ecoya/design-system/ui/badge";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
-import { BusinessListToolbar, BusinessFilterField, BusinessFilterSelect } from "@shared/components/business-filters";
+import { BusinessListToolbar, BusinessFilterField } from "@shared/components/business-filters";
 
 import { Segmented } from "@trade-os/operations/components/SegmentedControl";
 export { Segmented } from "@trade-os/operations/components/SegmentedControl";
@@ -1427,12 +1427,14 @@ function ReportsConnectedSession({
         />
       </BusinessFilterField>
       {currencies.length > 0 ? (
-        <BusinessFilterSelect
-          label={copy.controls.currencyAria}
-          options={currencies.map((ccy) => ({ value: ccy, label: ccy }))}
-          value={currency ?? ""}
-          onValueChange={setCurrencyChoice}
-        />
+        <BusinessFilterField label={copy.controls.currencyAria}>
+          <Segmented
+            ariaLabel={copy.controls.currencyAria}
+            options={currencies.map((ccy) => ({ id: ccy, label: ccy }))}
+            value={currency ?? ""}
+            onChange={setCurrencyChoice}
+          />
+        </BusinessFilterField>
       ) : null}
       {isManager ? (
         <BusinessFilterField
@@ -2182,6 +2184,7 @@ function ReportsConnectedSession({
 
       {/* ── 마감 스냅샷 뷰 (동결 숫자 그대로 렌더 — 라이브 재계산 없음) ── */}
       <Dialog
+        className="max-w-[calc(100vw-2rem)]"
         cancelText={copy.closes.cancel}
         closeLabel={copy.closes.dialogCloseLabel}
         open={snapshotState.status !== "closed"}
