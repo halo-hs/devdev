@@ -41,6 +41,18 @@ test("creation sort sits below the pipeline switch and above the deal table", as
   await expect(table.getByRole("row").nth(1)).toContainText("DL-260803-03")
 })
 
+test("sales performance links open deal lists filtered to the selected person or counterparty", async ({ page }) => {
+  await page.goto("/erp/deals?lifecycle=all&assignee=%EC%A1%B0%EB%AF%BC%EC%98%81")
+  const table = page.getByRole("table", { name: "거래 업무표" })
+  await expect(page.getByLabel("적용된 필터").getByRole("button", { name: "담당자: 조민영" })).toBeVisible()
+  await expect(table).toContainText("KATAMAN ASIA-PACIFIC PTE LTD")
+  await expect(table).not.toContainText("Sakura Logistics KK")
+  await page.goto("/erp/deals?lifecycle=all&counterparty=ACME%20GmbH")
+  await expect(page.getByLabel("적용된 필터").getByRole("button", { name: "거래처: ACME GmbH" })).toBeVisible()
+  await expect(table).toContainText("ACME GmbH")
+  await expect(table).not.toContainText("KATAMAN ASIA-PACIFIC PTE LTD")
+})
+
 test("list filters ETA and counterparty together, updates counts and retains context in pipeline", async ({
   page,
 }) => {

@@ -315,11 +315,12 @@ export function DealsScreen({
   const [view, setView] = useState("operations")
   const [financeFilters, setFinanceFilters] = useState(defaultFinanceFilters)
   const [query, setQuery] = useState("")
-  const [counterparty, setCounterparty] = useState("all")
+  const [counterparty, setCounterparty] = useState(() => new URLSearchParams(window.location.search).get("counterparty") || "all")
+  const [assigneeName, setAssigneeName] = useState(() => new URLSearchParams(window.location.search).get("assignee")?.trim() ?? "")
   const [etaStart, setEtaStart] = useState("")
   const [etaEnd, setEtaEnd] = useState("")
   const [pending, setPending] = useState("all")
-  const [lifecycle, setLifecycle] = useState("open")
+  const [lifecycle, setLifecycle] = useState(() => new URLSearchParams(window.location.search).get("lifecycle") === "all" ? "all" : "open")
   const [pipeline, setPipeline] = useState(false)
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false)
   const [stage, setStage] = useState("active")
@@ -370,6 +371,7 @@ export function DealsScreen({
         return false
       if (counterparty !== "all" && deal.counterparty !== counterparty)
         return false
+      if (assigneeName && deal.assignee !== assigneeName) return false
       const eta = deal.eta.replaceAll(".", "-")
       if (etaStart && (!/^\d{4}-\d{2}-\d{2}$/.test(eta) || eta < etaStart))
         return false
@@ -425,6 +427,7 @@ export function DealsScreen({
   }, [
     allDeals,
     assignee,
+    assigneeName,
     ops,
     query,
     risk,
@@ -453,6 +456,7 @@ export function DealsScreen({
   if (pending !== "all") activeFilterChips.push({ key: "pending", label: `미확인: ${pending === "yes" ? "있음" : "없음"}`, clear: () => setPending("all") })
   if (stage !== "active") activeFilterChips.push({ key: "stage", label: `단계: ${stageLabels[stage as DealStage]}`, clear: () => setStage("active") })
   if (assignee !== "all") activeFilterChips.push({ key: "assignee", label: `담당자: ${assignee === "mine" ? "내 거래" : "미배정"}`, clear: () => setAssignee("all") })
+  if (assigneeName) activeFilterChips.push({ key: "assigneeName", label: `담당자: ${assigneeName}`, clear: () => setAssigneeName("") })
   if (risk !== "all") activeFilterChips.push({ key: "risk", label: "리스크: 있음", clear: () => setRisk("all") })
   if (ops !== "all") activeFilterChips.push({
     key: "ops",
@@ -610,6 +614,7 @@ export function DealsScreen({
                     pending !== "all" ||
                     stage !== "active" ||
                     assignee !== "all" ||
+                    assigneeName ||
                     risk !== "all" ||
                     ops !== "all" ||
                     counterparty !== "all" ||
@@ -694,6 +699,7 @@ export function DealsScreen({
                       value={assignee}
                       onChange={(value) => {
                         setAssignee(value)
+                        setAssigneeName("")
                         setPage(1)
                       }}
                       options={[
@@ -792,6 +798,7 @@ export function DealsScreen({
                     pending !== "all" ||
                     stage !== "active" ||
                     assignee !== "all" ||
+                    assigneeName ||
                     risk !== "all" ||
                     ops !== "all" ||
                     (view === "finance" &&
@@ -810,6 +817,7 @@ export function DealsScreen({
                         setPending("all")
                         setStage("active")
                         setAssignee("all")
+                        setAssigneeName("")
                         setRisk("all")
                         setOps("all")
                         setFinanceFilters(defaultFinanceFilters)
@@ -885,7 +893,7 @@ export function DealsScreen({
                         }}
                       >
                         <option value="all">전체</option>
-                        {[...new Set(allDeals.map((deal) => deal.counterparty))]
+                        {[...new Set([...allDeals.map((deal) => deal.counterparty), ...(counterparty !== "all" ? [counterparty] : [])])]
                           .sort()
                           .map((name) => (
                             <option key={name} value={name}>
