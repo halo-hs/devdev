@@ -6,6 +6,7 @@ import {
   type DealWorkKey,
 } from "@trade-os/lib/deal-workflow"
 import { DealsFinanceTable } from "@trade-os/deals/finance-table"
+import { SalesPrototype } from "@trade-os/extended-screens"
 import {
   filteredFinanceFacts,
   defaultFinanceFilters,
@@ -1025,10 +1026,11 @@ export function DealsScreen({
               onOpenDeal={(id) => onOpenDeal(id, "finance")}
             />
           ) : pipeline ? (
-            <div
-              aria-label="영업 파이프라인"
-              className="grid gap-3 md:grid-cols-2 xl:grid-cols-4"
-            >
+            <div className="space-y-6">
+              <div
+                aria-label="영업 파이프라인"
+                className="grid gap-3 md:grid-cols-2 xl:grid-cols-4"
+              >
               {(Object.entries(stageLabels) as [DealStage, string][]).map(
                 ([stageKey, label]) => {
                   const rows = filtered.filter(
@@ -1083,6 +1085,8 @@ export function DealsScreen({
                   )
                 }
               )}
+              </div>
+              <SalesPrototype embedded onOpenDeal={onOpenDeal} />
             </div>
           ) : (
             <Table
