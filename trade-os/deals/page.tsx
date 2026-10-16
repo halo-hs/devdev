@@ -25,7 +25,6 @@ import {
   ArrowUpRight,
   ChevronRight,
   GitBranch,
-  List,
   CircleAlert,
   Download,
   FilePlus2,
@@ -298,9 +297,11 @@ function isDueSoon(deal: Deal) {
 
 export function DealsScreen({
   onOpenDeal,
+  onOpenPipeline,
   role = "owner",
 }: {
   onOpenDeal: (dealId: string, tab?: DealWorkKey) => void
+  onOpenPipeline: () => void
   role?: DealsRole
 }) {
   const [view, setView] = useState("operations")
@@ -311,7 +312,6 @@ export function DealsScreen({
   const [etaEnd, setEtaEnd] = useState("")
   const [pending, setPending] = useState("all")
   const [lifecycle, setLifecycle] = useState("open")
-  const [pipeline, setPipeline] = useState(false)
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false)
   const [stage, setStage] = useState("active")
   const [assignee, setAssignee] = useState("all")
@@ -985,7 +985,6 @@ export function DealsScreen({
             value={view}
             onValueChange={(value) => {
               setView(value)
-              setPipeline(false)
               setPage(1)
             }}
             aria-label="거래 보기 방식"
@@ -1001,14 +1000,10 @@ export function DealsScreen({
           <Button
             variant="outline"
             size="sm"
-            aria-pressed={pipeline}
-            onClick={() => {
-              setPipeline((value) => !value)
-              setView("operations")
-            }}
+            onClick={onOpenPipeline}
           >
-            {pipeline ? <List /> : <GitBranch />}
-            {pipeline ? "업무표로 보기" : "영업 파이프라인"}
+            <GitBranch />
+            영업 파이프라인
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
@@ -1024,66 +1019,6 @@ export function DealsScreen({
               deals={visibleDeals}
               onOpenDeal={(id) => onOpenDeal(id, "finance")}
             />
-          ) : pipeline ? (
-            <div
-              aria-label="영업 파이프라인"
-              className="grid gap-3 md:grid-cols-2 xl:grid-cols-4"
-            >
-              {(Object.entries(stageLabels) as [DealStage, string][]).map(
-                ([stageKey, label]) => {
-                  const rows = filtered.filter(
-                    (deal) => deal.stage === stageKey
-                  )
-                  return (
-                    <section
-                      key={stageKey}
-                      className="rounded-lg border bg-muted/25 p-3"
-                    >
-                      <h3 className="mb-3 flex justify-between text-sm font-semibold">
-                        {label}
-                        <span className="text-muted-foreground">
-                          {rows.length}건
-                        </span>
-                      </h3>
-                      <div className="space-y-2">
-                        {rows.map((deal) => (
-                          <button
-                            key={deal.id}
-                            className="block w-full rounded-md border bg-background p-3 text-left hover:border-primary/50"
-                            onClick={() => onOpenDeal(deal.id)}
-                          >
-                            <strong className="block text-sm">
-                              {deal.counterparty}
-                            </strong>
-                            <span className="mt-1 block text-xs text-muted-foreground">
-                              {prototypeBackend.deals.getTitle(
-                                deal.id,
-                                deal.title
-                              )}
-                            </span>
-                            <span className="mt-2 block space-y-1 text-xs text-muted-foreground">
-                              {dealStateDetails(deal).map((detail) => (
-                                <span key={detail} className="block">
-                                  {detail}
-                                </span>
-                              ))}
-                            </span>
-                            <span className="mt-3 block text-xs text-primary">
-                              {deal.nextAction}
-                            </span>
-                          </button>
-                        ))}
-                        {!rows.length && (
-                          <p className="py-6 text-center text-xs text-muted-foreground">
-                            해당 단계의 거래가 없습니다.
-                          </p>
-                        )}
-                      </div>
-                    </section>
-                  )
-                }
-              )}
-            </div>
           ) : (
             <Table
               aria-label="거래 업무표"
@@ -1385,19 +1320,17 @@ export function DealsScreen({
           조건에 맞는 전체 거래 기준입니다. 통화·단위가 다른 값은 합산하지
           않습니다.
         </p>
-        {!pipeline && (
-          <TablePagination
-            page={currentPage}
-            pageSize={pageSize}
-            total={filtered.length}
-            aria-label="거래 목록 페이지 이동"
-            onPageChange={setPage}
-            onPageSizeChange={(nextPageSize) => {
-              setPageSize(nextPageSize)
-              setPage(1)
-            }}
-          />
-        )}
+        <TablePagination
+          page={currentPage}
+          pageSize={pageSize}
+          total={filtered.length}
+          aria-label="거래 목록 페이지 이동"
+          onPageChange={setPage}
+          onPageSizeChange={(nextPageSize) => {
+            setPageSize(nextPageSize)
+            setPage(1)
+          }}
+        />
 
         {role === "owner" ? (
           <section className="border-t pt-4">

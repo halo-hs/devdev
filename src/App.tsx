@@ -218,6 +218,7 @@ import {
   type HomePreviewState,
 } from "@trade-os/home/page"
 import { ReferenceOperations } from "@trade-os/operations/index"
+import { SalesPrototype } from "@trade-os/extended-screens"
 import { NotificationsPrototype } from "@share/notifications/page"
 import { notifications, type NotificationDealTarget } from "@share/notifications/data"
 import {
@@ -2403,6 +2404,7 @@ function WorkspaceHeader({
     monitoring: "운영 감시",
     reports: "결산 리포트",
     sales: "영업 성과",
+    "sales-pipeline": "연락처·파이프라인",
     notifications: "알림",
     settings: "설정",
     counterparty: "거래처 360",
@@ -2428,6 +2430,7 @@ function WorkspaceHeader({
     monitoring: "경영·성과",
     reports: "경영·성과",
     sales: "경영·성과",
+    "sales-pipeline": "기록",
     notifications: "알림",
     settings: "설정",
     billing: "설정",
@@ -17100,6 +17103,7 @@ export function App() {
                   ) : screen === "deals" ? (
                     <DealsScreen
                       role={erpHomeRole}
+                      onOpenPipeline={() => navigateTo("sales-pipeline")}
                       onOpenDeal={(dealId, tab) => {
                         setDealNotificationTarget(tab ? { tab: tab === "documents" ? "overview" : tab, sectionId: tab === "documents" ? "deal-documents" : tab === "fulfillment" ? "deal-fulfillment" : tab === "customs" ? "deal-customs" : "deal-finance" } : null)
                         setSelectedDealId(dealId)
@@ -17136,6 +17140,8 @@ export function App() {
                     <ReferenceOperations screen="reports" />
                   ) : screen === "sales" ? (
                     <ReferenceOperations screen="sales" />
+                  ) : screen === "sales-pipeline" ? (
+                    <SalesPrototype onOpenDeal={(dealId) => navigateTo("deal", { dealId })} />
                   ) : screen === "notifications" ? (
                     <NotificationsPrototype
                       readIds={readNotificationIds}

@@ -139,6 +139,7 @@ export type ErpMenuTarget =
   | "monitoring"
   | "reports"
   | "sales"
+  | "sales-pipeline"
   | "notifications"
   | "settings"
   | "counterparty"

@@ -15,7 +15,7 @@ test("empty deal table keeps its message visible and left aligned on mobile", as
   await expect(message.locator("..")).toHaveCSS("text-align", "left")
 })
 
-test("list filters ETA and counterparty together, updates counts and retains context in pipeline", async ({
+test("list filters ETA and counterparty together and updates counts", async ({
   page,
 }) => {
   await page.goto("/erp/deals")
@@ -35,13 +35,6 @@ test("list filters ETA and counterparty together, updates counts and retains con
   await page.getByLabel("기록된 ETA 종료", { exact: true }).fill("2026-08-03")
   await expect(table).toContainText("PO-260704-18.pdf")
   await expect(table).not.toContainText("ACME GmbH")
-  await page
-    .getByRole("button", { name: "영업 파이프라인", exact: true })
-    .click()
-  const board = page.getByLabel("영업 파이프라인", { exact: true })
-  await expect(board.getByRole("button")).toHaveCount(1)
-  await page.getByRole("button", { name: "업무표로 보기", exact: true }).click()
-  await expect(table.getByRole("row")).toHaveCount(2)
   await page.getByRole("button", { name: "전체 해제", exact: true }).click()
   await expect(table.getByRole("row")).toHaveCount(11)
   await page
@@ -50,6 +43,31 @@ test("list filters ETA and counterparty together, updates counts and retains con
     .click()
   await expect(table.getByRole("row")).toHaveCount(2)
   await expect(table).toContainText("Meridian Metals")
+})
+
+test("deal pipeline entry opens contact pipeline while sales performance keeps its route", async ({ page }) => {
+  await page.goto("/erp/deals")
+  await page.getByRole("button", { name: "영업 파이프라인", exact: true }).click()
+  await expect(page).toHaveURL(/\/erp\/sales-pipeline$/)
+  await expect(page.getByRole("heading", { name: "연락처·파이프라인", exact: true })).toBeVisible()
+  await page.getByPlaceholder("이름 또는 회사 검색").fill("Mia")
+  await expect(page.getByRole("button", { name: /Mia Chen/ })).toBeVisible()
+  await expect(page.getByRole("button", { name: /Anna Keller/ })).toHaveCount(0)
+  await page.getByRole("button", { name: /Mia Chen/ }).click()
+  await expect(page.getByText("활동 이력이 없습니다.")).toBeVisible()
+  await page.getByPlaceholder("이름 또는 회사 검색").fill("")
+  await page.getByRole("button", { name: "연락처 추가" }).click()
+  const editor = page.getByRole("dialog", { name: "연락처 추가" })
+  await editor.getByRole("textbox", { name: "이름" }).fill("Alex Kim")
+  await editor.getByRole("textbox", { name: "회사" }).fill("ACME GmbH")
+  await editor.getByRole("button", { name: "저장" }).click()
+  await expect(page.getByRole("button", { name: /Alex Kim/ })).toBeVisible()
+  await page.getByRole("button", { name: /Anna Keller/ }).click()
+  await page.getByRole("button", { name: /DL-260707-04/ }).first().click()
+  await expect(page).toHaveURL(/\/erp\/deals\/DL-260707-04$/)
+  await page.goto("/erp/sales")
+  await expect(page).toHaveURL(/\/erp\/sales$/)
+  await expect(page.getByText("영업 성과", { exact: true }).first()).toBeVisible()
 })
 
 test("keyboard finance action opens finance directly and mobile keeps overflow within the table", async ({

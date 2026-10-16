@@ -25,6 +25,7 @@ const ERP_SCREEN_PATHS: Partial<Record<ErpRouteScreen, string>> = {
   monitoring: "/erp/monitoring",
   reports: "/erp/reports",
   sales: "/erp/sales",
+  "sales-pipeline": "/erp/sales-pipeline",
   notifications: "/erp/notifications",
   counterparty: "/erp/counterparties",
   snap: "/erp/evidence",
