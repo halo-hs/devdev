@@ -3,6 +3,7 @@
 import "./SettlementDunningPanel.css";
 
 import { useId, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Check, ChevronDown, ChevronUp, Copy, ExternalLink } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@shared/components/ui/popover";
 
@@ -105,8 +106,8 @@ export function SettlementDunningPanel({
         return navigator.clipboard.writeText(draft);
       })
       .then(
-        () => setCopyState({ id, status: "copied" }),
-        () => setCopyState({ id, status: "error" }),
+        () => { setCopyState({ id, status: "copied" }); toast.success(copy.copied); },
+        () => { setCopyState({ id, status: "error" }); toast.error(copy.copyError); },
       );
   };
 
@@ -125,7 +126,7 @@ export function SettlementDunningPanel({
       </div>
       <span className="whitespace-nowrap text-right font-medium"><span className="dunning-field-label mr-2 text-xs font-normal text-text-secondary">미결제금액</span>{row.amount}</span>
       <span className="whitespace-nowrap text-text-secondary"><span className="dunning-field-label mr-2 text-xs">지급기한</span>{row.dueDate}</span>
-      <div className="flex justify-end">
+      <div className="dunning-action-group" role="group" aria-label={`${row.counterparty} 초안 작업`}>
         <Popover open={previewId === row.entry.id} onOpenChange={(open) => setPreviewId(open ? row.entry.id : null)}>
           <PopoverTrigger asChild>
             <button type="button" className={`${buttonClass} rounded-r-none border-r-0`} aria-label={`${row.counterparty} 초안 미리보기`}>미리보기</button>
@@ -139,7 +140,6 @@ export function SettlementDunningPanel({
               </button>
               <a className={buttonClass} href={row.mailto}>{copy.openMail}<ExternalLink className="size-3.5" aria-hidden="true" /></a>
             </div>
-            {copyState?.id === row.entry.id && <p role="status" className="text-xs">{copyState.status === "copied" ? copy.copied : copy.copyError}</p>}
           </PopoverContent>
         </Popover>
         <button type="button" className={`${buttonClass} w-8 rounded-l-none px-0`} aria-label={`${row.counterparty} ${copy.copy}`} onClick={() => copyDraft(row.entry.id, row.draft)}>
@@ -186,7 +186,6 @@ export function SettlementDunningPanel({
           <Button onClick={onRetry} size="sm" type="button" variant="tertiary">{copy.retry}</Button>
         </div>
       ) : rows.length === 0 ? <p className="pb-4 text-[13px] text-text-muted">{copy.empty}</p> : null}
-      {copyState && !previewId && <p role="status" className="sr-only">{copyState.status === "copied" ? copy.copied : copy.copyError}</p>}
     </SectionPanel>
   );
 }
