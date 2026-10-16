@@ -1575,6 +1575,7 @@ function ReportsConnectedSession({
                   sub={
                     <>
                       {replaceTokens(copy.charts.gp.sub, { currency: currencyLabel })}
+                      <span className="mt-1 block text-label-12 text-text-muted">{copy.charts.gp.basis}</span>
                       {gpExclusion.text ? (
                         <>
                           {" — "}
@@ -1775,7 +1776,7 @@ function ReportsConnectedSession({
                 sub={replaceTokens(copy.topn.sub, {
                   months: String(rangeMonths),
                   currency: topCurrency ?? "",
-                })}
+                }).replace(/\s*·\s*$/, "")}
               >
                 {!topForbidden && topState.status === "error" && topSnapshot ? (
                   <CardStaleNotice

@@ -1,4 +1,7 @@
 "use client";
+
+import { counterpartyDisplayState } from "./counterpartyDisplayState";
+import { StatusBadge } from "@trade-os/operations/components/StatusBadge";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField, BusinessFilterSelect } from "@shared/components/business-filters";
 import { Search } from "lucide-react";
@@ -1237,6 +1240,7 @@ function SalesPerformanceIdentityScope({
               sub={
                 <>
                   {replaceTokens(copy.gpTrend.sub, { currency: currencyLabel })}
+                  <span className="mt-1 block text-label-12 text-text-muted">{copy.gpTrend.basis}</span>
                   {gpExclusion.text ? (
                     <>
                       {" — "}
@@ -1389,7 +1393,7 @@ function SalesPerformanceIdentityScope({
               <p className="mt-3 text-body-13 text-text-muted">{copy.table.empty}</p>
             ) : (
               <div className="mt-3 overflow-x-auto" data-ui="salesperf-status-scroll">
-                <div className="min-w-[1200px]" data-ui="salesperf-status-table">
+                <div className="min-w-[1400px]" data-ui="salesperf-status-table">
                   {statusItemChunks.map((chunk, chunkIndex) => {
                     const chunkStart = chunkIndex * STATUS_TABLE_CHUNK_SIZE;
                     const chunkEnd = chunkStart + chunk.length;
@@ -1412,12 +1416,13 @@ function SalesPerformanceIdentityScope({
                           className="w-full table-fixed border-collapse text-body-13 tabular-nums"
                         >
                           <colgroup>
-                            <col className="w-[24%]" />
+                            <col className="w-[18%]" />
+                            <col className="w-[12%]" />
                             <col className="w-[7%]" />
                             <col className="w-[9%]" />
                             <col className="w-[9%]" />
                             <col className="w-[9%]" />
-                            <col className="w-[16%]" />
+                            <col className="w-[10%]" />
                             <col className="w-[7%]" />
                             <col className="w-[7%]" />
                             <col className="w-[7%]" />
@@ -1426,6 +1431,7 @@ function SalesPerformanceIdentityScope({
                           <HostTableHeader className={chunkIndex === 0 ? undefined : "sr-only"}>
                             <HostTableRow className="border-b border-border-muted text-left text-label-12 text-text-muted">
                               <HostTableHead className="py-1.5 pr-3 font-medium">{copy.table.columns.counterparty}</HostTableHead>
+                              <HostTableHead className="py-1.5 pr-3 font-medium">상태</HostTableHead>
                               <HostTableHead className="py-1.5 pr-3 font-medium">{copy.table.columns.currency}</HostTableHead>
                               <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.table.columns.totalDue}</HostTableHead>
                               <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.table.columns.outstanding}</HostTableHead>
@@ -1441,6 +1447,7 @@ function SalesPerformanceIdentityScope({
                             {chunk.map((item, chunkOffset) => {
                               const rowIndex = chunkStart + chunkOffset;
                               const overdue = amountCell(item.overdue);
+                              const displayState = counterpartyDisplayState(item);
                               return (
                                 <HostTableRow
                                   key={`${item.counterparty}-${item.currency}`}
@@ -1463,6 +1470,10 @@ function SalesPerformanceIdentityScope({
                                         <Search className="size-4" aria-hidden="true" />
                                       </a>
                                     </span>
+                                  </HostTableCell>
+                                  <HostTableCell className="py-1.5 pr-3" data-ui="counterparty-status-evidence">
+                                    <StatusBadge tone={displayState.tone}>{displayState.label}</StatusBadge>
+                                    <p className="mt-1 text-label-12 text-text-muted">{!displayState.writtenOff.valid || displayState.writtenOff.scaled < 0n ? "상각 확인 필요" : displayState.writtenOff.scaled > 0n ? `상각 처리됨 · ${fmtAmount(displayState.writtenOff.raw, item.currency)} ${item.currency}` : null}</p>
                                   </HostTableCell>
                                   <HostTableCell className="py-1.5 pr-3 text-text-secondary">{item.currency}</HostTableCell>
                                   <HostTableCell className="py-1.5 pr-3 text-right">

@@ -1,3 +1,4 @@
+import { demoExceptionResponse } from "./settlementExceptions"
 import captured from './responses.json'
 import reportFixtures from './reports.json'
 import { deals } from '@trade-os/lib/prototype-deals'
@@ -88,6 +89,8 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
   const url = new URL(rawPath.replace(/^\/(?:__reference3030\/)?api\/(?:platform|v1)/, ''), 'https://demo.invalid')
   const path = url.pathname, query = url.searchParams
   const method = (init?.method || 'GET').toUpperCase()
+  const exception = demoExceptionResponse(path, method, typeof init?.body === "string" ? init.body : undefined)
+  if (exception.handled) return copy(exception.value) as T
   let value: unknown
   if (method !== 'GET') {
     const match = path.match(/^\/trade\/shipments\/([^/]+)\/refresh-tracking$/)
@@ -165,7 +168,7 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
   else if (path === '/me/entitlements') value = {
     contract_version: 'demo-v1', organization_id: demoOrg, generated_at: new Date().toISOString(), tier: 'pro',
     products: { erp: { enabled: true }, snap: { enabled: true }, intelligence: { enabled: false } },
-    features: { 'erp.write': true, 'erp.reports': true, 'erp.sales_performance': true, 'erp.month_close': true }, workspace: { default_product: 'TRADE_OS' },
+    features: { 'erp.write': true, 'erp.money.record': true, 'erp.money': true, 'erp.reports': true, 'erp.sales_performance': true, 'erp.month_close': true }, workspace: { default_product: 'TRADE_OS' },
   }
   else if (path === '/erp/payment-schedules') value = { items: [], pagination: { total: 0, limit: 200, offset: 0 } }
   else if (path === '/trade/shipments') {

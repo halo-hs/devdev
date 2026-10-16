@@ -1,5 +1,6 @@
-import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 "use client";
+
+import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField } from "@shared/components/business-filters";
 
 import Link from "@trade-os/operations/compat/link";
@@ -4142,13 +4143,16 @@ function SettlementView({
                                 if (denied) return denied;
                                 if (
                                   error instanceof ApiError &&
-                                  [
+                                  ([
                                     "ERP_SETTLEMENT_CURRENCY_MISMATCH",
+                                    "ERP_SETTLEMENT_COUNTERPARTY_MISMATCH",
+                                    "AUTH_MISSING_TOKEN",
+                                    "AUTH_INVALID_TOKEN",
                                     "ERP_SETTLEMENT_SCHEDULE_CLOSED",
                                     "ERP_SETTLEMENT_DUPLICATE_SOURCE_DOCUMENT",
                                     "ERP_SETTLEMENT_VALIDATION",
                                     "ERP_SETTLEMENT_SCHEDULE_NOT_FOUND",
-                                  ].includes(error.code)
+                                  ].includes(error.code) || [400, 401, 422].includes(error.status))
                                 ) {
                                   return recordCashErrorMessage(
                                     error,
@@ -4304,6 +4308,7 @@ function SettlementView({
       ) : null}
 
       <Dialog
+        className="max-w-[calc(100vw-2rem)]"
         cancelText={copy.ledger.formCancel}
         closeLabel={copy.ledger.dialogCloseLabel}
         okText={copy.ledger.formSave}
@@ -4405,6 +4410,7 @@ function SettlementView({
         </div>
       </Dialog>
       <Dialog
+        className="max-w-[calc(100vw-2rem)]"
         cancelText={copy.ledger.writeoff.cancel}
         closeLabel={copy.ledger.dialogCloseLabel}
         okText={copy.ledger.writeoff.finalize}
@@ -4868,6 +4874,7 @@ function SettlementView({
       </Dialog>
 
       <Dialog
+        className="max-w-[calc(100vw-2rem)]"
         cancelText={copy.ledger.uncompleteCancel}
         closeLabel={copy.ledger.dialogCloseLabel}
         okText={copy.ledger.uncompleteConfirm}
