@@ -287,6 +287,14 @@ function ddayOrder(value: string) {
     : Number.POSITIVE_INFINITY
 }
 
+function dealCreationTime(deal: Deal) {
+  if (deal.createdAt) return Date.parse(deal.createdAt)
+  const match = /^DL-(\d{2})(\d{2})(\d{2})-/.exec(deal.id)
+  return match
+    ? Date.UTC(2000 + Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    : 0
+}
+
 function isDueSoon(deal: Deal) {
   if (deal.stage !== "shipment") return false
   const eta = new Date(`${deal.eta.replaceAll(".", "-")}T00:00:00`)
@@ -392,6 +400,7 @@ export function DealsScreen({
       return true
     })
     return rows.sort((a, b) => {
+      if (sort === "created") return dealCreationTime(b) - dealCreationTime(a)
       if (sort === "risk") return b.risks.length - a.risks.length
       if (sort === "amount") {
         const currencyOrder = a.currency.localeCompare(b.currency)
@@ -435,6 +444,37 @@ export function DealsScreen({
     () => filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize),
     [currentPage, filtered, pageSize]
   )
+  const activeFilterChips: { key: string; label: string; clear: () => void }[] = []
+  if (lifecycle !== "all") activeFilterChips.push({
+    key: "lifecycle",
+    label: `주문 결정: ${{ open: "열림", closed: "종결", cancelled: "취소", unknown: "미확인" }[lifecycle] ?? lifecycle}`,
+    clear: () => setLifecycle("all"),
+  })
+  if (pending !== "all") activeFilterChips.push({ key: "pending", label: `미확인: ${pending === "yes" ? "있음" : "없음"}`, clear: () => setPending("all") })
+  if (stage !== "active") activeFilterChips.push({ key: "stage", label: `단계: ${stageLabels[stage as DealStage]}`, clear: () => setStage("active") })
+  if (assignee !== "all") activeFilterChips.push({ key: "assignee", label: `담당자: ${assignee === "mine" ? "내 거래" : "미배정"}`, clear: () => setAssignee("all") })
+  if (risk !== "all") activeFilterChips.push({ key: "risk", label: "리스크: 있음", clear: () => setRisk("all") })
+  if (ops !== "all") activeFilterChips.push({
+    key: "ops",
+    label: `운영: ${{ overdue: "연체", remaining: "미선적 잔량", doc_gap: "서류 갭", eta: "도착 임박", quantity: "수량 불일치" }[ops] ?? ops}`,
+    clear: () => setOps("all"),
+  })
+  if (counterparty !== "all") activeFilterChips.push({ key: "counterparty", label: `거래처: ${counterparty}`, clear: () => setCounterparty("all") })
+  if (etaStart) activeFilterChips.push({ key: "etaStart", label: `ETA 시작: ${etaStart}`, clear: () => setEtaStart("") })
+  if (etaEnd) activeFilterChips.push({ key: "etaEnd", label: `ETA 종료: ${etaEnd}`, clear: () => setEtaEnd("") })
+  if (view === "finance") {
+    if (financeFilters.currency !== "all") activeFilterChips.push({ key: "currency", label: `금융 통화: ${financeFilters.currency}`, clear: () => setFinanceFilters((current) => ({ ...current, currency: "all" })) })
+    if (financeFilters.result !== "all") activeFilterChips.push({
+      key: "result",
+      label: `손익 상태: ${{ positive: "흑자", negative: "적자", unknown: "근거 확인 필요" }[financeFilters.result] ?? financeFilters.result}`,
+      clear: () => setFinanceFilters((current) => ({ ...current, result: "all" })),
+    })
+    if (financeFilters.balance !== "all") activeFilterChips.push({
+      key: "balance",
+      label: `정산 잔액: ${{ receivable: "받을 돈 있음", payable: "줄 돈 있음", clear: "잔액 없음", unknown: "잔액 확인 필요" }[financeFilters.balance] ?? financeFilters.balance}`,
+      clear: () => setFinanceFilters((current) => ({ ...current, balance: "all" })),
+    })
+  }
 
   const exportCsv = () => {
     const rows =
@@ -583,6 +623,25 @@ export function DealsScreen({
               }
               result={`${filtered.length}건 표시 중`}
             >
+              {activeFilterChips.length > 0 && (
+                <div aria-label="적용된 필터" className="flex w-full flex-wrap gap-2">
+                  {activeFilterChips.map((filter) => (
+                    <Button
+                      key={filter.key}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full border-white/25 bg-white/15 text-white hover:bg-white/25 hover:text-white"
+                      onClick={() => {
+                        filter.clear()
+                        setPage(1)
+                      }}
+                    >
+                      {filter.label}
+                      <X className="size-3" />
+                    </Button>
+                  ))}
+                </div>
+              )}
               {advancedFiltersOpen && (
                 <div id="deal-advanced-filters" className="w-full space-y-3 border-t border-white/20 pt-3">
                   <div className="flex flex-wrap items-end gap-3">
@@ -725,28 +784,6 @@ export function DealsScreen({
                       </>
                     )}
                   </div>
-                  {lifecycle !== "all" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full border-white/25 bg-white/15 text-white"
-                      onClick={() => {
-                        setLifecycle("all")
-                        setPage(1)
-                      }}
-                    >
-                      주문 결정:{" "}
-                      {
-                        {
-                          open: "열림",
-                          closed: "종결",
-                          cancelled: "취소",
-                          unknown: "미확인",
-                        }[lifecycle]
-                      }
-                      <X className="size-3" />
-                    </Button>
-                  )}
                   {(query ||
                     lifecycle !== "all" ||
                     counterparty !== "all" ||
@@ -992,21 +1029,6 @@ export function DealsScreen({
           <span className="ml-auto text-xs text-muted-foreground">
             {currentPage} / {totalPages} 페이지
           </span>
-          <SelectControl
-            label="정렬"
-            value={sort}
-            onChange={(value) => {
-              setSort(value)
-              setPage(1)
-            }}
-            options={[
-              ["dday", "D-day 임박순"],
-              ["risk", "리스크 높은순"],
-              ["amount", "통화별 금액 높은순"],
-              ["counterparty", "거래처명"],
-              ["eta", "ETA 임박순"],
-            ]}
-          />
           <Button
             variant="outline"
             size="sm"
@@ -1025,6 +1047,24 @@ export function DealsScreen({
             ? "송장·입출금은 누적 흐름, 받을 돈·줄 돈은 현재 잔액입니다. 통화별로 표시합니다."
             : "금액은 출처 문서 기준입니다. 근거가 없는 값은 —로 표시합니다."}
         </p>
+        <div className="flex justify-end">
+          <SelectControl
+            label="정렬"
+            value={sort}
+            onChange={(value) => {
+              setSort(value)
+              setPage(1)
+            }}
+            options={[
+              ["dday", "D-day 임박순"],
+              ["created", "최신 생성순"],
+              ["risk", "리스크 높은순"],
+              ["amount", "통화별 금액 높은순"],
+              ["counterparty", "거래처명"],
+              ["eta", "ETA 임박순"],
+            ]}
+          />
+        </div>
         <section className="[container-type:inline-size]">
           {view === "finance" ? (
             <DealsFinanceTable
@@ -1510,6 +1550,7 @@ export function DealsScreen({
               {
                 ...deals[1],
                 id: `DL-260711-${String(createdDeals.length + 1).padStart(2, "0")}`,
+                createdAt: new Date().toISOString(),
                 title,
                 counterparty,
                 primaryItem: "품목 미등록",
