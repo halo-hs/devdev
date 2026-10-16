@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
 import {
   AlertTriangle,
   ArrowLeft,
@@ -1585,20 +1585,54 @@ const emptySalesContactForm: SalesContactForm = {
 }
 
 export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: (dealId: string) => void; embedded?: boolean } = {}) {
-  const [contacts, setContacts] = useState<SalesPreviewContact[]>(salesContacts)
+  // Explicit prototype fixtures; these are not server authorization decisions.
+  const [preview] = useState(() => new URLSearchParams(window.location.search).get("salesState") ?? "ready")
+  const [listState, setListState] = useState<"ready" | "loading" | "error">(preview === "list-error" ? "error" : preview === "list-loading" ? "loading" : "ready")
+  const [detailState, setDetailState] = useState<"ready" | "loading" | "error" | "forbidden" | "not-found">(
+    preview === "detail-error" ? "error" : preview === "detail-loading" ? "loading" : preview === "forbidden" ? "forbidden" : preview === "not-found" ? "not-found" : "ready"
+  )
+  const [retryTarget, setRetryTarget] = useState<"list" | "detail" | null>(null)
+  const canWrite = preview !== "readonly"
+  useEffect(() => {
+    if (!retryTarget) return
+    const timer = window.setTimeout(() => {
+      if (retryTarget === "list") setListState("ready")
+      else setDetailState("ready")
+      setRetryTarget(null)
+    }, 300)
+    return () => window.clearTimeout(timer)
+  }, [retryTarget])
+  const retry = (target: "list" | "detail") => {
+    if (target === "list") setListState("loading")
+    else setDetailState("loading")
+    setRetryTarget(target)
+  }
+  const [contacts, setContacts] = useState<SalesPreviewContact[]>(() => preview === "list-empty" ? [] : salesContacts.map((contact, index) => preview === "archived" && index === 0 ? { ...contact, status: "보관" } : contact))
   const [selectedId, setSelectedId] = useState(salesContacts[0].id)
   const [query, setQuery] = useState("")
   const [page, setPage] = useState(1)
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<SalesContactForm>(emptySalesContactForm)
-  const selected = contacts.find((contact) => contact.id === selectedId) ?? contacts[0]
   const visibleContacts = contacts.filter((contact) =>
     `${contact.name} ${contact.company}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())
+  )
+  const selected = listState === "ready" ? visibleContacts.find((contact) => contact.id === selectedId) : undefined
+  const selectContact = (id: string) => {
+    setSelectedId(id)
+    setDetailState("loading")
+    setRetryTarget("detail")
+  }
+  const loadingNotice = (label: string) => (
+    <div role="status" aria-label={label} className="space-y-3 p-4" aria-busy="true">
+      <span className="sr-only">{label}</span>
+      {[0, 1, 2].map((row) => <div key={row} className="h-12 animate-pulse rounded-md bg-muted" />)}
+    </div>
   )
   const totalPages = Math.max(1, Math.ceil(visibleContacts.length / 50))
   const pagedContacts = visibleContacts.slice((page - 1) * 50, page * 50)
   const openEditor = (contact?: SalesPreviewContact) => {
+    if (!canWrite || (contact && (contact.status === "보관" || detailState !== "ready"))) return
     setEditingId(contact?.id ?? null)
     setForm(contact ? {
       name: contact.name,
@@ -1612,6 +1646,7 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
     setEditorOpen(true)
   }
   const saveContact = () => {
+    if (!canWrite || (editingId && (detailState !== "ready" || contacts.find((contact) => contact.id === editingId)?.status === "보관"))) return
     const name = form.name.trim()
     if (!name) return
     if (editingId) {
@@ -1629,7 +1664,7 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
     { id: "DL-260707-04", amount: "380,000.00 USD", stage: "계약", owner: "나", risk: 0 },
     { id: "DL-260918-91", amount: "50,820.00 USD", stage: "정산", owner: "조민영", risk: 0 },
     { id: "DL-260625-07", amount: "—", stage: "계약", owner: "나", risk: 0 },
-  ].filter((deal) => selected.dealIds.includes(deal.id))
+  ].filter((deal) => selected?.dealIds.includes(deal.id))
   const dealStages = ["계약", "선적", "통관", "정산"]
   return (
     <AppPage
@@ -1639,11 +1674,11 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
       description="연락처를 선택해 현재 단계, 관련 Deal과 읽기 전용 활동 이력을 한 화면에서 확인합니다."
       actions={
         <div className="flex flex-wrap items-center gap-2">
-          <Button size="sm" onClick={() => openEditor()}>
+          {canWrite && <Button size="sm" onClick={() => openEditor()}>
             <Plus data-icon="inline-start" />
             연락처 추가
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => { setQuery(""); setPage(1); setSelectedId(contacts[0]?.id ?? "") }}>
+          </Button>}
+          <Button size="sm" variant="outline" onClick={() => retry("list")} disabled={listState === "loading"}>
           <RefreshCcw data-icon="inline-start" />
           새로고침
           </Button>
@@ -1655,17 +1690,19 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
           <div className="border-b p-4">
             <div className="relative">
               <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input className="pl-9" placeholder="이름 또는 회사 검색" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1) }} />
+              <Input className="pl-9" placeholder="이름 또는 회사 검색" value={query} onChange={(event) => { const value = event.target.value; setQuery(value); setPage(1); const first = contacts.find((contact) => `${contact.name} ${contact.company}`.toLocaleLowerCase().includes(value.trim().toLocaleLowerCase())); setSelectedId(first?.id ?? ""); setDetailState("ready") }} />
             </div>
           </div>
           <div className="grid">
-            {pagedContacts.map((contact) => (
+            {listState === "loading" ? loadingNotice("연락처 목록 불러오는 중") : listState === "error" ? (
+              <div className="p-4"><Notice tone="danger" title="연락처 목록을 불러오지 못했습니다." action={<Button size="sm" variant="outline" onClick={() => retry("list")}>다시 시도</Button>} /></div>
+            ) : pagedContacts.map((contact) => (
               <button
                 key={contact.id}
-                onClick={() => setSelectedId(contact.id)}
+                onClick={() => selectContact(contact.id)}
                 className={cn(
                   "border-b p-4 text-left hover:bg-sidebar-accent",
-                  selected.id === contact.id && "bg-sidebar-accent"
+                  selected?.id === contact.id && "bg-sidebar-accent"
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -1680,9 +1717,9 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
                 </p>
               </button>
             ))}
-            {visibleContacts.length === 0 ? <p className="p-4 text-sm text-muted-foreground">검색 결과가 없습니다.</p> : null}
+            {listState === "ready" && visibleContacts.length === 0 ? <p className="p-4 text-sm text-muted-foreground">{query.trim() ? "검색 결과가 없습니다." : canWrite ? "연락처가 없습니다. ‘연락처 추가’로 등록하거나 거래 상세에서 연결하세요." : "표시할 연락처가 없습니다. 권한이 있는 팀원에게 등록을 요청하세요."}</p> : null}
           </div>
-          {visibleContacts.length > 50 ? (
+          {listState === "ready" && visibleContacts.length > 50 ? (
             <div className="flex items-center justify-between gap-2 p-3 text-xs text-muted-foreground">
               <span>연락처 {visibleContacts.length}명</span>
               <div className="flex items-center gap-1">
@@ -1693,7 +1730,16 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
             </div>
           ) : null}
         </aside>
-        <section className="min-w-0 p-4 sm:p-6">
+        <section className="min-w-0 p-4 sm:p-6" aria-label="선택 연락처 상세">
+          {!selected ? null : detailState === "loading" ? loadingNotice("연락처 상세 불러오는 중") : detailState === "error" ? (
+            <Notice tone="danger" title="영업 파이프라인을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요." action={<Button size="sm" variant="outline" onClick={() => retry("detail")}>다시 시도</Button>} />
+          ) : detailState === "forbidden" ? (
+            <Notice tone="danger" title="이 연락처의 파이프라인을 볼 권한이 없습니다.">조직 관리자에게 권한을 요청하세요.</Notice>
+          ) : detailState === "not-found" ? (
+            <Notice tone="danger" title="연락처가 삭제되었거나 접근할 수 없습니다.">다른 연락처를 선택해 주세요.</Notice>
+          ) : <>
+          {selected.status === "보관" && <Notice title="보관된 연락처입니다.">이력은 확인할 수 있지만 연락처는 수정할 수 없습니다.</Notice>}
+          {!canWrite && <p className="mb-3 text-sm text-muted-foreground">보기 전용 · 연락처를 추가하거나 수정할 권한이 없습니다.</p>}
           <div className="flex flex-col gap-3 pb-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-xs text-muted-foreground">선택 연락처</p>
@@ -1711,9 +1757,9 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
                   <Badge key={count} variant="outline">{count}</Badge>
                 ))}
               </div>
-              <Button size="icon" variant="ghost" aria-label="연락처 수정" onClick={() => openEditor(selected)}>
+              {canWrite && selected.status !== "보관" && <Button size="icon" variant="ghost" aria-label="연락처 수정" onClick={() => openEditor(selected)}>
                 <Pencil className="size-4" />
-              </Button>
+              </Button>}
             </div>
           </div>
           <div className="mt-6 grid gap-8">
@@ -1774,9 +1820,9 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
               />
               <div className="mt-3 border-y">
                 {(selected.deals === 0 ? [] : [
-                  { type: "견적서 전달", time: "07.31 16:20", description: "견적서를 고객에게 전달했습니다.", deal: "DL-260707-04" },
-                  { type: "연락처 업데이트", time: "07.30 11:02", description: "전화번호와 담당 범위를 업데이트했습니다.", deal: "DL-260707-04" },
-                  { type: "Deal 연결", time: "07.29 09:14", description: "연락처를 거래 담당자로 연결했습니다.", deal: "DL-260918-91" },
+                  { type: "견적서 전달", time: "2026.07.31 16:20", description: "견적서를 고객에게 전달했습니다.", deal: "DL-260707-04" },
+                  { type: "연락처 업데이트", time: "2026.07.30 11:02", description: "전화번호와 담당 범위를 업데이트했습니다.", deal: "DL-260707-04" },
+                  { type: "Deal 연결", time: "2026.07.29 09:14", description: "연락처를 거래 담당자로 연결했습니다.", deal: "DL-260918-91" },
                 ].filter((event) => selected.dealIds.includes(event.deal))).map((event) => (
                   <div
                     key={`${event.type}-${event.time}`}
@@ -1790,10 +1836,11 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
                     </div>
                   </div>
                 ))}
-                {selected.deals === 0 ? <p className="py-4 text-sm text-muted-foreground">활동 이력이 없습니다.</p> : null}
+                {!selected.dealIds.some((id) => ["DL-260707-04", "DL-260918-91"].includes(id)) ? <p className="py-4 text-sm text-muted-foreground">활동 이력이 없습니다.</p> : null}
               </div>
             </div>
           </div>
+          </>}
         </section>
       </div>
       <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
