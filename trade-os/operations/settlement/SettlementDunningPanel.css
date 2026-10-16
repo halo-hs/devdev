@@ -20,3 +20,31 @@
 @container dunning (max-width: 639px) {
   #settlement-dunning .dunning-field-label { display: block; margin-right: 0; }
 }
+
+/* Scope overrides to this split action; imported utilities must not round each half. */
+#settlement-dunning .dunning-action-group {
+  display: inline-flex;
+  justify-self: end;
+  align-items: stretch;
+  gap: 0;
+  border: 1px solid var(--color-border-muted, #dfe2e8);
+  border-radius: 4px;
+  background: white;
+}
+#settlement-dunning .dunning-action-group > button {
+  height: 28px;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+#settlement-dunning .dunning-action-group > button:first-child {
+  border-radius: 3px 0 0 3px;
+  padding: 0 10px;
+}
+#settlement-dunning .dunning-action-group > button:last-child {
+  width: 30px;
+  padding: 0;
+  border-left: 1px solid var(--color-border-muted, #dfe2e8);
+  border-radius: 0 3px 3px 0;
+}
