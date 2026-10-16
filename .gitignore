@@ -46,3 +46,7 @@ reference-3030/
 coverage/
 .cache/
 *.tsbuildinfo
+
+# Local documentation (keep files locally; do not publish)
+/doc/
+/docs/

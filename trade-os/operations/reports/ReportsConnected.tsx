@@ -1,4 +1,5 @@
 "use client";
+import { Badge } from "@ecoya/design-system/ui/badge";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField, BusinessFilterSelect } from "@shared/components/business-filters";
 
@@ -1187,7 +1188,7 @@ function ReportsConnectedSession({
 <div
             className={cx(
               "grid gap-3 max-lg:grid-cols-2 max-sm:grid-cols-1",
-              showGp && gpKpi.latest ? "grid-cols-7" : "grid-cols-6",
+              showGp ? "grid-cols-7" : "grid-cols-6",
             )}
             data-ui="reports-kpis"
           >
@@ -1257,12 +1258,12 @@ function ReportsConnectedSession({
                   : null
               }
             />
-            {showGp && gpKpi.latest ? (
+            {showGp ? (
               <KpiTile
-                label={replaceTokens(copy.kpi.gp, { period: gpLatestLabel, currency: currencyLabel })}
-                value={fmtAmount(gpKpi.latest.gp)}
+                label={replaceTokens(copy.kpi.gp, { period: gpLatestLabel || latestLabel, currency: currencyLabel })}
+                value={gpState.status === "error" || !gpKpi.latest ? "—" : fmtAmount(gpKpi.latest.gp)}
                 delta={
-                  gpKpi.marginPermyriad != null
+                  gpState.status !== "error" && gpKpi.latest && gpKpi.marginPermyriad != null
                     ? {
                         text:
                           gpKpi.marginDeltaPermyriad != null
@@ -1285,8 +1286,9 @@ function ReportsConnectedSession({
                       }
                     : null
                 }
-                basis={gpBasisText}
-                caution={gpCautionText}
+                basis={gpState.status === "error" ? null : gpBasisText}
+                caution={gpState.status === "error" ? null : gpCautionText}
+                errorMessage={gpState.status === "error" ? copy.cardLoadFailed : null}
               />
             ) : null}
             <KpiTile
@@ -1573,6 +1575,7 @@ function ReportsConnectedSession({
                   sub={
                     <>
                       {replaceTokens(copy.charts.gp.sub, { currency: currencyLabel })}
+                      <span className="mt-1 block text-label-12 text-text-muted">{copy.charts.gp.basis}</span>
                       {gpExclusion.text ? (
                         <>
                           {" — "}
@@ -1773,7 +1776,7 @@ function ReportsConnectedSession({
                 sub={replaceTokens(copy.topn.sub, {
                   months: String(rangeMonths),
                   currency: topCurrency ?? "",
-                })}
+                }).replace(/\s*·\s*$/, "")}
               >
                 {!topForbidden && topState.status === "error" && topSnapshot ? (
                   <CardStaleNotice
@@ -1988,6 +1991,9 @@ function ReportsConnectedSession({
                       <span className="text-label-12">
                         {replaceTokens(copy.closes.inProgress, { date: closableFromLabel })}
                       </span>
+                      <Badge className="ml-auto" data-ui="reports-close-status" palette="orange" size="sm" tone="fill">
+                        {copy.closes.notClosed}
+                      </Badge>
                     </div>
                     {closesData.length === 0 ? (
                       <p className="text-body-13 text-text-muted">{copy.closes.empty}</p>
@@ -2032,17 +2038,10 @@ function ReportsConnectedSession({
                                 </span>
                               ) : null}
                             </span>
-                            {/* 재개방된 달은 숫자가 다시 움직인다 — `동결됨`이라고 말하면 안 된다. */}
-                            <span
-                              className={cx(
-                                "ml-auto shrink-0 rounded-full px-2.5 py-0.5 text-body-13 font-bold",
-                                close.reopened
-                                  ? "bg-status-warning-bg text-status-warning"
-                                  : "bg-ecoya-blue-9 text-ecoya-indigo",
-                              )}
-                            >
+                            {/* 재개방된 달은 숫자가 다시 움직인다 — 마감 완료로 표시하지 않는다. */}
+                            <Badge className="ml-auto" data-ui="reports-close-status" palette={close.reopened ? "orange" : "green"} size="sm" tone="fill">
                               {close.reopened ? copy.closes.reopened : copy.closes.frozen}
-                            </span>
+                            </Badge>
                           </button>
                           {canCloseMonth && close.reopened ? (
                             <Button
@@ -2122,9 +2121,17 @@ function ReportsConnectedSession({
               />
             </label>
             {closeError ? (
-              <p className="text-body-13 text-status-danger" role="alert" data-ui="reports-close-error">
-                {closeError}
-              </p>
+              <div className="flex flex-col items-start gap-1" role="alert" data-ui="reports-close-error">
+                <Badge palette="red" size="sm" tone="fill">
+                  {copy.closes.closeFailed}
+                </Badge>
+                <p className="text-body-13 text-status-danger">{closeError}</p>
+              </div>
+            ) : null}
+            {closeSubmitting ? (
+              <Badge data-ui="reports-close-submitting" palette="blue" role="status" size="sm" tone="fill">
+                {copy.closes.closing}
+              </Badge>
             ) : null}
           </div>
         </Dialog>
@@ -2268,12 +2275,14 @@ export function KpiTile({
   delta,
   basis,
   caution,
+  errorMessage,
 }: {
   label: string;
   value: string;
   delta: { text: string; tone: "up" | "bad" | "flat" } | null;
   basis?: string | null;
   caution?: string | null;
+  errorMessage?: string | null;
 }) {
   return (
     <div
@@ -2303,6 +2312,11 @@ export function KpiTile({
         <div className="mt-0.5 text-label-12 tabular-nums text-ecoya-system-orange-1" data-ui="reports-kpi-caution">
           {caution}
         </div>
+      ) : null}
+      {errorMessage ? (
+        <p className="mt-0.5 text-label-12 text-status-danger" data-ui="reports-kpi-error" role="status">
+          {errorMessage}
+        </p>
       ) : null}
     </div>
   );

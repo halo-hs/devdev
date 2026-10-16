@@ -1,8 +1,19 @@
 import { expect, test, type Page } from '@playwright/test'
+import { carrierTrackingAction } from '../trade-os/operations/shipments/carrierSites'
 
 const dealId = 'aaaaaaaa-1111-4111-8111-111111111111'
 const shipmentId = 'bbbbbbbb-2222-4222-8222-222222222222'
-const original = { id: shipmentId, deal_id: dealId, deal_title: '연결 검증 거래', deal_counterparty: '연결 검증 거래처', bl_number: 'TEST-BL-01', container_number: 'TEST000001', pol: 'KRPUS', pod: 'DEHAM', eta: '2026-09-24', etd: '2026-09-10', source: 'carrier', status: 'departed' }
+const original = { id: shipmentId, deal_id: dealId, deal_title: '연결 검증 거래', deal_counterparty: '연결 검증 거래처', bl_number: 'TEST-BL-01', container_number: 'TEST000001', carrier: 'HMM', pol: 'KRPUS', pod: 'DEHAM', eta: '2026-09-24', etd: '2026-09-10', source: 'carrier', status: 'departed' }
+
+test('carrier site names match only the planning document names and normalization order', () => {
+  expect(carrierTrackingAction(' CK Line ')).toEqual({ kind: 'site', href: 'https://es.ckline.co.kr/' })
+  expect(carrierTrackingAction('CK LINE CO., LTD.')).toEqual({ kind: 'site', href: 'https://es.ckline.co.kr/' })
+  expect(carrierTrackingAction('WAN HAI LINES LTD.')).toEqual({ kind: 'site', href: 'https://shipper.wanhai.com/index.jsp' })
+  expect(carrierTrackingAction('OOLU')).toEqual({ kind: 'site', href: 'https://www.oocl.com/' })
+  for (const name of ['CK - Line', 'CK·Line', 'ckline', 'cosco', 'namsung', 'tslines', 't s lines', 'wan hai lines', 'sitc container lines', 'regional container lines']) {
+    expect(carrierTrackingAction(name), name).toEqual({ kind: 'unknown' })
+  }
+})
 
 async function mockShipmentSession(page: Page, writable = true) {
   await page.route('**/__reference3030/api/platform/me', route => route.fulfill({ json: {
@@ -62,6 +73,47 @@ test('read-only deal preserves confirmed ETA and hides mutation controls', async
   await expect(detail.locator('article')).toContainText('2026-09-28')
   await expect(detail.locator('article')).toContainText('선사 도착 예정 2026-09-26')
   await expect(detail.getByRole('button', { name: '추적 정보 갱신', exact: true })).toHaveCount(0)
+})
+
+test('carrier actions use verified sites without offering refresh for unsupported or unknown carriers', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await mockShipmentSession(page, false)
+  await page.route('**/trade/shipments**', route => route.fulfill({ json: { shipments: [
+    { ...original, id: 'supported', carrier: 'HMM' },
+    { ...original, id: 'site', carrier: 'MSC' },
+    { ...original, id: 'unknown', carrier: 'Unidentified Ocean Line' },
+    { ...original, id: 'punctuation', carrier: 'Hapag.Lloyd' },
+    { ...original, id: 'stale', carrier: 'Maersk', tracking_health: 'stale', last_carrier_sync_at: '2026-10-10T00:00:00Z' },
+    { ...original, id: 'failed', carrier: 'Hapag-Lloyd', tracking_health: 'fetch_failed' },
+  ] } }))
+  await page.goto('/erp/shipments')
+
+  const supported = page.locator('[data-shipment-id="supported"]')
+  const site = page.locator('[data-shipment-id="site"]')
+  const unknown = page.locator('[data-shipment-id="unknown"]')
+  const punctuation = page.locator('[data-shipment-id="punctuation"]')
+  const stale = page.locator('[data-shipment-id="stale"]')
+  const failed = page.locator('[data-shipment-id="failed"]')
+  await expect(supported.getByRole('link', { name: '선사 사이트 ↗' })).toHaveCount(0)
+  await expect(site.getByRole('link', { name: '선사 사이트 ↗' })).toHaveAttribute('href', 'https://www.msc.com/en/track-a-shipment')
+  await expect(site.getByRole('link', { name: '선사 사이트 ↗' })).toHaveAttribute('target', '_blank')
+  await expect(unknown.getByRole('link', { name: '선사 사이트 ↗' })).toHaveCount(0)
+  await expect(unknown).not.toContainText('선사 확인 필요')
+  await expect(stale).toContainText('조회 정보 오래됨')
+  await expect(failed).toContainText('선사 조회 실패')
+  await expect(failed).toContainText('마지막 조회 기록 없음')
+  await expect(page.getByRole('button', { name: '추적 정보 갱신' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: '일정 및 운송 상태 수정' })).toHaveCount(0)
+
+  await mockShipmentSession(page, true)
+  await page.reload()
+  await expect(supported.getByRole('button', { name: '추적 정보 갱신' })).toBeVisible()
+  await expect(punctuation.getByRole('button', { name: '추적 정보 갱신' })).toBeVisible()
+  await expect(site.getByRole('button', { name: '추적 정보 갱신' })).toHaveCount(0)
+  await expect(site.getByRole('button', { name: '일정 및 운송 상태 수정' })).toBeVisible()
+  await expect(unknown.getByRole('link', { name: '선사 사이트 ↗' })).toHaveCount(0)
+  await expect(unknown.getByRole('button', { name: '일정 및 운송 상태 수정' })).toBeVisible()
+  await expect(unknown.getByRole('button', { name: '추적 정보 갱신' })).toHaveCount(0)
 })
 
 test('operational widths and typography follow the host tokens on desktop and mobile', async ({ page }) => {
@@ -171,4 +223,42 @@ test('tracking updates reach the existing deal shipment section and summary acro
   await expect(page.locator(`[data-shipment-id="${shipmentId}"]`)).toContainText('2026.09.30')
   await expect(detail.getByRole('complementary', { name: '거래 현황' })).toContainText('2026-09-30')
   await detail.close()
+})
+
+for (const width of [1440, 390]) {
+  test(`shipment edit actions and status confirmation record ${width}`, async ({ page }) => {
+    await page.setViewportSize({width,height:900})
+    await mockShipmentSession(page)
+    let row = {...original, edit_token:'first', confirmed_status:'departed', confirmed_status_by:'담당자', confirmed_status_at:'2026-10-14T06:30:00Z'}
+    await page.route('**/__reference3030/api/platform/trade/shipments**', async route => {
+      if (route.request().method() === 'PATCH') {
+        expect(route.request().postDataJSON()).toEqual({expected_edit_token:'first',confirmed_status:'arrived'})
+        row = {...row,status:'arrived',confirmed_status:'arrived',edit_token:'second'}
+        await route.fulfill({json:{shipment:row}})
+      } else await route.fulfill({json:{shipments:[row],sync_status:'ok'}})
+    })
+    await page.goto('/erp/shipments')
+    const edit = page.getByRole('button',{name:'일정 및 운송 상태 수정',exact:true})
+    await expect(edit).toHaveText('수정')
+    await expect(page.getByRole('button',{name:'추적 정보 갱신',exact:true})).toHaveText('갱신')
+    await edit.click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('운송 상태 최근 확인: 담당자')
+    await dialog.screenshot({path:`/tmp/ship4-dialog-${width}.png`})
+    await dialog.getByRole('combobox').click()
+    await page.getByRole('option',{name:'도착',exact:true}).click()
+    await dialog.getByRole('button',{name:'변경사항 저장',exact:true}).click()
+    await expect(dialog).toHaveCount(0)
+    await expect(edit).toBeFocused()
+  })
+}
+
+test('read-only shipment shows status confirmation without date evidence', async ({page}) => {
+  await mockShipmentSession(page,false)
+  await page.route('**/trade/shipments**',route=>route.fulfill({json:{shipments:[{...original,eta:null,etd:null,confirmed_status:'departed',confirmed_status_by:'조회 가능한 담당자',confirmed_status_at:'2026-10-14T06:30:00Z'}]}}))
+  await page.goto('/erp/shipments')
+  await expect(page.getByRole('button',{name:'일정 및 운송 상태 수정'})).toHaveCount(0)
+  await expect(page.getByRole('button',{name:'추적 정보 갱신'})).toHaveCount(0)
+  await page.getByText('일정 근거',{exact:true}).click()
+  await expect(page.getByText(/운송 상태 최근 확인: 조회 가능한 담당자/)).toBeVisible()
 })

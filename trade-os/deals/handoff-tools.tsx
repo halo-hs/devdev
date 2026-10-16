@@ -745,8 +745,9 @@ export function DealDocumentTools({
 export function DealContractTool() {
   const { items, documents, direction } = useTools()
   const [open, setOpen] = useState(false)
+  const primaryCode = direction === "sales" ? "SC" : direction === "purchase" ? "PO" : null
   const source = documents.find(
-    (doc) => doc.code === (direction === "sales" ? "SC" : "PO") && doc.file
+    (doc) => doc.code === primaryCode && doc.file
   )
   if (!source || !items.length) return null
   return (
@@ -860,6 +861,8 @@ export function DealClaimTool() {
               <TableCell>
                 {row.deal !== dealId
                   ? "다른 거래 · 연결 불가"
+                  : direction !== "sales" && direction !== "purchase"
+                    ? "거래 방향 확인 필요"
                   : !source
                     ? "원천 송장 확인 필요"
                     : row.amount !== source.amount

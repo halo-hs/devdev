@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import { Badge } from "@shared/components/ui/badge"
 import { useState, type ReactNode } from "react"
 import {
@@ -1177,7 +1178,7 @@ function EmptyHomePrototype({
                     variant="outline"
                     size="sm"
                     className="mt-4"
-                    onClick={() => window.location.reload()}
+                    onClick={() => appLocation.reload()}
                   >
                     다시 불러오기
                   </Button>

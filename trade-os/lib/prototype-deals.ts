@@ -5,6 +5,7 @@ export type DealRisk =
   "amount" | "schedule" | "payment" | "quantity" | "currency"
 export type Deal = {
   id: string
+  createdAt?: string
   title: string
   counterparty: string
   primaryItem: string
@@ -14,6 +15,9 @@ export type Deal = {
   assignee: string
   amount: string
   currency: string
+  direction?: "purchase" | "sales"
+  dDayBasis?: "payment" | "eta" | "etd"
+  requiredDocsMissing?: number
   dday: string
   eta: string
   pending: number
@@ -22,8 +26,14 @@ export type Deal = {
   nextWork?: "documents" | "fulfillment" | "customs" | "finance"
   nextAction: string
   nextKind: "upload" | "create" | "confirm" | "deliver" | "reconcile"
+  nextDocument?: {
+    label: string
+    kind: "upload" | "create" | "confirm" | "deliver" | "reconcile"
+    templateCode: string
+    tone: "info" | "warning"
+  }
   remaining?: string
-  overdue?: boolean
+  overdueAr?: boolean
   shared?: boolean
 }
 
@@ -31,6 +41,9 @@ export const deals: Deal[] = [
   ...statusPreviewDeals,
   {
     id: "DL-260708-01",
+    direction: "purchase",
+    requiredDocsMissing: 1,
+    dDayBasis: "eta",
     title: "7월 알루미늄 스크랩 수입",
     counterparty: "KATAMAN ASIA-PACIFIC PTE LTD",
     primaryItem: "알루미늄 스크랩",
@@ -48,10 +61,14 @@ export const deals: Deal[] = [
     nextWork: "fulfillment" as const,
     nextAction: "B/L 중량을 포장명세와 대조",
     nextKind: "reconcile",
+    nextDocument: { label: "선하증권 · 포장명세서", kind: "reconcile", templateCode: "BL", tone: "warning" },
     remaining: "4 MT",
   },
   {
     id: "DL-260707-04",
+    direction: "sales",
+    requiredDocsMissing: 0,
+    dDayBasis: "payment",
     title: "ACME 7월 해상운송 계약",
     counterparty: "ACME GmbH",
     primaryItem: "해상운송 서비스",
@@ -69,9 +86,13 @@ export const deals: Deal[] = [
     nextWork: "documents" as const,
     nextAction: "판매계약서 승인 요청",
     nextKind: "confirm",
+    nextDocument: { label: "판매계약서", kind: "confirm", templateCode: "SC", tone: "info" },
   },
   {
     id: "DL-260704-02",
+    direction: "purchase",
+    requiredDocsMissing: 1,
+    dDayBasis: "payment",
     title: "부산항 산업재 수입",
     counterparty: "Nordic Raw Materials AB",
     primaryItem: "산업용 원자재",
@@ -89,10 +110,13 @@ export const deals: Deal[] = [
     nextWork: "customs" as const,
     nextAction: "수입신고필증 업로드",
     nextKind: "upload",
+    nextDocument: { label: "수입신고필증", kind: "upload", templateCode: "IMPORT_DECLARATION", tone: "warning" },
     shared: true,
   },
   {
     id: "DL-260701-09",
+    direction: "sales",
+    requiredDocsMissing: 0,
     title: "한빛 6월 정산 거래",
     counterparty: "Hanbit Trading Co.",
     primaryItem: "알루미늄 코일",
@@ -113,6 +137,9 @@ export const deals: Deal[] = [
   },
   {
     id: "DL-260629-03",
+    direction: "purchase",
+    requiredDocsMissing: 0,
+    dDayBasis: "payment",
     title: "싱가포르 구리 스크랩 매입",
     counterparty: "Meridian Metals Pte Ltd",
     primaryItem: "구리 스크랩",
@@ -130,11 +157,14 @@ export const deals: Deal[] = [
     nextWork: "finance" as const,
     nextAction: "지연된 결제 일정 확인",
     nextKind: "reconcile",
-    overdue: true,
+    overdueAr: true,
     remaining: "8 MT",
   },
   {
     id: "DL-260625-07",
+    direction: "purchase",
+    requiredDocsMissing: 0,
+    dDayBasis: "etd",
     title: "일본 내륙운송 발주",
     counterparty: "Sakura Logistics KK",
     primaryItem: "일본 내륙운송 서비스",
@@ -152,6 +182,7 @@ export const deals: Deal[] = [
     nextWork: "documents" as const,
     nextAction: "발주서 만들기",
     nextKind: "create",
+    nextDocument: { label: "발주서", kind: "create", templateCode: "PO", tone: "info" },
   },
   ...[
     {
@@ -183,6 +214,9 @@ export const deals: Deal[] = [
     },
   ].map((item) => ({
     ...item,
+    direction: "sales" as const,
+    dDayBasis: "etd" as const,
+    requiredDocsMissing: 0,
     itemCount: 1,
     orderLifecycle: "open" as const,
     stage: "shipment" as const,

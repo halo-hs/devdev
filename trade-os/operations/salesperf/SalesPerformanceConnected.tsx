@@ -1,6 +1,10 @@
 "use client";
+
+import { counterpartyDisplayState } from "./counterpartyDisplayState";
+import { StatusBadge } from "@trade-os/operations/components/StatusBadge";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField, BusinessFilterSelect } from "@shared/components/business-filters";
+import { Search } from "lucide-react";
 
 import { useLocale } from "@trade-os/operations/compat/intl";
 import {
@@ -213,6 +217,13 @@ const ASSIGNEE_ALL = "all";
 /** Native table rows cannot establish containment; defer bounded block-wrapped tables instead. */
 const STATUS_TABLE_CHUNK_SIZE = 25;
 const STATUS_TABLE_ROW_ESTIMATED_BLOCK_SIZE_PX = 44;
+function dealListHref(filter: "assignee" | "counterparty", value: string, role?: string) {
+  const params = new URLSearchParams();
+  if (role === "admin" || role === "member") params.set("role", role);
+  params.set("lifecycle", "all");
+  params.set(filter, value);
+  return `/erp/deals?${params.toString()}`;
+}
 const STATUS_CHUNK_DEFERRED_RENDER_STYLE = {
   contentVisibility: "auto",
   containIntrinsicInlineSize: "auto 1200px",
@@ -283,7 +294,7 @@ function SalesPerformanceIdentityScope({
   orgId: string;
   rangeMonths: SalesPerformanceRangeMonths;
 }) {
-  const { getIdToken } = usePlatformSession();
+  const { getIdToken, identity } = usePlatformSession();
   // erp-v2-adapt: begin — QA-1352 removes the lossy entitlement-projection read.
   // erp-v2-adapt: end
   const locale = useLocale();
@@ -853,7 +864,7 @@ function SalesPerformanceIdentityScope({
     memberDirectory.status === "ready" ? memberDirectory.members : [];
   const currencyLabel = currency ?? "";
 
-  // Member는 회사 전체 settlement-series의 실효 조회 범위를 표시한다.
+  // Member는 settlement-series의 담당자 필터를 사용하며, assignee 부재를 회사 전체 권한으로 해석하지 않는다.
   const effectiveAssignee = isManager
     ? data?.status?.assignee ?? null
     : data?.series?.assignee ?? null;
@@ -1015,7 +1026,7 @@ function SalesPerformanceIdentityScope({
           <KpiTile
             label={copy.kpi.activeDeals}
             value={copy.kpi.pendingValue ?? "준비 중"}
-            delta={{ text: copy.kpi.pendingNote ?? "회사 전체 집계를 준비하고 있습니다", tone: "flat" }}
+            delta={{ text: copy.kpi.pendingNote ?? "집계 정보를 준비하고 있습니다.", tone: "flat" }}
           />
           <KpiTile
             label={replaceTokens(copy.kpi.revenue, { period: kpiPeriodLabel, currency: currencyLabel })}
@@ -1057,7 +1068,7 @@ function SalesPerformanceIdentityScope({
           <KpiTile
             label={copy.kpi.overdueItems ?? "기한 초과"}
             value={copy.kpi.pendingValue ?? "준비 중"}
-            delta={{ text: copy.kpi.pendingNote ?? "회사 전체 집계를 준비하고 있습니다", tone: "flat" }}
+            delta={{ text: copy.kpi.pendingNote ?? "집계 정보를 준비하고 있습니다.", tone: "flat" }}
           />
         </div>
       )
@@ -1229,6 +1240,7 @@ function SalesPerformanceIdentityScope({
               sub={
                 <>
                   {replaceTokens(copy.gpTrend.sub, { currency: currencyLabel })}
+                  <span className="mt-1 block text-label-12 text-text-muted">{copy.gpTrend.basis}</span>
                   {gpExclusion.text ? (
                     <>
                       {" — "}
@@ -1298,43 +1310,57 @@ function SalesPerformanceIdentityScope({
                 ) : (
                   <>
                     <div className="mt-3.5 grid gap-3" data-ui="salesperf-by-assignee">
-                      {byAssigneeRows.map((row) => (
-                        <div key={row.assigneeUserId ?? "unassigned"} className="grid gap-1">
-                          <div className="flex justify-between text-body-13">
-                            <span className="font-medium text-ecoya-gray-3">
-                              {assigneeLabel(row.assigneeUserId, members, copy.byAssignee.unassigned)}
-                            </span>
-                            <span
-                              className={cx(
-                                "tabular-nums",
-                                row.gp.scaled < BigInt(0) ? "text-status-danger" : "text-text-secondary",
-                              )}
-                            >
-                              {fmtAmount(row.gp)} {currencyLabel}
-                            </span>
+                      {byAssigneeRows.map((row) => {
+                        const name = assigneeLabel(row.assigneeUserId, members, copy.byAssignee.unassigned);
+                        const dealAssignee = row.assigneeUserId == null
+                          ? "미배정"
+                          : row.assigneeUserId === identity.user_id ? "나" : name;
+                        return (
+                          <div key={row.assigneeUserId ?? "unassigned"} className="grid gap-1">
+                            <div className="flex justify-between text-body-13">
+                              <span className="inline-flex items-center gap-1 font-medium text-ecoya-gray-3">
+                                <span>{name}</span>
+                                <a
+                                  aria-label={`${name} 담당 거래 보기`}
+                                  className="inline-flex size-6 shrink-0 items-center justify-center rounded text-ecoya-accent hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-ecoya-accent"
+                                  href={dealListHref("assignee", dealAssignee, role)}
+                                  title={`${name} 담당 거래 보기`}
+                                >
+                                  <Search className="size-4" aria-hidden="true" />
+                                </a>
+                              </span>
+                              <span
+                                className={cx(
+                                  "tabular-nums",
+                                  row.gp.scaled < BigInt(0) ? "text-status-danger" : "text-text-secondary",
+                                )}
+                              >
+                                {fmtAmount(row.gp)} {currencyLabel}
+                              </span>
+                            </div>
+                            <div className="rounded-r bg-surface-muted">
+                              <div
+                                className={cx(
+                                  "h-3.5 rounded-r",
+                                  row.gp.scaled < BigInt(0)
+                                    ? "bg-ecoya-system-red-1"
+                                    : "bg-ecoya-accent",
+                                )}
+                                style={{ width: `${maxAbsGp > 0 ? (Math.abs(row.gp.approx) / maxAbsGp) * 100 : 0}%` }}
+                              />
+                            </div>
+                            <div className="text-body-13 text-text-secondary tabular-nums">
+                              {replaceTokens(copy.byAssignee.metaLine, {
+                                margin:
+                                  row.marginPermyriad != null
+                                    ? fmtRatioPct(row.marginPermyriad)
+                                    : "—",
+                                count: String(row.dealCount),
+                              })}
+                            </div>
                           </div>
-                          <div className="rounded-r bg-surface-muted">
-                            <div
-                              className={cx(
-                                "h-3.5 rounded-r",
-                                row.gp.scaled < BigInt(0)
-                                  ? "bg-ecoya-system-red-1"
-                                  : "bg-ecoya-accent",
-                              )}
-                              style={{ width: `${maxAbsGp > 0 ? (Math.abs(row.gp.approx) / maxAbsGp) * 100 : 0}%` }}
-                            />
-                          </div>
-                          <div className="text-body-13 text-text-secondary tabular-nums">
-                            {replaceTokens(copy.byAssignee.metaLine, {
-                              margin:
-                                row.marginPermyriad != null
-                                  ? fmtRatioPct(row.marginPermyriad)
-                                  : "—",
-                              count: String(row.dealCount),
-                            })}
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                     {byAssigneeLimitReached ? (
                       <p
@@ -1367,7 +1393,7 @@ function SalesPerformanceIdentityScope({
               <p className="mt-3 text-body-13 text-text-muted">{copy.table.empty}</p>
             ) : (
               <div className="mt-3 overflow-x-auto" data-ui="salesperf-status-scroll">
-                <div className="min-w-[1200px]" data-ui="salesperf-status-table">
+                <div className="min-w-[1400px]" data-ui="salesperf-status-table">
                   {statusItemChunks.map((chunk, chunkIndex) => {
                     const chunkStart = chunkIndex * STATUS_TABLE_CHUNK_SIZE;
                     const chunkEnd = chunkStart + chunk.length;
@@ -1390,12 +1416,13 @@ function SalesPerformanceIdentityScope({
                           className="w-full table-fixed border-collapse text-body-13 tabular-nums"
                         >
                           <colgroup>
-                            <col className="w-[24%]" />
+                            <col className="w-[18%]" />
+                            <col className="w-[12%]" />
                             <col className="w-[7%]" />
                             <col className="w-[9%]" />
                             <col className="w-[9%]" />
                             <col className="w-[9%]" />
-                            <col className="w-[16%]" />
+                            <col className="w-[10%]" />
                             <col className="w-[7%]" />
                             <col className="w-[7%]" />
                             <col className="w-[7%]" />
@@ -1404,6 +1431,7 @@ function SalesPerformanceIdentityScope({
                           <HostTableHeader className={chunkIndex === 0 ? undefined : "sr-only"}>
                             <HostTableRow className="border-b border-border-muted text-left text-label-12 text-text-muted">
                               <HostTableHead className="py-1.5 pr-3 font-medium">{copy.table.columns.counterparty}</HostTableHead>
+                              <HostTableHead className="py-1.5 pr-3 font-medium">상태</HostTableHead>
                               <HostTableHead className="py-1.5 pr-3 font-medium">{copy.table.columns.currency}</HostTableHead>
                               <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.table.columns.totalDue}</HostTableHead>
                               <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.table.columns.outstanding}</HostTableHead>
@@ -1419,6 +1447,7 @@ function SalesPerformanceIdentityScope({
                             {chunk.map((item, chunkOffset) => {
                               const rowIndex = chunkStart + chunkOffset;
                               const overdue = amountCell(item.overdue);
+                              const displayState = counterpartyDisplayState(item);
                               return (
                                 <HostTableRow
                                   key={`${item.counterparty}-${item.currency}`}
@@ -1430,7 +1459,21 @@ function SalesPerformanceIdentityScope({
                                   data-overdue={overdue.valid && overdue.scaled > BigInt(0) ? "true" : undefined}
                                 >
                                   <HostTableCell className="break-words py-1.5 pr-3 font-medium text-text-primary">
-                                    {item.counterparty}
+                                    <span className="inline-flex items-center gap-1">
+                                      <span>{item.counterparty}</span>
+                                      <a
+                                        aria-label={`${item.counterparty} 거래 보기`}
+                                        className="inline-flex size-6 shrink-0 items-center justify-center rounded text-ecoya-accent hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-ecoya-accent"
+                                        href={dealListHref("counterparty", item.counterparty, role)}
+                                        title={`${item.counterparty} 거래 보기`}
+                                      >
+                                        <Search className="size-4" aria-hidden="true" />
+                                      </a>
+                                    </span>
+                                  </HostTableCell>
+                                  <HostTableCell className="py-1.5 pr-3" data-ui="counterparty-status-evidence">
+                                    <StatusBadge tone={displayState.tone}>{displayState.label}</StatusBadge>
+                                    <p className="mt-1 text-label-12 text-text-muted">{!displayState.writtenOff.valid || displayState.writtenOff.scaled < 0n ? "상각 확인 필요" : displayState.writtenOff.scaled > 0n ? `상각 처리됨 · ${fmtAmount(displayState.writtenOff.raw, item.currency)} ${item.currency}` : null}</p>
                                   </HostTableCell>
                                   <HostTableCell className="py-1.5 pr-3 text-text-secondary">{item.currency}</HostTableCell>
                                   <HostTableCell className="py-1.5 pr-3 text-right">

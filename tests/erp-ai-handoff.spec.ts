@@ -1,5 +1,19 @@
 import { expect, test } from "@playwright/test"
 
+for (const width of [1440, 390]) {
+test(`member AI welcome links to deals instead of organization questions at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 844 })
+  await page.goto("/erp/ai?role=member")
+  await expect(page.getByRole("button", { name: "이번 주 받을 돈", exact: true })).toHaveCount(0)
+  await expect(page.getByText("거래 화면에서 그 거래에 대해 물을 수 있습니다.")).toBeVisible()
+  await page.getByRole("button", { name: "거래 목록 보기" }).click()
+  await expect(page).toHaveURL(/\/erp\/deals/)
+
+  await page.goto("/erp/ai")
+  await expect(page.getByRole("button", { name: "이번 주 받을 돈", exact: true })).toBeVisible()
+})
+}
+
 for (const legacy of ["/erp/copilot", "/erp/home#ask"]) {
   test(`legacy AI link ${legacy} opens the canonical screen`, async ({
     page,
@@ -276,7 +290,7 @@ test("shipment empty search recovers and SNAP links open evidence", async ({ pag
   await expect(page.getByText("검색 조건에 맞는 선적이 없습니다.")).toBeVisible()
   await search.clear()
   await expect(page.getByText("검색 조건에 맞는 선적이 없습니다.")).toHaveCount(0)
-  await page.getByRole("button", { name: /^SNAP \d+장$/ }).first().click()
+  await page.getByRole("button", { name: /^SNAP (?:\d+건 · )?\d+장$/ }).first().click()
   await expect(page.getByRole("heading", { name: "SNAP 증거함", exact: true })).toBeVisible()
 })
 

@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import { useEffect } from "react"
 import { ArrowRight, Check } from "lucide-react"
 import { LandingShell } from "../shared/layout"
@@ -46,7 +47,7 @@ const plans = [
 export function PricingLanding() {
   const t = useT()
   const product =
-    new URLSearchParams(window.location.search).get("product") === "snap"
+    new URLSearchParams(appLocation.search).get("product") === "snap"
       ? "snap"
       : "erp"
   const contact = `/contact?product=${product}`

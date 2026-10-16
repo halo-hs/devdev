@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import { useState } from "react"
 import {
   CircleHelp,
@@ -37,14 +38,16 @@ export function SidebarProfileMenu({
   product = "erp",
   workspaceName = "ECOYA Demo Co.",
   billingPlan = "Pro",
+  showProductSummary = true,
 }: {
-  onSettings: () => void
+  onSettings?: () => void
   onUsage?: () => void
   onBilling?: () => void
   onLogout: () => void
   product?: "erp" | "snap"
   workspaceName?: string
   billingPlan?: string
+  showProductSummary?: boolean
 }) {
   const { state: sidebarState } = useSidebar()
   const [language, setLanguage] = useState("ko-KR")
@@ -101,10 +104,10 @@ export function SidebarProfileMenu({
             <>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={onSettings}>
+                {onSettings ? <DropdownMenuItem onClick={onSettings}>
                   <Settings />
                   설정
-                </DropdownMenuItem>
+                </DropdownMenuItem> : null}
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <CircleHelp />
@@ -124,12 +127,12 @@ export function SidebarProfileMenu({
                       이용 가이드
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => window.location.assign("/legal/terms")}
+                      onClick={() => appLocation.assign("/legal/terms")}
                     >
                       이용 약관
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => window.location.assign("/legal/privacy")}
+                      onClick={() => appLocation.assign("/legal/privacy")}
                     >
                       개인정보 처리방침
                     </DropdownMenuItem>
@@ -140,7 +143,7 @@ export function SidebarProfileMenu({
           ) : null}
           <DropdownMenuSeparator />
 
-          <div className="space-y-2 px-2">
+          {showProductSummary ? <div className="space-y-2 px-2">
             {productPlans.map(({ name, plan }) => {
               const isProductFree = plan.trim().toLowerCase() === "free"
               const usageLabel = isProductFree
@@ -192,7 +195,7 @@ export function SidebarProfileMenu({
                 </div>
               )
             })}
-          </div>
+          </div> : null}
 
           <DropdownMenuSeparator />
           <DropdownMenuSub>
@@ -236,7 +239,7 @@ export function SidebarProfileMenu({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <SidebarMenuButton
+      {onSettings ? <SidebarMenuButton
         aria-label="설정"
         tooltip="설정"
         className="size-8 shrink-0 justify-center p-0 group-data-[collapsible=icon]:hidden"
@@ -244,7 +247,7 @@ export function SidebarProfileMenu({
       >
         <Settings />
         <span className="sr-only">설정</span>
-      </SidebarMenuButton>
+      </SidebarMenuButton> : null}
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -274,12 +277,12 @@ export function SidebarProfileMenu({
             이용 가이드
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => window.location.assign("/legal/terms")}
+            onClick={() => appLocation.assign("/legal/terms")}
           >
             이용 약관
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => window.location.assign("/legal/privacy")}
+            onClick={() => appLocation.assign("/legal/privacy")}
           >
             개인정보 처리방침
           </DropdownMenuItem>

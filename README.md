@@ -46,7 +46,9 @@ Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run bui
 
 배포 주소: https://devdev-e6t.pages.dev
 
-배포 명령과 GitHub 자동 배포 설정은 [저장소 이전 안내](docs/repository-migration.md)를 확인하세요.
+미리보기: https://halo-hs.github.io/devdev/
+
+기존 PR 브랜치에 push하면 GitHub Pages 미리보기가 갱신되고, main 병합 시에만 Cloudflare에 배포됩니다. [배포 설정 안내](docs/deployment-preview.md)를 확인하세요.
 
 홈페이지 문구·이미지·디자인을 수정할 때는 [마케팅 페이지 수정 지침](landing/AGENTS.md)을 먼저 확인하세요. 공통 헤더와 CSS는 인증·다른 소개 페이지에서도 사용하므로 홈 전용 범위로 수정합니다.
 

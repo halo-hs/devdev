@@ -587,7 +587,7 @@ function MonitorRightPanel({
       {!ops && (
         <TaskQueue
           title={copy.nextAction}
-          action={<StatusBadge tone="danger">{empty ? "—" : "P0"}</StatusBadge>}
+          action={<StatusBadge tone={empty ? "neutral" : "danger"}>{empty ? "—" : "P0"}</StatusBadge>}
           empty={copy.taskQueueEmpty}
           items={empty ? [] : monitorPanelItems}
         />
@@ -635,7 +635,7 @@ function ThroughputPanel({
       action={
         throughputFailure ?? (
           empty || showLiveEmpty ? (
-            <StatusBadge tone="info">—</StatusBadge>
+            <StatusBadge tone="neutral">—</StatusBadge>
           ) : ops ? undefined : (
             <StatusBadge tone="info">{String(rateBadge)}</StatusBadge>
           )
@@ -679,6 +679,7 @@ function FlagFeedSection({
   empty = false,
   items,
   badge,
+  failure,
   onAck,
   checked = false,
   onCheckedChange,
@@ -689,6 +690,7 @@ function FlagFeedSection({
   empty?: boolean;
   items?: TaskQueueItem[];
   badge?: string;
+  failure?: string;
   onAck?: (flagId: string) => void;
   checked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
@@ -716,7 +718,7 @@ function FlagFeedSection({
       contentProps={{ tabIndex: 0, role: "region", "aria-label": `${copy.flagTitle} 목록` }}
       title={copy.flagTitle}
       description={checked ? copy.flagDescChecked : copy.flagDesc}
-      action={<StatusBadge tone={checked ? "neutral" : "danger"}>{resolvedBadge}</StatusBadge>}
+      action={areaFailureBadge(failure, "flags") ?? <StatusBadge tone={checked || resolvedBadge === "—" ? "neutral" : "danger"}>{resolvedBadge}</StatusBadge>}
     >
       {onCheckedChange ? (
         <ChipGroup
@@ -761,7 +763,7 @@ function PendingActionSection({
       title={copy.pendingTitle}
       description={withAreaFreshness(copy.pendingDesc, [{ area: "pending", value: freshness }])}
       action={
-        areaFailureBadge(failure, "pending") ?? <StatusBadge tone="info">{resolvedBadge}</StatusBadge>
+        areaFailureBadge(failure, "pending") ?? <StatusBadge tone={resolvedBadge === "—" ? "neutral" : "info"}>{resolvedBadge}</StatusBadge>
       }
     >
       <TaskQueue empty={copy.taskQueueEmpty} items={empty ? [] : resolved} />
@@ -790,6 +792,7 @@ function MonitorBody({
   flagChecked,
   onFlagCheckedChange,
   flagBusy,
+  flagFailure,
   readOnly = false,
   actions,
   copy: copyOverride,
@@ -803,6 +806,7 @@ function MonitorBody({
   flagChecked?: boolean;
   onFlagCheckedChange?: (checked: boolean) => void;
   flagBusy?: boolean;
+  flagFailure?: string;
   readOnly?: boolean;
   actions?: MonitorBodyActions;
   copy?: Partial<MonitorBodyCopy>;
@@ -884,7 +888,7 @@ function MonitorBody({
               live?.areaFailures?.blockedP0 ?? live?.areaFailures?.blockedP1,
               "blocked",
             ) ?? (
-              <StatusBadge tone="danger">{isEmpty ? "—" : live ? live.blockedBadge : "P0 3건"}</StatusBadge>
+              <StatusBadge tone={isEmpty || live?.blockedBadge === "—" ? "neutral" : "danger"}>{isEmpty ? "—" : live ? live.blockedBadge : "P0 3건"}</StatusBadge>
             )
           }
         >
@@ -899,7 +903,7 @@ function MonitorBody({
           ])}
           action={
             areaFailureBadge(live?.areaFailures?.risks, "risks") ?? (
-              <StatusBadge tone="warning">{isEmpty ? "—" : live ? live.riskBadge : "2건"}</StatusBadge>
+              <StatusBadge tone={isEmpty || live?.riskBadge === "—" ? "neutral" : "warning"}>{isEmpty ? "—" : live ? live.riskBadge : "2건"}</StatusBadge>
             )
           }
         >
@@ -910,6 +914,7 @@ function MonitorBody({
           empty={isEmpty}
           items={live?.flagItems}
           badge={live?.flagBadge}
+          failure={flagFailure}
           onAck={onAckFlag}
           checked={flagChecked}
           onCheckedChange={onFlagCheckedChange}

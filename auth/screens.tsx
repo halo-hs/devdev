@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import { useMemo, useState, type FormEvent, type ReactNode } from "react"
 import googleIcon from "@ecoya/design-system/assets/icons/icon-google.svg"
 import appleIcon from "@ecoya/design-system/assets/icons/icon-apple.svg"
@@ -90,7 +91,7 @@ import { AccountGuide, CommonPublicFooter } from "@auth/layout"
 function showPreviewControls() {
   return (
     import.meta.env.DEV &&
-    new URLSearchParams(window.location.search).get("preview") === "1"
+    new URLSearchParams(appLocation.search).get("preview") === "1"
   )
 }
 

@@ -48,7 +48,7 @@ for (const width of [1440, 390]) {
     const september = page.locator('[data-ui="reports-close-row"]').filter({ hasText: '2026-09' })
     await expect(september).toHaveCount(1)
     await expect(september).toHaveAttribute('data-reopened', 'false')
-    await expect(september).toContainText('동결됨')
+    await expect(september).toContainText('마감 완료')
     await september.locator('[data-ui="reports-close-snapshot"]').click()
     const snapshot = page.locator('[data-ui="reports-snapshot"]')
     await expect(snapshot).toContainText('783,900')

@@ -1,3 +1,4 @@
+import { appLocation } from "@/app/app-location"
 import { useEffect, useState, type ReactNode } from "react"
 import {
   ArrowRight,
@@ -299,7 +300,7 @@ function DocumentPackage({
     setDownloadError("")
     try {
       if (preview) await downloadSample(bundle)
-      else window.location.assign(endpoint + (bundle ? "/bundle" : ""))
+      else appLocation.assign(endpoint + (bundle ? "/bundle" : ""))
     } catch {
       setDownloadError("다운로드를 시작하지 못했습니다. 다시 시도해 주세요.")
     } finally {
@@ -638,7 +639,7 @@ export function PublicSharePage({
               onChange={(event) => {
                 const next = event.target.value as ShareState
                 setPreviewState(next)
-                const url = new URL(window.location.href)
+                const url = new URL(appLocation.href)
                 url.searchParams.set("state", next)
                 window.history.replaceState({}, "", url)
               }}

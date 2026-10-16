@@ -1,6 +1,10 @@
 "use client";
 import { BusinessListToolbar, BusinessFilterSearch } from "@shared/components/business-filters";
 
+import { RefreshCw, Pencil } from "lucide-react";
+import { ShipmentConfirmationDialog } from "./ShipmentConfirmationDialog";
+import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
+import { carrierTrackingAction } from "./carrierSites";
 import Link from "@trade-os/operations/compat/link";
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
@@ -13,6 +17,7 @@ import { Button } from "@trade-os/operations/components/ui/button";
 import { usePlatformSession } from "@trade-os/operations/session/PlatformSessionContext";
 import { ApiError } from "@trade-os/operations/lib/api/client";
 import {
+  confirmShipment,
   effectiveShipmentEta,
   effectiveShipmentEtd,
   listAllShipments,
@@ -102,6 +107,8 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
   const dateTag = useLocaleTag();
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [refreshState, setRefreshState] = useState<RefreshState>({ status: "idle" });
+  const editTrigger = useRef<HTMLButtonElement | null>(null);
+  const [editing, setEditing] = useState<Shipment | null>(null);
   const [q, setQ] = useState("");
   const [kind, setKind] = useState<FilterKind>("all");
   const tabsId = useId();
@@ -276,7 +283,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
             status: "ready",
             syncStatus: current.syncStatus,
             shipments: current.shipments.map((row) =>
-              row.id === shipmentId ? { ...row, ...shipment } : row,
+              row.id === shipmentId ? { ...row, ...shipment, snap_evidence_count: shipment.snap_evidence_count ?? row.snap_evidence_count } : row,
             ),
           };
         });
@@ -502,6 +509,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                 const refreshing = refreshState.status === "pending" && refreshState.shipmentId === ship.id;
                 const refreshError = refreshState.status === "error" && refreshState.shipmentId === ship.id ? refreshState.message : null;
                 const fetchedAt = ship.provider_fetched_at || ship.last_carrier_sync_at;
+                const trackingAction = carrierTrackingAction(ship.carrier);
                 return (
                   <HostTableRow key={ship.id} data-shipment-id={ship.id} aria-busy={refreshing} data-refresh-state={refreshError ? "error" : refreshing ? "pending" : "ready"}>
                     <HostTableCell>
@@ -516,13 +524,14 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                     <HostTableCell>
                       <div className="tabular-nums">{effectiveEtd ? formatDate(effectiveEtd, dateTag) : "—"} / {effectiveEta ? formatDate(effectiveEta, dateTag) : "—"}</div>
                       <div className="mt-1 text-body-13 text-text-muted">{ship.confirmed_eta || ship.confirmed_etd ? "확정 일정 기준" : copy.source[ship.source]}{dday !== null ? ` · ${ddayLabel(dday)}` : ""}</div>
-                      {ship.confirmed_eta || ship.provider_eta || ship.confirmed_etd || ship.provider_etd ? (
+                      {ship.confirmed_eta || ship.provider_eta || ship.confirmed_etd || ship.provider_etd || ship.confirmed_status_at || ship.confirmed_status_by ? (
                         <details className="reference-shipment-date-details text-body-13 text-text-muted" data-ui="shipment-eta-basis">
                           <summary>일정 근거</summary>
                           {ship.confirmed_etd ? <p>확정 ETD {formatDate(ship.confirmed_etd, dateTag)}</p> : null}
                           {ship.confirmed_eta ? <p>확정 ETA {formatDate(ship.confirmed_eta, dateTag)}</p> : null}
                           {ship.provider_etd ? <p>선사 ETD {formatDate(ship.provider_etd, dateTag)}</p> : null}
                           {ship.provider_eta ? <p>선사 ETA {formatDate(ship.provider_eta, dateTag)}</p> : null}
+                          <ShipmentConfirmationRecord shipment={ship} />
                           {ship.confirmed_at ? <p>{copy.source.manualAt.replace("{at}", formatDateTime(ship.confirmed_at, dateTag))}</p> : null}
                           {ship.confirmed_by ? <p>{copy.source.manualBy.replace("{by}", ship.confirmed_by)}</p> : null}
                         </details>
@@ -531,7 +540,9 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                     <HostTableCell>
                       <div className="text-body-13 text-text-muted">{ship.bl_number ? "B/L 번호 등록" : "B/L 번호 없음"}</div>
                       {shipEvidence ? <HostButton variant="outline" size="sm" asChild className="mt-1">
-                        <Link href="/erp/snap-evidence" title={shipEvidence.allocationLabel ? copy.evidenceAllocatedTo.replace("{label}", shipEvidence.allocationLabel) : undefined}>SNAP {shipEvidence.mediaCount}장</Link>
+                        <Link href="/erp/snap-evidence" title={shipEvidence.allocationLabel ? copy.evidenceAllocatedTo.replace("{label}", shipEvidence.allocationLabel) : undefined}>
+                          SNAP {ship.snap_evidence_count === undefined ? "" : `${ship.snap_evidence_count}건 · `}{shipEvidence.mediaCount}장
+                        </Link>
                       </HostButton> : <div className="mt-1 text-body-13 text-text-muted">증거 미확인</div>}
                     </HostTableCell>
                     <HostTableCell>
@@ -541,10 +552,24 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                       {delayed || arriving ? <div className="mt-1 text-body-13 text-text-muted">{copy.status[ship.status] ?? ship.status}</div> : null}
                     </HostTableCell>
                     <HostTableCell>
-                      {canRefresh ? <HostButton aria-label={refreshing ? copy.refreshingTracking : copy.refreshTracking} disabled={refreshState.status === "pending"} onClick={() => void refreshTracking(ship.id)} size="sm" type="button" variant="outline">
-                        {refreshing ? copy.refreshingTracking : copy.refreshTracking}
-                      </HostButton> : <span className="text-body-13 text-text-muted">조회만 가능</span>}
+                      <div className="flex flex-wrap gap-2">
+                        {trackingAction.kind === "refresh" && canRefresh ? (
+                          <HostButton title="추적 정보 갱신" aria-label={refreshing ? copy.refreshingTracking : copy.refreshTracking} disabled={refreshState.status === "pending"} onClick={() => void refreshTracking(ship.id)} size="sm" type="button" variant="outline">
+                            <RefreshCw aria-hidden="true" className={refreshing ? "size-4 animate-spin" : "size-4"} />{refreshing ? "갱신 중" : "갱신"}
+                          </HostButton>
+                        ) : null}
+                        {trackingAction.kind === "site" ? (
+                          <HostButton variant="outline" size="sm" asChild><a href={trackingAction.href} target="_blank" rel="noopener noreferrer">선사 사이트 ↗</a></HostButton>
+                        ) : null}
+                        {canRefresh ? (
+                          <HostButton title="일정 및 운송 상태 수정" aria-label="일정 및 운송 상태 수정" disabled={refreshState.status === "pending"} onClick={event => { editTrigger.current = event.currentTarget; setEditing(ship); }} size="sm" type="button" variant="outline"><Pencil aria-hidden="true" className="size-4" />수정</HostButton>
+                        ) : null}
+                      </div>
+                      {ship.tracking_health === "stale" || ship.tracking_health === "fetch_failed" ? (
+                        <p className={`mt-1 text-body-13 ${ship.tracking_health === "stale" ? "text-status-warning" : "text-status-danger"}`}>{ship.tracking_health === "stale" ? "조회 정보 오래됨" : "선사 조회 실패"}</p>
+                      ) : null}
                       {fetchedAt ? <p className="mt-1 text-body-13 text-text-muted">{copy.source.carrierAt.replace("{at}", formatDateTime(fetchedAt, dateTag))}</p> : null}
+                      {!fetchedAt && (ship.tracking_health === "stale" || ship.tracking_health === "fetch_failed") ? <p className="mt-1 text-body-13 text-text-muted">마지막 조회 기록 없음</p> : null}
                       {refreshError ? <p className="mt-1 text-body-13 text-status-danger" role="alert">{refreshError}</p> : null}
                     </HostTableCell>
                   </HostTableRow>
@@ -556,6 +581,11 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
         ))
       )}
       </div>
+      {editing ? <ShipmentConfirmationDialog shipment={editing} canWrite={canRefresh} copy={copy} returnFocus={() => editTrigger.current?.focus()} onReload={async () => { const result = await listAllShipments(getIdToken); const latest = result.shipments.find(row => row.id === editing.id); if (!latest) throw new Error("선적을 찾을 수 없습니다."); return latest; }} onClose={() => setEditing(null)} onSave={async (body) => {
+        if (!canRefresh) throw new Error("수정 권한이 없습니다.");
+        const { shipment } = await confirmShipment(getIdToken, editing.id, body);
+        setState(current => current.status === "ready" ? { ...current, shipments: current.shipments.map(row => row.id === shipment.id ? { ...row, ...shipment, snap_evidence_count: shipment.snap_evidence_count ?? row.snap_evidence_count } : row) } : current);
+      }} /> : null}
     </div>
   );
 }

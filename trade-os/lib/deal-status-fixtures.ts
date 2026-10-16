@@ -5,6 +5,7 @@ import type { TradeFinanceFact } from "./erp-finance"
 export const statusPreviewDeals: Deal[] = [
   {
     id: "DL-260918-91",
+    direction: "sales",
     title: "9월 철강재 거래 종결",
     counterparty: "ACME GmbH",
     primaryItem: "스테인리스 코일",
@@ -25,6 +26,7 @@ export const statusPreviewDeals: Deal[] = [
   },
   {
     id: "DL-260918-92",
+    direction: "purchase",
     title: "9월 운송 발주 취소",
     counterparty: "Sakura Logistics KK",
     primaryItem: "내륙운송",

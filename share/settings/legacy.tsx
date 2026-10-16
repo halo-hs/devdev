@@ -854,7 +854,7 @@ const approvalModeLabel: Record<ApprovalMode, string> = {
   conditional: "조건부 승인",
 }
 
-function ApprovalPolicySettings() {
+export function ApprovalPolicySettings() {
   const [policies, setPolicies] = useState<ApprovalPolicy[]>([
     { ...emptyApprovalPolicy, id: "AP-ORG-001", revision: 3 },
   ])
@@ -934,7 +934,7 @@ function ApprovalPolicySettings() {
       <SettingsHeading
         title="결재 정책"
         description="생성 문서에 적용할 승인 방식과 조건을 관리합니다. 실제 적용 정책은 조직 정책과 문서 유형 정책의 우선순위로 결정됩니다."
-        action={<Badge variant="secondary">Owner / Admin</Badge>}
+        action={<Badge variant="secondary">조직 소유자</Badge>}
       />
       <div className="max-w-5xl divide-y">
         <section className="py-5">
@@ -978,7 +978,7 @@ function ApprovalPolicySettings() {
                       </Badge>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      revision {policy.revision} · 금액, 거래처 위험, 불일치, 신규 거래처 조건
+                      정책 버전 {policy.revision} · 금액, 거래처 위험, 불일치, 신규 거래처 조건
                     </p>
                   </div>
                   <Button
@@ -1140,7 +1140,7 @@ function ApprovalPolicySettings() {
             </p>
           ) : null}
           {error ? <p className="mt-3 text-sm text-red-600" role="alert">{error}</p> : null}
-          <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
             <Button
               disabled={pending || amountInvalid || scopeInvalid}
               onClick={() =>

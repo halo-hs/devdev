@@ -14,6 +14,7 @@ export default defineConfig(({ command }) => {
     ? loadEnv("development", referenceRoot, "NEXT_PUBLIC_DEV_BEARER").NEXT_PUBLIC_DEV_BEARER
     : undefined
   return {
+  base: process.env.GITHUB_PAGES === "true" ? "/devdev/" : "/",
   plugins: [svgr({ include: "**/*.svg" }), react(), tailwindcss()],
   resolve: {
     alias: {
