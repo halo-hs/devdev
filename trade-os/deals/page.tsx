@@ -5,6 +5,7 @@ import {
   workLabels,
   type DealWorkKey,
 } from "@trade-os/lib/deal-workflow"
+import { SalesPrototype } from "@trade-os/extended-screens"
 import { DealsFinanceTable } from "@trade-os/deals/finance-table"
 import {
   filteredFinanceFacts,
@@ -383,10 +384,11 @@ export function DealsScreen({
   const [view, setView] = useState("operations")
   const [financeFilters, setFinanceFilters] = useState(defaultFinanceFilters)
   const [query, setQuery] = useState("")
-  const [counterparty, setCounterparty] = useState("all")
+  const [counterparty, setCounterparty] = useState(() => new URLSearchParams(window.location.search).get("counterparty") || "all")
+  const [assigneeName, setAssigneeName] = useState(() => new URLSearchParams(window.location.search).get("assignee")?.trim() ?? "")
   const [dateStart, setDateStart] = useState("")
   const [dateEnd, setDateEnd] = useState("")
-  const [lifecycle, setLifecycle] = useState("open")
+  const [lifecycle, setLifecycle] = useState(() => new URLSearchParams(window.location.search).get("lifecycle") === "all" ? "all" : "open")
   const [pipeline, setPipeline] = useState(false)
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false)
   const [stage, setStage] = useState("active")
@@ -437,6 +439,7 @@ export function DealsScreen({
         return false
       if (counterparty !== "all" && deal.counterparty !== counterparty)
         return false
+      if (assigneeName && deal.assignee !== assigneeName) return false
       const date = deal.eta.replaceAll(".", "-")
       if (dateStart && (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date < dateStart))
         return false
@@ -484,6 +487,7 @@ export function DealsScreen({
   }, [
     allDeals,
     assignee,
+    assigneeName,
     query,
     sort,
     stage,
@@ -509,6 +513,11 @@ export function DealsScreen({
   )
 
   const activeFilters = [
+    assigneeName && {
+      key: "assigneeName",
+      label: `담당자: ${assigneeName}`,
+      clear: () => setAssigneeName(""),
+    },
     lifecycle !== "all" && {
       key: "lifecycle",
       label: `주문 결정: ${optionLabel(lifecycleOptions, lifecycle)}`,
@@ -899,6 +908,7 @@ export function DealsScreen({
                           setDateEnd("")
                           setStage("active")
                           setAssignee("all")
+                          setAssigneeName("")
                           setKpiFilter("all")
                           setFinanceFilters(defaultFinanceFilters)
                           setPage(1)
@@ -1001,17 +1011,6 @@ export function DealsScreen({
               <TabsTrigger value="finance">금융</TabsTrigger>
             </TabsList>
           </Tabs>
-          <BusinessFilterBar style={{ width: "auto" }}>
-            <SelectControl
-              label="정렬"
-              value={sort}
-              onChange={(value) => {
-                setSort(value)
-                setPage(1)
-              }}
-              options={sortOptions}
-            />
-          </BusinessFilterBar>
           <span className="ml-auto text-xs text-muted-foreground">
             {currentPage} / {totalPages} 페이지
           </span>
@@ -1033,6 +1032,17 @@ export function DealsScreen({
             ? "송장·입출금은 누적 흐름, 받을 돈·줄 돈은 현재 잔액입니다. 통화별로 표시합니다."
             : "금액은 출처 문서 기준입니다. 근거가 없는 값은 —로 표시합니다."}
         </p>
+        <BusinessFilterBar style={{ width: "auto" }}>
+          <SelectControl
+            label="정렬"
+            value={sort}
+            onChange={(value) => {
+              setSort(value)
+              setPage(1)
+            }}
+            options={sortOptions}
+          />
+        </BusinessFilterBar>
         <section className="[container-type:inline-size]">
           {view === "finance" ? (
             <DealsFinanceTable
@@ -1042,64 +1052,67 @@ export function DealsScreen({
               onOpenDeal={(id) => onOpenDeal(id, "finance")}
             />
           ) : pipeline ? (
-            <div
-              aria-label="영업 파이프라인"
-              className="grid gap-3 md:grid-cols-2 xl:grid-cols-4"
-            >
-              {(Object.entries(stageLabels) as [DealStage, string][]).map(
-                ([stageKey, label]) => {
-                  const rows = filtered.filter(
-                    (deal) => deal.stage === stageKey
-                  )
-                  return (
-                    <section
-                      key={stageKey}
-                      className="rounded-lg border bg-muted/25 p-3"
-                    >
-                      <h3 className="mb-3 flex justify-between text-sm font-semibold">
-                        {label}
-                        <span className="text-muted-foreground">
-                          {rows.length}건
-                        </span>
-                      </h3>
-                      <div className="space-y-2">
-                        {rows.map((deal) => (
-                          <button
-                            key={deal.id}
-                            className="block w-full rounded-md border bg-background p-3 text-left hover:border-primary/50"
-                            onClick={() => onOpenDeal(deal.id)}
-                          >
-                            <strong className="block text-sm">
-                              {deal.counterparty}
-                            </strong>
-                            <span className="mt-1 block text-xs text-muted-foreground">
-                              {prototypeBackend.deals.getTitle(
-                                deal.id,
-                                deal.title
-                              )}
-                            </span>
-                            <span className="mt-2 block space-y-1 text-xs text-muted-foreground">
-                              {dealStateDetails(deal).map((detail) => (
-                                <span key={detail} className="block">
-                                  {detail}
-                                </span>
-                              ))}
-                            </span>
-                            <span className="mt-3 block text-xs text-primary">
-                              {deal.nextAction}
-                            </span>
-                          </button>
-                        ))}
-                        {!rows.length && (
-                          <p className="py-6 text-center text-xs text-muted-foreground">
-                            해당 단계의 거래가 없습니다.
-                          </p>
-                        )}
-                      </div>
-                    </section>
-                  )
-                }
-              )}
+            <div className="grid gap-8">
+              <div
+                aria-label="영업 파이프라인"
+                className="grid gap-3 md:grid-cols-2 xl:grid-cols-4"
+              >
+                {(Object.entries(stageLabels) as [DealStage, string][]).map(
+                  ([stageKey, label]) => {
+                    const rows = filtered.filter(
+                      (deal) => deal.stage === stageKey
+                    )
+                    return (
+                      <section
+                        key={stageKey}
+                        className="rounded-lg border bg-muted/25 p-3"
+                      >
+                        <h3 className="mb-3 flex justify-between text-sm font-semibold">
+                          {label}
+                          <span className="text-muted-foreground">
+                            {rows.length}건
+                          </span>
+                        </h3>
+                        <div className="space-y-2">
+                          {rows.map((deal) => (
+                            <button
+                              key={deal.id}
+                              className="block w-full rounded-md border bg-background p-3 text-left hover:border-primary/50"
+                              onClick={() => onOpenDeal(deal.id)}
+                            >
+                              <strong className="block text-sm">
+                                {deal.counterparty}
+                              </strong>
+                              <span className="mt-1 block text-xs text-muted-foreground">
+                                {prototypeBackend.deals.getTitle(
+                                  deal.id,
+                                  deal.title
+                                )}
+                              </span>
+                              <span className="mt-2 block space-y-1 text-xs text-muted-foreground">
+                                {dealStateDetails(deal).map((detail) => (
+                                  <span key={detail} className="block">
+                                    {detail}
+                                  </span>
+                                ))}
+                              </span>
+                              <span className="mt-3 block text-xs text-primary">
+                                {deal.nextAction}
+                              </span>
+                            </button>
+                          ))}
+                          {!rows.length && (
+                            <p className="py-6 text-center text-xs text-muted-foreground">
+                              해당 단계의 거래가 없습니다.
+                            </p>
+                          )}
+                        </div>
+                      </section>
+                    )
+                  }
+                )}
+              </div>
+              <SalesPrototype embedded onOpenDeal={onOpenDeal} />
             </div>
           ) : (
             <Table

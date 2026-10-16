@@ -77,3 +77,45 @@ test("creating a share link does not mark the document sent", async ({ page }) =
   await expect(heading).toContainText("확정")
   await expect(heading).not.toContainText("발송됨")
 })
+
+for (const width of [1440, 390]) {
+  test(`deal picker searches names and numbers without changing the current connection at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/erp/documents/create/SC-2026-0708')
+    const open = page.getByRole('button', { name: /^거래 (변경|연결)$/ }).first()
+    await open.click()
+    const picker = page.getByRole('dialog', { name: /^거래 (변경|연결)$/ })
+    const search = picker.getByRole('textbox', { name: '연결할 거래 검색' })
+    const rows = picker.locator('tbody tr')
+    const originalCount = await rows.count()
+    expect(originalCount).toBeGreaterThan(1)
+    const title = await rows.first().locator('td').first().locator('.font-medium').innerText()
+    const number = (await rows.first().locator('td').first().innerText()).match(/DL-[\d-]+/)![0]
+    const party = await rows.first().locator('td').nth(1).innerText()
+    for (const query of [number.toLowerCase(), title, party]) {
+      await search.fill(`  ${query}  `)
+      await expect(rows.filter({ hasText: number })).toHaveCount(1)
+    }
+    await search.fill('검색결과없는거래-999')
+    await expect(picker.getByText('검색 조건에 맞는 거래가 없습니다.')).toBeVisible()
+    await expect(picker.getByRole('button', { name: '연결', exact: true })).toHaveCount(0)
+    await search.fill('')
+    await expect(rows).toHaveCount(originalCount)
+    const bounds = await search.boundingBox()
+    expect(bounds!.x).toBeGreaterThanOrEqual(0)
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width)
+    await search.fill(number)
+    await page.keyboard.press('Escape')
+    await open.click()
+    await expect(search).toHaveValue('')
+    await expect(rows).toHaveCount(originalCount)
+  })
+}
+
+test('confirmed document breadcrumb does not call the document a draft', async ({ page }) => {
+  await page.goto('/erp/documents/create/CI-2026-0703')
+  await expect(page.getByRole('heading', { name: '문서 만들기', exact: true }).locator('..')).toContainText('확정')
+  const breadcrumb = page.getByRole('navigation', { name: '현재 위치' })
+  await expect(breadcrumb).toContainText('상업송장')
+  await expect(breadcrumb).not.toContainText('초안')
+})
