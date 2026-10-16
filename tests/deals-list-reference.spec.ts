@@ -19,7 +19,12 @@ test("list filters ETA and counterparty together, updates counts and retains con
   page,
 }) => {
   await page.goto("/erp/deals")
+  await expect(page.getByRole("combobox", { name: "정렬" })).toBeVisible()
+  await expect(page.getByRole("combobox", { name: "주문 결정" })).toHaveCount(0)
+  await expect(page.getByLabel("운영 거래 지표")).toHaveCount(0)
   await page.getByRole("button", { name: "상세 필터", exact: true }).click()
+  await expect(page.getByRole("combobox", { name: "주문 결정" })).toBeVisible()
+  await expect(page.getByLabel("운영 거래 지표")).toBeVisible()
   const table = page.getByRole("table", { name: "거래 업무표" })
   await expect(table.getByRole("row")).toHaveCount(10)
   await page
