@@ -1,0 +1,22 @@
+/* Local grid avoids the imported operations utility layer overriding container variants. */
+#settlement-dunning .settlement-dunning-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+@container dunning (min-width: 640px) {
+  #settlement-dunning .settlement-dunning-row {
+    grid-template-columns: minmax(0, 1fr) minmax(180px, auto) 165px 104px;
+  }
+}
+
+#settlement-dunning .settlement-dunning-columns { display: none; }
+@container dunning (min-width: 640px) {
+  #settlement-dunning .settlement-dunning-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, auto) 165px 104px;
+  }
+  #settlement-dunning[data-expanded="true"] .dunning-field-label { display: none; }
+}
+@container dunning (max-width: 639px) {
+  #settlement-dunning .dunning-field-label { display: block; margin-right: 0; }
+}
