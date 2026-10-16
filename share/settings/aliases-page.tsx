@@ -68,7 +68,7 @@ export const aliasPreview = {
     localStorage.setItem(key, JSON.stringify(data))
   },
 }
-const roles = { both: "구매·판매 모두", buyer: "구매처", seller: "판매처" }
+const roles = { both: "매입처·매출처", buyer: "매출처", seller: "매입처" }
 const statuses = { active: "사용 중", archived: "보관", merged: "병합됨" }
 const selectClass = "h-9 w-full rounded-md border bg-background px-3 text-sm"
 const newMaster = (): Master => ({
