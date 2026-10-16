@@ -13,7 +13,7 @@
     "staleNotice": "최신 값을 불러오지 못해 {time} 기준 값을 표시합니다.",
     "staleNoticeFetched": "최신 값을 불러오지 못해 {time}에 불러온 값을 표시합니다.",
     "retry": "다시 시도",
-    "refresh": "새로고침",
+    "refresh": "다시 조회",
     "emptyTitle": "아직 표시할 결산 데이터가 없습니다",
     "emptyBody": "거래와 정산 일정이 쌓이면 월별 추세와 고객사 집계가 여기에 표시됩니다.",
     "ratioUnavailable": "계산 불가",
@@ -40,7 +40,7 @@
     "kpi": {
       "receivableDue": "{period} 수취 예정 ({currency})",
       "payableDue": "{period} 지급 예정 ({currency})",
-      "received": "{period} 수금 적용액 ({currency})",
+      "received": "{period} 받을 돈 적용액 ({currency})",
       "paidOut": "{period} 지급 적용액 ({currency})",
       "gp": "{period} 예정 거래손익 ({currency})",
       "outstanding": "기말 미수 잔액 ({currency})",
@@ -64,16 +64,16 @@
     },
     "charts": {
       "planVsActual": {
-        "title": "수취 계획 vs 수금 적용",
-        "subMonth": "월별 · {currency} — 예정(만기 기준)과 AR 일정에 적용된 현금(가치일 기준)",
-        "subWeek": "주별 · {currency} — 예정(만기 기준)과 AR 일정에 적용된 현금(가치일 기준)",
-        "aria": "기간별 수취 예정 대비 수금 적용액 막대 차트",
+        "title": "수취 계획 vs 받을 돈 적용액",
+        "subMonth": "월별 · {currency} — 예정(만기 기준)과 받을 돈 적용액(가치일 기준)",
+        "subWeek": "주별 · {currency} — 예정(만기 기준)과 받을 돈 적용액(가치일 기준)",
+        "aria": "기간별 수취 예정 대비 받을 돈 적용액 막대 차트",
         "planned": "수취 예정",
-        "received": "수금 적용액"
+        "received": "받을 돈 적용액"
       },
       "gp": {
         "title": "월별 예정 거래손익",
-        "sub": "최초 받을 일정 − 최초 줄 일정 − 가산 부대비용 · 동일 통화 딜 기준 · {currency} · 딜 전체는 마지막 수취 예정일이 속한 달에 집계",
+        "sub": "동일 통화 거래의 예정 손익 · {currency}",
         "aria": "월별 예정 거래손익 막대 차트",
         "gpLabel": "예정 거래손익",
         "marginLabel": "마진",
@@ -84,7 +84,8 @@
         "excludedCommerciallyInactive": "취소·보관 딜 {count}건 제외",
         "excludedSuffix": "(승인된 환율 근거 없음 — 환산 불가)",
         "excludedWindowNote": "(조회 기간 전체 기준)",
-        "excludedUnknown": "제외 건수 확인 불가 — 서버가 제외 집계를 주지 않았습니다"
+        "excludedUnknown": "제외 건수 확인 불가 — 서버가 제외 집계를 주지 않았습니다",
+        "basis": "최초 받을 돈 − 최초 지급할 돈 − 가산 부대비용. 거래 전체 손익은 마지막 받을 돈 만기일이 속한 달에 집계합니다."
       },
       "balance": {
         "title": "기말 잔액 추세",
@@ -171,7 +172,7 @@
         "loadFailed": "스냅샷을 불러오지 못했습니다.",
         "currency": "통화",
         "receivableDue": "수취 예정",
-        "received": "수금 적용액",
+        "received": "받을 돈 적용액",
         "outstandingEnd": "기말 미수",
         "payableEnd": "기말 미지급",
         "overdueRate": "연체율",
