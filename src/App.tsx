@@ -16909,7 +16909,7 @@ export function App() {
       style={
         {
           "--header-height": "var(--ui-shell-header-height)",
-          "--sidebar-width": "var(--ui-shell-sidebar-width)",
+          "--sidebar-width": screen === "deals" ? "216px" : "var(--ui-shell-sidebar-width)",
           "--sidebar-width-icon": "var(--ui-shell-sidebar-collapsed-width)",
         } as CSSProperties
       }
