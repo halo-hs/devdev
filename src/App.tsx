@@ -4,6 +4,7 @@ import { type DocumentConnection, type DocumentDealLink, type CandidateEvidence 
 import { dealDocumentPreviews, dealDocumentFromReviewUrl, type DealDocumentRecord } from "@trade-os/lib/deal-document-actions"
 import { appLocation } from "@/app/app-location"
 import { StartGuideProvider, useStartGuide } from "@trade-os/onboarding/runtime"
+import { SettingsDemoProvider, useTradeSeatAssigned } from "@share/settings/subscription-settings"
 import { BusinessListToolbar, BusinessFilterSearch, BusinessFilterField } from "@shared/components/business-filters"
 import { FormField, FormFieldHeader } from "@shared/components/form-field"
 import { PageLoadingBoundary } from "@shared/components/page-loading-boundary"
@@ -1404,7 +1405,7 @@ type GeneratedDraft = {
   type: string
   number: string
   party: string
-  status: "작성 중" | "승인 대기" | "승인 완료" | "반려" | "확정" | "전달 요청됨"
+  status: "작성 중" | "승인 대기" | "승인 완료" | "반려" | "확정" | "발송됨"
   tone: Tone
   readiness: string
   tab: "draft" | "confirmed" | "progress" | "sharing" | "done"
@@ -2164,6 +2165,7 @@ function AppNav({
               <WorkspaceSwitcher
                 workspaceId={workspaceId}
                 onWorkspaceChange={onWorkspaceChange}
+                product={product}
                 textOnly
               />
             </div>
@@ -2199,6 +2201,7 @@ function AppNav({
               <WorkspaceSwitcher
                 workspaceId={workspaceId}
                 onWorkspaceChange={onWorkspaceChange}
+                product={product}
                 textOnly
               />
             </div>
@@ -2233,6 +2236,7 @@ function AppNav({
           <WorkspaceSwitcher
             workspaceId={workspaceId}
             onWorkspaceChange={onWorkspaceChange}
+            product={product}
           />
         </div>
       </SidebarHeader>
@@ -2350,6 +2354,7 @@ function AppNav({
 
 function WorkspaceHeader({
   screen,
+  documentConfirmed,
   templateCode,
   unreadNotificationCount,
   onOpenNotifications,
@@ -2366,6 +2371,7 @@ function WorkspaceHeader({
   isV2Workspace,
   dealActionsRef,
 }: {
+  documentConfirmed: boolean
   screen: Screen
   templateCode: string
   unreadNotificationCount: number
@@ -2434,7 +2440,7 @@ function WorkspaceHeader({
     tokens: "설정",
     "snap-platform": "ECOYA SNAP",
   }
-  const title = screenTitles[screen] ?? `${templateTitle} 초안`
+  const title = screenTitles[screen] ?? (documentConfirmed ? templateTitle : `${templateTitle} 초안`)
   const section = screenSections[screen] ?? "AI 서류 처리"
   const breadcrumbs =
     screen === "snap-platform" && activeSnapRoute
@@ -4645,6 +4651,7 @@ function HorizontalDocumentTray({
 }
 
 function InboxScreen({
+  role,
   onOpenDeal,
   originDealId,
   initialDocumentName,
@@ -4653,6 +4660,7 @@ function InboxScreen({
   linkedDealsByDocument,
   onDocumentDealLinked,
 }: {
+  role: "owner" | "admin" | "member"
   onOpenDeal: (dealId: string, focus?: "finance") => void
   originDealId?: string | null
   initialDocumentName?: string
@@ -4667,6 +4675,7 @@ function InboxScreen({
     link: UploadDocumentDealLink | null
   ) => void
 }) {
+  const tradeSeatAssigned = useTradeSeatAssigned(role)
   const guide = useStartGuide()
   const [pendingCostDealId, setPendingCostDealId] = useState<string | null>(null)
   const [dealReviewDocument] = useState<DealDocumentRecord | null>(() => dealDocumentFromReviewUrl())
@@ -4880,7 +4889,7 @@ function InboxScreen({
     toast.success("연결할 거래를 선택해 주세요.")
   }
   const handleDealLink = async (dealId: string, dealLabel: string, bankCash?: Omit<BankCashInput, "sourceDocumentId" | "idempotencyKey">, evidence?: string[]) => {
-    if (linkingDocument || isDealBlocked) return false
+    if (!tradeSeatAssigned || linkingDocument || isDealBlocked) return false
     const documentName = selectedDocument.name
     setLinkingDocument(true)
     try {
@@ -5435,6 +5444,7 @@ function InboxScreen({
             pdfReviewCompleted={pdfReviewCompleted}
             linkedDealLabel={linkedDealLabel}
             linkingDocument={linkingDocument}
+            tradeSeatAssigned={tradeSeatAssigned}
             downloadingDraft={downloadingDraft}
             dealActionTarget={dealActionTarget}
             onLinkDeal={handleDealLink}
@@ -6032,6 +6042,7 @@ function InlinePdfCompare({
           document={document}
           linkedDealLabel={document.dealLabel ?? null}
           linking={false}
+          tradeSeatAssigned
           onShowPdf={() => onMobilePaneChange("preview")}
           onLinkDeal={async () => false}
         />
@@ -6070,6 +6081,7 @@ function DocumentReviewWorkspace({
   pdfReviewCompleted,
   linkedDealLabel,
   linkingDocument,
+  tradeSeatAssigned,
   downloadingDraft,
   dealActionTarget,
   onLinkDeal,
@@ -6089,6 +6101,7 @@ function DocumentReviewWorkspace({
   pdfReviewCompleted: boolean
   linkedDealLabel: string | null
   linkingDocument: boolean
+  tradeSeatAssigned: boolean
   downloadingDraft: boolean
   dealActionTarget: HTMLElement | null
   onLinkDeal: (dealId: string, dealLabel: string, bankCash?: Omit<BankCashInput, "sourceDocumentId" | "idempotencyKey">, evidence?: string[]) => Promise<boolean>
@@ -6246,6 +6259,7 @@ function DocumentReviewWorkspace({
         originDealId={originDealId}
         linkedDealLabel={linkedDealLabel}
         linking={linkingDocument}
+        tradeSeatAssigned={tradeSeatAssigned}
         linkBlocked={Boolean(dealBlocked)}
         actionPortalTarget={dealActionTarget}
         onShowPdf={isCompact ? () => onMobilePaneChange("preview") : undefined}
@@ -7178,6 +7192,7 @@ function DealConfirmPanel({
   originDealId,
   linkedDealLabel,
   linking,
+  tradeSeatAssigned,
   linkBlocked = false,
   actionPortalTarget,
   onShowPdf,
@@ -7188,6 +7203,7 @@ function DealConfirmPanel({
   originDealId?: string | null
   linkedDealLabel: string | null
   linking: boolean
+  tradeSeatAssigned: boolean
   linkBlocked?: boolean
   actionPortalTarget?: HTMLElement | null
   onShowPdf?: () => void
@@ -7355,7 +7371,7 @@ function DealConfirmPanel({
   }
 
   const handleLink = async () => {
-    if (linking || creatingRef.current || !connectionReady) return
+    if (!tradeSeatAssigned || linking || creatingRef.current || !connectionReady) return
     if (activeLink) {
       if (!changingConnection || !selectedCandidate || selectedCandidate.id === activeLink.dealId) return
       setChangeDialog({ target: { dealId: selectedCandidate.id, dealLabel: `${selectedCandidate.id} · ${selectedCandidate.party}` }, evidence: selectedCandidate.reasons.length ? selectedCandidate.reasons : ["직접 선택"] })
@@ -7426,19 +7442,19 @@ function DealConfirmPanel({
     ...(!selectedCandidate && !newDealFormOpen ? [{ key: "deal", label: "연결할 거래 선택", onSelect: openConnectionRequirement }] : []),
     ...(bankMatchRequired && !bankScheduleId ? [{ key: "schedule", label: "결제 일정 또는 서류만 연결 선택", onSelect: openConnectionRequirement }] : []),
   ]
-  const primaryAction = (
-    <>
-    <DocumentBlockingAlerts errors={connectionErrors} checks={connectionChecks} />
+  const primaryButton = (
     <Button
       size="sm"
+      aria-disabled={!tradeSeatAssigned}
+      className={!tradeSeatAssigned ? "opacity-50" : undefined}
       disabled={
-        !connectionReady || (!activeLink && linkBlocked) || (Boolean(activeLink) && (!changingConnection || selectedDealId === activeLink?.dealId)) || creatingDeal ||
+        tradeSeatAssigned && (!connectionReady || (!activeLink && linkBlocked) || (Boolean(activeLink) && (!changingConnection || selectedDealId === activeLink?.dealId)) || creatingDeal ||
         candidateLoadState !== "ready" ||
         (!selectedCandidate && !newDealReady) ||
         bankMatchIncomplete ||
-        linking
+        linking)
       }
-      onClick={() => void handleLink()}
+      onClick={() => { if (tradeSeatAssigned) void handleLink() }}
     >
       {linking || creatingDeal ? (
         <LoaderCircle className="animate-spin" data-icon="inline-start" />
@@ -7461,6 +7477,16 @@ function DealConfirmPanel({
               ? "결제 일정 선택 필요"
               : "선택한 거래 연결"}
     </Button>
+  )
+  const primaryAction = (
+    <>
+    <DocumentBlockingAlerts errors={connectionErrors} checks={connectionChecks} />
+    {tradeSeatAssigned ? primaryButton : (
+      <Tooltip>
+        <TooltipTrigger asChild>{primaryButton}</TooltipTrigger>
+        <TooltipContent side="bottom">거래를 연결하려면 Trade 사용 권한이 필요해요</TooltipContent>
+      </Tooltip>
+    )}
     </>
   )
 
@@ -7497,10 +7523,11 @@ function DealConfirmPanel({
         <ScrollArea className="min-h-0 flex-1">
           <div data-document-requirement="connection" className="mx-auto w-full max-w-4xl space-y-5 p-6">
             {connectionError ? <Alert variant="destructive"><AlertTitle>현재 거래 연결을 불러오지 못했습니다</AlertTitle><AlertDescription>{connectionError}</AlertDescription><Button className="mt-3" size="sm" variant="outline" onClick={() => setConnectionAttempt(value => value + 1)}>현재 연결 다시 확인</Button></Alert>
-              : connection ? <DocumentConnectionSummary connection={connection} disabled={linking || candidateLoadState !== "ready" || !onConnectionChanged}
+              : connection ? <DocumentConnectionSummary connection={connection} disabled={!tradeSeatAssigned || linking || candidateLoadState !== "ready" || !onConnectionChanged}
                 onChange={() => { setChangingConnection(true); setNewDealFormOpen(false); setSelectedDealId(null) }}
                 onUnlink={() => setChangeDialog({ target: null, evidence: [] })} />
               : <p role="status" className="text-xs text-muted-foreground">현재 거래 연결을 확인하고 있습니다.</p>}
+            {!tradeSeatAssigned ? <p role="status" className="text-xs text-muted-foreground">Trade OS는 조회만 가능해요. 거래를 연결하려면 사용 권한이 필요합니다.</p> : null}
             {connectionReady && !activeLink ? <p className="text-xs text-muted-foreground">거래 방향 확인 필요</p> : null}
             {originDealId && connectionReady && !activeLink ? (
               <p className="text-xs text-muted-foreground">거래 상세에서 올린 문서입니다. {originDealId} 거래를 먼저 선택했습니다. 다른 거래도 선택할 수 있습니다.</p>
@@ -7589,7 +7616,7 @@ function DealConfirmPanel({
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={candidateLoadState !== "ready" || Boolean(activeLink) || creatingDeal}
+                    disabled={!tradeSeatAssigned || candidateLoadState !== "ready" || Boolean(activeLink) || creatingDeal}
                     onClick={() => {
                       setNewDealFormOpen((current) => {
                         const next = !current
@@ -7637,7 +7664,7 @@ function DealConfirmPanel({
               ) : (
                 <>
                   {newDealFormOpen ? (
-                    <fieldset disabled={Boolean(createdDeal) || creatingDeal} className="mt-3 rounded-lg border border-primary/30 bg-background p-4">
+                    <fieldset disabled={!tradeSeatAssigned || Boolean(createdDeal) || creatingDeal} className="mt-3 rounded-lg border border-primary/30 bg-background p-4">
                       <div>
                         <div className="text-sm font-semibold">
                           {hasReadCounterparty
@@ -7721,6 +7748,7 @@ function DealConfirmPanel({
                           variant="outline"
                           size="sm"
                           className="mt-4"
+                          disabled={!tradeSeatAssigned}
                           onClick={() => {
                             prepareNewDealForm()
                             setNewDealFormOpen(true)
@@ -7938,7 +7966,7 @@ function DealConfirmPanel({
           </div>
         </ScrollArea>
       </div>
-      {changeDialog && connection ? <DocumentConnectionChangeDialog documentId={document.name} connection={connection} target={changeDialog.target} evidence={changeDialog.evidence} open
+      {tradeSeatAssigned && changeDialog && connection ? <DocumentConnectionChangeDialog documentId={document.name} connection={connection} target={changeDialog.target} evidence={changeDialog.evidence} open
         onClose={() => setChangeDialog(null)}
         onApplied={accepted => { setConnection(accepted); setChangingConnection(false); setSelectedDealId(null); onConnectionChanged?.(accepted); toast.success(accepted.link ? "거래 연결을 변경했습니다." : "거래 연결을 해제했습니다.") }} /> : null}
     </>
@@ -8485,11 +8513,16 @@ function RecentDocumentsTable({
   )
 }
 
-function TemplateStrip({ onResult }: {
+function TemplateStrip({ onResult, initialSelectedCode }: {
   onResult: (mode?: CreateStartMode, templateCode?: string, direction?: DocumentDirection) => void
+  initialSelectedCode?: string
 }) {
   const [direction, setDirection] = useState<"purchase" | "sales">("purchase")
-  const [selectedCode, setSelectedCode] = useState<string>(templates[0][0])
+  const [selectedCode, setSelectedCode] = useState<string>(
+    initialSelectedCode && templateSchemas[initialSelectedCode]
+      ? initialSelectedCode
+      : templates[0][0]
+  )
   const visibleTemplates = templates.filter(([kind]) =>
     templateDirections[kind].some((availableDirection) => availableDirection === direction)
   )
@@ -9313,6 +9346,7 @@ function StructuredDocumentCreateEditor({
 function CreateScreen({
   onResult,
   initialEntryState = "first",
+  initialTemplateCode,
   relatedDeal = null,
   role,
 }: {
@@ -9322,6 +9356,7 @@ function CreateScreen({
     options?: GeneratedDocumentOpenOptions
   ) => void
   initialEntryState?: "history" | "first"
+  initialTemplateCode?: string
   relatedDeal?: DealDocumentContext | null
   role: ErpPreviewRole
 }) {
@@ -9333,6 +9368,7 @@ function CreateScreen({
     relatedDeal ? "QT" : "SC"
   )
   const [workbenchDirection, setWorkbenchDirection] = useState<DocumentDirection | null>(null)
+  const [workbenchDocumentNumber, setWorkbenchDocumentNumber] = useState<string | null>(null)
   const [structuredEditorOpen, setStructuredEditorOpen] = useState(false)
   const [createdDocuments, setCreatedDocuments] = useState<GeneratedDraft[]>(
     () => [...generatedDrafts]
@@ -9381,7 +9417,7 @@ function CreateScreen({
     )
     return true
   }
-  const handleDuplicateCreatedDocument = async (draft: GeneratedDraft) => {
+  const handleDuplicateCreatedDocument = async (draft: GeneratedDraft, openAfterDuplicate = false) => {
     const result = await prototypeBackend.generatedDocuments.duplicate({
       id: draft.number,
     })
@@ -9407,6 +9443,11 @@ function CreateScreen({
       updated: "방금 전",
     }
     setCreatedDocuments((current) => [duplicatedDraft, ...current])
+    if (openAfterDuplicate) {
+      setWorkbenchTemplateCode(draft.number.split("-")[0])
+      setWorkbenchDocumentNumber(nextNumber)
+      setUnifiedWorkbenchOpen(true)
+    }
     toast.success(
       `${nextNumber} 작성 중 문서를 만들었습니다. 원본은 변경되지 않습니다.`
     )
@@ -9421,6 +9462,7 @@ function CreateScreen({
       templateCode && templateSchemas[templateCode] ? templateCode : "SC"
     )
     setWorkbenchDirection(direction ?? null)
+    setWorkbenchDocumentNumber(null)
     setUnifiedWorkbenchOpen(true)
   }
   const pageHeading = (
@@ -9432,11 +9474,36 @@ function CreateScreen({
   if (unifiedWorkbenchOpen) {
     return (
       <ResultScreen
+        key={workbenchDocumentNumber ?? workbenchTemplateCode}
         initialTemplateCode={workbenchTemplateCode}
         initialDirection={workbenchDirection}
+        initialDocumentNumber={workbenchDocumentNumber}
         relatedDeal={relatedDeal}
-        initialWorkspaceStep="source"
+        initialWorkspaceStep={workbenchDocumentNumber ? "editor" : "source"}
         role={role}
+        onDuplicateConfirmed={(direction) => {
+          const sourceNumber = workbenchDocumentNumber ?? `${workbenchTemplateCode}-2026-0708`
+          const draft = createdDocuments.find((item) => item.number === sourceNumber) ?? {
+            dealId: relatedDeal?.id ?? "",
+            title: templateMeta(workbenchTemplateCode)[1],
+            type: templateMeta(workbenchTemplateCode)[1],
+            number: sourceNumber,
+            party: relatedDeal?.party ?? "거래 미연결",
+            status: "확정" as const,
+            tone: "success" as const,
+            readiness: "확정",
+            tab: "confirmed" as const,
+            creatorName: currentAccount.name,
+            creatorAccountId: currentAccount.id,
+            updated: "방금 전",
+            memberCanAccessDeal: Boolean(relatedDeal),
+            memberCanDeliver: true,
+            pdfState: "final" as const,
+            approvalRequirement: "none" as const,
+          }
+          setWorkbenchDirection(direction)
+          void handleDuplicateCreatedDocument(draft, true)
+        }}
         onBackToList={() => {
           setUnifiedWorkbenchOpen(false)
           setStructuredEditorOpen(false)
@@ -9463,7 +9530,7 @@ function CreateScreen({
           {relatedDeal ? <RelatedDealNotice deal={relatedDeal} /> : null}
           {pageHeading}
           <section className="space-y-5 pb-8">
-            <TemplateStrip onResult={openUnifiedWorkbench} />
+            <TemplateStrip onResult={openUnifiedWorkbench} initialSelectedCode={initialTemplateCode} />
           </section>
         </div>
       </div>
@@ -9477,7 +9544,7 @@ function CreateScreen({
         {pageHeading}
 
         <section className="mb-7">
-          <TemplateStrip onResult={openUnifiedWorkbench} />
+          <TemplateStrip onResult={openUnifiedWorkbench} initialSelectedCode={initialTemplateCode} />
         </section>
 
         <section>
@@ -13349,9 +13416,7 @@ function buildDocumentReviewRows({
           ? `활성 링크 ${activeLinkCount}개`
           : linkSlotOccupied
             ? "기존 링크 철회 후 새 링크 가능"
-          : !deliveryAllowed
-            ? "고객 전달 권한 필요"
-            : documentConfirmed
+          : documentConfirmed
               ? "링크 생성 가능"
               : "문서 확정 후 가능",
       state:
@@ -13368,9 +13433,7 @@ function buildDocumentReviewRows({
       value:
         deliveryRecordCount > 0
           ? `전달 요청 ${deliveryRecordCount}건`
-          : !deliveryAllowed
-            ? "고객 전달 권한 필요"
-            : activeLinkCount > 0
+          : activeLinkCount > 0
               ? "생성한 링크 전달 전"
               : "공유 링크 생성 후 가능",
       state:
@@ -14016,7 +14079,7 @@ function DocumentReviewSharePanel({
       return
     }
     if (file.size > 2 * 1024 * 1024) {
-      setLogoError("로고 파일은 2MB 이하만 사용할 수 있습니다.")
+      setLogoError("로고 파일이 너무 큽니다. 더 작은 이미지를 선택해 주세요.")
       return
     }
     setLogoError("")
@@ -14223,7 +14286,7 @@ function DocumentReviewSharePanel({
                     accept="image/png,image/jpeg,.png,.jpg,.jpeg"
                     aria-label="로고 파일 선택 또는 끌어놓기"
                     label="로고 파일 선택"
-                    instructions="PNG, JPG · 최대 2MB"
+                    instructions="PNG, JPG"
                     onFiles={applyLogoFiles}
                     className={cn(
                       "min-h-10 flex-row justify-start gap-2 border-solid bg-background px-2.5 py-1.5 text-left",
@@ -14240,7 +14303,7 @@ function DocumentReviewSharePanel({
                           : "로고 파일 선택"}
                       </span>
                       <span className="shrink-0 text-[11px] text-muted-foreground">
-                        PNG, JPG · 최대 2MB
+                        PNG, JPG
                       </span>
                     </span>
                     {documentStyle.logo?.source === "file" ? (
@@ -14919,6 +14982,7 @@ function DocumentConfirmedSummaryPanel({
   dealConnectionRestricted,
   discrepancyReview,
   onOpenShare,
+  onDuplicate,
   deliveryAllowed,
 }: {
   approvalChoice: DocumentApprovalChoice
@@ -14936,6 +15000,7 @@ function DocumentConfirmedSummaryPanel({
   dealConnectionRestricted: boolean
   discrepancyReview: DocumentDiscrepancyReview
   onOpenShare: () => void
+  onDuplicate: () => void
   deliveryAllowed: boolean
 }) {
   const lastRequestEvent = approvalEvents.findLast(
@@ -14959,6 +15024,21 @@ function DocumentConfirmedSummaryPanel({
       ? "전달 완료"
       : "전달 전"
   const latestRecipient = latestEmail?.recipient.replace(/(^.).*(@.*$)/, "$1***$2")
+  const approvalSummaryRow: ReviewChecklistRow | null = approvalChoice === "request"
+    ? {
+        label: "승인",
+        value: approvalStatus === "approved"
+          ? lastDecisionEvent
+            ? `${lastDecisionEvent.actor} 승인 · ${lastDecisionEvent.occurredAt}`
+            : "승인 완료"
+          : approvalStatus === "rejected"
+            ? "반려"
+            : approvalStatus === "requested"
+              ? "승인 대기"
+              : "승인 요청 전",
+        state: approvalStatus === "approved" ? "complete" : approvalStatus === "rejected" ? "blocked" : "pending",
+      }
+    : null
   const completedReviewRows = buildDocumentReviewRows({
     missingRequiredCount: 0,
     documentStyle,
@@ -14981,7 +15061,8 @@ function DocumentConfirmedSummaryPanel({
     deliveryRecordCount,
     interactive: false,
     deliveryAllowed,
-  }).map((row) => {
+  }).filter((row) => row.label !== "품목 합계" && row.label !== "문서 모양").flatMap((row) => {
+    if (row.label === "문서 확정" && approvalSummaryRow) return [approvalSummaryRow, row]
     if (row.label !== "은행 거절 전 점검") return row
     if (discrepancyReview.errorCount > 0) {
       return {
@@ -15023,17 +15104,16 @@ function DocumentConfirmedSummaryPanel({
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold">문서가 확정되었습니다</div>
               </div>
-              {deliveryAllowed ? (
-                <Button
-                  type="button"
-                  size="sm"
-                  className="shrink-0"
-                  onClick={onOpenShare}
-                >
+              <div className="flex shrink-0 flex-wrap justify-end gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={onDuplicate}>
+                  <Copy data-icon="inline-start" />
+                  복제해서 수정
+                </Button>
+                <Button type="button" size="sm" onClick={onOpenShare}>
                   <Send data-icon="inline-start" />
                   공유하기
                 </Button>
-              ) : null}
+              </div>
             </div>
           </section>
 
@@ -15134,6 +15214,8 @@ function ResultScreen({
   relatedDeal = null,
   initialWorkspaceStep = "editor",
   onBackToList,
+  onDuplicateConfirmed,
+  onDocumentConfirmed,
   role = "owner",
   dealConnectionRestricted = false,
 }: {
@@ -15149,6 +15231,8 @@ function ResultScreen({
   relatedDeal?: DealDocumentContext | null
   initialWorkspaceStep?: DocumentCreateWorkspaceStep
   onBackToList?: () => void
+  onDocumentConfirmed?: () => void
+  onDuplicateConfirmed?: (direction: DocumentDirection | null) => void
   role?: ErpPreviewRole
   memberCanDeliver?: boolean
   dealConnectionRestricted?: boolean
@@ -15162,7 +15246,9 @@ function ResultScreen({
   const templateTitle = templateSelected
     ? templateMeta(templateCode)[1]
     : "문서 종류 미선택"
-  const documentNumber = initialDocumentNumber ?? `${templateCode}-2026-0708`
+  const documentNumber = initialDocumentNumber?.startsWith(`${templateCode}-`)
+    ? initialDocumentNumber
+    : `${templateCode}-2026-0708`
   const initialDraft = initialDocumentNumber
     ? generatedDrafts.find((draft) => draft.number === initialDocumentNumber)
     : undefined
@@ -15319,6 +15405,7 @@ function ResultScreen({
     initialSharePanelOpen && deliveryAllowed
   )
   const [dealPickerOpen, setDealPickerOpen] = useState(false)
+  const [dealPickerQuery, setDealPickerQuery] = useState("")
   const [saveState, setSaveState] = useState<DocumentSaveState>("saved")
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(
     () => initialDraft?.documentMetadata?.updated_at ?? initialDraft?.updated ?? null
@@ -15373,6 +15460,15 @@ function ResultScreen({
         ? `${previousDeal?.id}에서 ${deal.id} 거래로 변경했습니다.`
         : `${deal.id} 거래를 문서에 연결했습니다.`
     )
+  }
+  const disconnectDealFromReview = () => {
+    if (!selectedDeal) return
+    const previousId = selectedDeal.id
+    setSelectedDeal(null)
+    setDealPickerOpen(false)
+    if (sourceMode === "deal") setSourceMode("files")
+    markDocumentChanged()
+    toast.success(`${previousId} 거래 연결을 해제했습니다.`)
   }
   const handleItemCountChange = useCallback((count: number) => {
     setItemCount(count)
@@ -15522,6 +15618,11 @@ function ResultScreen({
     const rightMatches = normalizeComparisonText(right.party) === targetParty
     return Number(rightMatches) - Number(leftMatches)
   })
+  const filteredReviewDeals = reviewDealOptions.filter((deal) =>
+    [deal.id, deal.title, deal.party].some((value) =>
+      value.toLocaleLowerCase().includes(dealPickerQuery.trim().toLocaleLowerCase())
+    )
+  )
   const qualityAcknowledged = reviewedDocumentRevision === documentRevision
   const confirmationReady =
     Boolean(selectedDeal) &&
@@ -15603,6 +15704,7 @@ function ResultScreen({
   const handleConfirmDocument = () => {
     if (!confirmationReady) return
     setDocumentConfirmed(true)
+    onDocumentConfirmed?.()
     setSharePanelOpen(deliveryAllowed)
     toast.success(
       deliveryAllowed
@@ -15889,6 +15991,7 @@ function ResultScreen({
       dealConnectionRestricted={dealConnectionRestricted}
       discrepancyReview={discrepancyReview}
       onOpenShare={() => deliveryAllowed && setSharePanelOpen(true)}
+      onDuplicate={() => onDuplicateConfirmed?.(documentDirection)}
       deliveryAllowed={deliveryAllowed}
     />
   ) : (
@@ -15950,6 +16053,22 @@ function ResultScreen({
     />
   )
 
+  if (!templateSelected) {
+    return (
+      <div className="h-full overflow-auto bg-background px-5 py-6 sm:px-6">
+        <div className="mx-auto w-full max-w-ecoya-wide-xl">
+          <h1 className="mb-6 text-2xl font-semibold tracking-tight">문서 만들기</h1>
+          <TemplateStrip onResult={(_mode, code, direction) => {
+            if (!code || !templateSchemas[code]) return
+            setTemplateCode(code)
+            setDocumentDirection(direction ?? null)
+            setWorkspaceStep("source")
+          }} />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       ref={workspaceRootRef}
@@ -15983,22 +16102,13 @@ function ResultScreen({
             </ToneBadge>
           </div>
           <p className="truncate text-[11px] text-[var(--surface-muted-foreground)]">
-            {templateSelected
-              ? `${templateTitle} · ${documentNumber}.pdf · `
-              : "문서 종류 미선택 · "}
-            {templateSelected
-              ? documentConfirmed
-                ? deliveryAllowed
-                  ? "공유 가능"
-                  : "보기 전용 · 고객 전달 권한 필요"
-                : dealConnectionRestricted
-                  ? "거래 연결됨 · Deal 접근 권한 필요"
-                  : selectedDeal
-                    ? "거래 연결됨 · 검토 후 문서 확정"
-                    : "거래 미연결 · 검토 완료 후 초안 PDF만 다운로드 가능"
-              : selectedDeal
-                ? `${selectedDeal.id} 거래 선택됨`
-                : "거래 미연결"}
+            {templateTitle} · {documentNumber}.pdf · {documentConfirmed
+              ? "공유 가능"
+              : dealConnectionRestricted
+                ? "거래 연결됨 · Deal 접근 권한 필요"
+                : selectedDeal
+                  ? "거래 연결됨 · 검토 후 문서 확정"
+                  : "거래 미연결 · 검토 완료 후 초안 PDF만 다운로드 가능"}
           </p>
           <DocumentSaveSummary
             state={saveState === "unsaved" ? "pending" : saveState}
@@ -16066,7 +16176,7 @@ function ResultScreen({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setDealPickerOpen(true)}
+                  onClick={() => { setDealPickerQuery(""); setDealPickerOpen(true) }}
                 >
                   <Building2 data-icon="inline-start" />
                   {selectedDeal ? "거래 변경" : "거래 연결"}
@@ -16196,7 +16306,17 @@ function ResultScreen({
             </SheetDescription>
           </SheetHeader>
           <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
-            <div className="overflow-hidden rounded-lg border bg-background">
+            <div className="relative mb-4">
+              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="pl-9"
+                aria-label="연결할 거래 검색"
+                placeholder="거래번호, 거래명, 거래처 검색"
+                value={dealPickerQuery}
+                onChange={(event) => setDealPickerQuery(event.target.value)}
+              />
+            </div>
+            <div className="overflow-x-auto rounded-lg border bg-background">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -16208,7 +16328,14 @@ function ResultScreen({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {reviewDealOptions.map((deal) => (
+                  {filteredReviewDeals.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                        검색 조건에 맞는 거래가 없습니다.
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                  {filteredReviewDeals.map((deal) => (
                     <TableRow
                       key={deal.id}
                       className={cn(
@@ -16235,10 +16362,11 @@ function ResultScreen({
                             selectedDeal?.id === deal.id ? "outline" : "ghost"
                           }
                           size="xs"
-                          disabled={selectedDeal?.id === deal.id}
-                          onClick={() => connectDealFromReview(deal)}
+                          onClick={() => selectedDeal?.id === deal.id
+                            ? disconnectDealFromReview()
+                            : connectDealFromReview(deal)}
                         >
-                          {selectedDeal?.id === deal.id ? "연결됨" : "연결"}
+                          {selectedDeal?.id === deal.id ? "연결 해제" : "연결"}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -16381,6 +16509,7 @@ export function App() {
   const [selectedTemplateCode, setSelectedTemplateCode] = useState(
     initialErpRoute?.params.documentNumber?.split("-")[0] ?? "SC"
   )
+  const [resultDirection, setResultDirection] = useState<DocumentDirection | null>(null)
   const [resultInitialWorkspaceStep, setResultInitialWorkspaceStep] =
     useState<DocumentCreateWorkspaceStep>("editor")
   const [selectedDealId, setSelectedDealId] = useState(
@@ -16423,7 +16552,7 @@ export function App() {
   >(initialErpRoute?.params.documentNumber ?? null)
   const [resultDealContext, setResultDealContext] =
     useState<DealDocumentContext | null>(() =>
-      initialGeneratedDocument
+      initialGeneratedDocument?.dealId
         ? getDealDocumentContext(initialGeneratedDocument.dealId)
         : null
     )
@@ -16433,8 +16562,13 @@ export function App() {
   const [pendingAskQuestion, setPendingAskQuestion] = useState("")
   const [pendingAskSubmit, setPendingAskSubmit] = useState(false)
   const [createDealContext, setCreateDealContext] =
-    useState<DealDocumentContext | null>(null)
+    useState<DealDocumentContext | null>(() => {
+      const dealId = new URLSearchParams(appLocation.search).get("deal_id")
+      return dealId ? getDealDocumentContext(dealId) : null
+    })
+  const [createInitialTemplateCode, setCreateInitialTemplateCode] = useState<string | undefined>(undefined)
   const [createEntryState, setCreateEntryState] = useState<"history" | "first">(
+    new URLSearchParams(appLocation.search).has("deal_id") ||
     new URLSearchParams(appLocation.search).get("state") === "first-use" ? "first" : "history"
   )
   const [createDeliveryMode, setCreateDeliveryMode] = useState(false)
@@ -16538,7 +16672,7 @@ export function App() {
         setOpenSharedOnResult(generatedDocument?.tab === "done")
         setResultMemberCanDeliver(generatedDocument?.memberCanDeliver ?? true)
         setResultDealContext(
-          generatedDocument
+          generatedDocument?.dealId
             ? getDealDocumentContext(generatedDocument.dealId)
             : null
         )
@@ -16636,6 +16770,7 @@ export function App() {
       nextUrl.searchParams.set("role", erpHomeRole)
     }
     if (nextScreen === "inbox" && originDealId) nextUrl.searchParams.set("fromDeal", originDealId)
+    if (nextScreen === "create" && params.dealId) nextUrl.searchParams.set("deal_id", params.dealId)
     const nextLocation = `${nextUrl.pathname}${nextUrl.search}`
     const currentLocation = `${appLocation.pathname}${appLocation.search}`
     if (nextLocation !== currentLocation) {
@@ -16679,6 +16814,7 @@ export function App() {
     if (nextScreen === "create") {
       setCreateDealContext(null)
       setCreateEntryState("history")
+      setCreateInitialTemplateCode(undefined)
       setCreateDeliveryMode(false)
     }
     if (nextScreen === "snap-platform") {
@@ -16773,19 +16909,29 @@ export function App() {
   }
 
   const openDealDocumentCreate = (templateCode: string) => {
-    const documentNumber = `${templateCode}-2026-0708`
-    setResultDeliveryAttachments([])
-    setResultDocumentNumber(documentNumber)
-    setResultMemberCanDeliver(true)
-    setResultDealConnectionRestricted(false)
-    setSelectedTemplateCode(templateCode)
-    setResultInitialWorkspaceStep("source")
-    setOpenDeliveryOnResult(false)
+    navigateTo("create", { dealId: selectedDealId })
+    setCreateDealContext(getDealDocumentContext(selectedDealId))
+    setCreateInitialTemplateCode(templateCode)
+    setCreateEntryState("first")
+  }
+
+  const duplicateConfirmedResult = async (direction: DocumentDirection | null) => {
+    const sourceNumber = resultDocumentNumber ?? `${selectedTemplateCode}-2026-0708`
+    const result = await prototypeBackend.generatedDocuments.duplicate({ id: sourceNumber })
+    if (!result.ok) {
+      toast.error(result.error)
+      return
+    }
+    const nextNumber = `${selectedTemplateCode}-2026-${String(Date.now()).slice(-6)}`
+    setResultDocumentNumber(nextNumber)
+    setResultDirection(direction)
+    setResultInitialWorkspaceStep("editor")
     setOpenConfirmedOnResult(false)
+    setOpenDeliveryOnResult(false)
     setOpenLinkCreatedOnResult(false)
     setOpenSharedOnResult(false)
-    setResultDealContext(getDealDocumentContext(selectedDealId))
-    navigateTo("result", { documentNumber })
+    toast.success(`${nextNumber} 작성 중 문서를 열었습니다. 원본은 변경되지 않습니다.`)
+    navigateTo("result", { documentNumber: nextNumber })
   }
 
   const openDealDocumentDelivery = (
@@ -16810,6 +16956,7 @@ export function App() {
         }))
       )
       setSelectedTemplateCode(selectedDocument.number.split("-")[0])
+      setResultDirection(null)
       setResultDocumentNumber(selectedDocument.number)
       setResultMemberCanDeliver(selectedDocument.memberCanDeliver)
       setResultDealConnectionRestricted(false)
@@ -16836,6 +16983,7 @@ export function App() {
     if (!selectedDocument) return
     setResultDeliveryAttachments([])
     setSelectedTemplateCode(selectedDocument.number.split("-")[0])
+    setResultDirection(null)
     setResultDocumentNumber(selectedDocument.number)
     setResultMemberCanDeliver(selectedDocument.memberCanDeliver)
     setResultDealConnectionRestricted(false)
@@ -16901,6 +17049,7 @@ export function App() {
     isThreePaneScreen || screen === "deal" || screen === "ask"
 
   return (
+    <SettingsDemoProvider key={workspaceId}>
     <StartGuideProvider key={workspaceId} scope={`preview-account:${workspaceId}`} role={erpHomeRole}>
     <SidebarProvider
       open={sidebarOpen}
@@ -16909,13 +17058,14 @@ export function App() {
       style={
         {
           "--header-height": "var(--ui-shell-header-height)",
-          "--sidebar-width": "var(--ui-shell-sidebar-width)",
+          "--sidebar-width": screen === "deals" ? "216px" : "var(--ui-shell-sidebar-width)",
           "--sidebar-width-icon": "var(--ui-shell-sidebar-collapsed-width)",
         } as CSSProperties
       }
     >
       <WorkspaceHeader
         screen={screen}
+        documentConfirmed={openConfirmedOnResult}
         templateCode={selectedTemplateCode}
         onNavigate={navigateTo}
         unreadNotificationCount={unreadNotificationCount}
@@ -17002,6 +17152,7 @@ export function App() {
                     />
                   ) : screen === "inbox" ? (
                     <InboxScreen
+                      role={erpHomeRole}
                       originDealId={uploadOriginDealId}
                       initialDocumentName={erpRoute?.params.documentName}
                       initialStep={
@@ -17043,6 +17194,7 @@ export function App() {
                   ) : screen === "create" ? (
                     <CreateScreen
                       initialEntryState={createEntryState}
+                      initialTemplateCode={createInitialTemplateCode}
                       relatedDeal={createDealContext}
                       role={erpHomeRole}
                       onResult={(_mode, templateCode, options) => {
@@ -17094,6 +17246,7 @@ export function App() {
                   ) : screen === "ask" ? (
                     <AskPrototype
                       onNavigate={navigateTo}
+                      role={erpHomeRole}
                       initialQuestion={pendingAskQuestion}
                       submitOnOpen={pendingAskSubmit}
                     />
@@ -17185,9 +17338,11 @@ export function App() {
                     <ResultScreen
                       key={`result:${documentApprovalPreviewState}:${resultDocumentNumber ?? "new"}`}
                       initialTemplateCode={selectedTemplateCode}
+                      initialDirection={resultDirection}
                       initialDocumentNumber={resultDocumentNumber}
                       approvalPreviewState={documentApprovalPreviewState === "live" ? generatedDrafts.find((draft) => draft.number === resultDocumentNumber)?.approvalPreviewState ?? "live" : documentApprovalPreviewState}
                       initialDocumentConfirmed={openConfirmedOnResult}
+                      onDocumentConfirmed={() => setOpenConfirmedOnResult(true)}
                       initialSharePanelOpen={openDeliveryOnResult}
                       initialLinkCreated={openLinkCreatedOnResult}
                       initialShareCompleted={openSharedOnResult}
@@ -17197,6 +17352,7 @@ export function App() {
                       role={erpHomeRole}
                       memberCanDeliver={resultMemberCanDeliver}
                       dealConnectionRestricted={resultDealConnectionRestricted}
+                      onDuplicateConfirmed={(direction) => { void duplicateConfirmedResult(direction) }}
                     />
                   )}
                   </PageLoadingBoundary>
@@ -17208,6 +17364,7 @@ export function App() {
       </div>
     </SidebarProvider>
     </StartGuideProvider>
+    </SettingsDemoProvider>
   )
 }
 

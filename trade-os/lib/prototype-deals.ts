@@ -5,6 +5,7 @@ export type DealRisk =
   "amount" | "schedule" | "payment" | "quantity" | "currency"
 export type Deal = {
   id: string
+  createdAt?: string
   title: string
   counterparty: string
   primaryItem: string

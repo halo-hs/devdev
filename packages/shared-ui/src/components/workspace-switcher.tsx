@@ -12,6 +12,7 @@ import { Button } from "@shared/components/ui/button"
 import { cn } from "@shared/lib/utils"
 import {
   workspaceOptions,
+  type WorkspaceProduct,
   type WorkspaceKey,
 } from "@shared/lib/workspaces"
 
@@ -19,10 +20,12 @@ export function WorkspaceSwitcher({
   workspaceId,
   onWorkspaceChange,
   textOnly = false,
+  product,
 }: {
   workspaceId: WorkspaceKey
   onWorkspaceChange: (workspaceId: WorkspaceKey) => void
   textOnly?: boolean
+  product?: WorkspaceProduct
 }) {
   const workspace =
     workspaceOptions.find((item) => item.id === workspaceId) ?? workspaceOptions[0]
@@ -56,6 +59,11 @@ export function WorkspaceSwitcher({
           >
             {workspace.name}
           </span>
+          {product && workspace.products[product] ? (
+            <span className="shrink-0 rounded-[var(--r-sm)] bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground group-data-[collapsible=icon]:hidden">
+              {workspace.products[product].statusLabel}
+            </span>
+          ) : null}
           <ChevronDown className="size-3 shrink-0 text-muted-foreground group-data-[collapsible=icon]:hidden" />
         </Button>
       </DropdownMenuTrigger>
@@ -90,7 +98,7 @@ export function WorkspaceSwitcher({
                     >
                       <span className="text-muted-foreground">{product.label}</span>
                       <span className="rounded-[var(--r-sm)] bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-                        {product.billingPlan}
+                        {product.statusLabel}
                       </span>
                     </span>
                   ))}

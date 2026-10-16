@@ -23,6 +23,8 @@ export function SettlementDecisionCards({ copy, overview, onDrill, profitability
   const moneyLocale = useLocaleTag();
   const cards = buildSettlementDecisionCards(overview, copy, moneyLocale, profitability);
 
+  if (cards.length === 0) return null;
+
   return (
     <SectionPanel
       id="settlement-decisions"
@@ -30,9 +32,6 @@ export function SettlementDecisionCards({ copy, overview, onDrill, profitability
       title={copy.title}
       description={copy.subtitle}
     >
-      {cards.length === 0 ? (
-        <p className="text-body-14 text-text-muted">{copy.empty}</p>
-      ) : (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {cards.map(({ drill, ...card }) => (
             <DecisionCard
@@ -43,7 +42,6 @@ export function SettlementDecisionCards({ copy, overview, onDrill, profitability
             />
           ))}
         </div>
-      )}
     </SectionPanel>
   );
 }
