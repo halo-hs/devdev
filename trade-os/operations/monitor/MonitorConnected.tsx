@@ -714,6 +714,7 @@ export function MonitorConnected({
         onAckFlag={handleAckFlag}
         copy={bodyCopy}
         flagBusy={flagsPending}
+        flagFailure={flagRefreshError ? bodyCopy?.areaLoadFailed ?? DEFAULT_AREA_LOAD_FAILED : undefined}
         flagChecked={flagChecked}
         onFlagCheckedChange={handleFlagCheckedChange}
       />
