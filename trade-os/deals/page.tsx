@@ -6,6 +6,7 @@ import {
   type DealWorkKey,
 } from "@trade-os/lib/deal-workflow"
 import { DealsFinanceTable } from "@trade-os/deals/finance-table"
+import { SalesPrototype } from "@trade-os/extended-screens"
 import {
   filteredFinanceFacts,
   defaultFinanceFilters,
@@ -286,6 +287,14 @@ function ddayOrder(value: string) {
     : Number.POSITIVE_INFINITY
 }
 
+function dealCreationTime(deal: Deal) {
+  if (deal.createdAt) return Date.parse(deal.createdAt)
+  const match = /^DL-(\d{2})(\d{2})(\d{2})-/.exec(deal.id)
+  return match
+    ? Date.UTC(2000 + Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    : 0
+}
+
 function isDueSoon(deal: Deal) {
   if (deal.stage !== "shipment") return false
   const eta = new Date(`${deal.eta.replaceAll(".", "-")}T00:00:00`)
@@ -306,11 +315,12 @@ export function DealsScreen({
   const [view, setView] = useState("operations")
   const [financeFilters, setFinanceFilters] = useState(defaultFinanceFilters)
   const [query, setQuery] = useState("")
-  const [counterparty, setCounterparty] = useState("all")
+  const [counterparty, setCounterparty] = useState(() => new URLSearchParams(window.location.search).get("counterparty") || "all")
+  const [assigneeName, setAssigneeName] = useState(() => new URLSearchParams(window.location.search).get("assignee")?.trim() ?? "")
   const [etaStart, setEtaStart] = useState("")
   const [etaEnd, setEtaEnd] = useState("")
   const [pending, setPending] = useState("all")
-  const [lifecycle, setLifecycle] = useState("open")
+  const [lifecycle, setLifecycle] = useState(() => new URLSearchParams(window.location.search).get("lifecycle") === "all" ? "all" : "open")
   const [pipeline, setPipeline] = useState(false)
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false)
   const [stage, setStage] = useState("active")
@@ -361,6 +371,7 @@ export function DealsScreen({
         return false
       if (counterparty !== "all" && deal.counterparty !== counterparty)
         return false
+      if (assigneeName && deal.assignee !== assigneeName) return false
       const eta = deal.eta.replaceAll(".", "-")
       if (etaStart && (!/^\d{4}-\d{2}-\d{2}$/.test(eta) || eta < etaStart))
         return false
@@ -391,6 +402,7 @@ export function DealsScreen({
       return true
     })
     return rows.sort((a, b) => {
+      if (sort === "created") return dealCreationTime(b) - dealCreationTime(a)
       if (sort === "risk") return b.risks.length - a.risks.length
       if (sort === "amount") {
         const currencyOrder = a.currency.localeCompare(b.currency)
@@ -415,6 +427,7 @@ export function DealsScreen({
   }, [
     allDeals,
     assignee,
+    assigneeName,
     ops,
     query,
     risk,
@@ -434,6 +447,38 @@ export function DealsScreen({
     () => filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize),
     [currentPage, filtered, pageSize]
   )
+  const activeFilterChips: { key: string; label: string; clear: () => void }[] = []
+  if (lifecycle !== "all") activeFilterChips.push({
+    key: "lifecycle",
+    label: `주문 결정: ${{ open: "열림", closed: "종결", cancelled: "취소", unknown: "미확인" }[lifecycle] ?? lifecycle}`,
+    clear: () => setLifecycle("all"),
+  })
+  if (pending !== "all") activeFilterChips.push({ key: "pending", label: `미확인: ${pending === "yes" ? "있음" : "없음"}`, clear: () => setPending("all") })
+  if (stage !== "active") activeFilterChips.push({ key: "stage", label: `단계: ${stageLabels[stage as DealStage]}`, clear: () => setStage("active") })
+  if (assignee !== "all") activeFilterChips.push({ key: "assignee", label: `담당자: ${assignee === "mine" ? "내 거래" : "미배정"}`, clear: () => setAssignee("all") })
+  if (assigneeName) activeFilterChips.push({ key: "assigneeName", label: `담당자: ${assigneeName}`, clear: () => setAssigneeName("") })
+  if (risk !== "all") activeFilterChips.push({ key: "risk", label: "리스크: 있음", clear: () => setRisk("all") })
+  if (ops !== "all") activeFilterChips.push({
+    key: "ops",
+    label: `운영: ${{ overdue: "연체", remaining: "미선적 잔량", doc_gap: "서류 갭", eta: "도착 임박", quantity: "수량 불일치" }[ops] ?? ops}`,
+    clear: () => setOps("all"),
+  })
+  if (counterparty !== "all") activeFilterChips.push({ key: "counterparty", label: `거래처: ${counterparty}`, clear: () => setCounterparty("all") })
+  if (etaStart) activeFilterChips.push({ key: "etaStart", label: `ETA 시작: ${etaStart}`, clear: () => setEtaStart("") })
+  if (etaEnd) activeFilterChips.push({ key: "etaEnd", label: `ETA 종료: ${etaEnd}`, clear: () => setEtaEnd("") })
+  if (view === "finance") {
+    if (financeFilters.currency !== "all") activeFilterChips.push({ key: "currency", label: `금융 통화: ${financeFilters.currency}`, clear: () => setFinanceFilters((current) => ({ ...current, currency: "all" })) })
+    if (financeFilters.result !== "all") activeFilterChips.push({
+      key: "result",
+      label: `손익 상태: ${{ positive: "흑자", negative: "적자", unknown: "근거 확인 필요" }[financeFilters.result] ?? financeFilters.result}`,
+      clear: () => setFinanceFilters((current) => ({ ...current, result: "all" })),
+    })
+    if (financeFilters.balance !== "all") activeFilterChips.push({
+      key: "balance",
+      label: `정산 잔액: ${{ receivable: "받을 돈 있음", payable: "줄 돈 있음", clear: "잔액 없음", unknown: "잔액 확인 필요" }[financeFilters.balance] ?? financeFilters.balance}`,
+      clear: () => setFinanceFilters((current) => ({ ...current, balance: "all" })),
+    })
+  }
 
   const exportCsv = () => {
     const rows =
@@ -565,229 +610,276 @@ export function DealsScreen({
                 >
                   <SlidersHorizontal />
                   상세 필터
-                  {(counterparty !== "all" || etaStart || etaEnd) && (
+                  {(lifecycle !== "open" ||
+                    pending !== "all" ||
+                    stage !== "active" ||
+                    assignee !== "all" ||
+                    assigneeName ||
+                    risk !== "all" ||
+                    ops !== "all" ||
+                    counterparty !== "all" ||
+                    etaStart ||
+                    etaEnd ||
+                    (view === "finance" &&
+                      Object.values(financeFilters).some((value) => value !== "all"))) && (
                     <span className="size-1.5 rounded-full bg-white" />
                   )}
                 </Button>
               }
               result={`${filtered.length}건 표시 중`}
             >
-              <SelectControl
-                label="주문 결정"
-                value={lifecycle}
-                onChange={(value) => {
-                  setLifecycle(value)
-                  setPage(1)
-                }}
-                options={[
-                  ["all", "전체"],
-                  ["open", "열림"],
-                  ["closed", "종결"],
-                  ["cancelled", "취소"],
-                  ["unknown", "미확인"],
-                ]}
-              />
-              <SelectControl
-                label="미확인"
-                value={pending}
-                onChange={(value) => {
-                  setPending(value)
-                  setPage(1)
-                }}
-                options={[
-                  ["all", "전체"],
-                  ["yes", "있음"],
-                  ["no", "없음"],
-                ]}
-              />
-              <SelectControl
-                label="단계"
-                value={stage}
-                onChange={(value) => {
-                  setStage(value)
-                  setPage(1)
-                }}
-                options={[
-                  ["active", "전체"],
-                  ["contract", "계약"],
-                  ["shipment", "선적"],
-                  ["customs", "통관"],
-                  ["settlement", "정산 중"],
-                  ["settled", "정산 완료"],
-                ]}
-              />
-              <SelectControl
-                label="담당자"
-                value={assignee}
-                onChange={(value) => {
-                  setAssignee(value)
-                  setPage(1)
-                }}
-                options={[
-                  ["all", "전체"],
-                  ["mine", "내 거래"],
-                  ["unassigned", "미배정"],
-                ]}
-              />
-              <SelectControl
-                label="리스크"
-                value={risk}
-                onChange={(value) => {
-                  setRisk(value)
-                  setPage(1)
-                }}
-                options={[
-                  ["all", "전체"],
-                  ["active", "있음"],
-                ]}
-              />
-              <SelectControl
-                label="운영"
-                value={ops}
-                onChange={(value) => {
-                  setOps(value)
-                  setPage(1)
-                }}
-                options={[
-                  ["all", "전체"],
-                  ["overdue", "연체"],
-                  ["remaining", "미선적 잔량"],
-                  ["doc_gap", "서류 갭"],
-                  ["eta", "도착 임박"],
-                  ["quantity", "수량 불일치"],
-                ]}
-              />
-              {view === "finance" && (
-                <>
-                  <SelectControl
-                    label="금융 통화"
-                    value={financeFilters.currency}
-                    onChange={(currency) => {
-                      setFinanceFilters((current) => ({
-                        ...current,
-                        currency,
-                      }))
-                      setPage(1)
-                    }}
-                    options={[
-                      ["all", "전체"],
-                      ...["USD", "EUR", "KRW", "JPY", "CNY", "SGD"].map(
-                        (currency) => [currency, currency] as [string, string]
-                      ),
-                    ]}
-                  />
-                  <SelectControl
-                    label="손익 상태"
-                    value={financeFilters.result}
-                    onChange={(result) => {
-                      setFinanceFilters((current) => ({ ...current, result }))
-                      setPage(1)
-                    }}
-                    options={[
-                      ["all", "전체"],
-                      ["positive", "흑자"],
-                      ["negative", "적자"],
-                      ["unknown", "근거 확인 필요"],
-                    ]}
-                  />
-                  <SelectControl
-                    label="정산 잔액"
-                    value={financeFilters.balance}
-                    onChange={(balance) => {
-                      setFinanceFilters((current) => ({
-                        ...current,
-                        balance,
-                      }))
-                      setPage(1)
-                    }}
-                    options={[
-                      ["all", "전체"],
-                      ["receivable", "받을 돈 있음"],
-                      ["payable", "줄 돈 있음"],
-                      ["clear", "잔액 없음"],
-                      ["unknown", "잔액 확인 필요"],
-                    ]}
-                  />
-                </>
-              )}
-              <SelectControl
-                label="정렬"
-                value={sort}
-                onChange={(value) => {
-                  setSort(value)
-                  setPage(1)
-                }}
-                options={[
-                  ["dday", "D-day 임박순"],
-                  ["risk", "리스크 높은순"],
-                  ["amount", "통화별 금액 높은순"],
-                  ["counterparty", "거래처명"],
-                  ["eta", "ETA 임박순"],
-                ]}
-              />
-              {lifecycle !== "all" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full border-white/25 bg-white/15 text-white"
-                  onClick={() => {
-                    setLifecycle("all")
-                    setPage(1)
-                  }}
-                >
-                  주문 결정:{" "}
-                  {
-                    {
-                      open: "열림",
-                      closed: "종결",
-                      cancelled: "취소",
-                      unknown: "미확인",
-                    }[lifecycle]
-                  }
-                  <X className="size-3" />
-                </Button>
-              )}
-              {(query ||
-                lifecycle !== "all" ||
-                counterparty !== "all" ||
-                etaStart ||
-                etaEnd ||
-                pending !== "all" ||
-                stage !== "active" ||
-                assignee !== "all" ||
-                risk !== "all" ||
-                ops !== "all" ||
-                (view === "finance" &&
-                  Object.values(financeFilters).some(
-                    (value) => value !== "all"
-                  ))) && (
-                <Button
-                  variant="ghost"
-                  className="text-white/80 hover:bg-white/10 hover:text-white"
-                  onClick={() => {
-                    setQuery("")
-                    setLifecycle("all")
-                    setCounterparty("all")
-                    setEtaStart("")
-                    setEtaEnd("")
-                    setPending("all")
-                    setStage("active")
-                    setAssignee("all")
-                    setRisk("all")
-                    setOps("all")
-                    setFinanceFilters(defaultFinanceFilters)
-                    setPage(1)
-                  }}
-                >
-                  전체 해제
-                </Button>
+              {activeFilterChips.length > 0 && (
+                <div aria-label="적용된 필터" className="flex w-full flex-wrap gap-2">
+                  {activeFilterChips.map((filter) => (
+                    <Button
+                      key={filter.key}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full border-white/25 bg-white/15 text-white hover:bg-white/25 hover:text-white"
+                      onClick={() => {
+                        filter.clear()
+                        setPage(1)
+                      }}
+                    >
+                      {filter.label}
+                      <X className="size-3" />
+                    </Button>
+                  ))}
+                </div>
               )}
               {advancedFiltersOpen && (
-                <div
-                  id="deal-advanced-filters"
-                  className="w-full space-y-2 border-t border-white/20 pt-3"
-                >
-                  {" "}
+                <div id="deal-advanced-filters" className="w-full space-y-3 border-t border-white/20 pt-3">
+                  <div className="flex flex-wrap items-end gap-3">
+                    <SelectControl
+                      label="주문 결정"
+                      value={lifecycle}
+                      onChange={(value) => {
+                        setLifecycle(value)
+                        setPage(1)
+                      }}
+                      options={[
+                        ["all", "전체"],
+                        ["open", "열림"],
+                        ["closed", "종결"],
+                        ["cancelled", "취소"],
+                        ["unknown", "미확인"],
+                      ]}
+                    />
+                    <SelectControl
+                      label="미확인"
+                      value={pending}
+                      onChange={(value) => {
+                        setPending(value)
+                        setPage(1)
+                      }}
+                      options={[
+                        ["all", "전체"],
+                        ["yes", "있음"],
+                        ["no", "없음"],
+                      ]}
+                    />
+                    <SelectControl
+                      label="단계"
+                      value={stage}
+                      onChange={(value) => {
+                        setStage(value)
+                        setPage(1)
+                      }}
+                      options={[
+                        ["active", "전체"],
+                        ["contract", "계약"],
+                        ["shipment", "선적"],
+                        ["customs", "통관"],
+                        ["settlement", "정산 중"],
+                        ["settled", "정산 완료"],
+                      ]}
+                    />
+                    <SelectControl
+                      label="담당자"
+                      value={assignee}
+                      onChange={(value) => {
+                        setAssignee(value)
+                        setAssigneeName("")
+                        setPage(1)
+                      }}
+                      options={[
+                        ["all", "전체"],
+                        ["mine", "내 거래"],
+                        ["unassigned", "미배정"],
+                      ]}
+                    />
+                    <SelectControl
+                      label="리스크"
+                      value={risk}
+                      onChange={(value) => {
+                        setRisk(value)
+                        setPage(1)
+                      }}
+                      options={[
+                        ["all", "전체"],
+                        ["active", "있음"],
+                      ]}
+                    />
+                    <SelectControl
+                      label="운영"
+                      value={ops}
+                      onChange={(value) => {
+                        setOps(value)
+                        setPage(1)
+                      }}
+                      options={[
+                        ["all", "전체"],
+                        ["overdue", "연체"],
+                        ["remaining", "미선적 잔량"],
+                        ["doc_gap", "서류 갭"],
+                        ["eta", "도착 임박"],
+                        ["quantity", "수량 불일치"],
+                      ]}
+                    />
+                    {view === "finance" && (
+                      <>
+                        <SelectControl
+                          label="금융 통화"
+                          value={financeFilters.currency}
+                          onChange={(currency) => {
+                            setFinanceFilters((current) => ({
+                              ...current,
+                              currency,
+                            }))
+                            setPage(1)
+                          }}
+                          options={[
+                            ["all", "전체"],
+                            ...["USD", "EUR", "KRW", "JPY", "CNY", "SGD"].map(
+                              (currency) => [currency, currency] as [string, string]
+                            ),
+                          ]}
+                        />
+                        <SelectControl
+                          label="손익 상태"
+                          value={financeFilters.result}
+                          onChange={(result) => {
+                            setFinanceFilters((current) => ({ ...current, result }))
+                            setPage(1)
+                          }}
+                          options={[
+                            ["all", "전체"],
+                            ["positive", "흑자"],
+                            ["negative", "적자"],
+                            ["unknown", "근거 확인 필요"],
+                          ]}
+                        />
+                        <SelectControl
+                          label="정산 잔액"
+                          value={financeFilters.balance}
+                          onChange={(balance) => {
+                            setFinanceFilters((current) => ({
+                              ...current,
+                              balance,
+                            }))
+                            setPage(1)
+                          }}
+                          options={[
+                            ["all", "전체"],
+                            ["receivable", "받을 돈 있음"],
+                            ["payable", "줄 돈 있음"],
+                            ["clear", "잔액 없음"],
+                            ["unknown", "잔액 확인 필요"],
+                          ]}
+                        />
+                      </>
+                    )}
+                  </div>
+                  {(query ||
+                    lifecycle !== "all" ||
+                    counterparty !== "all" ||
+                    etaStart ||
+                    etaEnd ||
+                    pending !== "all" ||
+                    stage !== "active" ||
+                    assignee !== "all" ||
+                    assigneeName ||
+                    risk !== "all" ||
+                    ops !== "all" ||
+                    (view === "finance" &&
+                      Object.values(financeFilters).some(
+                        (value) => value !== "all"
+                      ))) && (
+                    <Button
+                      variant="ghost"
+                      className="text-white/80 hover:bg-white/10 hover:text-white"
+                      onClick={() => {
+                        setQuery("")
+                        setLifecycle("all")
+                        setCounterparty("all")
+                        setEtaStart("")
+                        setEtaEnd("")
+                        setPending("all")
+                        setStage("active")
+                        setAssignee("all")
+                        setAssigneeName("")
+                        setRisk("all")
+                        setOps("all")
+                        setFinanceFilters(defaultFinanceFilters)
+                        setPage(1)
+                      }}
+                    >
+                      전체 해제
+                    </Button>
+                  )}
+                  <div
+                    aria-label="운영 거래 지표"
+                    className="flex flex-wrap items-center gap-2"
+                  >
+                    {[
+                      {
+                        label: "리스크",
+                        count: filtered.filter((deal) => deal.risks.length).length,
+                        active: risk === "active",
+                        select: () => setRisk(risk === "active" ? "all" : "active"),
+                      },
+                      {
+                        label: "미선적 잔량",
+                        count: filtered.filter((deal) => deal.remaining).length,
+                        active: ops === "remaining",
+                        select: () => setOps(ops === "remaining" ? "all" : "remaining"),
+                      },
+                      {
+                        label: "서류 갭",
+                        count: filtered.filter((deal) => deal.pending > 0).length,
+                        active: ops === "doc_gap",
+                        select: () => setOps(ops === "doc_gap" ? "all" : "doc_gap"),
+                      },
+                      {
+                        label: "수량 불일치",
+                        count: filtered.filter((deal) => deal.risks.includes("quantity"))
+                          .length,
+                        active: ops === "quantity",
+                        select: () => setOps(ops === "quantity" ? "all" : "quantity"),
+                      },
+                    ].map((item) => (
+                      <Button
+                        key={item.label}
+                        variant={item.active ? "secondary" : "outline"}
+                        size="sm"
+                        className={cn(
+                          "rounded-full border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white",
+                          item.active && "border-white bg-white text-primary hover:bg-white/90 hover:text-primary"
+                        )}
+                        aria-pressed={item.active}
+                        onClick={() => {
+                          item.select()
+                          setPage(1)
+                        }}
+                      >
+                        {item.label}
+                        <span className="tabular-nums">{item.count}</span>
+                      </Button>
+                    ))}
+                    <span className="ml-auto text-xs text-white/70">
+                      현재 목록 기준
+                    </span>
+                  </div>
                   <div className="flex flex-wrap items-end gap-3">
                     <label className="grid gap-1.5 text-xs text-white/70">
                       거래처
@@ -801,7 +893,7 @@ export function DealsScreen({
                         }}
                       >
                         <option value="all">전체</option>
-                        {[...new Set(allDeals.map((deal) => deal.counterparty))]
+                        {[...new Set([...allDeals.map((deal) => deal.counterparty), ...(counterparty !== "all" ? [counterparty] : [])])]
                           .sort()
                           .map((name) => (
                             <option key={name} value={name}>
@@ -927,59 +1019,6 @@ export function DealsScreen({
             </section>
           }
         />
-        <div
-          aria-label="운영 거래 지표"
-          className="flex flex-wrap items-center gap-2"
-        >
-          {[
-            {
-              label: "리스크",
-              count: filtered.filter((deal) => deal.risks.length).length,
-              active: risk === "active",
-              select: () => setRisk(risk === "active" ? "all" : "active"),
-            },
-            {
-              label: "미선적 잔량",
-              count: filtered.filter((deal) => deal.remaining).length,
-              active: ops === "remaining",
-              select: () => setOps(ops === "remaining" ? "all" : "remaining"),
-            },
-            {
-              label: "서류 갭",
-              count: filtered.filter((deal) => deal.pending > 0).length,
-              active: ops === "doc_gap",
-              select: () => setOps(ops === "doc_gap" ? "all" : "doc_gap"),
-            },
-            {
-              label: "수량 불일치",
-              count: filtered.filter((deal) => deal.risks.includes("quantity"))
-                .length,
-              active: ops === "quantity",
-              select: () => setOps(ops === "quantity" ? "all" : "quantity"),
-            },
-          ].map((item) => (
-            <Button
-              key={item.label}
-              variant={item.active ? "secondary" : "outline"}
-              size="sm"
-              className={cn(
-                "rounded-full",
-                item.active && "border-primary/20 bg-primary/10 text-primary"
-              )}
-              aria-pressed={item.active}
-              onClick={() => {
-                item.select()
-                setPage(1)
-              }}
-            >
-              {item.label}
-              <span className="tabular-nums">{item.count}</span>
-            </Button>
-          ))}
-          <span className="ml-auto text-xs text-muted-foreground">
-            현재 목록 기준
-          </span>
-        </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Tabs
             value={view}
@@ -1016,6 +1055,24 @@ export function DealsScreen({
             ? "송장·입출금은 누적 흐름, 받을 돈·줄 돈은 현재 잔액입니다. 통화별로 표시합니다."
             : "금액은 출처 문서 기준입니다. 근거가 없는 값은 —로 표시합니다."}
         </p>
+        <div className="flex justify-end">
+          <SelectControl
+            label="정렬"
+            value={sort}
+            onChange={(value) => {
+              setSort(value)
+              setPage(1)
+            }}
+            options={[
+              ["dday", "D-day 임박순"],
+              ["created", "최신 생성순"],
+              ["risk", "리스크 높은순"],
+              ["amount", "통화별 금액 높은순"],
+              ["counterparty", "거래처명"],
+              ["eta", "ETA 임박순"],
+            ]}
+          />
+        </div>
         <section className="[container-type:inline-size]">
           {view === "finance" ? (
             <DealsFinanceTable
@@ -1025,10 +1082,11 @@ export function DealsScreen({
               onOpenDeal={(id) => onOpenDeal(id, "finance")}
             />
           ) : pipeline ? (
-            <div
-              aria-label="영업 파이프라인"
-              className="grid gap-3 md:grid-cols-2 xl:grid-cols-4"
-            >
+            <div className="space-y-6">
+              <div
+                aria-label="영업 파이프라인"
+                className="grid gap-3 md:grid-cols-2 xl:grid-cols-4"
+              >
               {(Object.entries(stageLabels) as [DealStage, string][]).map(
                 ([stageKey, label]) => {
                   const rows = filtered.filter(
@@ -1083,6 +1141,8 @@ export function DealsScreen({
                   )
                 }
               )}
+              </div>
+              <SalesPrototype embedded onOpenDeal={onOpenDeal} />
             </div>
           ) : (
             <Table
@@ -1498,6 +1558,7 @@ export function DealsScreen({
               {
                 ...deals[1],
                 id: `DL-260711-${String(createdDeals.length + 1).padStart(2, "0")}`,
+                createdAt: new Date().toISOString(),
                 title,
                 counterparty,
                 primaryItem: "품목 미등록",
