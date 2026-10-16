@@ -17243,6 +17243,7 @@ export function App() {
                   ) : screen === "ask" ? (
                     <AskPrototype
                       onNavigate={navigateTo}
+                      role={erpHomeRole}
                       initialQuestion={pendingAskQuestion}
                       submitOnOpen={pendingAskSubmit}
                     />
