@@ -2350,6 +2350,7 @@ function AppNav({
 
 function WorkspaceHeader({
   screen,
+  documentConfirmed,
   templateCode,
   unreadNotificationCount,
   onOpenNotifications,
@@ -2366,6 +2367,7 @@ function WorkspaceHeader({
   isV2Workspace,
   dealActionsRef,
 }: {
+  documentConfirmed: boolean
   screen: Screen
   templateCode: string
   unreadNotificationCount: number
@@ -2434,7 +2436,7 @@ function WorkspaceHeader({
     tokens: "설정",
     "snap-platform": "ECOYA SNAP",
   }
-  const title = screenTitles[screen] ?? `${templateTitle} 초안`
+  const title = screenTitles[screen] ?? (documentConfirmed ? templateTitle : `${templateTitle} 초안`)
   const section = screenSections[screen] ?? "AI 서류 처리"
   const breadcrumbs =
     screen === "snap-platform" && activeSnapRoute
@@ -15171,6 +15173,7 @@ function ResultScreen({
   initialWorkspaceStep = "editor",
   onBackToList,
   onDuplicateConfirmed,
+  onDocumentConfirmed,
   role = "owner",
   dealConnectionRestricted = false,
 }: {
@@ -15186,6 +15189,7 @@ function ResultScreen({
   relatedDeal?: DealDocumentContext | null
   initialWorkspaceStep?: DocumentCreateWorkspaceStep
   onBackToList?: () => void
+  onDocumentConfirmed?: () => void
   onDuplicateConfirmed?: (direction: DocumentDirection | null) => void
   role?: ErpPreviewRole
   memberCanDeliver?: boolean
@@ -15359,6 +15363,7 @@ function ResultScreen({
     initialSharePanelOpen && deliveryAllowed
   )
   const [dealPickerOpen, setDealPickerOpen] = useState(false)
+  const [dealPickerQuery, setDealPickerQuery] = useState("")
   const [saveState, setSaveState] = useState<DocumentSaveState>("saved")
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(
     () => initialDraft?.documentMetadata?.updated_at ?? initialDraft?.updated ?? null
@@ -15571,6 +15576,11 @@ function ResultScreen({
     const rightMatches = normalizeComparisonText(right.party) === targetParty
     return Number(rightMatches) - Number(leftMatches)
   })
+  const filteredReviewDeals = reviewDealOptions.filter((deal) =>
+    [deal.id, deal.title, deal.party].some((value) =>
+      value.toLocaleLowerCase().includes(dealPickerQuery.trim().toLocaleLowerCase())
+    )
+  )
   const qualityAcknowledged = reviewedDocumentRevision === documentRevision
   const confirmationReady =
     Boolean(selectedDeal) &&
@@ -15652,6 +15662,7 @@ function ResultScreen({
   const handleConfirmDocument = () => {
     if (!confirmationReady) return
     setDocumentConfirmed(true)
+    onDocumentConfirmed?.()
     setSharePanelOpen(deliveryAllowed)
     toast.success(
       deliveryAllowed
@@ -16123,7 +16134,7 @@ function ResultScreen({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setDealPickerOpen(true)}
+                  onClick={() => { setDealPickerQuery(""); setDealPickerOpen(true) }}
                 >
                   <Building2 data-icon="inline-start" />
                   {selectedDeal ? "거래 변경" : "거래 연결"}
@@ -16253,7 +16264,17 @@ function ResultScreen({
             </SheetDescription>
           </SheetHeader>
           <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
-            <div className="overflow-hidden rounded-lg border bg-background">
+            <div className="relative mb-4">
+              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="pl-9"
+                aria-label="연결할 거래 검색"
+                placeholder="거래번호, 거래명, 거래처 검색"
+                value={dealPickerQuery}
+                onChange={(event) => setDealPickerQuery(event.target.value)}
+              />
+            </div>
+            <div className="overflow-x-auto rounded-lg border bg-background">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -16265,7 +16286,14 @@ function ResultScreen({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {reviewDealOptions.map((deal) => (
+                  {filteredReviewDeals.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                        검색 조건에 맞는 거래가 없습니다.
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                  {filteredReviewDeals.map((deal) => (
                     <TableRow
                       key={deal.id}
                       className={cn(
@@ -16994,6 +17022,7 @@ export function App() {
     >
       <WorkspaceHeader
         screen={screen}
+        documentConfirmed={openConfirmedOnResult}
         templateCode={selectedTemplateCode}
         onNavigate={navigateTo}
         unreadNotificationCount={unreadNotificationCount}
@@ -17268,6 +17297,7 @@ export function App() {
                       initialDocumentNumber={resultDocumentNumber}
                       approvalPreviewState={documentApprovalPreviewState === "live" ? generatedDrafts.find((draft) => draft.number === resultDocumentNumber)?.approvalPreviewState ?? "live" : documentApprovalPreviewState}
                       initialDocumentConfirmed={openConfirmedOnResult}
+                      onDocumentConfirmed={() => setOpenConfirmedOnResult(true)}
                       initialSharePanelOpen={openDeliveryOnResult}
                       initialLinkCreated={openLinkCreatedOnResult}
                       initialShareCompleted={openSharedOnResult}
