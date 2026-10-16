@@ -994,10 +994,12 @@ const askFiles: AskFile[] = [
 
 export function AskPrototype({
   onNavigate,
+  role = "owner",
   initialQuestion = "",
   submitOnOpen = false,
 }: {
   onNavigate: Navigate
+  role?: "owner" | "admin" | "member"
   initialQuestion?: string
   submitOnOpen?: boolean
 }) {
@@ -1936,19 +1938,26 @@ export function AskPrototype({
               </p>
               <div className="mx-auto mt-8 w-full max-w-3xl">
                 {renderComposer({ welcome: true })}
-                <div className="mx-auto mt-5 grid max-w-2xl gap-1 sm:grid-cols-2">
-                  {quickQuestions.map((item) => (
-                    <Button
-                      key={item}
-                      variant="ghost"
-                      className="h-auto justify-start gap-3 px-3 py-2.5 text-left text-sm font-normal text-muted-foreground hover:text-foreground"
-                      onClick={() => setQuestion(item)}
-                    >
-                      <Sparkles className="size-3.5 text-primary" />
-                      {item}
-                    </Button>
-                  ))}
-                </div>
+                {role === "member" ? (
+                  <div className="mx-auto mt-5 flex max-w-2xl flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground">
+                    <p>거래 화면에서 그 거래에 대해 물을 수 있습니다.</p>
+                    <Button variant="outline" size="sm" onClick={() => onNavigate("deals")}>거래 목록 보기</Button>
+                  </div>
+                ) : (
+                  <div className="mx-auto mt-5 grid max-w-2xl gap-1 sm:grid-cols-2">
+                    {quickQuestions.map((item) => (
+                      <Button
+                        key={item}
+                        variant="ghost"
+                        className="h-auto justify-start gap-3 px-3 py-2.5 text-left text-sm font-normal text-muted-foreground hover:text-foreground"
+                        onClick={() => setQuestion(item)}
+                      >
+                        <Sparkles className="size-3.5 text-primary" />
+                        {item}
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ) : (

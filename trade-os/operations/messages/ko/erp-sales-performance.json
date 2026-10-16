@@ -36,8 +36,8 @@
     },
     "kpi": {
       "revenue": "{period} 수취 예정 ({currency})",
-      "revenueSub": "수금 적용 {received} · 수취 예정 중 {ratio}",
-      "revenueNoPlan": "수금 적용 {received}",
+      "revenueSub": "받을 돈 적용액 {received} · 수취 예정 중 {ratio}",
+      "revenueNoPlan": "받을 돈 적용액 {received}",
       "gp": "{period} 예정 거래손익 ({currency})",
       "gpMargin": "마진 {margin}",
       "outstanding": "미수 잔액 ({currency})",
@@ -65,7 +65,7 @@
     },
     "gpTrend": {
       "title": "월별 예정 거래손익 추세",
-      "sub": "최초 받을 돈 일정 − 최초 줄 돈 일정 − 가산 부대비용 · 동일 통화 딜 기준 · {currency} · 딜 전체는 마지막 수취 예정일이 속한 달에 집계",
+      "sub": "동일 통화 거래의 예정 손익 · {currency}",
       "aria": "월별 예정 거래손익 막대 차트",
       "gpLabel": "GP",
       "marginLabel": "마진",
@@ -77,7 +77,8 @@
       "excludedSuffix": "(승인된 환율 근거 없음 — 환산 불가)",
       "excludedWindowNote": "(조회 기간 전체 기준)",
       "excludedUnknown": "조회 기간 전체의 제외 건수 확인 불가 — 서버가 제외 집계를 주지 않았습니다",
-      "noData": "이 기간에 표시할 데이터가 없습니다."
+      "noData": "이 기간에 표시할 데이터가 없습니다.",
+      "basis": "최초 받을 돈 − 최초 지급할 돈 − 가산 부대비용. 거래 전체 손익은 마지막 받을 돈 만기일이 속한 달에 집계합니다."
     },
     "byAssignee": {
       "title": "담당자별 GP",
@@ -113,11 +114,11 @@
     "subtitleMember": "주요 영업 지표와 거래·정산 현황을 확인합니다.",
     "emptyBodyMember": "거래와 정산 일정이 쌓이면 영업 현황이 표시됩니다.",
     "memberTrend": {
-      "title": "월별 수취 예정·수금 적용",
+      "title": "월별 수취 예정·받을 돈 적용액",
       "sub": "월별 집계 · {currency}",
-      "aria": "월별 수취 예정 대비 수금 적용 막대 차트",
+      "aria": "월별 수취 예정 대비 받을 돈 적용액 막대 차트",
       "planned": "수취 예정",
-      "received": "수금 적용"
+      "received": "받을 돈 적용액"
     }
   }
 }

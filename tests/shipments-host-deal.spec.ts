@@ -1,8 +1,19 @@
 import { expect, test, type Page } from '@playwright/test'
+import { carrierTrackingAction } from '../trade-os/operations/shipments/carrierSites'
 
 const dealId = 'aaaaaaaa-1111-4111-8111-111111111111'
 const shipmentId = 'bbbbbbbb-2222-4222-8222-222222222222'
 const original = { id: shipmentId, deal_id: dealId, deal_title: '연결 검증 거래', deal_counterparty: '연결 검증 거래처', bl_number: 'TEST-BL-01', container_number: 'TEST000001', carrier: 'HMM', pol: 'KRPUS', pod: 'DEHAM', eta: '2026-09-24', etd: '2026-09-10', source: 'carrier', status: 'departed' }
+
+test('carrier site names match only the planning document names and normalization order', () => {
+  expect(carrierTrackingAction(' CK Line ')).toEqual({ kind: 'site', href: 'https://es.ckline.co.kr/' })
+  expect(carrierTrackingAction('CK LINE CO., LTD.')).toEqual({ kind: 'site', href: 'https://es.ckline.co.kr/' })
+  expect(carrierTrackingAction('WAN HAI LINES LTD.')).toEqual({ kind: 'site', href: 'https://shipper.wanhai.com/index.jsp' })
+  expect(carrierTrackingAction('OOLU')).toEqual({ kind: 'site', href: 'https://www.oocl.com/' })
+  for (const name of ['CK - Line', 'CK·Line', 'ckline', 'cosco', 'namsung', 'tslines', 't s lines', 'wan hai lines', 'sitc container lines', 'regional container lines']) {
+    expect(carrierTrackingAction(name), name).toEqual({ kind: 'unknown' })
+  }
+})
 
 async function mockShipmentSession(page: Page, writable = true) {
   await page.route('**/__reference3030/api/platform/me', route => route.fulfill({ json: {

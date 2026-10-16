@@ -1,7 +1,11 @@
-import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 "use client";
 
-import { useMemo, useState } from "react";
+import "./SettlementDunningPanel.css";
+
+import { useId, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { Check, ChevronDown, ChevronUp, Copy, ExternalLink } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@shared/components/ui/popover";
 
 import { Button } from "@trade-os/operations/components/ui/button";
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
@@ -61,6 +65,9 @@ export function SettlementDunningPanel({
   onRetry,
   status,
 }: SettlementDunningPanelProps) {
+  const [expanded, setExpanded] = useState(false);
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const listId = useId();
   const [copyState, setCopyState] = useState<CopyState>(null);
   const rows = useMemo(() => {
     if (entries === null) return [];
@@ -99,90 +106,86 @@ export function SettlementDunningPanel({
         return navigator.clipboard.writeText(draft);
       })
       .then(
-        () => setCopyState({ id, status: "copied" }),
-        () => setCopyState({ id, status: "error" }),
+        () => { setCopyState({ id, status: "copied" }); toast.success(copy.copied); },
+        () => { setCopyState({ id, status: "error" }); toast.error(copy.copyError); },
       );
   };
 
-  return (
-    <SectionPanel
-      description={<span className="break-keep">{copy.subtitle}</span>}
-      id="settlement-dunning"
-      title={copy.title}
+  const buttonClass = "inline-flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-sm border border-border-muted bg-white px-2 text-xs font-medium text-text-primary hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600";
+
+  const renderRow = (row: (typeof rows)[number]) => (
+    <div
+      key={row.entry.id}
+      data-ui="settlement-dunning-row"
+      data-overdue={row.overdue ? "true" : "false"}
+      className="settlement-dunning-row min-w-0 items-center gap-x-4 gap-y-2 py-3 text-[13px] tabular-nums"
     >
+      <div className="flex min-w-0 items-center gap-2">
+        <span className="truncate font-medium" title={row.counterparty}>{row.counterparty}</span>
+        {row.overdue && <span className="shrink-0 rounded bg-status-danger-bg px-1.5 py-0.5 text-[11px] text-status-danger">{copy.overdue}</span>}
+      </div>
+      <span className="whitespace-nowrap text-right font-medium"><span className="dunning-field-label mr-2 text-xs font-normal text-text-secondary">미결제금액</span>{row.amount}</span>
+      <span className="whitespace-nowrap text-text-secondary"><span className="dunning-field-label mr-2 text-xs">지급기한</span>{row.dueDate}</span>
+      <div className="dunning-action-group" role="group" aria-label={`${row.counterparty} 초안 작업`}>
+        <Popover open={previewId === row.entry.id} onOpenChange={(open) => setPreviewId(open ? row.entry.id : null)}>
+          <PopoverTrigger asChild>
+            <button type="button" className={`${buttonClass} rounded-r-none border-r-0`} aria-label={`${row.counterparty} 초안 미리보기`}>미리보기</button>
+          </PopoverTrigger>
+          <PopoverContent align="end" sideOffset={8} className="w-96 p-4" aria-label={`${row.counterparty} 독촉 초안`}>
+            <h3 className="text-sm font-semibold">{copy.title} · {copy.draft}</h3>
+            <p className="whitespace-pre-wrap break-words text-[13px] leading-6">{row.draft}</p>
+            <div className="flex flex-wrap items-center justify-end gap-2 border-t pt-3">
+              <button type="button" className={buttonClass} onClick={() => copyDraft(row.entry.id, row.draft)}>
+                <Copy className="size-3.5" aria-hidden="true" />복사하기
+              </button>
+              <a className={buttonClass} href={row.mailto}>{copy.openMail}<ExternalLink className="size-3.5" aria-hidden="true" /></a>
+            </div>
+          </PopoverContent>
+        </Popover>
+        <button type="button" className={`${buttonClass} w-8 rounded-l-none px-0`} aria-label={`${row.counterparty} ${copy.copy}`} onClick={() => copyDraft(row.entry.id, row.draft)}>
+          {copyState?.id === row.entry.id && copyState.status === "copied" ? <Check className="size-3.5" aria-hidden="true" /> : <Copy className="size-3.5" aria-hidden="true" />}
+        </button>
+      </div>
+    </div>
+  );
+
+  const ready = status === "ready" && rows.length > 0;
+  return (
+    <SectionPanel data-expanded={expanded} id="settlement-dunning" contentProps={{ className: "@container/dunning px-4" }}>
+      <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-1 py-1 @min-[960px]/dunning:flex-nowrap">
+        <h2 className="shrink-0 py-3 text-sm font-semibold">{copy.title}</h2>
+        {ready && !expanded && <div className="order-3 w-full min-w-0 @min-[960px]/dunning:order-none @min-[960px]/dunning:w-auto @min-[960px]/dunning:flex-1">{renderRow(rows[0])}</div>}
+        {ready && (
+          <button
+            type="button"
+            className="ml-auto inline-flex shrink-0 items-center gap-1 py-3 text-xs font-medium text-blue-600 focus-visible:outline-2"
+            aria-expanded={expanded}
+            aria-controls={listId}
+            onClick={() => { setPreviewId(null); setExpanded((value) => !value); }}
+          >
+            전체 {rows.length}건
+            {expanded ? <ChevronUp className="size-4" aria-hidden="true" /> : <ChevronDown className="size-4" aria-hidden="true" />}
+          </button>
+        )}
+      </div>
+      <div id={listId} hidden={!ready || !expanded} data-ui="settlement-dunning-list" className="divide-y border-t">
+        {ready && expanded && (
+          <>
+            <div className="settlement-dunning-columns items-center gap-x-4 py-2 text-xs text-text-secondary" aria-hidden="true">
+              <span>거래처</span><span className="text-right">미결제금액</span><span>지급기한</span><span className="text-right">작업</span>
+            </div>
+            {rows.map(renderRow)}
+          </>
+        )}
+      </div>
       {status === "idle" || status === "loading" ? (
-        <p className="text-body-13 text-text-muted">{copy.loading}</p>
+        <p className="pb-4 text-[13px] text-text-muted">{copy.loading}</p>
       ) : status === "error" ? (
-        <div className="flex flex-wrap items-center justify-between gap-3" role="alert">
-          <p className="m-0 text-body-13 text-status-danger">{copy.error}</p>
-          <Button onClick={onRetry} size="sm" type="button" variant="tertiary">
-            {copy.retry}
-          </Button>
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4" role="alert">
+          <p className="text-[13px] text-status-danger">{copy.error}</p>
+          <Button onClick={onRetry} size="sm" type="button" variant="tertiary">{copy.retry}</Button>
         </div>
-      ) : rows.length === 0 ? (
-        <p className="text-body-13 text-text-muted">{copy.empty}</p>
-      ) : (
-        <div className="overflow-x-auto" data-ui="settlement-dunning-list">
-          <HostTable className="w-full min-w-[720px] border-collapse text-body-13 tabular-nums">
-            <HostTableHeader>
-              <HostTableRow className="border-b border-border-muted bg-surface text-text-secondary">
-                <HostTableHead className="px-3 py-2 text-left font-medium" scope="col">{copy.counterparty}</HostTableHead>
-                <HostTableHead className="px-3 py-2 text-right font-medium" scope="col">{copy.outstanding}</HostTableHead>
-                <HostTableHead className="px-3 py-2 text-left font-medium" scope="col">{copy.due}</HostTableHead>
-                <HostTableHead className="px-3 py-2 text-left font-medium" scope="col">{copy.draft}</HostTableHead>
-                <HostTableHead className="px-3 py-2 text-right font-medium" scope="col">{copy.copy}</HostTableHead>
-              </HostTableRow>
-            </HostTableHeader>
-            <HostTableBody>
-              {rows.map((row) => (
-                <HostTableRow
-                  className="border-b border-border-subtle last:border-0"
-                  data-overdue={row.overdue ? "true" : "false"}
-                  data-ui="settlement-dunning-row"
-                  key={row.entry.id}
-                  style={{ containIntrinsicSize: "0 72px", contentVisibility: "auto" }}
-                >
-                  <HostTableCell className="px-3 py-3 align-top font-semibold text-text-primary">{row.counterparty}</HostTableCell>
-                  <HostTableCell className="whitespace-nowrap px-3 py-3 text-right align-top font-medium text-text-primary">{row.amount}</HostTableCell>
-                  <HostTableCell className="px-3 py-3 align-top text-text-primary">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span>{row.dueDate}</span>
-                      {row.overdue ? (
-                        <span className="rounded-full bg-status-danger-bg px-2 py-0.5 text-label-12 font-medium text-status-danger">
-                          {copy.overdue}
-                        </span>
-                      ) : null}
-                    </div>
-                  </HostTableCell>
-                  <HostTableCell className="max-w-[34rem] whitespace-pre-wrap break-words px-3 py-3 align-top text-text-primary">
-                    {row.draft}
-                    {copyState?.id === row.entry.id ? (
-                      <span aria-live="polite" className="mt-1 block text-label-12 text-text-secondary" role="status">
-                        {copyState.status === "copied" ? copy.copied : copy.copyError}
-                      </span>
-                    ) : null}
-                  </HostTableCell>
-                  <HostTableCell className="px-3 py-3 align-top">
-                    <div className="flex flex-wrap justify-end gap-2">
-                      <Button
-                        onClick={() => copyDraft(row.entry.id, row.draft)}
-                        size="sm"
-                        type="button"
-                        variant="secondary"
-                      >
-                        {copy.copy}
-                      </Button>
-                      <Button asChild size="sm" type="button" variant="tertiary">
-                        <a href={row.mailto}>{copy.openMail}</a>
-                      </Button>
-                    </div>
-                  </HostTableCell>
-                </HostTableRow>
-              ))}
-            </HostTableBody>
-          </HostTable>
-        </div>
-      )}
+      ) : rows.length === 0 ? <p className="pb-4 text-[13px] text-text-muted">{copy.empty}</p> : null}
     </SectionPanel>
   );
 }

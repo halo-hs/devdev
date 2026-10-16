@@ -1,5 +1,9 @@
 "use client";
 
+import { OverpaymentAllocationPanel } from "./OverpaymentAllocationPanel";
+import { readPendingRefund, savePendingRefund, clearPendingRefund, refundConfirmed } from "./refundRecovery";
+import { ApiError } from "@trade-os/operations/lib/api/client";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@trade-os/operations/components/ui/button";
@@ -207,6 +211,7 @@ export function SettlementExceptionPanel({
     total: string;
     writtenOff: string | null;
   } | null>(null);
+  const [pendingRefundIds, setPendingRefundIds] = useState<string[]>([]);
   const [refunds, setRefunds] = useState<Record<string, Loadable<SettlementOverpaymentRefund[]>>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const mutationBusyRef = useRef(false);
@@ -264,6 +269,7 @@ export function SettlementExceptionPanel({
 
     if (overpaymentResult.status === "fulfilled") {
       const rows = overpaymentResult.value.overpayments ?? [];
+      setPendingRefundIds(rows.filter(row => readPendingRefund(row.id)).map(row => row.id));
       setOverpayments(rows.length > 0 ? { status: "ready", data: rows } : { status: "empty" });
       if (rows.length > 0) {
         void Promise.allSettled(
@@ -281,6 +287,11 @@ export function SettlementExceptionPanel({
               return;
             }
             const [, refundRequestId, response] = result.value;
+            const pending = readPendingRefund(rowId);
+            if (pending && refundConfirmed(pending, response.refunds)) {
+              clearPendingRefund(rowId);
+              setPendingRefundIds(current => current.filter(id => id !== rowId));
+            }
             if (refundRequestIdsRef.current[rowId] !== refundRequestId) return;
             nextRefunds[rowId] = response.refunds.length > 0
               ? { status: "ready", data: response.refunds }
@@ -348,6 +359,12 @@ export function SettlementExceptionPanel({
     const refundRequestId = nextRefundRequestId(refundRequestIdsRef, overpaymentId);
     void listOverpaymentRefunds(overpaymentId, getIdToken).then((response) => {
       if (!refundRequestIsCurrent(mountedRef, loadRequestIdRef, refundRequestIdsRef, loadRequestId, overpaymentId, refundRequestId)) return;
+      const pending = readPendingRefund(overpaymentId);
+      if (pending && refundConfirmed(pending, response.refunds)) {
+        clearPendingRefund(overpaymentId);
+        setPendingRefundIds(current => current.filter(id => id !== overpaymentId));
+        void load();
+      }
       setRefunds((current) => ({
         ...current,
         [overpaymentId]: response.refunds.length > 0
@@ -358,7 +375,7 @@ export function SettlementExceptionPanel({
       if (!refundRequestIsCurrent(mountedRef, loadRequestIdRef, refundRequestIdsRef, loadRequestId, overpaymentId, refundRequestId)) return;
       setRefunds((current) => ({ ...current, [overpaymentId]: { status: "error", retryable: true } }));
     });
-  }, [getIdToken, refundRetry]);
+  }, [getIdToken, refundRetry, load]);
 
   const refundRows = useMemo(
     () => (overpayments.status === "ready" ? overpayments.data : []),
@@ -501,7 +518,7 @@ export function SettlementExceptionPanel({
   };
 
   const submitRefund = async (overpayment: SettlementOverpayment) => {
-    if (!canRecord || mutationBusyRef.current) return;
+    if (!canRecord || mutationBusyRef.current || readPendingRefund(overpayment.id)) return;
     const draft = refundDrafts[overpayment.id] ?? EMPTY_REFUND_DRAFT;
     const amount = normalizeDecimalInput(draft.amount);
     const amountNumber = Number(amount);
@@ -540,12 +557,23 @@ export function SettlementExceptionPanel({
     setValidationField(null);
     setSaved(false);
     try {
+      // Persist before sending: an ambiguous request must not become a new refund on reload.
+      const known = refunds[overpayment.id];
+      if (!known || (known.status !== "ready" && known.status !== "empty")) throw new Error("refund history unavailable");
+      savePendingRefund(overpayment.id, { body, previousIds: known.status === "ready" ? known.data.map(row => row.id) : [] });
+      setPendingRefundIds(current => [...new Set([...current, overpayment.id])]);
       await recordOverpaymentRefund(overpayment.id, body, getIdToken);
+      clearPendingRefund(overpayment.id);
+      setPendingRefundIds(current => current.filter(id => id !== overpayment.id));
       setRefundDrafts((current) => ({ ...current, [overpayment.id]: EMPTY_REFUND_DRAFT }));
       setSaved(true);
       onSaved();
       await load();
-    } catch {
+    } catch (refundError) {
+      if (refundError instanceof ApiError && refundError.status >= 400 && refundError.status < 500 && ![408, 409, 429].includes(refundError.status)) {
+        clearPendingRefund(overpayment.id);
+        setPendingRefundIds(current => current.filter(id => id !== overpayment.id));
+      }
       setError(copy.error);
       setValidationField(null);
       setSaved(false);
@@ -621,6 +649,10 @@ export function SettlementExceptionPanel({
                       <span>{copy.overpayments.allocated}: {formatMoney(overpayment.allocated_amount, overpayment.currency)}</span>
                       <span>{copy.overpayments.refunded}: {formatMoney(overpayment.refunded_total, overpayment.currency)}</span>
                     </div>
+                    {pendingRefundIds.includes(overpayment.id) && <div role="status" className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-amber-950">
+                      <p>이전 환불 기록 결과를 확인 중입니다. 결과가 확인될 때까지 같은 환불을 다시 기록할 수 없습니다.</p>
+                      <Button size="sm" variant="tertiary" onClick={() => retryRefund(overpayment.id)}>결과 다시 확인</Button>
+                    </div>}
                     <div className="mt-2">
                       <span className="font-medium text-text-secondary">{copy.overpayments.refundTitle}</span>
                       {refundState.status === "loading" ? <p className="mt-1 text-text-muted">{copy.loading}</p> : null}
@@ -702,7 +734,7 @@ export function SettlementExceptionPanel({
                           </label>
                           <Button
                             aria-label={busy === `refund:${overpayment.id}` ? copy.saving : undefined}
-                            disabled={busy !== null}
+                            disabled={busy !== null || pendingRefundIds.includes(overpayment.id) || !["ready", "empty"].includes(refundState.status)}
                             loading={busy === `refund:${overpayment.id}`}
                             onClick={() => void submitRefund(overpayment)}
                             aria-describedby={`settlement-refund-hint-${overpayment.id}`}
@@ -715,6 +747,7 @@ export function SettlementExceptionPanel({
                         </div>
                       ) : null}
                     </div>
+                    <OverpaymentAllocationPanel id={overpayment.id} canRecord={canRecord} disabled={busy !== null || pendingRefundIds.includes(overpayment.id)} onSaved={() => { onSaved(); void load(); }} />
                   </li>
                 );
               })}

@@ -1,4 +1,6 @@
 import { appLocation } from "@/app/app-location"
+import { TrialStartDemo } from "@auth/components/trial-start-demo"
+import type { TrialPeriod, TrialProduct, TrialStartState } from "@auth/components/trial-start-card"
 import { createContext, useContext, useState, type ReactNode } from "react"
 import {
   Check,
@@ -109,6 +111,13 @@ function useSettingsDemo() {
   const value = useContext(SettingsDemoContext)
   if (!value) throw new Error("SettingsDemoProvider is required")
   return value
+}
+export function useTradeSeatAssigned(role: SettingsRole) {
+  const state = useContext(SettingsDemoContext)
+  return state?.members.find((member) => member.id === role)?.erp ?? true
+}
+export function useSettingsDemoPresent() {
+  return useContext(SettingsDemoContext) !== null
 }
 const selectClass =
   "h-9 w-full rounded-md border bg-background px-2 text-sm disabled:opacity-50"
@@ -822,18 +831,27 @@ export function ProductsSubscriptions({
   subscriptionKind = "separate",
   subscriptionStates = {},
   planInitiallyOpen = false,
+  initialChangeIntent,
   organizationName,
+  trialStates = {},
+  trialDays = {},
+  trialPeriods = {},
 }: {
   role: SettingsRole
   products: readonly ProductEntitlement[]
   subscriptionKind?: "separate" | "bundle"
   subscriptionStates?: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>
   planInitiallyOpen?: boolean
+  initialChangeIntent?: SubscriptionChangeIntent
   organizationName: string
+  trialStates?: Partial<Record<TrialProduct, TrialStartState>>
+  trialDays?: Partial<Record<TrialProduct, number>>
+  trialPeriods?: Partial<Record<TrialProduct, TrialPeriod>>
 }) {
   const { members, capacity, requests, setRequests } = useSettingsDemo()
   const isBundle = subscriptionKind === "bundle" && products.includes("erp") && products.includes("snap")
   const [changeIntent, setChangeIntent] = useState<SubscriptionChangeIntent | null>(() => {
+    if (initialChangeIntent && role === "owner") return initialChangeIntent
     if (!planInitiallyOpen) return null
     const product = new URLSearchParams(appLocation.search).get("product")
     return { kind: "seats", initialPlan: isBundle ? "bundle" : product === "erp" || product === "snap" ? product : products[0] }
@@ -918,8 +936,17 @@ export function ProductsSubscriptions({
         <div className="divide-y px-5">
           {subscriptions.map((subscription) => {
             const status = statusOf(subscription.id)
-            const action = status === "trial_not_started" ? "무료 체험 시작"
-              : status === "trial_active" || status === "trial_expired" || status === "read_only" ? "구독하기"
+            if (status === "trial_not_started" || status === "trial_expired") return (
+              <div key={subscription.id} className="space-y-4 py-4">
+                {subscription.items.map((product) => <TrialStartDemo
+                  key={`${product}:${role}:${status}:${trialStates[product] ?? "ready"}`}
+                  product={product} role={role} layout="row"
+                  initialState={status === "trial_expired" ? "used" : trialStates[product]} trialDays={trialDays[product]} trialPeriod={trialPeriods[product]}
+                  onSubscribe={(selectedProduct) => setChangeIntent({ kind: "plan", initialPlan: selectedProduct })}
+                />)}
+              </div>
+            )
+            const action = status === "trial_active" || status === "read_only" ? "구독하기"
               : status === "cancel_scheduled" ? "예약 취소"
               : status === "payment_pending" ? "다시 결제하기" : null
             return (
@@ -937,7 +964,7 @@ export function ProductsSubscriptions({
                   {(status === "paid_active" || status === "cancel_scheduled") && <span>구독 시작 {subscriptionExamples[subscription.id].startedAt}</span>}
                   {status === "paid_active" && <span>다음 갱신 {subscriptionExamples[subscription.id].renewsAt}</span>}
                   {status === "cancel_scheduled" && <span>해지 예정 {subscriptionExamples[subscription.id].renewsAt}</span>}
-                  {status === "trial_active" && <span>체험 종료 {subscriptionExamples[subscription.id].renewsAt}</span>}
+                  {status === "trial_active" && <span>체험 기간 {"{서버 값}일"} · {"{시작일} – {종료일}"}</span>}
                 </div>
                 <div className="mt-2 grid gap-2">
                   {subscription.items.map((product) => {
@@ -954,7 +981,7 @@ export function ProductsSubscriptions({
             )
           })}
         </div>
-        {role === "member" && (
+        {role === "member" && subscriptions.some(({ id }) => statusOf(id) !== "trial_not_started") && (
           <div className="border-t px-5 py-4">
             <Button variant="outline" onClick={() => {
               const product = products.find((p) => !members.find((m) => m.id === "member")?.[p])
@@ -976,6 +1003,11 @@ export function ProductsSubscriptions({
         </div>
         <div className="grid gap-3 lg:grid-cols-3">
           {offers.filter((offer) => offer.id === "bundle" || !products.includes(offer.id)).map((offer) => (
+            offer.id !== "bundle" && (subscriptionStates[offer.id] ?? "trial_not_started") === "trial_not_started" ? (
+              <div key={`${offer.id}:${role}:${trialStates[offer.id] ?? "ready"}`} className="rounded-xl border bg-background p-5 lg:col-span-3">
+                <TrialStartDemo product={offer.id} role={role} layout="row" initialState={trialStates[offer.id]} trialDays={trialDays[offer.id]} trialPeriod={trialPeriods[offer.id]} onSubscribe={(product) => setChangeIntent({ kind: "plan", initialPlan: product })} />
+              </div>
+            ) : (
             <article key={offer.id} className="flex flex-col rounded-xl border bg-background p-5">
               <h3 className="font-medium">{offer.title}</h3>
               <p className="mt-2 flex-1 text-sm text-muted-foreground">{offer.description}</p>
@@ -988,6 +1020,7 @@ export function ProductsSubscriptions({
                 <p className="mt-4 text-xs text-muted-foreground">구독 변경은 OWNER가 관리합니다.</p>
               )}
             </article>
+            )
           ))}
         </div>
 
