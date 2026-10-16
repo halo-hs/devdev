@@ -47,7 +47,7 @@ test("deadline basis stays separate from ETA and status has one badge with suppo
   expect(paymentLine).toContain("결제")
   expect(paymentLine).toContain("2026-07-09")
 
-  await page.getByRole("button", { name: "상세 필터", exact: true }).click()
+  await page.getByRole("button", { name: /^상세 필터/ }).click()
   await page.getByRole("button", { name: "전체 해제", exact: true }).click()
   await page.getByPlaceholder("거래명, 번호, 거래처, 품목 검색").fill("DL-260918-93")
   const unknown = table.getByRole("row").filter({ hasText: "DL-260918-93" })

@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test"
 test("empty deal table keeps its message visible and left aligned on mobile", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto("/erp/deals")
-  await page.getByRole("button", { name: "상세 필터", exact: true }).click()
+  await page.getByRole("button", { name: /^상세 필터/ }).click()
   await page.getByPlaceholder("거래명, 번호, 거래처, 품목 검색").fill("없는 거래 검색")
   const message = page.getByText("조건에 맞는 거래가 없습니다.", { exact: true })
   await page.getByRole("table", { name: "거래 업무표" }).evaluate(element => element.scrollIntoView({ block: "center", inline: "nearest" }))
@@ -19,13 +19,13 @@ test("selected deal filters remain visible after details close and can be remove
   await page.goto("/erp/deals")
   const selected = page.getByLabel("적용된 필터")
   await expect(selected.getByRole("button", { name: "주문 결정: 열림" })).toBeVisible()
-  await page.getByRole("button", { name: "상세 필터", exact: true }).click()
-  await page.getByRole("combobox", { name: "미확인" }).click()
-  await page.getByRole("option", { name: "있음" }).click()
-  await page.getByRole("button", { name: "상세 필터", exact: true }).click()
-  await expect(selected.getByRole("button", { name: "미확인: 있음" })).toBeVisible()
-  await selected.getByRole("button", { name: "미확인: 있음" }).click()
-  await expect(selected.getByRole("button", { name: "미확인: 있음" })).toHaveCount(0)
+  await page.getByRole("button", { name: /^상세 필터/ }).click()
+  await page.getByRole("combobox", { name: "담당자" }).click()
+  await page.getByRole("option", { name: "내 거래" }).click()
+  await page.getByRole("button", { name: /^상세 필터/ }).click()
+  await expect(selected.getByRole("button", { name: "담당자: 내 거래" })).toBeVisible()
+  await selected.getByRole("button", { name: "담당자: 내 거래" }).click()
+  await expect(selected.getByRole("button", { name: "담당자: 내 거래" })).toHaveCount(0)
 })
 
 test("creation sort sits below the pipeline switch and above the deal table", async ({ page }) => {
@@ -37,7 +37,7 @@ test("creation sort sits below the pipeline switch and above the deal table", as
   expect(await pipelineSwitch.evaluate((element) => Boolean(element.compareDocumentPosition(document.querySelector('[aria-label="정렬"]')) & Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true)
   expect(await sort.evaluate((element) => Boolean(element.compareDocumentPosition(document.querySelector('[aria-label="거래 업무표"]')) & Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true)
   await sort.click()
-  await page.getByRole("option", { name: "최신 생성순" }).click()
+  await page.getByRole("option", { name: "생성일 최신순" }).click()
   await expect(table.getByRole("row").nth(1)).toContainText("DL-260803-03")
 })
 
@@ -59,23 +59,22 @@ test("list filters ETA and counterparty together, updates counts and retains con
   await page.goto("/erp/deals")
   await expect(page.getByRole("combobox", { name: "정렬" })).toBeVisible()
   await expect(page.getByRole("combobox", { name: "주문 결정" })).toHaveCount(0)
-  await expect(page.getByLabel("운영 거래 지표")).toHaveCount(0)
-  await page.getByRole("button", { name: "상세 필터", exact: true }).click()
+  await page.getByRole("button", { name: /^상세 필터/ }).click()
   await expect(page.getByRole("combobox", { name: "주문 결정" })).toBeVisible()
-  await expect(page.getByLabel("운영 거래 지표")).toBeVisible()
   const table = page.getByRole("table", { name: "거래 업무표" })
   await expect(table.getByRole("row")).toHaveCount(10)
+  await page.getByRole("combobox", { name: "거래처", exact: true }).click()
   await page
-    .getByRole("combobox", { name: "거래처", exact: true })
-    .selectOption("KATAMAN ASIA-PACIFIC PTE LTD")
+    .getByRole("option", { name: "KATAMAN ASIA-PACIFIC PTE LTD", exact: true })
+    .click()
   await expect(table.getByRole("row")).toHaveCount(2)
   await expect(
     page.getByRole("region", { name: "주요 거래 지표" })
   ).toContainText("1건")
-  await page.getByLabel("기록된 ETA 시작", { exact: true }).fill("2026-08-04")
+  await page.getByLabel("ETA 기간 시작일", { exact: true }).fill("2026-08-04")
   await expect(table).toContainText("조건에 맞는 거래가 없습니다")
-  await page.getByLabel("기록된 ETA 시작", { exact: true }).fill("2026-08-01")
-  await page.getByLabel("기록된 ETA 종료", { exact: true }).fill("2026-08-03")
+  await page.getByLabel("ETA 기간 시작일", { exact: true }).fill("2026-08-01")
+  await page.getByLabel("ETA 기간 종료일", { exact: true }).fill("2026-08-03")
   await expect(table).toContainText("PO-260704-18.pdf")
   await expect(table).not.toContainText("ACME GmbH")
   await page
@@ -106,7 +105,7 @@ test("keyboard finance action opens finance directly and mobile keeps overflow w
   page,
 }) => {
   await page.goto("/erp/deals")
-  await page.getByRole("button", { name: "상세 필터", exact: true }).click()
+  await page.getByRole("button", { name: /^상세 필터/ }).click()
   await page
     .getByPlaceholder("거래명, 번호, 거래처, 품목 검색")
     .fill("KATAMAN")
@@ -119,7 +118,7 @@ test("keyboard finance action opens finance directly and mobile keeps overflow w
   await expect(page.locator("#deal-finance")).toBeInViewport()
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto("/erp/deals")
-  await page.getByRole("button", { name: "상세 필터", exact: true }).click()
+  await page.getByRole("button", { name: /^상세 필터/ }).click()
   const table = page.getByRole("table", { name: "거래 업무표" })
   await expect(table).toBeAttached()
   const overflow = await table.evaluate((element) => ({
@@ -128,7 +127,7 @@ test("keyboard finance action opens finance directly and mobile keeps overflow w
       element.parentElement!.scrollWidth > element.parentElement!.clientWidth,
   }))
   expect(overflow).toEqual({ page: false, own: true })
-  await page.getByLabel("기록된 ETA 종료", { exact: true }).fill("2026-07-02")
+  await page.getByLabel("ETA 기간 종료일", { exact: true }).fill("2026-07-02")
   await expect(table.getByRole("row")).toHaveCount(2)
   await expect(table).toContainText("Hanbit Trading")
 })

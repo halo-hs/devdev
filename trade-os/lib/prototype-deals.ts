@@ -5,7 +5,6 @@ export type DealRisk =
   "amount" | "schedule" | "payment" | "quantity" | "currency"
 export type Deal = {
   id: string
-  createdAt?: string
   title: string
   counterparty: string
   primaryItem: string
@@ -20,6 +19,9 @@ export type Deal = {
   requiredDocsMissing?: number
   dday: string
   eta: string
+  /** ISO timestamps. createdAt falls back to the DL-YYMMDD id when absent. */
+  createdAt?: string
+  updatedAt?: string
   pending: number
   confirmed: number
   risks: DealRisk[]
@@ -55,6 +57,7 @@ export const deals: Deal[] = [
     currency: "USD",
     dday: "D-3",
     eta: "2026.08.03",
+    updatedAt: "2026-10-15T09:20:00+09:00",
     pending: 2,
     confirmed: 5,
     risks: ["quantity", "amount"],
@@ -80,6 +83,7 @@ export const deals: Deal[] = [
     currency: "USD",
     dday: "D-8",
     eta: "2026.08.11",
+    updatedAt: "2026-10-14T16:05:00+09:00",
     pending: 1,
     confirmed: 3,
     risks: [],
@@ -104,6 +108,7 @@ export const deals: Deal[] = [
     currency: "EUR",
     dday: "D-1",
     eta: "2026.07.18",
+    updatedAt: "2026-10-16T08:40:00+09:00",
     pending: 3,
     confirmed: 7,
     risks: ["schedule"],
@@ -128,6 +133,7 @@ export const deals: Deal[] = [
     currency: "KRW",
     dday: "완료",
     eta: "2026.07.02",
+    updatedAt: "2026-09-30T11:00:00+09:00",
     pending: 0,
     confirmed: 9,
     risks: [],
@@ -151,6 +157,7 @@ export const deals: Deal[] = [
     currency: "USD",
     dday: "D+2",
     eta: "2026.07.09",
+    updatedAt: "2026-10-12T13:30:00+09:00",
     pending: 1,
     confirmed: 6,
     risks: ["payment", "currency"],
@@ -176,6 +183,7 @@ export const deals: Deal[] = [
     currency: "JPY",
     dday: "D-14",
     eta: "2026.08.20",
+    updatedAt: "2026-10-10T10:00:00+09:00",
     pending: 0,
     confirmed: 2,
     risks: [],
@@ -187,6 +195,7 @@ export const deals: Deal[] = [
   ...[
     {
       id: "DL-260801-01",
+      updatedAt: "2026-10-13T15:10:00+09:00",
       title: "Pacific 재생 플라스틱 수출",
       counterparty: "Pacific Recycling Pte Ltd",
       primaryItem: "재생 플라스틱",
@@ -196,6 +205,7 @@ export const deals: Deal[] = [
     },
     {
       id: "DL-260802-02",
+      updatedAt: "2026-10-11T09:45:00+09:00",
       title: "Baltic 철강재 수출",
       counterparty: "Baltic Steel GmbH",
       primaryItem: "철강재",
@@ -205,6 +215,7 @@ export const deals: Deal[] = [
     },
     {
       id: "DL-260803-03",
+      updatedAt: "2026-10-09T14:20:00+09:00",
       title: "Delta 비철금속 수출",
       counterparty: "Delta Resources Ltd",
       primaryItem: "비철금속",
@@ -231,3 +242,10 @@ export const deals: Deal[] = [
     nextKind: "reconcile" as const,
   })),
 ]
+
+/** Creation time for sorting. Prototype records without createdAt use the DL-YYMMDD id date. */
+export function dealCreatedAt(deal: Pick<Deal, "id" | "createdAt">) {
+  if (deal.createdAt) return deal.createdAt
+  const match = /^DL-(\d{2})(\d{2})(\d{2})-/.exec(deal.id)
+  return match ? `20${match[1]}-${match[2]}-${match[3]}T00:00:00+09:00` : ""
+}

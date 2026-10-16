@@ -87,7 +87,7 @@ for (const [value, title, id, detail] of [
 ]) {
   test(`transaction lifecycle ${value} has a navigable example`, async ({ page }) => {
     await page.goto("/erp/deals")
-    await page.getByRole("button", { name: "상세 필터", exact: true }).click()
+    await page.getByRole("button", { name: /^상세 필터/ }).click()
     await page.getByRole("combobox", { name: "주문 결정", exact: true }).click()
     await page.getByRole("option", { name: value === "unknown" ? "미확인" : detail, exact: true }).click()
     const table = page.getByRole("table", { name: "거래 업무표" })
