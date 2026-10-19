@@ -418,6 +418,7 @@ type CreateDetailStep = "setup" | "editor" | "share"
 type DocumentCreateWorkspaceStep = "source" | "fields" | "editor"
 type CreateStartMode = "generated" | "template"
 type DocumentDirection = "purchase" | "sales"
+type GeneratedDocumentPdfState = "none" | "draft" | "reviewed" | "final"
 type GeneratedDocumentDestination =
   "editor" | "confirmed" | "share" | "link-created" | "shared"
 type GeneratedDocumentOpenOptions = {
@@ -427,6 +428,8 @@ type GeneratedDocumentOpenOptions = {
   memberCanDeliver?: boolean
   memberCanAccessDeal?: boolean
   documentNumber?: string
+  pdfState?: GeneratedDocumentPdfState
+  workspaceStep?: DocumentCreateWorkspaceStep
 }
 type UploadDetailStep = "compare" | "deal"
 type RecentDocument = {
@@ -1414,7 +1417,7 @@ type GeneratedDraft = {
   updated: string
   memberCanAccessDeal: boolean
   memberCanDeliver: boolean
-  pdfState: "none" | "draft" | "final"
+  pdfState: GeneratedDocumentPdfState
   approvalRequirement: "required" | "none"
   approvalPreviewState?: DocumentApprovalPreviewState
 }
@@ -1442,7 +1445,7 @@ const generatedDrafts: GeneratedDraft[] = [
     dealId: "DL-260707-04", title: "상업송장 승인 완료", type: "인보이스",
     number: "CI-2026-0918", party: "ACME GmbH", status: "작성 중", tone: "neutral",
     readiness: "승인 완료 · 최종 검토", tab: "draft", creatorName: "조민영", creatorAccountId: "account-owner",
-    updated: "오늘 10:00", memberCanAccessDeal: true, memberCanDeliver: true, pdfState: "draft",
+    updated: "오늘 10:00", memberCanAccessDeal: true, memberCanDeliver: true, pdfState: "reviewed",
     approvalRequirement: "required",
     approvalPreviewState: "requester-approved",
   },
@@ -1487,7 +1490,7 @@ const generatedDrafts: GeneratedDraft[] = [
     updated: "오늘 09:36",
     memberCanAccessDeal: true,
     memberCanDeliver: true,
-    pdfState: "draft",
+    pdfState: "reviewed",
     approvalRequirement: "required",
   },
   {
@@ -8179,6 +8182,8 @@ function RecentDocumentsTable({
   const [deleteTarget, setDeleteTarget] = useState<GeneratedDraft | null>(null)
   const [deletePending, setDeletePending] = useState(false)
   const [deleteError, setDeleteError] = useState("")
+  const [pdfPreviewTarget, setPdfPreviewTarget] =
+    useState<GeneratedDraft | null>(null)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const totalPages = Math.max(1, Math.ceil(docs.length / pageSize))
@@ -8228,6 +8233,8 @@ function RecentDocumentsTable({
             const actionDestination: GeneratedDocumentDestination =
               draft.tab === "confirmed" ? "share" : rowDestination
             const isDraft = draft.tab === "draft" || draft.tab === "progress"
+            const resumeWorkspaceStep: DocumentCreateWorkspaceStep =
+              draft.pdfState === "none" ? "source" : "editor"
             const listStage = generatedDraftListStage(draft)
             const canOpenDeal = role !== "member" || draft.memberCanAccessDeal
             // Generated documents belong to the organization; Deal access is independent.
@@ -8240,8 +8247,10 @@ function RecentDocumentsTable({
               draft.pdfState === "none"
                 ? "PDF 미생성"
                 : draft.pdfState === "draft"
-                  ? "PDF 초안 보기"
-                  : "최종 PDF 보기"
+                  ? "PDF 검토하기"
+                  : draft.pdfState === "reviewed"
+                    ? "초안 PDF 보기"
+                    : "최종 PDF 보기"
             const PdfStateIcon =
               draft.pdfState === "none"
                 ? FileX2
@@ -8259,6 +8268,8 @@ function RecentDocumentsTable({
                 memberCanDeliver: draft.memberCanDeliver,
                 memberCanAccessDeal: draft.memberCanAccessDeal,
                 documentNumber: draft.number,
+                pdfState: draft.pdfState,
+                workspaceStep: resumeWorkspaceStep,
               })
             return (
               <TableRow
@@ -8365,13 +8376,23 @@ function RecentDocumentsTable({
                             className={cn(
                               "text-muted-foreground",
                               draft.pdfState === "draft" && "text-primary",
+                              draft.pdfState === "reviewed" && "text-primary",
                               draft.pdfState === "final" && "text-emerald-700"
                             )}
                             aria-label={`${draft.title} ${pdfStateLabel}`}
                             disabled={draft.pdfState === "none"}
                             onClick={(event) => {
                               event.stopPropagation()
-                              openDraft(rowDestination)
+                              if (draft.pdfState === "draft") {
+                                openDraft(rowDestination)
+                                return
+                              }
+                              if (
+                                draft.pdfState === "reviewed" ||
+                                draft.pdfState === "final"
+                              ) {
+                                setPdfPreviewTarget(draft)
+                              }
                             }}
                           >
                             <PdfStateIcon className="size-4" />
@@ -8445,6 +8466,52 @@ function RecentDocumentsTable({
           setPage(1)
         }}
       />
+      <Dialog
+        open={pdfPreviewTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setPdfPreviewTarget(null)
+        }}
+      >
+        <DialogContent className="flex h-[min(88svh,900px)] max-w-5xl flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
+          <DialogHeader className="shrink-0 border-b px-5 py-4 text-left">
+            <DialogTitle>
+              {pdfPreviewTarget?.pdfState === "final"
+                ? "최종 PDF 보기"
+                : "초안 PDF 보기"}
+            </DialogTitle>
+            <DialogDescription>
+              {pdfPreviewTarget?.title} · {pdfPreviewTarget?.number}
+            </DialogDescription>
+          </DialogHeader>
+          {pdfPreviewTarget ? (
+            <div className="min-h-0 flex-1">
+              <DocumentStage
+                result
+                fitPage
+                controlsPlacement="top"
+                templateCode={pdfPreviewTarget.number.split("-")[0]}
+                toolbarEyebrow={
+                  pdfPreviewTarget.pdfState === "final"
+                    ? "확정 문서"
+                    : "검토된 초안"
+                }
+                toolbarTitle={`${pdfPreviewTarget.number}.pdf`}
+                reviewGate={{
+                  completed: true,
+                  onComplete: () => undefined,
+                  downloadLabel:
+                    pdfPreviewTarget.pdfState === "final"
+                      ? "최종 PDF 다운로드"
+                      : "초안 PDF 다운로드",
+                }}
+                downloadName={`${pdfPreviewTarget.number}-${
+                  pdfPreviewTarget.pdfState === "final" ? "FINAL" : "DRAFT"
+                }.pdf`}
+              />
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
       <AlertDialog
         open={deleteTarget !== null}
         onOpenChange={(open) => {
@@ -15213,6 +15280,7 @@ function ResultScreen({
   initialDeliveryAttachments,
   relatedDeal = null,
   initialWorkspaceStep = "editor",
+  initialPdfState = "draft",
   onBackToList,
   onDuplicateConfirmed,
   onDocumentConfirmed,
@@ -15230,6 +15298,7 @@ function ResultScreen({
   initialDeliveryAttachments?: readonly DeliveryAttachment[]
   relatedDeal?: DealDocumentContext | null
   initialWorkspaceStep?: DocumentCreateWorkspaceStep
+  initialPdfState?: GeneratedDocumentPdfState
   onBackToList?: () => void
   onDocumentConfirmed?: () => void
   onDuplicateConfirmed?: (direction: DocumentDirection | null) => void
@@ -15286,10 +15355,10 @@ function ResultScreen({
       initialWorkspaceStep === "source" ? "source" : "editor"
     )
   const [pdfPrepared, setPdfPrepared] = useState(
-    initialWorkspaceStep !== "source" || confirmedAtStart
+    initialPdfState !== "none" || confirmedAtStart
   )
   const [hasPreparedPdf, setHasPreparedPdf] = useState(
-    initialWorkspaceStep !== "source" || confirmedAtStart
+    initialPdfState !== "none" || confirmedAtStart
   )
   const [sourceMode, setSourceMode] = useState<DocumentSourceMode>(
     relatedDeal ? "deal" : "files"
@@ -15413,7 +15482,11 @@ function ResultScreen({
   const [documentRevision, setDocumentRevision] = useState(0)
   const [reviewedDocumentRevision, setReviewedDocumentRevision] = useState<
     number | null
-  >(confirmedAtStart || approvalPreviewRequested ? 0 : null)
+  >(
+    confirmedAtStart || initialPdfState === "reviewed"
+      ? 0
+      : null
+  )
   const [mobilePane, setMobilePane] = useState<"left" | "right">("left")
   const [reviewFocusRequest, setReviewFocusRequest] =
     useState<ReviewFocusRequest | null>(null)
@@ -16511,7 +16584,13 @@ export function App() {
   )
   const [resultDirection, setResultDirection] = useState<DocumentDirection | null>(null)
   const [resultInitialWorkspaceStep, setResultInitialWorkspaceStep] =
-    useState<DocumentCreateWorkspaceStep>("editor")
+    useState<DocumentCreateWorkspaceStep>(
+      initialGeneratedDocument?.pdfState === "none" ? "source" : "editor"
+    )
+  const [resultInitialPdfState, setResultInitialPdfState] =
+    useState<GeneratedDocumentPdfState>(
+      initialGeneratedDocument?.pdfState ?? "draft"
+    )
   const [selectedDealId, setSelectedDealId] = useState(
     initialErpRoute?.params.dealId ?? "DL-260708-01"
   )
@@ -16657,6 +16736,10 @@ export function App() {
         )
         setResultDocumentNumber(documentNumber)
         setSelectedTemplateCode(documentNumber.split("-")[0] ?? "SC")
+        setResultInitialWorkspaceStep(
+          generatedDocument?.pdfState === "none" ? "source" : "editor"
+        )
+        setResultInitialPdfState(generatedDocument?.pdfState ?? "draft")
         setOpenDeliveryOnResult(false)
         setOpenConfirmedOnResult(
           Boolean(
@@ -16925,7 +17008,8 @@ export function App() {
     const nextNumber = `${selectedTemplateCode}-2026-${String(Date.now()).slice(-6)}`
     setResultDocumentNumber(nextNumber)
     setResultDirection(direction)
-    setResultInitialWorkspaceStep("editor")
+    setResultInitialWorkspaceStep("source")
+    setResultInitialPdfState("none")
     setOpenConfirmedOnResult(false)
     setOpenDeliveryOnResult(false)
     setOpenLinkCreatedOnResult(false)
@@ -16961,6 +17045,7 @@ export function App() {
       setResultMemberCanDeliver(selectedDocument.memberCanDeliver)
       setResultDealConnectionRestricted(false)
       setResultInitialWorkspaceStep("editor")
+      setResultInitialPdfState("final")
       setOpenDeliveryOnResult(true)
       setOpenConfirmedOnResult(true)
       setOpenLinkCreatedOnResult(
@@ -16988,6 +17073,7 @@ export function App() {
     setResultMemberCanDeliver(selectedDocument.memberCanDeliver)
     setResultDealConnectionRestricted(false)
     setResultInitialWorkspaceStep("editor")
+    setResultInitialPdfState(selectedDocument.pdfState)
     setOpenDeliveryOnResult(false)
     setOpenConfirmedOnResult(false)
     setOpenLinkCreatedOnResult(false)
@@ -17239,7 +17325,13 @@ export function App() {
                             ? templateCode
                             : "SC"
                         )
-                        setResultInitialWorkspaceStep("editor")
+                        setResultInitialWorkspaceStep(
+                          options?.workspaceStep ??
+                            (options?.pdfState === "none"
+                              ? "source"
+                              : "editor")
+                        )
+                        setResultInitialPdfState(options?.pdfState ?? "draft")
                         navigateTo("result", { documentNumber })
                       }}
                     />
@@ -17349,6 +17441,7 @@ export function App() {
                       initialDeliveryAttachments={resultDeliveryAttachments}
                       relatedDeal={resultDealContext}
                       initialWorkspaceStep={resultInitialWorkspaceStep}
+                      initialPdfState={resultInitialPdfState}
                       role={erpHomeRole}
                       memberCanDeliver={resultMemberCanDeliver}
                       dealConnectionRestricted={resultDealConnectionRestricted}
