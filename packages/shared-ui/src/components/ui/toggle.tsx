@@ -3,8 +3,8 @@ import { Toggle as DSToggle, toggleVariants as dsToggleVariants } from "@ecoya/d
 import { cn } from "@shared/lib/utils"
 
 const sizes = {
-  default: "h-9 min-w-9 [--leading-button-3:var(--leading-body-md)] font-normal [--font-weight-medium:400]",
-  sm: "[--leading-button-3:var(--leading-body-md)] font-normal [--font-weight-medium:400]",
+  default: "h-9 min-w-9 [--leading-button-3:var(--text-base--line-height)] font-normal [--font-weight-medium:400]",
+  sm: "[--leading-button-3:var(--text-base--line-height)] font-normal [--font-weight-medium:400]",
   lg: "font-normal [--font-weight-medium:400]",
 } as const
 function toggleVariants(options: Parameters<typeof dsToggleVariants>[0] = {}) {

@@ -34,8 +34,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-size: var(--text-body-md);
-    line-height: var(--leading-body-md);
+    font-size: var(--text-body-8);
+    line-height: var(--text-base--line-height);
     font-weight: var(--font-weight-regular);
   }
   html {

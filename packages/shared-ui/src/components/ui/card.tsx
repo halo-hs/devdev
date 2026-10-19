@@ -9,7 +9,7 @@ function Card({ className, ...props }: ComponentProps<typeof DesignSystemCard>) 
     <DesignSystemCard
       {...props}
       className={cn(
-        "text-[length:var(--text-body-md)] leading-[var(--leading-body-md)] bg-[var(--card)] shadow-[var(--card-shadow)] ring-[var(--card-border)] has-[>[data-slot=card-header]]:[--card-shadow:var(--card-module-shadow)] has-[>[data-slot=card-header]]:ring-0 [--card-content-px:14px] [--card-content-pt:20px] has-[>[data-slot=card-header]]:[--card-content-px:20px] has-[>[data-slot=card-header]]:[--card-content-pt:16px]",
+        "text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)] bg-[var(--card)] shadow-[var(--shadow-section)] ring-[var(--color-gray-10)] has-[>[data-slot=card-header]]:shadow-[var(--shadow-modal)] has-[>[data-slot=card-header]]:ring-0 [--card-content-px:14px] [--card-content-pt:20px] has-[>[data-slot=card-header]]:[--card-content-px:20px] has-[>[data-slot=card-header]]:[--card-content-pt:16px]",
         className,
       )}
     />
@@ -17,11 +17,11 @@ function Card({ className, ...props }: ComponentProps<typeof DesignSystemCard>) 
 }
 
 function CardTitle({ className, ...props }: ComponentProps<typeof DSCardTitle>) {
-  return <DSCardTitle {...props} className={cn("text-[length:var(--text-heading-xs)] leading-[var(--leading-heading-xs)] text-[var(--component-title)]", className)} />
+  return <DSCardTitle {...props} className={cn("text-[length:var(--text-compat-body-5-5)] leading-[var(--leading-header-5)] text-[var(--surface-foreground)]", className)} />
 }
 
 function CardDescription({ className, ...props }: ComponentProps<typeof DSCardDescription>) {
-  return <DSCardDescription {...props} className={cn("text-[length:var(--text-body-md)] leading-[var(--leading-body-md)]", className)} />
+  return <DSCardDescription {...props} className={cn("text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)]", className)} />
 }
 
 function CardHeader({ className, ...props }: ComponentProps<typeof DSCardHeader>) {
@@ -33,7 +33,7 @@ function CardContent({ className, ...props }: ComponentProps<typeof DSCardConten
 }
 
 function CardFooter({ className, ...props }: ComponentProps<typeof DSCardFooter>) {
-  return <DSCardFooter {...props} className={cn("mx-[var(--card-content-px)] mb-5 min-h-5 gap-3 border-[var(--component-subtle-outline)] p-0 not-empty:py-2.5 group-data-[size=sm]/card:p-0 group-data-[size=sm]/card:not-empty:py-2.5", className)} />
+  return <DSCardFooter {...props} className={cn("mx-[var(--card-content-px)] mb-5 min-h-5 gap-3 border-[var(--color-gray-10)] p-0 not-empty:py-2.5 group-data-[size=sm]/card:p-0 group-data-[size=sm]/card:not-empty:py-2.5", className)} />
 }
 
 function CardAction({ className, ...props }: ComponentProps<typeof DSCardAction>) {

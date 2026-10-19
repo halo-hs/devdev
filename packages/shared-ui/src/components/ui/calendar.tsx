@@ -5,7 +5,7 @@ export { CalendarDayButton } from "@ecoya/design-system/ui/calendar"
 
 function Calendar(props: ComponentProps<typeof DSCalendar>) {
   return <DSCalendar {...props} className={cn(
-    "[--text-header-9:var(--text-body-md)] [--leading-header-9:var(--leading-body-md)] [--font-weight-bold:400] [--font-weight-medium:400]",
+    "[--text-header-9:var(--text-body-8)] [--leading-header-9:var(--text-base--line-height)] [--font-weight-bold:400] [--font-weight-medium:400]",
     props.className,
   )} />
 }

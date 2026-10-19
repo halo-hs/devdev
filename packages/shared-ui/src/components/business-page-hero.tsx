@@ -44,11 +44,12 @@ export function BusinessPageHero({
     >
       <div
         className={cn(
-          "relative isolate overflow-hidden rounded-[var(--ui-radius-panel)] text-white shadow-[var(--ui-shadow-panel)]",
-          compact ? "px-5 pt-4" : "px-5 pt-5 sm:px-6 sm:pt-6",
+          // Figma HeroBanner type=controls (5806:59130): radius 22, no elevation.
+          "relative isolate overflow-hidden rounded-[22px] text-white",
+          compact ? "px-5 pt-4" : "px-5 pt-5 sm:px-[30px] sm:pt-[26px]",
           variant === "ai"
             ? "[background-image:var(--ui-ai-hero-background)]"
-            : "bg-[linear-gradient(118deg,var(--color-primary-1)_0%,var(--color-primary-5)_100%)]",
+            : "bg-[linear-gradient(120deg,#1d4ed8_0%,#2563eb_52%,#3b82f6_100%)]",
           "business-hero-controls",
           summary
             ? compact
@@ -56,7 +57,7 @@ export function BusinessPageHero({
               : "pb-16 sm:pb-20"
             : compact
               ? "pb-4"
-              : "pb-5 sm:pb-6"
+              : "pb-5"
         )}
       >
         <div
@@ -71,7 +72,7 @@ export function BusinessPageHero({
         <header
           className={cn(
             "relative z-10 flex items-start justify-between gap-5",
-            compact ? "min-h-12" : "min-h-16",
+            compact && "min-h-12",
             align === "center" && "justify-center text-center"
           )}
         >
@@ -105,7 +106,7 @@ export function BusinessPageHero({
               <h1
                 id={generatedTitleId}
                 className={cn(
-                  "text-2xl font-semibold tracking-normal",
+                  "text-xl font-bold tracking-normal",
                   titleClassName
                 )}
               >
@@ -114,7 +115,7 @@ export function BusinessPageHero({
               {description ? (
                 <p
                   className={cn(
-                    "max-w-3xl text-sm leading-6 text-white/75",
+                    "max-w-3xl text-base text-white",
                     compact ? "mt-1" : "mt-2",
                     align === "center" && "mx-auto",
                     descriptionClassName
@@ -133,7 +134,7 @@ export function BusinessPageHero({
         </header>
 
         {controls ? (
-          <div className={cn("relative z-10", compact ? "mt-3" : "mt-5")}>
+          <div className={cn("relative z-10", compact ? "mt-3" : "mt-[13px]")}>
             {controls}
           </div>
         ) : null}
@@ -143,7 +144,7 @@ export function BusinessPageHero({
         <div
           className={cn(
             "relative z-20 mx-3",
-            compact ? "-mt-6" : "-mt-10 sm:mx-4 sm:-mt-12"
+            compact ? "-mt-6" : "-mt-10 sm:mx-4 sm:-mt-14"
           )}
         >
           {summary}

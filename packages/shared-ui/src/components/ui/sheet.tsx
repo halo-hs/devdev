@@ -5,11 +5,11 @@ import { cn } from "@shared/lib/utils"
 export * from "@ecoya/design-system/ui/sheet"
 
 function SheetTitle({ className, ...props }: ComponentProps<typeof DSSheetTitle>) {
-  return <DSSheetTitle {...props} className={cn("text-[length:var(--text-heading-xs)] leading-[var(--leading-heading-xs)] font-bold text-[var(--component-title)]", className)} />
+  return <DSSheetTitle {...props} className={cn("text-[length:var(--text-compat-body-5-5)] leading-[var(--leading-header-5)] font-bold text-[var(--surface-foreground)]", className)} />
 }
 
 function SheetDescription({ className, ...props }: ComponentProps<typeof DSSheetDescription>) {
-  return <DSSheetDescription {...props} className={cn("text-[length:var(--text-body-md)] leading-[var(--leading-body-md)] font-normal text-[var(--component-description)]", className)} />
+  return <DSSheetDescription {...props} className={cn("text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)] font-normal text-[var(--color-gray-4)]", className)} />
 }
 
 function SheetHeader({ className, ...props }: ComponentProps<typeof DSSheetHeader>) {
@@ -17,6 +17,6 @@ function SheetHeader({ className, ...props }: ComponentProps<typeof DSSheetHeade
 }
 
 function SheetContent({ className, ...props }: ComponentProps<typeof DSSheetContent>) {
-  return <DSSheetContent {...props} className={cn("data-[side=bottom]:border-[var(--component-outline)] data-[side=left]:border-[var(--component-outline)] data-[side=right]:border-[var(--component-outline)] data-[side=top]:border-[var(--component-outline)]", className)} />
+  return <DSSheetContent {...props} className={cn("data-[side=bottom]:border-[var(--color-gray-9)] data-[side=left]:border-[var(--color-gray-9)] data-[side=right]:border-[var(--color-gray-9)] data-[side=top]:border-[var(--color-gray-9)]", className)} />
 }
 export { SheetTitle, SheetDescription, SheetHeader, SheetContent }

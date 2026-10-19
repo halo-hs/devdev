@@ -5,11 +5,11 @@ import { cn } from "@shared/lib/utils"
 export * from "@ecoya/design-system/ui/input-group"
 
 function InputGroupInput({ className, ...props }: ComponentProps<typeof DSInputGroupInput>) {
-  return <DSInputGroupInput {...props} className={cn("text-[length:var(--text-body-lg)] leading-[var(--leading-body-lg)] font-normal", className)} />
+  return <DSInputGroupInput {...props} className={cn("text-[length:var(--text-body-6)] leading-[var(--leading-body-6)] font-normal", className)} />
 }
 
 function InputGroupTextarea({ className, ...props }: ComponentProps<typeof DSInputGroupTextarea>) {
-  return <DSInputGroupTextarea {...props} className={cn("text-[length:var(--text-body-lg)] leading-[var(--leading-body-lg)] font-normal", className)} />
+  return <DSInputGroupTextarea {...props} className={cn("text-[length:var(--text-body-6)] leading-[var(--leading-body-6)] font-normal", className)} />
 }
 
 export { InputGroupInput, InputGroupTextarea }
