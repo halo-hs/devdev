@@ -1,3 +1,4 @@
+import { PageHeading, SettingsSection } from "./settings-layout"
 import {
   useEffect,
   useRef,
@@ -931,31 +932,15 @@ export function ApprovalPolicySettings() {
 
   return (
     <div>
-      <SettingsHeading
+      <PageHeading
         title="결재 정책"
         description="생성 문서에 적용할 승인 방식과 조건을 관리합니다. 실제 적용 정책은 조직 정책과 문서 유형 정책의 우선순위로 결정됩니다."
         action={<Badge variant="secondary">조직 소유자</Badge>}
       />
-      <div className="max-w-5xl divide-y">
-        <section className="py-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 className="font-semibold">등록된 정책</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                문서 유형 정책이 조직 기본 정책보다 먼저 적용됩니다.
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setForm(emptyApprovalPolicy)
-                setMessage("")
-              }}
-            >
-              새 정책
-            </Button>
-          </div>
-          <div className="mt-4 divide-y rounded-md border">
+      <div className="space-y-7">
+        <SettingsSection title="등록된 정책" description="문서 유형 정책이 조직 기본 정책보다 먼저 적용됩니다."
+          action={<Button variant="outline" onClick={() => { setForm(emptyApprovalPolicy); setMessage("") }}>새 정책</Button>}>
+          <div className="divide-y">
             {policies.length === 0 ? (
               <div className="px-4 py-8 text-center text-sm text-muted-foreground">
                 등록된 정책이 없습니다. 승인 없이 문서를 확정할 수 있습니다.
@@ -1002,13 +987,10 @@ export function ApprovalPolicySettings() {
               ))
             )}
           </div>
-        </section>
+        </SettingsSection>
 
-        <section className="py-5">
-          <h3 className="font-semibold">
-            {form.id ? "정책 수정" : "정책 만들기"}
-          </h3>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <SettingsSection title={form.id ? "정책 수정" : "정책 만들기"} description="적용 범위와 승인 조건을 설정합니다.">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="적용 범위">
               <Select
                 value={form.scopeKind}
@@ -1159,7 +1141,7 @@ export function ApprovalPolicySettings() {
             ) : null}
             {message ? <span className="text-sm text-emerald-700">{message}</span> : null}
           </div>
-        </section>
+        </SettingsSection>
       </div>
 
       <AlertDialog

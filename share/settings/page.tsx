@@ -1,3 +1,7 @@
+import { PageHeading, SettingsSection } from "./settings-layout"
+import { EmailLimits } from "./email-limits"
+import { emailLimitsPreview, type EmailLimitsLoader } from "./email-limits-data"
+import { resolveImportPermissions, type ImportPermissions } from "./import-permissions"
 import { ApprovalPolicySettings } from "./legacy"
 import { AliasesPage } from "./aliases-page"
 import { appLocation } from "@/app/app-location"
@@ -97,6 +101,7 @@ type NavItem = {
   icon: typeof CircleUserRound
   product?: ProductEntitlement
   roles?: readonly SettingsRole[]
+  permission?: keyof ImportPermissions
   keywords?: readonly string[]
 }
 
@@ -146,12 +151,14 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
       {
         id: "trade-counterparty-import",
         label: "거래처 일괄 등록",
+        permission: "canImportCounterparties",
         icon: FileSpreadsheet,
         product: "erp",
       },
       {
         id: "trade-deal-import",
         label: "거래 일괄 등록",
+        permission: "canImportDeals",
         icon: Upload,
         product: "erp",
       },
@@ -197,59 +204,6 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
     ],
   },
 ]
-
-function PageHeading({
-  title,
-  description,
-  action,
-}: {
-  title: string
-  description: string
-  action?: ReactNode
-}) {
-  return (
-    <header className="mb-7 flex items-start justify-between gap-5 border-b pb-6">
-      <div className="min-w-0 flex-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-        <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground break-keep [overflow-wrap:anywhere]">
-          {description}
-        </p>
-      </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
-    </header>
-  )
-}
-
-function SettingsSection({
-  title,
-  description,
-  action,
-  children,
-}: {
-  title: string
-  description?: string
-  action?: ReactNode
-  children: ReactNode
-}) {
-  return (
-    <section className="space-y-3">
-      <div className="flex items-end justify-between gap-4 px-0.5">
-        <div>
-        <h2 className="text-base font-semibold">{title}</h2>
-          {description ? (
-            <p className="mt-1 text-sm leading-5 text-muted-foreground break-keep [overflow-wrap:anywhere]">
-              {description}
-            </p>
-          ) : null}
-        </div>
-        {action}
-      </div>
-      <Card className="shadow-xs">
-        <CardContent className="p-5 sm:p-6">{children}</CardContent>
-      </Card>
-    </section>
-  )
-}
 
 function SettingRow({
   label,
@@ -457,7 +411,7 @@ function TradeDefaultsPage({ role }: { role: SettingsRole }) {
   )
 }
 
-function EmailPage() {
+function EmailPage({ loadLimits }: { loadLimits: EmailLimitsLoader }) {
   const [copied, setCopied] = useState(false)
   return (
     <div>
@@ -469,12 +423,13 @@ function EmailPage() {
         title="전용 수신 주소"
         description="주소 복사는 문서 수신·분석 성공을 의미하지 않습니다."
       >
-        <SettingRow label="수신 주소" description="PDF · 최대 10MB · 실제 주소는 로그와 캡처에서 마스킹됩니다.">
+        <SettingRow label="수신 주소" description="실제 주소는 로그와 캡처에서 마스킹됩니다.">
           <div className="flex flex-wrap items-center justify-end gap-2">
             <code className="min-w-0 truncate text-sm">hanbit-••••@inbound.ecoya.app</code>
             <Button variant="outline" onClick={() => setCopied(true)}><Copy /> 주소 복사</Button>
           </div>
         </SettingRow>
+        <EmailLimits loadLimits={loadLimits} />
         {copied ? (
           <p className="mt-3 text-right text-xs text-emerald-700">주소를 복사했습니다.</p>
         ) : null}
@@ -799,17 +754,23 @@ function renderSection(
   products: readonly ProductEntitlement[],
   subscriptionKind: "separate" | "bundle",
   subscriptionStates: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>,
-  organizationName: string
+  organizationName: string,
+  importPermissions: ImportPermissions,
+  loadEmailLimits: EmailLimitsLoader
 ) {
-  if (section === "approvals") {
-    if (role !== "owner" || !products.includes("erp")) return (
-      <div role="alert" className="space-y-3 py-8">
-        <h1 className="text-xl font-semibold">결재 정책에 접근할 수 없습니다.</h1>
-        <p className="text-sm text-muted-foreground">현재 조직의 Trade OS를 이용하는 조직 소유자만 결재 정책을 관리할 수 있습니다.</p>
-      </div>
-    )
-    return <ApprovalPolicySettings />
+  const importSection = section === "trade-counterparty-import" || section === "trade-deal-import"
+  const importAllowed = section === "trade-counterparty-import" ? importPermissions.canImportCounterparties : importPermissions.canImportDeals
+  if ((importSection && (!importAllowed || !products.includes("erp"))) ||
+      (section === "approvals" && (role !== "owner" || !products.includes("erp")))) {
+    const title = section === "approvals" ? "결재 정책" : section === "trade-counterparty-import" ? "거래처 일괄 등록" : "거래 일괄 등록"
+    return <div role="alert" className="space-y-3 py-8">
+      <h1 className="text-xl font-semibold">{title}에 접근할 수 없습니다.</h1>
+      <p className="text-sm text-muted-foreground">{section === "approvals"
+        ? "현재 조직의 Trade OS를 이용하는 조직 소유자만 결재 정책을 관리할 수 있습니다."
+        : "현재 조직의 Trade OS 파일 등록 권한이 필요합니다."}</p>
+    </div>
   }
+  if (section === "approvals") return <ApprovalPolicySettings />
   if (section === "account") return <AccountPage />
   if (section === "trade-usage") return <OrganizationAiUsage organizationName={organizationName} />
   if (section === "organizations")
@@ -842,7 +803,7 @@ function renderSection(
         }
       />
     )
-  if (section === "trade-email") return <EmailPage />
+  if (section === "trade-email") return <EmailPage loadLimits={loadEmailLimits} />
   if (section === "trade-counterparty-import")
     return <ImportPage kind="counterparty" />
   if (section === "trade-deal-import") return <ImportPage kind="deal" />
@@ -866,6 +827,8 @@ function SettingsHubContent({
   role = "owner",
   subscriptionKind = "separate",
   subscriptionStates = {},
+  permissions,
+  loadEmailLimits = emailLimitsPreview,
 }: {
   onNavigate: (target: SettingsTarget) => void
   onLogout: () => void
@@ -873,10 +836,13 @@ function SettingsHubContent({
   onWorkspaceChange: (workspaceId: WorkspaceKey) => void
   availableProducts?: readonly ProductEntitlement[]
   role?: SettingsRole
+  permissions?: Partial<ImportPermissions>
+  loadEmailLimits?: EmailLimitsLoader
   subscriptionKind?: "separate" | "bundle"
   subscriptionStates?: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>
 }) {
   const { isMobile, setOpenMobile, state: sidebarState } = useSidebar()
+  const importPermissions = useMemo(() => resolveImportPermissions(role, permissions), [role, permissions])
   const groups = useMemo(
     () =>
       navigation
@@ -885,11 +851,12 @@ function SettingsHubContent({
           items: group.items.filter(
             (item) =>
               (!item.product || availableProducts.includes(item.product)) &&
-              (!item.roles || item.roles.includes(role))
+              (!item.roles || item.roles.includes(role)) &&
+              (!item.permission || importPermissions[item.permission])
           ),
         }))
         .filter((group) => group.items.length > 0),
-    [availableProducts, role]
+    [availableProducts, role, importPermissions]
   )
   const availableIds = useMemo(
     () => groups.flatMap((group) => group.items.map((item) => item.id)),
@@ -901,7 +868,7 @@ function SettingsHubContent({
     const candidate = (requested === "credits" ? "trade-usage" : requested) as SectionId | null
     return candidate === "billing"
       ? "products"
-      : candidate && (candidate === "approvals" || availableIds.includes(candidate))
+      : candidate && (["approvals", "trade-counterparty-import", "trade-deal-import"].includes(candidate) || availableIds.includes(candidate))
         ? candidate
         : "account"
   })()
@@ -913,7 +880,7 @@ function SettingsHubContent({
     // No server session issuer is configured in this UI prototype. Never open a static portal URL.
     setPortalError(true)
   }
-  const effectiveSection = section === "approvals" || availableIds.includes(section) ? section : "account"
+  const effectiveSection = ["approvals", "trade-counterparty-import", "trade-deal-import"].includes(section) || availableIds.includes(section) ? section : "account"
   const visibleGroups = groups
     .map((group) => ({
       ...group,
@@ -942,7 +909,7 @@ function SettingsHubContent({
       setSection(
         candidate === "billing"
           ? "products"
-          : candidate && (candidate === "approvals" || availableIds.includes(candidate))
+          : candidate && (["approvals", "trade-counterparty-import", "trade-deal-import"].includes(candidate) || availableIds.includes(candidate))
             ? candidate
             : "account"
       )
@@ -1085,7 +1052,7 @@ function SettingsHubContent({
               </div>
             )}
             <div key={`${workspaceId}:${effectiveSection}`}>
-              {renderSection(effectiveSection, role, availableProducts, subscriptionKind, subscriptionStates, workspaceOptions.find((workspace) => workspace.id === workspaceId)?.organizationName ?? "현재 조직")}
+              {renderSection(effectiveSection, role, availableProducts, subscriptionKind, subscriptionStates, workspaceOptions.find((workspace) => workspace.id === workspaceId)?.organizationName ?? "현재 조직", importPermissions, loadEmailLimits)}
             </div>
           </div>
         </div>

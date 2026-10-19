@@ -1,5 +1,5 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shared/components/ui/tabs"
-import { counterpartyPreview } from "@trade-os/counterparty-workspace"
+import { counterpartyPreview, counterpartyPreviewAccess, type CounterpartyAccess } from "@trade-os/counterparty-workspace"
 import { listDealDocuments } from "@trade-os/lib/deal-document-actions"
 import { orderProgress } from "@trade-os/lib/deal-finance-workspace"
 import { SnapEvidenceWorkspace } from "./components/snap-evidence-workspace"
@@ -6287,22 +6287,25 @@ export function SettingsPrototype({
   )
 }
 
-export function CounterpartyPrototype({ onNavigate, counterpartyId = "acme", role }: {
-  onNavigate: Navigate; counterpartyId?: string; role?: string
+export function CounterpartyPrototype({ onNavigate, counterpartyId = "acme", role, access }: {
+  onNavigate: Navigate; counterpartyId?: string; role?: string; access?: CounterpartyAccess
 }) {
+  const { userId, canReadOrganizationSettlement } = access ?? counterpartyPreviewAccess(role)
   const [model, setModel] = useState<Awaited<ReturnType<typeof counterpartyPreview.read>>>(null)
   const [loadState, setLoadState] = useState("loading")
+  const requestKey = `${counterpartyId}:${userId}:${canReadOrganizationSettlement}`
+  const [loadedFor, setLoadedFor] = useState("")
   const [attempt, setAttempt] = useState(0)
   const [page, setPage] = useState(1)
   const [currency, setCurrency] = useState("all")
   useEffect(() => {
     let active = true
     setLoadState("loading"); setPage(1); setCurrency("all")
-    counterpartyPreview.read(counterpartyId).then(value => {
-      if (active) { setModel(value); setLoadState("ready") }
-    }).catch(() => { if (active) setLoadState("error") })
+    counterpartyPreview.read(counterpartyId, { userId, canReadOrganizationSettlement }).then(value => {
+      if (active) { setModel(value); setLoadedFor(requestKey); setLoadState("ready") }
+    }).catch(() => { if (active) { setLoadedFor(requestKey); setLoadState("error") } })
     return () => { active = false }
-  }, [counterpartyId, attempt])
+  }, [counterpartyId, attempt, userId, canReadOrganizationSettlement, requestKey])
   const stages = { contract: "계약", shipment: "선적", customs: "통관", settlement: "정산 중", settled: "정산 완료" }
   const recentDocuments = model?.deals.flatMap(deal => listDealDocuments(deal.id).map(doc => ({ ...doc, linkedDealId: deal.id }))).slice(0, 5) ?? []
   return <Page
@@ -6310,12 +6313,14 @@ export function CounterpartyPrototype({ onNavigate, counterpartyId = "acme", rol
     description="거래처별 거래, AR/AP, 결제 신뢰와 최근 서류를 확인합니다."
     action={<><Button variant="outline" onClick={() => onNavigate("settlement")}>정산으로 돌아가기</Button><Button disabled={!model} onClick={() => document.getElementById("counterparty-deals")?.scrollIntoView({ behavior: "smooth" })}>관련 거래 보기</Button></>}
   >
-    {loadState === "loading" ? <p role="status">거래처 정보를 불러오는 중입니다.</p> : loadState === "error" ? <div role="alert"><p>거래처 정보를 불러오지 못했습니다.</p><Button variant="outline" onClick={() => setAttempt(value => value + 1)}>다시 시도</Button></div> : !model ? <p>거래처를 찾을 수 없습니다.</p> : <>
+    {loadState === "loading" || loadedFor !== requestKey ? <p role="status">거래처 정보를 불러오는 중입니다.</p> : loadState === "error" ? <div role="alert"><p>거래처 정보를 불러오지 못했습니다.</p><Button variant="outline" onClick={() => setAttempt(value => value + 1)}>다시 시도</Button></div> : !model ? <p>거래처를 찾을 수 없습니다.</p> : <>
       {model.mergedFrom && <p role="status" className="mb-4 text-sm text-muted-foreground">‘{model.mergedFrom}’은 ‘{model.name}’으로 합쳐졌습니다.</p>}
       <SummaryMetricStrip items={([['receivable', '받을 돈'], ['payable', '지급할 돈'], ['overdue', '연체'], ['trust', '결제 신뢰']] as const).map(([key, label]) => ({
         label, tone: key === "overdue" ? "red" : key === "trust" ? "amber" : "neutral",
-        value: <span className="block space-y-1" role="region" aria-label={label}>{model.currencies.map(row => <span className="block" key={row.currency}>{role === "member" && key !== "trust" ? "확인 필요" : row[key]} <span className="text-xs font-normal text-muted-foreground">{row.currency}</span></span>)}</span>,
+        detail: key === "trust" ? "회사 전체 기준" : model.financeScope === "assigned" ? "담당·공동 작업 기준" : "회사 전체 기준",
+        value: <span className="block space-y-1" role="region" aria-label={label}>{(key === "trust" ? model.trustCurrencies : model.currencies).map(row => <span className="block" key={row.currency}>{row[key]} <span className="text-xs font-normal text-muted-foreground">{row.currency}</span></span>)}{key !== "trust" && model.currencies.length === 0 ? <span className="text-sm font-normal text-muted-foreground">해당 거래 없음</span> : null}</span>,
       }))} />
+      {model.financeScope === "assigned" && <p className="mt-3 text-xs text-muted-foreground">회사 전체 금액·일정 조회는 조직 소유자에게 권한을 요청하세요.</p>}
       <Tabs defaultValue="ops" key={counterpartyId} className="mt-8">
         <TabsList aria-label="거래처 보기"><TabsTrigger value="ops">운영</TabsTrigger><TabsTrigger value="analytics">분석</TabsTrigger></TabsList>
         <TabsContent value="analytics" className="mt-8"><ContentPanel><SectionHeader title="분석 준비 중" /><p className="text-sm text-muted-foreground">거래처 분석은 준비 중입니다.</p></ContentPanel></TabsContent>
@@ -6337,7 +6342,7 @@ export function CounterpartyPrototype({ onNavigate, counterpartyId = "acme", rol
           </div>
           <div className="mt-8 grid gap-8 lg:grid-cols-2">
             <ContentPanel><section aria-label="미결제 일정"><SectionHeader title="미결제 일정" trailing={<label className="flex items-center gap-2 text-xs">통화<select className="h-8 rounded-md border bg-background px-2" value={currency} onChange={event => setCurrency(event.target.value)}><option value="all">전체 통화</option>{model.currencies.map(row => <option key={row.currency}>{row.currency}</option>)}</select></label>} />
-            {role === "member" ? <p className="text-sm text-muted-foreground">조회 가능한 결제 일정의 근거를 확인해 주세요.</p> : <Table><TableHeader><TableRow><TableHead>거래번호</TableHead><TableHead>구분</TableHead><TableHead>예정일</TableHead><TableHead>미결제 금액</TableHead><TableHead>상태</TableHead></TableRow></TableHeader><TableBody>{model.schedules.filter(row => currency === "all" || row.currency === currency).map(row => <TableRow key={row.id}><TableCell><button className="text-primary" onClick={() => onNavigate("deal", { dealId: row.dealId })}>{row.dealId}</button></TableCell><TableCell>{row.direction}</TableCell><TableCell>{row.due}</TableCell><TableCell>{row.amount} {row.currency}</TableCell><TableCell>{row.overdue ? "연체" : "예정"}</TableCell></TableRow>)}{!model.schedules.some(row => currency === "all" || row.currency === currency) && <TableRow><TableCell colSpan={5}>조회된 미결제 일정이 없습니다.</TableCell></TableRow>}</TableBody></Table>}
+            <p className="mb-3 text-xs text-muted-foreground">{model.financeScope === "assigned" ? "담당·공동 작업 기준" : "회사 전체 기준"}</p><Table><TableHeader><TableRow><TableHead>거래번호</TableHead><TableHead>구분</TableHead><TableHead>예정일</TableHead><TableHead>미결제 금액</TableHead><TableHead>상태</TableHead></TableRow></TableHeader><TableBody>{model.schedules.filter(row => currency === "all" || row.currency === currency).map(row => <TableRow key={row.id}><TableCell><button className="text-primary" onClick={() => onNavigate("deal", { dealId: row.dealId })}>{row.dealId}</button></TableCell><TableCell>{row.direction}</TableCell><TableCell>{row.due}</TableCell><TableCell>{row.amount} {row.currency}</TableCell><TableCell>{row.overdue ? "연체" : "예정"}</TableCell></TableRow>)}{!model.schedules.some(row => currency === "all" || row.currency === currency) && <TableRow><TableCell colSpan={5}>조회된 미결제 일정이 없습니다.</TableCell></TableRow>}</TableBody></Table>
             </section></ContentPanel>
             <ContentPanel><SectionHeader title="필요 서류" /><div className="divide-y text-sm">{model.deals.filter(deal => deal.nextDocument?.kind === "upload").map(deal => <Button variant="ghost" key={deal.id} className="h-auto w-full justify-start rounded-none py-4 text-left font-normal" onClick={() => onNavigate("deal", { dealId: deal.id })}><span>{deal.nextDocument?.label}<span className="block text-xs text-muted-foreground">{deal.id}</span></span></Button>)}{!model.deals.some(deal => deal.nextDocument?.kind === "upload") && <p className="text-sm text-muted-foreground">조회된 필요 서류가 없습니다.</p>}</div></ContentPanel>
           </div>
