@@ -47,7 +47,7 @@ test("document list shows one current label and separates stage lists while keep
   await expect(row.getByRole("cell").nth(2)).toContainText("승인 완료 · 최종 검토")
   await expect(row).not.toContainText("작성 중")
   await expect(row).not.toContainText("초안 PDF")
-  await expect(row.getByRole("button", { name: /PDF 초안 보기/ })).toBeEnabled()
+  await expect(row.getByRole("button", { name: /초안 PDF 보기/ })).toBeEnabled()
 
   const unrequested = page.getByRole("row").filter({ hasText: "SC-2026-0708" })
   await expect(unrequested).toContainText("작성 중")
@@ -100,6 +100,57 @@ test("document list shows one current label and separates stage lists while keep
   await expect(duplicate.getByRole("button", { name: /PDF 미생성/ })).toBeDisabled()
   await page.getByRole("tab", { name: "승인 완료 1", exact: true }).click()
   await expect(row.getByRole("cell").nth(2).locator('[data-slot="badge"]')).toHaveText("승인 완료")
+})
+
+test("generated document cards resume work while PDF buttons keep file actions separate", async ({
+  page,
+}) => {
+  await page.goto("/erp/documents/create")
+
+  const noPdf = page.getByRole("row").filter({ hasText: "SC-2026-0708" })
+  await expect(noPdf.getByRole("button", { name: /PDF 미생성/ })).toBeDisabled()
+  await noPdf.getByText("표준 매매계약서 초안", { exact: true }).click()
+  await expect(page).toHaveURL(/\/erp\/documents\/create\/SC-2026-0708/)
+  await expect(
+    page.getByRole("button", { name: "문서 초안 만들기", exact: true })
+  ).toBeVisible()
+
+  await page.goto("/erp/documents/create")
+  const draftPdf = page.getByRole("row").filter({ hasText: "SC-2026-0918" })
+  await draftPdf.getByRole("button", { name: /PDF 검토하기/ }).click()
+  await expect(page).toHaveURL(/\/erp\/documents\/create\/SC-2026-0918/)
+  await expect(
+    page.getByRole("button", { name: "검토 완료", exact: true }).first()
+  ).toBeVisible()
+  await expect(page.getByRole("button", { name: "초안 PDF 다운로드", exact: true })).toHaveCount(0)
+
+  await page.goto("/erp/documents/create")
+  const reviewedPdf = page.getByRole("row").filter({ hasText: "CI-2026-0918" })
+  await reviewedPdf.getByRole("button", { name: /초안 PDF 보기/ }).click()
+  const draftPreview = page.getByRole("dialog")
+  await expect(draftPreview.getByRole("heading", { name: "초안 PDF 보기" })).toBeVisible()
+  await expect(draftPreview.getByRole("button", { name: "초안 PDF 다운로드", exact: true })).toBeVisible()
+  await draftPreview.getByRole("button", { name: "Close", exact: true }).click()
+
+  const finalPdf = page.getByRole("row").filter({ hasText: "CI-2026-0703" })
+  await finalPdf.getByRole("button", { name: /최종 PDF 보기/ }).click()
+  const finalPreview = page.getByRole("dialog")
+  await expect(finalPreview.getByRole("heading", { name: "최종 PDF 보기" })).toBeVisible()
+  await expect(finalPreview.getByRole("button", { name: "최종 PDF 다운로드", exact: true })).toBeVisible()
+  await finalPreview.getByRole("button", { name: "Close", exact: true }).click()
+
+  await finalPdf.getByText("수출 인보이스", { exact: true }).click()
+  await expect(page).toHaveURL(/\/erp\/documents\/create\/CI-2026-0703/)
+  await expect(page.getByRole("dialog")).toHaveCount(0)
+
+  await page.goto("/erp/documents/create")
+  await page
+    .getByRole("row")
+    .filter({ hasText: "CI-2026-0703" })
+    .getByRole("button", { name: "고객 전달", exact: true })
+    .click()
+  await expect(page.getByRole("dialog")).toBeVisible()
+  await expect(page.getByRole("dialog")).toContainText("파일 공유하기")
 })
 
 test("next document opens the matching draft without confirming it", async ({
