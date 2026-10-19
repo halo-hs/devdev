@@ -1,3 +1,5 @@
+import { AccountWithdrawal, WithdrawalResultSurface } from "./account-withdrawal"
+import { createWithdrawalPreview, withdrawalScenario, type WithdrawalGateway, type WithdrawalResult } from "./withdrawal-data"
 import { PageHeading, SettingsSection } from "./settings-layout"
 import { EmailLimits } from "./email-limits"
 import { emailLimitsPreview, type EmailLimitsLoader } from "./email-limits-data"
@@ -272,7 +274,13 @@ function BrandColorPicker({
   )
 }
 
-function AccountPage() {
+function AccountPage({ withdrawal, onOrganizations, onResult }: {
+  withdrawal: WithdrawalGateway
+  onOrganizations: () => void
+  onResult: (result: WithdrawalResult) => void
+}) {
+  const [withdrawing, setWithdrawing] = useState(false)
+  if (withdrawing) return <AccountWithdrawal gateway={withdrawal} onCancel={() => setWithdrawing(false)} onOrganizations={onOrganizations} onResult={onResult} />
   return (
     <div>
       <PageHeading
@@ -282,8 +290,8 @@ function AccountPage() {
       <div className="space-y-7">
         <SettingsSection title="내 계정">
           <div>
-            <SettingRow label="이름"><Input aria-label="이름" defaultValue="조민영" readOnly /></SettingRow>
-            <SettingRow label="로그인 이메일"><Input aria-label="로그인 이메일" defaultValue="minyoung@ecoya.app" readOnly /></SettingRow>
+            <SettingRow label="이름"><Input aria-label="이름" defaultValue={withdrawal.identity.name} readOnly /></SettingRow>
+            <SettingRow label="로그인 이메일"><Input aria-label="로그인 이메일" defaultValue={withdrawal.identity.email} readOnly /></SettingRow>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
             업무 시간대와 기본 언어는 각 제품의 조직 설정에서 관리합니다.
@@ -296,6 +304,12 @@ function AccountPage() {
               onClick={() => appLocation.assign("/password-recovery")}
             >비밀번호 변경</Button></div>
           </SettingRow>
+        </SettingsSection>
+        <SettingsSection title="계정 탈퇴">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <p className="min-w-0 flex-1 text-sm leading-6 text-muted-foreground">소속 조직을 확인한 뒤 계정 탈퇴를 진행합니다.<br />완료 후에는 계정을 복구할 수 없습니다.</p>
+            <Button variant="outline" className="ml-auto text-destructive" onClick={() => setWithdrawing(true)}>계정 탈퇴</Button>
+          </div>
         </SettingsSection>
       </div>
     </div>
@@ -756,7 +770,10 @@ function renderSection(
   subscriptionStates: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>,
   organizationName: string,
   importPermissions: ImportPermissions,
-  loadEmailLimits: EmailLimitsLoader
+  loadEmailLimits: EmailLimitsLoader,
+  withdrawal: WithdrawalGateway,
+  onOrganizations: () => void,
+  onWithdrawalResult: (result: WithdrawalResult) => void
 ) {
   const importSection = section === "trade-counterparty-import" || section === "trade-deal-import"
   const importAllowed = section === "trade-counterparty-import" ? importPermissions.canImportCounterparties : importPermissions.canImportDeals
@@ -771,7 +788,7 @@ function renderSection(
     </div>
   }
   if (section === "approvals") return <ApprovalPolicySettings />
-  if (section === "account") return <AccountPage />
+  if (section === "account") return <AccountPage withdrawal={withdrawal} onOrganizations={onOrganizations} onResult={onWithdrawalResult} />
   if (section === "trade-usage") return <OrganizationAiUsage organizationName={organizationName} />
   if (section === "organizations")
     return (
@@ -815,7 +832,7 @@ function renderSection(
     return <SnapSimplePage type="localization" role={role} />
   if (section === "snap-data") return <SnapDataPage />
   if (section === "snap-usage") return <SnapUsagePage role={role} />
-  return <AccountPage />
+  return <AccountPage withdrawal={withdrawal} onOrganizations={onOrganizations} onResult={onWithdrawalResult} />
 }
 
 function SettingsHubContent({
@@ -829,6 +846,7 @@ function SettingsHubContent({
   subscriptionStates = {},
   permissions,
   loadEmailLimits = emailLimitsPreview,
+  withdrawalGateway,
 }: {
   onNavigate: (target: SettingsTarget) => void
   onLogout: () => void
@@ -838,10 +856,13 @@ function SettingsHubContent({
   role?: SettingsRole
   permissions?: Partial<ImportPermissions>
   loadEmailLimits?: EmailLimitsLoader
+  withdrawalGateway?: WithdrawalGateway
   subscriptionKind?: "separate" | "bundle"
   subscriptionStates?: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>
 }) {
   const { isMobile, setOpenMobile, state: sidebarState } = useSidebar()
+  const withdrawal = useMemo(() => withdrawalGateway ?? createWithdrawalPreview(withdrawalScenario(appLocation.search), role === "owner" ? "OWNER" : role === "admin" ? "ADMIN" : "MEMBER"), [withdrawalGateway, role])
+  const [withdrawalResult, setWithdrawalResult] = useState<WithdrawalResult | null>(null)
   const importPermissions = useMemo(() => resolveImportPermissions(role, permissions), [role, permissions])
   const groups = useMemo(
     () =>
@@ -917,6 +938,8 @@ function SettingsHubContent({
     window.addEventListener("popstate", handlePopState)
     return () => window.removeEventListener("popstate", handlePopState)
   }, [availableIds])
+
+  if (withdrawalResult) return <WithdrawalResultSurface result={withdrawalResult} />
 
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-1 bg-background">
@@ -1052,7 +1075,7 @@ function SettingsHubContent({
               </div>
             )}
             <div key={`${workspaceId}:${effectiveSection}`}>
-              {renderSection(effectiveSection, role, availableProducts, subscriptionKind, subscriptionStates, workspaceOptions.find((workspace) => workspace.id === workspaceId)?.organizationName ?? "현재 조직", importPermissions, loadEmailLimits)}
+              {renderSection(effectiveSection, role, availableProducts, subscriptionKind, subscriptionStates, workspaceOptions.find((workspace) => workspace.id === workspaceId)?.organizationName ?? "현재 조직", importPermissions, loadEmailLimits, withdrawal, () => selectSection("organizations"), setWithdrawalResult)}
             </div>
           </div>
         </div>
