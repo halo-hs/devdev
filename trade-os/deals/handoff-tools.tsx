@@ -4,7 +4,7 @@ import {
   EmptyHeader,
   EmptyTitle,
   EmptyDescription,
-} from "@ecoya/design-system/ui/empty"
+} from "@shared/components/ui/empty"
 import { createContext, useContext, useState, type ReactNode } from "react"
 import { Button } from "@shared/components/ui/button"
 import {

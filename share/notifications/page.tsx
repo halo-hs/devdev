@@ -1,4 +1,4 @@
-import { Command, CommandInput } from "@ecoya/design-system/ui/command"
+import { Command, CommandInput } from "@shared/components/ui/command"
 import { useMemo, useState } from "react"
 import {
   AlertTriangle,

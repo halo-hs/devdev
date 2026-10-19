@@ -1,13 +1,9 @@
+import { NavigationIcon } from "@shared/components/navigation-icon"
 import { appLocation } from "@/app/app-location"
 import { useState } from "react"
 import {
   CircleHelp,
-  CreditCard,
-  Gauge,
-  Languages,
-  LogOut,
   Settings,
-  UserRound,
 } from "lucide-react"
 
 import {
@@ -68,16 +64,16 @@ export function SidebarProfileMenu({
   }
 
   return (
-    <SidebarMenuItem className="flex w-full min-w-0 items-center gap-1 group-data-[collapsible=icon]:w-auto">
+    <SidebarMenuItem className="flex w-full min-w-0 items-center gap-1 group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:flex-col">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <SidebarMenuButton
             tooltip="프로필 메뉴"
             aria-label="프로필 메뉴"
-            className="min-w-0 flex-1 text-sidebar-foreground/75"
+            className="h-[52px] min-w-0 flex-1 gap-2.5 p-2.5 group-data-[collapsible=icon]:order-3 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:p-1!"
           >
-            <UserRound />
-            <span className="min-w-0 truncate text-sm font-medium group-data-[collapsible=icon]:hidden">
+            <span data-nav-icon="avatar" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-indigo)] text-[15px] leading-[22px] text-white">조</span>
+            <span className="min-w-0 truncate text-[14px] leading-5 font-semibold text-[var(--component-title)] group-data-[collapsible=icon]:hidden">
               조민영
             </span>
           </SidebarMenuButton>
@@ -86,15 +82,12 @@ export function SidebarProfileMenu({
           side="top"
           align="start"
           sideOffset={8}
-          className="w-72 bg-[var(--surface-background)] shadow-lg"
+          className="navigation-account-popover w-[280px] rounded-xl border border-[var(--component-subtle-outline)] bg-[var(--surface-background)] p-2 shadow-[0_4px_12px_rgb(0_0_0/10%)] ring-0"
         >
           <DropdownMenuGroup>
-            <DropdownMenuLabel>
-              <div className="flex items-center gap-2">
-                <UserRound className="size-4" />
-                <span className="font-medium">조민영</span>
-              </div>
-              <div className="mt-1 font-normal text-muted-foreground">
+            <DropdownMenuLabel className="px-3 py-2.5">
+              <div className="text-[15px] leading-[22px] font-semibold text-[var(--component-title)]">조민영</div>
+              <div className="mt-0.5 text-[13px] leading-[18px] font-normal text-[var(--component-description)]">
                 minyoung@ecoya.app · {workspaceName}
               </div>
             </DropdownMenuLabel>
@@ -141,9 +134,8 @@ export function SidebarProfileMenu({
               </DropdownMenuGroup>
             </>
           ) : null}
-          <DropdownMenuSeparator />
 
-          {showProductSummary ? <div className="space-y-2 px-2">
+          {showProductSummary ? <div className="space-y-0.5">
             {productPlans.map(({ name, plan }) => {
               const isProductFree = plan.trim().toLowerCase() === "free"
               const usageLabel = isProductFree
@@ -154,30 +146,30 @@ export function SidebarProfileMenu({
               return (
                 <div
                   key={name}
-                  className="rounded-[var(--r-md)] border border-[var(--surface-border)] p-2.5"
+                  className="grid gap-2 rounded-lg border border-[var(--component-subtle-outline)] p-3"
                 >
-                  <div className="flex items-center gap-2 px-1 pb-1.5">
-                    <span className="min-w-0 flex-1 truncate text-xs font-semibold">
+                  <div className="flex items-center gap-2">
+                    <span className="min-w-0 flex-1 truncate text-[15px] leading-[22px] font-semibold text-[var(--component-title)]">
                       {name}
                     </span>
-                    <span className="text-[11px] font-medium text-muted-foreground">
+                    <span className="text-[13px] leading-[18px] font-medium text-[var(--component-description)]">
                       {plan}
                     </span>
                   </div>
 
                   {onUsage ? (
-                    <DropdownMenuItem className="px-2" onClick={onUsage}>
-                      <Gauge />
+                    <DropdownMenuItem className="h-5 min-h-0 gap-1 p-0 text-[14px] leading-5" onClick={onUsage}>
+                      <NavigationIcon name="usage" className="-m-1 scale-[0.666667]" />
                       {usageLabel}
-                      <span className="ml-auto text-xs text-muted-foreground">
+                      <span className="ml-auto text-[13px] leading-[18px] text-[var(--component-description)]">
                         {usageValue}
                       </span>
                     </DropdownMenuItem>
                   ) : (
                     <div className="flex h-8 items-center gap-2 px-2 text-sm">
-                      <Gauge className="size-4" />
+                      <NavigationIcon name="usage" className="-m-1 scale-[0.666667]" />
                       <span>{usageLabel}</span>
-                      <span className="ml-auto text-xs text-muted-foreground">
+                      <span className="ml-auto text-[13px] leading-[18px] text-[var(--component-description)]">
                         {usageValue}
                       </span>
                     </div>
@@ -185,10 +177,10 @@ export function SidebarProfileMenu({
 
                   {onBilling ? (
                     <DropdownMenuItem
-                      className="mt-1 justify-center border border-[var(--button-outline-border)] bg-[var(--button-outline-background)] font-medium shadow-[var(--shadow-btn-tertiary-black)]"
+                      className="h-10 justify-center gap-1 rounded-[10px] border border-[var(--button-primary-background)] bg-[var(--button-primary-background)] text-[15px] font-normal text-[var(--button-primary-foreground)] shadow-[var(--shadow-btn-primary-blue)] focus:bg-[var(--button-primary-background-hover)] focus:text-[var(--button-primary-foreground)]"
                       onClick={onBilling}
                     >
-                      <CreditCard />
+                      <NavigationIcon name="billing" />
                       {isProductFree ? "플랜 업그레이드" : "요금제 보기"}
                     </DropdownMenuItem>
                   ) : null}
@@ -200,7 +192,7 @@ export function SidebarProfileMenu({
           <DropdownMenuSeparator />
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Languages />
+              <NavigationIcon name="language" />
               언어
               <span className="mr-2 ml-auto text-xs text-muted-foreground">
                 {language === "ko-KR" ? "한국어" : language}
@@ -233,7 +225,7 @@ export function SidebarProfileMenu({
             </DropdownMenuSubContent>
           </DropdownMenuSub>
           <DropdownMenuItem onClick={onLogout}>
-            <LogOut />
+            <NavigationIcon name="logout" />
             로그아웃
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -242,10 +234,10 @@ export function SidebarProfileMenu({
       {onSettings ? <SidebarMenuButton
         aria-label="설정"
         tooltip="설정"
-        className="size-8 shrink-0 justify-center p-0 group-data-[collapsible=icon]:hidden"
+        className="size-7 shrink-0 justify-center p-0 group-data-[collapsible=icon]:order-1"
         onClick={onSettings}
       >
-        <Settings />
+        <NavigationIcon name="settings" />
         <span className="sr-only">설정</span>
       </SidebarMenuButton> : null}
 
@@ -254,9 +246,9 @@ export function SidebarProfileMenu({
           <SidebarMenuButton
             aria-label="고객 지원"
             tooltip="고객 지원"
-            className="size-8 shrink-0 justify-center p-0 group-data-[collapsible=icon]:hidden"
+            className="size-7 shrink-0 justify-center p-0 group-data-[collapsible=icon]:order-2"
           >
-            <CircleHelp />
+            <NavigationIcon name="help" />
             <span className="sr-only">고객 지원</span>
           </SidebarMenuButton>
         </DropdownMenuTrigger>
@@ -264,8 +256,9 @@ export function SidebarProfileMenu({
           side="top"
           align="end"
           sideOffset={8}
-          className="w-48"
+          className="w-60 rounded-xl border border-[var(--component-subtle-outline)] p-2 shadow-[0_4px_12px_rgb(0_0_0/10%)] ring-0"
         >
+          <DropdownMenuLabel className="px-4 pt-1.5 pb-0.5 text-[12px] font-semibold text-muted-foreground">지원</DropdownMenuLabel>
           <DropdownMenuItem
             onClick={() => openSupportMail("ECOYA 자주 묻는 질문 문의")}
           >
@@ -276,6 +269,8 @@ export function SidebarProfileMenu({
           >
             이용 가이드
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel className="px-4 pt-1.5 pb-0.5 text-[12px] font-semibold text-muted-foreground">정책</DropdownMenuLabel>
           <DropdownMenuItem
             onClick={() => appLocation.assign("/legal/terms")}
           >

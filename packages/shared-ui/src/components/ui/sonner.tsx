@@ -1,1 +1,8 @@
-export * from "@ecoya/design-system/ui/sonner"
+import type { ComponentProps } from "react"
+import { Toaster as DSToaster } from "@ecoya/design-system/ui/sonner"
+
+function Toaster({ style, ...props }: ComponentProps<typeof DSToaster>) {
+  return <DSToaster closeButton {...props} style={{ "--width": "380px", ...style } as ComponentProps<typeof DSToaster>["style"]} />
+}
+
+export { Toaster }

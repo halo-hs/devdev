@@ -3,7 +3,7 @@ import {
   EmptyHeader,
   EmptyTitle,
   EmptyDescription,
-} from "@ecoya/design-system/ui/empty"
+} from "@shared/components/ui/empty"
 import { DealClaimTool } from "@trade-os/deals/handoff-tools"
 import { useRef, useState, type ReactNode } from "react"
 import { Info, Pencil, Plus, Trash2 } from "lucide-react"

@@ -20,7 +20,7 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "@ecoya/design-system/ui/alert"
+} from "@shared/components/ui/alert"
 import {
   Dialog,
   DialogContent,

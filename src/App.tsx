@@ -1,3 +1,5 @@
+import { NavigationIcon } from "@shared/components/navigation-icon"
+import navigationWordmark from "@shared/assets/navigation/ecoya-wordmark.svg?url"
 import { SnapStartGuidePage, useSnapStartGuide } from "@snap/onboarding/start-guide"
 import { DocumentConnectionSummary, DocumentConnectionChangeDialog } from "@trade-os/components/document-connection-summary"
 import { type DocumentConnection, type DocumentDealLink, type CandidateEvidence } from "@trade-os/lib/document-deal-connection"
@@ -29,7 +31,6 @@ import {
 import { createPortal } from "react-dom"
 import {
   AlertTriangle,
-  Bell,
   Bot,
   Building2,
   Calculator,
@@ -176,14 +177,14 @@ import {
   AlertAction,
   AlertDescription,
   AlertTitle,
-} from "@ecoya/design-system/ui/alert"
-import { Card, CardContent, CardHeader } from "@ecoya/design-system/ui/card"
+} from "@shared/components/ui/alert"
+import { Card, CardContent, CardHeader } from "@shared/components/ui/card"
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-} from "@ecoya/design-system/ui/field"
+} from "@shared/components/ui/field"
 import {
   Item,
   ItemActions,
@@ -192,7 +193,7 @@ import {
   ItemGroup,
   ItemMedia,
   ItemTitle,
-} from "@ecoya/design-system/ui/item"
+} from "@shared/components/ui/item"
 import {
   FileDropZone,
   type FileDropZoneRef,
@@ -653,6 +654,8 @@ const TRADE_DOCUMENT_MAX_UPLOAD_FILES = 5
 const TRADE_DOCUMENT_MAX_UPLOAD_MB = 50
 const TRADE_DOCUMENT_MAX_UPLOAD_BYTES =
   TRADE_DOCUMENT_MAX_UPLOAD_MB * 1024 * 1024
+
+const erpNavigationIcons = { onboarding: "start", home: "home", inbox: "upload", create: "document", ask: "chat", deals: "deals", shipments: "ship", settlement: "settlement", monitoring: "monitoring", reports: "report", sales: "sales" } as const
 
 const erpNavGroups = [
   {
@@ -2014,7 +2017,7 @@ function ProductSwitcher({
             ) : (
               <span className="flex min-w-0 flex-1 items-center text-left">
                 {product === "erp" ? (
-                  <EcoyaTradeOsLogo tone={tone} />
+                  <><span className="navigation-product-logo hidden items-center gap-[3.4px]"><img src={navigationWordmark} alt="ECOYA" /><span className="text-[17.2px] leading-[24.08px] font-bold text-[var(--component-title)]">Trade OS</span></span><span className="navigation-product-logo-fallback"><EcoyaTradeOsLogo tone={tone} /></span></>
                 ) : (
                   <img
                     src={
@@ -2109,7 +2112,7 @@ function AppNav({
   const snapGuideCount = (["S1", "S2", "S3", "S4"] as const).filter(id => snapStartGuide.state?.completed[id]).length + snapGuideCommonCount
   const snapGuideTotal = snapGuidePrivileged ? 6 : 4
   const snapGuideReady = Boolean(snapStartGuide.state && (!snapGuidePrivileged || (startGuide?.state && !startGuide.error)))
-  const { isMobile, setOpenMobile, state: sidebarState } = useSidebar()
+  const { isMobile, setOpenMobile, toggleSidebar, state: sidebarState } = useSidebar()
   const sidebarCollapsed = sidebarState === "collapsed"
   const canOpenSettings = product !== "snap" || Boolean(
     snapRole && canAccessSnapRoute(getSnapRouteByScreen("SC-30")!, {
@@ -2139,123 +2142,42 @@ function AppNav({
       collapsible="icon"
       className={cn(
         "snap-navigation",
-        "top-0 z-[var(--z-side-nav)] h-svh!",
+        "top-0 z-[var(--z-side-nav)] h-svh! data-[side=left]:border-r-0 data-[side=right]:border-l-0",
         isV2Workspace && "v2-navigation"
       )}
     >
-      {isV2Workspace ? (
-        <SidebarHeader className="hidden shrink-0 p-0 md:block">
-          <div className="flex h-(--header-height) items-center px-4 group-data-[collapsible=icon]:px-2">
-            <div className="flex min-w-0 flex-1 items-center gap-1">
-              <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-                <ProductSwitcher
-                  product={product}
-                  onProductChange={onProductChange}
-                  availableProducts={availableProducts}
-                  tone="color"
-                />
-              </div>
-              <SidebarTrigger
-                aria-label={
-                  sidebarCollapsed ? "사이드바 펼치기" : "사이드바 접기"
-                }
-                className="ml-auto shrink-0 group-data-[collapsible=icon]:mx-auto"
-              />
-            </div>
+      <SidebarHeader className="app-navigation-header shrink-0 gap-4 px-5 pt-5 pb-0 group-data-[collapsible=icon]:px-3">
+        <div className="app-navigation-brand flex h-7 items-center gap-1.5 group-data-[collapsible=icon]:h-10">
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+            <ProductSwitcher product={product} onProductChange={onProductChange} availableProducts={availableProducts} tone="color" />
           </div>
-          <div className="flex items-center gap-1 px-3 pt-2 pb-1">
-            <div className="min-w-0 flex-1">
-              <WorkspaceSwitcher
-                workspaceId={workspaceId}
-                onWorkspaceChange={onWorkspaceChange}
-                product={product}
-                textOnly
-              />
-            </div>
-            {!sidebarCollapsed ? (
-              <NotificationButton
-                unreadCount={unreadNotificationCount}
-                active={screen === "notifications"}
-                onClick={onOpenNotifications}
-              />
-            ) : null}
-          </div>
-        </SidebarHeader>
-      ) : (
-        <SidebarHeader className="hidden shrink-0 p-0 lg:block">
-          <div className="flex min-h-14 items-center px-3 group-data-[collapsible=icon]:px-2">
-            <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-              <ProductSwitcher
-                product={product}
-                onProductChange={onProductChange}
-                availableProducts={availableProducts}
-                tone="color"
-              />
-            </div>
-            <SidebarTrigger
-              aria-label={
-                sidebarCollapsed ? "사이드바 펼치기" : "사이드바 접기"
-              }
-              className="ml-1 shrink-0 group-data-[collapsible=icon]:mx-auto"
-            />
-          </div>
-          <div className="flex items-center gap-1 px-3 pt-1 pb-2">
-            <div className="min-w-0 flex-1">
-              <WorkspaceSwitcher
-                workspaceId={workspaceId}
-                onWorkspaceChange={onWorkspaceChange}
-                product={product}
-                textOnly
-              />
-            </div>
-            {!sidebarCollapsed ? (
-              <NotificationButton
-                unreadCount={unreadNotificationCount}
-                active={screen === "notifications"}
-                onClick={onOpenNotifications}
-              />
-            ) : null}
-          </div>
-        </SidebarHeader>
-      )}
-      <SidebarHeader
-        className={cn(
-          "border-b p-3",
-          isV2Workspace ? "md:hidden" : "lg:hidden"
-        )}
-      >
+          <Button variant="ghost" onClick={toggleSidebar}
+            aria-label={isMobile ? "메뉴 닫기" : sidebarCollapsed ? "사이드바 펼치기" : "사이드바 접기"}
+            className="navigation-toggle ml-auto size-[18px] shrink-0 p-0 text-[var(--component-title)] group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:mx-auto"
+          >
+            <NavigationIcon name="slide" className="scale-75 group-data-[collapsible=icon]:scale-100" />
+          </Button>
+        </div>
         <div className="flex items-center gap-2">
           <div className="min-w-0 flex-1">
-            <ProductSwitcher
-              product={product}
-              onProductChange={onProductChange}
-              availableProducts={availableProducts}
-              tone="color"
-            />
+            <WorkspaceSwitcher workspaceId={workspaceId} onWorkspaceChange={onWorkspaceChange} product={product} navigation unreadCount={unreadNotificationCount} />
           </div>
-          <SidebarTrigger aria-label="메뉴 닫기" />
-        </div>
-        <div className="mt-2">
-          <WorkspaceSwitcher
-            workspaceId={workspaceId}
-            onWorkspaceChange={onWorkspaceChange}
-            product={product}
-          />
+          {(!sidebarCollapsed || isMobile) && <NotificationButton unreadCount={unreadNotificationCount} active={screen === "notifications"} onClick={onOpenNotifications} />}
         </div>
       </SidebarHeader>
-      <SidebarContent className="group-data-[collapsible=icon]:pl-0 lg:pl-2">
+      <SidebarContent className="app-navigation-content gap-5 px-5 pt-4 pb-5 group-data-[collapsible=icon]:px-3">
         {product === "erp"
-          ? erpNavGroups.map((group, groupIndex) => (
+          ? erpNavGroups.map((group) => (
               <SidebarGroup
                 key={group.label || "primary"}
-                className={cn(groupIndex > 0 && "pt-1")}
+                className="p-0"
               >
                 {group.label ? (
-                  <SidebarGroupLabel className="group-data-[collapsible=icon]:pointer-events-none">{group.label}</SidebarGroupLabel>
+                  <SidebarGroupLabel className="text-[11px] leading-4 font-normal text-[var(--component-title)] group-data-[collapsible=icon]:pointer-events-none">{group.label}</SidebarGroupLabel>
                 ) : null}
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {group.items.map(([label, Icon, key]) => {
+                    {group.items.map(([label, , key]) => {
                       if (key === "onboarding" && startGuide?.complete) return null
                       if (key === "monitoring" && erpRole !== "owner") return null
                       const active =
@@ -2271,9 +2193,9 @@ function AppNav({
                             tooltip={label}
                             aria-label={label}
                             onClick={() => navigate(key)}
-                            className="text-sidebar-foreground/75 data-active:font-semibold"
+                            className="app-navigation-item"
                           >
-                            <Icon />
+                            <NavigationIcon name={erpNavigationIcons[key]} />
                             <span>{label}</span>
                             {key === "onboarding" && startGuide?.state && <span className="ml-auto text-xs">{startGuide.count}/{startGuide.total}</span>}
                           </SidebarMenuButton>
@@ -2284,7 +2206,7 @@ function AppNav({
                 </SidebarGroupContent>
               </SidebarGroup>
             ))
-          : snapNavGroups.map((group, groupIndex) => {
+          : snapNavGroups.map((group) => {
               const visibleItems = group.items.filter(([, , key]) => {
                 const definition = getSnapRouteByScreen(key)
                 if (key === "SC-10" && snapGuideReady && snapGuideCount === snapGuideTotal) return false
@@ -2300,10 +2222,10 @@ function AppNav({
               return (
                 <SidebarGroup
                   key={group.label || "snap-primary"}
-                  className={cn(groupIndex > 0 && "pt-1")}
+                  className="p-0"
                 >
                   {group.label ? (
-                    <SidebarGroupLabel className="group-data-[collapsible=icon]:pointer-events-none">{group.label}</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-[11px] leading-4 font-normal text-[var(--component-title)] group-data-[collapsible=icon]:pointer-events-none">{group.label}</SidebarGroupLabel>
                   ) : null}
                   <SidebarGroupContent>
                     <SidebarMenu>
@@ -2319,7 +2241,7 @@ function AppNav({
                               onSnapScreenChange(key)
                               navigate("snap-platform")
                             }}
-                            className="text-sidebar-foreground/75 data-active:font-semibold"
+                            className="app-navigation-item"
                           >
                             <Icon />
                             <span>{label}</span>
@@ -2333,7 +2255,7 @@ function AppNav({
               )
             })}
       </SidebarContent>
-      <SidebarFooter className="mt-auto min-h-16 shrink-0 border-t p-3">
+      <SidebarFooter className="app-navigation-footer mt-auto shrink-0 border-t border-[var(--component-subtle-outline)] px-4 py-2 group-data-[collapsible=icon]:px-3 group-data-[collapsible=icon]:pb-4">
         <SidebarMenu>
           <SidebarProfileMenu
             onSettings={canOpenSettings ? openSettings : undefined}
@@ -2629,10 +2551,10 @@ function NotificationButton({
       onClick={onClick}
       className="relative shrink-0 text-muted-foreground"
     >
-      <Bell className="size-4.5" />
+      <NavigationIcon name="notification" />
       {unreadCount > 0 ? (
-        <span className="absolute -top-0.5 -right-0.5 grid min-w-4 place-items-center rounded-full bg-destructive px-1 text-[9px] leading-4 font-semibold text-white">
-          {unreadCount > 99 ? "99+" : unreadCount}
+        <span className="absolute -top-0.5 -right-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full border-2 border-white bg-[#e53b3b] px-1 text-[11px] leading-[14px] font-bold text-white">
+          {unreadCount > 9 ? "9+" : unreadCount}
         </span>
       ) : null}
     </Button>
@@ -4519,12 +4441,12 @@ function HorizontalDocumentTray({
                             <UploadDocumentTypeMark
                               documentType={document.documentType}
                             />
-                            <span className="flex min-w-0 items-center gap-1.5 truncate text-xs font-semibold">
+                            <span className="flex min-w-0 items-center gap-1.5 truncate">
                               {uploadDocumentTypeLabel(document.documentType)}
                             </span>
                           </span>
                         </TableCell>
-                        <TableCell className="truncate py-2 text-left! font-medium">
+                        <TableCell className="truncate py-2 text-left!">
                           {document.name}
                         </TableCell>
                         <TableCell className="max-w-[240px] truncate py-2 text-left! text-[var(--surface-muted-foreground)]">
@@ -5631,12 +5553,12 @@ function PendingUploadDocumentsTable({
                         <UploadDocumentTypeMark
                           documentType={document.documentType}
                         />
-                        <span className="flex min-w-0 items-center gap-1.5 truncate text-sm font-semibold">
+                        <span className="flex min-w-0 items-center gap-1.5 truncate">
                           {uploadDocumentTypeLabel(document.documentType)}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="truncate text-left! font-medium">
+                    <TableCell className="truncate text-left!">
                       {document.name}
                     </TableCell>
                     <TableCell className="truncate text-left! text-[var(--surface-muted-foreground)]">
@@ -8288,11 +8210,11 @@ function RecentDocumentsTable({
                 <TableCell className="h-auto min-w-0 py-3 text-left whitespace-normal">
                   <div className="flex min-w-0 items-center gap-2">
                     <ToneBadge tone="blue">{draft.type}</ToneBadge>
-                    <span className="truncate text-sm font-semibold">
+                    <span className="truncate">
                       {draft.title}
                     </span>
                   </div>
-                  <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                  <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-sm leading-[18px] text-muted-foreground">
                     <span>{draft.number}</span>
                     {reuseFacts.slice(0, 2).map((fact) => (
                       <span
@@ -8329,7 +8251,7 @@ function RecentDocumentsTable({
                   <ToneBadge tone={listStage.tone}>{listStage.label}</ToneBadge>
                   {draft.readiness && (
                     <div
-                      className="mt-1 truncate text-[11px] text-muted-foreground"
+                      className="mt-1 truncate text-sm leading-[18px] text-muted-foreground"
                       title={draft.readiness}
                     >
                       {draft.readiness}
@@ -8338,7 +8260,6 @@ function RecentDocumentsTable({
                 </TableCell>
                 <TableCell className="truncate text-left">
                   <span
-                    className="text-sm"
                     title={
                       draft.creatorAccountId
                         ? draft.creatorName
@@ -9226,7 +9147,7 @@ function StructuredDocumentCreateEditor({
                                     }
                                   />
                                 </TableCell>
-                                <TableCell className="text-right! text-xs font-semibold tabular-nums">
+                                <TableCell className="text-right! tabular-nums">
                                   ${quotationMoney(amount)}
                                 </TableCell>
                                 <TableCell>
@@ -17144,8 +17065,8 @@ export function App() {
       style={
         {
           "--header-height": "var(--ui-shell-header-height)",
-          "--sidebar-width": screen === "deals" ? "216px" : "var(--ui-shell-sidebar-width)",
-          "--sidebar-width-icon": "var(--ui-shell-sidebar-collapsed-width)",
+          "--sidebar-width": "240px",
+          "--sidebar-width-icon": "64px",
         } as CSSProperties
       }
     >

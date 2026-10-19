@@ -1,6 +1,6 @@
 import { type ComponentProps, type ReactNode } from "react"
 import { AlertCircle, Info } from "lucide-react"
-import { Field, FieldLabel } from "@ecoya/design-system/ui/field"
+import { Field, FieldLabel } from "@shared/components/ui/field"
 import { cn } from "@shared/lib/utils"
 
 type FieldTone = "neutral" | "warning" | "danger"

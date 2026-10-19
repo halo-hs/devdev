@@ -1,3 +1,4 @@
+import { NavigationIcon } from "@shared/components/navigation-icon"
 import { Check, ChevronDown } from "lucide-react"
 
 import {
@@ -21,10 +22,14 @@ export function WorkspaceSwitcher({
   onWorkspaceChange,
   textOnly = false,
   product,
+  navigation = false,
+  unreadCount = 0,
 }: {
   workspaceId: WorkspaceKey
   onWorkspaceChange: (workspaceId: WorkspaceKey) => void
   textOnly?: boolean
+  navigation?: boolean
+  unreadCount?: number
   product?: WorkspaceProduct
 }) {
   const workspace =
@@ -38,10 +43,18 @@ export function WorkspaceSwitcher({
           variant="ghost"
           className={cn(
             "h-8 w-full justify-start py-0 text-left hover:bg-sidebar-accent group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0",
-            textOnly ? "gap-1.5 px-1" : "gap-1.5 px-0"
+            navigation ? "navigation-workspace relative h-[60px] gap-2.5 rounded-lg p-2.5 group-data-[collapsible=icon]:size-10" : textOnly ? "gap-1.5 px-1" : "gap-1.5 px-0"
           )}
           aria-label="워크스페이스 전환"
         >
+          {navigation ? <>
+            {unreadCount > 0 && <span aria-hidden="true" className="absolute -top-0.5 -right-0.5 z-10 hidden h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-white bg-[#e53b3b] px-1 text-[11px] leading-[14px] font-bold text-white group-data-[collapsible=icon]:flex">{unreadCount > 9 ? "9+" : unreadCount}</span>}
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--color-indigo)] text-[13px] leading-[18px] font-semibold text-white">{organizationName.slice(0, 1).toUpperCase()}</span>
+            <span className="grid min-w-0 flex-1 gap-0.5 group-data-[collapsible=icon]:hidden">
+              <span className="flex min-w-0 items-center justify-between gap-1"><span className="truncate text-[14px] leading-5 font-semibold text-[var(--component-title)]">{workspace.name}</span><NavigationIcon name="chevron-down" className="-m-1 scale-[0.666667] text-[var(--component-description)]" /></span>
+              <span className="truncate text-[11px] leading-4 text-[var(--component-description)]">{product === "snap" ? "SNAP" : "ERP"} {workspace.billingPlan}</span>
+            </span>
+          </> : <>
           <span
             className={cn(
               "flex size-4 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[8px] font-normal text-primary",
@@ -65,9 +78,10 @@ export function WorkspaceSwitcher({
             </span>
           ) : null}
           <ChevronDown className="size-3 shrink-0 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+          </>}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="right" align="start" className="w-72">
+      <DropdownMenuContent side="right" align="start" className={cn("w-72", navigation && "w-[336px] rounded-xl border border-[var(--component-outline)] p-2 shadow-[0_12px_32px_-8px_rgb(17_24_39/18%)]")}>
         <DropdownMenuGroup>
           <DropdownMenuLabel>조직</DropdownMenuLabel>
         </DropdownMenuGroup>

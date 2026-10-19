@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 @import "@ecoya/ui/styles.css";
 @import "../packages/shared-ui/src/styles/hero-filter-tokens.css";
+@import "../packages/shared-ui/src/styles/figma-prototype-tokens.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -17,13 +18,6 @@
 }
 
 :root:not(.dark) {
-  /* Keep the page canvas lighter than Gray 11 table headers so data regions
-     remain visible without adding heavier borders or shadows. */
-  --background: color-mix(
-    in srgb,
-    var(--color-gray-11) 20%,
-    var(--color-gray-12)
-  );
   --sidebar: var(--color-gray-12);
 }
 
@@ -40,8 +34,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-size: var(--text-body-7);
-    line-height: var(--leading-body-7);
+    font-size: var(--text-body-md);
+    line-height: var(--leading-body-md);
     font-weight: var(--font-weight-regular);
   }
   html {
@@ -91,7 +85,6 @@
 
 .snap-product [data-slot="card"] {
   border-radius: var(--ui-radius-panel);
-  box-shadow: var(--ui-shadow-panel);
 }
 
 .snap-product [data-slot="card-footer"] {
@@ -229,8 +222,7 @@
 }
 
 /* Data-display pattern: every standalone DS table is a white surface on the
-   light app canvas. Gray 11 remains reserved for table headers and muted
-   regions. Tables already composed inside a Card inherit that
+   light app canvas. Tables already composed inside a Card inherit that
    Card's surface so shadows and radii never stack. */
 [data-slot="sidebar-inset"] {
   background: var(--background);
@@ -246,7 +238,7 @@
 }
 
 [data-slot="card"] [data-slot="table-container"] {
-  border-radius: var(--r-md);
+  border-radius: 0;
   box-shadow: none;
 }
 
@@ -267,6 +259,14 @@
 [data-slot="card-content"][data-layout="flush-table"]
   [data-slot="table-container"] {
   border-radius: 0;
+}
+
+/* Full-width card tables retain the source's 20px outer cell inset. */
+[data-layout="flush-table"] :is([data-slot="table-head"], [data-slot="table-cell"]):first-child {
+  padding-left: 20px;
+}
+[data-layout="flush-table"] :is([data-slot="table-head"], [data-slot="table-cell"]):last-child {
+  padding-right: 20px;
 }
 
 /* Public authentication keeps labels, controls and recovery text readable. */

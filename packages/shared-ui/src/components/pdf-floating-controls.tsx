@@ -17,7 +17,7 @@ import { Button } from "@shared/components/ui/button"
 import {
   ButtonGroup,
   ButtonGroupText,
-} from "@ecoya/design-system/ui/button-group"
+} from "@shared/components/ui/button-group"
 import {
   Popover,
   PopoverContent,
