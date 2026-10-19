@@ -51,8 +51,8 @@ export function WorkspaceSwitcher({
             {unreadCount > 0 && <span aria-hidden="true" className="absolute -top-0.5 -right-0.5 z-10 hidden h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-white bg-[#e53b3b] px-1 text-[11px] leading-[14px] font-bold text-white group-data-[collapsible=icon]:flex">{unreadCount > 9 ? "9+" : unreadCount}</span>}
             <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--color-indigo)] text-[13px] leading-[18px] font-semibold text-white">{organizationName.slice(0, 1).toUpperCase()}</span>
             <span className="grid min-w-0 flex-1 gap-0.5 group-data-[collapsible=icon]:hidden">
-              <span className="flex min-w-0 items-center justify-between gap-1"><span className="truncate text-[14px] leading-5 font-semibold text-[var(--component-title)]">{workspace.name}</span><NavigationIcon name="chevron-down" className="-m-1 scale-[0.666667] text-[var(--component-description)]" /></span>
-              <span className="truncate text-[11px] leading-4 text-[var(--component-description)]">{product === "snap" ? "SNAP" : "ERP"} {workspace.billingPlan}</span>
+              <span className="flex min-w-0 items-center justify-between gap-1"><span className="truncate text-[14px] leading-5 font-semibold text-[var(--surface-foreground)]">{workspace.name}</span><NavigationIcon name="chevron-down" className="-m-1 scale-[0.666667] text-[var(--color-gray-4)]" /></span>
+              <span className="truncate text-[11px] leading-4 text-[var(--color-gray-4)]">{product === "snap" ? "SNAP" : "ERP"} {workspace.billingPlan}</span>
             </span>
           </> : <>
           <span
@@ -81,7 +81,7 @@ export function WorkspaceSwitcher({
           </>}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="right" align="start" className={cn("w-72", navigation && "w-[336px] rounded-xl border border-[var(--component-outline)] p-2 shadow-[0_12px_32px_-8px_rgb(17_24_39/18%)]")}>
+      <DropdownMenuContent side="right" align="start" className={cn("w-72", navigation && "w-[336px] rounded-xl border border-[var(--color-gray-9)] p-2 shadow-[0_12px_32px_-8px_rgb(17_24_39/18%)]")}>
         <DropdownMenuGroup>
           <DropdownMenuLabel>조직</DropdownMenuLabel>
         </DropdownMenuGroup>

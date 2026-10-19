@@ -5,15 +5,15 @@ import { cn } from "@shared/lib/utils"
 export * from "@ecoya/design-system/ui/popover"
 
 function PopoverContent({ className, ...props }: ComponentProps<typeof DSPopoverContent>) {
-  return <DSPopoverContent {...props} className={cn("gap-0.5 ring-[var(--component-subtle-outline)] text-[length:var(--text-body-md)] leading-[var(--leading-body-md)] font-normal", className)} />
+  return <DSPopoverContent {...props} className={cn("gap-0.5 ring-[var(--color-gray-10)] text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)] font-normal", className)} />
 }
 
 function PopoverTitle({ className, ...props }: ComponentProps<typeof DSPopoverTitle>) {
-  return <DSPopoverTitle {...props} className={cn("text-[length:var(--text-body-md)] leading-[var(--leading-body-md)] font-normal text-[var(--component-title)]", className)} />
+  return <DSPopoverTitle {...props} className={cn("text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)] font-normal text-[var(--surface-foreground)]", className)} />
 }
 
 function PopoverDescription({ className, ...props }: ComponentProps<typeof DSPopoverDescription>) {
-  return <DSPopoverDescription {...props} className={cn("text-[length:var(--text-body-md)] leading-[var(--leading-body-md)] font-normal", className)} />
+  return <DSPopoverDescription {...props} className={cn("text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)] font-normal", className)} />
 }
 
 export { PopoverContent, PopoverTitle, PopoverDescription }

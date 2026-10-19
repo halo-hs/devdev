@@ -4,7 +4,7 @@ import { cn } from "@shared/lib/utils"
 
 
 function Label({ className, ...props }: ComponentProps<typeof DSLabel>) {
-  return <DSLabel {...props} className={cn("gap-1.5 font-normal text-[length:var(--text-body-md)] leading-[var(--leading-body-md)]", className)} />
+  return <DSLabel {...props} className={cn("gap-1.5 font-normal text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)]", className)} />
 }
 
 export { Label }

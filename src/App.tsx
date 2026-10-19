@@ -2017,7 +2017,7 @@ function ProductSwitcher({
             ) : (
               <span className="flex min-w-0 flex-1 items-center text-left">
                 {product === "erp" ? (
-                  <><span className="navigation-product-logo hidden items-center gap-[3.4px]"><img src={navigationWordmark} alt="ECOYA" /><span className="text-[17.2px] leading-[24.08px] font-bold text-[var(--component-title)]">Trade OS</span></span><span className="navigation-product-logo-fallback"><EcoyaTradeOsLogo tone={tone} /></span></>
+                  <><span className="navigation-product-logo hidden items-center gap-[3.4px]"><img src={navigationWordmark} alt="ECOYA" /><span className="text-[17.2px] leading-[24.08px] font-bold text-[var(--surface-foreground)]">Trade OS</span></span><span className="navigation-product-logo-fallback"><EcoyaTradeOsLogo tone={tone} /></span></>
                 ) : (
                   <img
                     src={
@@ -2153,7 +2153,7 @@ function AppNav({
           </div>
           <Button variant="ghost" onClick={toggleSidebar}
             aria-label={isMobile ? "메뉴 닫기" : sidebarCollapsed ? "사이드바 펼치기" : "사이드바 접기"}
-            className="navigation-toggle ml-auto size-[18px] shrink-0 p-0 text-[var(--component-title)] group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:mx-auto"
+            className="navigation-toggle ml-auto size-[18px] shrink-0 p-0 text-[var(--surface-foreground)] group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:mx-auto"
           >
             <NavigationIcon name="slide" className="scale-75 group-data-[collapsible=icon]:scale-100" />
           </Button>
@@ -2173,7 +2173,7 @@ function AppNav({
                 className="p-0"
               >
                 {group.label ? (
-                  <SidebarGroupLabel className="text-[11px] leading-4 font-normal text-[var(--component-title)] group-data-[collapsible=icon]:pointer-events-none">{group.label}</SidebarGroupLabel>
+                  <SidebarGroupLabel className="text-[11px] leading-4 font-normal text-[var(--surface-foreground)] group-data-[collapsible=icon]:pointer-events-none">{group.label}</SidebarGroupLabel>
                 ) : null}
                 <SidebarGroupContent>
                   <SidebarMenu>
@@ -2225,7 +2225,7 @@ function AppNav({
                   className="p-0"
                 >
                   {group.label ? (
-                    <SidebarGroupLabel className="text-[11px] leading-4 font-normal text-[var(--component-title)] group-data-[collapsible=icon]:pointer-events-none">{group.label}</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-[11px] leading-4 font-normal text-[var(--surface-foreground)] group-data-[collapsible=icon]:pointer-events-none">{group.label}</SidebarGroupLabel>
                   ) : null}
                   <SidebarGroupContent>
                     <SidebarMenu>
@@ -2255,7 +2255,7 @@ function AppNav({
               )
             })}
       </SidebarContent>
-      <SidebarFooter className="app-navigation-footer mt-auto shrink-0 border-t border-[var(--component-subtle-outline)] px-4 py-2 group-data-[collapsible=icon]:px-3 group-data-[collapsible=icon]:pb-4">
+      <SidebarFooter className="app-navigation-footer mt-auto shrink-0 border-t border-[var(--color-gray-10)] px-4 py-2 group-data-[collapsible=icon]:px-3 group-data-[collapsible=icon]:pb-4">
         <SidebarMenu>
           <SidebarProfileMenu
             onSettings={canOpenSettings ? openSettings : undefined}

@@ -5,11 +5,11 @@ import { cn } from "@shared/lib/utils"
 export * from "@ecoya/design-system/ui/command"
 
 function CommandInput({ className, ...props }: ComponentProps<typeof DSCommandInput>) {
-  return <DSCommandInput {...props} className={cn("text-[length:var(--text-body-lg)] leading-[var(--leading-body-lg)] font-normal", className)} />
+  return <DSCommandInput {...props} className={cn("text-[length:var(--text-body-6)] leading-[var(--leading-body-6)] font-normal", className)} />
 }
 
 function CommandItem({ className, ...props }: ComponentProps<typeof DSCommandItem>) {
-  return <DSCommandItem {...props} className={cn("text-[length:var(--text-body-lg)] leading-[var(--leading-body-lg)] font-normal [--text-body-9:var(--text-body-lg)] [--leading-body-9:var(--leading-body-lg)]", className)} />
+  return <DSCommandItem {...props} className={cn("text-[length:var(--text-body-6)] leading-[var(--leading-body-6)] font-normal [--text-body-9:var(--text-body-6)] [--leading-body-9:var(--leading-body-6)]", className)} />
 }
 
 export { CommandInput, CommandItem }

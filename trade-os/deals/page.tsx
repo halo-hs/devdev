@@ -674,7 +674,11 @@ export function DealsScreen({
           className="[&_header]:flex-wrap"
           actions={
             <>
-              <Button variant="outline" onClick={exportCsv}>
+              <Button
+                variant="outline"
+                className="border-white/25 bg-white/10 text-white shadow-none hover:border-white/50 hover:bg-white/15 hover:text-white active:border-white/50 active:bg-white/20 active:text-white"
+                onClick={exportCsv}
+              >
                 <Download data-icon="inline-start" />
                 엑셀 다운로드
               </Button>
@@ -899,7 +903,7 @@ export function DealsScreen({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-white/80 hover:bg-white/10 hover:text-white"
+                        className="text-white/80 hover:bg-white/10 hover:text-white active:bg-white/15"
                         onClick={() => {
                           setQuery("")
                           setLifecycle("all")
@@ -1006,7 +1010,7 @@ export function DealsScreen({
             }}
             aria-label="거래 보기 방식"
           >
-            <TabsList>
+            <TabsList variant="segment">
               <TabsTrigger value="operations">운영</TabsTrigger>
               <TabsTrigger value="finance">금융</TabsTrigger>
             </TabsList>

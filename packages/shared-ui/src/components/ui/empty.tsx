@@ -12,15 +12,15 @@ function EmptyHeader({ className, ...props }: ComponentProps<typeof DSEmptyHeade
 }
 
 function EmptyTitle({ className, ...props }: ComponentProps<typeof DSEmptyTitle>) {
-  return <DSEmptyTitle {...props} className={cn("text-[length:var(--text-heading-2xs)] leading-[var(--leading-heading-2xs)] font-bold tracking-normal", className)} />
+  return <DSEmptyTitle {...props} className={cn("text-[length:var(--text-body-7)] leading-[var(--leading-body-7)] font-bold tracking-normal", className)} />
 }
 
 function EmptyDescription({ className, ...props }: ComponentProps<typeof DSEmptyDescription>) {
-  return <DSEmptyDescription {...props} className={cn("text-[length:var(--text-body-md)] leading-[var(--leading-body-md)] text-[var(--color-gray-3)]", className)} />
+  return <DSEmptyDescription {...props} className={cn("text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)] text-[var(--color-gray-3)]", className)} />
 }
 
 function EmptyContent({ className, ...props }: ComponentProps<typeof DSEmptyContent>) {
-  return <DSEmptyContent {...props} className={cn("max-w-none text-[length:var(--text-body-md)] leading-[var(--leading-body-md)]", className)} />
+  return <DSEmptyContent {...props} className={cn("max-w-none text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)]", className)} />
 }
 
 function EmptyMedia({ className, ...props }: ComponentProps<typeof DSEmptyMedia>) {

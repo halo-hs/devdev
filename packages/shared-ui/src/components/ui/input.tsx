@@ -4,7 +4,7 @@ import { cn } from "@shared/lib/utils"
 
 
 function Input({ className, ...props }: ComponentProps<typeof DSInput>) {
-  return <DSInput {...props} className={cn("text-[length:var(--text-body-lg)] leading-[var(--leading-body-lg)]", className)} />
+  return <DSInput {...props} className={cn("text-[length:var(--text-body-6)] leading-[var(--leading-body-6)]", className)} />
 }
 
 export { Input }
