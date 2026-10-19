@@ -1,0 +1,330 @@
+/* Prototype theme, read from the restored SNAP 2.0 Figma on 2026-10-19.
+   Source: https://www.figma.com/design/mqn2S73BOI4F02Xq6lNeMt?node-id=2832-15354
+   Component Color supplies shadcn roles. Actual component states take
+   precedence over older, unused effect styles and handwritten swatch labels.
+   This application theme leaves the vendored design-system snapshot intact. */
+:root:not(.dark) {
+  /* Semantic Red 1 is #940101 in the variable and rendered swatch;
+     the #BF4040 text on the reference board is stale. Keep the existing
+     eight-step compatibility names; Figma's six-step scale has its own names. */
+  --color-semantic-red-1: #940101;
+  --color-semantic-red-2: #d64c4c;
+  --color-semantic-red-3: #e68686;
+  --color-semantic-red-4: #f2b2b2;
+  --color-semantic-red-5: #f5c0c0;
+  --color-semantic-red-6: #ffefef;
+  --color-red-1: var(--color-semantic-red-1);
+  --color-red-2: var(--color-semantic-red-2);
+  --color-red-3: var(--color-semantic-red-3);
+  --color-red-5: var(--color-semantic-red-4);
+  --color-red-6: var(--color-semantic-red-5);
+  --color-red-8: var(--color-semantic-red-6);
+  --color-system-red1: var(--color-red-1);
+
+  /* Other primary and neutral primitives already match the restored file. */
+  --background: var(--color-gray-11);
+  --foreground: var(--color-gray-2);
+  --card: var(--color-gray-12);
+  --card-foreground: var(--color-gray-2);
+  --popover: var(--color-gray-12);
+  --popover-foreground: var(--color-gray-2);
+  --primary: var(--color-indigo);
+  --primary-foreground: var(--color-gray-12);
+  --secondary: var(--color-primary-4);
+  --secondary-foreground: var(--color-gray-3);
+  --muted: var(--color-gray-10);
+  --muted-foreground: var(--color-gray-5);
+  --accent: var(--color-primary-10);
+  --accent-foreground: var(--color-primary-4);
+  --destructive: var(--color-semantic-red-2);
+  --destructive-foreground: var(--color-gray-12);
+  --border: var(--color-gray-9);
+  --input: var(--color-gray-6);
+  --ring: var(--color-primary-4);
+  --ring-soft: rgb(22 109 215 / 20%);
+  --info: var(--color-primary-4);
+  --success: var(--color-green-1);
+  --warning: var(--color-orange-1);
+
+  /* Input (145:34, 145:38): the component's focus effect is bound to
+     base/ring, unlike the older unbound shadow/input/focused style. */
+  --control-border: var(--input);
+  --shadow-input-focused:
+    0 0 0 1px var(--ring), 0 0 0 3px var(--ring-soft),
+    0 1px 2px rgb(0 0 0 / 25%);
+
+  /* Button (3419:63906): filled buttons use shadow/btn in every enabled
+     pointer state. Disabled and outline buttons have no elevation. */
+  --shadow-btn: 0 1px 2px 0 rgb(5 29 57 / 10%);
+  --shadow-btn-primary-blue: var(--shadow-btn);
+  --shadow-btn-primary-blue-hover: var(--shadow-btn);
+  --shadow-btn-primary-blue-pressed: var(--shadow-btn);
+  --shadow-btn-primary-blue-disabled: none;
+  --shadow-btn-primary-red: var(--shadow-btn);
+  --shadow-btn-primary-red-hover: var(--shadow-btn);
+  --shadow-btn-primary-red-pressed: var(--shadow-btn);
+  --shadow-btn-primary-red-disabled: none;
+  --shadow-btn-tertiary-black: none;
+  --shadow-btn-tertiary-black-hover: none;
+  --shadow-btn-tertiary-black-pressed: none;
+  --shadow-btn-tertiary-black-disabled: none;
+
+  --button-primary-background-active: var(--color-primary-1);
+  --button-primary-disabled-background: var(--color-gray-11);
+  --button-primary-disabled-foreground: var(--color-gray-6);
+  --button-filled-disabled-border: var(--color-gray-9);
+
+  --button-secondary-background-active: var(--color-primary-8);
+  --button-secondary-foreground: var(--color-primary-4);
+  --button-secondary-foreground-hover: var(--color-primary-3);
+  --button-secondary-foreground-active: var(--color-primary-2);
+  --button-secondary-border: var(--color-primary-8);
+  --button-secondary-border-hover: var(--color-primary-7);
+  --button-secondary-border-active: var(--color-primary-6);
+  --button-secondary-disabled-foreground: var(--color-gray-6);
+
+  --button-outline-background: transparent;
+  --button-outline-background-hover: transparent;
+  --button-outline-background-active: var(--color-primary-10);
+  --button-outline-foreground: var(--color-primary-4);
+  --button-outline-foreground-hover: var(--color-primary-3);
+  --button-outline-foreground-active: var(--color-primary-2);
+  --button-outline-border: var(--color-primary-4);
+  --button-outline-border-hover: var(--color-primary-3);
+  --button-outline-border-active: var(--color-primary-2);
+  --button-outline-disabled-background: transparent;
+  --button-outline-disabled-foreground: var(--color-gray-6);
+  --button-outline-disabled-border: var(--color-gray-8);
+
+  --button-ghost-background: var(--color-gray-12);
+  --button-ghost-background-active: var(--color-primary-9);
+  --button-ghost-disabled-foreground: var(--color-gray-6);
+  --button-destructive-background: var(--color-semantic-red-2);
+  --button-destructive-background-hover: var(--color-semantic-red-2);
+  --button-destructive-background-active: var(--color-semantic-red-1);
+  --button-destructive-disabled-background: var(--color-gray-11);
+  --button-destructive-disabled-foreground: var(--color-gray-6);
+  --button-link-foreground-active: var(--color-primary-4);
+  --button-link-disabled-foreground: var(--color-gray-6);
+
+  /* Card (2955:17368) uses shadow/section, not the separate shadow/card
+     style. Retain this distinction instead of replacing every elevation. */
+  --card-border: var(--color-gray-10);
+  --card-shadow: var(--shadow-section);
+  --shadow-card: 0 6px 18px 0 rgb(16 24 40 / 5%);
+}
+
+/* New state roles retain the established dark-theme colors. */
+.dark {
+  --button-secondary-foreground-hover: var(--button-secondary-foreground);
+  --button-secondary-foreground-active: var(--button-secondary-foreground);
+  --button-secondary-border: transparent;
+  --button-secondary-border-hover: transparent;
+  --button-secondary-border-active: transparent;
+  --button-filled-disabled-border: transparent;
+  --button-outline-foreground-hover: var(--button-outline-foreground);
+  --button-outline-border-hover: var(--button-outline-border);
+  --button-outline-border-active: var(--button-outline-border);
+  --button-outline-disabled-border: var(--control-disabled-border);
+  --card-border: var(--surface-border);
+  --card-shadow: var(--shadow-section);
+}
+
+/* Figma typography roles and component dimensions (2832:15354).
+   Keep numbered legacy tokens intact; new roles follow the current source. */
+:root {
+  --text-heading-lg: 26px;
+  --leading-heading-lg: 36px;
+  --text-heading-md: 22px;
+  --leading-heading-md: 30px;
+  --text-heading-sm: 20px;
+  --leading-heading-sm: 28px;
+  --text-heading-xs: 18px;
+  --leading-heading-xs: 26px;
+  --text-heading-2xs: 16px;
+  --leading-heading-2xs: 24px;
+  --text-body-xl: 19px;
+  --leading-body-xl: 28px;
+  --text-body-lg: 17px;
+  --leading-body-lg: 24px;
+  --text-body-md: 15px;
+  --leading-body-md: 22px;
+  --text-body-sm: 13px;
+  --leading-body-sm: 18px;
+  --text-caption: 11px;
+  --leading-caption: 16px;
+  --badge-size-lg: 24px;
+  --badge-padding-inline-lg: 10px;
+  --leading-badge-sm: 16px;
+  --text-badge-default: 13px;
+  --leading-badge-default: 18px;
+  --text-badge-lg: 17px;
+  --leading-badge-lg: 24px;
+}
+
+@theme inline {
+  --text-xs: var(--text-caption);
+  --text-xs--line-height: var(--leading-caption);
+  --text-sm: var(--text-body-sm);
+  --text-sm--line-height: var(--leading-body-sm);
+  --text-base: var(--text-body-md);
+  --text-base--line-height: var(--leading-body-md);
+  --text-lg: var(--text-body-lg);
+  --text-lg--line-height: var(--leading-body-lg);
+  --text-xl: var(--text-heading-sm);
+  --text-xl--line-height: var(--leading-heading-sm);
+  --text-2xl: var(--text-heading-md);
+  --text-2xl--line-height: var(--leading-heading-md);
+}
+
+/* Sonner owns stacking, focus and live announcements; style its public slots. */
+.toaster [data-sonner-toast][data-styled="true"] {
+  padding: 14px 10px 14px 16px;
+  align-items: flex-start;
+  gap: 10px;
+  border-radius: 12px;
+  font-family: var(--font-family-sans);
+  box-shadow: 0 4px 12px rgba(5, 29, 57, 0.18);
+}
+.toaster [data-sonner-toast][data-styled="true"] [data-title] {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 17px;
+}
+.toaster [data-sonner-toast][data-styled="true"] [data-description] {
+  font-size: 13px;
+  line-height: 16px;
+}
+.toaster [data-sonner-toast][data-styled="true"] [data-icon] {
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+}
+.toaster [data-sonner-toast][data-styled="true"] [data-icon] svg {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+}
+.toaster[data-sonner-toaster] [data-sonner-toast][data-styled="true"] [data-close-button] {
+  position: static;
+  order: 3;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  transform: none;
+  background: transparent;
+  color: var(--color-gray-3);
+}
+.toaster [data-sonner-toast][data-styled="true"] [data-close-button] svg {
+  width: 16px;
+  height: 16px;
+}
+.toaster [data-sonner-toast][data-styled="true"] [data-button] {
+  height: 24px;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: var(--color-primary-4);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 400;
+}
+.toaster [data-sonner-toast][data-styled="true"] [data-button]:hover {
+  text-decoration: underline 2px;
+}
+:root:not(.dark) .toaster [data-sonner-toast][data-styled="true"] {
+  background: var(--color-gray-12);
+  border-color: var(--color-gray-8);
+  color: var(--color-gray-1);
+}
+:root:not(.dark) .toaster [data-sonner-toast][data-styled="true"] [data-description] {
+  color: var(--color-gray-3);
+}
+
+/* TableHead/TableCell: horizontal 1px rules, no vertical header dividers.
+   TableRow presets are business content, not table primitive definitions. */
+:root:not(.dark) {
+  --table-header-background: var(--color-gray-11);
+  --table-border: var(--color-gray-10);
+}
+
+.toaster [data-sonner-toast][data-type="success"] [data-icon] { color: var(--color-green-2); }
+.toaster [data-sonner-toast][data-type="error"] [data-icon] { color: var(--color-red-2); }
+.toaster [data-sonner-toast][data-type="warning"] [data-icon] { color: var(--color-orange-1); }
+.toaster [data-sonner-toast][data-type="info"] [data-icon] { color: var(--color-gray-1); }
+
+/* Surface roles from the actual Card/Tabs/Info/Popover compositions.
+   Match hex values: legacy gray token numbers differ from the Figma library.
+   A module Card has no outer stroke and uses shadow/modal; a plain Card
+   retains its 1px outline and shadow/section. */
+:root {
+  --component-title: var(--surface-foreground);
+  --component-description: var(--surface-muted-foreground);
+  --component-outline: var(--surface-border);
+  --component-subtle-outline: var(--surface-border);
+  --card-module-shadow: var(--shadow-section);
+  --tabs-list-shadow: var(--shadow-section);
+  --tabs-selected-shadow: 0 2px 4px rgb(0 0 0 / 5%);
+  --alert-neutral-border: var(--color-gray-9);
+  --alert-neutral-foreground: var(--color-indigo);
+  --alert-caution-background: var(--color-yellow-6);
+  --alert-caution-border: var(--color-yellow-5);
+  --alert-caution-foreground: var(--color-yellow-1);
+}
+:root:not(.dark) {
+  --component-title: var(--color-gray-2); /* #2a2c32 */
+  --component-description: var(--color-gray-4); /* #5c5e66 */
+  --component-outline: var(--color-gray-9); /* #dedfe3 */
+  --component-subtle-outline: var(--color-gray-10);
+  --card-module-shadow: var(--shadow-modal);
+  --table-header-foreground: var(--component-description);
+  --tabs-trigger-foreground: var(--component-description);
+  --tabs-trigger-foreground-selected: var(--color-primary-4);
+  --tabs-indicator: var(--color-primary-4);
+  --alert-neutral-border: var(--component-outline);
+  --alert-neutral-foreground: var(--component-title);
+  --alert-caution-background: var(--color-orange-6);
+  --alert-caution-border: var(--color-orange-4);
+  --alert-caution-foreground: var(--color-orange-1);
+}
+
+/* Navigation 3893:4887: expanded 240px, collapsed 64px. */
+.navigation-icon {
+  display: inline-block;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  background: currentColor;
+  mask: var(--navigation-icon) center / contain no-repeat;
+}
+.navigation-icon-24 { width: 24px; height: 24px; }
+.app-navigation-item { background: var(--sidebar); }
+.app-navigation-item [data-nav-icon] { color: var(--component-title); }
+.app-navigation-item:is(:hover, [data-active="true"], [data-state="open"]) [data-nav-icon] { color: var(--sidebar-accent-foreground); }
+.app-navigation-item[data-active="true"] { outline: 1px solid var(--sidebar-accent-foreground); outline-offset: -1px; }
+.app-navigation-brand .navigation-product-logo { display: inline-flex; }
+.app-navigation-brand .navigation-product-logo-fallback { display: none; }
+.app-navigation-brand .snap-product-switcher { height: 28px; padding: 0; gap: 6px; }
+.app-navigation-brand .snap-product-switcher > svg { width: 16px; height: 16px; }
+.app-navigation-brand .navigation-toggle > svg { display: none; }
+[data-collapsible="icon"] .app-navigation-content [data-slot="sidebar-menu"] { gap: 4px; }
+.app-navigation-footer [data-slot="sidebar-menu"] { gap: 0; }
+.app-navigation-brand .snap-product-switcher > svg { display: none; }
+.app-navigation-brand .snap-product-switcher::after {
+  content: "";
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: -4px;
+  background: var(--component-description);
+  mask: url("../assets/navigation/chevron-down.svg") center / contain no-repeat;
+  transform: scale(0.666667);
+}
+.navigation-icon[data-nav-icon="ship"] { mask-size: 18.3333px 13.75px; mask-position: 0.8333px 2.9167px; }
+.app-navigation-item:is(:hover, [data-active="true"], [data-state="open"]) {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+.navigation-icon-16 { width: 16px; height: 16px; }

@@ -1,5 +1,5 @@
 import { BusinessFilterBar, BusinessListToolbar, BusinessFilterSearch, BusinessFilterSelect } from "@shared/components/business-filters"
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@ecoya/design-system/ui/empty"
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@shared/components/ui/empty"
 import {
   getDealWorkPlan,
   workLabels,

@@ -1,5 +1,5 @@
 "use client";
-import { Badge } from "@ecoya/design-system/ui/badge";
+import { Badge } from "@shared/components/ui/badge";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField } from "@shared/components/business-filters";
 

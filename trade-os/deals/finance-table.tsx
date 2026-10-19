@@ -1,4 +1,4 @@
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@ecoya/design-system/ui/empty"
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@shared/components/ui/empty"
 import { Button } from "@shared/components/ui/button"
 import {
   Table,
