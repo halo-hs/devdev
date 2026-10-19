@@ -10,6 +10,8 @@ import type { EmailLimitsLoader } from "../../share/settings/email-limits-data"
 import { SidebarProvider } from "../../packages/shared-ui/src/components/ui/sidebar"
 import { TooltipProvider } from "../../packages/shared-ui/src/components/ui/tooltip"
 
+import type { WithdrawalGateway } from "../../share/settings/withdrawal-data"
+
 let root: Root | undefined
 export function renderSettings(
   products: ProductEntitlement[],
@@ -17,7 +19,8 @@ export function renderSettings(
   subscriptionKind: "separate" | "bundle" = "separate",
   subscriptionStates: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>> = {},
   permissions?: Partial<ImportPermissions>,
-  loadEmailLimits?: EmailLimitsLoader
+  loadEmailLimits?: EmailLimitsLoader,
+  withdrawalGateway?: WithdrawalGateway
 ) {
   if (!root) {
     document.getElementById("root")?.remove()
@@ -33,6 +36,7 @@ export function renderSettings(
           role={role}
           permissions={permissions}
           loadEmailLimits={loadEmailLimits}
+          withdrawalGateway={withdrawalGateway}
           subscriptionKind={subscriptionKind}
           subscriptionStates={subscriptionStates}
           workspaceId="ecoya"
