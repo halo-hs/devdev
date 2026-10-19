@@ -1,3 +1,5 @@
+import { PendingInvitations } from "./pending-invitations"
+import { invitationExamples } from "./invitation-data"
 import { appLocation } from "@/app/app-location"
 import { TrialStartDemo } from "@auth/components/trial-start-demo"
 import type { TrialPeriod, TrialProduct, TrialStartState } from "@auth/components/trial-start-card"
@@ -82,6 +84,7 @@ const initialMembers: Member[] = [
 ]
 function useDemoState(subscriptionKind: "separate" | "bundle") {
   const [members, setMembers] = useState(initialMembers)
+  const [invitations, setInvitations] = useState(invitationExamples)
   const [requests, setRequests] = useState<Request[]>([
     {
       id: "request-member-snap",
@@ -94,7 +97,7 @@ function useDemoState(subscriptionKind: "separate" | "bundle") {
   ])
   // Purchased capacity is a fixture. UI assignment must never change purchased capacity.
   const capacity = subscriptionKind === "bundle" ? { erp: 8, snap: 8 } : { erp: 8, snap: 5 }
-  return { members, setMembers, requests, setRequests, capacity }
+  return { members, setMembers, requests, setRequests, capacity, invitations, setInvitations }
 }
 const SettingsDemoContext = createContext<ReturnType<
   typeof useDemoState
@@ -200,7 +203,7 @@ export function OrganizationMembers({
   role: SettingsRole
   products: readonly ProductEntitlement[]
 }) {
-  const { members, setMembers, capacity, requests, setRequests } =
+  const { members, setMembers, capacity, requests, setRequests, invitations, setInvitations } =
     useSettingsDemo()
   const [confirmation, setConfirmation] = useState<{
     member: Member
@@ -396,7 +399,7 @@ export function OrganizationMembers({
         </Button>
       </div>
       {inviteOpen && (
-        <section className="rounded-xl border bg-background p-5">
+        <section aria-label="멤버 초대" className="rounded-xl border bg-background p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="font-semibold">멤버 초대</h2>
@@ -476,6 +479,7 @@ export function OrganizationMembers({
               {inviteError}
             </p>
           )}
+          <PendingInvitations items={invitations} onChange={setInvitations} />
         </section>
       )}
       <div className="overflow-x-auto rounded-xl border bg-background">

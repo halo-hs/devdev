@@ -5,6 +5,8 @@ import {
   type SettingsRole,
   type SubscriptionDisplayStatus,
 } from "../../share/settings/page"
+import type { ImportPermissions } from "../../share/settings/import-permissions"
+import type { EmailLimitsLoader } from "../../share/settings/email-limits-data"
 import { SidebarProvider } from "../../packages/shared-ui/src/components/ui/sidebar"
 import { TooltipProvider } from "../../packages/shared-ui/src/components/ui/tooltip"
 
@@ -13,7 +15,9 @@ export function renderSettings(
   products: ProductEntitlement[],
   role: SettingsRole = "owner",
   subscriptionKind: "separate" | "bundle" = "separate",
-  subscriptionStates: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>> = {}
+  subscriptionStates: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>> = {},
+  permissions?: Partial<ImportPermissions>,
+  loadEmailLimits?: EmailLimitsLoader
 ) {
   if (!root) {
     document.getElementById("root")?.remove()
@@ -27,6 +31,8 @@ export function renderSettings(
         <SettingsHubV2
           availableProducts={products}
           role={role}
+          permissions={permissions}
+          loadEmailLimits={loadEmailLimits}
           subscriptionKind={subscriptionKind}
           subscriptionStates={subscriptionStates}
           workspaceId="ecoya"
