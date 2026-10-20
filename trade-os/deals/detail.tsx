@@ -2259,7 +2259,9 @@ function DealDocumentPanels({
               aria-hidden={documentOpen || undefined}
               aria-label="거래 상세 정보"
               tabIndex={-1}
-              className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
+              // Title, document tabs and the detail editor share one card; the
+              // editor drops its own card chrome so cards are not nested.
+              className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 pt-5 pb-1 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] outline-none"
             >
               <div className="mb-3 flex items-center justify-between gap-3">
                 <h2 className="text-base font-semibold">거래 상세 정보</h2>
@@ -2283,7 +2285,7 @@ function DealDocumentPanels({
                   style={documentOpen ? { height: inlineHeight } : undefined}
                 >
                   {!documentOpen && (
-                    <PdfPanelWorkspaceCard>{primary}</PdfPanelWorkspaceCard>
+                    <PdfPanelWorkspaceCard className="-mx-5 rounded-none bg-transparent shadow-none ring-0">{primary}</PdfPanelWorkspaceCard>
                   )}
                 </div>
               )}
