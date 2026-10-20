@@ -6307,9 +6307,9 @@ export function DealDetailScreen({
           <div
             ref={stickyHeaderRef}
             data-deal-sticky-header
-            // Figma 문서 올리기 V2 (6233:81736) pattern: the page title sits in a blue
-            // HeroBanner card (radius 22) inset 20px, with white cards below it.
-            className="sticky top-0 z-30 mx-4 mt-1.5 rounded-[22px] bg-[linear-gradient(120deg,#1d4ed8_0%,#2563eb_52%,#3b82f6_100%)] text-white [--muted-foreground:rgb(255_255_255/80%)] [--surface-muted-foreground:rgb(255_255_255/80%)] sm:mx-5 [&_.text-muted-foreground]:text-white/80 [&_h1]:text-white [&_[data-slot=badge]]:bg-[var(--color-gray-12)] [&_[data-slot=button][data-variant=ghost]]:text-white [&_[data-slot=button][data-variant=ghost]:hover]:bg-white/15 [&_[data-slot=button][data-variant=ghost]:hover]:text-white"
+            // Figma 문서 올리기 V2 (6233:81736) layout, white: the title row is a
+            // card (same radius as the body cards) inset 20px, with the alert card below it.
+            className="sticky top-0 z-30 mx-4 mt-1.5 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] sm:mx-5"
           >
             <div className="flex min-h-14 flex-wrap items-center gap-2 px-3 py-2 sm:px-4 xl:px-6">
               <Button
