@@ -231,6 +231,11 @@
 [data-slot="sidebar-inset"] {
   background: var(--color-gray-10);
 }
+/* Settings keeps its lighter canvas; the Gray 9 shell reads too dark around forms. */
+[data-slot="sidebar-wrapper"]:has(.settings-navigation),
+[data-slot="sidebar-wrapper"]:has(.settings-navigation) [data-slot="sidebar-inset"] {
+  background: var(--color-gray-11);
+}
 
 [data-slot="sidebar-inset"] [data-slot="table-container"],
 .snap-product [data-slot="table-container"] {
