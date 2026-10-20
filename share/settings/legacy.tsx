@@ -3206,7 +3206,7 @@ export function SettingsWorkspace({
     return () => window.cancelAnimationFrame(frame)
   }, [effectiveSection, pendingSearchTarget])
   return (
-    <div className="flex h-full min-h-0 min-w-0 flex-1 bg-background">
+    <div className="flex h-full min-h-0 min-w-0 flex-1 bg-transparent">
       <Sidebar
         collapsible="icon"
         className="settings-navigation top-0 h-svh! md:z-50"

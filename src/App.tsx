@@ -5237,7 +5237,7 @@ function InboxScreen({
   }
 
   return (
-    <div data-guide-target={step === "deal" ? "connect" : undefined} tabIndex={-1} className="flex h-[calc(100svh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-background">
+    <div data-guide-target={step === "deal" ? "connect" : undefined} tabIndex={-1} className="flex h-[calc(100svh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-transparent">
       <Dialog open={Boolean(pendingCostDealId)} onOpenChange={open => { if (!open && pendingCostDealId) { onOpenDeal(pendingCostDealId); setPendingCostDealId(null) } }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader><DialogTitle>비용 등록</DialogTitle><DialogDescription>운임·통관 서류를 연결했습니다. 이 거래의 비용을 등록하시겠습니까?</DialogDescription></DialogHeader>
@@ -9541,7 +9541,7 @@ function CreateScreen({
 
   if (showInitialTemplateState) {
     return (
-      <div className="flex h-full min-h-0 flex-col overflow-auto bg-background">
+      <div className="flex h-full min-h-0 flex-col overflow-auto bg-transparent">
         <div className="mx-auto w-full max-w-ecoya-wide-xl shrink-0 px-5 pt-5 sm:px-6 sm:pt-6 xl:px-8">
           {relatedDeal ? <RelatedDealNotice deal={relatedDeal} /> : null}
           {pageHeading}
@@ -10586,7 +10586,7 @@ function DocumentCreateWorkbench({
         </div>
       ) : null}
 
-      <div className="flex min-h-0 flex-1 flex-col bg-background">
+      <div className="flex min-h-0 flex-1 flex-col bg-transparent">
         <div className="shrink-0 border-b bg-background px-5 py-3">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -16097,7 +16097,7 @@ function ResultScreen({
       onBlurCapture={() => {
         if (saveState === "unsaved") void persistDocumentDraft()
       }}
-      className="flex h-[calc(100svh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-background"
+      className="flex h-[calc(100svh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-transparent"
     >
       <div className="flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-3 py-2 sm:px-4">
         {onBackToList ? (
@@ -17073,7 +17073,7 @@ export function App() {
         routeParams={snapRoute?.params}
         routeSearch={snapRoute?.search}
         showNavigator={false}
-        className="min-h-svh bg-background"
+        className="min-h-svh bg-transparent"
       />
     )
   }
@@ -17089,7 +17089,7 @@ export function App() {
     <SidebarProvider
       open={sidebarOpen}
       onOpenChange={setSidebarOpen}
-      className="h-svh min-h-0 flex-col overflow-hidden bg-background text-foreground"
+      className="h-svh min-h-0 flex-col overflow-hidden bg-transparent text-foreground"
       style={
         {
           "--header-height": "var(--ui-shell-header-height)",

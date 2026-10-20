@@ -942,7 +942,7 @@ function SettingsHubContent({
   if (withdrawalResult) return <WithdrawalResultSurface result={withdrawalResult} />
 
   return (
-    <div className="flex h-full min-h-0 min-w-0 flex-1 bg-background">
+    <div className="flex h-full min-h-0 min-w-0 flex-1 bg-transparent">
       <Sidebar
         collapsible="icon"
         className="settings-navigation top-0 h-svh! bg-background md:z-50"
@@ -1043,7 +1043,7 @@ function SettingsHubContent({
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
-      <SidebarInset className="min-h-0 min-w-0 overflow-hidden bg-background md:pt-(--header-height)">
+      <SidebarInset className="min-h-0 min-w-0 overflow-hidden bg-transparent md:pt-(--header-height)">
         <div className="h-full min-h-0 overflow-y-auto">
           <div
             data-ui="settings-content"
