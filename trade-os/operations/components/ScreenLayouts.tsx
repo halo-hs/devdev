@@ -87,7 +87,7 @@ function DashboardLayout({ titleBar, children, className, ...props }: ScreenLayo
     <section className={cx(layoutRootClass, className)} data-layout="dashboard" {...props}>
       {titleBar}
       <div className={scrollableBodyClass}>
-        <ConstrainedBody maxWidth="none" className="reference-content-width" data-ui="dashboard-body">{children}</ConstrainedBody>
+        <ConstrainedBody maxWidth="none" className="reference-content-width px-5 pt-4" data-ui="dashboard-body">{children}</ConstrainedBody>
       </div>
     </section>
   );

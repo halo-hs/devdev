@@ -2351,7 +2351,7 @@ function CorrectiveActionsPage({ navigate }: { navigate: SnapNavigate }) {
 
 function OperationsLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="h-full overflow-y-auto bg-background">
+    <div className="h-full overflow-y-auto bg-transparent">
       <div className="mx-auto flex w-full max-w-ecoya-wide-xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
         {children}
       </div>

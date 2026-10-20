@@ -359,3 +359,9 @@
 [data-slot="scroll-area-scrollbar"] { border-width: 0; padding: 2px; }
 [data-slot="scroll-area-scrollbar"][data-orientation="vertical"] { width: 12px; }
 [data-slot="scroll-area-scrollbar"][data-orientation="horizontal"] { height: 12px; }
+
+/* Figma KPI cards are plain: no decorative pattern behind the summary cards. */
+.ui-summary-hero.ui-summary-hero > *::before { content: none; display: none; }
+
+/* Figma app shell: white Sidebar with a 1px Gray 8 (#dedfe3) edge against the Gray 9 canvas. */
+[data-slot="sidebar-container"] { border-right: 1px solid var(--color-gray-9); }

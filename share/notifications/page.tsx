@@ -119,7 +119,7 @@ export function NotificationsPrototype({
   return (
     <div
       data-slot="notifications-page"
-      className="h-full overflow-y-auto bg-background"
+      className="h-full overflow-y-auto bg-transparent"
     >
       <div className="w-full px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
         <header className="flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-blue-700 to-blue-500 px-6 py-5 text-white sm:flex-row sm:items-center sm:justify-between">

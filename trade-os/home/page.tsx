@@ -903,7 +903,7 @@ export function LegacyMemberHomePrototype({
   return (
     <div
       data-slot="business-page"
-      className="h-full overflow-y-auto bg-background"
+      className="h-full overflow-y-auto bg-transparent"
     >
       <div className="w-full p-4 sm:p-5 xl:p-6">
         <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_380px]">
@@ -1305,7 +1305,7 @@ export function LegacyOwnerHomePrototype({
   return (
     <div
       data-slot="business-page"
-      className="h-full overflow-y-auto bg-background"
+      className="h-full overflow-y-auto bg-transparent"
     >
       <div className="w-full p-4 sm:p-5 xl:p-6">
         <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_380px]">
@@ -1562,18 +1562,28 @@ export function HomePrototype({
   onNavigate,
   role = "owner",
   previewState = "default",
+  marketAccess = true,
+  insightAccess = true,
 }: {
   onNavigate: Navigate
-  role?: "owner" | "member"
+  role?: "owner" | "admin" | "member"
   previewState?: HomePreviewState
+  marketAccess?: boolean
+  insightAccess?: boolean
 }) {
-  if (previewState === "empty") {
-    return <PlatformHomeOverview onNavigate={onNavigate} role={role} empty />
-  }
-
-  if (previewState !== "default") {
+  if (previewState === "first-use") {
     return <EmptyHomePrototype onNavigate={onNavigate} state={previewState} />
   }
 
-  return <PlatformHomeOverview onNavigate={onNavigate} role={role} />
+  // Figma 홈 시안 · 권한별: owner(대표) / admin(관리자) / member(실무자) boards with
+  // 데이터 있음 · 데이터 없음 · 조회 실패 states and market/insight entitlements.
+  return (
+    <PlatformHomeOverview
+      onNavigate={onNavigate}
+      role={role}
+      state={previewState === "empty" || previewState === "error" ? previewState : "default"}
+      marketAccess={marketAccess}
+      insightAccess={insightAccess}
+    />
+  )
 }

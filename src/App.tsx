@@ -2674,7 +2674,7 @@ function TopBarUtilities({
                   }}
                 >
                   <SelectTrigger
-                    className="h-8 w-full bg-background"
+                    className="h-8 w-full bg-[var(--control-background)]"
                     aria-label="화면 권한 전환"
                   >
                     <SelectValue />
@@ -2713,7 +2713,7 @@ function TopBarUtilities({
                   }}
                 >
                   <SelectTrigger
-                    className="h-8 w-full bg-background"
+                    className="h-8 w-full bg-[var(--control-background)]"
                     aria-label="문서 승인 화면 상태 전환"
                   >
                     <SelectValue />
@@ -5213,7 +5213,7 @@ function InboxScreen({
   )
   if (!hasFile) {
     return (
-      <div className="h-full min-h-0 bg-background">
+      <div className="h-full min-h-0 bg-transparent">
         {guide?.state && !guide.state.anchor && (!guide.state.access || guide.state.access === "active") && <div className="flex flex-wrap items-center gap-3 border-b px-5 py-3 text-sm"><span className="text-muted-foreground">준비된 문서가 없다면 예시 발주서로 시작할 수 있습니다.</span><Button variant="outline" size="sm" onClick={async () => {
           const { jsPDF } = await import("jspdf")
           const pdf = new jsPDF()
@@ -5237,7 +5237,7 @@ function InboxScreen({
   }
 
   return (
-    <div data-guide-target={step === "deal" ? "connect" : undefined} tabIndex={-1} className="flex h-[calc(100svh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-background">
+    <div data-guide-target={step === "deal" ? "connect" : undefined} tabIndex={-1} className="flex h-[calc(100svh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-transparent">
       <Dialog open={Boolean(pendingCostDealId)} onOpenChange={open => { if (!open && pendingCostDealId) { onOpenDeal(pendingCostDealId); setPendingCostDealId(null) } }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader><DialogTitle>비용 등록</DialogTitle><DialogDescription>운임·통관 서류를 연결했습니다. 이 거래의 비용을 등록하시겠습니까?</DialogDescription></DialogHeader>
@@ -5697,7 +5697,7 @@ function BeforeUploadState({
   const [mailOpen, setMailOpen] = useState(false)
 
   return (
-    <div className="h-full min-h-0 overflow-y-auto bg-background">
+    <div className="h-full min-h-0 overflow-y-auto bg-transparent">
       <div className="mx-auto w-full max-w-ecoya-wide-xl px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
         <BusinessPageHero
           variant="ai"
@@ -6047,11 +6047,6 @@ function DocumentReviewWorkspace({
   const [requestedPage, setRequestedPage] = useState<{ page: number }>()
   const previewRef = useRef<HTMLElement>(null)
   useEffect(() => setRequestedPage(undefined), [document.name, document.documentType])
-  const showSourcePage = (page: number) => {
-    setRequestedPage({ page })
-    onMobilePaneChange("preview")
-    requestAnimationFrame(() => previewRef.current?.focus())
-  }
 
   const fieldsPanel = (
     <section
@@ -6111,8 +6106,6 @@ function DocumentReviewWorkspace({
                 documentType={document.documentType}
                 onAutoSave={onAutoSave}
                 reviewedFields={document.reviewedFields}
-                sourcePages={document.sourcePages}
-                onSourcePage={showSourcePage}
                 onReviewedFieldChange={onReviewedFieldChange}
               />
               <UploadFieldHistory />
@@ -6715,15 +6708,11 @@ function OcrFieldReviewList({
   documentType,
   onAutoSave,
   reviewedFields,
-  sourcePages,
-  onSourcePage,
   onReviewedFieldChange,
 }: {
   mode: "compare" | "deal"
   documentType: RecentDocument["documentType"]
   onAutoSave: (phase?: "pending" | "commit") => void
-  sourcePages?: Record<string, number>
-  onSourcePage: (page: number) => void
   reviewedFields?: Record<string, ReviewedField>
   onReviewedFieldChange: (key: string, patch: Partial<ReviewedField>) => void
 }) {
@@ -6755,11 +6744,6 @@ function OcrFieldReviewList({
               htmlFor={`upload-field-${field.key}`}
               label={field.label}
               badge={<ToneBadge tone={field.tone}>{field.status}</ToneBadge>}
-              sourceAction={sourcePages?.[field.key] ? (
-                <Button variant="ghost" size="sm" onClick={() => onSourcePage(sourcePages[field.key])}>
-                  원본 보기 · {sourcePages[field.key]}쪽
-                </Button>
-              ) : undefined}
               message={field.userEdited ? field.comment : `${field.confidence} · ${field.comment}`}
               messageId={`upload-field-${field.key}-message`}
               tone={danger ? "danger" : warning ? "warning" : "neutral"}
@@ -7026,7 +7010,7 @@ function EditableUnitInput({
     <Input
       value={value}
       aria-label={`${label} 단위 입력`}
-      className="h-10 w-28 shrink-0 bg-background text-sm font-medium"
+      className="h-10 w-28 shrink-0 bg-[var(--control-background)] text-sm font-medium"
       placeholder="단위"
       onChange={(event) => {
         const nextUnit = event.target.value
@@ -7076,7 +7060,7 @@ function SavingField({
         aria-describedby={describedBy}
         aria-invalid={danger || emphasized || undefined}
         className={cn(
-          "h-10 min-w-0 flex-1 bg-background text-sm font-semibold",
+          "h-10 min-w-0 flex-1 bg-[var(--control-background)] text-sm font-semibold",
           danger && "border-destructive/50 ring-1 ring-destructive/20",
           emphasized && !danger && "border-warning/50 ring-1 ring-warning/20"
         )}
@@ -9541,7 +9525,7 @@ function CreateScreen({
 
   if (showInitialTemplateState) {
     return (
-      <div className="flex h-full min-h-0 flex-col overflow-auto bg-background">
+      <div className="flex h-full min-h-0 flex-col overflow-auto bg-transparent">
         <div className="mx-auto w-full max-w-ecoya-wide-xl shrink-0 px-5 pt-5 sm:px-6 sm:pt-6 xl:px-8">
           {relatedDeal ? <RelatedDealNotice deal={relatedDeal} /> : null}
           {pageHeading}
@@ -9554,7 +9538,7 @@ function CreateScreen({
   }
 
   return (
-    <div className="h-full min-h-0 overflow-auto bg-background">
+    <div className="h-full min-h-0 overflow-auto bg-transparent">
       <section className="mx-auto w-full max-w-ecoya-wide-xl px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
         {relatedDeal ? <RelatedDealNotice deal={relatedDeal} compact /> : null}
         {pageHeading}
@@ -10586,7 +10570,7 @@ function DocumentCreateWorkbench({
         </div>
       ) : null}
 
-      <div className="flex min-h-0 flex-1 flex-col bg-background">
+      <div className="flex min-h-0 flex-1 flex-col bg-transparent">
         <div className="shrink-0 border-b bg-background px-5 py-3">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -11097,11 +11081,11 @@ function ShareDeliveryPanel({
                     <div className="mt-3 grid grid-cols-2 gap-3">
                       <label className="grid gap-1 text-xs">
                         <span>만료일</span>
-                        <Input type="date" className="h-8 bg-background" value={expires} onChange={(event) => setExpires(event.target.value)} />
+                        <Input type="date" className="h-8 bg-[var(--control-background)]" value={expires} onChange={(event) => setExpires(event.target.value)} />
                       </label>
                       <label className="grid gap-1 text-xs">
                         <span>최대 열람 횟수</span>
-                        <Input type="number" min={1} step={1} className="h-8 bg-background" value={maxOpens} onChange={(event) => setMaxOpens(event.target.value)} />
+                        <Input type="number" min={1} step={1} className="h-8 bg-[var(--control-background)]" value={maxOpens} onChange={(event) => setMaxOpens(event.target.value)} />
                       </label>
                     </div>
                   </details>
@@ -11120,13 +11104,13 @@ function ShareDeliveryPanel({
               <div className="pt-3">
                 <div className="grid gap-2">
                 <FormField label="받는 사람" htmlFor="share-email-recipient">
-                  <Input id="share-email-recipient" type="email" className="h-10 bg-background" value={recipient} onChange={(event) => setRecipient(event.target.value)} />
+                  <Input id="share-email-recipient" type="email" className="h-10 bg-[var(--control-background)]" value={recipient} onChange={(event) => setRecipient(event.target.value)} />
                 </FormField>
                 <FormField label="제목" htmlFor="share-email-subject">
-                  <Input id="share-email-subject" className="h-10 bg-background" value={subject} onChange={(event) => setSubject(event.target.value)} />
+                  <Input id="share-email-subject" className="h-10 bg-[var(--control-background)]" value={subject} onChange={(event) => setSubject(event.target.value)} />
                 </FormField>
                 <FormField label="이메일 내용" htmlFor="share-email-body">
-                  <Textarea id="share-email-body" aria-label="이메일 내용" className="min-h-28 resize-none bg-background text-xs leading-5" value={textBody} onChange={(event) => setTextBody(event.target.value)} />
+                  <Textarea id="share-email-body" aria-label="이메일 내용" className="min-h-28 resize-none bg-[var(--control-background)] text-xs leading-5" value={textBody} onChange={(event) => setTextBody(event.target.value)} />
                 </FormField>
                 </div>
                 <div className="mt-3 rounded-md border bg-background p-3 text-xs">
@@ -12732,7 +12716,7 @@ function DocumentSourceSetupStep({
                 <Textarea
                   id="document-source-prompt"
                   aria-label="만들 내용을 자연어로 입력"
-                  className="mt-3 min-h-36 resize-none bg-background text-sm leading-6"
+                  className="mt-3 min-h-36 resize-none bg-[var(--control-background)] text-sm leading-6"
                   value={naturalLanguagePrompt}
                   onChange={(event) =>
                     onNaturalLanguagePromptChange(event.target.value)
@@ -12841,7 +12825,7 @@ function DocumentSourceSetupStep({
                   <div className="relative mt-3">
                     <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      className="h-8 bg-background pl-8 text-xs"
+                      className="h-8 bg-[var(--control-background)] pl-8 text-xs"
                       value={dealQuery}
                       onChange={(event) => setDealQuery(event.target.value)}
                       placeholder="거래번호, 거래명, 거래처 검색"
@@ -16097,7 +16081,7 @@ function ResultScreen({
       onBlurCapture={() => {
         if (saveState === "unsaved") void persistDocumentDraft()
       }}
-      className="flex h-[calc(100svh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-background"
+      className="flex h-[calc(100svh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-transparent"
     >
       <div className="flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-3 py-2 sm:px-4">
         {onBackToList ? (
@@ -16513,6 +16497,12 @@ export function App() {
     const role = new URLSearchParams(appLocation.search).get("role")
     return role === "admin" || role === "member" ? role : "owner"
   })
+  // Market (시장정보) and insight (인사이트) entitlements; `?access=basic` previews
+  // the account without either add-on, as in the Figma 권한 없음 home variants.
+  const homeEntitlements = (() => {
+    const access = new URLSearchParams(appLocation.search).get("access")
+    return { market: access !== "basic", insight: access !== "basic" }
+  })()
   const homePreviewState = (() => {
     const state = new URLSearchParams(appLocation.search).get("state")
     return state === "empty" || state === "first-use" || state === "error"
@@ -17073,7 +17063,7 @@ export function App() {
         routeParams={snapRoute?.params}
         routeSearch={snapRoute?.search}
         showNavigator={false}
-        className="min-h-svh bg-background"
+        className="min-h-svh bg-transparent"
       />
     )
   }
@@ -17089,7 +17079,7 @@ export function App() {
     <SidebarProvider
       open={sidebarOpen}
       onOpenChange={setSidebarOpen}
-      className="h-svh min-h-0 flex-col overflow-hidden bg-background text-foreground"
+      className="h-svh min-h-0 flex-col overflow-hidden bg-transparent text-foreground"
       style={
         {
           "--header-height": "var(--ui-shell-header-height)",
@@ -17182,8 +17172,10 @@ export function App() {
                   ) : screen === "home" ? (
                     <V2HomePrototype
                       onNavigate={navigateTo}
-                      role={erpHomeRole === "member" ? "member" : "owner"}
+                      role={erpHomeRole}
                       previewState={homePreviewState}
+                      marketAccess={homeEntitlements.market}
+                      insightAccess={homeEntitlements.insight}
                     />
                   ) : screen === "inbox" ? (
                     <InboxScreen

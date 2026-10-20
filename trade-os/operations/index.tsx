@@ -54,7 +54,7 @@ function Body({ screen }: { screen: ReferenceOperationsScreen }) {
       : messages.erpSalesPerformance.cockpit.subtitleMember
     : "subtitle" in copy ? copy.subtitle : undefined
   return <div className="reference-page-scroll">
-    <div className="reference-content-width w-full space-y-6 px-7 py-6">
+    <div className="reference-content-width w-full space-y-4 px-5 pt-1.5 pb-10">
       {screen === "reports" ? <ReportsConnected copy={messages.erpReports.reports} role={identity.role}
           renderHeader={(controls, summary) => <PageHeader variant="hero" title={copy.title} description={description}
             meta={<span className="rounded-full bg-ecoya-blue-9 px-2 py-0.5 text-body-13 font-bold text-ecoya-indigo">{messages.erpReports.reports.proBadge}</span>}

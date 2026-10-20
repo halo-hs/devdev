@@ -667,7 +667,7 @@ export function DealsScreen({
   }
 
   return (
-    <div className="field-scrollbar h-full overflow-y-auto bg-background">
+    <div className="field-scrollbar h-full overflow-y-auto bg-transparent">
       <div className="flex w-full flex-col gap-5 p-4 sm:p-6">
         <BusinessPageHero
           title="거래"
@@ -815,7 +815,7 @@ export function DealsScreen({
                             <Input
                               type="date"
                               aria-label="ETA 기간 시작일"
-                              className="min-w-0 bg-background text-foreground sm:w-36"
+                              className="min-w-0 bg-[var(--control-background)] text-foreground sm:w-36"
                               value={dateStart}
                               max={dateEnd || undefined}
                               onChange={(event) => {
@@ -827,7 +827,7 @@ export function DealsScreen({
                             <Input
                               type="date"
                               aria-label="ETA 기간 종료일"
-                              className="min-w-0 bg-background text-foreground sm:w-36"
+                              className="min-w-0 bg-[var(--control-background)] text-foreground sm:w-36"
                               value={dateEnd}
                               min={dateStart || undefined}
                               onChange={(event) => {
@@ -2714,7 +2714,7 @@ export function LegacyDealDetailScreen({
   }
 
   return (
-    <div className="field-scrollbar h-full overflow-y-auto bg-background">
+    <div className="field-scrollbar h-full overflow-y-auto bg-transparent">
       <div className="mx-auto w-full max-w-[1540px] px-6 py-5">
         <Button variant="ghost" size="sm" onClick={onBack}>
           <ArrowLeft data-icon="inline-start" />

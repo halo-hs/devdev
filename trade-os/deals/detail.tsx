@@ -6287,7 +6287,7 @@ export function DealDetailScreen({
     <div
       ref={scrollViewportRef}
       data-deal-scroll-viewport
-      className="field-scrollbar relative h-full [scrollbar-gutter:stable] overflow-y-auto bg-background"
+      className="field-scrollbar relative h-full [scrollbar-gutter:stable] overflow-y-auto bg-transparent"
     >
       <DealHandoffProvider
         key={dealId}

@@ -45,7 +45,7 @@ export function YGrid({
               x={CHART_PAD.l - 6}
               y={y + 4}
               textAnchor="end"
-              fontSize="var(--text-body-10)"
+              fontSize="12"
               fill={CHART_COLORS.axisText}
             >
               {format(tv)}
@@ -90,7 +90,7 @@ export function XLabels({
             x={x}
             y={height - 8}
             textAnchor="middle"
-            fontSize="var(--text-body-10)"
+            fontSize="12"
             fill={CHART_COLORS.axisText}
           >
             {label}

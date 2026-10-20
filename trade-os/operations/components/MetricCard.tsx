@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 
+import { KpiCard } from "@shared/components/kpi-card";
 import { cx } from "@trade-os/operations/components/ui/utils";
 
 type MetricTone = "neutral" | "info" | "success" | "warning" | "danger" | "indigo";
@@ -22,6 +23,8 @@ const toneTextClass: Record<MetricTone, string> = {
   indigo: "text-ecoya-indigo",
 };
 
+// Renders the shared Figma KPI card so every operations hero summary matches
+// 결산리포트 v6 (label 14 SemiBold, separator, value 26 Bold, detail 12).
 function MetricCard({
   label,
   value,
@@ -33,35 +36,27 @@ function MetricCard({
   ...props
 }: MetricCardProps) {
   return (
-    <article
-      className={cx(
-        "min-w-0 rounded-lg border border-ecoya-gray-10 bg-ecoya-gray-12 p-0 shadow-section",
-        className,
-      )}
+    <KpiCard
+      className={cx("min-w-0 bg-[var(--color-gray-12)]", className)}
       data-ui="metric-card"
-      {...props}
+      label={
+        icon ? (
+          <span className="flex items-center gap-2">
+            <span className={cx("inline-flex flex-none", toneTextClass[tone])} data-ui="metric-card-icon">
+              {icon}
+            </span>
+            {label}
+          </span>
+        ) : (
+          label
+        )
+      }
+      value={value}
+      valueClassName={valueToned ? toneTextClass[tone] : undefined}
+      {...(props as Omit<ComponentProps<typeof KpiCard>, "label" | "value">)}
     >
-      <div className="flex items-center gap-4 p-5">
-        {icon && (
-          <div
-            className={cx(
-              "inline-flex size-12 flex-none items-center justify-center rounded-full bg-ecoya-gray-11",
-              toneTextClass[tone],
-            )}
-            data-ui="metric-card-icon"
-          >
-            {icon}
-          </div>
-        )}
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <div className="text-label-14 font-medium text-ecoya-gray-4">{label}</div>
-          <div className={cx("text-display-28 font-bold tabular-nums", valueToned ? toneTextClass[tone] : "text-ecoya-gray-2")}>{value}</div>
-          {meta && (
-            <div className={cx("text-body-13 font-regular", toneTextClass[tone])}>{meta}</div>
-          )}
-        </div>
-      </div>
-    </article>
+      {meta ? <span className={toneTextClass[tone]}>{meta}</span> : null}
+    </KpiCard>
   );
 }
 

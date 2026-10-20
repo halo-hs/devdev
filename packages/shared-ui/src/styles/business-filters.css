@@ -348,3 +348,55 @@
   font-size: var(--filter-font-size);
   line-height: var(--leading-body-9);
 }
+
+/* Hero filter tabs match the 40px hero Select: 40px pill track, 32px triggers,
+   15/22 text, selected white with Blue 4 (Figma TabsTrigger 160:74 styling). */
+:is(.business-hero-controls, .reference-hero-filters) .business-filter-segments {
+  gap: 4px;
+  padding: 4px;
+  border: 0;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+:is(.business-hero-controls, .reference-hero-filters) .business-filter-segments > button {
+  flex: none;
+  min-height: 32px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 9999px;
+  color: white;
+  font-size: var(--text-body-8);
+  line-height: 22px;
+  font-weight: 500;
+}
+:is(.business-hero-controls, .reference-hero-filters) .business-filter-segments > button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+:is(.business-hero-controls, .reference-hero-filters) .business-filter-segments > button[aria-pressed="true"] {
+  background: white;
+  box-shadow: 0 1.739px 1.739px rgb(0 0 0 / 5%);
+  color: var(--color-primary-4);
+  font-weight: 700;
+}
+:is(.business-hero-controls, .reference-hero-filters) .business-filter-bar .business-filter-label {
+  color: white;
+  font-size: var(--text-body-10);
+  line-height: var(--leading-body-10);
+  font-weight: 600;
+}
+
+/* Operations hero Select (결산리포트 v6): 40px pill, 20/16 inset, Medium 15/24. */
+.reference-hero-filters .business-filter-bar[data-layout] [data-ui="select-trigger"] {
+  padding-inline: 20px 16px;
+  border-color: transparent;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: var(--text-body-8);
+  line-height: 24px;
+  font-weight: 500;
+}
+
+/* Hero banners use body-md (15/22) for controls and buttons; labels stay 13 SemiBold. */
+:is(.business-hero-controls, .reference-hero-filters) .business-filter-bar {
+  --filter-font-size: var(--text-body-8);
+}

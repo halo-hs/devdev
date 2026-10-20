@@ -186,7 +186,7 @@ function AppPage({
     )
   }
   return (
-    <div className="min-h-full w-full bg-background text-foreground">
+    <div className="min-h-full w-full bg-transparent text-foreground">
       <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur">
         <div className="flex h-14 items-center justify-between gap-3 px-4 sm:px-6 xl:px-8">
           <div className="flex min-w-0 items-center gap-3">
@@ -221,7 +221,7 @@ function AppPage({
 
 function PublicFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-full bg-background text-foreground">
+    <div className="min-h-full bg-transparent text-foreground">
       <header className="border-b">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2 font-semibold">

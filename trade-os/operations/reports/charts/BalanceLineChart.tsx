@@ -47,8 +47,8 @@ export function BalanceLineChart({
   const yAt = (v: number) => CHART_PAD.t + ih - (maxV > 0 ? (v / maxV) * ih : 0);
 
   const series: Array<{ id: string; values: number[]; color: string }> = [
-    { id: "receivable", values: points.map((p) => p.receivable), color: CHART_COLORS.blue },
-    { id: "payable", values: points.map((p) => p.payable), color: CHART_COLORS.orange },
+    { id: "receivable", values: points.map((p) => p.receivable), color: CHART_COLORS.receivableLine },
+    { id: "payable", values: points.map((p) => p.payable), color: CHART_COLORS.payableLine },
   ];
 
   const handleMove = (event: React.MouseEvent<SVGRectElement>) => {

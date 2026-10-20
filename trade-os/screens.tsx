@@ -211,7 +211,7 @@ function Page({
     <div
       data-slot="business-page"
       data-analytics-layout={analyticsLayout || undefined}
-      className="h-full overflow-y-auto bg-background"
+      className="h-full overflow-y-auto bg-transparent"
     >
       <div className="w-full px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
         <BusinessPageHero
@@ -1792,7 +1792,7 @@ export function AskPrototype({
               <Input
                 value={historyQuery}
                 onChange={(event) => setHistoryQuery(event.target.value)}
-                className="h-9 bg-background pl-9 text-sm"
+                className="h-9 bg-[var(--control-background)] pl-9 text-sm"
                 placeholder="대화 검색"
                 aria-label="대화 검색"
               />

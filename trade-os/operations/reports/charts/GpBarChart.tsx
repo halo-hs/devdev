@@ -75,7 +75,7 @@ function GpGrid({
                 x={CHART_PAD.l - 6}
                 y={y + 4}
                 textAnchor="end"
-                fontSize="var(--text-body-10)"
+                fontSize="12"
                 fill={CHART_COLORS.axisText}
               >
                 {format(tick)}
@@ -166,7 +166,7 @@ export function GpBarChart({
             <g key={p.key} data-gp-bar={negative ? "negative" : "positive"}>
               <path
                 d={negative ? barPathBottom(x, y, bw, h, 4) : barPathTop(x, y, bw, h, 4)}
-                fill={negative ? CHART_COLORS.red : CHART_COLORS.blue}
+                fill={negative ? CHART_COLORS.gpNegative : CHART_COLORS.gpPositive}
               />
               {negative ? (
                 <text
