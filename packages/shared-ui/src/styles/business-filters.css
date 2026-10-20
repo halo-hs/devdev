@@ -349,8 +349,8 @@
   line-height: var(--leading-body-9);
 }
 
-/* Hero filters use Figma Tabs size=sm (TabsTrigger 160:74 · 결산리포트 v6):
-   32px pill track, 24px triggers, 13/16 text, selected white with Blue 4. */
+/* Hero filter tabs match the 40px hero Select: 40px pill track, 32px triggers,
+   15/22 text, selected white with Blue 4 (Figma TabsTrigger 160:74 styling). */
 :is(.business-hero-controls, .reference-hero-filters) .business-filter-segments {
   gap: 4px;
   padding: 4px;
@@ -360,13 +360,13 @@
 }
 :is(.business-hero-controls, .reference-hero-filters) .business-filter-segments > button {
   flex: none;
-  min-height: 24px;
-  height: 24px;
-  padding: 0 12px;
+  min-height: 32px;
+  height: 32px;
+  padding: 0 14px;
   border-radius: 9999px;
   color: white;
-  font-size: var(--text-body-10);
-  line-height: 16px;
+  font-size: var(--text-body-8);
+  line-height: 22px;
   font-weight: 500;
 }
 :is(.business-hero-controls, .reference-hero-filters) .business-filter-segments > button:hover {
