@@ -16,7 +16,9 @@
   --color-system-red1: var(--color-red-1);
 
   /* Other primary and neutral primitives already match the restored file. */
-  --background: var(--color-gray-11);
+  /* The shell canvas is painted by the sidebar wrapper/inset; bg-background is the
+     white surface used by cards and panels inside it. */
+  --background: var(--color-gray-12);
   --foreground: var(--color-gray-2);
   --card: var(--color-gray-12);
   --card-foreground: var(--color-gray-2);
