@@ -6047,11 +6047,6 @@ function DocumentReviewWorkspace({
   const [requestedPage, setRequestedPage] = useState<{ page: number }>()
   const previewRef = useRef<HTMLElement>(null)
   useEffect(() => setRequestedPage(undefined), [document.name, document.documentType])
-  const showSourcePage = (page: number) => {
-    setRequestedPage({ page })
-    onMobilePaneChange("preview")
-    requestAnimationFrame(() => previewRef.current?.focus())
-  }
 
   const fieldsPanel = (
     <section
@@ -6111,8 +6106,6 @@ function DocumentReviewWorkspace({
                 documentType={document.documentType}
                 onAutoSave={onAutoSave}
                 reviewedFields={document.reviewedFields}
-                sourcePages={document.sourcePages}
-                onSourcePage={showSourcePage}
                 onReviewedFieldChange={onReviewedFieldChange}
               />
               <UploadFieldHistory />
@@ -6715,15 +6708,11 @@ function OcrFieldReviewList({
   documentType,
   onAutoSave,
   reviewedFields,
-  sourcePages,
-  onSourcePage,
   onReviewedFieldChange,
 }: {
   mode: "compare" | "deal"
   documentType: RecentDocument["documentType"]
   onAutoSave: (phase?: "pending" | "commit") => void
-  sourcePages?: Record<string, number>
-  onSourcePage: (page: number) => void
   reviewedFields?: Record<string, ReviewedField>
   onReviewedFieldChange: (key: string, patch: Partial<ReviewedField>) => void
 }) {
@@ -6755,11 +6744,6 @@ function OcrFieldReviewList({
               htmlFor={`upload-field-${field.key}`}
               label={field.label}
               badge={<ToneBadge tone={field.tone}>{field.status}</ToneBadge>}
-              sourceAction={sourcePages?.[field.key] ? (
-                <Button variant="ghost" size="sm" onClick={() => onSourcePage(sourcePages[field.key])}>
-                  원본 보기 · {sourcePages[field.key]}쪽
-                </Button>
-              ) : undefined}
               message={field.userEdited ? field.comment : `${field.confidence} · ${field.comment}`}
               messageId={`upload-field-${field.key}-message`}
               tone={danger ? "danger" : warning ? "warning" : "neutral"}
