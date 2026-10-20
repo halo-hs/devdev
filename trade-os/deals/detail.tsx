@@ -1888,7 +1888,8 @@ function DealCompactAlerts({
     {
       key: "missing",
       label: "검토 필요",
-      tone: "border-destructive/25 bg-destructive/5 text-destructive",
+      // Solid tints stay legible on the blue sticky hero.
+      tone: "border-destructive/25 bg-[var(--color-red-8)] text-destructive",
       items: missingFields.map((field) => ({
         id: field.key,
         title: field.label,
@@ -1898,7 +1899,7 @@ function DealCompactAlerts({
     {
       key: "confirmation",
       label: "확인 필요",
-      tone: "border-warning/30 bg-warning/10 text-warning-foreground",
+      tone: "border-warning/30 bg-[var(--color-orange-6)] text-warning-foreground",
       items: notices.map((notice) => ({
         id: notice.id,
         title: notice.title,
@@ -2227,7 +2228,8 @@ function DealDocumentPanels({
         data-common-deal-information
         className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] space-y-4 outline-none"
       >
-        <div className="rounded-lg border border-[var(--surface-border)] px-4 py-3">
+        {/* Same no-header Card surface as 거래 경제: white, radius 12, section shadow. */}
+        <Card className="gap-0 px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold">딜 요약 브리프</h2>
             {aiQuestion}
@@ -2238,7 +2240,7 @@ function DealDocumentPanels({
               ? `다음 작업: ${plan.nextAction}`
               : "거래 업무가 완료되었습니다."}
           </p>
-        </div>
+        </Card>
       </section>
       {plan.order.map((work) => (
         <DealWorkBlock
@@ -2257,7 +2259,9 @@ function DealDocumentPanels({
               aria-hidden={documentOpen || undefined}
               aria-label="거래 상세 정보"
               tabIndex={-1}
-              className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
+              // Title, document tabs and the detail editor share one card; the
+              // editor drops its own card chrome so cards are not nested.
+              className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 pt-5 pb-1 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] outline-none"
             >
               <div className="mb-3 flex items-center justify-between gap-3">
                 <h2 className="text-base font-semibold">거래 상세 정보</h2>
@@ -2281,7 +2285,7 @@ function DealDocumentPanels({
                   style={documentOpen ? { height: inlineHeight } : undefined}
                 >
                   {!documentOpen && (
-                    <PdfPanelWorkspaceCard>{primary}</PdfPanelWorkspaceCard>
+                    <PdfPanelWorkspaceCard className="-mx-5 rounded-none bg-transparent shadow-none ring-0">{primary}</PdfPanelWorkspaceCard>
                   )}
                 </div>
               )}
@@ -6305,7 +6309,9 @@ export function DealDetailScreen({
           <div
             ref={stickyHeaderRef}
             data-deal-sticky-header
-            className="sticky top-0 z-30 bg-[var(--surface-background)] shadow-[0_1px_0_var(--surface-border)]"
+            // Figma 문서 올리기 V2 (6233:81736) layout, white: the title row is a
+            // card (same radius as the body cards) inset 20px, with the alert card below it.
+            className="sticky top-0 z-30 mx-4 mt-1.5 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] sm:mx-5"
           >
             <div className="flex min-h-14 flex-wrap items-center gap-2 px-3 py-2 sm:px-4 xl:px-6">
               <Button
@@ -6758,7 +6764,7 @@ export function DealDetailScreen({
             ref={alertsRef}
             aria-label="거래 중요 알림"
             data-deal-summary
-            className="bg-background px-4 py-3 sm:px-6 xl:px-8"
+            className="mx-4 mt-4 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-4 py-3 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] empty:hidden sm:mx-5 sm:px-5"
           >
             <DealAssistBar
               notices={dealReviewNotices(riskDismissed)}
@@ -6767,7 +6773,7 @@ export function DealDetailScreen({
               onOpenVerification={openReviewNotice}
             />
           </section>
-          <div className="w-full px-4 py-4 sm:px-6 xl:px-8">
+          <div className="w-full px-4 py-4 sm:px-5">
             {!documentOpen && <div className={refresh.failure ? "mb-4" : ""}>
               <PostWriteRefreshNotice failure={refresh.failure} busy={refresh.busy} onRetry={() => void refresh.refresh()} />
             </div>}
@@ -6894,7 +6900,7 @@ export function DealDetailScreen({
                 aria-label="거래 현황"
                 data-deal-information-aside
                 ref={informationRailRef}
-                className="min-w-0 rounded-xl border border-[var(--surface-border)] bg-background shadow-sm xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
+                className="min-w-0 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
               >
                 <div className="divide-y divide-[var(--surface-border)]">
                   <section
