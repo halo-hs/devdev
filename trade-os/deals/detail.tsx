@@ -2227,7 +2227,8 @@ function DealDocumentPanels({
         data-common-deal-information
         className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] space-y-4 outline-none"
       >
-        <div className="rounded-lg border border-[var(--surface-border)] px-4 py-3">
+        {/* Same no-header Card surface as 거래 경제: white, radius 12, section shadow. */}
+        <Card className="gap-0 px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold">딜 요약 브리프</h2>
             {aiQuestion}
@@ -2238,7 +2239,7 @@ function DealDocumentPanels({
               ? `다음 작업: ${plan.nextAction}`
               : "거래 업무가 완료되었습니다."}
           </p>
-        </div>
+        </Card>
       </section>
       {plan.order.map((work) => (
         <DealWorkBlock
@@ -6894,7 +6895,7 @@ export function DealDetailScreen({
                 aria-label="거래 현황"
                 data-deal-information-aside
                 ref={informationRailRef}
-                className="min-w-0 rounded-xl border border-[var(--surface-border)] bg-background shadow-sm xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
+                className="min-w-0 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
               >
                 <div className="divide-y divide-[var(--surface-border)]">
                   <section
