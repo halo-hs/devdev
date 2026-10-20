@@ -942,7 +942,6 @@ function TodayModule({
   onDragLeave: (event: DragEvent<HTMLElement>) => void
   onDrop: (event: DragEvent<HTMLElement>) => void
 }) {
-  const Icon = module.icon
   const moduleRef = useRef<HTMLElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const [measuredSize, setMeasuredSize] = useState<ModuleSize>(
@@ -1001,28 +1000,27 @@ function TodayModule({
         draggable
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
-        className="flex h-11 shrink-0 cursor-grab items-center gap-2 border-b border-[var(--surface-border)] px-3 select-none active:cursor-grabbing"
+        className="flex min-h-14 shrink-0 cursor-grab items-center gap-1 border-b border-[var(--color-gray-10)] py-3 pr-4 pl-2 select-none active:cursor-grabbing"
       >
         <span
-          className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+          className="flex h-[26px] w-8 shrink-0 items-center justify-center rounded-[var(--r-sm)] text-[var(--color-gray-5)] hover:bg-[var(--color-gray-11)]"
           aria-label={`${module.title} 모듈 이동`}
           title="끌어서 위치 변경"
         >
-          <GripVertical className="size-4" />
+          <GripVertical className="size-[18px]" />
         </span>
-        <Icon className="size-4 shrink-0 text-primary" />
-        <h2 className="min-w-0 truncate text-sm font-semibold">
+        <h2 className="min-w-0 truncate text-[length:var(--text-compat-body-5-5)] leading-[var(--leading-header-5)] font-bold">
           {module.title}
         </h2>
-        <span className="shrink-0 text-[11px] whitespace-nowrap text-muted-foreground">
+        <span className="shrink-0 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] whitespace-nowrap text-muted-foreground">
           {contentState === "empty" ? "0건" : module.count}
         </span>
         {module.id !== "settlement" && (
           <Button
             type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="pointer-events-none ml-auto shrink-0 opacity-0 transition-opacity group-focus-within/module:pointer-events-auto group-focus-within/module:opacity-100 group-hover/module:pointer-events-auto group-hover/module:opacity-100 motion-reduce:transition-none [@media(hover:none)]:pointer-events-auto [@media(hover:none)]:opacity-100"
+            variant="outline"
+            size="icon-xs"
+            className="pointer-events-none ml-auto size-6 shrink-0 rounded-[var(--r-sm)] border-[var(--color-gray-9)] text-[var(--color-gray-4)] shadow-[0_1px_1px_rgb(5_29_57/10%)] opacity-0 transition-opacity group-focus-within/module:pointer-events-auto group-focus-within/module:opacity-100 group-hover/module:pointer-events-auto group-hover/module:opacity-100 motion-reduce:transition-none [@media(hover:none)]:pointer-events-auto [@media(hover:none)]:opacity-100"
             aria-label={`${module.title} 모듈 닫기`}
             title="모듈 닫기"
             draggable={false}
@@ -1033,7 +1031,7 @@ function TodayModule({
             }}
             onClick={onClose}
           >
-            <X className="size-4" aria-hidden="true" />
+            <X className="size-[15px]" aria-hidden="true" />
           </Button>
         )}
       </header>
@@ -1057,7 +1055,7 @@ function TodaySplitHandle({ label }: { label: string }) {
   return (
     <ResizableHandle
       aria-label={label}
-      className="z-20 shrink-0 bg-transparent after:bg-[var(--surface-border)] hover:bg-primary/5 aria-[orientation=horizontal]:h-2 aria-[orientation=horizontal]:after:h-px aria-[orientation=vertical]:w-2 aria-[orientation=vertical]:after:w-px data-[resize-handle-state=drag]:bg-primary/10"
+      className="z-20 shrink-0 bg-transparent after:bg-[var(--color-gray-10)] hover:bg-primary/5 aria-[orientation=horizontal]:h-2 aria-[orientation=horizontal]:after:h-px aria-[orientation=vertical]:w-2 aria-[orientation=vertical]:after:w-px data-[resize-handle-state=drag]:bg-primary/10"
     />
   )
 }
@@ -1567,19 +1565,19 @@ export function TodayModularWorkspace({
     >
       <header
         ref={workspaceHeaderRef}
-        className="sticky top-0 z-20 mb-2 flex min-h-12 shrink-0 flex-wrap items-center gap-2 rounded-[var(--r-lg)] border border-[var(--surface-border)] bg-[var(--surface-background)] px-3 py-2 shadow-[var(--shadow-section)]"
+        className="sticky top-0 z-20 mb-2 flex min-h-14 shrink-0 flex-wrap items-center gap-2 rounded-[var(--r-lg)] bg-[var(--surface-background)] py-2 pr-2 pl-5 shadow-[var(--shadow-modal)]"
       >
-        <div className="flex min-w-0 items-center gap-2">
-          <LayoutDashboard className="size-4 shrink-0 text-primary" />
+        <div className="flex min-w-0 items-center gap-[11px]">
+          <LayoutDashboard className="size-[18px] shrink-0 text-[var(--color-gray-2)]" />
           <h1
             id="today-workspace-title"
-            className="truncate text-sm font-semibold"
+            className="truncate text-[length:var(--text-compat-body-5-5)] leading-[var(--leading-header-5)] font-bold"
           >
             오늘 업무판
           </h1>
-          <Badge variant="secondary" className="font-normal">
-            {activeModules.length}개 모듈
-          </Badge>
+          <span className="shrink-0 text-[length:var(--text-body-6)] leading-[var(--leading-body-6)] text-muted-foreground">
+            모듈 {activeModules.length}/{definitions.length}
+          </span>
           <Badge
             variant="outline"
             className="hidden font-normal sm:inline-flex"
@@ -1598,9 +1596,10 @@ export function TodayModularWorkspace({
             <DropdownMenuTrigger asChild>
               <Button
                 type="button"
-                variant="ghost"
-                size="sm"
+                variant="outline"
+                size="lg"
                 aria-label="모듈 편집"
+                className="gap-1.5 border-[var(--color-gray-10)] px-4 [&_svg]:size-5"
               >
                 <MoreVertical /> 모듈 편집
               </Button>

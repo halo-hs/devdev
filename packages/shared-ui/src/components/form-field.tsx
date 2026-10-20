@@ -1,9 +1,9 @@
 import { type ComponentProps, type ReactNode } from "react"
-import { AlertCircle, Info } from "lucide-react"
+import { AlertCircle, CheckCircle2, Info } from "lucide-react"
 import { Field, FieldLabel } from "@shared/components/ui/field"
 import { cn } from "@shared/lib/utils"
 
-type FieldTone = "neutral" | "warning" | "danger"
+type FieldTone = "neutral" | "warning" | "danger" | "success"
 
 /** Label/status stay left; conflict selection precedes the source action at the right edge. */
 export function FormFieldHeader({
@@ -25,14 +25,14 @@ export function FormFieldHeader({
     <div
       data-slot="form-field-header"
       className={cn(
-        "flex min-h-7 min-w-0 flex-wrap items-center gap-x-2 gap-y-1",
+        "flex min-h-[var(--text-base--line-height)] min-w-0 flex-wrap items-center gap-x-2 gap-y-1",
         className
       )}
       {...props}
     >
       <FieldLabel
         htmlFor={htmlFor}
-        className="text-xs font-medium text-foreground"
+        className="text-foreground"
       >
         {label}
       </FieldLabel>
@@ -77,19 +77,22 @@ export function FormFieldMessage({
   children,
   ...props
 }: ComponentProps<"div"> & { tone?: FieldTone }) {
-  const Icon = tone === "neutral" ? Info : AlertCircle
+  // Figma FieldDescription: 13/18 with a 16px icon; warning keeps the info icon.
+  const Icon = tone === "danger" ? AlertCircle : tone === "success" ? CheckCircle2 : Info
   return (
     <div
       data-slot="form-field-message"
       role={tone === "danger" ? "alert" : undefined}
       className={cn(
-        "flex min-w-0 items-start gap-1.5 text-xs leading-5 text-muted-foreground",
+        "flex min-w-0 items-center gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-muted-foreground",
+        tone === "warning" && "text-[var(--warning)]",
+        tone === "success" && "text-[var(--success)]",
         tone === "danger" && "text-destructive",
         className
       )}
       {...props}
     >
-      <Icon aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
+      <Icon aria-hidden="true" className="size-4 shrink-0" />
       <span className="min-w-0 break-words">{children}</span>
     </div>
   )

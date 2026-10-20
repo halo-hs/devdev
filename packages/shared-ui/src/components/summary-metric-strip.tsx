@@ -99,15 +99,16 @@ export function SummaryMetricStrip({
             data-decoration={item.decoration ?? resolveDecoration(item.label)}
             className={cn("min-w-0 px-4 py-4", itemClassName)}
           >
-            <div className="text-xs text-muted-foreground">{item.label}</div>
+            {/* Figma KPI (결산리포트 v6): label 14/20 SemiBold, value 26/36 Bold, detail 12/16. */}
+            <div className="text-[length:var(--text-body-9)] leading-5 font-semibold text-[var(--color-gray-2)]">{item.label}</div>
             <div className="mt-1 flex items-end justify-between gap-2">
-              <strong className="text-xl font-semibold tabular-nums">
+              <strong className="text-[26px] leading-9 font-bold tabular-nums">
                 <MetricValue value={item.value} />
               </strong>
               {item.note ? (
                 <Badge
                   className={cn(
-                    "h-5 rounded-full border-0 px-2 text-[11px] font-medium",
+                    "h-5 rounded-full border-0 px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-normal",
                     noteToneClasses[tone]
                   )}
                 >
@@ -118,7 +119,7 @@ export function SummaryMetricStrip({
             {item.detail ? (
               <div
                 className={cn(
-                  "mt-1 text-xs text-muted-foreground",
+                  "mt-1 text-[12px] leading-4 text-muted-foreground",
                   item.detailClassName
                 )}
               >

@@ -884,7 +884,7 @@ export function SnapReportsPage({ navigate, routeSearch }: { navigate: SnapNavig
         </Tabs>
 
         <div className="mt-5">
-          {resource.loading ? <div className="space-y-3"><Skeleton className="h-10 w-full max-w-xl" /><Skeleton className="h-56 w-full" /></div> : resource.error ? <PageState icon={<AlertCircle />} title="리포트를 불러오지 못했습니다" description={resource.error} action={<Button variant="outline" onClick={resource.reload}><RefreshCw /> 다시 시도</Button>} /> : tab === "field" ? <FieldReports rows={resource.data.field} navigate={navigate} /> : tab === "review" ? <ReviewReports rows={resource.data.review} navigate={navigate} onChanged={resource.reload} /> : tab === "sent" ? <SentReports rows={resource.data.sent} onChanged={resource.reload} /> : <DeliveryReports failures={resource.data.failures} email={resource.data.email} onChanged={resource.reload} />}
+          {resource.loading ? <div className="space-y-3"><Skeleton className="h-10 w-full max-w-xl" /><Skeleton className="h-56 w-full rounded-[var(--r-md)]" /></div> : resource.error ? <PageState icon={<AlertCircle />} title="리포트를 불러오지 못했습니다" description={resource.error} action={<Button variant="outline" onClick={resource.reload}><RefreshCw /> 다시 시도</Button>} /> : tab === "field" ? <FieldReports rows={resource.data.field} navigate={navigate} /> : tab === "review" ? <ReviewReports rows={resource.data.review} navigate={navigate} onChanged={resource.reload} /> : tab === "sent" ? <SentReports rows={resource.data.sent} onChanged={resource.reload} /> : <DeliveryReports failures={resource.data.failures} email={resource.data.email} onChanged={resource.reload} />}
         </div>
       </div>
     </div>

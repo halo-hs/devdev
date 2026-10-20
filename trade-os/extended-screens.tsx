@@ -284,9 +284,9 @@ function SectionHeading({
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h2 className="text-base font-semibold">{title}</h2>
+        <h2 className="text-[length:var(--text-header-7)] leading-[var(--leading-header-7)] font-bold">{title}</h2>
         {description ? (
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+          <p className="mt-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-muted-foreground">{description}</p>
         ) : null}
       </div>
       {action}
@@ -1856,7 +1856,7 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
               </label>
               <label className="grid gap-1.5 text-sm font-medium">
                 구분
-                <select className="h-9 rounded-md border bg-background px-3 text-sm" value={form.kind} onChange={(event) => setForm({ ...form, kind: event.target.value })}>
+                <select className="h-9 rounded-md border border-[var(--control-border)] bg-[var(--control-background)] px-3 text-sm" value={form.kind} onChange={(event) => setForm({ ...form, kind: event.target.value })}>
                   <option value="counterparty">거래처 담당자</option>
                   <option value="internal">조직 구성원</option>
                   <option value="other">기타</option>

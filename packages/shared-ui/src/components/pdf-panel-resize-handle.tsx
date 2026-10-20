@@ -37,7 +37,7 @@ export function PdfPanelResizeHandle({
     <ResizableHandle
       withHandle
       aria-label={label}
-      className="w-2 shrink-0 bg-[linear-gradient(to_right,transparent_3px,var(--surface-border)_3px,var(--surface-border)_4px,transparent_4px)] transition-colors after:w-3 hover:bg-[var(--color-primary-10)] data-[resize-handle-state=drag]:bg-[var(--color-primary-9)] [&>div]:h-10 [&>div]:w-1 [&>div]:bg-[var(--color-gray-8)]"
+      className="w-2 shrink-0 bg-[linear-gradient(to_right,transparent_3px,var(--color-gray-10)_3px,var(--color-gray-10)_4px,transparent_4px)] transition-colors after:w-3 hover:bg-[var(--color-primary-10)] data-[resize-handle-state=drag]:bg-[var(--color-primary-9)] [&>div]:h-6 [&>div]:w-1 [&>div]:bg-[var(--color-gray-9)]"
     />
   )
 }

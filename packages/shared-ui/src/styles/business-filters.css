@@ -237,8 +237,22 @@
     select
   ):is(:focus-within, [aria-expanded="true"]) {
   background: var(--control-background-open);
+  border-color: var(--control-focus-border);
+  box-shadow: var(--shadow-input-focused);
+}
+/* Hero filters keep the white ring on the blue banner. */
+.business-hero-controls .business-filter-bar[data-layout]
+  :is(
+    [data-ui="text-input"],
+    [data-ui="select-trigger"],
+    [data-slot="select-trigger"],
+    button[role="combobox"],
+    input[type="month"],
+    input[type="date"],
+    select
+  ):is(:focus-within, [aria-expanded="true"]) {
   border-color: var(--control-border-hover);
-  box-shadow: 0 0 0 2px var(--hero-filter-focus-ring, var(--ring));
+  box-shadow: 0 0 0 2px var(--hero-filter-focus-ring);
 }
 .business-filter-bar[data-layout] [data-ui="text-input"] input {
   color: var(--control-foreground);

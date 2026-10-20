@@ -1261,11 +1261,11 @@ function SnapTaskDetailPage({ navigate, routeParams }: SnapTaskWorkspaceProps) {
     return (
       <div className="h-full overflow-y-auto bg-background">
         <div className="mx-auto w-full max-w-ecoya-wide space-y-5 px-4 py-6 sm:px-6 lg:px-8">
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-20 w-full rounded-[var(--r-md)]" />
+          <Skeleton className="h-28 w-full rounded-[var(--r-md)]" />
           <div className="grid gap-5 lg:grid-cols-3">
-            <Skeleton className="h-72" />
-            <Skeleton className="h-72 lg:col-span-2" />
+            <Skeleton className="h-72 rounded-[var(--r-md)]" />
+            <Skeleton className="h-72 lg:col-span-2 rounded-[var(--r-md)]" />
           </div>
         </div>
       </div>

@@ -232,16 +232,15 @@ export function NotificationsPrototype({
                           <article
                             key={item.id}
                             className={cn(
-                              "group relative grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 px-4 py-4 transition-colors sm:grid-cols-[auto_minmax(0,1fr)_auto]",
-                              unread
-                                ? "bg-primary/[0.035] hover:bg-primary/[0.065]"
-                                : "hover:bg-muted/45"
+                              "group relative grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 bg-[var(--color-gray-12)] px-5 py-3.5 transition-colors hover:bg-[var(--color-gray-11)] sm:grid-cols-[auto_minmax(0,1fr)_auto]",
+                              selectedIds.has(item.id) &&
+                                "bg-[var(--color-primary-10)] hover:bg-[var(--color-primary-10)]"
                             )}
                           >
                             {unread ? (
                               <span
                                 aria-hidden="true"
-                                className="absolute inset-y-0 left-0 w-0.5 bg-primary"
+                                className="absolute inset-y-0 left-0 w-0.5 bg-[var(--color-primary-4)]"
                               />
                             ) : null}
                             <Checkbox
@@ -250,34 +249,39 @@ export function NotificationsPrototype({
                                 toggleSelection(item.id, checked === true)
                               }
                               aria-label={`${item.title} 선택`}
-                              className="mt-2"
+                              className="self-center"
                             />
                             <button
                               type="button"
                               onClick={() => onOpenDeal(item)}
-                              className="min-w-0 space-y-1.5 text-left outline-none after:absolute after:inset-y-0 after:right-0 after:left-12 focus-visible:after:ring-2 focus-visible:after:ring-ring focus-visible:after:ring-inset"
+                              className="min-w-0 space-y-0.5 text-left outline-none after:absolute after:inset-y-0 after:right-0 after:left-12 focus-visible:after:ring-2 focus-visible:after:ring-ring focus-visible:after:ring-inset"
                             >
-                              <span className="flex min-h-5 min-w-0 flex-wrap items-center gap-2 leading-5">
+                              <span className="flex min-h-5 min-w-0 flex-wrap items-center gap-1.5">
                                 <span
                                   className={cn(
-                                    "text-sm leading-5",
-                                    unread ? "font-semibold" : "font-medium"
+                                    "text-[length:var(--text-body-8)] leading-[1.5] text-[var(--color-gray-2)]",
+                                    unread ? "font-semibold" : "font-normal"
                                   )}
                                 >
                                   {item.title}
                                 </span>
                                 <Badge
-                                  variant="secondary"
-                                  className="inline-flex h-5 items-center border-0 px-1.5 text-[10px] font-medium leading-none"
+                                  size="sm"
+                                  palette={
+                                    item.category === "approval" ||
+                                    item.category === "risk"
+                                      ? "orange"
+                                      : "grayComplete"
+                                  }
                                 >
                                   {meta.label}
                                 </Badge>
                               </span>
-                              <span className="block text-sm leading-5 text-muted-foreground">
+                              <span className="block text-[length:var(--text-body-9)] leading-[1.5] text-[var(--color-gray-4)]">
                                 {item.description}
                               </span>
-                              <span className="flex min-h-4 flex-wrap items-center gap-x-2 text-xs leading-4 text-muted-foreground">
-                                <span className="font-medium text-foreground/75">
+                              <span className="flex min-h-4 flex-wrap items-center gap-x-1 text-[12px] leading-[1.5] text-[var(--color-gray-6)]">
+                                <span>
                                   {item.context}
                                 </span>
                                 <span aria-hidden="true">·</span>

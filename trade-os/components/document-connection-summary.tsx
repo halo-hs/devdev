@@ -10,21 +10,21 @@ export function DocumentConnectionSummary({ connection, onChange, disabled, chan
 }) {
   const history = connection.connectionHistory ?? []
   const latest = history.at(-1)
-  return <section aria-label="현재 거래 연결" className="rounded-lg border bg-background p-4 text-xs">
+  return <section aria-label="현재 거래 연결" className="rounded-[var(--r-lg)] border border-[var(--surface-border)] bg-[var(--color-gray-11)] px-5 py-4 text-[12px] leading-[18px]">
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0 flex-1">
-        <h3 className="font-semibold">{connection.link ? "연결된 거래" : "연결된 거래 없음"}</h3>
-        {connection.link ? <a className="mt-1.5 block break-words font-medium text-primary hover:underline" href={`/erp/deals/${encodeURIComponent(connection.link.dealId)}`}>{connection.link.dealLabel}</a> : null}
+        <h3 className="font-medium text-muted-foreground">{connection.link ? "연결된 거래" : "연결된 거래 없음"}</h3>
+        {connection.link ? <a className="mt-1.5 block break-words text-[length:var(--text-body-9)] leading-5 font-semibold text-[var(--color-primary-4)] hover:underline" href={`/erp/deals/${encodeURIComponent(connection.link.dealId)}`}>{connection.link.dealLabel}</a> : null}
         <p className="mt-1.5 text-muted-foreground">{connection.link ? "거래 방향 확인 필요 · " : ""}{latest
           ? `${latest.actorLabel} · ${new Date(latest.occurredAt).toLocaleString("ko-KR")} · ${latest.action === "unlinked" ? "연결 해제" : latest.action === "relinked" ? "연결 변경" : "연결"}`
           : connection.link ? "이전 연결의 처리자·시각은 기록되어 있지 않습니다." : "후보를 선택한 뒤 연결을 확정하세요."}</p>
       </div>
-      {connection.link ? <div className="flex flex-wrap justify-end gap-2">
+      {connection.link ? <div className="flex flex-wrap items-center justify-end gap-2.5">
         <Button size="sm" variant="outline" disabled={disabled && !changing} onClick={onChange}>{changing ? "변경 취소" : "다른 거래로 변경"}</Button>
       </div> : null}
     </div>
     {history.length ? <details className="mt-3 border-t pt-3">
-      <summary className="cursor-pointer text-muted-foreground">연결 이력 {history.length}건</summary>
+      <summary className="cursor-pointer font-medium text-muted-foreground">연결 이력 {history.length}건</summary>
       <ol className="mt-3 space-y-3">
         {[...history].reverse().map((event, index) => <li key={`${event.occurredAt}:${index}`} className="space-y-1 break-words">
           <p className="font-medium">{event.action === "linked" ? "연결" : event.action === "relinked" ? "연결 변경" : "연결 해제"} · {event.fromDealId ? `${event.fromDealId} → ` : ""}{event.dealLabel ?? event.dealId ?? "미연결"}</p>

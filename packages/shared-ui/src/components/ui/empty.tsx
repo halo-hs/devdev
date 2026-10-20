@@ -4,7 +4,7 @@ import { cn } from "@shared/lib/utils"
 
 
 function Empty({ className, ...props }: ComponentProps<typeof DSEmpty>) {
-  return <DSEmpty {...props} className={cn("p-4 text-[var(--color-gray-3)]", className)} />
+  return <DSEmpty {...props} className={cn("p-4 text-[var(--color-gray-4)]", className)} />
 }
 
 function EmptyHeader({ className, ...props }: ComponentProps<typeof DSEmptyHeader>) {
@@ -16,7 +16,7 @@ function EmptyTitle({ className, ...props }: ComponentProps<typeof DSEmptyTitle>
 }
 
 function EmptyDescription({ className, ...props }: ComponentProps<typeof DSEmptyDescription>) {
-  return <DSEmptyDescription {...props} className={cn("text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)] text-[var(--color-gray-3)]", className)} />
+  return <DSEmptyDescription {...props} className={cn("text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)] text-[var(--color-gray-4)]", className)} />
 }
 
 function EmptyContent({ className, ...props }: ComponentProps<typeof DSEmptyContent>) {
@@ -24,7 +24,7 @@ function EmptyContent({ className, ...props }: ComponentProps<typeof DSEmptyCont
 }
 
 function EmptyMedia({ className, ...props }: ComponentProps<typeof DSEmptyMedia>) {
-  return <DSEmptyMedia {...props} className={cn("mb-0 bg-transparent text-[var(--color-gray-3)] [&_svg:not([class*='size-'])]:size-8", className)} />
+  return <DSEmptyMedia {...props} className={cn("mb-0 bg-transparent text-[var(--color-gray-4)] [&_svg:not([class*='size-'])]:size-8", className)} />
 }
 
 export { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent, EmptyMedia }

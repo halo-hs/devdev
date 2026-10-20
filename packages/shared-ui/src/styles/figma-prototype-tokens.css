@@ -90,6 +90,24 @@
   --button-destructive-disabled-foreground: var(--color-gray-6);
   --button-link-foreground-active: var(--color-primary-4);
   --button-link-disabled-foreground: var(--color-gray-6);
+
+  /* Form controls (01 입력 · 폼, 3658:16385): hover draws a Blue 4 border
+     and an opened trigger shows the focus ring. */
+  --control-border-hover: var(--color-primary-4);
+  --shadow-input-open: var(--shadow-input-focused);
+  --control-accessory-foreground: var(--color-gray-4);
+  --control-clear-foreground: var(--color-gray-2);
+  --menu-item-selected-background: var(--color-primary-10);
+  --menu-item-disabled-foreground: var(--color-gray-6);
+  --switch-track-disabled-checked: var(--control-disabled-background);
+  --switch-track-disabled-unchecked: var(--control-disabled-background);
+  --file-drop-border: var(--color-primary-6);
+  --calendar-foreground: var(--color-gray-2);
+  --calendar-heading-foreground: var(--color-gray-2);
+  --calendar-day-foreground: var(--color-gray-2);
+  --calendar-weekday-foreground: var(--color-gray-4);
+  --calendar-day-outside-foreground: var(--color-gray-4);
+  --calendar-range-background: var(--color-primary-10);
 }
 
 
@@ -105,6 +123,7 @@
   --leading-badge-lg: 24px;
 }
 
+/* Figma type scale: caption 11/16, body-sm 13/18, body-md 15/22, body-lg 17/24. */
 @theme inline {
   --text-xs: var(--text-body-11);
   --text-xs--line-height: var(--leading-body-11);
@@ -158,7 +177,7 @@
   border-radius: 6px;
   transform: none;
   background: transparent;
-  color: var(--color-gray-3);
+  color: var(--color-gray-4);
 }
 .toaster [data-sonner-toast][data-styled="true"] [data-close-button] svg {
   width: 16px;
@@ -179,11 +198,11 @@
 }
 :root:not(.dark) .toaster [data-sonner-toast][data-styled="true"] {
   background: var(--color-gray-12);
-  border-color: var(--color-gray-8);
-  color: var(--color-gray-1);
+  border-color: var(--color-gray-9);
+  color: var(--color-gray-2);
 }
 :root:not(.dark) .toaster [data-sonner-toast][data-styled="true"] [data-description] {
-  color: var(--color-gray-3);
+  color: var(--color-gray-4);
 }
 
 /* TableHead/TableCell: horizontal 1px rules, no vertical header dividers.
@@ -196,7 +215,7 @@
 .toaster [data-sonner-toast][data-type="success"] [data-icon] { color: var(--color-green-2); }
 .toaster [data-sonner-toast][data-type="error"] [data-icon] { color: var(--color-red-2); }
 .toaster [data-sonner-toast][data-type="warning"] [data-icon] { color: var(--color-orange-1); }
-.toaster [data-sonner-toast][data-type="info"] [data-icon] { color: var(--color-gray-1); }
+.toaster [data-sonner-toast][data-type="info"] [data-icon] { color: var(--color-gray-2); }
 
 :root:not(.dark) {
   --table-header-foreground: var(--color-gray-4);
@@ -243,3 +262,100 @@
   color: var(--sidebar-accent-foreground);
 }
 .navigation-icon-16 { width: 16px; height: 16px; }
+
+/* CommandInput (01 입력 · 폼): 16px icon inset, 6px to the text, and the
+   shared focus ring, which the DS group selector cannot see. */
+[data-slot="command-input-wrapper"] [data-slot="input-group-addon"] { padding-left: 16px !important; }
+[data-slot="command-input-wrapper"] [data-slot="command-input"] { padding-left: 6px; }
+[data-slot="command-input-wrapper"] [data-slot="input-group"]:has([data-slot="command-input"]:focus-visible) {
+  border-color: var(--control-focus-border);
+  box-shadow: var(--shadow-input-focused);
+}
+[data-slot="command-input-wrapper"] [data-slot="input-group"]:has([data-slot="command-input"]:disabled) [data-slot="input-group-addon"] svg {
+  color: var(--control-disabled-foreground);
+}
+[data-slot="command"] [cmdk-group-heading] {
+  font-size: var(--text-body-6);
+  line-height: var(--leading-body-6);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-gray-4);
+}
+[data-slot="command-empty"] {
+  font-size: var(--text-body-6);
+  line-height: var(--leading-body-6);
+}
+[data-slot="command-item"][data-selected="true"] { color: var(--accent-foreground); }
+
+/* DatePicker (153:992): the calendar icon trails the value at 16px. */
+[data-slot="date-picker"] > button[aria-haspopup="dialog"] {
+  flex-direction: row-reverse;
+  justify-content: space-between;
+}
+[data-slot="date-picker"] > button[aria-haspopup="dialog"] > svg {
+  width: 16px;
+  height: 16px;
+  color: var(--control-accessory-foreground);
+}
+/* Calendar (206:834): Regular 15/22 caption and Regular weekday labels. */
+.rdp-root .rdp-caption_label {
+  font-size: var(--text-body-8);
+  line-height: 22px;
+  font-weight: var(--font-weight-regular);
+}
+.rdp-root .rdp-weekday { font-weight: var(--font-weight-regular); }
+
+/* Chart (05 데이터 표시 · 5729:113565): 12px gray axis labels, 16% grid, tinted cursor. */
+[data-slot="chart"] .recharts-cartesian-axis-tick text { font-size: 12px; fill: var(--color-gray-5); }
+[data-slot="chart"] .recharts-cartesian-grid line { stroke: var(--color-gray-2); stroke-opacity: 0.16; }
+[data-slot="chart"] .recharts-rectangle.recharts-tooltip-cursor { fill: var(--color-gray-2); fill-opacity: 0.06; }
+[data-slot="chart"] .recharts-curve.recharts-tooltip-cursor { stroke: var(--color-gray-2); stroke-opacity: 0.24; }
+
+/* Overlay close X (158:181, 158:291): ghost-neutral Gray 3 icon with Gray 1 tint.
+   Footer DialogClose buttons are not direct children, so they keep their variant. */
+:is([data-slot="dialog-content"] > [data-slot="dialog-close"], [data-slot="sheet-content"] > [data-slot="sheet-close"]) {
+  color: var(--color-gray-4);
+}
+:is([data-slot="dialog-content"] > [data-slot="dialog-close"], [data-slot="sheet-content"] > [data-slot="sheet-close"]):hover {
+  color: var(--color-gray-2);
+  background: color-mix(in srgb, var(--color-gray-2) 6%, transparent);
+}
+:is([data-slot="dialog-content"] > [data-slot="dialog-close"], [data-slot="sheet-content"] > [data-slot="sheet-close"]):active {
+  background: color-mix(in srgb, var(--color-gray-2) 10%, transparent);
+}
+
+
+/* Topbar (742:11599): 64px; world-time trigger is a tertiary 32px button. */
+:root { --ui-shell-header-height: 64px; }
+:root:not(.dark) .snap-shell-header [aria-label="세계시간 열기"] {
+  border-color: var(--color-gray-9);
+  background: var(--color-gray-12);
+  box-shadow: var(--shadow-btn-tertiary-black);
+}
+
+/* Pagination (155:197) · PaginationItem (160:84): Gray 1 pages, Blue 4 current page,
+   16px chevrons. The DS controller imports the DS Button, so wrappers cannot reach it. */
+[data-slot="pagination-controller"] :is([data-slot="pagination-total"], [data-slot="pagination-page-size-label"]) {
+  font-size: var(--text-body-8);
+  line-height: 22px;
+}
+[data-slot="pagination-controller"] [data-slot="pagination-total"] { color: var(--color-gray-3); }
+[data-slot="pagination-controller"] [data-slot="pagination-page-size-label"] { color: var(--color-gray-2); }
+[data-slot="pagination-controller"] [data-slot="pagination-item"] > button {
+  font-size: var(--text-body-8);
+  line-height: 22px;
+  font-weight: var(--font-weight-regular);
+}
+[data-slot="pagination-controller"] [data-slot="pagination-item"] > button:not(:has(svg)) { color: var(--color-gray-2); }
+[data-slot="pagination-controller"] [data-slot="pagination-item"] > button[aria-current="page"] { color: var(--color-primary-4); }
+[data-slot="pagination-controller"] [data-slot="pagination-item"] > button:not(:has(svg)):disabled { color: var(--color-gray-6); }
+[data-slot="pagination-controller"] [data-slot="pagination-item"] > button > svg { width: 16px; height: 16px; }
+[data-slot="pagination-controller"] [data-slot="pagination-item"] > button:has(svg):disabled { color: var(--color-gray-8); }
+[data-slot="pagination-controller"] [data-slot="pagination-ellipsis"] { color: var(--color-gray-2); }
+
+/* Progress (151:216): both ends of the fill are rounded. */
+[data-slot="progress-indicator"] { border-radius: 9999px; }
+
+/* ScrollBar (167:361): 12px track, 8px thumb with a 2px inset. */
+[data-slot="scroll-area-scrollbar"] { border-width: 0; padding: 2px; }
+[data-slot="scroll-area-scrollbar"][data-orientation="vertical"] { width: 12px; }
+[data-slot="scroll-area-scrollbar"][data-orientation="horizontal"] { height: 12px; }

@@ -89,7 +89,7 @@ export function PlatformHomeOverview({
                   submit()
                 }
               }}
-              className="block min-h-24 w-full min-w-0 resize-y rounded-lg border bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="block min-h-24 w-full min-w-0 resize-y rounded-lg border border-[var(--control-border)] bg-[var(--control-background)] px-3 py-2 text-sm text-foreground outline-none placeholder:text-[var(--control-placeholder)] focus-visible:ring-2 focus-visible:ring-ring"
             />
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex min-w-0 flex-wrap gap-2">

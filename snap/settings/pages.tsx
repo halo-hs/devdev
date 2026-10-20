@@ -233,8 +233,8 @@ function ResourceBoundary({
   if (state.loading)
     return (
       <div className="space-y-3" aria-label="불러오는 중">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-24 w-full rounded-[var(--r-md)]" />
+        <Skeleton className="h-64 w-full rounded-[var(--r-md)]" />
       </div>
     )
   if (state.error) {

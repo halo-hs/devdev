@@ -147,7 +147,7 @@ export function SubscriptionChangePanel({
             <label className="grid gap-2 text-sm font-medium">
               구독 중인 상품
               <select
-                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                className="h-9 w-full rounded-md border border-[var(--control-border)] bg-[var(--control-background)] px-3 text-sm"
                 value={plan}
                 onChange={(event) =>
                   selectPlan(event.target.value as SubscriptionPlan)

@@ -28,7 +28,7 @@ function AlertTitle({ className, ...props }: ComponentProps<typeof DSAlertTitle>
 }
 
 function AlertDescription({ className, ...props }: ComponentProps<typeof DSAlertDescription>) {
-  return <DSAlertDescription {...props} className={cn("text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)]", className)} />
+  return <DSAlertDescription {...props} className={cn("text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]", className)} />
 }
 
 export { Alert, AlertTitle, AlertDescription, alertVariants }
