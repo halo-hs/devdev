@@ -224,8 +224,10 @@
 /* Data-display pattern: every standalone DS table is a white surface on the
    light app canvas. Tables already composed inside a Card inherit that
    Card's surface so shadows and radii never stack. */
+/* Figma app shell (결산리포트 v6 · 5789:54375): Gray 9 canvas beside the white
+   Sidebar; the sidebar edge is this contrast, not a shadow. */
 [data-slot="sidebar-inset"] {
-  background: var(--background);
+  background: var(--color-gray-10);
 }
 
 [data-slot="sidebar-inset"] [data-slot="table-container"],

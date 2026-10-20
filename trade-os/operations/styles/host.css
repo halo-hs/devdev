@@ -7,7 +7,7 @@
   font-family: var(--ecoya-font-sans);
 }
 /* The host main owns page scrolling. Tables keep their horizontal overflow. */
-.reference-3030 .reference-page-scroll { min-height: 0; background: var(--ecoya-gray-12); }
+.reference-3030 .reference-page-scroll { min-height: 0; background: transparent; }
 .reference-3030 .reference-monitor-shell { display: grid; min-height: 0; grid-template-columns: minmax(0, 1fr); background: var(--ecoya-gray-12); }
 .reference-3030 .reference-monitor-shell [data-component="MonitorConnected"],
 .reference-3030 .reference-monitor-shell [data-layout="dashboard"],

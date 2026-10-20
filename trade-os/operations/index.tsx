@@ -54,7 +54,7 @@ function Body({ screen }: { screen: ReferenceOperationsScreen }) {
       : messages.erpSalesPerformance.cockpit.subtitleMember
     : "subtitle" in copy ? copy.subtitle : undefined
   return <div className="reference-page-scroll">
-    <div className="reference-content-width w-full space-y-6 px-7 py-6">
+    <div className="reference-content-width w-full space-y-4 px-5 pt-1.5 pb-10">
       {screen === "reports" ? <ReportsConnected copy={messages.erpReports.reports} role={identity.role}
           // Figma 결산리포트 v6: KPI cards sit 16px below the hero instead of overlapping it.
           renderHeader={(controls, summary) => <div className="space-y-4"><PageHeader variant="hero" title={copy.title} description={description}

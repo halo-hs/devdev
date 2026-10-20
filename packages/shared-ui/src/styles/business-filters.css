@@ -352,11 +352,11 @@
 /* Hero filters use Figma Tabs size=sm (TabsTrigger 160:74 · 결산리포트 v6):
    32px pill track, 24px triggers, 13/16 text, selected white with Blue 4. */
 :is(.business-hero-controls, .reference-hero-filters) .business-filter-segments {
-  gap: 0;
+  gap: 4px;
   padding: 4px;
   border: 0;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.18);
 }
 :is(.business-hero-controls, .reference-hero-filters) .business-filter-segments > button {
   flex: none;
@@ -374,7 +374,7 @@
 }
 :is(.business-hero-controls, .reference-hero-filters) .business-filter-segments > button[aria-pressed="true"] {
   background: white;
-  box-shadow: none;
+  box-shadow: 0 1.739px 1.739px rgb(0 0 0 / 5%);
   color: var(--color-primary-4);
   font-weight: 700;
 }
@@ -383,4 +383,15 @@
   font-size: var(--text-body-10);
   line-height: var(--leading-body-10);
   font-weight: 600;
+}
+
+/* Operations hero Select (결산리포트 v6): 40px pill, 20/16 inset, Medium 15/24. */
+.reference-hero-filters .business-filter-bar[data-layout] [data-ui="select-trigger"] {
+  padding-inline: 20px 16px;
+  border-color: transparent;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: var(--text-body-8);
+  line-height: 24px;
+  font-weight: 500;
 }

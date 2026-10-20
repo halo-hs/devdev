@@ -1,6 +1,7 @@
 "use client";
 import { RefreshCw } from "lucide-react";
 import { Badge } from "@shared/components/ui/badge";
+import { Button as ShadcnButton } from "@shared/components/ui/button";
 import { KpiCard } from "@shared/components/kpi-card";
 import { RankingRow } from "@shared/components/ranking-row";
 import { PeriodCloseRow } from "@shared/components/period-close-row";
@@ -1362,37 +1363,39 @@ function ReportsConnectedSession({
       actions={
         <>
           {settlementState.status !== "error" ? (
-            <Button
+            <ShadcnButton
               aria-label={copy.refresh}
               aria-busy={reportsRefreshDisabled}
               data-ui="reports-refresh"
               disabled={reportsRefreshDisabled}
               onClick={() => void refreshReports()}
-              size="sm"
+              size="icon-lg"
               title={reportsRefreshDisabled ? copy.loading : copy.refresh}
               type="button"
-              variant="tertiary"
+              variant="outline"
+              className="rounded-[var(--r-md)] [&_svg]:size-5"
             >
-              <RefreshCw aria-hidden className={cx("size-[18px]", reportsRefreshDisabled && "animate-spin")} />
-            </Button>
+              <RefreshCw aria-hidden className={cx(reportsRefreshDisabled && "animate-spin")} />
+            </ShadcnButton>
           ) : null}
 
           {canCloseMonth && closableProposal ? (
-            <Button
+            <ShadcnButton
               data-ui="reports-close-button"
               onClick={() => {
                 setCloseError(null)
                 setReclosePeriod(null)
                 setCloseDialogOpen(true)
               }}
-              size="md"
+              size="lg"
+              className="rounded-[var(--r-md)] px-4"
               type="button"
-              variant="primary"
+              variant="default"
             >
               {replaceTokens(copy.closes.closeButton, {
                 period: closableProposal,
               })}
-            </Button>
+            </ShadcnButton>
           ) : null}
         </>
       }
@@ -1524,7 +1527,7 @@ function ReportsConnectedSession({
       )}
 
           {/* ── 본문 그리드: 좌 차트 컬럼 / 우 Top·월마감 ── */}
-          <div className="grid items-start gap-4 grid-cols-[minmax(0,1.9fr)_minmax(0,1.1fr)] max-lg:grid-cols-1">
+          <div className="grid items-start gap-4 grid-cols-[minmax(0,1fr)_360px] max-lg:grid-cols-1">
             <div className="grid min-w-0 gap-4">
               {/* 수취 계획 vs AR 적용액 */}
               {settlementSnapshot != null && !settlementEmpty ? (
