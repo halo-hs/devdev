@@ -4,8 +4,8 @@ import { cn } from "@shared/lib/utils"
 
 export * from "@ecoya/design-system/ui/popover"
 
-function PopoverContent({ className, ...props }: ComponentProps<typeof DSPopoverContent>) {
-  return <DSPopoverContent {...props} className={cn("gap-0.5 ring-[var(--color-gray-10)] text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)] font-normal", className)} />
+function PopoverContent({ className, sideOffset = 8, ...props }: ComponentProps<typeof DSPopoverContent>) {
+  return <DSPopoverContent {...props} sideOffset={sideOffset} className={cn("gap-0.5 ring-[var(--color-gray-10)] text-[length:var(--text-body-8)] leading-[var(--text-base--line-height)] font-normal", className)} />
 }
 
 function PopoverTitle({ className, ...props }: ComponentProps<typeof DSPopoverTitle>) {

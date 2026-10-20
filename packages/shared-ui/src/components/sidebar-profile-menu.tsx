@@ -82,7 +82,7 @@ export function SidebarProfileMenu({
           side="top"
           align="start"
           sideOffset={8}
-          className="navigation-account-popover w-[280px] rounded-xl border border-[var(--color-gray-10)] bg-[var(--surface-background)] p-2 shadow-[0_4px_12px_rgb(0_0_0/10%)] ring-0"
+          className="navigation-account-popover flex w-[280px] flex-col gap-0.5 rounded-xl border border-[var(--color-gray-10)] bg-[var(--surface-background)] p-2 shadow-[var(--shadow-modal)] ring-0"
         >
           <DropdownMenuGroup>
             <DropdownMenuLabel className="px-3 py-2.5">
@@ -158,7 +158,7 @@ export function SidebarProfileMenu({
                   </div>
 
                   {onUsage ? (
-                    <DropdownMenuItem className="h-5 min-h-0 gap-1 p-0 text-[14px] leading-5" onClick={onUsage}>
+                    <DropdownMenuItem className="h-5 min-h-0 gap-1 p-0 text-[14px] leading-5 text-[var(--color-gray-3)]" onClick={onUsage}>
                       <NavigationIcon name="usage" className="-m-1 scale-[0.666667]" />
                       {usageLabel}
                       <span className="ml-auto text-[13px] leading-[18px] text-[var(--color-gray-4)]">
@@ -177,7 +177,7 @@ export function SidebarProfileMenu({
 
                   {onBilling ? (
                     <DropdownMenuItem
-                      className="h-10 justify-center gap-1 rounded-[10px] border border-[var(--button-primary-background)] bg-[var(--button-primary-background)] text-[15px] font-normal text-[var(--button-primary-foreground)] shadow-[var(--shadow-btn-primary-blue)] focus:bg-[var(--button-primary-background-hover)] focus:text-[var(--button-primary-foreground)]"
+                      className="h-10 justify-center gap-1 rounded-[10px] border border-[var(--button-primary-background)] bg-[var(--button-primary-background)] text-[15px] font-normal text-[var(--button-primary-foreground)] shadow-[var(--shadow-btn-primary-blue)] pl-3.5 pr-4 hover:bg-[var(--button-primary-background-hover)] hover:text-[var(--button-primary-foreground)] focus:bg-[var(--button-primary-background-hover)] focus:text-[var(--button-primary-foreground)]"
                       onClick={onBilling}
                     >
                       <NavigationIcon name="billing" />
@@ -189,12 +189,12 @@ export function SidebarProfileMenu({
             })}
           </div> : null}
 
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="my-1 bg-[var(--color-gray-10)]" />
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
+            <DropdownMenuSubTrigger className="min-h-0 rounded-[6px] px-3 py-2">
               <NavigationIcon name="language" />
               언어
-              <span className="mr-2 ml-auto text-xs text-muted-foreground">
+              <span className="ml-auto text-[13px] leading-[18px] text-[var(--color-gray-4)]">
                 {language === "ko-KR" ? "한국어" : language}
               </span>
             </DropdownMenuSubTrigger>
@@ -224,7 +224,7 @@ export function SidebarProfileMenu({
               </DropdownMenuRadioGroup>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
-          <DropdownMenuItem onClick={onLogout}>
+          <DropdownMenuItem className="min-h-0 rounded-[6px] px-3 py-2" onClick={onLogout}>
             <NavigationIcon name="logout" />
             로그아웃
           </DropdownMenuItem>
@@ -256,7 +256,7 @@ export function SidebarProfileMenu({
           side="top"
           align="end"
           sideOffset={8}
-          className="w-60 rounded-xl border border-[var(--color-gray-10)] p-2 shadow-[0_4px_12px_rgb(0_0_0/10%)] ring-0"
+          className="flex w-60 flex-col gap-0.5 rounded-xl border border-[var(--color-gray-10)] p-2 shadow-[var(--shadow-modal)] ring-0"
         >
           <DropdownMenuLabel className="px-4 pt-1.5 pb-0.5 text-[12px] font-semibold text-muted-foreground">지원</DropdownMenuLabel>
           <DropdownMenuItem

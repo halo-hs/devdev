@@ -2443,19 +2443,19 @@ function WorkspaceHeader({
             />
             <nav
               aria-label="현재 위치"
-              className="flex min-w-0 items-center gap-1.5 text-sm"
+              className="flex min-w-0 items-center gap-1.5 text-[15px] leading-[22px]"
             >
               {breadcrumbs.map((breadcrumb, index) => {
                 const isCurrent = index === breadcrumbs.length - 1
                 return (
                   <Fragment key={`${breadcrumb}-${index}`}>
                     {index > 0 ? (
-                      <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
+                      <ChevronRight className="size-3.5 shrink-0 text-[var(--color-gray-4)]" />
                     ) : null}
                     {index === 0 && !isCurrent && firstDepthTargets[section] ? (
                       <button
                         type="button"
-                        className="shrink-0 text-muted-foreground transition-colors hover:text-foreground hover:underline"
+                        className="shrink-0 text-[var(--color-gray-4)] transition-colors hover:text-foreground hover:underline"
                         onClick={navigateToFirstDepth}
                       >
                         {breadcrumb}
@@ -2465,7 +2465,7 @@ function WorkspaceHeader({
                       section === "ECOYA SNAP" ? (
                       <button
                         type="button"
-                        className="shrink-0 text-muted-foreground transition-colors hover:text-foreground hover:underline"
+                        className="shrink-0 text-[var(--color-gray-4)] transition-colors hover:text-foreground hover:underline"
                         onClick={navigateToFirstDepth}
                       >
                         {breadcrumb}
@@ -2474,8 +2474,8 @@ function WorkspaceHeader({
                       <span
                         className={
                           isCurrent
-                            ? "truncate font-semibold"
-                            : "shrink-0 text-muted-foreground"
+                            ? "truncate font-normal text-[var(--color-gray-2)]"
+                            : "shrink-0 text-[var(--color-gray-4)]"
                         }
                         aria-current={isCurrent ? "page" : undefined}
                       >
@@ -2626,13 +2626,13 @@ function TopBarUtilities({
         onClick={() =>
           setOpen((current) => (current === "clock" ? null : "clock"))
         }
-        className="hidden lg:inline-flex"
+        className="hidden h-8 gap-1 px-3 text-[15px] leading-[22px] font-normal lg:inline-flex"
       >
-        <Clock3 className="size-4 text-primary" />
-        <span className="font-medium">세계시간</span>
-        <span className="text-muted-foreground tabular-nums">
+        <span className="text-[var(--color-gray-6)]">세계시간</span>
+        <span className="text-[var(--color-gray-2)] tabular-nums">
           서울 {formatWorldTime("Asia/Seoul", now)}
         </span>
+        <ChevronDown className="size-3.5 text-[var(--color-gray-2)]" />
       </Button>
       <Popover
         open={open === "more"}

@@ -35,6 +35,9 @@ const sizeStyles = {
   "icon-lg": "rounded-[10px] [&_svg:not([class*='size-'])]:size-5",
 } as const
 
+// Figma link button (3419:63906) is the label alone, without side padding.
+const linkPadding = "px-0 has-data-[icon=inline-end]:pr-0 has-data-[icon=inline-start]:pl-0"
+
 function buttonVariants(options: Parameters<typeof designSystemButtonVariants>[0] = {}) {
   const { className, class: classValue, ...variants } = options
   return cn(
@@ -42,6 +45,7 @@ function buttonVariants(options: Parameters<typeof designSystemButtonVariants>[0
     "font-normal",
     colorStates[variants.variant ?? "default"],
     sizeStyles[variants.size ?? "default"],
+    variants.variant === "link" && linkPadding,
     classValue,
     className,
   )
@@ -53,7 +57,7 @@ function Button({ className, variant = "default", size = "default", ...props }: 
       {...props}
       variant={variant}
       size={size}
-      className={cn("font-normal", colorStates[variant ?? "default"], sizeStyles[size ?? "default"], className)}
+      className={cn("font-normal", colorStates[variant ?? "default"], sizeStyles[size ?? "default"], variant === "link" && linkPadding, className)}
     />
   )
 }

@@ -176,7 +176,7 @@
   border-radius: 6px;
   transform: none;
   background: transparent;
-  color: var(--color-gray-3);
+  color: var(--color-gray-4);
 }
 .toaster [data-sonner-toast][data-styled="true"] [data-close-button] svg {
   width: 16px;
@@ -197,11 +197,11 @@
 }
 :root:not(.dark) .toaster [data-sonner-toast][data-styled="true"] {
   background: var(--color-gray-12);
-  border-color: var(--color-gray-8);
-  color: var(--color-gray-1);
+  border-color: var(--color-gray-9);
+  color: var(--color-gray-2);
 }
 :root:not(.dark) .toaster [data-sonner-toast][data-styled="true"] [data-description] {
-  color: var(--color-gray-3);
+  color: var(--color-gray-4);
 }
 
 /* TableHead/TableCell: horizontal 1px rules, no vertical header dividers.
@@ -214,7 +214,7 @@
 .toaster [data-sonner-toast][data-type="success"] [data-icon] { color: var(--color-green-2); }
 .toaster [data-sonner-toast][data-type="error"] [data-icon] { color: var(--color-red-2); }
 .toaster [data-sonner-toast][data-type="warning"] [data-icon] { color: var(--color-orange-1); }
-.toaster [data-sonner-toast][data-type="info"] [data-icon] { color: var(--color-gray-1); }
+.toaster [data-sonner-toast][data-type="info"] [data-icon] { color: var(--color-gray-2); }
 
 :root:not(.dark) {
   --table-header-foreground: var(--color-gray-4);
@@ -302,3 +302,59 @@
   font-weight: var(--font-weight-regular);
 }
 .rdp-root .rdp-weekday { font-weight: var(--font-weight-regular); }
+
+/* Chart (05 데이터 표시 · 5729:113565): 12px gray axis labels, 16% grid, tinted cursor. */
+[data-slot="chart"] .recharts-cartesian-axis-tick text { font-size: 12px; fill: var(--color-gray-5); }
+[data-slot="chart"] .recharts-cartesian-grid line { stroke: var(--color-gray-2); stroke-opacity: 0.16; }
+[data-slot="chart"] .recharts-rectangle.recharts-tooltip-cursor { fill: var(--color-gray-2); fill-opacity: 0.06; }
+[data-slot="chart"] .recharts-curve.recharts-tooltip-cursor { stroke: var(--color-gray-2); stroke-opacity: 0.24; }
+
+/* Overlay close X (158:181, 158:291): ghost-neutral Gray 3 icon with Gray 1 tint.
+   Footer DialogClose buttons are not direct children, so they keep their variant. */
+:is([data-slot="dialog-content"] > [data-slot="dialog-close"], [data-slot="sheet-content"] > [data-slot="sheet-close"]) {
+  color: var(--color-gray-4);
+}
+:is([data-slot="dialog-content"] > [data-slot="dialog-close"], [data-slot="sheet-content"] > [data-slot="sheet-close"]):hover {
+  color: var(--color-gray-2);
+  background: color-mix(in srgb, var(--color-gray-2) 6%, transparent);
+}
+:is([data-slot="dialog-content"] > [data-slot="dialog-close"], [data-slot="sheet-content"] > [data-slot="sheet-close"]):active {
+  background: color-mix(in srgb, var(--color-gray-2) 10%, transparent);
+}
+
+
+/* Topbar (742:11599): 64px; world-time trigger is a tertiary 32px button. */
+:root { --ui-shell-header-height: 64px; }
+:root:not(.dark) .snap-shell-header [aria-label="세계시간 열기"] {
+  border-color: var(--color-gray-9);
+  background: var(--color-gray-12);
+  box-shadow: var(--shadow-btn-tertiary-black);
+}
+
+/* Pagination (155:197) · PaginationItem (160:84): Gray 1 pages, Blue 4 current page,
+   16px chevrons. The DS controller imports the DS Button, so wrappers cannot reach it. */
+[data-slot="pagination-controller"] :is([data-slot="pagination-total"], [data-slot="pagination-page-size-label"]) {
+  font-size: var(--text-body-8);
+  line-height: 22px;
+}
+[data-slot="pagination-controller"] [data-slot="pagination-total"] { color: var(--color-gray-3); }
+[data-slot="pagination-controller"] [data-slot="pagination-page-size-label"] { color: var(--color-gray-2); }
+[data-slot="pagination-controller"] [data-slot="pagination-item"] > button {
+  font-size: var(--text-body-8);
+  line-height: 22px;
+  font-weight: var(--font-weight-regular);
+}
+[data-slot="pagination-controller"] [data-slot="pagination-item"] > button:not(:has(svg)) { color: var(--color-gray-2); }
+[data-slot="pagination-controller"] [data-slot="pagination-item"] > button[aria-current="page"] { color: var(--color-primary-4); }
+[data-slot="pagination-controller"] [data-slot="pagination-item"] > button:not(:has(svg)):disabled { color: var(--color-gray-6); }
+[data-slot="pagination-controller"] [data-slot="pagination-item"] > button > svg { width: 16px; height: 16px; }
+[data-slot="pagination-controller"] [data-slot="pagination-item"] > button:has(svg):disabled { color: var(--color-gray-8); }
+[data-slot="pagination-controller"] [data-slot="pagination-ellipsis"] { color: var(--color-gray-2); }
+
+/* Progress (151:216): both ends of the fill are rounded. */
+[data-slot="progress-indicator"] { border-radius: 9999px; }
+
+/* ScrollBar (167:361): 12px track, 8px thumb with a 2px inset. */
+[data-slot="scroll-area-scrollbar"] { border-width: 0; padding: 2px; }
+[data-slot="scroll-area-scrollbar"][data-orientation="vertical"] { width: 12px; }
+[data-slot="scroll-area-scrollbar"][data-orientation="horizontal"] { height: 12px; }

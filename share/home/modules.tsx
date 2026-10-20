@@ -1057,7 +1057,7 @@ function TodaySplitHandle({ label }: { label: string }) {
   return (
     <ResizableHandle
       aria-label={label}
-      className="z-20 shrink-0 bg-transparent after:bg-[var(--surface-border)] hover:bg-primary/5 aria-[orientation=horizontal]:h-2 aria-[orientation=horizontal]:after:h-px aria-[orientation=vertical]:w-2 aria-[orientation=vertical]:after:w-px data-[resize-handle-state=drag]:bg-primary/10"
+      className="z-20 shrink-0 bg-transparent after:bg-[var(--color-gray-10)] hover:bg-primary/5 aria-[orientation=horizontal]:h-2 aria-[orientation=horizontal]:after:h-px aria-[orientation=vertical]:w-2 aria-[orientation=vertical]:after:w-px data-[resize-handle-state=drag]:bg-primary/10"
     />
   )
 }

@@ -1,5 +1,3 @@
-import { CircleAlert, LoaderCircle } from "lucide-react"
-
 import { cn } from "@shared/lib/utils"
 
 export type AutoSaveStatusState = "saved" | "saving" | "pending" | "error"
@@ -37,26 +35,26 @@ function AutoSaveStatus({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-1 text-[11px] text-[var(--surface-muted-foreground)]",
-        state === "error" && "text-destructive",
+        "inline-flex items-center gap-2 px-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]",
+        state === "error" && "text-[var(--color-red-2)]",
         className
       )}
       role={state === "error" ? "alert" : "status"}
       aria-live="polite"
     >
-      {state === "saving" ? (
-        <LoaderCircle aria-hidden className="size-3.5 animate-spin" />
-      ) : state === "error" ? (
-        <CircleAlert aria-hidden className="size-3.5" />
-      ) : (
-        <span
-          aria-hidden
-          className={cn(
-            "size-1.5 rounded-[var(--r-pill)]",
-            state === "saved" ? "bg-success" : "bg-warning"
-          )}
-        />
-      )}
+      {/* Figma SaveStatus (2364:18687): one 7px dot per state. */}
+      <span
+        aria-hidden
+        className={cn(
+          "size-[7px] shrink-0 rounded-[var(--r-pill)]",
+          {
+            saving: "bg-[var(--color-gray-6)]",
+            saved: "bg-[var(--color-green-2)]",
+            error: "bg-[var(--color-red-2)]",
+            pending: "bg-[var(--color-orange-2)]",
+          }[state]
+        )}
+      />
       {label}
     </span>
   )

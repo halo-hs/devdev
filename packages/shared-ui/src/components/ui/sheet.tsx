@@ -17,6 +17,6 @@ function SheetHeader({ className, ...props }: ComponentProps<typeof DSSheetHeade
 }
 
 function SheetContent({ className, ...props }: ComponentProps<typeof DSSheetContent>) {
-  return <DSSheetContent {...props} className={cn("data-[side=bottom]:border-[var(--color-gray-9)] data-[side=left]:border-[var(--color-gray-9)] data-[side=right]:border-[var(--color-gray-9)] data-[side=top]:border-[var(--color-gray-9)]", className)} />
+  return <DSSheetContent {...props} className={cn("data-[side=bottom]:border-[var(--color-gray-9)] data-[side=left]:border-[var(--color-gray-9)] data-[side=right]:border-[var(--color-gray-9)] data-[side=top]:border-[var(--color-gray-9)] [&>[data-slot=sheet-close]]:top-5 [&>[data-slot=sheet-close]]:right-4 [&>[data-slot=sheet-close]_svg]:size-[18px]", className)} />
 }
 export { SheetTitle, SheetDescription, SheetHeader, SheetContent }
