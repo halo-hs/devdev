@@ -6811,7 +6811,7 @@ export function DealDetailScreen({
                       <section
                         id="deal-customs"
                         tabIndex={-1}
-                        className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-lg border p-5 outline-none"
+                        className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] p-5 outline-none"
                       >
                         <h2 className="text-base font-semibold">
                           통관 문서 확인
@@ -6885,7 +6885,7 @@ export function DealDetailScreen({
                   aria-label="거래 메모·활동 이력"
                   id="deal-records-main"
                   tabIndex={-1}
-                  className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-lg border bg-background p-4"
+                  className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] p-5"
                 >
                   <DealRecordSections
                     key={dealId}
