@@ -1518,7 +1518,7 @@ function CalendarPage({ navigate }: { navigate: SnapNavigate }) {
                               <button
                                 type="button"
                                 className={cn(
-                                  "block w-full truncate rounded border-l-2 px-1.5 py-1 text-left text-[11px] transition-colors",
+                                  "block w-full truncate rounded border-l-2 px-1.5 py-1 text-left text-[13px] transition-colors",
                                   style.event
                                 )}
                                 onClick={() =>
@@ -1542,7 +1542,7 @@ function CalendarPage({ navigate }: { navigate: SnapNavigate }) {
                               className="flex max-w-72 flex-col items-start gap-1 px-3 py-2"
                             >
                               <strong className="text-xs">{title}</strong>
-                              <span className="flex items-center gap-1.5 text-[11px] text-background/80">
+                              <span className="flex items-center gap-1.5 text-[13px] text-background/80">
                                 <span
                                   className={cn(
                                     "size-2 rounded-full",
@@ -1551,7 +1551,7 @@ function CalendarPage({ navigate }: { navigate: SnapNavigate }) {
                                 />
                                 진행 상태 · {statusLabel(status)}
                               </span>
-                              <span className="text-[11px] text-background/70">
+                              <span className="text-[13px] text-background/70">
                                 {taskLocation(task)}
                               </span>
                             </TooltipContent>
@@ -1559,7 +1559,7 @@ function CalendarPage({ navigate }: { navigate: SnapNavigate }) {
                         )
                       })}
                       {items.length > 3 ? (
-                        <div className="px-1 text-[10px] text-muted-foreground">
+                        <div className="px-1 text-[12px] text-muted-foreground">
                           +{items.length - 3}건
                         </div>
                       ) : null}

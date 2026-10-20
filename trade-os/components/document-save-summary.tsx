@@ -14,7 +14,7 @@ export function DocumentSaveSummary({ state, savedAt, metadata, confirmed }: {
   const details = generatedDocumentSaveDetails(metadata)
   const savedTime = formatDocumentSavedAt(savedAt)
   return (
-    <div aria-label="문서 저장 이력" className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-[var(--surface-muted-foreground)]">
+    <div aria-label="문서 저장 이력" className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-[var(--surface-muted-foreground)]">
       {confirmed ? (
         <span>{savedTime ? `마지막 수정 ${savedTime}` : "수정 시각 정보 없음"}</span>
       ) : state === "saved" && !savedTime ? (

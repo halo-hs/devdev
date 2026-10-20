@@ -185,7 +185,7 @@ function StatusBadge({
     <Badge
       variant="secondary"
       className={cn(
-        "h-5 rounded-full border-0 px-2 text-[11px] font-medium",
+        "h-5 rounded-full border-0 px-2 text-[13px] font-medium",
         tone === "neutral" && "bg-muted text-muted-foreground",
         tone === "blue" && "bg-primary/10 text-primary",
         tone === "success" && "bg-success/10 text-success",
@@ -1744,7 +1744,7 @@ function DealPdfViewer({
         <div className="flex min-w-0 items-center gap-2">
           <FileSearch className="size-4 shrink-0 text-muted-foreground" />
           <span className="min-w-0">
-            <span className="block text-[11px] text-muted-foreground">
+            <span className="block text-[13px] text-muted-foreground">
               {document.label}
             </span>
             <strong className="block truncate text-xs">{document.file}</strong>
@@ -1778,7 +1778,7 @@ function DealPdfViewer({
         >
           <div className="flex items-start justify-between border-b pb-5">
             <div>
-              <span className="text-[10px] font-semibold tracking-[0.18em] text-primary">
+              <span className="text-[12px] font-semibold tracking-[0.18em] text-primary">
                 ECOYA DEMO CO.
               </span>
               <h4
@@ -1790,7 +1790,7 @@ function DealPdfViewer({
                 {document.code === "PO" ? "PURCHASE ORDER" : document.label}
               </h4>
             </div>
-            <div className="text-right text-[10px] leading-5 text-[#666]">
+            <div className="text-right text-[12px] leading-5 text-[#666]">
               <strong className="block text-[#242424]">
                 {document.code}-260704-18
               </strong>
@@ -1799,7 +1799,7 @@ function DealPdfViewer({
           </div>
           {page === 1 ? (
             <>
-              <div className="mt-6 grid grid-cols-2 gap-5 text-[10px]">
+              <div className="mt-6 grid grid-cols-2 gap-5 text-[12px]">
                 <div>
                   <span className="text-[#777]">SUPPLIER</span>
                   <strong className="mt-1 block text-xs">
@@ -1821,7 +1821,7 @@ function DealPdfViewer({
                   </p>
                 </div>
               </div>
-              <div className="mt-6 overflow-hidden rounded-sm border text-[9px]">
+              <div className="mt-6 overflow-hidden rounded-sm border text-[11px]">
                 <div className="grid grid-cols-[1fr_42px_70px_74px] bg-[#f5f5f3] px-2 py-2 font-semibold">
                   <span>DESCRIPTION</span>
                   <span>QTY</span>
@@ -1856,7 +1856,7 @@ function DealPdfViewer({
                   </div>
                 ))}
               </div>
-              <div className="mt-5 ml-auto w-44 text-[10px]">
+              <div className="mt-5 ml-auto w-44 text-[12px]">
                 <div className="flex justify-between border-b py-2">
                   <span>SUBTOTAL</span>
                   <strong>2,454,200 USD</strong>
@@ -1868,7 +1868,7 @@ function DealPdfViewer({
               </div>
             </>
           ) : (
-            <div className="mt-7 text-[10px] leading-5">
+            <div className="mt-7 text-[12px] leading-5">
               <h5 className="text-sm font-semibold">TERMS & CONDITIONS</h5>
               <div className="mt-4 flex flex-col gap-4 text-[#555]">
                 <p>

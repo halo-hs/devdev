@@ -233,8 +233,8 @@ function ResourceBoundary({
   if (state.loading)
     return (
       <div className="space-y-3" aria-label="불러오는 중">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-24 w-full rounded-[var(--r-md)]" />
+        <Skeleton className="h-64 w-full rounded-[var(--r-md)]" />
       </div>
     )
   if (state.error) {
@@ -621,7 +621,7 @@ function PlatformIntegrationsPage() {
   return <PlatformPage title="연동 상태" description="외부 SaaS와 인프라 환경변수의 실제 설정 여부를 확인합니다.">
     <ResourceBoundary state={state}>
       <div className="flex flex-wrap items-center gap-3 rounded-md border p-4"><Badge variant={payload.launch_ready ? "secondary" : "destructive"}>{payload.launch_ready ? "출시 준비 완료" : "출시 준비 미완료"}</Badge><span className="text-sm">설정 {numberValue(payload.configured, items.filter((row) => row.configured).length)}/{numberValue(payload.total, items.length)}</span><span className="text-sm text-muted-foreground">필수 {numberValue(payload.required_ready)}/{numberValue(payload.required_total)}</span></div>
-      {items.length === 0 ? <StatePanel title="등록된 연동이 없습니다" description="백엔드 연동 레지스트리에 항목이 추가되면 이곳에서 상태를 확인할 수 있습니다." /> : Array.from(groups.entries()).map(([category, rows]) => <Card key={category} className="rounded-md shadow-none"><CardHeader><CardTitle className="text-base">{category}</CardTitle></CardHeader><CardContent className="space-y-2">{rows.map((row) => <div key={row.key} className={cn("rounded-md border p-3", row.configured && "ui-status-success")}><div className="flex flex-wrap items-center gap-2">{row.configured ? <CheckCircle2 className="size-4 text-success" /> : <Circle className="size-4 text-muted-foreground" />}<span className="font-medium">{row.vendor}</span><Badge variant={row.required ? "secondary" : "outline"}>{row.required ? "필수" : "선택"}</Badge><Badge variant="outline">{row.launch_phase}</Badge><span className="ml-auto text-xs text-muted-foreground">{row.configured ? "설정됨" : "미설정"}</span></div><p className="mt-1 pl-6 text-xs text-muted-foreground">{row.scope}</p><div className="mt-2 flex flex-wrap gap-1 pl-6">{row.env.map((env) => <code key={env.key} className={cn("rounded border px-1.5 py-0.5 text-[11px]", env.set ? "border-success/30 text-success" : "text-muted-foreground")}>{env.set ? "✓" : "○"} {env.key}</code>)}</div></div>)}</CardContent></Card>)}
+      {items.length === 0 ? <StatePanel title="등록된 연동이 없습니다" description="백엔드 연동 레지스트리에 항목이 추가되면 이곳에서 상태를 확인할 수 있습니다." /> : Array.from(groups.entries()).map(([category, rows]) => <Card key={category} className="rounded-md shadow-none"><CardHeader><CardTitle className="text-base">{category}</CardTitle></CardHeader><CardContent className="space-y-2">{rows.map((row) => <div key={row.key} className={cn("rounded-md border p-3", row.configured && "ui-status-success")}><div className="flex flex-wrap items-center gap-2">{row.configured ? <CheckCircle2 className="size-4 text-success" /> : <Circle className="size-4 text-muted-foreground" />}<span className="font-medium">{row.vendor}</span><Badge variant={row.required ? "secondary" : "outline"}>{row.required ? "필수" : "선택"}</Badge><Badge variant="outline">{row.launch_phase}</Badge><span className="ml-auto text-xs text-muted-foreground">{row.configured ? "설정됨" : "미설정"}</span></div><p className="mt-1 pl-6 text-xs text-muted-foreground">{row.scope}</p><div className="mt-2 flex flex-wrap gap-1 pl-6">{row.env.map((env) => <code key={env.key} className={cn("rounded border px-1.5 py-0.5 text-[13px]", env.set ? "border-success/30 text-success" : "text-muted-foreground")}>{env.set ? "✓" : "○"} {env.key}</code>)}</div></div>)}</CardContent></Card>)}
     </ResourceBoundary>
   </PlatformPage>
 }

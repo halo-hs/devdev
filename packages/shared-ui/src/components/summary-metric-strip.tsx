@@ -107,7 +107,7 @@ export function SummaryMetricStrip({
               {item.note ? (
                 <Badge
                   className={cn(
-                    "h-5 rounded-full border-0 px-2 text-[11px] font-medium",
+                    "h-5 rounded-full border-0 px-2 text-[13px] font-medium",
                     noteToneClasses[tone]
                   )}
                 >

@@ -562,7 +562,7 @@ export function SnapWorkersPage() {
           </div>
 
           {loading ? (
-            <div className="mt-4 space-y-3 py-4"><Skeleton className="h-16 w-full" /></div>
+            <div className="mt-4 space-y-3 py-4"><Skeleton className="h-16 w-full rounded-[var(--r-md)]" /></div>
           ) : joinRequests.length ? (
             <div className="mt-4 overflow-x-auto">
               <Table>
@@ -627,7 +627,7 @@ export function SnapWorkersPage() {
           </div>
 
           {loading ? (
-            <div className="mt-4 space-y-3 py-5"><Skeleton className="h-16 w-full" /><Skeleton className="h-16 w-full" /><Skeleton className="h-16 w-full" /></div>
+            <div className="mt-4 space-y-3 py-5"><Skeleton className="h-16 w-full rounded-[var(--r-md)]" /><Skeleton className="h-16 w-full rounded-[var(--r-md)]" /><Skeleton className="h-16 w-full rounded-[var(--r-md)]" /></div>
           ) : error ? (
             <div className="mt-4 flex min-h-40 flex-col items-center justify-center rounded-md border border-destructive/30 bg-destructive/5 text-center">
               <p className="text-sm font-medium">작업 인력을 불러오지 못했습니다.</p>

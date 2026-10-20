@@ -775,8 +775,8 @@ export function SnapCustomersPage() {
 
                 {historyLoading ? (
                   <div className="mt-6 space-y-3 border-t pt-5">
-                    <Skeleton className="h-20 w-full" />
-                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-20 w-full rounded-[var(--r-md)]" />
+                    <Skeleton className="h-20 w-full rounded-[var(--r-md)]" />
                   </div>
                 ) : (
                   <div className="mt-6 space-y-6">

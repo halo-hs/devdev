@@ -70,7 +70,7 @@ export function DocumentTemplateOptions({
                 >
                   <span
                     className={cn(
-                      "flex size-8 items-center justify-center rounded-md border bg-background text-[11px] font-semibold",
+                      "flex size-8 items-center justify-center rounded-md border bg-background text-[13px] font-semibold",
                       selected
                         ? "border-primary text-primary"
                         : "text-muted-foreground"
@@ -81,11 +81,11 @@ export function DocumentTemplateOptions({
                   <span className="min-w-0">
                     <span className="flex min-w-0 items-center gap-2">
                       <strong className="truncate text-xs">{title}</strong>
-                      <span className="shrink-0 text-[10px] text-muted-foreground">
+                      <span className="shrink-0 text-[12px] text-muted-foreground">
                         {standard}
                       </span>
                     </span>
-                    <span className="mt-1 block truncate text-[11px] text-muted-foreground">
+                    <span className="mt-1 block truncate text-[13px] text-muted-foreground">
                       {description}
                     </span>
                   </span>

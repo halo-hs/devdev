@@ -123,11 +123,12 @@
   --leading-badge-lg: 24px;
 }
 
+/* Figma body text is 13/15px; the 11px caption stays explicit (tooltip, chart). */
 @theme inline {
-  --text-xs: var(--text-body-11);
-  --text-xs--line-height: var(--leading-body-11);
-  --text-sm: var(--text-body-10);
-  --text-sm--line-height: var(--leading-body-10);
+  --text-xs: var(--text-body-10);
+  --text-xs--line-height: var(--leading-body-10);
+  --text-sm: var(--text-body-9);
+  --text-sm--line-height: 20px;
   --text-base: var(--text-body-8);
   --text-base--line-height: 22px;
   --text-lg: var(--text-body-6);

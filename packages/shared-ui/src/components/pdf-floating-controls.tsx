@@ -168,11 +168,11 @@ export function PdfFloatingControls({
             <div className="flex items-center justify-between border-b border-[var(--surface-border)] px-3 py-2.5">
               <span>
                 <span className="block text-xs font-semibold">페이지 선택</span>
-                <span className="mt-0.5 block text-[10px] text-[var(--surface-muted-foreground)]">
+                <span className="mt-0.5 block text-[12px] text-[var(--surface-muted-foreground)]">
                   가로로 스크롤해 페이지를 선택하세요.
                 </span>
               </span>
-              <span className="text-[11px] text-[var(--surface-muted-foreground)]">
+              <span className="text-[13px] text-[var(--surface-muted-foreground)]">
                 전체 {pageCount}장
               </span>
             </div>
@@ -191,13 +191,13 @@ export function PdfFloatingControls({
                       setPagePickerOpen(false)
                     }}
                   >
-                    <span className="relative flex aspect-[3/4] w-12 items-center justify-center rounded-[var(--r-sm)] border border-[var(--surface-border)] bg-[var(--surface-background)] text-[10px] text-[var(--surface-muted-foreground)]">
+                    <span className="relative flex aspect-[3/4] w-12 items-center justify-center rounded-[var(--r-sm)] border border-[var(--surface-border)] bg-[var(--surface-background)] text-[12px] text-[var(--surface-muted-foreground)]">
                       {pageNumber}
                       {pageNumber === page ? (
                         <Check className="absolute -top-1 -right-1 size-3.5 rounded-[var(--r-pill)] bg-[var(--control-selected-background)] p-0.5 text-[var(--control-selected-foreground)]" />
                       ) : null}
                     </span>
-                    <span className="text-[11px]">{pageNumber}페이지</span>
+                    <span className="text-[13px]">{pageNumber}페이지</span>
                   </Button>
                 )
               )}

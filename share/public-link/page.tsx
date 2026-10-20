@@ -120,7 +120,7 @@ function SampleInvoice() {
           <p className="text-lg font-bold text-[#1148a2] sm:text-xl">
             ECOYA Demo Co.
           </p>
-          <p className="mt-2 text-[10px] leading-4 text-slate-500">
+          <p className="mt-2 text-[12px] leading-4 text-slate-500">
             123 Teheran-ro, Gangnam-gu
             <br />
             Seoul, Republic of Korea
@@ -132,38 +132,38 @@ function SampleInvoice() {
             <br />
             INVOICE
           </h3>
-          <p className="mt-2 text-[10px] text-slate-500">CI-2026-0916</p>
+          <p className="mt-2 text-[12px] text-slate-500">CI-2026-0916</p>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-6 py-7 text-xs leading-5">
         <div>
-          <p className="mb-2 text-[10px] font-semibold text-slate-500">
+          <p className="mb-2 text-[12px] font-semibold text-slate-500">
             SELLER / EXPORTER
           </p>
           <p className="font-semibold">ECOYA Demo Co.</p>
           <p>Seoul, Republic of Korea</p>
         </div>
         <div>
-          <p className="mb-2 text-[10px] font-semibold text-slate-500">
+          <p className="mb-2 text-[12px] font-semibold text-slate-500">
             BUYER / CONSIGNEE
           </p>
           <p className="font-semibold">ACME GmbH</p>
           <p>Hamburg, Germany</p>
         </div>
         <div>
-          <p className="text-[10px] font-semibold text-slate-500">
+          <p className="text-[12px] font-semibold text-slate-500">
             INVOICE DATE
           </p>
           <p>September 16, 2026</p>
         </div>
         <div>
-          <p className="text-[10px] font-semibold text-slate-500">
+          <p className="text-[12px] font-semibold text-slate-500">
             TERMS OF DELIVERY
           </p>
           <p>CIF Hamburg · Incoterms® 2020</p>
         </div>
       </div>
-      <table className="w-full table-fixed text-left text-[10px] sm:text-xs">
+      <table className="w-full table-fixed text-left text-[12px] sm:text-xs">
         <caption className="sr-only">상업송장 품목 및 금액</caption>
         <thead className="border-y border-slate-200 bg-slate-50 text-slate-500">
           <tr>
@@ -209,18 +209,18 @@ function SampleInvoice() {
       </div>
       <div className="mt-10 space-y-4 text-xs leading-5">
         <div>
-          <p className="text-[10px] font-semibold text-slate-500">
+          <p className="text-[12px] font-semibold text-slate-500">
             PAYMENT TERMS
           </p>
           <p>T/T 30% in advance, 70% before shipment</p>
         </div>
         <div>
-          <p className="text-[10px] font-semibold text-slate-500">SHIPMENT</p>
+          <p className="text-[12px] font-semibold text-slate-500">SHIPMENT</p>
           <p>Busan, Korea → Hamburg, Germany</p>
           <p>HMM AMBITION / 026W</p>
         </div>
       </div>
-      <div className="mt-14 flex justify-between gap-4 border-t border-slate-200 pt-4 text-[10px] text-slate-400">
+      <div className="mt-14 flex justify-between gap-4 border-t border-slate-200 pt-4 text-[12px] text-slate-400">
         <span>Design sample · Not for commercial use</span>
         <span>1 / 1</span>
       </div>

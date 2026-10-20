@@ -378,7 +378,7 @@ function ImportantDealDocumentsPanel({
             >
               <span
                 className={cn(
-                  "shrink-0 text-[10px] font-semibold",
+                  "shrink-0 text-[12px] font-semibold",
                   isMissing
                     ? "text-warning"
                     : isSelected || isNew
@@ -388,15 +388,15 @@ function ImportantDealDocumentsPanel({
               >
                 {document.code}
               </span>
-              <span className="min-w-0 flex-1 truncate text-[11px] font-semibold">
+              <span className="min-w-0 flex-1 truncate text-[13px] font-semibold">
                 {document.type}
               </span>
               {isMissing ? (
-                <span className="shrink-0 text-[10px] font-semibold text-warning">
+                <span className="shrink-0 text-[12px] font-semibold text-warning">
                   {isManual ? "원본 없음" : "미비"}
                 </span>
               ) : isNew ? (
-                <span className="flex shrink-0 items-center gap-1 text-[10px] font-medium text-primary">
+                <span className="flex shrink-0 items-center gap-1 text-[12px] font-medium text-primary">
                   <span className="size-1.5 rounded-full bg-primary" /> 신규
                 </span>
               ) : (
@@ -1244,7 +1244,7 @@ function StatusBadge({
     <Badge
       variant="secondary"
       className={cn(
-        "h-5 rounded-full px-2 text-[11px] font-medium",
+        "h-5 rounded-full px-2 text-[13px] font-medium",
         outline ? "border bg-transparent" : "border-0",
         tone === "neutral" && (outline ? "border-muted-foreground/50 text-muted-foreground" : "bg-muted text-muted-foreground"),
         tone === "blue" && (outline ? "border-primary/50 text-primary" : "bg-primary/10 text-primary"),
@@ -1614,7 +1614,7 @@ function AuditTrail({ items }: { items: AuditItem[] }) {
         <div key={item.id} className="pb-4 last:pb-0">
           <strong className="text-sm">{item.action}</strong>
           <p className="mt-0.5 text-xs text-muted-foreground">{item.detail}</p>
-          <small className="mt-1 block text-[11px] text-muted-foreground">
+          <small className="mt-1 block text-[13px] text-muted-foreground">
             {item.actor} · {item.time}
           </small>
         </div>
@@ -1993,7 +1993,7 @@ function DealKeyMetrics({
       <dl className="grid grid-cols-2 gap-x-3 gap-y-3">
         {metrics.map(({ label, value }) => (
           <div key={label} className="min-w-0">
-            <dt className="text-[11px] text-muted-foreground">{label}</dt>
+            <dt className="text-[13px] text-muted-foreground">{label}</dt>
             <dd className="mt-1 text-sm leading-5 font-semibold break-words tabular-nums">
               {value}
             </dd>
@@ -2595,12 +2595,12 @@ function DealPdf({
     >
       <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--surface-border)] bg-background px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[9px] font-semibold text-[var(--color-red-2)]">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[11px] font-semibold text-[var(--color-red-2)]">
             PDF
           </span>
           <span className="min-w-0">
             <span className="block truncate text-xs font-semibold">{file}</span>
-            <span className="mt-0.5 block truncate text-[10px] text-muted-foreground">
+            <span className="mt-0.5 block truncate text-[12px] text-muted-foreground">
               {slot.code} · {slot.type} · {fieldSummary}
             </span>
           </span>
@@ -2706,7 +2706,7 @@ function CandidateValuePicker({
           type="button"
           variant="outline"
           size="sm"
-          className="h-7 gap-1.5 border-destructive/35 px-2 text-[11px] text-destructive hover:bg-destructive/5 hover:text-destructive"
+          className="h-7 gap-1.5 border-destructive/35 px-2 text-[13px] text-destructive hover:bg-destructive/5 hover:text-destructive"
         >
           문서별 값 {candidates.length}개
           <ChevronDown className="size-3" />
@@ -2715,7 +2715,7 @@ function CandidateValuePicker({
       <PopoverContent align="start" className="z-[var(--z-popup)] w-80 max-w-[calc(100vw-2rem)] gap-0 p-1">
         <div className="border-b px-2.5 py-2">
           <strong className="text-xs">{label} 기준값 선택</strong>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
+          <p className="mt-0.5 text-[13px] text-muted-foreground">
             연결 문서에서 읽은 값 중 거래에 사용할 값을 고릅니다.
           </p>
         </div>
@@ -2738,7 +2738,7 @@ function CandidateValuePicker({
               >
                 <Badge
                   variant="secondary"
-                  className="justify-center px-1 text-[10px]"
+                  className="justify-center px-1 text-[12px]"
                 >
                   {candidate.source}
                 </Badge>
@@ -2751,14 +2751,14 @@ function CandidateValuePicker({
                   >
                     {candidate.value}
                   </span>
-                  <span className="block truncate text-[10px] text-muted-foreground">
+                  <span className="block truncate text-[12px] text-muted-foreground">
                     {candidate.document}
                   </span>
                 </span>
                 {selected ? (
                   <Check className="size-3.5 text-primary" />
                 ) : (
-                  <span className="text-[10px] text-destructive">다른 값</span>
+                  <span className="text-[12px] text-destructive">다른 값</span>
                 )}
               </Button>
             )
@@ -3609,7 +3609,7 @@ function DealDocumentBundleRail({
           ))}
         </div>
         <div className="field-scrollbar mt-2 max-h-64 overflow-y-auto rounded-[var(--r-md)] ring-1 ring-[var(--table-border)]">
-          <div className="sticky top-0 z-10 grid grid-cols-[38px_minmax(0,1fr)_90px] gap-2 border-b border-[var(--table-border)] bg-[var(--table-header-background)] px-2.5 py-2 text-[10px] font-medium text-muted-foreground">
+          <div className="sticky top-0 z-10 grid grid-cols-[38px_minmax(0,1fr)_90px] gap-2 border-b border-[var(--table-border)] bg-[var(--table-header-background)] px-2.5 py-2 text-[12px] font-medium text-muted-foreground">
             <span>종류</span>
             <span>파일</span>
             <span className="text-right">상태</span>
@@ -3631,7 +3631,7 @@ function DealDocumentBundleRail({
                 >
                   <Badge
                     variant="secondary"
-                    className="justify-center px-1 text-[10px]"
+                    className="justify-center px-1 text-[12px]"
                   >
                     {document.code}
                   </Badge>
@@ -3639,7 +3639,7 @@ function DealDocumentBundleRail({
                     <span className="block truncate text-xs font-medium">
                       {document.file || `${document.type} 미연결`}
                     </span>
-                    <span className="mt-0.5 block text-[10px] text-muted-foreground">
+                    <span className="mt-0.5 block text-[12px] text-muted-foreground">
                       {document.type}
                     </span>
                   </span>
@@ -3715,14 +3715,14 @@ function GeneratedDealDocumentsList({
             )}
             onClick={() => onSelect(document.number)}
           >
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-[var(--r-sm)] border border-[var(--surface-border)] text-[9px] font-bold text-primary">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-[var(--r-sm)] border border-[var(--surface-border)] text-[11px] font-bold text-primary">
               {document.number.split("-")[0]}
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-xs font-semibold">
                 {document.title}
               </span>
-              <span className="mt-0.5 block truncate text-[10px] text-muted-foreground">
+              <span className="mt-0.5 block truncate text-[12px] text-muted-foreground">
                 {document.number}.pdf · {document.type}
               </span>
             </span>
@@ -3741,7 +3741,7 @@ function GeneratedDealDocumentsList({
                 ) : null}
               </span>
             ) : (
-              <span className="w-14 text-right text-[10px] text-muted-foreground">
+              <span className="w-14 text-right text-[12px] text-muted-foreground">
                 확정 후 가능
               </span>
             )}
@@ -4336,7 +4336,7 @@ function DocumentsTab({
                     <strong className="text-xs">
                       {fieldConflict.label}에 다른 변경이 있습니다.
                     </strong>
-                    <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
+                    <p className="mt-1 text-[13px] leading-5 text-muted-foreground">
                       {fieldConflict.updatedBy}의 값 “
                       {fieldConflict.current || "비어 있음"}”과 내 값 “
                       {fieldConflict.mine || "비어 있음"}” 중 적용할 값을
@@ -4496,7 +4496,7 @@ function DocumentsTab({
                         key={documentKey(document)}
                         type="button"
                         className={cn(
-                          "flex h-7 shrink-0 items-center gap-1 rounded-[var(--r-sm)] px-2 text-[10px] font-medium whitespace-nowrap transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
+                          "flex h-7 shrink-0 items-center gap-1 rounded-[var(--r-sm)] px-2 text-[12px] font-medium whitespace-nowrap transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
                           isSelected
                             ? "bg-[var(--control-selected-soft-background)] text-primary"
                             : "text-muted-foreground hover:bg-[var(--surface-muted-background)] hover:text-foreground"
@@ -4525,7 +4525,7 @@ function DocumentsTab({
                   <button
                     type="button"
                     className={cn(
-                      "flex h-7 shrink-0 items-center gap-1 rounded-[var(--r-sm)] px-2 text-[10px] font-medium transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
+                      "flex h-7 shrink-0 items-center gap-1 rounded-[var(--r-sm)] px-2 text-[12px] font-medium transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
                       documentsExpanded || supplementaryDocumentsExpanded
                         ? "bg-muted text-foreground"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -4565,7 +4565,7 @@ function DocumentsTab({
                   <>
                     <div className="mt-3 flex items-center justify-between px-1">
                       <h4 className="text-xs font-semibold">중요 서류</h4>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-[12px] text-muted-foreground">
                         거래 진행에 필요한 기준 서류
                       </span>
                     </div>
@@ -4583,7 +4583,7 @@ function DocumentsTab({
                 ) : null}
                 <div className="mt-3 flex items-center justify-between px-1">
                   <h4 className="text-xs font-semibold">기타 서류</h4>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-[12px] text-muted-foreground">
                     {visibleSupplementaryDocuments.length}건
                   </span>
                 </div>
@@ -4605,14 +4605,14 @@ function DocumentsTab({
             <div className="mt-2">
               {!selected.file ? (
                 <div className="flex min-w-0 items-center gap-2 border-y border-[var(--surface-border)] px-1 py-2.5">
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[9px] font-semibold text-[var(--color-red-2)]">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[11px] font-semibold text-[var(--color-red-2)]">
                     PDF
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-xs font-semibold">
                       {selected.type} 미연결
                     </span>
-                    <span className="mt-0.5 block truncate text-[10px] text-muted-foreground">
+                    <span className="mt-0.5 block truncate text-[12px] text-muted-foreground">
                       {selected.code} · {selected.type} · 파일 추가 필요
                     </span>
                   </span>
@@ -5073,7 +5073,7 @@ function FulfillmentTab({
                   <span className="text-xs font-medium text-white/75">
                     선적 / 구간
                   </span>
-                  <div className="grid grid-cols-7 text-center text-[11px] text-muted-foreground">
+                  <div className="grid grid-cols-7 text-center text-[13px] text-muted-foreground">
                     {[0, 15, 30, 45, 60, 75, 90].map((day) => (
                       <span key={day}>{formatTimelineDate(day)}</span>
                     ))}
@@ -6463,7 +6463,7 @@ export function DealDetailScreen({
                       }}
                     />
                   ) : (
-                    <span className="truncate text-[11px] text-[var(--surface-muted-foreground)]">
+                    <span className="truncate text-[13px] text-[var(--surface-muted-foreground)]">
                       {dealTitle} · {profile.counterparty}
                     </span>
                   )}
@@ -6471,7 +6471,7 @@ export function DealDetailScreen({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-auto shrink-0 gap-1 p-0 text-[11px] text-[var(--surface-muted-foreground)] shadow-none"
+                    className="h-auto shrink-0 gap-1 p-0 text-[13px] text-[var(--surface-muted-foreground)] shadow-none"
                     disabled={refreshing}
                     aria-label="거래 다시 불러오기"
                     onClick={() => void refresh.refresh()}
@@ -6530,7 +6530,7 @@ export function DealDetailScreen({
                 >
                   <div className="border-b p-3">
                     <div className="text-xs font-semibold">문서 유형</div>
-                    <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
+                    <p className="mt-1 text-[13px] leading-4 text-muted-foreground">
                       이 거래 정보로 만들 문서 유형을 선택하세요.
                     </p>
                     <div className="mt-3">
@@ -6582,7 +6582,7 @@ export function DealDetailScreen({
                     }
                   >
                     문서 고객 전달
-                    <span className="ml-0.5 inline-flex min-w-5 items-center justify-center rounded-full bg-white/15 px-1.5 text-[11px] text-white">
+                    <span className="ml-0.5 inline-flex min-w-5 items-center justify-center rounded-full bg-white/15 px-1.5 text-[13px] text-white">
                       {generatedDocuments.length}
                     </span>
                   </Button>
@@ -6590,17 +6590,17 @@ export function DealDetailScreen({
                 <PopoverContent align="end" className="w-[440px] p-0">
                   <div className="border-b border-[var(--surface-border)] px-4 py-3">
                     <div className="text-sm font-semibold">문서 고객 전달</div>
-                    <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
+                    <p className="mt-1 text-[13px] leading-4 text-muted-foreground">
                       확정된 생성 문서 1개를 본문으로 선택하고, 수신·업로드된
                       서류는 동봉 문서로 함께 보낼 수 있습니다.
                     </p>
                   </div>
                   <div className="field-scrollbar max-h-[min(62vh,560px)] overflow-y-auto px-2 py-2">
                     <div className="flex items-center justify-between px-2 py-1">
-                      <span className="text-[11px] font-semibold">
+                      <span className="text-[13px] font-semibold">
                         본문 문서
                       </span>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-[12px] text-muted-foreground">
                         1개 선택
                       </span>
                     </div>
@@ -6611,10 +6611,10 @@ export function DealDetailScreen({
                     />
                     <div className="mt-2 border-t border-[var(--surface-border)] pt-2">
                       <div className="flex items-center justify-between px-2 py-1.5">
-                        <span className="text-[11px] font-semibold">
+                        <span className="text-[13px] font-semibold">
                           동봉 문서
                         </span>
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-[12px] text-muted-foreground">
                           {deliveryAttachmentNames.size}개 선택 · 최대{" "}
                           {dealDeliveryAttachmentOptions.length}개
                         </span>
@@ -6656,14 +6656,14 @@ export function DealDetailScreen({
                               >
                                 {selected ? <Check className="size-3" /> : null}
                               </span>
-                              <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[9px] font-semibold text-primary">
+                              <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[11px] font-semibold text-primary">
                                 {document.code}
                               </span>
                               <span className="min-w-0 flex-1">
                                 <span className="block truncate text-xs font-medium">
                                   {document.file}
                                 </span>
-                                <span className="mt-0.5 block text-[10px] text-muted-foreground">
+                                <span className="mt-0.5 block text-[12px] text-muted-foreground">
                                   {document.type} · {document.source}
                                 </span>
                               </span>
@@ -6677,7 +6677,7 @@ export function DealDetailScreen({
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-3 border-t border-[var(--surface-border)] px-4 py-3">
-                    <span className="text-[11px] text-muted-foreground">
+                    <span className="text-[13px] text-muted-foreground">
                       생성 문서 {deliveryDocumentNumber ? 1 : 0}개 · 동봉 문서{" "}
                       {deliveryAttachmentNames.size}개
                     </span>

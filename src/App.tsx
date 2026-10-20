@@ -2173,7 +2173,7 @@ function AppNav({
                 className="p-0"
               >
                 {group.label ? (
-                  <SidebarGroupLabel className="text-[11px] leading-4 font-normal text-[var(--surface-foreground)] group-data-[collapsible=icon]:pointer-events-none">{group.label}</SidebarGroupLabel>
+                  <SidebarGroupLabel className="text-[13px] leading-4 font-normal text-[var(--surface-foreground)] group-data-[collapsible=icon]:pointer-events-none">{group.label}</SidebarGroupLabel>
                 ) : null}
                 <SidebarGroupContent>
                   <SidebarMenu>
@@ -2225,7 +2225,7 @@ function AppNav({
                   className="p-0"
                 >
                   {group.label ? (
-                    <SidebarGroupLabel className="text-[11px] leading-4 font-normal text-[var(--surface-foreground)] group-data-[collapsible=icon]:pointer-events-none">{group.label}</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-[13px] leading-4 font-normal text-[var(--surface-foreground)] group-data-[collapsible=icon]:pointer-events-none">{group.label}</SidebarGroupLabel>
                   ) : null}
                   <SidebarGroupContent>
                     <SidebarMenu>
@@ -2553,7 +2553,7 @@ function NotificationButton({
     >
       <NavigationIcon name="notification" />
       {unreadCount > 0 ? (
-        <span className="absolute -top-0.5 -right-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full border-2 border-white bg-[#e53b3b] px-1 text-[11px] leading-[14px] font-bold text-white">
+        <span className="absolute -top-0.5 -right-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full border-2 border-white bg-[#e53b3b] px-1 text-[13px] leading-[14px] font-bold text-white">
           {unreadCount > 9 ? "9+" : unreadCount}
         </span>
       ) : null}
@@ -2630,7 +2630,10 @@ function TopBarUtilities({
       >
         <span className="text-[var(--color-gray-6)]">세계시간</span>
         <span className="text-[var(--color-gray-2)] tabular-nums">
-          서울 {formatWorldTime("Asia/Seoul", now)}
+          {worldClockZones
+            .slice(0, 3)
+            .map(([label, timeZone]) => `${label} ${formatWorldTime(timeZone, now)}`)
+            .join(" · ")}
         </span>
         <ChevronDown className="size-3.5 text-[var(--color-gray-2)]" />
       </Button>
@@ -2827,7 +2830,7 @@ function DocumentPaper({
       <div className={cn("flex items-start justify-between gap-8", archetype === "formal" && "border-2 p-4", archetype === "letter" && "border-b pb-4")}>
         <div>
           <div
-            className="text-[11px] font-semibold tracking-[0.14em] uppercase"
+            className="text-[13px] font-semibold tracking-[0.14em] uppercase"
             style={{ color: accent }}
           >
             {result ? `${templateCode} Generated Draft` : "Invoice"}
@@ -2836,7 +2839,7 @@ function DocumentPaper({
             {result ? templateTitle : "INVOICE"}
           </div>
         </div>
-        <div className="flex min-h-10 flex-col items-end justify-start text-right text-[11px] leading-5 text-muted-foreground">
+        <div className="flex min-h-10 flex-col items-end justify-start text-right text-[13px] leading-5 text-muted-foreground">
           {logo?.source === "file" && logo.dataUrl ? (
             <img
               src={logo.dataUrl}
@@ -2889,7 +2892,7 @@ function DocumentPaper({
                 <div
                   key={`${row}-${cell}`}
                   className={cn(
-                    "h-9 border-r px-2 py-2 text-[10px] last:border-r-0 xl:px-3 xl:text-[11px]",
+                    "h-9 border-r px-2 py-2 text-[12px] last:border-r-0 xl:px-3 xl:text-[13px]",
                     row === 0
                       ? "bg-muted/65 font-medium text-muted-foreground"
                       : "text-foreground",
@@ -2952,7 +2955,7 @@ function PaperField({
         tone === "danger" && "bg-destructive/7 ring-1 ring-destructive/35"
       )}
     >
-      <div className="text-[11px] text-muted-foreground">{label}</div>
+      <div className="text-[13px] text-muted-foreground">{label}</div>
       <div className="mt-1 font-semibold">{value}</div>
     </div>
   )
@@ -3065,7 +3068,7 @@ function DocumentStage({
             <FileText className="size-4 shrink-0 text-muted-foreground" />
             <span className="min-w-0">
               {toolbarEyebrow ? (
-                <span className="block text-[11px] text-muted-foreground">
+                <span className="block text-[13px] text-muted-foreground">
                   {toolbarEyebrow}
                 </span>
               ) : null}
@@ -3151,7 +3154,7 @@ function DocumentStage({
       </PannablePdfViewport>
       {aiDetectionVisible ? (
         <div className="pointer-events-none absolute top-18 right-7 hidden w-44 rounded-md border bg-background/95 p-3 shadow-sm xl:block">
-          <div className="text-[11px] font-semibold text-primary">AI 검출</div>
+          <div className="text-[13px] font-semibold text-primary">AI 검출</div>
           <div className="mt-2 text-xs leading-5 text-muted-foreground">
             금액 합계가 거래 데이터와 다릅니다. 우측 패널에서 확인하세요.
           </div>
@@ -3282,7 +3285,7 @@ function EmailForwardInPanel({
           {visibleEmails.slice(0, 2).map((mail) => (
             <div key={mail.id} className="px-1 py-2">
               <div className="grid grid-cols-[minmax(0,.8fr)_auto] gap-2">
-                <div className="truncate text-[11px] text-muted-foreground">
+                <div className="truncate text-[13px] text-muted-foreground">
                   {mail.received} · {mail.from}
                 </div>
                 <ToneBadge tone="neutral">{mail.documents.length}개</ToneBadge>
@@ -3297,7 +3300,7 @@ function EmailForwardInPanel({
         <div className="mt-3">
           <div className="grid grid-cols-2 gap-2 rounded-[var(--r-lg)] bg-[var(--surface-background)] px-3 py-3 shadow-[var(--shadow-section)] ring-1 ring-[var(--surface-border)]">
             <label className="grid gap-1">
-              <span className="text-[11px] font-medium text-muted-foreground">
+              <span className="text-[13px] font-medium text-muted-foreground">
                 수신일자
               </span>
               <AppSelect
@@ -3315,7 +3318,7 @@ function EmailForwardInPanel({
               />
             </label>
             <label className="grid gap-1">
-              <span className="text-[11px] font-medium text-muted-foreground">
+              <span className="text-[13px] font-medium text-muted-foreground">
                 발신자 멤버
               </span>
               <AppSelect
@@ -3520,7 +3523,7 @@ function DuplicateUploadAlert({
       <AlertTitle className="text-xs">
         {notice.kind === "content" ? "동일한 내용의 문서가 있습니다." : "이미 같은 이름의 문서가 있습니다."}
       </AlertTitle>
-      <AlertDescription className="text-[11px] leading-5">
+      <AlertDescription className="text-[13px] leading-5">
         <span className="font-semibold">{notice.fileName}</span>
         {notice.dealLabel
           ? ` 파일은 ${notice.dealLabel} 거래에 이미 포함되어 있습니다.`
@@ -3987,7 +3990,7 @@ function UploadDocumentTypeMark({
       title={uploadDocumentTypeLabel(documentType)}
       aria-label={`문서 유형 ${uploadDocumentTypeLabel(documentType)}`}
     >
-      <span className="text-[9px] leading-none font-bold tracking-wide">
+      <span className="text-[11px] leading-none font-bold tracking-wide">
         {uploadDocumentTypeCode(documentType)}
       </span>
     </span>
@@ -4154,24 +4157,17 @@ function HorizontalDocumentTray({
 
         {selectedDocument ? (
           <div className="order-2 flex min-w-0 w-full items-center gap-2 px-3 pb-2 xl:order-none xl:w-auto xl:flex-1 xl:rounded-[var(--r-md)] xl:bg-[var(--color-gray-11)] xl:py-2">
-            <UploadDocumentTypeMark
-              documentType={selectedDocument.documentType}
-              className="size-9"
-            />
-            <div className="min-w-0 flex-1 leading-tight">
-              <div className="flex min-w-0 items-center gap-1.5">
-                <span className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[var(--surface-foreground)]">
-                  {uploadDocumentTypeLabel(selectedDocument.documentType)}
-                </span>
-                <span className="shrink-0 text-[11px] text-[var(--surface-muted-foreground)]">
-                  {selectedIndex >= 0 ? `· ${selectedIndex + 1} / ${documents.length}` : "· 연결 완료"}
-                </span>
-                <span
-                  className="min-w-0 truncate text-[length:var(--text-body-10)] font-medium text-[var(--surface-muted-foreground)]"
-                  title={selectedDocument.name}
-                >
-                  · {selectedDocument.name}
-                </span>
+            {/* Figma AccordionHeader/CurrentDoc (6294:32320): file name over type · position. */}
+            <div className="min-w-0 flex-1">
+              <div
+                className="truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-medium text-[var(--color-gray-2)]"
+                title={selectedDocument.name}
+              >
+                {selectedDocument.name}
+              </div>
+              <div className="truncate text-[13px] leading-4 text-[var(--color-gray-5)]">
+                {uploadDocumentTypeLabel(selectedDocument.documentType)}
+                {selectedIndex >= 0 ? ` · ${selectedIndex + 1}/${documents.length}` : " · 연결 완료"}
               </div>
             </div>
             <ToneBadge tone={selectedDocument.tone}>
@@ -4181,7 +4177,8 @@ function HorizontalDocumentTray({
         ) : null}
 
         <span aria-hidden="true" className="hidden h-[26px] w-px shrink-0 bg-[var(--color-gray-10)] xl:block" />
-        <div className="ml-auto hidden h-11 shrink-0 items-center gap-2 whitespace-nowrap pr-2 text-[11px] font-medium xl:flex">
+        <div className="ml-auto hidden h-11 shrink-0 items-center gap-2 whitespace-nowrap pr-2 text-[13px] font-medium xl:flex">
+          <span className="font-normal text-[var(--color-gray-5)]">오늘 처리할 서류</span>
           <span className="rounded-[10px] bg-[var(--color-system-orange6)] px-2 py-0.5 text-[var(--color-orange-2)]">
             확인 대기 {reviewCount}
           </span>
@@ -5722,7 +5719,7 @@ function BeforeUploadState({
                     aria-hidden="true"
                   />
                 )}
-                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[13px] font-semibold text-primary">
                   {index + 1}
                 </span>
                 <span>{title}</span>
@@ -6067,7 +6064,7 @@ function DocumentReviewWorkspace({
       <div className="flex min-h-[72px] shrink-0 items-center justify-between gap-4 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-5 py-3">
         <div className="min-w-0">
           <h2 className="truncate text-sm font-semibold">항목 검토</h2>
-          <p className="mt-1 truncate text-[11px] text-[var(--surface-muted-foreground)]">
+          <p className="mt-1 truncate text-[13px] text-[var(--surface-muted-foreground)]">
             AI가 문서에서 읽은 항목 값을 확인하세요.
           </p>
         </div>
@@ -6089,7 +6086,7 @@ function DocumentReviewWorkspace({
               <AlertTitle className="text-xs">
                 은행거래내역서 — 거래 연결 + 일정 매칭
               </AlertTitle>
-              <AlertDescription className="text-[11px] leading-5">
+              <AlertDescription className="text-[13px] leading-5">
                 거래 연결 단계에서 같은 통화의 미결제 일정을 선택하면 검토 완료
                 후 정산 현금을 기록합니다. 자동 환전은 하지 않으며, 맞는 일정이
                 없으면 서류만 연결하고 현금은 정산에서 기록합니다.
@@ -6677,7 +6674,7 @@ function UploadFieldHistory() {
       >
         <History className="size-3.5 text-muted-foreground" />
         필드 변경 이력
-        <span className="ml-auto text-[10px] font-normal text-muted-foreground">
+        <span className="ml-auto text-[12px] font-normal text-muted-foreground">
           AI 최초 추출 포함
         </span>
         {open ? (
@@ -6687,7 +6684,7 @@ function UploadFieldHistory() {
         )}
       </button>
       {open ? (
-        <div className="border-t border-[var(--surface-border)] px-4 py-3 text-[11px]">
+        <div className="border-t border-[var(--surface-border)] px-4 py-3 text-[13px]">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
             <span className="font-semibold text-foreground">AI 근거</span>
             <span>문서 최초 추출</span>
@@ -6988,7 +6985,7 @@ function CurrencyUnitSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-40 gap-0 p-2">
-        <div className="px-2 py-1.5 text-[11px] font-semibold">통화 선택</div>
+        <div className="px-2 py-1.5 text-[13px] font-semibold">통화 선택</div>
         <div className="grid gap-0.5">
           {REVIEW_CURRENCIES.map((option) => (
             <Button
@@ -7449,7 +7446,7 @@ function DealConfirmPanel({
         <div className="flex min-h-16 shrink-0 items-center justify-between border-b px-5 py-2">
           <div className="min-w-0 pr-3">
             <div className="text-sm font-semibold">거래 연결</div>
-            <p className="mt-1 truncate text-[11px] text-muted-foreground">
+            <p className="mt-1 truncate text-[13px] text-muted-foreground">
               확인한 문서 값을 기준으로 일치 근거를 확인하고 연결할 거래를
               선택하세요.
             </p>
@@ -7499,7 +7496,7 @@ function DealConfirmPanel({
                   <div className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold">
                     문서에서 읽은 거래 값
                   </div>
-                  <div className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-primary">
+                  <div className="flex shrink-0 items-center gap-1 text-[13px] font-medium text-primary">
                     <Sparkles className="size-3.5" /> AI 추천 기준
                   </div>
                 </div>
@@ -7510,7 +7507,7 @@ function DealConfirmPanel({
                       className="min-w-0 border-t border-[var(--color-gray-10)] py-2.5 first:border-t-0 sm:border-t-0 sm:border-l sm:px-3 sm:first:border-l-0 sm:first:pl-0 sm:last:pr-0"
                     >
                       <div className="flex min-w-0 items-center gap-2">
-                        <dt className="truncate text-[11px] leading-4 text-[var(--color-gray-4)]">
+                        <dt className="truncate text-[13px] leading-4 text-[var(--color-gray-4)]">
                           {field.label}
                         </dt>
                         <Badge
@@ -7590,7 +7587,7 @@ function DealConfirmPanel({
                     <AlertTitle className="text-xs">
                       거래 후보를 불러오지 못했습니다
                     </AlertTitle>
-                    <AlertDescription className="text-[11px] leading-5">
+                    <AlertDescription className="text-[13px] leading-5">
                       후보를 확인하지 않은 채 새 거래를 만들면 중복될 수
                       있습니다.
                     </AlertDescription>
@@ -7609,8 +7606,8 @@ function DealConfirmPanel({
               ) : candidateLoadState === "loading" ? (
                 <div className="mt-3 space-y-2" aria-label="거래 후보 조회 중">
                   <Skeleton className="h-9 w-full" />
-                  <Skeleton className="h-16 w-full" />
-                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full rounded-[var(--r-md)]" />
+                  <Skeleton className="h-16 w-full rounded-[var(--r-md)]" />
                 </div>
               ) : (
                 <>
@@ -7622,7 +7619,7 @@ function DealConfirmPanel({
                             ? "새 거래 등록"
                             : "새 거래처와 거래 등록"}
                         </div>
-                        <p className="mt-1 text-[11px] text-muted-foreground">
+                        <p className="mt-1 text-[13px] text-muted-foreground">
                           {hasReadCounterparty
                           ? activeLink
                             ? "문서에서 확인한 거래처에 새 거래를 등록한 뒤, 연결 변경을 확인합니다."
@@ -7650,7 +7647,7 @@ function DealConfirmPanel({
                               <span className="min-w-0 flex-1 truncate">
                                 {aiCounterpartyName}
                               </span>
-                              <span className="shrink-0 text-[10px] font-normal text-muted-foreground">
+                              <span className="shrink-0 text-[12px] font-normal text-muted-foreground">
                                 문서에서 확인
                               </span>
                             </div>
@@ -7676,7 +7673,7 @@ function DealConfirmPanel({
                               placeholder="거래번호를 입력하세요"
                               aria-label="새 거래번호"
                             />
-                            <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[10px] text-muted-foreground">
+                            <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[12px] text-muted-foreground">
                               {newDealNumber === recommendedNewDealNumber
                                 ? "추천 번호"
                                 : "직접 입력"}
@@ -7780,14 +7777,14 @@ function DealConfirmPanel({
                                     {candidate.stage}
                                   </ToneBadge>
                                 </span>
-                                <span className="mt-1 block truncate text-[11px] text-muted-foreground">
+                                <span className="mt-1 block truncate text-[13px] text-muted-foreground">
                                   {candidate.id} · {candidate.party}
                                 </span>
-                                <span className="mt-1 block text-[11px] text-primary">
+                                <span className="mt-1 block text-[13px] text-primary">
                                   {candidate.item} · {candidate.amount}{" "}
                                   {candidate.currency}
                                 </span>
-                                {candidate.id === activeLink?.dealId ? <span className="mt-2 block text-[10px] font-medium">현재 연결</span> : null}
+                                {candidate.id === activeLink?.dealId ? <span className="mt-2 block text-[12px] font-medium">현재 연결</span> : null}
                               </span>
                               {recommended ? (
                                 <span className="flex min-h-12 shrink-0 items-center gap-1.5 border-l border-[var(--surface-border)] pl-4 text-xs font-semibold text-primary">
@@ -8248,7 +8245,7 @@ function RecentDocumentsTable({
                     {reuseFacts.slice(0, 2).map((fact) => (
                       <span
                         key={fact}
-                        className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary"
+                        className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[13px] font-medium text-primary"
                       >
                         {fact}
                       </span>
@@ -8712,7 +8709,7 @@ function QuotationPreviewPaper({
       className="relative mx-auto aspect-[0.72] w-[min(94%,520px)] max-w-[520px] rounded-[var(--r-xs)] border border-[var(--surface-border)] bg-[var(--color-gray-12)] px-9 py-10 text-[var(--color-indigo)] shadow-[var(--shadow-section)]"
     >
       <div className="flex items-start justify-between gap-8">
-        <div className="text-[10px] leading-3 font-bold tracking-[0.16em] text-[var(--color-primary-2)] uppercase">
+        <div className="text-[12px] leading-3 font-bold tracking-[0.16em] text-[var(--color-primary-2)] uppercase">
           ECOYA
           <br />
           CORPORATION
@@ -8789,7 +8786,7 @@ function QuotationPreviewPaper({
           <span>FREIGHT</span>
           <span>{quotationMoney(freight)}</span>
         </div>
-        <div className="flex justify-between border-b-2 border-[var(--color-primary-2)] py-2 text-[9px] font-bold">
+        <div className="flex justify-between border-b-2 border-[var(--color-primary-2)] py-2 text-[11px] font-bold">
           <span>TOTAL USD</span>
           <span>{quotationMoney(grandTotal)}</span>
         </div>
@@ -8944,7 +8941,7 @@ function StructuredDocumentCreateEditor({
         <div className="flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-4 py-2">
           <div className="mr-auto min-w-0">
             <h1 className="text-sm font-semibold">견적서 만들기</h1>
-            <p className="truncate text-[11px] text-[var(--surface-muted-foreground)]">
+            <p className="truncate text-[13px] text-[var(--surface-muted-foreground)]">
               내용을 작성하면서 오른쪽 문서 결과를 바로 확인합니다.
             </p>
           </div>
@@ -9004,11 +9001,11 @@ function StructuredDocumentCreateEditor({
                 <div className="flex min-h-17 shrink-0 items-center justify-between gap-4 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-5 py-3">
                   <div>
                     <h2 className="text-sm font-semibold">견적 정보</h2>
-                    <p className="mt-1 text-[11px] text-[var(--surface-muted-foreground)]">
+                    <p className="mt-1 text-[13px] text-[var(--surface-muted-foreground)]">
                       필수 항목을 입력하면 미리보기에 바로 반영됩니다.
                     </p>
                   </div>
-                  <div className="text-[11px] text-[var(--surface-muted-foreground)]">
+                  <div className="text-[13px] text-[var(--surface-muted-foreground)]">
                     <strong className="text-[var(--color-green-1)]">
                       필수 6/6
                     </strong>{" "}
@@ -9028,7 +9025,7 @@ function StructuredDocumentCreateEditor({
                       <Field className="grid grid-cols-[112px_minmax(0,1fr)] gap-4 px-5 py-4">
                         <div className="pt-2">
                           <FieldLabel className="text-xs">거래처</FieldLabel>
-                          <span className="mt-1 block text-[10px] text-[var(--surface-muted-foreground)]">
+                          <span className="mt-1 block text-[12px] text-[var(--surface-muted-foreground)]">
                             필수
                           </span>
                         </div>
@@ -9044,7 +9041,7 @@ function StructuredDocumentCreateEditor({
                       <Field className="grid grid-cols-[112px_minmax(0,1fr)] gap-4 px-5 py-4">
                         <div className="pt-2">
                           <FieldLabel className="text-xs">견적 번호</FieldLabel>
-                          <span className="mt-1 block text-[10px] text-[var(--surface-muted-foreground)]">
+                          <span className="mt-1 block text-[12px] text-[var(--surface-muted-foreground)]">
                             자동 생성
                           </span>
                         </div>
@@ -9060,7 +9057,7 @@ function StructuredDocumentCreateEditor({
                       <Field className="grid grid-cols-[112px_minmax(0,1fr)] gap-4 px-5 py-4">
                         <div className="pt-2">
                           <FieldLabel className="text-xs">견적일</FieldLabel>
-                          <span className="mt-1 block text-[10px] text-[var(--surface-muted-foreground)]">
+                          <span className="mt-1 block text-[12px] text-[var(--surface-muted-foreground)]">
                             필수
                           </span>
                         </div>
@@ -9081,7 +9078,7 @@ function StructuredDocumentCreateEditor({
                       <Field className="grid grid-cols-[112px_minmax(0,1fr)] gap-4 px-5 py-4">
                         <div className="pt-2">
                           <FieldLabel className="text-xs">유효기간</FieldLabel>
-                          <span className="mt-1 block text-[10px] text-[var(--color-orange-2)]">
+                          <span className="mt-1 block text-[12px] text-[var(--color-orange-2)]">
                             확인 필요
                           </span>
                         </div>
@@ -9097,7 +9094,7 @@ function StructuredDocumentCreateEditor({
                               updateDraft("validUntil", formattedValue)
                             }
                           />
-                          <FieldDescription className="text-[10px] text-[var(--color-orange-2)]">
+                          <FieldDescription className="text-[12px] text-[var(--color-orange-2)]">
                             기본 유효기간 14일보다 짧습니다.
                           </FieldDescription>
                         </div>
@@ -9909,7 +9906,7 @@ function DocumentStepPage({
                   <span className="mt-0.5 [display:-webkit-box] block overflow-hidden text-xs leading-4 text-muted-foreground [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
                     {desc}
                   </span>
-                  <span className="mt-1 block text-[11px] font-medium text-primary">
+                  <span className="mt-1 block text-[13px] font-medium text-primary">
                     {templateFieldSummary(kind)}
                   </span>
                 </span>
@@ -10151,7 +10148,7 @@ function DocumentStepPage({
                 <span className="block text-xs font-semibold">
                   조직 로고 사용
                 </span>
-                <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
+                <span className="mt-0.5 block truncate text-[13px] text-muted-foreground">
                   ECOYA Demo Co. 등록 로고
                 </span>
               </span>
@@ -10167,7 +10164,7 @@ function DocumentStepPage({
                 <span className="block text-xs font-semibold">
                   로고 파일 올리기
                 </span>
-                <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                <span className="mt-0.5 block text-[13px] text-muted-foreground">
                   PNG/JPG · 200KB 이하
                 </span>
               </span>
@@ -10608,7 +10605,7 @@ function DocumentCreateWorkbench({
                     className="rounded-md border bg-muted/25 px-3 py-2"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-muted-foreground">
+                      <span className="text-[13px] text-muted-foreground">
                         {label}
                       </span>
                       <ToneBadge tone={tone as Tone}>
@@ -11226,7 +11223,7 @@ function ShareDeliveryPanel({
                 </div>
                 {item.email ? (
                   <div className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
-                    <span className="text-[11px] text-muted-foreground">시도 {item.email.attempts ?? 1}회</span>
+                    <span className="text-[13px] text-muted-foreground">시도 {item.email.attempts ?? 1}회</span>
                     {item.email.status === "requested" || item.email.status === "queued" ? (
                       <Button variant="outline" size="xs" onClick={() => onCancelEmail?.(item.email!.id)}>
                         요청 취소
@@ -11421,7 +11418,7 @@ function CustomerPreviewDialog({
                       className="rounded-md border bg-background px-3 py-2"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="truncate text-[11px] font-semibold text-muted-foreground uppercase">
+                        <span className="truncate text-[13px] font-semibold text-muted-foreground uppercase">
                           {label}
                         </span>
                         <span className="size-2 rounded-full bg-success" />
@@ -11445,7 +11442,7 @@ function CustomerPreviewDialog({
                     key={label}
                     className="rounded-lg border bg-background px-3.5 py-3"
                   >
-                    <div className="text-[11px] font-semibold text-muted-foreground uppercase">
+                    <div className="text-[13px] font-semibold text-muted-foreground uppercase">
                       {label}
                     </div>
                     <div className="mt-1 truncate text-sm font-semibold">
@@ -11482,7 +11479,7 @@ function CustomerPreviewDialog({
                       key={label}
                       className="rounded-lg border bg-background px-3.5 py-3"
                     >
-                      <div className="text-[11px] font-semibold text-muted-foreground uppercase">
+                      <div className="text-[13px] font-semibold text-muted-foreground uppercase">
                         {label}
                       </div>
                       <div className="mt-1 truncate text-sm font-semibold">
@@ -11638,7 +11635,7 @@ function CreateFieldValuePicker({ label, value, options, onSelect }: {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" size="sm" className="h-7 gap-1.5 px-2 text-[11px]" aria-label={`${label} 후보 값 선택`}>
+        <Button type="button" variant="outline" size="sm" className="h-7 gap-1.5 px-2 text-[13px]" aria-label={`${label} 후보 값 선택`}>
           후보 값 {options.length}개 <ChevronDown className="size-3" />
         </Button>
       </PopoverTrigger>
@@ -12130,7 +12127,7 @@ function CreateFieldReviewPanel({
                 }
               />
               {row.kind === "money" ? (
-                <div className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[11px] font-medium text-muted-foreground">
+                <div className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[13px] font-medium text-muted-foreground">
                   {fieldValues.currency?.trim() || "USD"}
                 </div>
               ) : null}
@@ -12152,7 +12149,7 @@ function CreateFieldReviewPanel({
             <div>
               <div className="text-sm font-semibold">품목</div>
               {lineItemIssueLabels.length > 0 ? (
-                <div className="mt-1 text-[11px] font-medium text-destructive">
+                <div className="mt-1 text-[13px] font-medium text-destructive">
                   은행 거절 전 점검 · {lineItemIssueLabels.join(", ")}
                 </div>
               ) : null}
@@ -12180,7 +12177,7 @@ function CreateFieldReviewPanel({
                   variant="outline"
                   size="sm"
                   type="button"
-                  className="text-[11px] text-muted-foreground hover:border-destructive/40 hover:text-destructive"
+                  className="text-[13px] text-muted-foreground hover:border-destructive/40 hover:text-destructive"
                   onClick={() => {
                     setDeletedItemIds(itemRows.map((item) => item.id))
                     setAssistPanelKey(null)
@@ -12242,7 +12239,7 @@ function CreateFieldReviewPanel({
                           }))
                         }
                       />
-                      <span className="mt-1 block text-[10px] text-muted-foreground">
+                      <span className="mt-1 block text-[12px] text-muted-foreground">
                         {item.source}
                       </span>
                     </TableCell>
@@ -12609,12 +12606,12 @@ function DocumentSourceSetupStep({
                     {selectedTemplate?.[1] ?? "문서 유형 선택"}
                   </span>
                   {selectedTemplate?.[3] ? (
-                    <span className="shrink-0 text-[11px] text-muted-foreground">
+                    <span className="shrink-0 text-[13px] text-muted-foreground">
                       {selectedTemplate[3]}
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-1 truncate text-[11px] text-muted-foreground">
+                <p className="mt-1 truncate text-[13px] text-muted-foreground">
                   {selectedTemplate
                     ? templateFieldSummary(selectedTemplate[0])
                     : "만들 문서 유형을 선택하세요"}
@@ -12640,7 +12637,7 @@ function DocumentSourceSetupStep({
                 >
                   <div className="border-b p-3">
                     <div className="text-xs font-semibold">문서 유형</div>
-                    <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
+                    <p className="mt-1 text-[13px] leading-4 text-muted-foreground">
                       유형에 따라 오른쪽 확인 항목과 PDF 양식이 구성됩니다.
                     </p>
                     <div className="mt-3">
@@ -12717,7 +12714,7 @@ function DocumentSourceSetupStep({
                 {sourceSummary ? (
                   <div className="mt-3 rounded-md border border-primary/20 bg-primary/5 px-3 py-2.5">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-[11px] font-semibold text-primary">
+                      <span className="text-[13px] font-semibold text-primary">
                         연결 근거
                       </span>
                       <ToneBadge
@@ -12726,7 +12723,7 @@ function DocumentSourceSetupStep({
                         {sourceChangesPending ? "반영 전" : "반영됨"}
                       </ToneBadge>
                     </div>
-                    <p className="mt-1.5 line-clamp-3 text-[11px] leading-5 text-foreground">
+                    <p className="mt-1.5 line-clamp-3 text-[13px] leading-5 text-foreground">
                       {sourceSummary}
                     </p>
                   </div>
@@ -12772,7 +12769,7 @@ function DocumentSourceSetupStep({
 
               <TabsContent value="files" className="m-0 p-3">
                 <div className="grid gap-2">
-                  <div className="flex items-center justify-between gap-3 px-1 text-[11px] text-muted-foreground">
+                  <div className="flex items-center justify-between gap-3 px-1 text-[13px] text-muted-foreground">
                     <span>문서함</span>
                     <span>{selectedSources.size}개 선택</span>
                   </div>
@@ -12812,7 +12809,7 @@ function DocumentSourceSetupStep({
                               {source.title}
                             </strong>
                           </span>
-                          <span className="mt-1 block truncate text-[11px] text-muted-foreground">
+                          <span className="mt-1 block truncate text-[13px] text-muted-foreground">
                             {source.meta} ·{" "}
                             {source.facts.slice(0, 2).join(" · ")}
                           </span>
@@ -12875,10 +12872,10 @@ function DocumentSourceSetupStep({
                                   {deal.stage}
                                 </ToneBadge>
                               </span>
-                              <span className="mt-1 block truncate text-[11px] text-muted-foreground">
+                              <span className="mt-1 block truncate text-[13px] text-muted-foreground">
                                 {deal.id} · {deal.party}
                               </span>
-                              <span className="mt-1 block truncate text-[11px] font-medium">
+                              <span className="mt-1 block truncate text-[13px] font-medium">
                                 {deal.item} · {deal.amount} {deal.currency}
                               </span>
                             </span>
@@ -13544,7 +13541,7 @@ function DocumentDiscrepancyPanel({
         </div>
       </div>
 
-      <p className="mt-1 text-[11px] text-muted-foreground">
+      <p className="mt-1 text-[13px] text-muted-foreground">
         연결 거래 {relatedDeal.id}의 서류 간 불일치(통화·금액·거래처·L/C)를
         발송 전에 대조합니다. 불일치를 수정해야 다음 단계로 진행할 수 있습니다.
       </p>
@@ -13560,7 +13557,7 @@ function DocumentDiscrepancyPanel({
                 : "bg-warning/[0.035]"
             )}
           >
-            <div className="flex min-w-0 items-center gap-1.5 px-3 py-2 text-[11px]">
+            <div className="flex min-w-0 items-center gap-1.5 px-3 py-2 text-[13px]">
               <span
                 className="min-w-0 basis-[18%] truncate font-medium"
                 title={finding.label}
@@ -13588,7 +13585,7 @@ function DocumentDiscrepancyPanel({
                 {finding.referenceValue || "—"}
               </span>
               <span
-                className="flex min-w-0 flex-1 items-center gap-1 text-[10px] text-muted-foreground"
+                className="flex min-w-0 flex-1 items-center gap-1 text-[12px] text-muted-foreground"
                 title={finding.source}
               >
                 <FileText className="size-3 shrink-0" />
@@ -14149,7 +14146,7 @@ function DocumentReviewSharePanel({
             </ToneBadge>
           </div>
           {!documentConfirmed ? (
-            <p className="mt-1 text-[11px] text-muted-foreground">
+            <p className="mt-1 text-[13px] text-muted-foreground">
               {templateTitle} · {documentNumber}.pdf · {documentDirection === "purchase" ? "구매" : documentDirection === "sales" ? "판매" : "방향 확인 필요"}
             </p>
           ) : null}
@@ -14196,7 +14193,7 @@ function DocumentReviewSharePanel({
                 <AlertTitle className="text-xs font-semibold">
                   {nextActionNotice.title}
                 </AlertTitle>
-                <AlertDescription className="text-[11px] leading-5">
+                <AlertDescription className="text-[13px] leading-5">
                   {nextActionNotice.description}
                 </AlertDescription>
               </div>
@@ -14234,7 +14231,7 @@ function DocumentReviewSharePanel({
                     key={label}
                     className="grid min-w-0 grid-cols-[88px_minmax(0,1fr)] items-center gap-3 bg-background px-3 py-2.5"
                   >
-                    <dt className="text-[11px] text-muted-foreground">
+                    <dt className="text-[13px] text-muted-foreground">
                       {label}
                     </dt>
                     <dd className="truncate font-semibold">{value}</dd>
@@ -14321,7 +14318,7 @@ function DocumentReviewSharePanel({
                           ? documentStyle.logo.name
                           : "로고 파일 선택"}
                       </span>
-                      <span className="shrink-0 text-[11px] text-muted-foreground">
+                      <span className="shrink-0 text-[13px] text-muted-foreground">
                         PNG, JPG
                       </span>
                     </span>
@@ -14518,7 +14515,7 @@ function DocumentReviewSharePanel({
                                   <span className="block truncate text-xs font-medium">
                                     {approver.name}
                                   </span>
-                                  <span className="block text-[10px] text-muted-foreground">
+                                  <span className="block text-[12px] text-muted-foreground">
                                     {approver.role}
                                   </span>
                                 </span>
@@ -14526,7 +14523,7 @@ function DocumentReviewSharePanel({
                             )
                           })}
                         </div>
-                        <div className="flex items-center gap-2 border-t px-2.5 py-2 text-[11px] text-muted-foreground">
+                        <div className="flex items-center gap-2 border-t px-2.5 py-2 text-[13px] text-muted-foreground">
                           <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5">
                             <Checkbox
                               className="!size-4 after:-inset-2 [&_[data-slot=checkbox-indicator]>svg]:!size-3"
@@ -14564,7 +14561,7 @@ function DocumentReviewSharePanel({
                     </Button>
                   </div>
                   {!approvalRequestReady ? (
-                    <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
+                    <p className="mt-2 text-[13px] leading-4 text-muted-foreground">
                       {approvalRequestBlockReason}
                     </p>
                   ) : null}
@@ -14584,10 +14581,10 @@ function DocumentReviewSharePanel({
                       </ToneBadge>
                     ))}
                   </div>
-                  <div className="mt-2 text-[11px] text-muted-foreground">
+                  <div className="mt-2 text-[13px] text-muted-foreground">
                     조민영 요청 · {lastRequestEvent?.occurredAt ?? "-"}
                   </div>
-                  <div className="mt-1 text-[11px] text-muted-foreground">
+                  <div className="mt-1 text-[13px] text-muted-foreground">
                     승인 전에는 문서를 확정할 수 없습니다.
                   </div>
                 </div>
@@ -14602,14 +14599,14 @@ function DocumentReviewSharePanel({
                       <div className="truncate text-xs font-semibold">
                         {templateTitle} · {documentNumber}.pdf
                       </div>
-                      <div className="mt-1 text-[11px] text-muted-foreground">
+                      <div className="mt-1 text-[13px] text-muted-foreground">
                         조민영 요청 · {lastRequestEvent?.occurredAt ?? "-"}
                       </div>
                     </div>
                     <ToneBadge tone="warning">결정 필요</ToneBadge>
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-3 border-t pt-3">
-                    <div className="text-[11px] text-muted-foreground">
+                    <div className="text-[13px] text-muted-foreground">
                       {actingApprover.name} · 승인자
                     </div>
                     <div className="flex gap-1.5">
@@ -14680,7 +14677,7 @@ function DocumentReviewSharePanel({
                   <div className="flex items-center gap-2 font-semibold text-success">
                     <Check className="size-3.5" /> 승인 완료
                   </div>
-                  <div className="mt-1 text-[11px] text-muted-foreground">
+                  <div className="mt-1 text-[13px] text-muted-foreground">
                     {lastDecisionEvent.actor} · 승인자 ·{" "}
                     {lastDecisionEvent.occurredAt}
                   </div>
@@ -14694,7 +14691,7 @@ function DocumentReviewSharePanel({
                   <div className="flex items-center gap-2 font-semibold text-success">
                     <Check className="size-3.5" /> 승인 처리 완료
                   </div>
-                  <div className="mt-1 text-[11px] text-muted-foreground">
+                  <div className="mt-1 text-[13px] text-muted-foreground">
                     {lastDecisionEvent.actor} · {lastDecisionEvent.occurredAt}
                   </div>
                 </div>
@@ -14710,7 +14707,7 @@ function DocumentReviewSharePanel({
                   <div className="mt-1 leading-5 text-foreground">
                     {lastDecisionEvent.reason}
                   </div>
-                  <div className="mt-1 text-[11px] text-muted-foreground">
+                  <div className="mt-1 text-[13px] text-muted-foreground">
                     {lastDecisionEvent.actor} · 승인자 ·{" "}
                     {lastDecisionEvent.occurredAt}
                   </div>
@@ -14743,7 +14740,7 @@ function DocumentReviewSharePanel({
                         ) : null}
                       </div>
                       {!approvalRequestReady ? (
-                        <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
+                        <p className="mt-2 text-[13px] leading-4 text-muted-foreground">
                           {approvalRequestBlockReason}
                         </p>
                       ) : null}
@@ -14754,7 +14751,7 @@ function DocumentReviewSharePanel({
 
               {approvalEvents.length > 0 ? (
                 <div className="mt-3 border-t pt-3">
-                  <div className="text-[11px] font-medium text-muted-foreground">
+                  <div className="text-[13px] font-medium text-muted-foreground">
                     승인 이력
                   </div>
                   <div className="mt-2 grid gap-1.5">
@@ -14767,7 +14764,7 @@ function DocumentReviewSharePanel({
                       return (
                         <div
                           key={event.id}
-                          className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 text-[11px]"
+                          className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 text-[13px]"
                         >
                           <ToneBadge
                             tone={
@@ -14895,7 +14892,7 @@ function DocumentReviewSharePanel({
                     <div className="truncate text-xs font-semibold text-primary">
                       {`https://ecoya.app/share/${documentNumber.toLowerCase()}-${activeLink.id}`}
                     </div>
-                    <div className="mt-2 text-[11px] text-muted-foreground">
+                    <div className="mt-2 text-[13px] text-muted-foreground">
                       {activeLink.opens}/{activeLink.maxOpens}회 열람 ·{" "}
                       {activeLink.expires} 만료
                     </div>
@@ -14923,13 +14920,13 @@ function DocumentReviewSharePanel({
                   <div className="mt-3 rounded-lg border bg-background p-3">
                     <div className="grid grid-cols-2 gap-2">
                       <label className="grid gap-1">
-                        <span className="text-[11px] text-muted-foreground">
+                        <span className="text-[13px] text-muted-foreground">
                           만료일
                         </span>
                         <Input className="h-8" defaultValue="2026.07.22" />
                       </label>
                       <label className="grid gap-1">
-                        <span className="text-[11px] text-muted-foreground">
+                        <span className="text-[13px] text-muted-foreground">
                           최대 열람
                         </span>
                         <Input className="h-8" defaultValue="10회" />
@@ -14953,7 +14950,7 @@ function DocumentReviewSharePanel({
                 </div>
                 <div className="mt-3 grid gap-2">
                   <label className="grid gap-1">
-                    <span className="text-[11px] text-muted-foreground">
+                    <span className="text-[13px] text-muted-foreground">
                       받는 사람
                     </span>
                     <Input
@@ -14962,7 +14959,7 @@ function DocumentReviewSharePanel({
                     />
                   </label>
                   <label className="grid gap-1">
-                    <span className="text-[11px] text-muted-foreground">
+                    <span className="text-[13px] text-muted-foreground">
                       제목
                     </span>
                     <Input
@@ -15104,7 +15101,7 @@ function DocumentConfirmedSummaryPanel({
     <aside className="flex h-full min-h-0 flex-col bg-[var(--surface-background)]">
       <div className="flex min-h-16 shrink-0 items-center justify-between gap-3 border-b border-[var(--surface-border)] px-4 py-2.5 sm:px-5">
         <div className="min-w-0">
-          <div className="text-[11px] font-medium text-[var(--surface-muted-foreground)]">문서</div>
+          <div className="text-[13px] font-medium text-[var(--surface-muted-foreground)]">문서</div>
           <div className="mt-1 flex items-center gap-2">
             <h2 className="truncate text-sm font-semibold">
               확정 문서
@@ -15154,7 +15151,7 @@ function DocumentConfirmedSummaryPanel({
                     {linkStatusLabel}
                   </ToneBadge>
                 </div>
-                <div className="mt-2 truncate text-[11px] text-muted-foreground">
+                <div className="mt-2 truncate text-[13px] text-muted-foreground">
                   {activeLink
                     ? `${activeLink.expires} 만료 · ${activeLink.opens}/${activeLink.maxOpens}회 열람`
                     : ""}
@@ -15167,7 +15164,7 @@ function DocumentConfirmedSummaryPanel({
                     {latestDeliveryStatus}
                   </ToneBadge>
                 </div>
-                <div className="mt-2 truncate text-[11px] text-muted-foreground">
+                <div className="mt-2 truncate text-[13px] text-muted-foreground">
                   {latestEmail
                     ? `${latestRecipient} · ${latestEmail.sentAt}`
                     : ""}
@@ -15964,7 +15961,7 @@ function ResultScreen({
           }
           toolbarTitle={`${documentNumber}.pdf`}
           toolbarMeta={
-            <div className="hidden items-center gap-2 text-[11px] text-muted-foreground lg:flex">
+            <div className="hidden items-center gap-2 text-[13px] text-muted-foreground lg:flex">
               <ToneBadge tone={documentConfirmed ? "success" : "blue"}>
                 {documentConfirmed ? "확정" : "미리보기"}
               </ToneBadge>
@@ -16126,7 +16123,7 @@ function ResultScreen({
               {documentStatusLabel}
             </ToneBadge>
           </div>
-          <p className="truncate text-[11px] text-[var(--surface-muted-foreground)]">
+          <p className="truncate text-[13px] text-[var(--surface-muted-foreground)]">
             {templateTitle} · {documentNumber}.pdf · {documentConfirmed
               ? "공유 가능"
               : dealConnectionRestricted
@@ -16369,7 +16366,7 @@ function ResultScreen({
                     >
                       <TableCell className="text-left!">
                         <div className="font-medium">{deal.title}</div>
-                        <div className="mt-0.5 text-[11px] text-muted-foreground">
+                        <div className="mt-0.5 text-[13px] text-muted-foreground">
                           {deal.id} · {deal.item}
                         </div>
                       </TableCell>
