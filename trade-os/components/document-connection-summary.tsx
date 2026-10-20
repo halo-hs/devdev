@@ -5,8 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { prototypeBackend } from "@trade-os/lib/prototype-backend"
 import type { DocumentConnection, DocumentDealLink, ConnectionChangePreview } from "@trade-os/lib/document-deal-connection"
 
-export function DocumentConnectionSummary({ connection, onChange, onUnlink, disabled }: {
-  connection: DocumentConnection; onChange: () => void; onUnlink: () => void; disabled: boolean
+export function DocumentConnectionSummary({ connection, onChange, disabled, changing = false }: {
+  connection: DocumentConnection; onChange: () => void; disabled: boolean; changing?: boolean
 }) {
   const history = connection.connectionHistory ?? []
   const latest = history.at(-1)
@@ -20,8 +20,7 @@ export function DocumentConnectionSummary({ connection, onChange, onUnlink, disa
           : connection.link ? "이전 연결의 처리자·시각은 기록되어 있지 않습니다." : "후보를 선택한 뒤 연결을 확정하세요."}</p>
       </div>
       {connection.link ? <div className="flex flex-wrap justify-end gap-2">
-        <Button size="sm" variant="outline" disabled={disabled} onClick={onChange}>다른 거래로 변경</Button>
-        <Button size="sm" variant="ghost" disabled={disabled} onClick={onUnlink}>연결 해제</Button>
+        <Button size="sm" variant="outline" disabled={disabled && !changing} onClick={onChange}>{changing ? "변경 취소" : "다른 거래로 변경"}</Button>
       </div> : null}
     </div>
     {history.length ? <details className="mt-3 border-t pt-3">
