@@ -7295,10 +7295,55 @@ function DealConfirmPanel({
     setBankScheduleId("")
   }
 
+  const registerNewDeal = async (): Promise<DocumentDealLink | null> => {
+    const counterpartyName = newDealName.trim()
+    const newDealId = newDealNumber.trim()
+    if (!hasReadCounterparty && createdCounterparty.current !== counterpartyName) {
+      const counterpartyResult = await prototypeBackend.counterparties.create({ name: counterpartyName })
+      if (!counterpartyResult.ok) {
+        toast.error(counterpartyResult.error)
+        return null
+      }
+      createdCounterparty.current = counterpartyName
+    }
+    const result = await prototypeBackend.deals.create({
+      id: newDealId,
+      title: `${counterpartyName} 신규 거래`,
+      counterparty: counterpartyName,
+      ...(newDealDirection ? { direction: newDealDirection } : {}),
+      amount: normalizeDecimalInput(readAmountField?.value ?? "0"),
+      currency: readCurrency || "USD",
+      sourceDocumentId: document.name,
+    })
+    if (!result.ok) {
+      toast.error(result.error)
+      return null
+    }
+    const accepted = { dealId: result.id, dealLabel: `${result.id} · ${counterpartyName}` }
+    setCreatedDeal(accepted)
+    setCandidateAttempt(value => value + 1)
+    return accepted
+  }
+
   const handleLink = async () => {
     if (!tradeSeatAssigned || linking || creatingRef.current || !connectionReady) return
     if (activeLink) {
-      if (!changingConnection || !selectedCandidate || selectedCandidate.id === activeLink.dealId) return
+      if (!changingConnection) return
+      if (newDealReady) {
+        if (createdDeal) {
+          setChangeDialog({ target: createdDeal, evidence: ["새 거래 등록 후 연결 변경"] })
+          return
+        }
+        creatingRef.current = true; setCreatingDeal(true)
+        try {
+          const accepted = await registerNewDeal()
+          if (accepted) setChangeDialog({ target: accepted, evidence: ["새 거래 등록 후 연결 변경"] })
+        } catch {
+          toast.error("새 거래를 등록하지 못했습니다. 입력한 내용을 확인하고 다시 시도해 주세요.")
+        } finally { creatingRef.current = false; setCreatingDeal(false) }
+        return
+      }
+      if (!selectedCandidate || selectedCandidate.id === activeLink.dealId) return
       setChangeDialog({ target: { dealId: selectedCandidate.id, dealLabel: `${selectedCandidate.id} · ${selectedCandidate.party}` }, evidence: selectedCandidate.reasons.length ? selectedCandidate.reasons : ["직접 선택"] })
       return
     }
@@ -7309,35 +7354,8 @@ function DealConfirmPanel({
           await onLinkDeal(createdDeal.dealId, createdDeal.dealLabel, undefined, ["새 거래 생성 후 연결"])
           return
         }
-        const counterpartyName = newDealName.trim()
-        const newDealId = newDealNumber.trim()
-        if (!hasReadCounterparty && createdCounterparty.current !== counterpartyName) {
-          const counterpartyResult =
-            await prototypeBackend.counterparties.create({
-              name: counterpartyName,
-            })
-          if (!counterpartyResult.ok) {
-            toast.error(counterpartyResult.error)
-            return
-          }
-          createdCounterparty.current = counterpartyName
-        }
-        const result = await prototypeBackend.deals.create({
-          id: newDealId,
-          title: `${counterpartyName} 신규 거래`,
-          counterparty: counterpartyName,
-          ...(newDealDirection ? { direction: newDealDirection } : {}),
-          amount: normalizeDecimalInput(readAmountField?.value ?? "0"),
-          currency: readCurrency || "USD",
-          sourceDocumentId: document.name,
-        })
-        if (!result.ok) {
-          toast.error(result.error)
-          return
-        }
-        const accepted = { dealId: result.id, dealLabel: `${result.id} · ${counterpartyName}` }
-        setCreatedDeal(accepted)
-        setCandidateAttempt(value => value + 1)
+        const accepted = await registerNewDeal()
+        if (!accepted) return
         await onLinkDeal(accepted.dealId, accepted.dealLabel, undefined, ["새 거래 생성 후 연결"])
         return
       }
@@ -7364,7 +7382,7 @@ function DealConfirmPanel({
     ] : []),
   ]
   const connectionChecks: DocumentBlockingIssue[] = activeLink && !changingConnection ? [] : [
-    ...(!selectedCandidate && !newDealFormOpen ? [{ key: "deal", label: "연결할 거래 선택", onSelect: openConnectionRequirement }] : []),
+    ...(!selectedCandidate && !newDealFormOpen && !(activeLink && changingConnection) ? [{ key: "deal", label: "연결할 거래 선택", onSelect: openConnectionRequirement }] : []),
     ...(bankMatchRequired && !bankScheduleId ? [{ key: "schedule", label: "결제 일정 또는 서류만 연결 선택", onSelect: openConnectionRequirement }] : []),
   ]
   const primaryButton = (
@@ -7373,7 +7391,7 @@ function DealConfirmPanel({
       aria-disabled={!tradeSeatAssigned}
       className={!tradeSeatAssigned ? "opacity-50" : undefined}
       disabled={
-        tradeSeatAssigned && (!connectionReady || (!activeLink && linkBlocked) || (Boolean(activeLink) && (!changingConnection || selectedDealId === activeLink?.dealId)) || creatingDeal ||
+        tradeSeatAssigned && (!connectionReady || (!activeLink && linkBlocked) || (Boolean(activeLink) && (!changingConnection || (!newDealReady && selectedDealId === activeLink?.dealId))) || creatingDeal ||
         candidateLoadState !== "ready" ||
         (!selectedCandidate && !newDealReady) ||
         bankMatchIncomplete ||
@@ -7391,7 +7409,7 @@ function DealConfirmPanel({
             : "거래처·거래 생성 중"
           : "연결 중"
         : activeLink
-          ? changingConnection ? "연결 변경 확인" : "거래 연결 완료"
+          ? changingConnection ? newDealReady ? createdDeal ? "생성한 거래로 변경 검토" : "새 거래 등록 후 변경 검토" : "연결 변경 확인" : "거래 연결 완료"
           : createdDeal && newDealFormOpen
             ? "생성한 거래에 연결 재시도"
           : newDealReady
@@ -7448,9 +7466,14 @@ function DealConfirmPanel({
         <ScrollArea className="min-h-0 flex-1">
           <div data-document-requirement="connection" className="mx-auto w-full max-w-4xl space-y-5 p-6">
             {connectionError ? <Alert variant="destructive"><AlertTitle>현재 거래 연결을 불러오지 못했습니다</AlertTitle><AlertDescription>{connectionError}</AlertDescription><Button className="mt-3" size="sm" variant="outline" onClick={() => setConnectionAttempt(value => value + 1)}>현재 연결 다시 확인</Button></Alert>
-              : connection ? <DocumentConnectionSummary connection={connection} disabled={!tradeSeatAssigned || linking || candidateLoadState !== "ready" || !onConnectionChanged}
-                onChange={() => { setChangingConnection(true); setNewDealFormOpen(false); setSelectedDealId(null) }}
-                onUnlink={() => setChangeDialog({ target: null, evidence: [] })} />
+              : connection ? <DocumentConnectionSummary connection={connection} changing={changingConnection} disabled={!tradeSeatAssigned || linking || candidateLoadState !== "ready" || !onConnectionChanged}
+                onChange={() => {
+                  if (changingConnection) {
+                    setChangingConnection(false); setNewDealFormOpen(false); setSelectedDealId(null); setSearchQuery("")
+                  } else {
+                    setChangingConnection(true); setNewDealFormOpen(false); setSelectedDealId(null)
+                  }
+                }} />
               : <p role="status" className="text-xs text-muted-foreground">현재 거래 연결을 확인하고 있습니다.</p>}
             {!tradeSeatAssigned ? <p role="status" className="text-xs text-muted-foreground">Trade OS는 조회만 가능해요. 거래를 연결하려면 사용 권한이 필요합니다.</p> : null}
             {connectionReady && !activeLink ? <p className="text-xs text-muted-foreground">거래 방향 확인 필요</p> : null}
@@ -7463,7 +7486,6 @@ function DealConfirmPanel({
                 <AlertDescription className="text-xs">거래 서류가 아닐 수 있습니다. 문서 유형을 확인한 뒤 연결하세요.</AlertDescription>
               </Alert>
             ) : null}
-            {changingConnection ? <div className="flex items-center justify-between gap-3 text-xs"><p>변경할 거래를 선택하세요. 확정하기 전까지 현재 연결이 유지됩니다.</p><Button size="sm" variant="ghost" onClick={() => setChangingConnection(false)}>변경 취소</Button></div> : null}
             {documentDealValues.length > 0 ? (
               <section className="rounded-lg border border-[var(--surface-border)] bg-background px-4 py-3">
                 <div className="flex items-center justify-between gap-3">
@@ -7518,7 +7540,9 @@ function DealConfirmPanel({
                     거래 후보
                   </div>
                   <p className="mt-1 text-[11px] text-muted-foreground">
-                    거래처·식별번호·금액 등 일치 근거를 기준으로 찾았습니다.
+                    {changingConnection
+                      ? "변경할 거래를 선택하세요. 변경을 확정하기 전까지 현재 연결은 유지됩니다."
+                      : "거래처·식별번호·금액 등 일치 근거를 기준으로 찾았습니다."}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
@@ -7541,7 +7565,7 @@ function DealConfirmPanel({
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={!tradeSeatAssigned || candidateLoadState !== "ready" || Boolean(activeLink) || creatingDeal}
+                    disabled={!tradeSeatAssigned || candidateLoadState !== "ready" || (Boolean(activeLink) && !changingConnection) || creatingDeal}
                     onClick={() => {
                       setNewDealFormOpen((current) => {
                         const next = !current
@@ -7598,8 +7622,12 @@ function DealConfirmPanel({
                         </div>
                         <p className="mt-1 text-[11px] text-muted-foreground">
                           {hasReadCounterparty
-                            ? "문서에서 확인한 거래처에 거래번호를 등록하고 바로 연결합니다."
-                            : "문서에서 거래처를 확인하지 못했습니다. 새 거래처명과 거래번호를 함께 등록합니다."}
+                          ? activeLink
+                            ? "문서에서 확인한 거래처에 새 거래를 등록한 뒤, 연결 변경을 확인합니다."
+                            : "문서에서 확인한 거래처에 거래번호를 등록하고 바로 연결합니다."
+                            : activeLink
+                              ? "문서에서 거래처를 확인하지 못했습니다. 새 거래처와 거래를 등록한 뒤, 연결 변경을 확인합니다."
+                              : "문서에서 거래처를 확인하지 못했습니다. 새 거래처명과 거래번호를 함께 등록합니다."}
                         </p>
                       </div>
                       <Field className="mt-3 gap-1.5">
@@ -7685,7 +7713,7 @@ function DealConfirmPanel({
                     ) : null
                   ) : (
                     <>
-                      {ambiguousCandidates > 1 || !recommendedDealId ? (
+                      {!changingConnection && (ambiguousCandidates > 1 || !recommendedDealId) ? (
                         <Alert className="mt-3 border-[var(--color-orange-4)] bg-[var(--color-orange-5)]">
                           <AlertTriangle className="size-4" />
                           <AlertDescription className="text-xs">
@@ -7893,7 +7921,7 @@ function DealConfirmPanel({
       </div>
       {tradeSeatAssigned && changeDialog && connection ? <DocumentConnectionChangeDialog documentId={document.name} connection={connection} target={changeDialog.target} evidence={changeDialog.evidence} open
         onClose={() => setChangeDialog(null)}
-        onApplied={accepted => { setConnection(accepted); setChangingConnection(false); setSelectedDealId(null); onConnectionChanged?.(accepted); toast.success(accepted.link ? "거래 연결을 변경했습니다." : "거래 연결을 해제했습니다.") }} /> : null}
+        onApplied={accepted => { setConnection(accepted); setChangingConnection(false); setNewDealFormOpen(false); setSelectedDealId(null); onConnectionChanged?.(accepted); toast.success(accepted.link ? "거래 연결을 변경했습니다." : "거래 연결을 해제했습니다.") }} /> : null}
     </>
   )
 }
