@@ -1888,7 +1888,8 @@ function DealCompactAlerts({
     {
       key: "missing",
       label: "검토 필요",
-      tone: "border-destructive/25 bg-destructive/5 text-destructive",
+      // Solid tints stay legible on the blue sticky hero.
+      tone: "border-destructive/25 bg-[var(--color-red-8)] text-destructive",
       items: missingFields.map((field) => ({
         id: field.key,
         title: field.label,
@@ -1898,7 +1899,7 @@ function DealCompactAlerts({
     {
       key: "confirmation",
       label: "확인 필요",
-      tone: "border-warning/30 bg-warning/10 text-warning-foreground",
+      tone: "border-warning/30 bg-[var(--color-orange-6)] text-warning-foreground",
       items: notices.map((notice) => ({
         id: notice.id,
         title: notice.title,
@@ -6306,7 +6307,9 @@ export function DealDetailScreen({
           <div
             ref={stickyHeaderRef}
             data-deal-sticky-header
-            className="sticky top-0 z-30 bg-[var(--surface-background)] shadow-[0_1px_0_var(--surface-border)]"
+            // Figma 문서 올리기 V2 (6233:81736) pattern: the page title sits in a blue
+            // HeroBanner card (radius 22) inset 20px, with white cards below it.
+            className="sticky top-0 z-30 mx-4 mt-1.5 rounded-[22px] bg-[linear-gradient(120deg,#1d4ed8_0%,#2563eb_52%,#3b82f6_100%)] text-white [--muted-foreground:rgb(255_255_255/80%)] [--surface-muted-foreground:rgb(255_255_255/80%)] sm:mx-5 [&_.text-muted-foreground]:text-white/80 [&_h1]:text-white [&_[data-slot=badge]]:bg-[var(--color-gray-12)] [&_[data-slot=button][data-variant=ghost]]:text-white [&_[data-slot=button][data-variant=ghost]:hover]:bg-white/15 [&_[data-slot=button][data-variant=ghost]:hover]:text-white"
           >
             <div className="flex min-h-14 flex-wrap items-center gap-2 px-3 py-2 sm:px-4 xl:px-6">
               <Button
@@ -6759,7 +6762,7 @@ export function DealDetailScreen({
             ref={alertsRef}
             aria-label="거래 중요 알림"
             data-deal-summary
-            className="bg-background px-4 py-3 sm:px-6 xl:px-8"
+            className="mx-4 mt-4 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-4 py-3 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] empty:hidden sm:mx-5 sm:px-5"
           >
             <DealAssistBar
               notices={dealReviewNotices(riskDismissed)}
@@ -6768,7 +6771,7 @@ export function DealDetailScreen({
               onOpenVerification={openReviewNotice}
             />
           </section>
-          <div className="w-full px-4 py-4 sm:px-6 xl:px-8">
+          <div className="w-full px-4 py-4 sm:px-5">
             {!documentOpen && <div className={refresh.failure ? "mb-4" : ""}>
               <PostWriteRefreshNotice failure={refresh.failure} busy={refresh.busy} onRetry={() => void refresh.refresh()} />
             </div>}
