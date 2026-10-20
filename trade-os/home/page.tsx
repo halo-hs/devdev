@@ -170,7 +170,7 @@ function HomeStartSection({
               </Button>
             </div>
 
-            <div className="mt-3 flex min-w-0 items-center gap-1.5 overflow-hidden text-[12px] text-white/75">
+            <div className="mt-3 flex min-w-0 items-center gap-1.5 overflow-hidden text-[10px] text-white/75">
               <span className="shrink-0 font-medium text-white">예시</span>
               {examples.map((example) => (
                 <button
@@ -542,7 +542,7 @@ function ShipmentSwimlane({ onNavigate }: { onNavigate: Navigate }) {
             <span className="text-xs font-medium text-[var(--surface-muted-foreground)]">
               선적 / 구간
             </span>
-            <div className="grid grid-cols-7 text-center text-[13px] text-[var(--surface-muted-foreground)]">
+            <div className="grid grid-cols-7 text-center text-[11px] text-[var(--surface-muted-foreground)]">
               {shipmentDates.map((date) => (
                 <span key={date}>{date}</span>
               ))}
@@ -563,7 +563,7 @@ function ShipmentSwimlane({ onNavigate }: { onNavigate: Navigate }) {
                     </span>
                   </div>
                   <div className="mt-1 flex items-center gap-2">
-                    <span className="text-[13px] text-[var(--surface-muted-foreground)]">
+                    <span className="text-[11px] text-[var(--surface-muted-foreground)]">
                       {shipment.meta}
                     </span>
                     <Status tone={shipment.statusTone}>
@@ -584,7 +584,7 @@ function ShipmentSwimlane({ onNavigate }: { onNavigate: Navigate }) {
                     ))}
                   </div>
                   <div className="absolute inset-y-0 left-[36%] z-10 w-px bg-[var(--color-system-blue2)]/45">
-                    <span className="absolute -top-4 -translate-x-1/2 text-[12px] font-medium text-[var(--color-system-blue1)]">
+                    <span className="absolute -top-4 -translate-x-1/2 text-[10px] font-medium text-[var(--color-system-blue1)]">
                       오늘
                     </span>
                   </div>
@@ -594,7 +594,7 @@ function ShipmentSwimlane({ onNavigate }: { onNavigate: Navigate }) {
                       type="button"
                       aria-label={`${shipment.carrier} ${segment.label} 구간 보기`}
                       className={cn(
-                        "absolute top-1/2 z-20 h-7 -translate-y-1/2 truncate rounded-md border px-2 text-[13px] font-medium shadow-sm transition-[filter] hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:outline-none",
+                        "absolute top-1/2 z-20 h-7 -translate-y-1/2 truncate rounded-md border px-2 text-[11px] font-medium shadow-sm transition-[filter] hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:outline-none",
                         segmentClasses[segment.tone]
                       )}
                       style={{
@@ -616,7 +616,7 @@ function ShipmentSwimlane({ onNavigate }: { onNavigate: Navigate }) {
             ))}
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-4 text-[13px] text-[var(--surface-muted-foreground)]">
+          <div className="mt-3 flex flex-wrap items-center gap-4 text-[11px] text-[var(--surface-muted-foreground)]">
             <span className="flex items-center gap-1.5">
               <i className="size-2 rounded-sm bg-[var(--color-system-green3)]" />
               완료
@@ -1362,7 +1362,7 @@ export function LegacyOwnerHomePrototype({
                             {note ? (
                               <p
                                 className={cn(
-                                  "mt-1 text-[13px] text-[var(--surface-muted-foreground)]",
+                                  "mt-1 text-[11px] text-[var(--surface-muted-foreground)]",
                                   (note === "검토 필요" || note === "손실") &&
                                     "text-[var(--color-system-red1)]"
                                 )}
@@ -1393,7 +1393,7 @@ export function LegacyOwnerHomePrototype({
                         ["미확인 이슈", "2건"],
                       ].map(([label, value]) => (
                         <div key={label} className="px-2">
-                          <p className="text-[13px] text-[var(--surface-muted-foreground)]">
+                          <p className="text-[11px] text-[var(--surface-muted-foreground)]">
                             {label}
                           </p>
                           <strong className="mt-1 block text-lg tabular-nums">

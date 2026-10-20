@@ -48,18 +48,18 @@ export function WorkspaceSwitcher({
           aria-label="워크스페이스 전환"
         >
           {navigation ? <>
-            {unreadCount > 0 && <span aria-hidden="true" className="absolute -top-0.5 -right-0.5 z-10 hidden h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-white bg-[#e53b3b] px-1 text-[13px] leading-[14px] font-bold text-white group-data-[collapsible=icon]:flex">{unreadCount > 9 ? "9+" : unreadCount}</span>}
+            {unreadCount > 0 && <span aria-hidden="true" className="absolute -top-0.5 -right-0.5 z-10 hidden h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-white bg-[#e53b3b] px-1 text-[11px] leading-[14px] font-bold text-white group-data-[collapsible=icon]:flex">{unreadCount > 9 ? "9+" : unreadCount}</span>}
             <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--color-indigo)] text-[13px] leading-[18px] font-semibold text-white">{organizationName.slice(0, 1).toUpperCase()}</span>
             <span className="grid min-w-0 flex-1 gap-0.5 group-data-[collapsible=icon]:hidden">
               <span className="flex min-w-0 items-center justify-between gap-1"><span className="truncate text-[14px] leading-5 font-semibold text-[var(--surface-foreground)]">{workspace.name}</span><NavigationIcon name="chevron-down" className="-m-1 scale-[0.666667] text-[var(--color-gray-4)]" /></span>
-              <span className="truncate text-[13px] leading-4 text-[var(--color-gray-4)]">{product === "snap" ? "SNAP" : "ERP"} {workspace.billingPlan}</span>
+              <span className="truncate text-[11px] leading-4 text-[var(--color-gray-4)]">{product === "snap" ? "SNAP" : "ERP"} {workspace.billingPlan}</span>
             </span>
           </> : <>
           <span
             className={cn(
               "flex size-4 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[8px] font-normal text-primary",
               textOnly &&
-                "group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:text-[12px]"
+                "group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:text-[10px]"
             )}
           >
             {organizationName.slice(0, 2).toUpperCase()}
@@ -67,13 +67,13 @@ export function WorkspaceSwitcher({
           <span
             className={cn(
               "min-w-0 truncate group-data-[collapsible=icon]:hidden",
-              textOnly ? "text-xs font-medium" : "text-[13px] font-normal"
+              textOnly ? "text-xs font-medium" : "text-[11px] font-normal"
             )}
           >
             {workspace.name}
           </span>
           {product && workspace.products[product] ? (
-            <span className="shrink-0 rounded-[var(--r-sm)] bg-muted px-1.5 py-0.5 text-[12px] font-medium text-muted-foreground group-data-[collapsible=icon]:hidden">
+            <span className="shrink-0 rounded-[var(--r-sm)] bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground group-data-[collapsible=icon]:hidden">
               {workspace.products[product].statusLabel}
             </span>
           ) : null}
@@ -91,7 +91,7 @@ export function WorkspaceSwitcher({
             onClick={() => onWorkspaceChange(item.id)}
             className="items-start gap-2 py-2"
           >
-            <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-[12px] font-semibold text-primary">
+            <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-[10px] font-semibold text-primary">
               {item.name.slice(0, 2).toUpperCase()}
             </span>
             <span className="min-w-0 flex-1">
@@ -111,7 +111,7 @@ export function WorkspaceSwitcher({
                       className="flex items-center justify-between gap-3 text-xs"
                     >
                       <span className="text-muted-foreground">{product.label}</span>
-                      <span className="rounded-[var(--r-sm)] bg-muted px-1.5 py-0.5 text-[13px] font-medium text-muted-foreground">
+                      <span className="rounded-[var(--r-sm)] bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
                         {product.statusLabel}
                       </span>
                     </span>

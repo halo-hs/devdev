@@ -587,7 +587,7 @@ function SnapPublicBrand({
         </span>
         <span
           className={cn(
-            "block text-[12px] font-medium tracking-[0.12em] text-muted-foreground uppercase",
+            "block text-[10px] font-medium tracking-[0.12em] text-muted-foreground uppercase",
             inverse && "text-white/60"
           )}
         >
@@ -700,7 +700,7 @@ function SnapAuthVisual({
           ["03", "보고서 전달"],
         ].map(([number, label]) => (
           <div key={number} className="border-r border-white/15 px-6 py-5 last:border-r-0">
-            <div className="text-[12px] font-semibold text-white/45">{number}</div>
+            <div className="text-[10px] font-semibold text-white/45">{number}</div>
             <div className="mt-1 text-sm font-medium text-white">{label}</div>
           </div>
         ))}
@@ -3686,18 +3686,18 @@ function ReportPhotoThumb({
           <div className="absolute inset-x-1.5 top-1.5 h-1/3 rounded-sm bg-white/35" />
           <div className="relative flex h-full flex-col items-center justify-center gap-1 p-1 text-center">
             <Camera className="size-3.5" />
-            <span className="max-w-full truncate text-[11px] font-medium">
+            <span className="max-w-full truncate text-[9px] font-medium">
               {label}
             </span>
           </div>
         </>
       )}
       {src ? (
-        <span className="absolute inset-x-0 bottom-0 truncate bg-black/55 px-1 py-0.5 text-center text-[11px] font-medium text-white">
+        <span className="absolute inset-x-0 bottom-0 truncate bg-black/55 px-1 py-0.5 text-center text-[9px] font-medium text-white">
           {label}
         </span>
       ) : null}
-      <span className="absolute right-1 bottom-1 rounded bg-black/55 px-1 text-[11px] text-white">
+      <span className="absolute right-1 bottom-1 rounded bg-black/55 px-1 text-[9px] text-white">
         {index}
       </span>
       {selected ? (
@@ -4342,7 +4342,7 @@ function LegacyManagerContent({
               >
                 {index < phaseIndex ? <Check className="size-3" /> : index + 1}
               </span>
-              <span className="text-[12px] leading-tight whitespace-nowrap sm:text-sm">
+              <span className="text-[10px] leading-tight whitespace-nowrap sm:text-sm">
                 {label}
               </span>
             </div>

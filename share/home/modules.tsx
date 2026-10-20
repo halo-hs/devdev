@@ -456,7 +456,7 @@ function TinyStatus({
     <Badge
       variant="secondary"
       className={cn(
-        "h-5 shrink-0 border-0 px-2 text-[12px] font-medium",
+        "h-5 shrink-0 border-0 px-2 text-[10px] font-medium",
         tone === "red" && "bg-red-50 text-red-600",
         tone === "amber" && "bg-amber-50 text-amber-700",
         tone === "green" && "bg-emerald-50 text-emerald-700",
@@ -500,7 +500,7 @@ function MoreItemsRow({
   return (
     <button
       type="button"
-      className="flex h-[30px] w-full items-center justify-center gap-1 border-t border-[var(--surface-border)] px-3 text-[13px] font-medium text-primary hover:bg-muted/40 focus-visible:bg-muted focus-visible:outline-none"
+      className="flex h-[30px] w-full items-center justify-center gap-1 border-t border-[var(--surface-border)] px-3 text-[11px] font-medium text-primary hover:bg-muted/40 focus-visible:bg-muted focus-visible:outline-none"
       onClick={onClick}
     >
       {count}건 더 보기 <ArrowRight className="size-3" />
@@ -587,7 +587,7 @@ function ModuleBody({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <p className="truncate text-sm font-medium">{item.title}</p>
-                    <span className="shrink-0 text-[13px] text-muted-foreground">
+                    <span className="shrink-0 text-[11px] text-muted-foreground">
                       {item.time}
                     </span>
                   </div>
@@ -689,13 +689,13 @@ function ModuleBody({
       <div className={cn(compactHeight ? "p-3" : "p-4")}>
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-lg bg-emerald-50 px-3 py-2.5">
-            <p className="text-[13px] text-emerald-700">7일 내 받을 돈</p>
+            <p className="text-[11px] text-emerald-700">7일 내 받을 돈</p>
             <strong className="mt-0.5 block text-sm text-emerald-900 tabular-nums">
               54,200 USD
             </strong>
           </div>
           <div className="rounded-lg bg-amber-50 px-3 py-2.5">
-            <p className="text-[13px] text-amber-700">7일 내 줄 돈</p>
+            <p className="text-[11px] text-amber-700">7일 내 줄 돈</p>
             <strong className="mt-0.5 block text-sm text-amber-900 tabular-nums">
               28,000 USD
             </strong>
@@ -714,7 +714,7 @@ function ModuleBody({
                 <span className="block truncate text-sm font-medium">
                   {item.party}
                 </span>
-                <span className="text-[13px] text-muted-foreground">
+                <span className="text-[11px] text-muted-foreground">
                   {item.date}
                 </span>
               </span>
@@ -759,7 +759,7 @@ function ModuleBody({
                 )}
                 onClick={() => onNavigate(target)}
               >
-                <span className="text-[13px] text-muted-foreground">
+                <span className="text-[11px] text-muted-foreground">
                   {date}
                 </span>
                 {size.columns >= 3 ? (
@@ -780,7 +780,7 @@ function ModuleBody({
                     {size.columns < 3 ? <TinyStatus>{type}</TinyStatus> : null}
                     <span className="truncate">{title}</span>
                   </span>
-                  <span className="mt-0.5 block truncate text-[13px] text-muted-foreground">
+                  <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
                     {meta}
                   </span>
                 </span>
@@ -819,7 +819,7 @@ function ModuleBody({
                   <span className="block truncate text-sm font-medium">
                     {carrier}
                   </span>
-                  <span className="mt-0.5 block text-[13px] text-muted-foreground">
+                  <span className="mt-0.5 block text-[11px] text-muted-foreground">
                     {port} · {eta}
                   </span>
                 </span>
@@ -828,7 +828,7 @@ function ModuleBody({
                     {status}
                   </TinyStatus>
                 ) : (
-                  <span className="shrink-0 text-[12px] text-muted-foreground">
+                  <span className="shrink-0 text-[10px] text-muted-foreground">
                     {status}
                   </span>
                 )}
@@ -890,7 +890,7 @@ function ModuleBody({
               )}
               onClick={() => onNavigate(target)}
             >
-              <span className="block text-[13px] text-muted-foreground">
+              <span className="block text-[11px] text-muted-foreground">
                 {label}
               </span>
               <strong
@@ -1584,7 +1584,7 @@ export function TodayModularWorkspace({
           >
             {layoutMode === "split" ? "분할 조절형" : "자동 재배치형"}
           </Badge>
-          <span className="hidden text-[13px] text-muted-foreground lg:inline">
+          <span className="hidden text-[11px] text-muted-foreground lg:inline">
             {layoutMode === "split"
               ? "헤더를 끌어 위치 교환 · 구분선을 끌어 함께 크기 조절"
               : "헤더를 끌어 위치 교환 · 카드 가장자리를 끌어 개별 크기 조절"}
