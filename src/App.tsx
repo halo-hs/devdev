@@ -16513,6 +16513,12 @@ export function App() {
     const role = new URLSearchParams(appLocation.search).get("role")
     return role === "admin" || role === "member" ? role : "owner"
   })
+  // Market (시장정보) and insight (인사이트) entitlements; `?access=basic` previews
+  // the account without either add-on, as in the Figma 권한 없음 home variants.
+  const homeEntitlements = (() => {
+    const access = new URLSearchParams(appLocation.search).get("access")
+    return { market: access !== "basic", insight: access !== "basic" }
+  })()
   const homePreviewState = (() => {
     const state = new URLSearchParams(appLocation.search).get("state")
     return state === "empty" || state === "first-use" || state === "error"
@@ -17182,8 +17188,10 @@ export function App() {
                   ) : screen === "home" ? (
                     <V2HomePrototype
                       onNavigate={navigateTo}
-                      role={erpHomeRole === "member" ? "member" : "owner"}
+                      role={erpHomeRole}
                       previewState={homePreviewState}
+                      marketAccess={homeEntitlements.market}
+                      insightAccess={homeEntitlements.insight}
                     />
                   ) : screen === "inbox" ? (
                     <InboxScreen
