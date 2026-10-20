@@ -4114,7 +4114,7 @@ function HorizontalDocumentTray({
       onDrop={handleQueueDrop}
       className={cn(
         "shrink-0 transition-[box-shadow,background-color]",
-        !expanded && "border-0 shadow-none",
+        !expanded && "border-0 shadow-[0_6px_18px_rgb(16_24_40/5%)]",
         queueDragActive &&
           "bg-[var(--control-selected-soft-background)] ring-2 ring-[var(--control-selected-border)]"
       )}
@@ -4124,7 +4124,7 @@ function HorizontalDocumentTray({
         tabIndex={0}
         aria-label="검토·배정 대기 문서 목록"
         aria-expanded={expanded}
-        className="flex min-h-14 cursor-pointer flex-wrap items-center gap-2 p-2 xl:flex-nowrap outline-none hover:bg-muted/20 focus-visible:[box-shadow:var(--shadow-keyboard-focus)]"
+        className="flex min-h-14 cursor-pointer flex-wrap items-center gap-2 p-2 xl:flex-nowrap xl:gap-3.5 xl:py-3 xl:pr-3.5 xl:pl-3 outline-none hover:bg-muted/20 focus-visible:[box-shadow:var(--shadow-keyboard-focus)]"
         onClick={() => handleExpandedChange(!expanded)}
         onKeyDown={(event) => {
           if (event.target !== event.currentTarget) return
@@ -4134,20 +4134,26 @@ function HorizontalDocumentTray({
           }
         }}
       >
-        <div className="order-0 flex h-11 min-w-0 flex-1 items-center gap-2 px-3 pr-4 text-primary xl:min-w-52 xl:flex-none">
+        <div
+          className={cn(
+            "order-0 flex h-11 min-w-0 flex-1 items-center gap-1.5 py-2 pr-2 pl-1 text-[length:var(--text-body-8)] xl:flex-none",
+            expanded ? "text-[var(--color-primary-4)]" : "text-[var(--color-gray-2)]"
+          )}
+        >
           <span className="font-semibold">검토·배정 대기 문서</span>
-          <span className="inline-flex size-6 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
+          <span className="inline-flex items-center justify-center rounded-[10px] bg-[var(--color-gray-11)] px-[7px] py-px text-[12px] font-semibold text-[var(--color-gray-4)]">
             {documents.length}
           </span>
           {expanded ? (
-            <ChevronUp className="ml-auto size-4" />
+            <ChevronUp className="ml-auto size-4 xl:ml-0" />
           ) : (
-            <ChevronDown className="ml-auto size-4" />
+            <ChevronDown className="ml-auto size-4 xl:ml-0" />
           )}
         </div>
+        <span aria-hidden="true" className="hidden h-[26px] w-px shrink-0 bg-[var(--color-gray-10)] xl:block" />
 
         {selectedDocument ? (
-          <div className="order-2 flex min-w-0 w-full items-center gap-2 px-3 pb-2 xl:order-none xl:ml-2 xl:w-auto xl:flex-1 xl:pb-0 xl:pl-4 xl:pr-1">
+          <div className="order-2 flex min-w-0 w-full items-center gap-2 px-3 pb-2 xl:order-none xl:w-auto xl:flex-1 xl:rounded-[var(--r-md)] xl:bg-[var(--color-gray-11)] xl:py-2">
             <UploadDocumentTypeMark
               documentType={selectedDocument.documentType}
               className="size-9"
@@ -4161,7 +4167,7 @@ function HorizontalDocumentTray({
                   {selectedIndex >= 0 ? `· ${selectedIndex + 1} / ${documents.length}` : "· 연결 완료"}
                 </span>
                 <span
-                  className="min-w-0 truncate text-[10px] text-[var(--surface-muted-foreground)]"
+                  className="min-w-0 truncate text-[length:var(--text-body-10)] font-medium text-[var(--surface-muted-foreground)]"
                   title={selectedDocument.name}
                 >
                   · {selectedDocument.name}
@@ -4174,14 +4180,15 @@ function HorizontalDocumentTray({
           </div>
         ) : null}
 
-        <div className="ml-auto hidden h-11 shrink-0 items-center gap-2 whitespace-nowrap pr-2 text-[11px] xl:flex">
-          <span className="rounded-full bg-[var(--color-system-orange6)] px-2 py-1 text-[var(--color-orange-2)]">
+        <span aria-hidden="true" className="hidden h-[26px] w-px shrink-0 bg-[var(--color-gray-10)] xl:block" />
+        <div className="ml-auto hidden h-11 shrink-0 items-center gap-2 whitespace-nowrap pr-2 text-[11px] font-medium xl:flex">
+          <span className="rounded-[10px] bg-[var(--color-system-orange6)] px-2 py-0.5 text-[var(--color-orange-2)]">
             확인 대기 {reviewCount}
           </span>
-          <span className="rounded-full bg-[var(--color-system-blue6)] px-2 py-1 text-[var(--color-blue-2)]">
+          <span className="rounded-[10px] bg-[var(--color-system-blue6)] px-2 py-0.5 text-[var(--color-primary-4)]">
             AI 분석 중 {processingCount}
           </span>
-          <span className="rounded-full bg-[var(--color-system-red6)] px-2 py-1 text-[var(--color-red-2)]">
+          <span className="rounded-[10px] bg-[var(--color-red-8)] px-2 py-0.5 text-[var(--color-red-2)]">
             재업로드 필요 {failedCount}
           </span>
         </div>
@@ -4195,7 +4202,7 @@ function HorizontalDocumentTray({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                size="sm"
+                size="lg"
                 aria-label="파일 추가 메뉴"
               >
                 <FilePlus2 data-icon="inline-start" />
@@ -7487,9 +7494,9 @@ function DealConfirmPanel({
               </Alert>
             ) : null}
             {documentDealValues.length > 0 ? (
-              <section className="rounded-lg border border-[var(--surface-border)] bg-background px-4 py-3">
+              <section className="rounded-[var(--r-md)] border border-[var(--color-gray-9)] bg-background p-4">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs font-semibold">
+                  <div className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold">
                     문서에서 읽은 거래 값
                   </div>
                   <div className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-primary">
@@ -7500,27 +7507,22 @@ function DealConfirmPanel({
                   {documentDealValues.map((field) => (
                     <div
                       key={field.key}
-                      className="min-w-0 border-t border-[var(--surface-border)] py-2.5 first:border-t-0 sm:border-t-0 sm:border-l sm:px-3 sm:first:border-l-0 sm:first:pl-0 sm:last:pr-0"
+                      className="min-w-0 border-t border-[var(--color-gray-10)] py-2.5 first:border-t-0 sm:border-t-0 sm:border-l sm:px-3 sm:first:border-l-0 sm:first:pl-0 sm:last:pr-0"
                     >
                       <div className="flex min-w-0 items-center gap-2">
-                        <dt className="truncate text-[10px] text-muted-foreground">
+                        <dt className="truncate text-[11px] leading-4 text-[var(--color-gray-4)]">
                           {field.label}
                         </dt>
-                        <span className="ml-auto flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground">
-                          <span
-                            aria-hidden="true"
-                            className={cn(
-                              "size-1.5 rounded-full",
-                              field.tone === "success"
-                                ? "bg-[var(--color-green-2)]"
-                                : "bg-[var(--color-orange-2)]"
-                            )}
-                          />
+                        <Badge
+                          size="sm"
+                          palette={field.tone === "success" ? "green" : "orange"}
+                          className="ml-auto shrink-0"
+                        >
                           {field.confidence}
-                        </span>
+                        </Badge>
                       </div>
                       <dd
-                        className="mt-1 truncate text-xs font-semibold"
+                        className="mt-1.5 truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold"
                         title={`${field.value}${field.unit ? ` ${field.unit}` : ""}`}
                       >
                         {field.value}
@@ -7818,13 +7820,13 @@ function DealConfirmPanel({
 
                       {selectedCandidate ? (
                         document.documentType === "BANK_STATEMENT" ? (
-                          <section className="mt-3 rounded-lg border border-[var(--color-blue-5)] bg-background p-4">
-                            <div className="flex items-center justify-between gap-3">
+                          <section className="mt-3 rounded-[var(--r-lg)] border border-[var(--color-primary-4)] bg-background p-5">
+                            <div className="flex items-start justify-between gap-3">
                               <div>
-                                <div className="text-sm font-semibold">
+                                <div className="text-[length:var(--text-header-7)] leading-[var(--leading-header-7)] font-bold">
                                   결제 일정에 매칭
                                 </div>
-                                <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
+                                <p className="mt-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-muted-foreground">
                                   같은 통화의 미결제 일정을 선택하면 문서 연결과
                                   정산 현금 기록을 함께 처리합니다.
                                 </p>
@@ -7833,7 +7835,7 @@ function DealConfirmPanel({
                             </div>
 
                             <div
-                              className="mt-3 grid gap-2"
+                              className="mt-3.5 grid"
                               role="radiogroup"
                               aria-label="미결제 일정"
                             >
@@ -7848,26 +7850,25 @@ function DealConfirmPanel({
                                 <label
                                   key={schedule.id}
                                   className={cn(
-                                    "flex cursor-pointer items-start gap-2 rounded-md border bg-background px-3 py-2",
-                                    bankScheduleId === schedule.id
-                                      ? "border-primary"
-                                      : "border-[var(--surface-border)]"
+                                    "flex cursor-pointer items-center gap-3 border-b border-[var(--color-gray-10)] py-3 last:border-b-0",
+                                    bankScheduleId === schedule.id &&
+                                      "text-[var(--color-primary-4)]"
                                   )}
                                 >
                                   <input
                                     type="radio"
                                     name="bank-payment-schedule"
-                                    className="mt-0.5"
+                                    className="size-5 shrink-0 accent-[var(--color-primary-4)]"
                                     checked={bankScheduleId === schedule.id}
                                     onChange={() =>
                                       setBankScheduleId(schedule.id)
                                     }
                                   />
                                   <span className="min-w-0">
-                                    <span className="block text-xs font-medium">
+                                    <span className="block text-[length:var(--text-body-8)] leading-[22px]">
                                       {schedule.label}
                                     </span>
-                                    <span className="mt-0.5 block truncate text-[10px] text-muted-foreground">
+                                    <span className="block truncate text-[length:var(--text-body-8)] leading-[22px] text-muted-foreground">
                                       {schedule.meta}
                                     </span>
                                   </span>
@@ -7877,7 +7878,7 @@ function DealConfirmPanel({
 
                             {bankScheduleId !== "document-only" && bankSchedules.length > 0 ? <div className="mt-3 grid grid-cols-2 gap-3">
                               <Field className="gap-1.5">
-                                <FieldLabel className="text-[11px]">
+                                <FieldLabel>
                                   기록할 금액
                                 </FieldLabel>
                                 <Input
@@ -7890,7 +7891,7 @@ function DealConfirmPanel({
                                 />
                               </Field>
                               <Field className="gap-1.5">
-                                <FieldLabel className="text-[11px]">
+                                <FieldLabel>
                                   입출금일
                                 </FieldLabel>
                                 <Input
@@ -7904,7 +7905,7 @@ function DealConfirmPanel({
                               </Field>
                             </div> : null}
                             {bankMatchIncomplete ? (
-                              <p role="status" className="mt-2 text-[11px] font-medium text-[var(--color-orange-2)]">
+                              <p role="status" className="mt-2 text-[12px] font-medium text-[var(--color-orange-2)]">
                                 {bankCashError ?? "미결제 일정을 선택하거나 서류만 연결해 주세요."}
                               </p>
                             ) : null}
