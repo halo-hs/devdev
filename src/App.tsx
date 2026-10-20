@@ -5213,7 +5213,7 @@ function InboxScreen({
   )
   if (!hasFile) {
     return (
-      <div className="h-full min-h-0 bg-background">
+      <div className="h-full min-h-0 bg-transparent">
         {guide?.state && !guide.state.anchor && (!guide.state.access || guide.state.access === "active") && <div className="flex flex-wrap items-center gap-3 border-b px-5 py-3 text-sm"><span className="text-muted-foreground">준비된 문서가 없다면 예시 발주서로 시작할 수 있습니다.</span><Button variant="outline" size="sm" onClick={async () => {
           const { jsPDF } = await import("jspdf")
           const pdf = new jsPDF()
@@ -5697,7 +5697,7 @@ function BeforeUploadState({
   const [mailOpen, setMailOpen] = useState(false)
 
   return (
-    <div className="h-full min-h-0 overflow-y-auto bg-background">
+    <div className="h-full min-h-0 overflow-y-auto bg-transparent">
       <div className="mx-auto w-full max-w-ecoya-wide-xl px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
         <BusinessPageHero
           variant="ai"
@@ -9554,7 +9554,7 @@ function CreateScreen({
   }
 
   return (
-    <div className="h-full min-h-0 overflow-auto bg-background">
+    <div className="h-full min-h-0 overflow-auto bg-transparent">
       <section className="mx-auto w-full max-w-ecoya-wide-xl px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
         {relatedDeal ? <RelatedDealNotice deal={relatedDeal} compact /> : null}
         {pageHeading}

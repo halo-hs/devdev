@@ -531,7 +531,7 @@ function SnapTaskCreatePage({ navigate }: SnapTaskWorkspaceProps) {
   const checklist = checklistFromDraft(draft)
 
   return (
-    <div className="h-full overflow-y-auto bg-background">
+    <div className="h-full overflow-y-auto bg-transparent">
       <div className="mx-auto w-full max-w-ecoya-wide px-4 py-6 sm:px-6 lg:px-8">
         <TaskPageHeader
           title="새 작업 만들기"
@@ -1259,7 +1259,7 @@ function SnapTaskDetailPage({ navigate, routeParams }: SnapTaskWorkspaceProps) {
 
   if (loading) {
     return (
-      <div className="h-full overflow-y-auto bg-background">
+      <div className="h-full overflow-y-auto bg-transparent">
         <div className="mx-auto w-full max-w-ecoya-wide space-y-5 px-4 py-6 sm:px-6 lg:px-8">
           <Skeleton className="h-20 w-full rounded-[var(--r-md)]" />
           <Skeleton className="h-28 w-full rounded-[var(--r-md)]" />
@@ -1298,7 +1298,7 @@ function SnapTaskDetailPage({ navigate, routeParams }: SnapTaskWorkspaceProps) {
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-background">
+    <div className="h-full overflow-y-auto bg-transparent">
       <div className="mx-auto w-full max-w-ecoya-wide px-4 py-6 sm:px-6 lg:px-8">
         <TaskPageHeader
           title={title}

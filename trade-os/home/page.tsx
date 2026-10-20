@@ -903,7 +903,7 @@ export function LegacyMemberHomePrototype({
   return (
     <div
       data-slot="business-page"
-      className="h-full overflow-y-auto bg-background"
+      className="h-full overflow-y-auto bg-transparent"
     >
       <div className="w-full p-4 sm:p-5 xl:p-6">
         <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_380px]">
@@ -1305,7 +1305,7 @@ export function LegacyOwnerHomePrototype({
   return (
     <div
       data-slot="business-page"
-      className="h-full overflow-y-auto bg-background"
+      className="h-full overflow-y-auto bg-transparent"
     >
       <div className="w-full p-4 sm:p-5 xl:p-6">
         <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_380px]">

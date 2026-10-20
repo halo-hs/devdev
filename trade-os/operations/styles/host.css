@@ -6,6 +6,8 @@
   --ecoya-hero-gradient-small: var(--reference-hero-background);
   font-family: var(--ecoya-font-sans);
 }
+/* Let the shell's Gray 9 canvas show through the operations screens. */
+.reference-3030.reference-3030 { background: transparent; }
 /* The host main owns page scrolling. Tables keep their horizontal overflow. */
 .reference-3030 .reference-page-scroll { min-height: 0; background: transparent; }
 .reference-3030 .reference-monitor-shell { display: grid; min-height: 0; grid-template-columns: minmax(0, 1fr); background: var(--ecoya-gray-12); }

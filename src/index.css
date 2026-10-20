@@ -158,8 +158,9 @@
   --muted-foreground: var(--surface-muted-foreground);
   --primary: var(--color-primary-4);
   --border: var(--surface-border);
-  border-bottom: 1px solid var(--surface-border);
-  background: var(--surface-background);
+  /* Figma Topbar (742:11599) has no fill or divider; it shares the Gray 9 canvas. */
+  border-bottom: 0;
+  background: transparent;
   color: var(--surface-foreground);
 }
 
@@ -226,6 +227,7 @@
    Card's surface so shadows and radii never stack. */
 /* Figma app shell (결산리포트 v6 · 5789:54375): Gray 9 canvas beside the white
    Sidebar; the sidebar edge is this contrast, not a shadow. */
+[data-slot="sidebar-wrapper"],
 [data-slot="sidebar-inset"] {
   background: var(--color-gray-10);
 }

@@ -859,7 +859,7 @@ export function SnapReportsPage({ navigate, routeSearch }: { navigate: SnapNavig
   }
 
   return (
-    <div className="field-scrollbar h-full overflow-y-auto bg-background">
+    <div className="field-scrollbar h-full overflow-y-auto bg-transparent">
       <div className="mx-auto w-full max-w-ecoya-wide-xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-start justify-between gap-4 border-b-0 pb-5">
           <div>
