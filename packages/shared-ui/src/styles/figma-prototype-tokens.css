@@ -90,6 +90,24 @@
   --button-destructive-disabled-foreground: var(--color-gray-6);
   --button-link-foreground-active: var(--color-primary-4);
   --button-link-disabled-foreground: var(--color-gray-6);
+
+  /* Form controls (01 입력 · 폼, 3658:16385): hover draws a Blue 4 border
+     and an opened trigger shows the focus ring. */
+  --control-border-hover: var(--color-primary-4);
+  --shadow-input-open: var(--shadow-input-focused);
+  --control-accessory-foreground: var(--color-gray-4);
+  --control-clear-foreground: var(--color-gray-2);
+  --menu-item-selected-background: var(--color-primary-10);
+  --menu-item-disabled-foreground: var(--color-gray-6);
+  --switch-track-disabled-checked: var(--control-disabled-background);
+  --switch-track-disabled-unchecked: var(--control-disabled-background);
+  --file-drop-border: var(--color-primary-6);
+  --calendar-foreground: var(--color-gray-2);
+  --calendar-heading-foreground: var(--color-gray-2);
+  --calendar-day-foreground: var(--color-gray-2);
+  --calendar-weekday-foreground: var(--color-gray-4);
+  --calendar-day-outside-foreground: var(--color-gray-4);
+  --calendar-range-background: var(--color-primary-10);
 }
 
 
@@ -243,3 +261,44 @@
   color: var(--sidebar-accent-foreground);
 }
 .navigation-icon-16 { width: 16px; height: 16px; }
+
+/* CommandInput (01 입력 · 폼): 16px icon inset, 6px to the text, and the
+   shared focus ring, which the DS group selector cannot see. */
+[data-slot="command-input-wrapper"] [data-slot="input-group-addon"] { padding-left: 16px !important; }
+[data-slot="command-input-wrapper"] [data-slot="command-input"] { padding-left: 6px; }
+[data-slot="command-input-wrapper"] [data-slot="input-group"]:has([data-slot="command-input"]:focus-visible) {
+  border-color: var(--control-focus-border);
+  box-shadow: var(--shadow-input-focused);
+}
+[data-slot="command-input-wrapper"] [data-slot="input-group"]:has([data-slot="command-input"]:disabled) [data-slot="input-group-addon"] svg {
+  color: var(--control-disabled-foreground);
+}
+[data-slot="command"] [cmdk-group-heading] {
+  font-size: var(--text-body-6);
+  line-height: var(--leading-body-6);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-gray-4);
+}
+[data-slot="command-empty"] {
+  font-size: var(--text-body-6);
+  line-height: var(--leading-body-6);
+}
+[data-slot="command-item"][data-selected="true"] { color: var(--accent-foreground); }
+
+/* DatePicker (153:992): the calendar icon trails the value at 16px. */
+[data-slot="date-picker"] > button[aria-haspopup="dialog"] {
+  flex-direction: row-reverse;
+  justify-content: space-between;
+}
+[data-slot="date-picker"] > button[aria-haspopup="dialog"] > svg {
+  width: 16px;
+  height: 16px;
+  color: var(--control-accessory-foreground);
+}
+/* Calendar (206:834): Regular 15/22 caption and Regular weekday labels. */
+.rdp-root .rdp-caption_label {
+  font-size: var(--text-body-8);
+  line-height: 22px;
+  font-weight: var(--font-weight-regular);
+}
+.rdp-root .rdp-weekday { font-weight: var(--font-weight-regular); }

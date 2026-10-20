@@ -1856,7 +1856,7 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
               </label>
               <label className="grid gap-1.5 text-sm font-medium">
                 구분
-                <select className="h-9 rounded-md border bg-background px-3 text-sm" value={form.kind} onChange={(event) => setForm({ ...form, kind: event.target.value })}>
+                <select className="h-9 rounded-md border border-[var(--control-border)] bg-[var(--control-background)] px-3 text-sm" value={form.kind} onChange={(event) => setForm({ ...form, kind: event.target.value })}>
                   <option value="counterparty">거래처 담당자</option>
                   <option value="internal">조직 구성원</option>
                   <option value="other">기타</option>
