@@ -47,8 +47,8 @@ export function PlanActualBarChart({
         {points.map((p, i) => {
           const x0 = CHART_PAD.l + i * slot + slot / 2;
           const bars: Array<[number, string, number]> = [
-            [p.planned, CHART_COLORS.planned, -bw - 1],
-            [p.received, CHART_COLORS.blue, 1],
+            [p.planned, CHART_COLORS.plannedSoft, -bw - 1],
+            [p.received, CHART_COLORS.appliedIndigo, 1],
           ];
           return (
             <g key={p.key}>

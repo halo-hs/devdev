@@ -56,9 +56,10 @@ function Body({ screen }: { screen: ReferenceOperationsScreen }) {
   return <div className="reference-page-scroll">
     <div className="reference-content-width w-full space-y-6 px-7 py-6">
       {screen === "reports" ? <ReportsConnected copy={messages.erpReports.reports} role={identity.role}
-          renderHeader={(controls, summary) => <PageHeader variant="hero" title={copy.title} description={description}
+          // Figma 결산리포트 v6: KPI cards sit 16px below the hero instead of overlapping it.
+          renderHeader={(controls, summary) => <div className="space-y-4"><PageHeader variant="hero" title={copy.title} description={description}
             meta={<span className="rounded-full bg-ecoya-blue-9 px-2 py-0.5 text-body-13 font-bold text-ecoya-indigo">{messages.erpReports.reports.proBadge}</span>}
-            filters={controls} summary={summary} />} />
+            filters={controls} />{summary}</div>} />
         : screen === "sales" ? <SalesPerformanceConnected copy={messages.erpSalesPerformance.cockpit} role={identity.role}
           renderHeader={(controls, summary) => <PageHeader variant="hero" title={copy.title} description={description}
             meta={<span className="rounded-full bg-ecoya-blue-9 px-2 py-0.5 text-body-13 font-bold text-ecoya-indigo">{messages.erpReports.reports.proBadge}</span>}

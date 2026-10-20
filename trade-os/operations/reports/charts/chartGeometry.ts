@@ -70,9 +70,19 @@ export const CHART_COLORS = {
   orange: "var(--ecoya-system-orange-1)",
   /** 연체율·음수 GP = 리스크 레드 (시안 --red #bf4040). */
   red: "var(--ecoya-system-red-1)",
-  grid: "var(--ecoya-gray-10)",
-  gridStrong: "var(--ecoya-gray-9)",
-  axisText: "var(--ecoya-gray-6)",
+  /** Figma 결산리포트 v6 (2026-10): 수취 계획 vs 수금 적용 = indigo light/dark. */
+  plannedSoft: "#e2e7f8",
+  appliedIndigo: "#3251ca",
+  /** 월별 예정 거래손익 = 양수 #5fa8d3 / 음수 #2f6690. */
+  gpPositive: "#5fa8d3",
+  gpNegative: "#2f6690",
+  /** 기말 잔액 추세 = 미수 badge/ocean/01-dark / 미지급 badge/sand/01-dark. */
+  receivableLine: "#136686",
+  payableLine: "#e69100",
+  /** 가로 격자 = Gray 1 16%, 축 글자 = Gray 4. */
+  grid: "rgb(42 44 50 / 0.16)",
+  gridStrong: "var(--color-gray-5)",
+  axisText: "var(--color-gray-5)",
   labelText: "var(--ecoya-gray-3)",
   surface: "var(--ecoya-gray-12)",
 } as const;

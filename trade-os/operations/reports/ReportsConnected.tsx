@@ -1,5 +1,10 @@
 "use client";
+import { RefreshCw } from "lucide-react";
 import { Badge } from "@shared/components/ui/badge";
+import { KpiCard } from "@shared/components/kpi-card";
+import { RankingRow } from "@shared/components/ranking-row";
+import { PeriodCloseRow } from "@shared/components/period-close-row";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@shared/components/ui/card";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField } from "@shared/components/business-filters";
 
@@ -10,7 +15,6 @@ import { useLocale } from "@trade-os/operations/compat/intl";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
-import { SectionCard } from "@trade-os/operations/components/SectionCard";
 import { AnalyticsSkeleton } from "@trade-os/operations/components/AnalyticsSkeleton";
 import { SkeletonList } from "@trade-os/operations/components/Skeletons";
 import { useToast } from "@trade-os/operations/components/toast/useToast";
@@ -1187,8 +1191,8 @@ function ReportsConnectedSession({
   const summary = settlementState.status !== "loading" && !settlementEmpty && (settlementState.status !== "error" || settlementSnapshot != null) ? (
 <div
             className={cx(
-              "grid gap-3 max-lg:grid-cols-2 max-sm:grid-cols-1",
-              showGp ? "grid-cols-7" : "grid-cols-6",
+              // Figma 결산리포트 v6 KPI 7 · 2줄: 4 cards, then GP (2 columns) + 2.
+              "grid grid-cols-4 gap-x-4 gap-y-3 max-lg:grid-cols-2 max-sm:grid-cols-1",
             )}
             data-ui="reports-kpis"
           >
@@ -1260,6 +1264,7 @@ function ReportsConnectedSession({
             />
             {showGp ? (
               <KpiTile
+                className="col-span-2 px-6 max-sm:col-span-1"
                 label={replaceTokens(copy.kpi.gp, { period: gpLatestLabel || latestLabel, currency: currencyLabel })}
                 value={gpState.status === "error" || !gpKpi.latest ? "—" : fmtAmount(gpKpi.latest.gp)}
                 delta={
@@ -1364,10 +1369,11 @@ function ReportsConnectedSession({
               disabled={reportsRefreshDisabled}
               onClick={() => void refreshReports()}
               size="sm"
+              title={reportsRefreshDisabled ? copy.loading : copy.refresh}
               type="button"
               variant="tertiary"
             >
-              {reportsRefreshDisabled ? copy.loading : copy.refresh}
+              <RefreshCw aria-hidden className={cx("size-[18px]", reportsRefreshDisabled && "animate-spin")} />
             </Button>
           ) : null}
 
@@ -1428,11 +1434,13 @@ function ReportsConnectedSession({
       </BusinessFilterField>
       {currencies.length > 0 ? (
         <BusinessFilterField label={copy.controls.currencyAria}>
-          <Segmented
-            ariaLabel={copy.controls.currencyAria}
-            options={currencies.map((ccy) => ({ id: ccy, label: ccy }))}
+          {/* Figma 결산리포트 v6 hero: currency is a Select, not a tab row. */}
+          <Select
+            aria-label={copy.controls.currencyAria}
+            onValueChange={setCurrencyChoice}
+            options={currencies.map((ccy) => ({ value: ccy, label: ccy }))}
+            size="sm"
             value={currency ?? ""}
-            onChange={setCurrencyChoice}
           />
         </BusinessFilterField>
       ) : null}
@@ -1526,9 +1534,9 @@ function ReportsConnectedSession({
                   currency: currencyLabel,
                 })}
               >
-                <div className="mb-1 mt-2.5 flex gap-3.5 text-body-13 text-text-secondary">
-                  <LegendKey swatchClass="bg-ecoya-blue-9" label={copy.charts.planVsActual.planned} />
-                  <LegendKey swatchClass="bg-ecoya-accent" label={copy.charts.planVsActual.received} />
+                <div className="mb-1 mt-2.5 flex justify-end gap-3.5 text-[12px] leading-4 text-[var(--color-gray-2)]">
+                  <LegendKey swatchClass="bg-[#e2e7f8]" label={copy.charts.planVsActual.planned} />
+                  <LegendKey swatchClass="bg-[#3251ca]" label={copy.charts.planVsActual.received} />
                 </div>
                 {points.some((point) => point.fxConversionState === "환산 불가") ? (
                   <p className="mt-2 text-body-13 font-medium text-status-danger" data-ui="reports-fx-unconvertible">
@@ -1693,9 +1701,9 @@ function ReportsConnectedSession({
                   currency: currencyLabel,
                 })}
               >
-                <div className="mb-1 mt-2.5 flex gap-3.5 text-body-13 text-text-secondary">
-                  <LegendKey lineClass="bg-ecoya-accent" label={copy.charts.balance.receivable} />
-                  <LegendKey lineClass="bg-ecoya-system-orange-1" label={copy.charts.balance.payable} />
+                <div className="mb-1 mt-2.5 flex justify-end gap-3.5 text-[12px] leading-4 text-[var(--color-gray-2)]">
+                  <LegendKey lineClass="bg-[#136686]" label={copy.charts.balance.receivable} />
+                  <LegendKey lineClass="bg-[#e69100]" label={copy.charts.balance.payable} />
                 </div>
                 <BalanceLineChart
                   ariaLabel={copy.charts.balance.aria}
@@ -1813,7 +1821,7 @@ function ReportsConnectedSession({
                     {assigneeFilter != null ? copy.topn.emptyAssignee : copy.topn.empty}
                   </p>
                 ) : (
-                  <div className="mt-3.5 grid gap-2" data-ui="reports-topn">
+                  <div className="grid divide-y divide-[var(--color-gray-10)]" data-ui="reports-topn">
                     {topRows.map((row, index) => {
                       const rowKey = `${row.counterparty}\u0000${row.currency}`;
                       const selected = Boolean(row.status) && selectedTopRow === row;
@@ -1823,21 +1831,14 @@ function ReportsConnectedSession({
                           ? copy.topn.statusUnavailable
                           : `${fmtAmount(row.overdue, row.currency)} ${row.currency}`;
                       const content = (
-                        <span className="grid gap-1">
-                          <span className="flex justify-between text-body-13">
-                            <span className="font-medium text-ecoya-gray-3">{row.counterparty}</span>
-                            <span className="text-text-secondary tabular-nums">
-                              {fmtAmount(row.amount, row.currency)} {row.currency}
-                            </span>
-                          </span>
-                          <span className="rounded-r bg-surface-muted">
-                            <span
-                              className="block h-3.5 rounded-r bg-ecoya-accent"
-                              style={{ width: `${maxTopAmount > 0 ? (row.amount.approx / maxTopAmount) * 100 : 0}%` }}
-                            />
-                          </span>
-                          <span className="flex flex-wrap gap-2.5 text-body-13">
-                            <span className="text-text-secondary tabular-nums">
+                        <RankingRow
+                          amount={fmtAmount(row.amount, row.currency)}
+                          className="py-0"
+                          name={row.counterparty}
+                          ratio={maxTopAmount > 0 ? (row.amount.approx / maxTopAmount) * 100 : 0}
+                          unit={row.currency}
+                        >
+                            <span className="tabular-nums">
                               {row.gp == null
                                 ? copy.topn.gpUnavailable
                                 : replaceTokens(copy.topn.gpLine, {
@@ -1849,13 +1850,12 @@ function ReportsConnectedSession({
                                   })}
                             </span>
                             {row.overdue == null || row.overdue.scaled > BigInt(0) ? (
-                              <span className="text-status-danger tabular-nums">
+                              <Badge className="tabular-nums" palette="red" tone="fill">
                                 {replaceTokens(copy.topn.overdueAmount, {
                                   amount: overdueDisplay,
                                 })}
-                              </span>
+                              </Badge>
                             ) : null}
-                          </span>
                           {row.fxConversionState === "환산 불가" ? (
                             <span
                               className="text-status-danger"
@@ -1871,7 +1871,7 @@ function ReportsConnectedSession({
                             </span>
                           ) : null}
                           <span
-                            className="text-body-13 text-text-muted"
+                            className="text-[11px] leading-4"
                             data-ui="reports-topn-status"
                           >
                             {row.status
@@ -1884,7 +1884,7 @@ function ReportsConnectedSession({
                           </span>
                           {row.status ? (
                             <span
-                              className="mt-1 rounded-md border border-border-subtle bg-surface-card px-2 py-1.5 text-body-13 text-text-secondary"
+                              className="mt-1 rounded-md border border-[var(--color-gray-10)] bg-surface-card px-2 py-1.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-3)]"
                               data-ui="reports-topn-evidence"
                               id={evidenceId}
                               hidden={!selected}
@@ -1905,7 +1905,7 @@ function ReportsConnectedSession({
                               })}
                             </span>
                           ) : null}
-                        </span>
+                        </RankingRow>
                       );
 
                       // FE#760 원천 데이터 드릴다운 — 이 (거래처, 통화) 숫자를 만든
@@ -1943,7 +1943,7 @@ function ReportsConnectedSession({
                       );
 
                       return (
-                        <div key={rowKey} className="grid gap-1" data-ui="reports-topn-row-group">
+                        <div key={rowKey} className="grid gap-1 py-2" data-ui="reports-topn-row-group">
                           {rowElement}
                           {/* Plain <a>, not next/link's <Link> or a <Button>+router.push:
                               <Link> schedules internal timers this file's fake-timer
@@ -1955,7 +1955,7 @@ function ReportsConnectedSession({
                               section is an acceptable, honest tradeoff here. */}
                           <a
                             aria-label={drillLabel}
-                            className="justify-self-start px-2.5 text-label-12 font-medium text-ecoya-accent hover:underline"
+                            className="justify-self-end px-2.5 text-[11px] leading-4 text-[var(--color-primary-4)] hover:underline"
                             data-ui="reports-topn-drill"
                             href={settlementCounterpartyDrillHref(row.counterparty, row.currency)}
                           >
@@ -1986,16 +1986,18 @@ function ReportsConnectedSession({
                     retryLabel={copy.retry}
                   />
                 ) : (
-                  <div className="mt-3 grid gap-2" data-ui="reports-closes">
-                    {/* 진행 중 달 (dashed) */}
-                    <div className="flex items-center gap-2.5 rounded-[10px] border border-dashed border-border px-3 py-2.5 text-body-13 text-text-disabled">
-                      <span className="min-w-[66px] font-semibold tabular-nums">{inProgressPeriod}</span>
-                      <span className="text-label-12">
-                        {replaceTokens(copy.closes.inProgress, { date: closableFromLabel })}
-                      </span>
-                      <Badge className="ml-auto" data-ui="reports-close-status" palette="orange" size="sm" tone="fill">
-                        {copy.closes.notClosed}
-                      </Badge>
+                  <div className="grid divide-y divide-[var(--color-gray-10)]" data-ui="reports-closes">
+                    {/* 진행 중 달 */}
+                    <div className="py-2.5">
+                      <PeriodCloseRow
+                        detail={replaceTokens(copy.closes.inProgress, { date: closableFromLabel })}
+                        period={inProgressPeriod}
+                        status={
+                          <Badge data-ui="reports-close-status" palette="grayComplete" tone="fill">
+                            {copy.closes.notClosed}
+                          </Badge>
+                        }
+                      />
                     </div>
                     {closesData.length === 0 ? (
                       <p className="text-body-13 text-text-muted">{copy.closes.empty}</p>
@@ -2003,20 +2005,25 @@ function ReportsConnectedSession({
                       closesData.map((close) => (
                         <div
                           key={close.id}
-                          className="flex items-center gap-1 rounded-[10px] border border-border-muted pr-2 hover:bg-surface-muted"
+                          className="flex items-center gap-2 py-2.5"
                           data-reopened={close.reopened ? "true" : "false"}
                           data-ui="reports-close-row"
                         >
                           <button
                             type="button"
                             onClick={() => openSnapshot(close)}
-                            className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5 text-left text-body-13"
+                            className="min-w-0 flex-1 rounded-[var(--r-sm)] text-left hover:bg-[var(--color-gray-11)]"
                             data-ui="reports-close-snapshot"
                           >
-                            <span className="min-w-[66px] font-bold tabular-nums text-text-primary">
-                              {monthPeriodOf(close.period_start)}
-                            </span>
-                            <span className="min-w-0 text-label-12 text-text-disabled">
+                            <PeriodCloseRow
+                              period={monthPeriodOf(close.period_start)}
+                              status={
+                                // 재개방된 달은 숫자가 다시 움직인다 — 마감 완료로 표시하지 않는다.
+                                <Badge data-ui="reports-close-status" palette={close.reopened ? "orange" : "green"} tone="fill">
+                                  {close.reopened ? copy.closes.reopened : copy.closes.frozen}
+                                </Badge>
+                              }
+                              detail={<>
                               {replaceTokens(copy.closes.closedMeta, {
                                 name: closerLabel(close.closed_by, members),
                                 date: monthDay(close.closed_at.slice(0, 10)),
@@ -2039,11 +2046,8 @@ function ReportsConnectedSession({
                                     : ""}
                                 </span>
                               ) : null}
-                            </span>
-                            {/* 재개방된 달은 숫자가 다시 움직인다 — 마감 완료로 표시하지 않는다. */}
-                            <Badge className="ml-auto" data-ui="reports-close-status" palette={close.reopened ? "orange" : "green"} size="sm" tone="fill">
-                              {close.reopened ? copy.closes.reopened : copy.closes.frozen}
-                            </Badge>
+                              </>}
+                            />
                           </button>
                           {canCloseMonth && close.reopened ? (
                             <Button
@@ -2278,6 +2282,7 @@ export function KpiTile({
   basis,
   caution,
   errorMessage,
+  className,
 }: {
   label: string;
   value: string;
@@ -2285,42 +2290,36 @@ export function KpiTile({
   basis?: string | null;
   caution?: string | null;
   errorMessage?: string | null;
+  className?: string;
 }) {
   return (
-    <div
-      className="rounded-xl border border-border-muted bg-surface px-4 py-3.5 shadow-[0_1px_3px_rgba(5,45,97,0.06)]"
+    <KpiCard
+      className={cx("bg-[var(--color-gray-12)]", className)}
       data-ui="reports-kpi"
+      label={label}
+      value={value}
+      delta={
+        delta
+          ? { text: delta.text, tone: delta.tone === "bad" ? "negative" : delta.tone === "up" ? "positive" : "neutral" }
+          : null
+      }
     >
-      <div className="text-label-12 text-text-secondary">{label}</div>
-      <div className="mt-0.5 text-header-22 font-bold tracking-[-0.01em] text-text-primary tabular-nums">{value}</div>
-      {delta ? (
-        <div
-          className={cx(
-            "mt-0.5 text-label-12 tabular-nums",
-            delta.tone === "up" && "text-status-success",
-            delta.tone === "bad" && "text-status-danger",
-            delta.tone === "flat" && "text-text-secondary",
-          )}
-        >
-          {delta.text}
-        </div>
+      {basis || caution || errorMessage ? (
+        <>
+          {basis ? <span data-ui="reports-kpi-basis">{basis}</span> : null}
+          {caution ? (
+            <span className="text-ecoya-system-orange-1" data-ui="reports-kpi-caution">
+              {caution}
+            </span>
+          ) : null}
+          {errorMessage ? (
+            <span className="text-status-danger" data-ui="reports-kpi-error" role="status">
+              {errorMessage}
+            </span>
+          ) : null}
+        </>
       ) : null}
-      {basis ? (
-        <div className="mt-0.5 text-label-12 tabular-nums text-text-muted" data-ui="reports-kpi-basis">
-          {basis}
-        </div>
-      ) : null}
-      {caution ? (
-        <div className="mt-0.5 text-label-12 tabular-nums text-ecoya-system-orange-1" data-ui="reports-kpi-caution">
-          {caution}
-        </div>
-      ) : null}
-      {errorMessage ? (
-        <p className="mt-0.5 text-label-12 text-status-danger" data-ui="reports-kpi-error" role="status">
-          {errorMessage}
-        </p>
-      ) : null}
-    </div>
+    </KpiCard>
   );
 }
 
@@ -2370,11 +2369,17 @@ function CardStaleNotice({
   );
 }
 
+// Figma 결산리포트 v6 chart/Top 5/월마감 cards: shadcn Card with the module CardHeader.
 export function ReportCard({ title, sub, children }: { title: string; sub: ReactNode; children: ReactNode }) {
   return (
-    <SectionCard className="min-w-0" density="compact" description={sub} title={title}>
-      {children}
-    </SectionCard>
+    // Operations scope maps --card to its gray page tone; Figma cards are white.
+    <Card className="min-w-0 bg-[var(--color-gray-12)]">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{sub}</CardDescription>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   );
 }
 
