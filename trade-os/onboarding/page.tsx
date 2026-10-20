@@ -167,7 +167,7 @@ export function OnboardingPrototype({
                 >
                   조직 안내
                 </h2>
-                <div className="divide-y rounded-xl border bg-card">
+                <div className="divide-y divide-[var(--color-gray-10)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
                   {[
                     {
                       id: "C1" as const,
@@ -221,7 +221,7 @@ export function OnboardingPrototype({
               >
                 제품 시작
               </h2>
-              <ol className="divide-y overflow-hidden rounded-xl border bg-card">
+              <ol className="divide-y divide-[var(--color-gray-10)] overflow-hidden rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
                 {steps.map((step, index) => (
                   <li
                     key={step.id}
@@ -281,7 +281,7 @@ export function OnboardingPrototype({
           </div>
           <aside
             aria-labelledby="first-pdf-title"
-            className="rounded-xl border bg-muted/25 p-6 lg:sticky lg:top-6"
+            className="rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] p-6 lg:sticky lg:top-6"
           >
             <FileUp className="mb-4 size-6 text-primary" aria-hidden="true" />
             <h2
@@ -306,7 +306,7 @@ export function OnboardingPrototype({
                 업로드 가능한 파일 크기는 문서 업로드 화면에서 확인하세요.
               </li>
             </ul>
-            <p className="mt-5 rounded-lg bg-background p-3 text-xs leading-5 text-muted-foreground">
+            <p className="mt-5 rounded-lg bg-[var(--color-gray-11)] p-3 text-xs leading-5 text-muted-foreground">
               AI 결과를 직접 확인한 뒤 거래를 확정합니다. 업로드만으로 거래가
               확정되지는 않아요.
             </p>
