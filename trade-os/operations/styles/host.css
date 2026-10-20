@@ -75,18 +75,9 @@
 
 
 
-/* Same inset and overlap as the host transaction list's summary cards. */
-.reference-3030 .reference-hero-group { position: relative; min-width: 0; }
-.reference-3030 .reference-hero-group > header { padding-bottom: 80px; }
-.reference-3030 .reference-hero-summary {
-  position: relative;
-  z-index: 1;
-  margin: -48px 16px 0;
-}
-@media (max-width: 639px) {
-  .reference-3030 .reference-hero-group > header { padding-bottom: 64px; }
-  .reference-3030 .reference-hero-summary { margin: -40px 12px 0; }
-}
+/* Figma 결산리포트 v6: summary cards sit 16px below the hero, full width, no overlap. */
+.reference-3030 .reference-hero-group { position: relative; display: grid; gap: 16px; min-width: 0; }
+.reference-3030 .reference-hero-summary { position: relative; z-index: 1; min-width: 0; }
 
 /* Reuse the document list's host Tabs immediately above shipment results. */
 .reference-3030 .reference-shipment-tabs { min-width: 0; max-width: 100%; }
@@ -217,4 +208,25 @@
 .reference-3030 .reference-settlement-bucket-table [data-ui="settlement-calendar-cell"] {
   max-width: 100%;
   white-space: normal;
+}
+
+/* Figma HeroBanner buttons (결산리포트 v6): 40px, 15/22, radius 8; secondary
+   actions are the white neutral button with the btn shadow. */
+.reference-3030 header[data-variant="hero"] [data-reference-button] {
+  height: 40px;
+  min-height: 0;
+  padding-inline: 16px;
+  border-radius: var(--r-md);
+  font-size: var(--text-body-8);
+  line-height: 22px;
+}
+.reference-3030 header[data-variant="hero"] :is([data-reference-button="tertiary"], [data-reference-button="secondary"]) {
+  border: 1px solid var(--color-gray-9);
+  background: var(--color-gray-12);
+  color: var(--color-gray-2);
+  box-shadow: 0 1px 2px rgb(5 29 57 / 10%);
+}
+.reference-3030 header[data-variant="hero"] :is([data-reference-button="tertiary"], [data-reference-button="secondary"]):enabled:hover {
+  border-color: var(--color-gray-8);
+  background: var(--color-gray-11);
 }

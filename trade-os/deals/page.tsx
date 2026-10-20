@@ -815,7 +815,7 @@ export function DealsScreen({
                             <Input
                               type="date"
                               aria-label="ETA 기간 시작일"
-                              className="min-w-0 bg-background text-foreground sm:w-36"
+                              className="min-w-0 bg-[var(--control-background)] text-foreground sm:w-36"
                               value={dateStart}
                               max={dateEnd || undefined}
                               onChange={(event) => {
@@ -827,7 +827,7 @@ export function DealsScreen({
                             <Input
                               type="date"
                               aria-label="ETA 기간 종료일"
-                              className="min-w-0 bg-background text-foreground sm:w-36"
+                              className="min-w-0 bg-[var(--control-background)] text-foreground sm:w-36"
                               value={dateEnd}
                               min={dateStart || undefined}
                               onChange={(event) => {

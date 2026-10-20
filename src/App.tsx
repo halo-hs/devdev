@@ -2674,7 +2674,7 @@ function TopBarUtilities({
                   }}
                 >
                   <SelectTrigger
-                    className="h-8 w-full bg-background"
+                    className="h-8 w-full bg-[var(--control-background)]"
                     aria-label="화면 권한 전환"
                   >
                     <SelectValue />
@@ -2713,7 +2713,7 @@ function TopBarUtilities({
                   }}
                 >
                   <SelectTrigger
-                    className="h-8 w-full bg-background"
+                    className="h-8 w-full bg-[var(--control-background)]"
                     aria-label="문서 승인 화면 상태 전환"
                   >
                     <SelectValue />
@@ -7026,7 +7026,7 @@ function EditableUnitInput({
     <Input
       value={value}
       aria-label={`${label} 단위 입력`}
-      className="h-10 w-28 shrink-0 bg-background text-sm font-medium"
+      className="h-10 w-28 shrink-0 bg-[var(--control-background)] text-sm font-medium"
       placeholder="단위"
       onChange={(event) => {
         const nextUnit = event.target.value
@@ -7076,7 +7076,7 @@ function SavingField({
         aria-describedby={describedBy}
         aria-invalid={danger || emphasized || undefined}
         className={cn(
-          "h-10 min-w-0 flex-1 bg-background text-sm font-semibold",
+          "h-10 min-w-0 flex-1 bg-[var(--control-background)] text-sm font-semibold",
           danger && "border-destructive/50 ring-1 ring-destructive/20",
           emphasized && !danger && "border-warning/50 ring-1 ring-warning/20"
         )}
@@ -11097,11 +11097,11 @@ function ShareDeliveryPanel({
                     <div className="mt-3 grid grid-cols-2 gap-3">
                       <label className="grid gap-1 text-xs">
                         <span>만료일</span>
-                        <Input type="date" className="h-8 bg-background" value={expires} onChange={(event) => setExpires(event.target.value)} />
+                        <Input type="date" className="h-8 bg-[var(--control-background)]" value={expires} onChange={(event) => setExpires(event.target.value)} />
                       </label>
                       <label className="grid gap-1 text-xs">
                         <span>최대 열람 횟수</span>
-                        <Input type="number" min={1} step={1} className="h-8 bg-background" value={maxOpens} onChange={(event) => setMaxOpens(event.target.value)} />
+                        <Input type="number" min={1} step={1} className="h-8 bg-[var(--control-background)]" value={maxOpens} onChange={(event) => setMaxOpens(event.target.value)} />
                       </label>
                     </div>
                   </details>
@@ -11120,13 +11120,13 @@ function ShareDeliveryPanel({
               <div className="pt-3">
                 <div className="grid gap-2">
                 <FormField label="받는 사람" htmlFor="share-email-recipient">
-                  <Input id="share-email-recipient" type="email" className="h-10 bg-background" value={recipient} onChange={(event) => setRecipient(event.target.value)} />
+                  <Input id="share-email-recipient" type="email" className="h-10 bg-[var(--control-background)]" value={recipient} onChange={(event) => setRecipient(event.target.value)} />
                 </FormField>
                 <FormField label="제목" htmlFor="share-email-subject">
-                  <Input id="share-email-subject" className="h-10 bg-background" value={subject} onChange={(event) => setSubject(event.target.value)} />
+                  <Input id="share-email-subject" className="h-10 bg-[var(--control-background)]" value={subject} onChange={(event) => setSubject(event.target.value)} />
                 </FormField>
                 <FormField label="이메일 내용" htmlFor="share-email-body">
-                  <Textarea id="share-email-body" aria-label="이메일 내용" className="min-h-28 resize-none bg-background text-xs leading-5" value={textBody} onChange={(event) => setTextBody(event.target.value)} />
+                  <Textarea id="share-email-body" aria-label="이메일 내용" className="min-h-28 resize-none bg-[var(--control-background)] text-xs leading-5" value={textBody} onChange={(event) => setTextBody(event.target.value)} />
                 </FormField>
                 </div>
                 <div className="mt-3 rounded-md border bg-background p-3 text-xs">
@@ -12732,7 +12732,7 @@ function DocumentSourceSetupStep({
                 <Textarea
                   id="document-source-prompt"
                   aria-label="만들 내용을 자연어로 입력"
-                  className="mt-3 min-h-36 resize-none bg-background text-sm leading-6"
+                  className="mt-3 min-h-36 resize-none bg-[var(--control-background)] text-sm leading-6"
                   value={naturalLanguagePrompt}
                   onChange={(event) =>
                     onNaturalLanguagePromptChange(event.target.value)
@@ -12841,7 +12841,7 @@ function DocumentSourceSetupStep({
                   <div className="relative mt-3">
                     <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      className="h-8 bg-background pl-8 text-xs"
+                      className="h-8 bg-[var(--control-background)] pl-8 text-xs"
                       value={dealQuery}
                       onChange={(event) => setDealQuery(event.target.value)}
                       placeholder="거래번호, 거래명, 거래처 검색"

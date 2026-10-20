@@ -1792,7 +1792,7 @@ export function AskPrototype({
               <Input
                 value={historyQuery}
                 onChange={(event) => setHistoryQuery(event.target.value)}
-                className="h-9 bg-background pl-9 text-sm"
+                className="h-9 bg-[var(--control-background)] pl-9 text-sm"
                 placeholder="대화 검색"
                 aria-label="대화 검색"
               />

@@ -395,3 +395,8 @@
   line-height: 24px;
   font-weight: 500;
 }
+
+/* Hero banners use body-md (15/22) for controls and buttons; labels stay 13 SemiBold. */
+:is(.business-hero-controls, .reference-hero-filters) .business-filter-bar {
+  --filter-font-size: var(--text-body-8);
+}

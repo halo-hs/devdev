@@ -818,7 +818,7 @@ function MonitorBody({
   const copy = useMemo(() => ({ ...DEFAULT_MONITOR_BODY_COPY, ...copyOverride }), [copyOverride]);
   const titleBar = useMemo(
     () => (
-      <div className="reference-content-width w-full px-7 pt-6">
+      <div className="reference-content-width w-full px-5 pt-1.5">
       <PageHeader
         data-component="PageTitleBar"
         variant="hero"
