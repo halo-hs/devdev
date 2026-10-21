@@ -81,6 +81,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DocumentBlockingAlerts, type DocumentBlockingIssue } from "@trade-os/components/document-blocking-alerts"
 import { AutoSaveStatus } from "@shared/components/auto-save-status"
 import { BusinessPageHero } from "@shared/components/business-page-hero"
+import { LabeledSelectTrigger } from "@shared/components/labeled-select-trigger"
 import { DocumentTemplateOptions } from "@trade-os/components/document-template-options"
 import { DocumentSaveSummary } from "@trade-os/components/document-save-summary"
 import { generatedDocumentStatusLabel, type GeneratedDocumentMetadata } from "@trade-os/lib/generated-document-metadata"
@@ -5463,7 +5464,6 @@ function PendingUploadDocumentsTable({
               aria-label="업로드 문서 필터"
               className="min-w-0 lg:flex-1 lg:[&_.business-filter-row]:justify-end"
             >
-              <BusinessFilterField label="상태">
                 <Select
                   value={statusFilter}
                   onValueChange={(value) => {
@@ -5471,9 +5471,7 @@ function PendingUploadDocumentsTable({
                     setPage(1)
                   }}
                 >
-                  <SelectTrigger className="w-36" aria-label="상태 필터">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <LabeledSelectTrigger label="상태" aria-label="상태 필터" />
                   <SelectContent align="end">
                     <SelectItem value="all">전체</SelectItem>
                     <SelectItem value="processing">처리 중</SelectItem>
@@ -5482,8 +5480,6 @@ function PendingUploadDocumentsTable({
                     <SelectItem value="confirmed">거래 연결 완료</SelectItem>
                   </SelectContent>
                 </Select>
-              </BusinessFilterField>
-              <BusinessFilterField label="문서 유형">
                 <Select
                   value={typeFilter}
                   onValueChange={(value) => {
@@ -5491,9 +5487,7 @@ function PendingUploadDocumentsTable({
                     setPage(1)
                   }}
                 >
-                  <SelectTrigger className="w-44" aria-label="문서 유형 필터">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <LabeledSelectTrigger label="문서 유형" aria-label="문서 유형 필터" />
                   <SelectContent align="end">
                     <SelectItem value="all">전체</SelectItem>
                     {availableDocumentTypes.map((documentType) => (
@@ -5503,8 +5497,6 @@ function PendingUploadDocumentsTable({
                     ))}
                   </SelectContent>
                 </Select>
-              </BusinessFilterField>
-              <BusinessFilterField label="정렬">
                 <Select
                   value={sort}
                   onValueChange={(value) => {
@@ -5512,7 +5504,7 @@ function PendingUploadDocumentsTable({
                     setPage(1)
                   }}
                 >
-                  <SelectTrigger className="w-44" aria-label="정렬">
+                  <SelectTrigger className="w-auto" aria-label="정렬">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent align="end">
@@ -5520,7 +5512,6 @@ function PendingUploadDocumentsTable({
                     <SelectItem value="oldest">오래된 업로드 순</SelectItem>
                   </SelectContent>
                 </Select>
-              </BusinessFilterField>
             </BusinessListToolbar>
           </div>
         </CardHeader>
@@ -8575,7 +8566,7 @@ function TemplateStrip({ onResult, initialSelectedCode }: {
   return (
     <section
       aria-label="문서 폼 선택"
-      className="min-w-0 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 pt-5 pb-2 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]"
+      className="min-w-0 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 pt-5 pb-2 text-[var(--color-gray-2)] shadow-[var(--shadow-modal)] ring-1 ring-[var(--color-gray-10)]"
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -8608,13 +8599,13 @@ function TemplateStrip({ onResult, initialSelectedCode }: {
           </Button>
         </div>
       </div>
-      <div ref={viewportRef} aria-label="문서 유형 목록" className="flex min-w-0 snap-x snap-proximity gap-3 overflow-x-auto overscroll-x-contain px-0.5 pt-0.5 pb-3">
+      <div ref={viewportRef} aria-label="문서 유형 목록" className="-mx-1 flex min-w-0 snap-x snap-proximity scroll-px-1 gap-3 overflow-x-auto overscroll-x-contain px-1 pt-1 pb-3">
         {visibleTemplates.map(([kind, title, description]) => {
           const selected = selectedCode === kind
           return (
             <button key={kind} type="button" aria-pressed={selected}
               onClick={() => setSelectedCode(kind)}
-              className={cn("flex w-60 shrink-0 snap-start flex-col items-start rounded-lg border border-[var(--color-gray-9)] bg-[var(--color-gray-12)] p-4 text-left transition hover:border-[var(--color-primary-4)] focus-visible:outline-2 focus-visible:outline-primary", selected && "border-[var(--color-primary-4)] bg-[var(--color-primary-10)] ring-1 ring-[var(--color-primary-4)]")}
+              className={cn("flex w-60 shrink-0 snap-start flex-col items-start rounded-lg border border-[var(--color-gray-9)] bg-[var(--color-gray-12)] p-4 text-left transition hover:border-[var(--color-primary-4)] focus-visible:outline-2 focus-visible:outline-primary", selected && "border-[var(--color-primary-4)] bg-[var(--color-primary-10)] ring-1 ring-[var(--color-primary-4)] ring-inset")}
             >
               <span className="flex w-full items-center justify-between gap-2"><ToneBadge tone="blue">{kind}</ToneBadge>{selected && <Check className="size-4 text-[var(--color-primary-4)]" />}</span>
               <strong className="mt-2 text-sm">{title} <span className="text-xs font-normal text-muted-foreground">· {direction === "purchase" ? "구매" : "판매"}</span></strong>
@@ -9491,7 +9482,16 @@ function CreateScreen({
     setWorkbenchDocumentNumber(null)
     setUnifiedWorkbenchOpen(true)
   }
-  const pageHeading = <BusinessPageHero title="문서 만들기" className="mb-4" />
+  // The type selector is the page's main action, so it sits in the hero and
+  // overlaps its lower edge like the 문서 올리기 upload card.
+  const pageHeading = (
+    <BusinessPageHero
+      title="문서 만들기"
+      description="발행 문서를 검색·필터하고, 이어서 작성·PDF·복제·삭제·고객 전달을 한곳에서 처리합니다."
+      className="mb-6"
+      summary={<TemplateStrip onResult={openUnifiedWorkbench} initialSelectedCode={initialTemplateCode} />}
+    />
+  )
 
   if (unifiedWorkbenchOpen) {
     return (
@@ -9550,10 +9550,7 @@ function CreateScreen({
       <div className="flex h-full min-h-0 flex-col overflow-auto bg-transparent">
         <div className="w-full shrink-0 px-4 pt-5 sm:px-5 sm:pt-6">
           {relatedDeal ? <RelatedDealNotice deal={relatedDeal} /> : null}
-          {pageHeading}
-          <section className="space-y-5 pb-8">
-            <TemplateStrip onResult={openUnifiedWorkbench} initialSelectedCode={initialTemplateCode} />
-          </section>
+          <div className="pb-8">{pageHeading}</div>
         </div>
       </div>
     )
@@ -9564,10 +9561,6 @@ function CreateScreen({
       <section className="w-full px-4 py-5 sm:px-5 sm:py-6">
         {relatedDeal ? <RelatedDealNotice deal={relatedDeal} compact /> : null}
         {pageHeading}
-
-        <section className="mb-7">
-          <TemplateStrip onResult={openUnifiedWorkbench} initialSelectedCode={initialTemplateCode} />
-        </section>
 
         <section>
           {hasGeneratedDocuments ? (
@@ -16085,13 +16078,17 @@ function ResultScreen({
     return (
       <div className="h-full overflow-auto bg-transparent px-4 py-6 sm:px-5">
         <div className="w-full">
-          <BusinessPageHero title="문서 만들기" className="mb-4" />
-          <TemplateStrip onResult={(_mode, code, direction) => {
-            if (!code || !templateSchemas[code]) return
-            setTemplateCode(code)
-            setDocumentDirection(direction ?? null)
-            setWorkspaceStep("source")
-          }} />
+          <BusinessPageHero
+            title="문서 만들기"
+            summary={
+              <TemplateStrip onResult={(_mode, code, direction) => {
+                if (!code || !templateSchemas[code]) return
+                setTemplateCode(code)
+                setDocumentDirection(direction ?? null)
+                setWorkspaceStep("source")
+              }} />
+            }
+          />
         </div>
       </div>
     )
