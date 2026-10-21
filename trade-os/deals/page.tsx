@@ -362,13 +362,27 @@ const sortOptions: FilterOptions = [
   ["amount", "통화별 금액 높은순"],
 ]
 
-// KPI cards (도착 임박 · 연체) narrow the list; shown as a removable filter chip.
-type KpiFilter = "all" | "eta" | "overdue"
+// KPI cards (도착 임박 · 연체) and the 운영 리스크 strip narrow the list; the
+// active one is shown as a removable filter chip.
+type KpiFilter =
+  | "all"
+  | "eta"
+  | "overdue"
+  | "risk"
+  | "remaining"
+  | "doc_gap"
+  | "quantity"
 
 const kpiFilterLabels: Record<Exclude<KpiFilter, "all">, string> = {
   eta: "도착 임박",
   overdue: "연체",
+  risk: "리스크",
+  remaining: "미선적 잔량",
+  doc_gap: "서류 갭",
+  quantity: "수량 불일치",
 }
+
+const riskStripFilters = ["risk", "remaining", "doc_gap", "quantity"] as const
 
 const kpiFilterMatchers: Record<
   Exclude<KpiFilter, "all">,
@@ -376,6 +390,10 @@ const kpiFilterMatchers: Record<
 > = {
   eta: isDueSoon,
   overdue: (deal) => Boolean(deal.overdueAr),
+  risk: (deal) => deal.risks.length > 0,
+  remaining: (deal) => Boolean(deal.remaining),
+  doc_gap: (deal) => deal.pending > 0,
+  quantity: (deal) => deal.risks.includes("quantity"),
 }
 
 function optionLabel(options: FilterOptions, value: string) {
@@ -1008,6 +1026,38 @@ export function DealsScreen({
             </section>
           }
         />
+        <div
+          aria-label="운영 리스크"
+          className="flex flex-wrap items-stretch gap-1 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-1.5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]"
+        >
+          {riskStripFilters.map((key) => {
+            const active = kpiFilter === key
+            return (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={active}
+                onClick={() => {
+                  setKpiFilter(active ? "all" : key)
+                  setPage(1)
+                }}
+                className={cn(
+                  "flex min-w-36 flex-1 items-center justify-between gap-3 rounded-[var(--r-md)] border border-transparent px-4 py-2.5 text-left text-sm transition-colors outline-none hover:bg-[var(--color-gray-11)] focus-visible:ring-2 focus-visible:ring-ring",
+                  active &&
+                    "border-[var(--color-primary-4)] bg-[var(--color-primary-10)] text-[var(--color-primary-4)] hover:bg-[var(--color-primary-10)]"
+                )}
+              >
+                <span className="font-medium">{kpiFilterLabels[key]}</span>
+                <span className="text-base font-bold tabular-nums">
+                  {baseDeals.filter(kpiFilterMatchers[key]).length}
+                </span>
+              </button>
+            )
+          })}
+          <span className="flex items-center px-3 text-xs text-muted-foreground">
+            현재 목록 기준
+          </span>
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Tabs
             value={view}
