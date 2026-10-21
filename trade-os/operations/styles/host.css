@@ -124,6 +124,7 @@
 .reference-3030 .reference-hero-summary [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] { padding: 0; }
 .reference-3030 .reference-hero-summary [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
 }
 @media (max-width: 1023px) {
   .reference-3030 .reference-hero-summary [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
@@ -210,6 +211,46 @@
 .reference-3030 .reference-settlement-bucket-table [data-ui="settlement-calendar-cell"] {
   max-width: 100%;
   white-space: normal;
+}
+
+/* Figma 정산 4차 (6224:188699): card headers drop the divider (title 18/26), tables
+   sit flat in the card — no inner boxes or grey head rows, Gray 9 row lines, Gray 4
+   regular headings, and drill links in Blue 4 (overdue stays red). Style only. */
+.reference-3030 [data-component="SettlementConnected"] [data-ui="section-panel-header"] {
+  min-height: 0;
+  padding: 20px 20px 0;
+  border-bottom: 0;
+}
+.reference-3030 [data-component="SettlementConnected"] [data-ui="section-panel-header"] h2 {
+  font-size: 18px;
+  line-height: 26px;
+}
+.reference-3030 [data-component="SettlementConnected"] [data-ui="section-panel-content"] { padding: 16px 20px 20px; }
+.reference-3030 [data-component="SettlementConnected"] [data-operational-table-frame] {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.reference-3030 [data-component="SettlementConnected"] [data-operational-table-frame] [data-slot="table-container"] {
+  border-radius: 0;
+  box-shadow: none;
+}
+.reference-3030 [data-component="SettlementConnected"] [data-operational-table-frame] :is(thead, thead tr) {
+  background: transparent;
+  border-bottom-color: var(--color-gray-10);
+}
+.reference-3030 [data-component="SettlementConnected"] [data-operational-table-frame] thead th:not([class*="danger"]) {
+  color: var(--color-gray-4);
+  font-weight: 400;
+}
+.reference-3030 [data-component="SettlementConnected"] [data-operational-table-frame] :is(th, td) {
+  background-color: transparent;
+}
+.reference-3030 [data-component="SettlementConnected"] [data-operational-table-frame] tbody tr {
+  border-bottom: 1px solid var(--color-gray-10);
+}
+.reference-3030 .reference-settlement-bucket-table td:not(.text-status-danger) > [data-ui="settlement-calendar-cell"] {
+  color: var(--color-primary-4);
 }
 
 /* Figma HeroBanner buttons (결산리포트 v6): 40px, 15/22, radius 8; secondary
