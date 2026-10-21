@@ -3029,7 +3029,7 @@ function DealFieldsPanel({
                             </div>
                           ) : undefined}
                           />
-                          <div className="grid grid-cols-[minmax(0,1fr)_56px] gap-1">
+                          <div className="grid grid-cols-[minmax(0,1fr)_88px] gap-1">
                             {input("quantity", "수량")}
                             {unit("quantityUnit", "수량 단위", ["MT", "KG", "EA"])}
                           </div>
