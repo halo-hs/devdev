@@ -16152,15 +16152,16 @@ function ResultScreen({
                   ? "거래 연결됨 · 검토 후 문서 확정"
                   : "거래 미연결 · 검토 완료 후 초안 PDF만 다운로드 가능"}
           </p>
+        </div>
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+          {/* Save status sits with the actions, as on the 문서 올리기 detail header. */}
           <DocumentSaveSummary
             state={saveState === "unsaved" ? "pending" : saveState}
             savedAt={lastSavedAt}
             metadata={savedMetadata}
             confirmed={documentConfirmed}
-            className="text-white/80"
+            className="mt-0 hidden text-white/90 lg:flex"
           />
-        </div>
-        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
           {saveState === "unsaved" ? (
             <Button
               type="button"
