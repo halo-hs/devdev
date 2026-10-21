@@ -81,7 +81,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DocumentBlockingAlerts, type DocumentBlockingIssue } from "@trade-os/components/document-blocking-alerts"
 import { AutoSaveStatus } from "@shared/components/auto-save-status"
 import { BusinessPageHero } from "@shared/components/business-page-hero"
-import { LabeledSelectTrigger } from "@shared/components/labeled-select-trigger"
 import { DocumentTemplateOptions } from "@trade-os/components/document-template-options"
 import { DocumentSaveSummary } from "@trade-os/components/document-save-summary"
 import { generatedDocumentStatusLabel, type GeneratedDocumentMetadata } from "@trade-os/lib/generated-document-metadata"
@@ -5464,6 +5463,7 @@ function PendingUploadDocumentsTable({
               aria-label="업로드 문서 필터"
               className="min-w-0 lg:flex-1 lg:[&_.business-filter-row]:justify-end"
             >
+              <BusinessFilterField label="상태">
                 <Select
                   value={statusFilter}
                   onValueChange={(value) => {
@@ -5471,7 +5471,9 @@ function PendingUploadDocumentsTable({
                     setPage(1)
                   }}
                 >
-                  <LabeledSelectTrigger label="상태" aria-label="상태 필터" />
+                  <SelectTrigger className="w-36" aria-label="상태 필터">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent align="end">
                     <SelectItem value="all">전체</SelectItem>
                     <SelectItem value="processing">처리 중</SelectItem>
@@ -5480,6 +5482,8 @@ function PendingUploadDocumentsTable({
                     <SelectItem value="confirmed">거래 연결 완료</SelectItem>
                   </SelectContent>
                 </Select>
+              </BusinessFilterField>
+              <BusinessFilterField label="문서 유형">
                 <Select
                   value={typeFilter}
                   onValueChange={(value) => {
@@ -5487,7 +5491,9 @@ function PendingUploadDocumentsTable({
                     setPage(1)
                   }}
                 >
-                  <LabeledSelectTrigger label="문서 유형" aria-label="문서 유형 필터" />
+                  <SelectTrigger className="w-44" aria-label="문서 유형 필터">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent align="end">
                     <SelectItem value="all">전체</SelectItem>
                     {availableDocumentTypes.map((documentType) => (
@@ -5497,6 +5503,8 @@ function PendingUploadDocumentsTable({
                     ))}
                   </SelectContent>
                 </Select>
+              </BusinessFilterField>
+              <BusinessFilterField label="정렬">
                 <Select
                   value={sort}
                   onValueChange={(value) => {
@@ -5504,7 +5512,7 @@ function PendingUploadDocumentsTable({
                     setPage(1)
                   }}
                 >
-                  <SelectTrigger className="w-auto" aria-label="정렬">
+                  <SelectTrigger className="w-44" aria-label="정렬">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent align="end">
@@ -5512,6 +5520,7 @@ function PendingUploadDocumentsTable({
                     <SelectItem value="oldest">오래된 업로드 순</SelectItem>
                   </SelectContent>
                 </Select>
+              </BusinessFilterField>
             </BusinessListToolbar>
           </div>
         </CardHeader>
