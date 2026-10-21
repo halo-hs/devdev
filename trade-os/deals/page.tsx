@@ -1011,7 +1011,7 @@ export function DealsScreen({
             }}
             aria-label="거래 보기 방식"
           >
-            <TabsList variant="segment">
+            <TabsList>
               <TabsTrigger value="operations">운영</TabsTrigger>
               <TabsTrigger value="finance">금융</TabsTrigger>
             </TabsList>
