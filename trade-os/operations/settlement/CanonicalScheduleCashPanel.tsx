@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@trade-os/operations/components/ui/button";
 import { TextLink } from "@trade-os/operations/components/ui/text-link";
+import { DateInput } from "@shared/components/date-input";
 import { ApiError } from "@trade-os/operations/lib/api/client";
 import {
   getScheduleCashApplications,
@@ -588,11 +589,11 @@ export function CanonicalScheduleCashPanel({
               </label>
               <label className="text-label-12 text-text-secondary">
                 {copy.date}
-                <input
-                  className={`${inputClass} mt-1 w-full`}
-                  type="date"
+                <DateInput
+                  ariaLabel={copy.date}
+                  className="mt-1 w-full"
                   value={valueDate}
-                  onChange={(event) => setValueDate(event.target.value)}
+                  onValueChange={setValueDate}
                 />
               </label>
               <label className="text-label-12 text-text-secondary">

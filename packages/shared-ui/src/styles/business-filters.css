@@ -339,7 +339,11 @@
     flex-basis: 100%;
   }
   /* Phone width: the status pill stays one row and scrolls sideways instead
-     of wrapping triggers onto extra rows. */
+     of wrapping triggers onto extra rows. The row is capped to the card so the
+     pill scrolls rather than being clipped. */
+  .business-filter-bar .business-filter-row {
+    max-width: 100%;
+  }
   .business-filter-bar [data-slot="tabs-list"] {
     flex-wrap: nowrap;
     justify-content: flex-start;
@@ -423,4 +427,21 @@
   :is(button[role="combobox"], [data-slot="select-trigger"], [data-slot="date-picker"] > button) {
   font-size: var(--text-body-6);
   line-height: var(--leading-body-6);
+}
+
+/* Phone width: hero pill segments (e.g. 영업 성과 통화) stay one row and
+   scroll sideways instead of folding into a 3-column grid inside the pill. */
+@media (max-width: 639px) {
+  :is(.business-hero-controls, .reference-hero-filters) .business-filter-segments,
+  :is(.business-hero-controls, .reference-hero-filters) .business-filter-bar .business-filter-segments[data-wrap="grid"] {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    width: auto;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  :is(.business-hero-controls, .reference-hero-filters) .business-filter-segments::-webkit-scrollbar {
+    display: none;
+  }
 }

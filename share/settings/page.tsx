@@ -59,7 +59,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarTrigger,
   useSidebar,
 } from "@shared/components/ui/sidebar"
 import {
@@ -874,7 +873,7 @@ function SettingsHubContent({
   subscriptionKind?: "separate" | "bundle"
   subscriptionStates?: Partial<Record<"erp" | "snap" | "bundle", SubscriptionDisplayStatus>>
 }) {
-  const { isMobile, setOpenMobile, state: sidebarState } = useSidebar()
+  const { isMobile, setOpenMobile, state: sidebarState, toggleSidebar } = useSidebar()
   const withdrawal = useMemo(() => withdrawalGateway ?? createWithdrawalPreview(withdrawalScenario(appLocation.search), role === "owner" ? "OWNER" : role === "admin" ? "ADMIN" : "MEMBER"), [withdrawalGateway, role])
   const [withdrawalResult, setWithdrawalResult] = useState<WithdrawalResult | null>(null)
   const importPermissions = useMemo(() => resolveImportPermissions(role, permissions), [role, permissions])
@@ -972,19 +971,25 @@ function SettingsHubContent({
               <ArrowLeft />
               <span>앱으로 돌아가기</span>
             </Button>
-            <SidebarTrigger
+            {/* Same toggle as the main Trade OS sidebar (gray slide icon). */}
+            <Button
+              variant="ghost"
+              onClick={toggleSidebar}
               aria-label={
                 sidebarState === "collapsed"
                   ? "사이드바 펼치기"
                   : "사이드바 접기"
               }
-              className="ml-auto shrink-0 group-data-[collapsible=icon]:mx-auto"
-            />
+              className="navigation-toggle ml-auto size-8 shrink-0 p-0 text-[var(--surface-foreground)] group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:mx-auto"
+            >
+              <NavigationIcon name="slide" className="scale-75 group-data-[collapsible=icon]:scale-100" />
+            </Button>
           </div>
           <div className="mt-3">
             <WorkspaceSwitcher
               workspaceId={workspaceId}
               onWorkspaceChange={onWorkspaceChange}
+              navigation
             />
           </div>
           <div className="relative mt-3 group-data-[collapsible=icon]:hidden">

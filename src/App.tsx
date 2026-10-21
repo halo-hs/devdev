@@ -3885,37 +3885,38 @@ function DocumentList({
                       {document.status}
                     </ToneBadge>
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="text-muted-foreground"
-                    aria-label={`${document.name} 메뉴`}
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      setOpenMenu(
-                        openMenu === document.name ? null : document.name
-                      )
-                    }}
+                  {/* Portal menu so the row's overflow never clips it. */}
+                  <DropdownMenu
+                    open={openMenu === document.name}
+                    onOpenChange={(open) =>
+                      setOpenMenu(open ? document.name : null)
+                    }
                   >
-                    <MoreVertical data-icon="inline-start" />
-                  </Button>
-                </span>
-                {openMenu === document.name ? (
-                  <div className="absolute top-10 right-2 z-10 min-w-28 rounded-md border bg-background p-1 shadow-lg">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="h-auto w-full justify-start px-2 py-1.5"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        setOpenMenu(null)
-                        setDeleteTarget(index)
-                      }}
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-muted-foreground"
+                        aria-label={`${document.name} 메뉴`}
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <MoreVertical data-icon="inline-start" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="min-w-28"
+                      onClick={(event) => event.stopPropagation()}
                     >
-                      <Trash2 className="size-3.5" /> 삭제
-                    </Button>
-                  </div>
-                ) : null}
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onSelect={() => setDeleteTarget(index)}
+                      >
+                        <Trash2 /> 삭제
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </span>
               </div>
             ))}
           </div>
@@ -4482,39 +4483,38 @@ function HorizontalDocumentTray({
                             {selectedIndex === index ? (
                               <Check className="size-4 text-[var(--color-primary-4)]" />
                             ) : null}
-                            <Button
-                              variant="ghost"
-                              size="icon-xs"
-                              className="[--button-ghost-foreground:var(--color-gray-4)]"
-                              aria-label={`${document.name} 메뉴`}
-                              onClick={(event) => {
-                                event.stopPropagation()
-                                setOpenMenu(
-                                  openMenu === document.name
-                                    ? null
-                                    : document.name
-                                )
-                              }}
+                            {/* Portal menu so the scrolling table never clips it. */}
+                            <DropdownMenu
+                              open={openMenu === document.name}
+                              onOpenChange={(open) =>
+                                setOpenMenu(open ? document.name : null)
+                              }
                             >
-                              <MoreHorizontal />
-                            </Button>
-                          </span>
-                          {openMenu === document.name ? (
-                            <span className="absolute top-8 right-2 z-[var(--z-dropdown)] min-w-24 rounded-[var(--r-md)] border border-[var(--surface-border)] bg-[var(--surface-background)] p-1 shadow-[var(--shadow-filter)]">
-                              <Button
-                                variant="destructive"
-                                size="xs"
-                                className="w-full justify-start"
-                                onClick={(event) => {
-                                  event.stopPropagation()
-                                  setOpenMenu(null)
-                                  setDeleteTarget(index)
-                                }}
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon-xs"
+                                  className="[--button-ghost-foreground:var(--color-gray-4)]"
+                                  aria-label={`${document.name} 메뉴`}
+                                  onClick={(event) => event.stopPropagation()}
+                                >
+                                  <MoreHorizontal />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="end"
+                                className="min-w-24"
+                                onClick={(event) => event.stopPropagation()}
                               >
-                                <Trash2 /> 삭제
-                              </Button>
-                            </span>
-                          ) : null}
+                                <DropdownMenuItem
+                                  variant="destructive"
+                                  onSelect={() => setDeleteTarget(index)}
+                                >
+                                  <Trash2 /> 삭제
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </span>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -8371,51 +8371,45 @@ function RecentDocumentsTable({
                       </TooltipTrigger>
                       <TooltipContent>{pdfStateLabel}</TooltipContent>
                     </Tooltip>
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      className="text-muted-foreground"
-                      aria-label={`${draft.title} 메뉴`}
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        setOpenMenu(
-                          openMenu === draft.number ? null : draft.number
-                        )
-                      }}
+                    {/* Portal menu so the scrolling table never clips it. */}
+                    <DropdownMenu
+                      open={openMenu === draft.number}
+                      onOpenChange={(open) =>
+                        setOpenMenu(open ? draft.number : null)
+                      }
                     >
-                      <MoreVertical className="size-4" />
-                    </Button>
-                    {openMenu === draft.number ? (
-                      <div className="absolute top-12 right-3 z-10 min-w-36 rounded-md border bg-background p-1 shadow-lg">
+                      <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          size="xs"
-                          className="h-auto w-full justify-start px-2 py-1.5"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            setOpenMenu(null)
-                            void onDuplicate(draft)
-                          }}
+                          size="icon-xs"
+                          className="text-muted-foreground"
+                          aria-label={`${draft.title} 메뉴`}
+                          onClick={(event) => event.stopPropagation()}
                         >
-                          <Copy className="size-3.5" /> 복제하여 수정
+                          <MoreVertical className="size-4" />
                         </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="min-w-36"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <DropdownMenuItem onSelect={() => void onDuplicate(draft)}>
+                          <Copy /> 복제하여 수정
+                        </DropdownMenuItem>
                         {canDelete ? (
-                          <Button
+                          <DropdownMenuItem
                             variant="destructive"
-                            size="xs"
-                            className="h-auto w-full justify-start px-2 py-1.5"
-                            onClick={(event) => {
-                              event.stopPropagation()
-                              setOpenMenu(null)
+                            onSelect={() => {
                               setDeleteError("")
                               setDeleteTarget(draft)
                             }}
                           >
-                            <Trash2 className="size-3.5" /> 삭제
-                          </Button>
+                            <Trash2 /> 삭제
+                          </DropdownMenuItem>
                         ) : null}
-                      </div>
-                    ) : null}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </TableCell>
               </TableRow>

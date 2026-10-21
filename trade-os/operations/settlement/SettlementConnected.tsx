@@ -12,6 +12,7 @@ import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { RefreshCw } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@shared/components/ui/tabs";
 import { Checkbox } from "@shared/components/ui/checkbox";
+import { DateInput } from "@shared/components/date-input";
 import { LoadableSection, type LoadableSectionCopy } from "@trade-os/operations/components/LoadableSection";
 import { OperationalTableFrame } from "@trade-os/operations/components/OperationalTableFrame";
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
@@ -2953,12 +2954,11 @@ function SettlementView({
             <RefreshCw className="size-5" aria-hidden="true" />
           </Button>
           <BusinessFilterField label={copy.export.monthLabel}>
-            <input
-              type="month"
-              aria-label={copy.export.monthLabel}
-              className="text-body-13 text-text-primary h-9 rounded-md border border-border px-2"
+            <DateInput
+              mode="month"
+              ariaLabel={copy.export.monthLabel}
               value={effectiveTaxMonth}
-              onChange={(ev) => setTaxMonth(ev.target.value)}
+              onValueChange={setTaxMonth}
             />
           </BusinessFilterField>
           <Button
@@ -4395,12 +4395,11 @@ function SettlementView({
           </label>
           <label className="flex flex-col gap-1 text-label-12 text-text-secondary">
             {copy.ledger.due}
-            <input
-              aria-label={copy.ledger.due}
-              className="h-9 rounded-md border border-border px-2 text-body-13 text-text-primary"
+            <DateInput
+              ariaLabel={copy.ledger.due}
+              className="w-full"
               disabled={manualScheduleBusy}
-              onChange={(event) => setManualScheduleDueDate(event.target.value)}
-              type="date"
+              onValueChange={setManualScheduleDueDate}
               value={manualScheduleDueDate}
             />
           </label>

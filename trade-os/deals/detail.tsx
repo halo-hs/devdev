@@ -3129,6 +3129,7 @@ function DealFieldsPanel({
             >
               {field.inputType === "date" ? (
                 <DateInput
+                  className="w-full"
                   id={`deal-field-${field.key}`}
                   ariaLabel={field.label}
                   value={field.value}
