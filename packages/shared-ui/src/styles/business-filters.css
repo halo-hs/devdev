@@ -400,3 +400,12 @@
 :is(.business-hero-controls, .reference-hero-filters) .business-filter-bar {
   --filter-font-size: var(--text-body-8);
 }
+
+/* Figma Select default (3446:42793): a 40px select or date field on a white
+   surface shows its value at 17/24 like Input. Labels and buttons in the bar keep
+   the filter size; hero filters (onBrand) keep 15. */
+.business-filter-bar[data-layout]:not(:is(.business-hero-controls, .reference-hero-filters) *)
+  :is(button[role="combobox"], [data-slot="select-trigger"], [data-slot="date-picker"] > button) {
+  font-size: var(--text-body-6);
+  line-height: var(--leading-body-6);
+}

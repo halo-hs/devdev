@@ -2899,7 +2899,7 @@ function DealFieldsPanel({
                         "calc(var(--deal-header-height,128px) + 16px)",
                     }}
                     className={cn(
-                      "h-10 px-3 py-0 text-sm",
+                      "h-10 px-3 py-0",
                       !["goods", "hsCode"].includes(key) &&
                         "text-right tabular-nums",
                       key === "quantity" &&
@@ -2952,7 +2952,7 @@ function DealFieldsPanel({
                   >
                     <SelectTrigger
                       size="sm"
-                      className="w-full gap-1 px-3 py-0 text-sm data-[size=sm]:h-10 data-[size=sm]:text-sm"
+                      className="w-full gap-1 px-3 py-0 data-[size=sm]:h-10 data-[size=sm]:text-[length:var(--text-body-6)] data-[size=sm]:leading-[var(--leading-body-6)]"
                       aria-label={`품목 ${number} ${label}`}
                     >
                       <SelectValue />
