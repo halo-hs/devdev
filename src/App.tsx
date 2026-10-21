@@ -51,6 +51,7 @@ import {
   FileX2,
   Mail,
   Home,
+  Info,
   Maximize2,
   Monitor,
   MoreHorizontal,
@@ -5216,12 +5217,12 @@ function InboxScreen({
   if (!hasFile) {
     return (
       <div className="h-full min-h-0 bg-transparent">
-        {guide?.state && !guide.state.anchor && (!guide.state.access || guide.state.access === "active") && <div className="flex flex-wrap items-center gap-3 border-b px-5 py-3 text-sm"><span className="text-muted-foreground">준비된 문서가 없다면 예시 발주서로 시작할 수 있습니다.</span><Button variant="outline" size="sm" onClick={async () => {
+        {guide?.state && !guide.state.anchor && (!guide.state.access || guide.state.access === "active") && <div className="px-4 pt-5 sm:px-5 sm:pt-6"><Alert variant="gray" className="flex flex-wrap items-center gap-3"><Info className="size-4 shrink-0" /><AlertDescription className="flex-1">준비된 문서가 없다면 예시 발주서로 시작할 수 있습니다.</AlertDescription><Button variant="outline" size="sm" onClick={async () => {
           const { jsPDF } = await import("jspdf")
           const pdf = new jsPDF()
           pdf.text(["PURCHASE ORDER", "PO-2026-001", "Buyer: Hanbit Trading", "Aluminium scrap / 20 MT / USD 1,850 per MT", "Total: USD 37,000", "Delivery: 2026-11-01"], 20, 25)
           await handleFilesSelected([new File([pdf.output("blob")], "PO_시작가이드_예시.pdf", { type: "application/pdf" })])
-        }}>예시 PDF 사용</Button></div>}
+        }}>예시 PDF 사용</Button></Alert></div>}
         <BeforeUploadState
           documents={uploadDocuments.map((document, index) => ({ document, index }))}
           onOpenDocument={(index) => {
