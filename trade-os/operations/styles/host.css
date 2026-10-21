@@ -83,12 +83,24 @@
 
 /* Reuse the document list's host Tabs immediately above shipment results. */
 .reference-3030 .reference-shipment-tabs { min-width: 0; max-width: 100%; }
-.reference-3030 .reference-shipment-tabs [data-slot="tabs-list"] { max-width: 100%; overflow-x: auto; }
+.reference-3030 .reference-shipment-tabs [data-slot="tabs-list"] {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.reference-3030 .reference-shipment-tabs [data-slot="tabs-list"]::-webkit-scrollbar { display: none; }
+/* Same white card and blue HeroBanner gradient as the other Trade OS list pages. */
+.reference-3030 [data-component="ShipmentsConnected"] {
+  --ecoya-hero-gradient-small: linear-gradient(120deg, #1d4ed8 0%, #2563eb 52%, #3b82f6 100%);
+}
 .reference-3030 [data-ui="shipments-list-controls"] {
   padding: 16px 20px;
-  border: 1px solid var(--border);
-  border-radius: var(--ui-radius-control, 8px);
-  background: var(--background);
+  border: 0;
+  border-radius: var(--r-lg);
+  background: var(--color-gray-12);
+  box-shadow: var(--shadow-section);
+  outline: 1px solid var(--color-gray-10);
 }
 .reference-3030 .reference-shipment-results { display: flex; flex-direction: column; gap: 16px; }
 
