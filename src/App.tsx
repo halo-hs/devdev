@@ -2630,10 +2630,7 @@ function TopBarUtilities({
       >
         <span className="text-[var(--color-gray-6)]">세계시간</span>
         <span className="text-[var(--color-gray-2)] tabular-nums">
-          {worldClockZones
-            .slice(0, 3)
-            .map(([label, timeZone]) => `${label} ${formatWorldTime(timeZone, now)}`)
-            .join(" · ")}
+          서울 {formatWorldTime("Asia/Seoul", now)}
         </span>
         <ChevronDown className="size-3.5 text-[var(--color-gray-2)]" />
       </Button>
@@ -4167,7 +4164,7 @@ function HorizontalDocumentTray({
               </div>
               <div className="truncate text-[11px] leading-4 text-[var(--color-gray-5)]">
                 {uploadDocumentTypeLabel(selectedDocument.documentType)}
-                {selectedIndex >= 0 ? ` · ${selectedIndex + 1}/${documents.length}` : " · 연결 완료"}
+                {selectedIndex >= 0 ? ` · ${selectedIndex + 1} / ${documents.length}` : " · 연결 완료"}
               </div>
             </div>
             <ToneBadge tone={selectedDocument.tone}>
@@ -4178,7 +4175,6 @@ function HorizontalDocumentTray({
 
         <span aria-hidden="true" className="hidden h-[26px] w-px shrink-0 bg-[var(--color-gray-10)] xl:block" />
         <div className="ml-auto hidden h-11 shrink-0 items-center gap-2 whitespace-nowrap pr-2 text-[11px] font-medium xl:flex">
-          <span className="font-normal text-[var(--color-gray-5)]">오늘 처리할 서류</span>
           <span className="rounded-[10px] bg-[var(--color-system-orange6)] px-2 py-0.5 text-[var(--color-orange-2)]">
             확인 대기 {reviewCount}
           </span>

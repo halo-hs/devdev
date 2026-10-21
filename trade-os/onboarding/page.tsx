@@ -1,3 +1,4 @@
+import { BusinessPageHero } from "@shared/components/business-page-hero"
 import { useEffect } from "react"
 import { useStartGuide } from "./runtime"
 import { isDone, type GuideItem } from "./state"
@@ -106,23 +107,16 @@ export function OnboardingPrototype({
       className="min-h-full bg-transparent px-5 py-6 sm:px-8 sm:py-8"
     >
       <div className="mx-auto max-w-6xl space-y-8">
-        <header className="flex flex-wrap items-start justify-between gap-4 border-b pb-6">
-          <div>
-            <p className="text-sm font-medium text-primary">
-              Trade OS 시작 가이드
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-              처음 시작하기
-            </h1>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Trade OS의 첫 거래를 만들어 보세요. 다른 업무를 먼저 시작하고
-              언제든 돌아와도 괜찮습니다.
-            </p>
-          </div>
-          <Button variant="outline" onClick={() => onNavigate("home")}>
-            오늘 할 일로 이동 <ArrowRight />
-          </Button>
-        </header>
+        <BusinessPageHero
+          eyebrow="Trade OS 시작 가이드"
+          title="처음 시작하기"
+          description="Trade OS의 첫 거래를 만들어 보세요. 다른 업무를 먼저 시작하고 언제든 돌아와도 괜찮습니다."
+          actions={
+            <Button variant="outline" onClick={() => onNavigate("home")}>
+              오늘 할 일로 이동 <ArrowRight />
+            </Button>
+          }
+        />
         {locked && (
           <p role="status" className="rounded-lg border p-4 text-sm">
             권한 필요 · 현재는 읽기 전용입니다. 기존 진행은 보존되며 제품 접근이
