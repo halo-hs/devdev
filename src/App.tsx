@@ -8573,7 +8573,10 @@ function TemplateStrip({ onResult, initialSelectedCode }: {
     })
   }
   return (
-    <section aria-label="문서 폼 선택" className="min-w-0">
+    <section
+      aria-label="문서 폼 선택"
+      className="min-w-0 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 pt-5 pb-2 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]"
+    >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Tabs
@@ -8611,9 +8614,9 @@ function TemplateStrip({ onResult, initialSelectedCode }: {
           return (
             <button key={kind} type="button" aria-pressed={selected}
               onClick={() => setSelectedCode(kind)}
-              className={cn("flex w-60 shrink-0 snap-start flex-col items-start rounded-lg border bg-card p-4 text-left transition hover:border-primary/60 focus-visible:outline-2 focus-visible:outline-primary", selected && "border-primary bg-primary/5 ring-1 ring-primary")}
+              className={cn("flex w-60 shrink-0 snap-start flex-col items-start rounded-lg border border-[var(--color-gray-9)] bg-[var(--color-gray-12)] p-4 text-left transition hover:border-[var(--color-primary-4)] focus-visible:outline-2 focus-visible:outline-primary", selected && "border-[var(--color-primary-4)] bg-[var(--color-primary-10)] ring-1 ring-[var(--color-primary-4)]")}
             >
-              <span className="flex w-full items-center justify-between gap-2"><ToneBadge tone="blue">{kind}</ToneBadge>{selected && <Check className="size-4 text-primary" />}</span>
+              <span className="flex w-full items-center justify-between gap-2"><ToneBadge tone="blue">{kind}</ToneBadge>{selected && <Check className="size-4 text-[var(--color-primary-4)]" />}</span>
               <strong className="mt-2 text-sm">{title} <span className="text-xs font-normal text-muted-foreground">· {direction === "purchase" ? "구매" : "판매"}</span></strong>
               <span className="mt-1.5 text-xs leading-5 text-muted-foreground">{description}</span>
             </button>
@@ -9488,11 +9491,7 @@ function CreateScreen({
     setWorkbenchDocumentNumber(null)
     setUnifiedWorkbenchOpen(true)
   }
-  const pageHeading = (
-    <header className="mb-6">
-      <h1 className="text-2xl font-semibold tracking-tight">문서 만들기</h1>
-    </header>
-  )
+  const pageHeading = <BusinessPageHero title="문서 만들기" className="mb-4" />
 
   if (unifiedWorkbenchOpen) {
     return (
@@ -12047,10 +12046,10 @@ function CreateFieldReviewPanel({
       className="@container flex min-h-0 flex-col border-r bg-background"
       onChange={() => onContentChange?.()}
     >
-      <div className="border-b px-5 py-4">
+      <div className="px-5 pt-5 pb-1">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="text-sm font-semibold">항목 확인</div>
+            <div className="text-base font-bold">항목 확인</div>
             <div className="mt-1 max-w-72 truncate text-xs text-muted-foreground">
               {startBlank ? "직접 입력" : `출처 · ${sourceLabel}`}
             </div>
@@ -12070,7 +12069,7 @@ function CreateFieldReviewPanel({
               key={row.key}
               data-review-key={row.key}
               className={cn(
-                "relative border-b bg-background px-5 py-4 transition-colors",
+                "relative bg-background px-5 py-2.5 transition-colors",
                 focusedReviewKey === row.key && "scroll-mt-4"
               )}
             >
@@ -12577,9 +12576,9 @@ function DocumentSourceSetupStep({
   )
   return (
     <section className="flex h-full min-h-0 flex-col bg-[var(--surface-background)]">
-      <div className="flex min-h-16 shrink-0 items-center justify-between gap-3 border-b border-[var(--surface-border)] px-5 py-3">
+      <div className="flex shrink-0 items-center justify-between gap-3 px-5 pt-5 pb-1">
         <div className="flex min-w-0 items-center gap-2">
-          <h2 className="truncate text-sm font-semibold">내용 입력</h2>
+          <h2 className="truncate text-base font-bold">내용 입력</h2>
           <ToneBadge
             tone={
               !canContinue
@@ -16086,7 +16085,7 @@ function ResultScreen({
     return (
       <div className="h-full overflow-auto bg-transparent px-4 py-6 sm:px-5">
         <div className="w-full">
-          <h1 className="mb-6 text-2xl font-semibold tracking-tight">문서 만들기</h1>
+          <BusinessPageHero title="문서 만들기" className="mb-4" />
           <TemplateStrip onResult={(_mode, code, direction) => {
             if (!code || !templateSchemas[code]) return
             setTemplateCode(code)
@@ -16106,12 +16105,14 @@ function ResultScreen({
       }}
       className="flex h-[calc(100svh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-transparent"
     >
-      <div className="flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-3 py-2 sm:px-4">
+      {/* Same HeroBanner card as the 문서 올리기 detail header. */}
+      <div className="mx-3 mt-1.5 flex min-h-[72px] shrink-0 flex-wrap items-center gap-2 rounded-[22px] bg-[linear-gradient(120deg,#1d4ed8_0%,#2563eb_52%,#3b82f6_100%)] px-5 py-3 text-white sm:mx-4 sm:px-[30px] [&_[data-slot=button][data-variant=default]]:bg-white [&_[data-slot=button][data-variant=default]]:text-[var(--primary)] [&_[data-slot=popover-trigger][data-variant=outline]]:bg-[var(--color-red-8)]">
         {onBackToList ? (
           <Button
             type="button"
             variant="ghost"
             size="icon-sm"
+            className="-ml-2 [--button-ghost-foreground:white]"
             aria-label="문서 목록으로 돌아가기"
             onClick={onBackToList}
           >
@@ -16120,7 +16121,7 @@ function ResultScreen({
         ) : null}
         <div className="mr-auto min-w-0">
           <div className="flex items-center gap-2">
-            <h1 className="truncate text-sm font-semibold">문서 만들기</h1>
+            <h1 className="truncate text-xl font-bold">문서 만들기</h1>
             {documentDirection ? (
               <ToneBadge tone="blue">
                 {documentDirection === "purchase" ? "구매" : "판매"}
@@ -16130,7 +16131,7 @@ function ResultScreen({
               {documentStatusLabel}
             </ToneBadge>
           </div>
-          <p className="truncate text-[11px] text-[var(--surface-muted-foreground)]">
+          <p className="truncate text-xs text-white/85">
             {templateTitle} · {documentNumber}.pdf · {documentConfirmed
               ? "공유 가능"
               : dealConnectionRestricted
@@ -16144,6 +16145,7 @@ function ResultScreen({
             savedAt={lastSavedAt}
             metadata={savedMetadata}
             confirmed={documentConfirmed}
+            className="text-white/80"
           />
         </div>
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
