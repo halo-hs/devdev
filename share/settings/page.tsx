@@ -265,14 +265,20 @@ function BrandColorPicker({
   const pickerColor = /^#[0-9a-fA-F]{6}$/.test(color) ? color : initialColor
   return (
     <div className="flex items-center gap-2">
-        <Input
-          type="color"
+        {/* Round swatch: the native picker stays under a 40px circle. */}
+        <label
+          className="relative size-10 shrink-0 cursor-pointer rounded-full border border-[var(--control-border)] p-1 shadow-[var(--shadow-input)] has-disabled:cursor-default has-disabled:opacity-60"
           aria-label={`${label} 선택`}
-          className="h-10 w-14 shrink-0 cursor-pointer p-1"
-          value={pickerColor}
-          disabled={disabled}
-          onChange={(event) => setColor(event.target.value)}
-        />
+        >
+          <input
+            type="color"
+            className="absolute inset-0 size-full cursor-pointer opacity-0 disabled:cursor-default"
+            value={pickerColor}
+            disabled={disabled}
+            onChange={(event) => setColor(event.target.value)}
+          />
+          <span aria-hidden="true" className="block size-full rounded-full" style={{ backgroundColor: pickerColor }} />
+        </label>
         <Input
           aria-label={`${label} 코드`}
           value={color}
