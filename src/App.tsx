@@ -5243,14 +5243,16 @@ function InboxScreen({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-end gap-2 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-3 py-2 sm:px-4">
+      {/* 문서 올리기 V2 항목 검토 (6233:81734): the step header is a HeroBanner card;
+          primary actions turn white on the blue fill. */}
+      <div className="mx-3 mt-1.5 flex min-h-[72px] shrink-0 flex-wrap items-center justify-end gap-2 rounded-[22px] bg-[linear-gradient(120deg,#1d4ed8_0%,#2563eb_52%,#3b82f6_100%)] px-5 py-3 text-white sm:mx-4 sm:px-[30px] [&_[data-slot=button][data-variant=default]]:bg-white [&_[data-slot=button][data-variant=default]]:text-[var(--primary)] [&_[data-slot=popover-trigger][data-variant=outline]]:bg-[var(--color-red-8)]">
         <div className="mr-auto min-w-0">
-          <h1 className="text-sm font-semibold">문서 올리기</h1>
-          {(dealReviewDocument?.dealId || originDealId) && <a href={`/erp/deals/${dealReviewDocument?.dealId ?? originDealId}`} className="text-xs text-primary underline">{dealReviewDocument?.dealId ?? originDealId} 거래로 돌아가기</a>}
+          <h1 className="text-xl font-bold">문서 올리기</h1>
+          {(dealReviewDocument?.dealId || originDealId) && <a href={`/erp/deals/${dealReviewDocument?.dealId ?? originDealId}`} className="text-xs text-white/85 underline">{dealReviewDocument?.dealId ?? originDealId} 거래로 돌아가기</a>}
         </div>
         <DocumentBlockingAlerts errors={uploadErrors} checks={uploadChecks} />
         <AutoSaveStatus
-          className="hidden lg:flex"
+          className="hidden text-white/90 lg:flex"
           state={
             autoSaveError
               ? "error"
@@ -6073,9 +6075,9 @@ function DocumentReviewWorkspace({
         mobilePane === "fields" ? "flex" : "hidden"
       )}
     >
-      <div className="flex min-h-[72px] shrink-0 items-center justify-between gap-4 border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-5 py-3">
+      <div className="flex shrink-0 items-center justify-between gap-4 bg-[var(--surface-background)] px-5 pt-5 pb-1">
         <div className="min-w-0">
-          <h2 className="truncate text-sm font-semibold">항목 검토</h2>
+          <h2 className="truncate text-base font-bold">항목 검토</h2>
           <p className="mt-1 truncate text-[11px] text-[var(--surface-muted-foreground)]">
             AI가 문서에서 읽은 항목 값을 확인하세요.
           </p>
@@ -6749,8 +6751,8 @@ function OcrFieldReviewList({
   }
 
   return (
-    <div className="@container -mx-4 border-y border-[var(--surface-border)] sm:-mx-5">
-      <div className="grid grid-cols-1 @min-[720px]:grid-cols-2">
+    <div className="@container">
+      <div className="grid grid-cols-1 gap-x-4 @min-[720px]:grid-cols-2">
         {fields.map((field) => {
           const danger = field.tone === "danger"
           const warning = field.tone === "warning"
@@ -6765,7 +6767,7 @@ function OcrFieldReviewList({
               messageId={`upload-field-${field.key}-message`}
               tone={danger ? "danger" : warning ? "warning" : "neutral"}
               className={cn(
-                "border-b border-[var(--surface-border)] bg-[var(--surface-background)] px-5 py-3.5",
+                "py-2.5",
                 (danger || warning || field.key === "payment") && "@min-[720px]:col-span-2"
               )}
             >
@@ -7077,7 +7079,7 @@ function SavingField({
         aria-describedby={describedBy}
         aria-invalid={danger || emphasized || undefined}
         className={cn(
-          "h-10 min-w-0 flex-1 bg-[var(--control-background)] text-sm font-semibold",
+          "h-10 min-w-0 flex-1 bg-[var(--control-background)] text-sm",
           danger && "border-destructive/50 ring-1 ring-destructive/20",
           emphasized && !danger && "border-warning/50 ring-1 ring-warning/20"
         )}
