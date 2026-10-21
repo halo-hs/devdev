@@ -60,15 +60,6 @@ export function BusinessPageHero({
               : "pb-5"
         )}
       >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-24 -right-16 size-72 rounded-full border-[42px] border-white/5"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute right-[12%] -bottom-24 size-52 rotate-12 rounded-[38%] border-[28px] border-white/4"
-        />
-
         <header
           className={cn(
             "relative z-10 flex items-start justify-between gap-5",

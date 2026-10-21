@@ -27,11 +27,6 @@ function PageHeader({ variant = "default", title, description, meta, actions, fi
       style={variant === "hero" ? { backgroundImage: "var(--ecoya-hero-gradient-small)", ...style } : style}
       {...props}
     >
-      {variant === "hero" ? (
-        <span aria-hidden="true" className="reference-hero-decoration">
-          <span className="pointer-events-none absolute -right-12 -top-24 size-64 rounded-full border-[36px] border-white/5" />
-        </span>
-      ) : null}
       <div className="min-w-0">
         <div className="flex min-w-0 items-baseline gap-2.5">
           <h1 className={cx("m-0 font-bold text-text-primary", variant === "hero" ? "text-[20px] leading-7" : "text-header-24")}>{title}</h1>
