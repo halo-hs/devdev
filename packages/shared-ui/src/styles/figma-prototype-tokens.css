@@ -288,6 +288,11 @@
 }
 [data-slot="command-item"][data-selected="true"] { color: var(--accent-foreground); }
 
+/* DatePicker (153:992): value at 17/24 like Input (hero filters keep their own size). */
+:not(:is(.business-hero-controls, .reference-hero-filters) *) > [data-slot="date-picker"] > button[aria-haspopup="dialog"] {
+  font-size: var(--text-body-6);
+  line-height: var(--leading-body-6);
+}
 /* DatePicker (153:992): the calendar icon trails the value at 16px. */
 [data-slot="date-picker"] > button[aria-haspopup="dialog"] {
   flex-direction: row-reverse;

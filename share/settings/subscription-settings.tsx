@@ -573,7 +573,7 @@ export function OrganizationMembers({
                       )
                     }}
                   >
-                    <SelectTrigger className="w-full text-sm" aria-label={`${member.name} 역할`}>
+                    <SelectTrigger className="w-full" aria-label={`${member.name} 역할`}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
