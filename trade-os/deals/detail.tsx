@@ -2067,7 +2067,7 @@ function DealWorkBlock({
                 : "진행 중"}
           </StatusBadge>
           {plan.current === work && (
-            <p className="w-full text-xs font-normal text-muted-foreground">
+            <p className="min-w-0 truncate pl-1 text-xs font-normal text-muted-foreground">
               {plan.nextAction}
             </p>
           )}
