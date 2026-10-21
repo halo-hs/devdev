@@ -119,6 +119,7 @@ import {
 } from "@shared/components/ui/sheet"
 import { Textarea } from "@shared/components/ui/textarea"
 import { cn } from "@shared/lib/utils"
+import { StatusBadge } from "@shared/components/status-badge"
 import { prototypeBackend, type MutationResult } from "@trade-os/lib/prototype-backend"
 import {
   DealHandoffProvider,
@@ -1231,32 +1232,6 @@ const initialDealLineItems: DealLineItem[] = [
   },
 ]
 
-function StatusBadge({
-  children,
-  tone = "neutral",
-  outline = false,
-}: {
-  children: ReactNode
-  tone?: "neutral" | "blue" | "success" | "warning" | "danger"
-  outline?: boolean
-}) {
-  return (
-    <Badge
-      variant="secondary"
-      className={cn(
-        "h-5 rounded-full px-2 text-[11px] font-medium",
-        outline ? "border bg-transparent" : "border-0",
-        tone === "neutral" && (outline ? "border-muted-foreground/50 text-muted-foreground" : "bg-muted text-muted-foreground"),
-        tone === "blue" && (outline ? "border-primary/50 text-primary" : "bg-primary/10 text-primary"),
-        tone === "success" && (outline ? "border-success/50 text-success" : "bg-success/10 text-success"),
-        tone === "warning" && (outline ? "border-warning/50 text-warning-foreground" : "bg-warning/10 text-warning-foreground"),
-        tone === "danger" && (outline ? "border-destructive/50 text-destructive" : "bg-destructive/10 text-destructive")
-      )}
-    >
-      {children}
-    </Badge>
-  )
-}
 
 function SectionHeading({
   title,
@@ -2924,7 +2899,7 @@ function DealFieldsPanel({
                         "calc(var(--deal-header-height,128px) + 16px)",
                     }}
                     className={cn(
-                      "h-10 px-2 py-0 text-xs",
+                      "h-10 px-3 py-0 text-sm",
                       !["goods", "hsCode"].includes(key) &&
                         "text-right tabular-nums",
                       key === "quantity" &&
@@ -2977,7 +2952,7 @@ function DealFieldsPanel({
                   >
                     <SelectTrigger
                       size="sm"
-                      className="w-full gap-1 px-2 py-0 text-xs data-[size=sm]:h-10"
+                      className="w-full gap-1 px-3 py-0 text-sm data-[size=sm]:h-10 data-[size=sm]:text-sm"
                       aria-label={`품목 ${number} ${label}`}
                     >
                       <SelectValue />
@@ -6416,7 +6391,7 @@ export function DealDetailScreen({
                   </StatusBadge>}
                   <StatusBadge
                     tone={profile.direction === "sales" ? "success" : profile.direction === "purchase" ? "blue" : "neutral"}
-                    outline
+                    variant="outline"
                   >
                     {directionLabels[profile.direction]}
                   </StatusBadge>

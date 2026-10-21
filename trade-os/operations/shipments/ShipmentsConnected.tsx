@@ -553,15 +553,18 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                       {delayed || arriving ? <div className="mt-1 text-body-13 text-text-muted">{copy.status[ship.status] ?? ship.status}</div> : null}
                     </HostTableCell>
                     <HostTableCell>
-                      <div className="flex flex-wrap gap-2">
+                      {/* The tracking action (갱신 or 선사 사이트) takes one fixed-width
+                          slot so 수정 lines up in every row. */}
+                      <div className="grid grid-cols-[112px_auto] items-center justify-start gap-2">
                         {trackingAction.kind === "refresh" && canRefresh ? (
-                          <HostButton title="추적 정보 갱신" aria-label={refreshing ? copy.refreshingTracking : copy.refreshTracking} disabled={refreshState.status === "pending"} onClick={() => void refreshTracking(ship.id)} size="sm" type="button" variant="outline">
+                          <HostButton className="w-full" title="추적 정보 갱신" aria-label={refreshing ? copy.refreshingTracking : copy.refreshTracking} disabled={refreshState.status === "pending"} onClick={() => void refreshTracking(ship.id)} size="sm" type="button" variant="outline">
                             <RefreshCw aria-hidden="true" className={refreshing ? "size-4 animate-spin" : "size-4"} />{refreshing ? "갱신 중" : "갱신"}
                           </HostButton>
                         ) : null}
                         {trackingAction.kind === "site" ? (
-                          <HostButton variant="outline" size="sm" asChild><a href={trackingAction.href} target="_blank" rel="noopener noreferrer">선사 사이트 ↗</a></HostButton>
+                          <HostButton className="w-full" variant="outline" size="sm" asChild><a href={trackingAction.href} target="_blank" rel="noopener noreferrer">선사 사이트 ↗</a></HostButton>
                         ) : null}
+                        {trackingAction.kind !== "site" && !(trackingAction.kind === "refresh" && canRefresh) ? <span aria-hidden="true" /> : null}
                         {canRefresh ? (
                           <HostButton title="일정 및 운송 상태 수정" aria-label="일정 및 운송 상태 수정" disabled={refreshState.status === "pending"} onClick={event => { editTrigger.current = event.currentTarget; setEditing(ship); }} size="sm" type="button" variant="outline"><Pencil aria-hidden="true" className="size-4" />수정</HostButton>
                         ) : null}

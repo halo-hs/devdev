@@ -91,7 +91,7 @@
 }
 .reference-3030 .reference-shipment-tabs [data-slot="tabs-list"]::-webkit-scrollbar { display: none; }
 /* Same white card and blue HeroBanner gradient as the other Trade OS list pages. */
-.reference-3030 [data-component="ShipmentsConnected"] {
+.reference-3030 :is([data-component="ShipmentsConnected"], [data-component="SettlementConnected"]) {
   --ecoya-hero-gradient-small: linear-gradient(120deg, #1d4ed8 0%, #2563eb 52%, #3b82f6 100%);
 }
 .reference-3030 [data-ui="shipments-list-controls"] {

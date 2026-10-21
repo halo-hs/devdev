@@ -368,9 +368,10 @@
 /* Figma app shell: white Sidebar with a 1px Gray 8 (#dedfe3) edge against the Gray 9 canvas. */
 [data-slot="sidebar-container"] { border-right: 1px solid var(--color-gray-9); }
 
-/* Deal screens: icon-only ghost buttons use Figma ghost-neutral (Gray 3 icon,
-   Gray 1 6%/10% tint) instead of the blue ghost default. */
-:is([data-deal-scroll-viewport], [data-deal-list]) [data-slot="button"][data-variant="ghost"][data-size^="icon"] {
+/* Icon-only ghost buttons use Figma ghost-neutral (Gray 3 icon, Gray 1 6%/10%
+   tint) instead of the blue ghost default. :where keeps it overridable by a
+   call site that sets its own ghost color (e.g. white on a hero). */
+:where([data-slot="button"][data-variant="ghost"][data-size^="icon"]) {
   --button-ghost-foreground: var(--color-gray-4);
   --button-ghost-background-hover: color-mix(in srgb, var(--color-gray-2) 6%, transparent);
   --button-ghost-background-active: color-mix(in srgb, var(--color-gray-2) 10%, transparent);

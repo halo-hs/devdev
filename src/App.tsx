@@ -7,6 +7,7 @@ import { dealDocumentPreviews, dealDocumentFromReviewUrl, type DealDocumentRecor
 import { appLocation } from "@/app/app-location"
 import { StartGuideProvider, useStartGuide } from "@trade-os/onboarding/runtime"
 import { SettingsDemoProvider, useTradeSeatAssigned } from "@share/settings/subscription-settings"
+import { settingsSectionLabel } from "@share/settings/page"
 import { BusinessListToolbar, BusinessFilterSearch, BusinessFilterField } from "@shared/components/business-filters"
 import { FormField, FormFieldHeader } from "@shared/components/form-field"
 import { PageLoadingBoundary } from "@shared/components/page-loading-boundary"
@@ -82,6 +83,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DocumentBlockingAlerts, type DocumentBlockingIssue } from "@trade-os/components/document-blocking-alerts"
 import { AutoSaveStatus } from "@shared/components/auto-save-status"
 import { BusinessPageHero } from "@shared/components/business-page-hero"
+import { StatusBadge } from "@shared/components/status-badge"
 import { DocumentTemplateOptions } from "@trade-os/components/document-template-options"
 import { DocumentSaveSummary } from "@trade-os/components/document-save-summary"
 import { generatedDocumentStatusLabel, type GeneratedDocumentMetadata } from "@trade-os/lib/generated-document-metadata"
@@ -1850,19 +1852,7 @@ const forwardedDocumentCount = forwardedEmails.reduce(
 )
 
 function ToneBadge({ tone, children }: { tone: Tone; children: ReactNode }) {
-  const palette = {
-    warning: "orange",
-    blue: "blue",
-    success: "green",
-    danger: "red",
-    neutral: "grayComplete",
-  }[tone] as "orange" | "blue" | "green" | "red" | "grayComplete"
-
-  return (
-    <Badge palette={palette} tone="fill" size="sm">
-      {children}
-    </Badge>
-  )
+  return <StatusBadge tone={tone}>{children}</StatusBadge>
 }
 
 function AppSelect({
@@ -2320,6 +2310,17 @@ function WorkspaceHeader({
 }) {
   const { isMobile, state: sidebarState } = useSidebar()
   const sidebarCollapsed = sidebarState === "collapsed"
+  // The settings page changes ?section= with pushState; follow it for the trail.
+  const [settingsSection, setSettingsSection] = useState(() => new URLSearchParams(appLocation.search).get("section") ?? "account")
+  useEffect(() => {
+    const sync = () => setSettingsSection(new URLSearchParams(window.location.search).get("section") ?? "account")
+    window.addEventListener("settings-section-change", sync)
+    window.addEventListener("popstate", sync)
+    return () => {
+      window.removeEventListener("settings-section-change", sync)
+      window.removeEventListener("popstate", sync)
+    }
+  }, [])
 
   const [, templateTitle] = templateMeta(templateCode)
   const activeSnapRoute = getSnapRouteByScreen(snapScreen)
@@ -2369,9 +2370,12 @@ function WorkspaceHeader({
   }
   const title = screenTitles[screen] ?? (documentConfirmed ? templateTitle : `${templateTitle} 초안`)
   const section = screenSections[screen] ?? "AI 서류 처리"
+  const settingsLabel = screen === "settings" ? settingsSectionLabel(settingsSection) : undefined
   const breadcrumbs =
     screen === "snap-platform" && activeSnapRoute
       ? [...activeSnapRoute.breadcrumb]
+      : settingsLabel
+        ? ["설정", settingsLabel]
       : screen === "deal"
         ? ["기록", "거래", title]
         : section !== title
@@ -2381,6 +2385,7 @@ function WorkspaceHeader({
     "AI 서류 처리": "home",
     기록: "deals",
     "경영·성과": "monitoring",
+    설정: "settings",
   }
   const navigateToFirstDepth = () => {
     if (section === "ECOYA SNAP") {
@@ -2389,6 +2394,10 @@ function WorkspaceHeader({
       return
     }
 
+    if (section === "설정") {
+      appLocation.assign("/erp/settings")
+      return
+    }
     const target = firstDepthTargets[section]
     if (target) onNavigate(target)
   }

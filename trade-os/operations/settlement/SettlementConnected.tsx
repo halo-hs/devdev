@@ -9,6 +9,7 @@ import { useSearchParams } from "@trade-os/operations/compat/navigation";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, Fragment, type CSSProperties, type ReactNode } from "react";
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
+import { RefreshCw } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@shared/components/ui/tabs";
 import { Checkbox } from "@shared/components/ui/checkbox";
 import { LoadableSection, type LoadableSectionCopy } from "@trade-os/operations/components/LoadableSection";
@@ -2936,16 +2937,20 @@ function SettlementView({
       aria-label="정산 필터"
       actions={
         <>
+          {/* HeroBanner controls rule: 새로고침 is an icon button. */}
           <Button
+            aria-label={copy.controls.refresh}
             data-ui="settlement-refresh"
             disabled={refreshingManually}
+            iconOnly
             intent="brand"
             onClick={onManualRefresh}
-            size="md"
+            size="lg"
+            title={copy.controls.refresh}
             type="button"
             variant="tertiary"
           >
-            {copy.controls.refresh}
+            <RefreshCw className="size-5" aria-hidden="true" />
           </Button>
           <BusinessFilterField label={copy.export.monthLabel}>
             <input
@@ -3210,27 +3215,30 @@ function SettlementView({
         ) : (
           // Figma 정산 4차 (5721:59286): one card per currency in a row, net
           // amount on the right of the code, AR/AP as label–value rows.
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div
+            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:[grid-template-columns:repeat(var(--fx-count),minmax(0,1fr))]"
+            style={{ "--fx-count": Math.min(overview.by_currency.length, 6) } as CSSProperties}
+          >
             {overview.by_currency.map((c) => {
               const net = financeDecimalMagnitude(c.net);
               return (
-                <div key={c.currency} className="rounded-[var(--r-lg)] border border-ecoya-gray-10 bg-ecoya-gray-12 p-4">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-[17px] leading-6 font-bold text-text-primary">{c.currency}</span>
+                <div key={c.currency} className="flex min-w-0 flex-col gap-3 rounded-[var(--r-lg)] border border-[var(--color-gray-10)] bg-ecoya-gray-12 px-[18px] py-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[18px] leading-[1.45] font-bold text-ecoya-gray-2">{c.currency}</span>
                     <span
-                      className={`text-[15px] leading-[22px] font-semibold tabular-nums ${net >= FINANCE_ZERO ? "text-status-success" : "text-status-danger"}`}
+                      className={`text-[16px] leading-[1.45] font-semibold tabular-nums ${net >= FINANCE_ZERO ? "text-[#178c4d]" : "text-[#d63333]"}`}
                     >
-                      <span className="mr-1 text-label-12 font-normal">{copy.fx.net}</span><span aria-hidden="true">{financeSignGlyph(net)}</span>{exactMoney(c.net)}
+                      <span className="sr-only">{copy.fx.net} </span><span aria-hidden="true">{financeSignGlyph(net)} </span>{exactMoney(c.net)}
                     </span>
                   </div>
-                  <dl className="mt-3 grid gap-1.5 text-body-13 tabular-nums">
+                  <dl className="grid gap-3 tabular-nums">
                     <div className="flex justify-between gap-2">
-                      <dt className="text-text-muted">{copy.kpi.receivable}</dt>
-                      <dd className="font-medium text-text-primary">{exactMoney(c.receivable)}</dd>
+                      <dt className="text-[14px] leading-[1.45] text-[var(--color-gray-5)]">{copy.kpi.receivable}</dt>
+                      <dd className="text-[15px] leading-[1.45] font-medium text-ecoya-gray-2">{exactMoney(c.receivable)}</dd>
                     </div>
                     <div className="flex justify-between gap-2">
-                      <dt className="text-text-muted">{copy.kpi.payable}</dt>
-                      <dd className="font-medium text-text-primary">{exactMoney(c.payable)}</dd>
+                      <dt className="text-[14px] leading-[1.45] text-[var(--color-gray-5)]">{copy.kpi.payable}</dt>
+                      <dd className="text-[15px] leading-[1.45] font-medium text-ecoya-gray-2">{exactMoney(c.payable)}</dd>
                     </div>
                   </dl>
                 </div>

@@ -16,7 +16,6 @@ import {
 } from "@trade-os/lib/deal-finance-workspace"
 import { exactFinanceMoney, presentFinanceFact } from "@trade-os/lib/erp-finance"
 import { decimalMagnitude, FINANCE_DECIMAL_SCALE } from "@trade-os/lib/financeDecimal"
-import { Badge } from "@shared/components/ui/badge"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import {
@@ -101,6 +100,7 @@ import {
 } from "@shared/components/pdf-floating-controls"
 import { PannablePdfViewport } from "@shared/components/pannable-pdf-viewport"
 import { cn } from "@shared/lib/utils"
+import { StatusBadge } from "@shared/components/status-badge"
 import { DatePicker } from "@ecoya/design-system/extensions/date-picker"
 import { prototypeBackend } from "@trade-os/lib/prototype-backend"
 
@@ -182,29 +182,6 @@ function dealItemSummary(deal: Deal) {
   return `${deal.primaryItem} 외 ${deal.itemCount - 1}건`
 }
 
-function StatusBadge({
-  children,
-  tone = "neutral",
-}: {
-  children: ReactNode
-  tone?: "neutral" | "blue" | "success" | "warning" | "danger"
-}) {
-  return (
-    <Badge
-      variant="secondary"
-      className={cn(
-        "h-5 rounded-full border-0 px-2 text-[11px] font-medium",
-        tone === "neutral" && "bg-muted text-muted-foreground",
-        tone === "blue" && "bg-primary/10 text-primary",
-        tone === "success" && "bg-success/10 text-success",
-        tone === "warning" && "bg-warning/10 text-warning-foreground",
-        tone === "danger" && "bg-destructive/10 text-destructive"
-      )}
-    >
-      {children}
-    </Badge>
-  )
-}
 
 function SelectControl({
   label,

@@ -207,6 +207,15 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
   },
 ]
 
+/** Header location trail: label of a settings section id, if it exists. */
+export function settingsSectionLabel(id: string | null): string | undefined {
+  for (const group of navigation) {
+    const item = group.items.find((entry) => entry.id === id)
+    if (item) return item.label
+  }
+  return undefined
+}
+
 function SettingRow({
   label,
   description,
@@ -920,6 +929,7 @@ function SettingsHubContent({
     const url = new URL(appLocation.href)
     url.searchParams.set("section", next)
     window.history.pushState({ section: next }, "", url)
+    window.dispatchEvent(new Event("settings-section-change"))
     if (isMobile) setOpenMobile(false)
   }
 
@@ -986,7 +996,8 @@ function SettingsHubContent({
         <SidebarContent>
           <nav aria-label="설정 메뉴">
             {visibleGroups.map((group) => (
-              <SidebarGroup key={group.label}>
+              // Same inset as the main Trade OS sidebar (menu starts 20px in).
+              <SidebarGroup key={group.label} className="px-5 py-1">
                 <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
@@ -1012,7 +1023,7 @@ function SettingsHubContent({
                             }
                             className="text-sidebar-foreground/75 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 data-active:text-primary"
                           >
-                            <Icon />
+                            <Icon strokeWidth={1.75} />
                             <span className="group-data-[collapsible=icon]:hidden">
                               {item.label}
                               {item.id === "billing" ? " ↗" : ""}

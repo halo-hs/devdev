@@ -269,7 +269,7 @@ export function DealFinanceWorkspace({
                     setDraft({ ...draft, type: value ?? "운임" })
                   }
                 >
-                  <SelectTrigger aria-label="원가 유형" className="h-9 w-full">
+                  <SelectTrigger aria-label="원가 유형" className="h-10 w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -284,7 +284,7 @@ export function DealFinanceWorkspace({
               <label className="grid min-w-0 gap-1.5 text-sm">
                 <span>금액</span>
                 <Input
-                  className="h-9"
+                  className="h-10"
                   aria-label="원가 금액"
                   title="금액은 정수 16자리, 소수점 2자리까지 입력할 수 있습니다."
                   inputMode="decimal"
@@ -307,7 +307,7 @@ export function DealFinanceWorkspace({
                     setDraft({ ...draft, currency: value ?? "USD" })
                   }
                 >
-                  <SelectTrigger aria-label="원가 통화" className="h-9 w-full">
+                  <SelectTrigger aria-label="원가 통화" className="h-10 w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -329,7 +329,7 @@ export function DealFinanceWorkspace({
                 >
                   <SelectTrigger
                     aria-label="원가 반영 기준"
-                    className="h-9 w-full"
+                    className="h-10 w-full"
                   >
                     <SelectValue />
                   </SelectTrigger>
@@ -342,7 +342,7 @@ export function DealFinanceWorkspace({
               <label className="grid min-w-0 gap-1.5 text-sm sm:col-span-2 @min-[860px]:col-span-1">
                 <span>메모</span>
                 <Input
-                  className="h-9"
+                  className="h-10"
                   aria-label="원가 메모"
                   disabled={busy}
                   maxLength={2000}

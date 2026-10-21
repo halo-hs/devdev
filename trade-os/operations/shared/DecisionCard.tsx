@@ -9,9 +9,9 @@ import type { MetricTone } from "@trade-os/operations/components/MetricCard";
 const toneValue: Record<MetricTone, string> = {
   neutral: "text-text-primary",
   danger: "text-status-danger",
-  warning: "text-status-warning",
-  success: "text-status-success",
-  info: "text-ecoya-blue-5",
+  warning: "text-ecoya-gray-2",
+  success: "text-ecoya-gray-2",
+  info: "text-ecoya-gray-2",
   // erp-v2-adapt: begin — superset MetricTone (see above).
   indigo: "text-ecoya-indigo",
   // erp-v2-adapt: end
@@ -41,15 +41,28 @@ function DecisionCardBody({
   badge,
   tone = "info",
 }: Omit<DecisionCardProps, "href" | "onActivate">) {
+  // Figma 정산 4차 KPI (6224:189967): title row with 자세히 on the right, a
+  // divider, the amount with its currency code after it, then the note.
+  const money = value.match(/^([A-Z]{3}) (.+)$/);
   return (
     <>
-      <span className="flex items-start justify-between gap-2">
-        <p className="text-[14px] leading-5 font-semibold text-ecoya-gray-2">{title}</p>
-        {badge}
+      <span className="flex w-full items-center justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-2">
+          <p className="text-[14px] leading-[1.45] font-semibold text-ecoya-gray-2">{title}</p>
+          {badge}
+        </span>
+        <span className="shrink-0 text-[11px] leading-4 text-[var(--color-primary-4)] group-hover:underline">{cta} →</span>
       </span>
-      <p className="mt-1 flex-1 text-[12px] leading-4 text-ecoya-gray-5">{body}</p>
-      <p className={cx("mt-2.5 text-[26px] leading-9 font-bold tabular-nums", toneValue[tone])}>{value}</p>
-      <span className="mt-2.5 text-[11px] leading-4 text-[var(--color-primary-4)] group-hover:underline">{cta} →</span>
+      <span aria-hidden="true" className="my-2.5 h-px w-full bg-[var(--color-gray-10)]" />
+      <p className={cx("flex items-baseline gap-1.5 text-[26px] leading-[1.45] font-bold tabular-nums", toneValue[tone])}>
+        {money ? (
+          <>
+            {money[2]}
+            <span className="text-[14px] font-semibold text-[var(--color-gray-5)]">{money[1]}</span>
+          </>
+        ) : value}
+      </p>
+      <p className="mt-2.5 text-[12px] leading-[1.45] text-[var(--color-gray-5)]">{body}</p>
     </>
   );
 }
@@ -57,7 +70,7 @@ function DecisionCardBody({
 export function DecisionCard({ title, body, value, cta, href, badge, tone = "info", onActivate }: DecisionCardProps) {
   // Figma 정산 4차 KPI (6224:188721): white card, Gray 10 ring, tone only on the value.
   const className =
-    "group flex h-full min-h-[148px] flex-col rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-[18px] py-5 text-left shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] transition hover:ring-[var(--color-gray-8)]";
+    "group flex h-full min-h-[148px] flex-col rounded-[20px] bg-[var(--color-gray-12)] px-[18px] py-5 text-left shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] transition hover:ring-[var(--color-gray-8)]";
 
   if (onActivate) {
     return (
