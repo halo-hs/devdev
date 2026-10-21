@@ -1,4 +1,5 @@
 import { AccountWithdrawal, WithdrawalResultSurface } from "./account-withdrawal"
+import { ColorPicker } from "@shared/components/color-picker"
 import { createWithdrawalPreview, withdrawalScenario, type WithdrawalGateway, type WithdrawalResult } from "./withdrawal-data"
 import { PageHeading, SettingsSection } from "./settings-layout"
 import { EmailLimits } from "./email-limits"
@@ -265,20 +266,12 @@ function BrandColorPicker({
   const pickerColor = /^#[0-9a-fA-F]{6}$/.test(color) ? color : initialColor
   return (
     <div className="flex items-center gap-2">
-        {/* Round swatch: the native picker stays under a 40px circle. */}
-        <label
-          className="relative size-10 shrink-0 cursor-pointer rounded-full border border-[var(--control-border)] p-1 shadow-[var(--shadow-input)] has-disabled:cursor-default has-disabled:opacity-60"
-          aria-label={`${label} 선택`}
-        >
-          <input
-            type="color"
-            className="absolute inset-0 size-full cursor-pointer opacity-0 disabled:cursor-default"
-            value={pickerColor}
-            disabled={disabled}
-            onChange={(event) => setColor(event.target.value)}
-          />
-          <span aria-hidden="true" className="block size-full rounded-full" style={{ backgroundColor: pickerColor }} />
-        </label>
+        <ColorPicker
+          label={`${label} 선택`}
+          value={pickerColor}
+          disabled={disabled}
+          onChange={setColor}
+        />
         <Input
           aria-label={`${label} 코드`}
           value={color}
