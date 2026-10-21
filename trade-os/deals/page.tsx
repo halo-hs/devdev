@@ -100,6 +100,7 @@ import {
 } from "@shared/components/pdf-floating-controls"
 import { PannablePdfViewport } from "@shared/components/pannable-pdf-viewport"
 import { cn } from "@shared/lib/utils"
+import { DatePicker } from "@ecoya/design-system/extensions/date-picker"
 import { prototypeBackend } from "@trade-os/lib/prototype-backend"
 
 import {
@@ -119,6 +120,12 @@ function dDayBasisLabel(basis: Deal["dDayBasis"]) {
     case "etd": return "ETD"
     default: return ""
   }
+}
+
+// "YYYY-MM-DD" filter value → local Date for the DatePicker (null when empty).
+function isoDate(value: string) {
+  const [year, month, day] = value.split("-").map(Number)
+  return year && month && day ? new Date(year, month - 1, day) : null
 }
 
 const stageLabels: Record<DealStage, string> = {
@@ -812,26 +819,26 @@ export function DealsScreen({
                             </Popover>
                           </span>
                           <div className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:flex sm:w-auto">
-                            <Input
-                              type="date"
-                              aria-label="ETA 기간 시작일"
-                              className="min-w-0 bg-[var(--control-background)] text-foreground sm:w-36"
-                              value={dateStart}
-                              max={dateEnd || undefined}
-                              onChange={(event) => {
-                                setDateStart(event.target.value)
+                            <DatePicker
+                              ariaLabel="ETA 기간 시작일"
+                              className="min-w-0 sm:w-40 [&>button]:w-full"
+                              placeholder="연도. 월. 일."
+                              value={isoDate(dateStart)}
+                              maxDate={isoDate(dateEnd) ?? undefined}
+                              onChange={(_value, formatted) => {
+                                setDateStart(formatted ?? "")
                                 setPage(1)
                               }}
                             />
                             <span className="text-white/70">~</span>
-                            <Input
-                              type="date"
-                              aria-label="ETA 기간 종료일"
-                              className="min-w-0 bg-[var(--control-background)] text-foreground sm:w-36"
-                              value={dateEnd}
-                              min={dateStart || undefined}
-                              onChange={(event) => {
-                                setDateEnd(event.target.value)
+                            <DatePicker
+                              ariaLabel="ETA 기간 종료일"
+                              className="min-w-0 sm:w-40 [&>button]:w-full"
+                              placeholder="연도. 월. 일."
+                              value={isoDate(dateEnd)}
+                              minDate={isoDate(dateStart) ?? undefined}
+                              onChange={(_value, formatted) => {
+                                setDateEnd(formatted ?? "")
                                 setPage(1)
                               }}
                             />
