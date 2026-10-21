@@ -667,7 +667,7 @@ export function DealsScreen({
   }
 
   return (
-    <div className="field-scrollbar h-full overflow-y-auto bg-transparent">
+    <div data-deal-list className="field-scrollbar h-full overflow-y-auto bg-transparent">
       <div className="flex w-full flex-col gap-5 p-4 sm:p-6">
         <BusinessPageHero
           title="거래"
