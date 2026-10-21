@@ -874,11 +874,12 @@ export function GeneratedDocumentsPrototype() {
                 action={
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="icon-sm"
+                    aria-label="새로고침"
+                    title="새로고침"
                     onClick={() => setLoadState("ready")}
                   >
-                    <RefreshCcw data-icon="inline-start" />
-                    새로고침
+                    <RefreshCcw aria-hidden="true" />
                   </Button>
                 }
               >
@@ -991,9 +992,8 @@ export function DocumentDeliveryPrototype() {
       description="확정된 패키지와 수신자별 전달 요청을 분리해 관리합니다. 링크 생성, 제공자 수락, 도달, 열람은 서로 다른 근거입니다."
       badge={<Badge variant="secondary">Confirm 완료</Badge>}
       actions={
-        <Button size="sm" variant="outline">
-          <RefreshCcw data-icon="inline-start" />
-          새로고침
+        <Button size="icon-sm" variant="outline" aria-label="새로고침" title="새로고침">
+          <RefreshCcw aria-hidden="true" />
         </Button>
       }
     >
@@ -1388,9 +1388,8 @@ export function IntelligencePrototype() {
       description="관측값·벤치마크·조직 관련 신호를 출처와 기준 시각까지 함께 확인합니다."
       badge={<Badge variant="secondary">Pro capability</Badge>}
       actions={
-        <Button size="sm" variant="outline">
-          <RefreshCcw data-icon="inline-start" />
-          새로고침
+        <Button size="icon-sm" variant="outline" aria-label="새로고침" title="새로고침">
+          <RefreshCcw aria-hidden="true" />
         </Button>
       }
     >
@@ -1488,11 +1487,13 @@ export function IntelligencePrototype() {
                   title="피드를 불러오지 못했습니다"
                   action={
                     <Button
-                      size="sm"
+                      size="icon-sm"
                       variant="outline"
+                      aria-label="새로고침"
+                      title="새로고침"
                       onClick={() => setFeedState("ready")}
                     >
-                      새로고침
+                      <RefreshCcw aria-hidden="true" />
                     </Button>
                   }
                 >
@@ -1678,9 +1679,8 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
             <Plus data-icon="inline-start" />
             연락처 추가
           </Button>}
-          <Button size="sm" variant="outline" onClick={() => retry("list")} disabled={listState === "loading"}>
-          <RefreshCcw data-icon="inline-start" />
-          새로고침
+          <Button size="icon-sm" variant="outline" aria-label="새로고침" title="새로고침" onClick={() => retry("list")} disabled={listState === "loading"}>
+          <RefreshCcw aria-hidden="true" />
           </Button>
         </div>
       }

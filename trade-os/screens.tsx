@@ -4859,8 +4859,8 @@ export function ReportsPrototype({
               <SelectItem value="seojun">박서준</SelectItem>
             </SelectContent>
           </Select>
-          <Button type="button" variant="outline" size="sm">
-            <RefreshCw /> 새로고침
+          <Button type="button" variant="outline" size="icon-sm" aria-label="새로고침" title="새로고침">
+            <RefreshCw aria-hidden="true" />
           </Button>
         </AnalyticsFilterBar>
       }

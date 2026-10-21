@@ -38,7 +38,10 @@ function DateInput({
       ariaLabel={ariaLabel}
       placeholder={placeholder ?? (mode === "month" ? "연도. 월." : "연도. 월. 일.")}
       disabled={disabled}
-      className={cn("min-w-0 [&>button]:w-full", className)}
+      className={cn(
+        "relative min-w-0 [&>button:first-of-type]:w-full [&>button:first-of-type]:pr-11 [&>button:last-of-type]:absolute [&>button:last-of-type]:right-1 [&>button:last-of-type]:top-1/2 [&>button:last-of-type]:size-8 [&>button:last-of-type]:-translate-y-1/2 [&>button:last-of-type]:rounded-[var(--r-sm)] [&>button:last-of-type]:text-muted-foreground [&>button:last-of-type]:hover:bg-transparent [&>button:last-of-type]:hover:text-foreground",
+        className,
+      )}
       format={mode === "month" ? "yyyy-MM" : "yyyy-MM-dd"}
       value={parse(value, mode)}
       minDate={parse(min, mode) ?? undefined}

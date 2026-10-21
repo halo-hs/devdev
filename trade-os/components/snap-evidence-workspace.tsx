@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
+import { RefreshCw } from "lucide-react"
 import { Button } from "@shared/components/ui/button"
 import { Badge } from "@shared/components/ui/badge"
 import { Input } from "@shared/components/ui/input"
@@ -285,8 +286,8 @@ export function SnapEvidenceWorkspace({
               {containers.length}
             </span>
           </h2>
-          <Button size="sm" variant="outline" onClick={() => void load()}>
-            새로고침
+          <Button size="icon-sm" variant="outline" aria-label="새로고침" title="새로고침" onClick={() => void load()}>
+            <RefreshCw aria-hidden="true" />
           </Button>
         </div>
         {containers.length === 0 ? (

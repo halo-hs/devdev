@@ -5008,8 +5008,10 @@ function FulfillmentTab({
                     </Button>
                   ) : null}
                   <Button
-                    size="sm"
+                    size="icon-sm"
                     variant="outline"
+                    aria-label={refreshing ? "갱신 중" : "새로고침"}
+                    title={refreshing ? "갱신 중" : "새로고침"}
                     disabled={refreshing}
                     onClick={async () => {
                       setRefreshing(true)
@@ -5027,10 +5029,9 @@ function FulfillmentTab({
                     }}
                   >
                     <RefreshCw
-                      data-icon="inline-start"
+                      aria-hidden="true"
                       className={cn(refreshing && "animate-spin")}
                     />
-                    {refreshing ? "갱신 중" : "새로고침"}
                   </Button>
                 </div>
               }

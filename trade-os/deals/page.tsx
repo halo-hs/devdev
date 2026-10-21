@@ -2423,16 +2423,17 @@ function FulfillmentTab() {
           description="이 계약의 B/L 2건"
           action={
             <Button
-              size="sm"
+              size="icon-sm"
               variant="outline"
+              aria-label={refreshing ? "갱신 중" : "새로고침"}
+              title={refreshing ? "갱신 중" : "새로고침"}
               disabled={refreshing}
               onClick={refresh}
             >
               <RefreshCw
-                data-icon="inline-start"
+                aria-hidden="true"
                 className={cn(refreshing && "animate-spin")}
               />
-              {refreshing ? "갱신 중" : "새로고침"}
             </Button>
           }
         />

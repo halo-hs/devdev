@@ -11205,8 +11205,8 @@ function ShareDeliveryPanel({
                   {deliveryHistorySummary}
                 </ToneBadge>
               </div>
-              <Button variant="outline" size="xs" onClick={() => setHistoryRefreshKey((value) => value + 1)}>
-                <RefreshCw data-icon="inline-start" /> 새로고침
+              <Button variant="outline" size="icon-xs" aria-label="새로고침" title="새로고침" onClick={() => setHistoryRefreshKey((value) => value + 1)}>
+                <RefreshCw aria-hidden="true" />
               </Button>
             </div>
             <div key={historyRefreshKey} className="grid gap-3">
