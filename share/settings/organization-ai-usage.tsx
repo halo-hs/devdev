@@ -31,7 +31,7 @@ export function OrganizationAiUsage({ organizationName }: { organizationName: st
       </header>
       <section aria-labelledby="organization-ai-usage-title">
         <h2 id="organization-ai-usage-title" className="mb-4 text-base font-semibold">제품별 사용량</h2>
-        <dl className="divide-y border-y">
+        <dl className="divide-y rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
           {["Trade OS", "SNAP"].map((product) => (
             <div key={product} className="flex items-center justify-between gap-4 py-6 text-sm">
               <dt className="font-medium">{product}</dt>
