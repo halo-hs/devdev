@@ -1920,7 +1920,7 @@ export function AskPrototype({
         <div className={cn("min-h-0 flex-1", toolsOpen && "hidden")}>
           {turns.length === 0 ? (
             <div className="flex h-full w-full flex-col justify-center overflow-y-auto px-5 py-12">
-              <div className="mx-auto mb-8 flex size-24 items-center justify-center rounded-full bg-[var(--color-primary-10)] text-[var(--primary)]">
+              <div className="mx-auto mb-8 flex size-24 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-10)] text-[var(--primary)]">
                 <Sparkles className="size-11" />
               </div>
               <h1 className="text-center text-[22px] leading-[30px] font-bold text-[var(--color-gray-1)]">

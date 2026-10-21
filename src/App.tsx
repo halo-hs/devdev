@@ -5439,23 +5439,24 @@ function PendingUploadDocumentsTable({
   return (
     <section aria-labelledby="pending-upload-title">
       <Card size="sm">
-        <CardHeader className="border-b">
-          <div className="flex flex-col items-stretch gap-3">
-            <div>
+        <CardHeader>
+          <div className="flex flex-col items-stretch gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="lg:shrink-0">
               <div className="flex items-center gap-2">
                 <h2
                   id="pending-upload-title"
-                  className="text-lg font-semibold tracking-tight"
+                  className="text-[18px] leading-[26px] font-bold"
                 >
                   업로드 문서
                 </h2>
               </div>
-              <p className="mt-1 text-xs text-[var(--surface-muted-foreground)]">
+              <p className="mt-1 text-sm text-[var(--color-gray-5)]">
                 업로드한 문서의 처리 상태를 확인하세요.
               </p>
             </div>
             <BusinessListToolbar
               aria-label="업로드 문서 필터"
+              className="min-w-0 lg:flex-1 lg:[&_.business-filter-row]:justify-end"
             >
               <BusinessFilterField label="상태">
                 <Select
@@ -5521,7 +5522,7 @@ function PendingUploadDocumentsTable({
 
         <CardContent data-layout="flush-table" className="p-0">
           <div className="overflow-x-auto">
-            <Table className="min-w-[760px] table-fixed">
+            <Table className="min-w-[760px] table-fixed [&_td]:text-sm">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[28%] text-left!">
@@ -5695,39 +5696,57 @@ function BeforeUploadState({
   return (
     <div className="h-full min-h-0 overflow-y-auto bg-transparent">
       <div className="w-full px-4 py-5 sm:px-5 sm:py-6">
+        {/* 문서 올리기 V2 (6325:101775): left-aligned hero with the upload card
+            overlapping its lower edge; the step list sits in the card's top row. */}
         <BusinessPageHero
-          variant="ai"
           eyebrow="AI 파일 올리기"
           title="문서 올리기"
           description="PDF를 올려 내용을 검토한 뒤, 거래를 선택하고 반영할 내용을 확인하세요."
-          align="center"
-        />
-        <ol
-          aria-label="문서 처리 순서"
-          className="mx-auto mt-4 flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground"
-        >
-          {["파일 올리기", "추출값 검토", "거래 연결·확정"].map(
-            (title, index) => (
-              <li key={title} className="flex items-center gap-2">
-                {index > 0 && (
-                  <ChevronRight
-                    className="mr-2 size-3 text-muted-foreground/60"
-                    aria-hidden="true"
-                  />
-                )}
-                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
-                  {index + 1}
-                </span>
-                <span>{title}</span>
-              </li>
-            )
-          )}
-        </ol>
-        <div className="mx-auto mt-5 w-full max-w-5xl">
-          <Card className="w-full bg-[var(--surface-background)]!" size="sm">
+          summary={
+        <div className="mx-auto w-full max-w-5xl">
+          <Card className="w-full bg-[var(--color-gray-12)]! shadow-[var(--shadow-modal)]" size="sm">
             <CardContent className="p-4 sm:p-5">
               <div className="mb-3 grid gap-2">
-                <AiDocumentProcessingNotice />
+                <div className="flex flex-wrap items-start gap-x-6 gap-y-2">
+                  <ol
+                    aria-label="문서 처리 순서"
+                    className="flex flex-wrap items-center gap-x-2 gap-y-2 py-1 text-xs text-[var(--color-gray-5)]"
+                  >
+                    {["파일 올리기", "추출값 검토", "거래 연결·확정"].map(
+                      (title, index) => (
+                        <li key={title} className="flex items-center gap-2">
+                          {index > 0 && (
+                            <ChevronRight
+                              className="mr-1 size-3.5 text-[var(--color-gray-3)]"
+                              aria-hidden="true"
+                            />
+                          )}
+                          <span
+                            className={cn(
+                              "flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold",
+                              index === 0
+                                ? "bg-[var(--primary)] text-white"
+                                : "bg-[var(--color-gray-10)] text-[var(--color-gray-5)]"
+                            )}
+                          >
+                            {index + 1}
+                          </span>
+                          <span
+                            className={cn(
+                              index === 0 &&
+                                "font-semibold text-[var(--color-gray-2)]"
+                            )}
+                          >
+                            {title}
+                          </span>
+                        </li>
+                      )
+                    )}
+                  </ol>
+                  <div className="min-w-60 flex-1">
+                    <AiDocumentProcessingNotice />
+                  </div>
+                </div>
                 {duplicateUploadNotice ? (
                   <DuplicateUploadAlert
                     notice={duplicateUploadNotice}
@@ -5819,9 +5838,11 @@ function BeforeUploadState({
             </CardContent>
           </Card>
         </div>
+          }
+        />
       </div>
       <div className="w-full px-4 pb-10 sm:px-5">
-        <div className="mt-7">
+        <div>
           <PendingUploadDocumentsTable
             documents={documents}
             onOpenDocument={onOpenDocument}
