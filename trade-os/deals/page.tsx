@@ -819,6 +819,8 @@ export function DealsScreen({
                               ariaLabel="ETA 기간 시작일"
                               className="min-w-0 sm:w-40 [&>button]:w-full"
                               placeholder="연도. 월. 일."
+                              allowClear={false}
+                              showToday={false}
                               value={isoDate(dateStart)}
                               maxDate={isoDate(dateEnd) ?? undefined}
                               onChange={(_value, formatted) => {
@@ -831,6 +833,8 @@ export function DealsScreen({
                               ariaLabel="ETA 기간 종료일"
                               className="min-w-0 sm:w-40 [&>button]:w-full"
                               placeholder="연도. 월. 일."
+                              allowClear={false}
+                              showToday={false}
                               value={isoDate(dateEnd)}
                               minDate={isoDate(dateStart) ?? undefined}
                               onChange={(_value, formatted) => {
