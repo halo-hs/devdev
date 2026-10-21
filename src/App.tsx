@@ -53,6 +53,7 @@ import {
   Home,
   Maximize2,
   Monitor,
+  MoreHorizontal,
   MoreVertical,
   Plus,
   RefreshCw,
@@ -3980,14 +3981,16 @@ function UploadDocumentTypeMark({
   return (
     <span
       className={cn(
-        "inline-flex size-9 shrink-0 flex-row items-center justify-center gap-1 rounded-[var(--r-sm)] border bg-[var(--surface-background)] text-primary",
-        unresolved && "border-dashed text-[var(--surface-muted-foreground)]",
+        // 문서 올리기 V2: small outlined chip — Document icon + type code.
+        "inline-flex h-5 shrink-0 flex-row items-center justify-center gap-0.5 rounded-[4px] border border-[var(--color-gray-7)] bg-[var(--color-gray-12)] px-1 text-[var(--color-gray-2)]",
+        unresolved && "border-dashed text-[var(--color-gray-5)]",
         className
       )}
       title={uploadDocumentTypeLabel(documentType)}
       aria-label={`문서 유형 ${uploadDocumentTypeLabel(documentType)}`}
     >
-      <span className="text-[9px] leading-none font-bold tracking-wide">
+      <FileText className="size-3" aria-hidden="true" />
+      <span className="text-[10px] leading-none font-semibold">
         {uploadDocumentTypeCode(documentType)}
       </span>
     </span>
@@ -4198,9 +4201,8 @@ function HorizontalDocumentTray({
                 size="lg"
                 aria-label="파일 추가 메뉴"
               >
-                <FilePlus2 data-icon="inline-start" />
+                <Plus data-icon="inline-start" />
                 파일 추가
-                <ChevronDown data-icon="inline-end" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-44">
@@ -4465,6 +4467,7 @@ function HorizontalDocumentTray({
                             <Button
                               variant="ghost"
                               size="icon-xs"
+                              className="[--button-ghost-foreground:var(--color-gray-4)]"
                               aria-label={`${document.name} 메뉴`}
                               onClick={(event) => {
                                 event.stopPropagation()
@@ -4475,7 +4478,7 @@ function HorizontalDocumentTray({
                                 )
                               }}
                             >
-                              <MoreVertical />
+                              <MoreHorizontal />
                             </Button>
                           </span>
                           {openMenu === document.name ? (
@@ -5589,10 +5592,11 @@ function PendingUploadDocumentsTable({
                             <Button
                               size="icon-xs"
                               variant="ghost"
+                              className="[--button-ghost-foreground:var(--color-gray-4)]"
                               aria-label={`${document.name} 메뉴`}
                               onClick={(event) => event.stopPropagation()}
                             >
-                              <MoreVertical />
+                              <MoreHorizontal />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent
@@ -7446,9 +7450,9 @@ function DealConfirmPanel({
         ? createPortal(primaryAction, actionPortalTarget)
         : null}
       <div className="flex min-h-0 flex-1 flex-col bg-[var(--surface-background)]">
-        <div className="flex min-h-16 shrink-0 items-center justify-between border-b px-5 py-2">
+        <div className="flex shrink-0 items-center justify-between px-5 pt-5 pb-1">
           <div className="min-w-0 pr-3">
-            <div className="text-sm font-semibold">거래 연결</div>
+            <div className="text-base font-bold">거래 연결</div>
             <p className="mt-1 truncate text-[11px] text-muted-foreground">
               확인한 문서 값을 기준으로 일치 근거를 확인하고 연결할 거래를
               선택하세요.
