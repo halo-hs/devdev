@@ -9573,14 +9573,6 @@ function CreateScreen({
                   <BusinessListToolbar
                     className="border-b px-4 py-3"
                     aria-label="만든 문서 검색 필터"
-                    search={
-                      <BusinessFilterSearch
-                        label="만든 문서 검색"
-                        placeholder="문서번호, 거래처, 상태 검색"
-                        value={documentSearch}
-                        onValueChange={setDocumentSearch}
-                      />
-                    }
                   >
                     <TabsList aria-label="만든 문서 상태">
                       {documentTabs.map((tab) => (
@@ -9589,6 +9581,12 @@ function CreateScreen({
                         </TabsTrigger>
                       ))}
                     </TabsList>
+                    <BusinessFilterSearch
+                      label="만든 문서 검색"
+                      placeholder="문서번호, 거래처, 상태 검색"
+                      value={documentSearch}
+                      onValueChange={setDocumentSearch}
+                    />
                   </BusinessListToolbar>
                   {documentTabs.map(({ value, docs }) => (
                     <TabsContent
