@@ -14,3 +14,18 @@
   --hero-filter-button-border: rgba(255, 255, 255, 0.25);
   --hero-filter-focus-ring: rgba(255, 255, 255, 0.85);
 }
+
+/* The shared Select wrapper pins its chevron to Gray 2; on the hero it follows
+   the light accessory color like the date picker icon. */
+:is(.business-hero-controls, .reference-hero-filters) [data-slot="select-trigger"] > svg {
+  color: var(--control-accessory-foreground);
+}
+
+/* One focus line on the hero: the ring replaces the translucent border instead
+   of drawing a second line outside it. */
+:is(.business-hero-controls, .reference-hero-filters)
+  :is([data-slot="select-trigger"], [data-slot="popover-trigger"]):is(:focus-visible, [aria-expanded="true"]) {
+  border-color: var(--hero-filter-focus-ring) !important;
+  box-shadow: 0 0 0 1px var(--hero-filter-focus-ring) !important;
+  outline: none !important;
+}
