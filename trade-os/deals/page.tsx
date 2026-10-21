@@ -1023,41 +1023,56 @@ export function DealsScreen({
                   },
                 ]}
               />
+              {/* Same 4-column grid and gap as the KPI cards so cells and
+                  dividers line up under them. */}
+              <div
+                aria-label="운영 리스크"
+                className="mt-3 grid grid-cols-2 gap-x-3 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-1.5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] lg:grid-cols-4"
+              >
+                {riskStripFilters.map((key, index) => {
+                  const active = kpiFilter === key
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => {
+                        setKpiFilter(active ? "all" : key)
+                        setPage(1)
+                      }}
+                      className={cn(
+                        "relative flex min-w-0 items-baseline gap-2 rounded-[var(--r-md)] border border-transparent px-2.5 py-2.5 text-left transition-colors outline-none hover:bg-[var(--color-gray-11)] focus-visible:ring-2 focus-visible:ring-ring",
+                        index % 2 === 1 &&
+                          "before:absolute before:top-2 before:bottom-2 before:-left-[7px] before:w-px before:bg-[var(--color-gray-9)]",
+                        index === 2 &&
+                          "lg:before:absolute lg:before:top-2 lg:before:bottom-2 lg:before:-left-[7px] lg:before:w-px lg:before:bg-[var(--color-gray-9)]",
+                        active &&
+                          "border-[var(--color-primary-4)] bg-[var(--color-primary-10)] hover:bg-[var(--color-primary-10)]"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "text-sm text-[var(--color-gray-3)]",
+                          active && "text-[var(--color-primary-4)]"
+                        )}
+                      >
+                        {kpiFilterLabels[key]}
+                      </span>
+                      <strong
+                        className={cn(
+                          "text-lg leading-6 font-bold tabular-nums text-[var(--color-gray-1)]",
+                          active && "text-[var(--color-primary-4)]"
+                        )}
+                      >
+                        {baseDeals.filter(kpiFilterMatchers[key]).length}건
+                      </strong>
+                    </button>
+                  )
+                })}
+              </div>
             </section>
           }
         />
-        <div
-          aria-label="운영 리스크"
-          className="flex flex-wrap items-stretch gap-1 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-1.5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]"
-        >
-          {riskStripFilters.map((key) => {
-            const active = kpiFilter === key
-            return (
-              <button
-                key={key}
-                type="button"
-                aria-pressed={active}
-                onClick={() => {
-                  setKpiFilter(active ? "all" : key)
-                  setPage(1)
-                }}
-                className={cn(
-                  "flex min-w-36 flex-1 items-center justify-between gap-3 rounded-[var(--r-md)] border border-transparent px-4 py-2.5 text-left text-sm transition-colors outline-none hover:bg-[var(--color-gray-11)] focus-visible:ring-2 focus-visible:ring-ring",
-                  active &&
-                    "border-[var(--color-primary-4)] bg-[var(--color-primary-10)] text-[var(--color-primary-4)] hover:bg-[var(--color-primary-10)]"
-                )}
-              >
-                <span className="font-medium">{kpiFilterLabels[key]}</span>
-                <span className="text-base font-bold tabular-nums">
-                  {baseDeals.filter(kpiFilterMatchers[key]).length}
-                </span>
-              </button>
-            )
-          })}
-          <span className="flex items-center px-3 text-xs text-muted-foreground">
-            현재 목록 기준
-          </span>
-        </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Tabs
             value={view}
