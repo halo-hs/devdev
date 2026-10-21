@@ -1,4 +1,5 @@
 import { PendingInvitations } from "./pending-invitations"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shared/components/ui/select"
 import { invitationExamples } from "./invitation-data"
 import { appLocation } from "@/app/app-location"
 import { TrialStartDemo } from "@auth/components/trial-start-demo"
@@ -122,8 +123,6 @@ export function useTradeSeatAssigned(role: SettingsRole) {
 export function useSettingsDemoPresent() {
   return useContext(SettingsDemoContext) !== null
 }
-const selectClass =
-  "h-9 w-full rounded-md border bg-background px-2 text-sm disabled:opacity-50"
 export function SeatSummary({
   products,
   compact = false,
@@ -434,33 +433,40 @@ export function OrganizationMembers({
             </label>
             <label className="grid gap-2 text-sm">
               조직 역할
-              <select
-                className={selectClass}
-                aria-label="초대 역할"
+              <Select
                 value={inviteRole}
-                onChange={(event) => setInviteRole(event.target.value)}
+                onValueChange={(value) => setInviteRole(value)}
               >
-                {role === "owner" && <option value="admin">ADMIN</option>}
-                <option value="member">MEMBER</option>
-              </select>
+                <SelectTrigger className="w-full" aria-label="초대 역할">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                {role === "owner" && <SelectItem value="admin">ADMIN</SelectItem>}
+                <SelectItem value="member">MEMBER</SelectItem>
+                </SelectContent>
+              </Select>
             </label>
             <label className="grid gap-2 text-sm">
               시트 유형
-              <select
-                className={selectClass}
+              <Select
                 value={inviteSeatType}
-                onChange={(event) => {
-                  setInviteSeatType(event.target.value as typeof inviteSeatType)
+                onValueChange={(value) => {
+                  setInviteSeatType(value as typeof inviteSeatType)
                   setInviteError("")
                 }}
               >
-                <option value="view">View · 무료</option>
-                {products.includes("erp") && <option value="erp">Trade OS 시트</option>}
-                {products.includes("snap") && <option value="snap">SNAP 시트</option>}
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                <SelectItem value="view">View · 무료</SelectItem>
+                {products.includes("erp") && <SelectItem value="erp">Trade OS 시트</SelectItem>}
+                {products.includes("snap") && <SelectItem value="snap">SNAP 시트</SelectItem>}
                 {products.includes("erp") && products.includes("snap") && (
-                  <option value="both">Trade OS + SNAP 시트</option>
+                  <SelectItem value="both">Trade OS + SNAP 시트</SelectItem>
                 )}
-              </select>
+                </SelectContent>
+              </Select>
             </label>
             <div className="rounded-lg border bg-muted/20 p-3 text-sm sm:col-span-2" role="status">
               {inviteSeatType === "view" ? (
@@ -545,13 +551,11 @@ export function OrganizationMembers({
                   <span className="mb-1 block text-xs text-muted-foreground lg:hidden">
                     조직 역할
                   </span>
-                  {canChangeRole(member) ? <select
-                    aria-label={`${member.name} 역할`}
-                    className={selectClass}
+                  {canChangeRole(member) ? <Select
                     value={member.role}
-                    onChange={(event) => {
+                    onValueChange={(value) => {
                       if (!canChangeRole(member)) return
-                      const next = event.target.value as SettingsRole
+                      const next = value as SettingsRole
                       if (next === "owner") {
                         setMessage(
                           "OWNER 지정은 수락·재인증 확인 후 가능합니다."
@@ -568,10 +572,15 @@ export function OrganizationMembers({
                       )
                     }}
                   >
-                    <option value="owner">OWNER</option>
-                    <option value="admin">ADMIN</option>
-                    <option value="member">MEMBER</option>
-                  </select> : (
+                    <SelectTrigger className="w-full text-sm" aria-label={`${member.name} 역할`}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="owner">OWNER</SelectItem>
+                    <SelectItem value="admin">ADMIN</SelectItem>
+                    <SelectItem value="member">MEMBER</SelectItem>
+                    </SelectContent>
+                  </Select> : (
                     <div>
                       <span aria-label={`${member.name} 역할`} className="font-medium">{member.role.toUpperCase()}</span>
                       {isLastOwner(member) && <p className="mt-1 text-xs text-muted-foreground">마지막 오너 · 역할 변경 불가</p>}
@@ -599,7 +608,7 @@ export function OrganizationMembers({
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="outline"
-                            className="w-full justify-between px-2"
+                            className="h-10 w-full justify-between px-4"
                             aria-label={`${member.name} ${names[product]}`}
                           >
                             {member[product]
@@ -689,6 +698,7 @@ export function OrganizationMembers({
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="[--button-ghost-foreground:var(--color-gray-4)]"
                           aria-label={`${member.name} 더보기`}
                         >
                           <MoreHorizontal />

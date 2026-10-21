@@ -306,7 +306,7 @@ export function SnapEvidenceWorkspace({
                 return (
                   <article
                     key={container.id}
-                    className="min-w-0 rounded-lg border p-4"
+                    className="min-w-0 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-4 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="text-sm font-semibold break-all">
