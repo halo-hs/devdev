@@ -7747,7 +7747,7 @@ function DealConfirmPanel({
                       </div>
 
                       <div
-                        className="mt-3 overflow-hidden rounded-lg border border-[var(--surface-border)]"
+                        className="mt-3 overflow-hidden rounded-[var(--r-lg)] border border-[var(--color-gray-9)]"
                         role="radiogroup"
                         aria-label="거래 후보"
                       >
@@ -7761,44 +7761,47 @@ function DealConfirmPanel({
                               role="radio"
                               aria-checked={selected}
                               className={cn(
-                                "flex w-full items-start gap-3 border-b border-[var(--surface-border)] px-4 py-3 text-left last:border-b-0 hover:bg-muted/40",
-                                selected && "bg-primary/5"
+                                // 문서 올리기 V2 거래 후보 (6233:82241): 20px radio, 15 title,
+                                // 13 meta, Blue 10 row when selected.
+                                "flex w-full items-center gap-4 border-b border-[var(--color-gray-10)] px-5 py-3.5 text-left last:border-b-0 hover:bg-[var(--color-gray-11)]",
+                                selected && "bg-[var(--color-primary-10)] hover:bg-[var(--color-primary-10)]"
                               )}
                               disabled={creatingDeal || linking || candidate.id === activeLink?.dealId}
                               onClick={() => handleCandidateSelect(candidate)}
                             >
                               <span
+                                aria-hidden="true"
                                 className={cn(
-                                  "flex size-4 shrink-0 items-center justify-center rounded-full border",
+                                  "flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] bg-[var(--color-gray-12)]",
                                   selected
-                                    ? "border-primary bg-primary text-primary-foreground"
-                                    : "border-[var(--surface-border)] bg-background"
+                                    ? "border-[var(--primary)]"
+                                    : "border-[var(--color-gray-6)]"
                                 )}
                               >
                                 {selected ? (
-                                  <Check className="size-2.5" />
+                                  <span className="size-2.5 rounded-full bg-[var(--primary)]" />
                                 ) : null}
                               </span>
                               <span className="min-w-0 flex-1">
                                 <span className="flex min-w-0 items-center gap-2">
-                                  <strong className="truncate text-xs">
+                                  <strong className="truncate text-[15px] leading-[22px] font-medium text-[var(--color-gray-1)]">
                                     {candidate.title}
                                   </strong>
                                   <ToneBadge tone={candidate.tone}>
                                     {candidate.stage}
                                   </ToneBadge>
                                 </span>
-                                <span className="mt-1 block truncate text-[11px] text-muted-foreground">
+                                <span className="mt-0.5 block truncate text-[13px] leading-[18px] text-[var(--color-gray-5)]">
                                   {candidate.id} · {candidate.party}
                                 </span>
-                                <span className="mt-1 block text-[11px] text-primary">
+                                <span className="mt-0.5 block text-[13px] leading-[18px] text-[var(--primary)]">
                                   {candidate.item} · {candidate.amount}{" "}
                                   {candidate.currency}
                                 </span>
                                 {candidate.id === activeLink?.dealId ? <span className="mt-2 block text-[10px] font-medium">현재 연결</span> : null}
                               </span>
                               {recommended ? (
-                                <span className="flex min-h-12 shrink-0 items-center gap-1.5 border-l border-[var(--surface-border)] pl-4 text-xs font-semibold text-primary">
+                                <span className="flex shrink-0 items-center gap-1 text-[13px] text-[#6b4ee6]">
                                   <Sparkles className="size-3.5" /> AI 추천
                                 </span>
                               ) : null}

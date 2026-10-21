@@ -78,20 +78,23 @@ export function PdfViewerToolbar({
         {isFullscreen ? <Minimize2 /> : <Maximize2 />}
       </Button>
       {onDownload ? (
+        // 문서 올리기 V2 (6233:82241): the labeled download is a 40px outline
+        // button with text only; the icon-only form stays 32px.
         <Button
           variant="outline"
-          size={labeledDownload ? "sm" : "icon-sm"}
+          size={labeledDownload ? "lg" : "icon-sm"}
           aria-label={downloadLabel}
           title={downloadLabel}
           disabled={isDownloading}
           onClick={onDownload}
         >
           {isDownloading ? (
-            <LoaderCircle className="animate-spin" />
-          ) : (
-            <Download
+            <LoaderCircle
+              className="animate-spin"
               data-icon={labeledDownload ? "inline-start" : undefined}
             />
+          ) : labeledDownload ? null : (
+            <Download />
           )}
           {labeledDownload ? downloadLabel : null}
         </Button>
