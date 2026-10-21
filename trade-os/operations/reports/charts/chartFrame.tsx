@@ -1,10 +1,12 @@
 // 공용 SVG 프레임 조각 — 헤어라인 그리드 + y 눈금 라벨 + x 축 라벨 (시안 frame/xLabels 이식).
 import { CHART_COLORS, CHART_PAD, xLabelEvery } from "./chartGeometry";
 
-export function innerSize(width: number, height: number) {
+export type ChartPad = { l: number; r: number; t: number; b: number };
+
+export function innerSize(width: number, height: number, pad: ChartPad = CHART_PAD) {
   return {
-    iw: Math.max(0, width - CHART_PAD.l - CHART_PAD.r),
-    ih: Math.max(0, height - CHART_PAD.t - CHART_PAD.b),
+    iw: Math.max(0, width - pad.l - pad.r),
+    ih: Math.max(0, height - pad.t - pad.b),
   };
 }
 
@@ -62,14 +64,16 @@ export function XLabels({
   width,
   height,
   mode,
+  pad = CHART_PAD,
 }: {
   labels: string[];
   width: number;
   height: number;
   /** band = 막대(슬롯 중앙), point = 라인(양끝 정렬). */
   mode: "band" | "point";
+  pad?: ChartPad;
 }) {
-  const { iw } = innerSize(width, height);
+  const { iw } = innerSize(width, height, pad);
   const n = labels.length;
   if (n === 0) return null;
   const every = xLabelEvery(n);
@@ -80,10 +84,10 @@ export function XLabels({
         if (i % every) return null;
         const x =
           mode === "band"
-            ? CHART_PAD.l + (i + 0.5) * (iw / n)
+            ? pad.l + (i + 0.5) * (iw / n)
             : n > 1
-              ? CHART_PAD.l + i * step
-              : CHART_PAD.l + iw / 2;
+              ? pad.l + i * step
+              : pad.l + iw / 2;
         return (
           <text
             key={`${i}-${label}`}

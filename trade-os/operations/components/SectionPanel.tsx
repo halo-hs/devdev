@@ -56,13 +56,13 @@ function SectionPanel({
       {(title || description || action) && (
         <header
           className={cx(
-            "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-ecoya-gray-10",
+            "flex flex-wrap items-center justify-between gap-3 border-b border-ecoya-gray-10",
             density === "compact" ? "min-h-11 px-3.5 py-2.5" : "min-h-12 px-5 py-3",
             headerSurface === "muted" ? "bg-ecoya-gray-11" : "bg-ecoya-gray-12",
           )}
           data-ui="section-panel-header"
         >
-          <div className="flex min-w-0 flex-col gap-0.5">
+          <div className="flex min-w-[min(100%,12rem)] flex-1 flex-col gap-0.5">
             {title && (
               <h2 className="m-0 text-header-17 font-bold text-ecoya-gray-2">{title}</h2>
             )}
@@ -70,7 +70,7 @@ function SectionPanel({
               <div className="text-body-13 font-regular text-ecoya-gray-4">{description}</div>
             )}
           </div>
-          {action && <div className="self-center">{action}</div>}
+          {action && <div className="max-w-full self-center">{action}</div>}
         </header>
       )}
       <div

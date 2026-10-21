@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 
 import { ChartTooltip, useChartTooltip } from "./ChartTooltip";
-import { innerSize, XLabels } from "./chartFrame";
+import { innerSize, XLabels, type ChartPad } from "./chartFrame";
 import {
   barPathBottom,
   barPathTop,
@@ -65,6 +65,7 @@ function GpGrid({
   width,
   height,
   format,
+  pad,
 }: {
   ticks: bigint[];
   maxV: bigint;
@@ -72,8 +73,9 @@ function GpGrid({
   width: number;
   height: number;
   format: (v: bigint) => string;
+  pad: ChartPad;
 }) {
-  const { ih } = innerSize(width, height);
+  const { ih } = innerSize(width, height, pad);
   const span = maxV - minV || BigInt(1);
   // All-zero months: keep the same four-step grid as the other report charts,
   // with only the 0 line labelled.
@@ -81,12 +83,12 @@ function GpGrid({
     return (
       <>
         {[4, 3, 2, 1, 0].map((step) => {
-          const y = CHART_PAD.t + ih - (step / 4) * ih;
+          const y = pad.t + ih - (step / 4) * ih;
           return (
             <g key={step}>
-              <line x1={CHART_PAD.l} x2={width - CHART_PAD.r} y1={y} y2={y} stroke={CHART_COLORS.grid} strokeWidth={1} />
+              <line x1={pad.l} x2={width - pad.r} y1={y} y2={y} stroke={CHART_COLORS.grid} strokeWidth={1} />
               {step === 0 ? (
-                <text x={CHART_PAD.l - 6} y={y + 4} textAnchor="end" fontSize="12" fill={CHART_COLORS.axisText}>
+                <text x={pad.l - 6} y={y + 4} textAnchor="end" fontSize="12" fill={CHART_COLORS.axisText}>
                   {format(BigInt(0))}
                 </text>
               ) : null}
@@ -101,19 +103,19 @@ function GpGrid({
       {ticks
         .filter((tick, index, all) => index === 0 || tick !== all[index - 1])
         .map((tick) => {
-          const y = CHART_PAD.t + ih - chartRatio(tick - minV, span) * ih;
+          const y = pad.t + ih - chartRatio(tick - minV, span) * ih;
           return (
             <g key={tick.toString()}>
               <line
-                x1={CHART_PAD.l}
-                x2={width - CHART_PAD.r}
+                x1={pad.l}
+                x2={width - pad.r}
                 y1={y}
                 y2={y}
                 stroke={tick === BigInt(0) ? CHART_COLORS.gridStrong : CHART_COLORS.grid}
                 strokeWidth={1}
               />
               <text
-                x={CHART_PAD.l - 6}
+                x={pad.l - 6}
                 y={y + 4}
                 textAnchor="end"
                 fontSize="12"
@@ -148,7 +150,6 @@ export function GpBarChart({
   const { ref, width } = useMeasuredWidth<HTMLDivElement>();
   const { tooltip, show, hide } = useChartTooltip();
 
-  const { iw, ih } = innerSize(width, height);
   const n = points.length;
   const exact = points.every((point) => typeof point.gp === "bigint");
   const values = points.map((point) => chartValue(point.gp));
@@ -170,12 +171,25 @@ export function GpBarChart({
   const format = formatAxisValue as (value: bigint | number) => string;
   const formatBar = formatBarLabel as (value: bigint | number) => string;
 
+  // Axis and bar labels are full money strings ("USD 1,234.00"), so the side
+  // padding grows with the longest label (≈7px per glyph) instead of clipping it.
+  const axisLabels = (ticks.length ? ticks : [BigInt(0)]).map((tick) => format(displayValue(tick)));
+  const lastValue = n > 0 ? chartValue(points[n - 1].gp) : BigInt(0);
+  const lastLabel = n > 0 && points[n - 1].hasData !== false ? formatBar(displayValue(lastValue)) : "";
+  const pad: ChartPad = {
+    ...CHART_PAD,
+    l: Math.max(CHART_PAD.l, Math.max(...axisLabels.map((label) => label.length)) * 7 + 10),
+    r: Math.max(CHART_PAD.r, Math.ceil(lastLabel.length * 3.8) - 4),
+  };
+  const { iw, ih } = innerSize(width, height, pad);
   const slot = n > 0 ? iw / n : iw;
   const bw = Math.max(2, Math.min(16, slot - 10));
-  const y0 = CHART_PAD.t + ih - chartRatio(-minV, span) * ih;
+  const y0 = pad.t + ih - chartRatio(-minV, span) * ih;
 
   return (
-    <div ref={ref} className="relative" data-chart-wrap data-component="GpBarChart">
+    // Narrow cards keep a fixed 520px plot and scroll sideways.
+    <div className="overflow-x-auto">
+    <div ref={ref} className="relative min-w-[520px]" data-chart-wrap data-component="GpBarChart">
       <svg width="100%" height={height} role="img" aria-label={ariaLabel}>
         <GpGrid
           ticks={ticks}
@@ -184,6 +198,7 @@ export function GpBarChart({
           width={width}
           height={height}
           format={(value) => format(displayValue(value))}
+          pad={pad}
         />
         {points.map((p, i) => {
           const value = chartValue(p.gp);
@@ -192,14 +207,14 @@ export function GpBarChart({
           const absolute = negative ? -value : value;
           const h = chartRatio(absolute, span) * ih;
           const y = negative ? y0 : y0 - h;
-          const x = CHART_PAD.l + i * slot + (slot - bw) / 2;
+          const x = pad.l + i * slot + (slot - bw) / 2;
           const isLast = i === n - 1;
           if (empty) {
             return (
               <g key={p.key} data-gp-bar="empty">
                 <rect
-                  x={CHART_PAD.l + i * slot}
-                  y={CHART_PAD.t}
+                  x={pad.l + i * slot}
+                  y={pad.t}
                   width={slot}
                   height={ih}
                   fill="transparent"
@@ -230,7 +245,7 @@ export function GpBarChart({
               {isLast && !negative ? (
                 <text
                   x={x + bw / 2}
-                  y={Math.max(CHART_PAD.t, y - 6)}
+                  y={Math.max(pad.t, y - 6)}
                   textAnchor="middle"
                   fontSize="var(--text-body-10)"
                   fontWeight={600}
@@ -240,8 +255,8 @@ export function GpBarChart({
                 </text>
               ) : null}
               <rect
-                x={CHART_PAD.l + i * slot}
-                y={CHART_PAD.t}
+                x={pad.l + i * slot}
+                y={pad.t}
                 width={slot}
                 height={ih}
                 fill="transparent"
@@ -251,9 +266,10 @@ export function GpBarChart({
             </g>
           );
         })}
-        <XLabels labels={points.map((p) => p.xLabel)} width={width} height={height} mode="band" />
+        <XLabels labels={points.map((p) => p.xLabel)} width={width} height={height} mode="band" pad={pad} />
       </svg>
       <ChartTooltip tooltip={tooltip} width={width} />
+    </div>
     </div>
   );
 }

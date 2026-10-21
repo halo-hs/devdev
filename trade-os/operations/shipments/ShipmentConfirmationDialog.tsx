@@ -8,7 +8,7 @@ import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shared/components/ui/select";
 import { Button } from "@shared/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@shared/components/ui/dialog";
-import { Input } from "@shared/components/ui/input";
+import { DateInput } from "@shared/components/date-input";
 import { ApiError } from "../lib/api/client";
 import { effectiveShipmentEta, effectiveShipmentEtd, type Shipment, type ShipmentConfirmation, type ShipmentStatus } from "../lib/api/shipments";
 
@@ -130,7 +130,7 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
                     <SelectContent position="popper" style={{ zIndex: "calc(var(--z-dialog) + 2)" }}>{statuses.map((status) => <SelectItem key={status} value={status}>{copy.status[status]}</SelectItem>)}</SelectContent>
                   </Select>
                 ) : (
-                  <Input aria-describedby={changed && !released && !draft[field] ? "shipment-date-error" : undefined} aria-invalid={changed && !released && !draft[field] || undefined} disabled={pending || released || !writable} id={`shipment-${field}`} max="9999-12-31" min="0001-01-01" onChange={(event) => setField(field, event.target.value)} type="date" value={draft[field]} />
+                  <DateInput ariaLabel={label} className="w-full" disabled={pending || released || !writable} id={`shipment-${field}`} invalid={changed && !released && !draft[field]} onValueChange={(value) => setField(field, value)} value={draft[field] ?? ""} />
                 )}
                 {field === "confirmed_status" ? <ShipmentConfirmationRecord shipment={baseline} /> : null}
                 {field === "confirmed_status" ? <FieldDescription className="text-[var(--color-gray-4)]" id="shipment-status-hint">{c.statusHint}</FieldDescription> : null}
