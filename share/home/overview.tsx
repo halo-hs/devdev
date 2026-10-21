@@ -52,7 +52,7 @@ export function PlatformHomeOverview({
       <div className="flex min-h-full min-w-0 flex-col gap-5 px-4 pb-10 sm:px-5">
         <section aria-labelledby="home-question-title" className="relative">
           <div className="relative h-[200px] overflow-hidden rounded-[22px] shadow-[var(--shadow-modal)] sm:h-[280px]">
-            <img src="/images/home-hero-ship.png" alt="" className="absolute inset-0 size-full object-cover object-[center_42%]" />
+            <img src="/images/home-hero-ship-2800.jpg" alt="" decoding="async" className="absolute inset-0 size-full object-cover object-[center_42%]" />
           </div>
           <div className="relative mx-3 -mt-24 flex flex-col gap-1.5 rounded-[22px] border border-[var(--color-gray-9)] bg-[var(--color-gray-12)] px-5 py-5 shadow-[0_4px_12px_rgb(0_0_0/10%)] sm:mx-[60px] sm:-mt-[117px] sm:px-[30px]">
             {state === "empty" ? (

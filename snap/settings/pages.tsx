@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
+import { DateInput } from "@shared/components/date-input"
 import {
   AlertCircle,
   Building2,
@@ -473,7 +474,7 @@ function PlatformSignupsPage() {
           </label>
           <label className="text-xs font-medium text-muted-foreground">
             신청일 이후
-            <Input className="mt-1 sm:w-44" type="date" value={since} onChange={(event) => setSince(event.target.value)} />
+            <DateInput className="mt-1 sm:w-44" ariaLabel="신청일 이후" value={since} onValueChange={setSince} />
           </label>
         </div>
         <Card className="rounded-md shadow-none">

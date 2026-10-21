@@ -43,14 +43,16 @@ type StatusBadgeProps = Omit<HTMLAttributes<HTMLSpanElement>, "color"> & {
  * carried for contract fidelity but not applied to the rendered span.
  */
 const toneMap: Record<StatusTone, { color: string; bg: string; border: string }> = {
+  // Core tones follow the Figma Badge (891:1212) status colors, same as the
+  // shared StatusBadge: Gray 9/3, Blue 10/4, Green 6/1, Orange 6/1, Red 6/2.
   neutral: {
-    color: "var(--ecoya-gray-4)",
-    bg: "var(--ecoya-gray-11)",
+    color: "var(--color-gray-4)",
+    bg: "var(--color-gray-10)",
     border: "var(--ecoya-gray-9)",
   },
   info: {
-    color: "var(--ecoya-system-blue-2)",
-    bg: "var(--ecoya-system-blue-6)",
+    color: "var(--color-primary-4)",
+    bg: "var(--color-primary-10)",
     border: "var(--ecoya-system-blue-5)",
   },
   // Brand-emphasis tag (canonical: #E5F2FF bg + #166DD7 text). bg = system-blue-6,
@@ -62,18 +64,18 @@ const toneMap: Record<StatusTone, { color: string; bg: string; border: string }>
     border: "var(--ecoya-system-blue-6)",
   },
   success: {
-    color: "var(--ecoya-system-green-1)",
-    bg: "var(--ecoya-system-green-6)",
+    color: "var(--color-green-1)",
+    bg: "var(--color-green-6)",
     border: "var(--ecoya-system-green-5)",
   },
   warning: {
-    color: "var(--ecoya-system-yellow-1)",
-    bg: "var(--ecoya-system-yellow-6)",
+    color: "var(--color-orange-1)",
+    bg: "var(--color-orange-6)",
     border: "var(--ecoya-system-yellow-5)",
   },
   danger: {
-    color: "var(--ecoya-system-red-2)",
-    bg: "var(--ecoya-system-red-8)",
+    color: "var(--color-red-2)",
+    bg: "var(--color-red-8)",
     border: "var(--ecoya-system-red-7)",
   },
   request: {

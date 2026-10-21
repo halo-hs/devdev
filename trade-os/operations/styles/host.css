@@ -91,7 +91,7 @@
 }
 .reference-3030 .reference-shipment-tabs [data-slot="tabs-list"]::-webkit-scrollbar { display: none; }
 /* Same white card and blue HeroBanner gradient as the other Trade OS list pages. */
-.reference-3030 [data-component="ShipmentsConnected"] {
+.reference-3030 :is([data-component="ShipmentsConnected"], [data-component="SettlementConnected"]) {
   --ecoya-hero-gradient-small: linear-gradient(120deg, #1d4ed8 0%, #2563eb 52%, #3b82f6 100%);
 }
 .reference-3030 [data-ui="shipments-list-controls"] {
@@ -198,10 +198,36 @@
 .reference-3030 .text-xs { font-size: var(--text-body-10); line-height: var(--leading-body-10); }
 
 /* A transaction owns a table of shipments; each row keeps its own actions. */
-.reference-3030 .reference-shipment-group { min-width: 0; overflow: hidden; border: 1px solid var(--table-border); border-radius: var(--erp-reference-r-lg); background: var(--ecoya-gray-12); }
-.reference-3030 .reference-shipment-group-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 20px; }
+/* Same list card as 문서 올리기: 16px card inset around the heading and table,
+   flat table inside, 20px outer cell inset. */
+.reference-3030 .reference-shipment-group { min-width: 0; overflow: hidden; border: 0; border-radius: var(--r-lg); background: var(--color-gray-12); box-shadow: var(--shadow-section); outline: 1px solid var(--color-gray-10); padding-bottom: 16px; }
+.reference-3030 .reference-shipment-group-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 16px 16px; }
 .reference-3030 .reference-shipment-group-heading h2 { overflow-wrap: anywhere; }
-.reference-3030 .reference-shipment-group > [data-slot="table-container"] { border-radius: 0; }
+.reference-3030 .reference-shipment-group > [data-slot="table-container"] { margin-inline: 16px; width: auto; border-radius: 0; box-shadow: none; }
+.reference-3030 .reference-shipment-group :is([data-slot="table-head"], [data-slot="table-cell"]):first-child { padding-left: 20px; }
+.reference-3030 .reference-shipment-group :is([data-slot="table-head"], [data-slot="table-cell"]):last-child { padding-right: 20px; }
+/* List page: one card holds the tabs and all deal groups; groups split by a line. */
+.reference-3030 .reference-shipment-list-card {
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  background: var(--color-gray-12);
+  box-shadow: var(--shadow-section);
+  outline: 1px solid var(--color-gray-10);
+}
+.reference-3030 .reference-shipment-list-card [data-ui="shipments-list-controls"] {
+  padding: 16px 16px 0;
+  border-radius: 0;
+  box-shadow: none;
+  outline: 0;
+  background: transparent;
+}
+.reference-3030 .reference-shipment-list-card .reference-shipment-results { gap: 0; padding-top: 8px; }
+.reference-3030 .reference-shipment-list-card .reference-shipment-group {
+  border-radius: 0;
+  box-shadow: none;
+  outline: 0;
+}
+.reference-3030 .reference-shipment-list-card .reference-shipment-group + .reference-shipment-group { border-top: 1px solid var(--color-gray-10); }
 .reference-3030 .reference-shipment-table { min-width: 1040px; table-layout: fixed; }
 .reference-3030 .reference-shipment-table [data-slot="table-cell"] { white-space: normal; overflow-wrap: anywhere; padding-block: 16px; }
 .reference-3030 .reference-shipment-table tbody tr:last-child td { border-bottom: 0; }
@@ -284,4 +310,13 @@
 .reference-3030 header[data-variant="hero"] :is([data-reference-button="tertiary"], [data-reference-button="secondary"]):enabled:hover {
   border-color: var(--color-gray-8);
   background: var(--color-gray-11);
+}
+
+/* Figma 정산 4차 HeroBanner (5721:59118): pill-shaped controls and white buttons. */
+.reference-3030 [data-component="SettlementConnected"] header[data-variant="hero"] :is([data-reference-button], [data-slot="select-trigger"], [data-ui="settlement-currency-filter"], [data-slot="popover-trigger"]) {
+  border-radius: var(--r-pill);
+}
+.reference-3030 [data-component="SettlementConnected"] header[data-variant="hero"] [data-slot="checkbox"] {
+  border-color: white;
+  background: white;
 }

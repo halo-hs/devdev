@@ -1,4 +1,5 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shared/components/ui/tabs"
+import { DateInput } from "@shared/components/date-input"
 import { counterpartyPreview, counterpartyPreviewAccess, type CounterpartyAccess } from "@trade-os/counterparty-workspace"
 import { listDealDocuments } from "@trade-os/lib/deal-document-actions"
 import { orderProgress } from "@trade-os/lib/deal-finance-workspace"
@@ -44,7 +45,7 @@ import {
   FileText,
   Loader2,
   Paperclip,
-  MessageSquareText,
+  PanelRight,
   Plus,
   RefreshCw,
   RotateCcw,
@@ -1375,17 +1376,18 @@ export function AskPrototype({
       className="w-full rounded-[18px] border border-[var(--color-gray-6)] bg-[var(--color-gray-12)] px-4 pt-3 pb-2.5 shadow-[0_2px_4px_rgb(0_0_0/0.05)] transition-shadow focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-ring/30"
     >
       {attachedFiles.length ? (
-        <div className="flex flex-wrap gap-2 pb-1">
+        // Figma 7차 (5729:61024): attached files as a list above a divider.
+        <div className="mb-2 max-h-[120px] overflow-y-auto border-b border-[var(--color-gray-10)] pb-2">
           {attachedFiles.map((file) => (
             <span
               key={file.id}
-              className="inline-flex max-w-full items-center gap-2 rounded-[var(--r-md)] border border-[var(--surface-border)] bg-[var(--surface-muted-background)] py-1.5 pr-1.5 pl-2.5 text-xs"
+              className="flex h-10 items-center gap-1.5 rounded-[var(--r-xs)] pr-2 pl-2.5 text-[15px] leading-[22px] text-[var(--color-gray-1)] hover:bg-[var(--color-gray-11)]"
             >
-              <FileText className="size-3.5 shrink-0 text-primary" />
-              <span className="max-w-48 truncate">{file.name}</span>
+              <FileText className="size-4 shrink-0 text-[var(--color-gray-4)]" />
+              <span className="min-w-0 flex-1 truncate">{file.name}</span>
               <button
                 type="button"
-                className="flex size-5 shrink-0 items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-background hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/30"
+                className="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-sm)] text-[var(--color-gray-4)] outline-none hover:bg-[var(--color-gray-10)] hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/30"
                 aria-label={`${file.name} 첨부 해제`}
                 onClick={() =>
                   setAttachedFiles((current) =>
@@ -1393,7 +1395,7 @@ export function AskPrototype({
                   )
                 }
               >
-                <X className="size-3" />
+                <X className="size-4" />
               </button>
             </span>
           ))}
@@ -1411,7 +1413,7 @@ export function AskPrototype({
           }
         }}
         className={cn(
-          "max-h-48 min-h-24 w-full resize-none border-0 bg-transparent px-0 pt-1 pb-2 text-[length:var(--text-body-md,15px)] leading-[22px] shadow-none focus-visible:ring-0",
+          "max-h-48 min-h-24 w-full resize-none border-0! bg-transparent! px-2.5 pt-1 pb-2 text-[length:var(--text-body-md,15px)] leading-[22px] shadow-none! focus-visible:ring-0",
           attachedFiles.length && "min-h-20"
         )}
         placeholder={
@@ -1651,36 +1653,39 @@ export function AskPrototype({
   return (
     <div
       data-slot="ai-chat-workspace"
-      className="flex h-full min-h-0 gap-4 overflow-hidden bg-transparent p-4 sm:p-5"
+      className="flex h-full min-h-0 overflow-hidden bg-transparent p-4 sm:p-5"
     >
+      {/* Figma 7차 (5729:61219): chat and conversation list share one card,
+          split by a single line. */}
+      <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
       <Dialog open={fileFinderOpen} onOpenChange={setFileFinderOpen}>
-        <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-xl">
-          <DialogHeader className="border-b border-[var(--surface-border)] px-5 py-4 text-left">
+        <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-[640px]">
+          <DialogHeader className="px-6 pt-6 pb-0 text-left">
             <DialogTitle>파일 찾기</DialogTitle>
             <DialogDescription>
               대화에서 확인할 기존 업무 문서를 선택하세요.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="p-4 sm:p-5">
+          <div className="px-6 pt-4 pb-2">
             <div className="relative">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 autoFocus
                 value={fileQuery}
                 onChange={(event) => setFileQuery(event.target.value)}
-                className="pl-9"
+                className="h-10 pl-10"
                 placeholder="파일명, 문서 유형, 거래번호 검색"
                 aria-label="업무 파일 검색"
               />
             </div>
 
-            <div className="mt-4 overflow-hidden rounded-[var(--r-lg)] border border-[var(--surface-border)]">
-              <div className="flex h-9 items-center justify-between border-b border-[var(--surface-border)] bg-[var(--surface-muted-background)] px-3 text-xs text-muted-foreground">
+            <div className="mt-3">
+              <div className="flex h-8 items-center justify-between px-1 text-[13px] text-muted-foreground">
                 <span>최근 문서</span>
                 <span>{filteredFiles.length}건</span>
               </div>
-              <div className="max-h-80 overflow-y-auto">
+              <div className="max-h-80 space-y-1 overflow-y-auto">
                 {filteredFiles.map((file) => {
                   const selected = selectedFileIds.includes(file.id)
                   const alreadyAttached = attachedFiles.some(
@@ -1695,28 +1700,29 @@ export function AskPrototype({
                       disabled={alreadyAttached}
                       onClick={() => toggleFile(file.id)}
                       className={cn(
-                        "flex w-full items-center gap-3 border-b border-[var(--surface-border)] px-3 py-3 text-left outline-none last:border-b-0 hover:bg-muted/50 focus-visible:bg-muted disabled:cursor-default disabled:opacity-70",
-                        selected && "bg-primary/6"
+                        "flex w-full items-center gap-3 rounded-[var(--r-md)] px-3 py-2.5 text-left outline-none hover:bg-[var(--color-gray-11)] focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-default disabled:opacity-60",
+                        (selected || alreadyAttached) && "bg-[var(--color-primary-10)] hover:bg-[var(--color-primary-10)]"
                       )}
                     >
+                      {/* Visual checkbox only: the row button carries aria-pressed. */}
                       <span
+                        aria-hidden="true"
                         className={cn(
-                          "flex size-8 shrink-0 items-center justify-center rounded-[var(--r-md)] border border-[var(--surface-border)] bg-background text-muted-foreground",
-                          selected &&
-                            "border-primary bg-primary text-primary-foreground"
+                          "flex size-5 shrink-0 items-center justify-center rounded-[4px] border border-[var(--color-gray-7)] bg-[var(--color-gray-12)] text-white",
+                          selected && "border-[var(--primary)] bg-[var(--primary)]",
+                          alreadyAttached && "border-[var(--color-gray-8)] bg-[var(--color-gray-10)]"
                         )}
                       >
-                        {selected ? (
-                          <Check className="size-4" />
-                        ) : (
-                          <FileText className="size-4" />
-                        )}
+                        {selected ? <Check className="size-3.5" /> : null}
+                      </span>
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--r-md)] bg-[var(--color-gray-11)] text-[var(--color-gray-3)]">
+                        <FileText className="size-5" />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium">
+                        <span className="block truncate text-[15px] leading-[22px]">
                           {file.name}
                         </span>
-                        <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                        <span className="mt-0.5 block truncate text-[13px] text-muted-foreground">
                           {file.type} · {file.reference}
                         </span>
                       </span>
@@ -1728,7 +1734,7 @@ export function AskPrototype({
                 })}
                 {!filteredFiles.length ? (
                   <div className="px-4 py-12 text-center">
-                    <FileText className="mx-auto size-5 text-muted-foreground" />
+                    <Search className="mx-auto size-7 text-[var(--color-gray-2)]" />
                     <p className="mt-3 text-sm font-medium">
                       찾는 파일이 없습니다.
                     </p>
@@ -1741,8 +1747,8 @@ export function AskPrototype({
             </div>
           </div>
 
-          <DialogFooter className="border-t border-[var(--surface-border)] px-5 py-3">
-            <Button variant="ghost" onClick={() => setFileFinderOpen(false)}>
+          <DialogFooter className="border-t border-[var(--color-gray-10)] px-6 py-4">
+            <Button variant="outline" onClick={() => setFileFinderOpen(false)}>
               취소
             </Button>
             <Button
@@ -1853,7 +1859,7 @@ export function AskPrototype({
         </SheetContent>
       </Sheet>
 
-      <section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
+      <section className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="flex shrink-0 items-start gap-1 px-5 pt-5 pb-4">
           <div className="flex min-w-0 items-center gap-2">
             <span className="grid min-w-0 gap-1">
@@ -1877,7 +1883,7 @@ export function AskPrototype({
               title="대화 목록 열기"
               onClick={() => setMobileHistoryOpen(true)}
             >
-              <MessageSquareText />
+              <PanelRight />
             </Button>
             {!historyOpen ? (
               <Button
@@ -1890,7 +1896,7 @@ export function AskPrototype({
                 title="대화 목록 열기"
                 onClick={() => setHistoryOpen(true)}
               >
-                <MessageSquareText />
+                <PanelRight />
               </Button>
             ) : null}
           </div>
@@ -1997,7 +2003,7 @@ export function AskPrototype({
 
       <aside
         className={cn(
-          "hidden min-h-0 w-72 shrink-0 flex-col gap-4 overflow-hidden rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] lg:flex xl:w-80",
+          "hidden min-h-0 w-72 shrink-0 flex-col gap-4 overflow-hidden border-l border-[var(--color-gray-10)] p-5 lg:flex xl:w-80",
           !historyOpen && "lg:hidden"
         )}
         id="ai-conversation-list"
@@ -2087,6 +2093,7 @@ export function AskPrototype({
           ) : null}
         </div>
       </aside>
+      </div>
     </div>
   )
 }
@@ -2956,12 +2963,12 @@ export function SettlementPrototype({ onNavigate }: { onNavigate: Navigate }) {
       description="회계 소프트웨어가 아닙니다. 세무사·더존으로 넘길 AR/AP와 자금 일정을 정리합니다."
       action={
         <>
-          <Input
-            type="month"
+          <DateInput
+            mode="month"
             value={exportMonth}
-            onChange={(event) => setExportMonth(event.target.value)}
-            aria-label="내보낼 대상 월"
-            className="w-36"
+            onValueChange={setExportMonth}
+            ariaLabel="내보낼 대상 월"
+            className="w-40"
           />
           <Button
             variant="outline"
@@ -3661,13 +3668,13 @@ export function SettlementPrototype({ onNavigate }: { onNavigate: Navigate }) {
                       </label>
                       <label className="grid gap-1.5 text-sm">
                         <span>처리일</span>
-                        <Input
-                          type="date"
+                        <DateInput
+                          ariaLabel="처리일"
                           value={paymentDraft.paidAt}
-                          onChange={(event) =>
+                          onValueChange={(paidAt) =>
                             setPaymentDraft((draft) => ({
                               ...draft,
-                              paidAt: event.target.value,
+                              paidAt,
                             }))
                           }
                         />
@@ -4852,8 +4859,8 @@ export function ReportsPrototype({
               <SelectItem value="seojun">박서준</SelectItem>
             </SelectContent>
           </Select>
-          <Button type="button" variant="outline" size="sm">
-            <RefreshCw /> 새로고침
+          <Button type="button" variant="outline" size="icon-sm" aria-label="새로고침" title="새로고침">
+            <RefreshCw aria-hidden="true" />
           </Button>
         </AnalyticsFilterBar>
       }

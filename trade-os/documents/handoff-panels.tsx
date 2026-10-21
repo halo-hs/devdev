@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { DateInput } from "@shared/components/date-input"
 import { ArrowRight, Download } from "lucide-react"
 import { Badge } from "@shared/components/ui/badge"
 import { Button } from "@shared/components/ui/button"
@@ -19,7 +20,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@shared/components/ui/dialog"
-import { Input } from "@shared/components/ui/input"
 import { Textarea } from "@shared/components/ui/textarea"
 import {
   Table,
@@ -255,19 +255,11 @@ export function ShipmentReviewContent({
                 <>
                   <label className="grid gap-2 text-sm">
                     확인 ETD
-                    <Input
-                      type="date"
-                      value={etd}
-                      onChange={(event) => setEtd(event.target.value)}
-                    />
+                    <DateInput ariaLabel="확인 ETD" value={etd} onValueChange={setEtd} />
                   </label>
                   <label className="grid gap-2 text-sm">
                     확인 ETA
-                    <Input
-                      type="date"
-                      value={eta}
-                      onChange={(event) => setEta(event.target.value)}
-                    />
+                    <DateInput ariaLabel="확인 ETA" value={eta} onValueChange={setEta} />
                   </label>
                 </>
               )}

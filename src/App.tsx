@@ -1,4 +1,5 @@
 import { NavigationIcon } from "@shared/components/navigation-icon"
+import { DateInput } from "@shared/components/date-input"
 import navigationWordmark from "@shared/assets/navigation/ecoya-wordmark.svg?url"
 import { SnapStartGuidePage, useSnapStartGuide } from "@snap/onboarding/start-guide"
 import { DocumentConnectionSummary, DocumentConnectionChangeDialog } from "@trade-os/components/document-connection-summary"
@@ -7,6 +8,7 @@ import { dealDocumentPreviews, dealDocumentFromReviewUrl, type DealDocumentRecor
 import { appLocation } from "@/app/app-location"
 import { StartGuideProvider, useStartGuide } from "@trade-os/onboarding/runtime"
 import { SettingsDemoProvider, useTradeSeatAssigned } from "@share/settings/subscription-settings"
+import { settingsSectionLabel } from "@share/settings/page"
 import { BusinessListToolbar, BusinessFilterSearch, BusinessFilterField } from "@shared/components/business-filters"
 import { FormField, FormFieldHeader } from "@shared/components/form-field"
 import { PageLoadingBoundary } from "@shared/components/page-loading-boundary"
@@ -51,6 +53,7 @@ import {
   FileX2,
   Mail,
   Home,
+  Info,
   Maximize2,
   Monitor,
   MoreHorizontal,
@@ -81,6 +84,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DocumentBlockingAlerts, type DocumentBlockingIssue } from "@trade-os/components/document-blocking-alerts"
 import { AutoSaveStatus } from "@shared/components/auto-save-status"
 import { BusinessPageHero } from "@shared/components/business-page-hero"
+import { StatusBadge } from "@shared/components/status-badge"
 import { DocumentTemplateOptions } from "@trade-os/components/document-template-options"
 import { DocumentSaveSummary } from "@trade-os/components/document-save-summary"
 import { generatedDocumentStatusLabel, type GeneratedDocumentMetadata } from "@trade-os/lib/generated-document-metadata"
@@ -1849,19 +1853,7 @@ const forwardedDocumentCount = forwardedEmails.reduce(
 )
 
 function ToneBadge({ tone, children }: { tone: Tone; children: ReactNode }) {
-  const palette = {
-    warning: "orange",
-    blue: "blue",
-    success: "green",
-    danger: "red",
-    neutral: "grayComplete",
-  }[tone] as "orange" | "blue" | "green" | "red" | "grayComplete"
-
-  return (
-    <Badge palette={palette} tone="fill" size="sm">
-      {children}
-    </Badge>
-  )
+  return <StatusBadge tone={tone}>{children}</StatusBadge>
 }
 
 function AppSelect({
@@ -2319,6 +2311,17 @@ function WorkspaceHeader({
 }) {
   const { isMobile, state: sidebarState } = useSidebar()
   const sidebarCollapsed = sidebarState === "collapsed"
+  // The settings page changes ?section= with pushState; follow it for the trail.
+  const [settingsSection, setSettingsSection] = useState(() => new URLSearchParams(appLocation.search).get("section") ?? "account")
+  useEffect(() => {
+    const sync = () => setSettingsSection(new URLSearchParams(window.location.search).get("section") ?? "account")
+    window.addEventListener("settings-section-change", sync)
+    window.addEventListener("popstate", sync)
+    return () => {
+      window.removeEventListener("settings-section-change", sync)
+      window.removeEventListener("popstate", sync)
+    }
+  }, [])
 
   const [, templateTitle] = templateMeta(templateCode)
   const activeSnapRoute = getSnapRouteByScreen(snapScreen)
@@ -2368,9 +2371,12 @@ function WorkspaceHeader({
   }
   const title = screenTitles[screen] ?? (documentConfirmed ? templateTitle : `${templateTitle} 초안`)
   const section = screenSections[screen] ?? "AI 서류 처리"
+  const settingsLabel = screen === "settings" ? settingsSectionLabel(settingsSection) : undefined
   const breadcrumbs =
     screen === "snap-platform" && activeSnapRoute
       ? [...activeSnapRoute.breadcrumb]
+      : settingsLabel
+        ? ["설정", settingsLabel]
       : screen === "deal"
         ? ["기록", "거래", title]
         : section !== title
@@ -2380,6 +2386,7 @@ function WorkspaceHeader({
     "AI 서류 처리": "home",
     기록: "deals",
     "경영·성과": "monitoring",
+    설정: "settings",
   }
   const navigateToFirstDepth = () => {
     if (section === "ECOYA SNAP") {
@@ -2388,6 +2395,10 @@ function WorkspaceHeader({
       return
     }
 
+    if (section === "설정") {
+      appLocation.assign("/erp/settings")
+      return
+    }
     const target = firstDepthTargets[section]
     if (target) onNavigate(target)
   }
@@ -5216,12 +5227,12 @@ function InboxScreen({
   if (!hasFile) {
     return (
       <div className="h-full min-h-0 bg-transparent">
-        {guide?.state && !guide.state.anchor && (!guide.state.access || guide.state.access === "active") && <div className="flex flex-wrap items-center gap-3 border-b px-5 py-3 text-sm"><span className="text-muted-foreground">준비된 문서가 없다면 예시 발주서로 시작할 수 있습니다.</span><Button variant="outline" size="sm" onClick={async () => {
+        {guide?.state && !guide.state.anchor && (!guide.state.access || guide.state.access === "active") && <div className="px-4 pt-5 sm:px-5 sm:pt-6"><Alert variant="gray" className="flex flex-wrap items-center gap-3"><Info className="size-4 shrink-0" /><AlertDescription className="flex-1">준비된 문서가 없다면 예시 발주서로 시작할 수 있습니다.</AlertDescription><Button variant="outline" size="sm" onClick={async () => {
           const { jsPDF } = await import("jspdf")
           const pdf = new jsPDF()
           pdf.text(["PURCHASE ORDER", "PO-2026-001", "Buyer: Hanbit Trading", "Aluminium scrap / 20 MT / USD 1,850 per MT", "Total: USD 37,000", "Delivery: 2026-11-01"], 20, 25)
           await handleFilesSelected([new File([pdf.output("blob")], "PO_시작가이드_예시.pdf", { type: "application/pdf" })])
-        }}>예시 PDF 사용</Button></div>}
+        }}>예시 PDF 사용</Button></Alert></div>}
         <BeforeUploadState
           documents={uploadDocuments.map((document, index) => ({ document, index }))}
           onOpenDocument={(index) => {
@@ -5772,17 +5783,15 @@ function BeforeUploadState({
                 instructions={`PDF 최대 ${TRADE_DOCUMENT_MAX_UPLOAD_FILES}개, 파일당 ${TRADE_DOCUMENT_MAX_UPLOAD_MB}MB`}
                 clickToSelect
                 onFiles={onFilesSelected}
-                className="min-h-36 flex-row gap-3 bg-[var(--surface-background)] px-4 text-left"
+                // 문서 올리기 V2 (6273:100113): Blue 10 drop area, stacked and centered.
+                className="min-h-[112px] flex-col gap-2 border-[var(--color-primary-6)] bg-[var(--color-primary-10)] px-4 text-center text-[var(--color-primary-4)]"
               >
-                <Upload
-                  className="text-[var(--file-drop-foreground)]"
-                  data-icon="inline-start"
-                />
-                <span className="text-[var(--surface-foreground)]">
-                  <span className="block text-sm font-semibold">
+                <Upload className="size-5" />
+                <span>
+                  <span className="block text-[15px] leading-[22px]">
                     파일을 끌어다 놓으세요
                   </span>
-                  <span className="text-xs text-[var(--surface-muted-foreground)]">
+                  <span className="mt-1 block text-[13px] leading-[18px]">
                     PDF 최대 {TRADE_DOCUMENT_MAX_UPLOAD_FILES}개, 파일당
                     {` ${TRADE_DOCUMENT_MAX_UPLOAD_MB}MB`}
                   </span>
@@ -7746,7 +7755,7 @@ function DealConfirmPanel({
                       </div>
 
                       <div
-                        className="mt-3 overflow-hidden rounded-lg border border-[var(--surface-border)]"
+                        className="mt-3 overflow-hidden rounded-[var(--r-lg)] border border-[var(--color-gray-9)]"
                         role="radiogroup"
                         aria-label="거래 후보"
                       >
@@ -7760,44 +7769,47 @@ function DealConfirmPanel({
                               role="radio"
                               aria-checked={selected}
                               className={cn(
-                                "flex w-full items-start gap-3 border-b border-[var(--surface-border)] px-4 py-3 text-left last:border-b-0 hover:bg-muted/40",
-                                selected && "bg-primary/5"
+                                // 문서 올리기 V2 거래 후보 (6233:82241): 20px radio, 15 title,
+                                // 13 meta, Blue 10 row when selected.
+                                "flex w-full items-center gap-4 border-b border-[var(--color-gray-10)] px-5 py-3.5 text-left last:border-b-0 hover:bg-[var(--color-gray-11)]",
+                                selected && "bg-[var(--color-primary-10)] hover:bg-[var(--color-primary-10)]"
                               )}
                               disabled={creatingDeal || linking || candidate.id === activeLink?.dealId}
                               onClick={() => handleCandidateSelect(candidate)}
                             >
                               <span
+                                aria-hidden="true"
                                 className={cn(
-                                  "flex size-4 shrink-0 items-center justify-center rounded-full border",
+                                  "flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] bg-[var(--color-gray-12)]",
                                   selected
-                                    ? "border-primary bg-primary text-primary-foreground"
-                                    : "border-[var(--surface-border)] bg-background"
+                                    ? "border-[var(--primary)]"
+                                    : "border-[var(--color-gray-6)]"
                                 )}
                               >
                                 {selected ? (
-                                  <Check className="size-2.5" />
+                                  <span className="size-2.5 rounded-full bg-[var(--primary)]" />
                                 ) : null}
                               </span>
                               <span className="min-w-0 flex-1">
                                 <span className="flex min-w-0 items-center gap-2">
-                                  <strong className="truncate text-xs">
+                                  <strong className="truncate text-[15px] leading-[22px] font-medium text-[var(--color-gray-1)]">
                                     {candidate.title}
                                   </strong>
                                   <ToneBadge tone={candidate.tone}>
                                     {candidate.stage}
                                   </ToneBadge>
                                 </span>
-                                <span className="mt-1 block truncate text-[11px] text-muted-foreground">
+                                <span className="mt-0.5 block truncate text-[13px] leading-[18px] text-[var(--color-gray-5)]">
                                   {candidate.id} · {candidate.party}
                                 </span>
-                                <span className="mt-1 block text-[11px] text-primary">
+                                <span className="mt-0.5 block text-[13px] leading-[18px] text-[var(--primary)]">
                                   {candidate.item} · {candidate.amount}{" "}
                                   {candidate.currency}
                                 </span>
                                 {candidate.id === activeLink?.dealId ? <span className="mt-2 block text-[10px] font-medium">현재 연결</span> : null}
                               </span>
                               {recommended ? (
-                                <span className="flex min-h-12 shrink-0 items-center gap-1.5 border-l border-[var(--surface-border)] pl-4 text-xs font-semibold text-primary">
+                                <span className="flex shrink-0 items-center gap-1 text-[13px] text-[#6b4ee6]">
                                   <Sparkles className="size-3.5" /> AI 추천
                                 </span>
                               ) : null}
@@ -7901,13 +7913,10 @@ function DealConfirmPanel({
                                 <FieldLabel>
                                   입출금일
                                 </FieldLabel>
-                                <Input
-                                  type="date"
-                                  aria-label="입출금일"
+                                <DateInput
+                                  ariaLabel="입출금일"
                                   value={bankValueDate}
-                                  onChange={(event) =>
-                                    setBankValueDate(event.target.value)
-                                  }
+                                  onValueChange={setBankValueDate}
                                 />
                               </Field>
                             </div> : null}
@@ -9577,13 +9586,15 @@ function CreateScreen({
         <section>
           {hasGeneratedDocuments ? (
             <>
-              <Card>
+              {/* Same list card as 문서 올리기: toolbar and table sit inside the
+                  16px card inset, no divider between them. */}
+              <Card size="sm">
                 <Tabs
                   value={documentListTab}
                   onValueChange={setDocumentListTab}
                 >
                   <BusinessListToolbar
-                    className="border-b px-4 py-3"
+                    className="px-4 pt-4"
                     aria-label="만든 문서 검색 필터"
                   >
                     <TabsList aria-label="만든 문서 상태">
@@ -11108,7 +11119,7 @@ function ShareDeliveryPanel({
                     <div className="mt-3 grid grid-cols-2 gap-3">
                       <label className="grid gap-1 text-xs">
                         <span>만료일</span>
-                        <Input type="date" className="h-8 bg-[var(--control-background)]" value={expires} onChange={(event) => setExpires(event.target.value)} />
+                        <DateInput ariaLabel="만료일" value={expires} onValueChange={setExpires} />
                       </label>
                       <label className="grid gap-1 text-xs">
                         <span>최대 열람 횟수</span>
@@ -11194,8 +11205,8 @@ function ShareDeliveryPanel({
                   {deliveryHistorySummary}
                 </ToneBadge>
               </div>
-              <Button variant="outline" size="xs" onClick={() => setHistoryRefreshKey((value) => value + 1)}>
-                <RefreshCw data-icon="inline-start" /> 새로고침
+              <Button variant="outline" size="icon-xs" aria-label="새로고침" title="새로고침" onClick={() => setHistoryRefreshKey((value) => value + 1)}>
+                <RefreshCw aria-hidden="true" />
               </Button>
             </div>
             <div key={historyRefreshKey} className="grid gap-3">
@@ -16149,15 +16160,16 @@ function ResultScreen({
                   ? "거래 연결됨 · 검토 후 문서 확정"
                   : "거래 미연결 · 검토 완료 후 초안 PDF만 다운로드 가능"}
           </p>
+        </div>
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+          {/* Save status sits with the actions, as on the 문서 올리기 detail header. */}
           <DocumentSaveSummary
             state={saveState === "unsaved" ? "pending" : saveState}
             savedAt={lastSavedAt}
             metadata={savedMetadata}
             confirmed={documentConfirmed}
-            className="text-white/80"
+            className="mt-0 hidden text-white/90 lg:flex"
           />
-        </div>
-        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
           {saveState === "unsaved" ? (
             <Button
               type="button"

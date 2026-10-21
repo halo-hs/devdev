@@ -16,7 +16,6 @@ import {
 } from "@trade-os/lib/deal-finance-workspace"
 import { exactFinanceMoney, presentFinanceFact } from "@trade-os/lib/erp-finance"
 import { decimalMagnitude, FINANCE_DECIMAL_SCALE } from "@trade-os/lib/financeDecimal"
-import { Badge } from "@shared/components/ui/badge"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import {
@@ -83,6 +82,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/components/ui/select"
+import { Card, CardContent } from "@shared/components/ui/card"
 import { Separator } from "@shared/components/ui/separator"
 import {
   Table,
@@ -100,6 +100,7 @@ import {
 } from "@shared/components/pdf-floating-controls"
 import { PannablePdfViewport } from "@shared/components/pannable-pdf-viewport"
 import { cn } from "@shared/lib/utils"
+import { StatusBadge } from "@shared/components/status-badge"
 import { DatePicker } from "@ecoya/design-system/extensions/date-picker"
 import { prototypeBackend } from "@trade-os/lib/prototype-backend"
 
@@ -181,29 +182,6 @@ function dealItemSummary(deal: Deal) {
   return `${deal.primaryItem} 외 ${deal.itemCount - 1}건`
 }
 
-function StatusBadge({
-  children,
-  tone = "neutral",
-}: {
-  children: ReactNode
-  tone?: "neutral" | "blue" | "success" | "warning" | "danger"
-}) {
-  return (
-    <Badge
-      variant="secondary"
-      className={cn(
-        "h-5 rounded-full border-0 px-2 text-[11px] font-medium",
-        tone === "neutral" && "bg-muted text-muted-foreground",
-        tone === "blue" && "bg-primary/10 text-primary",
-        tone === "success" && "bg-success/10 text-success",
-        tone === "warning" && "bg-warning/10 text-warning-foreground",
-        tone === "danger" && "bg-destructive/10 text-destructive"
-      )}
-    >
-      {children}
-    </Badge>
-  )
-}
 
 function SelectControl({
   label,
@@ -730,7 +708,7 @@ export function DealsScreen({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="shrink-0 border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white sm:ml-auto"
+                    className="shrink-0 border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white"
                     aria-expanded={advancedFiltersOpen}
                     aria-controls="deal-advanced-filters"
                     onClick={() => setAdvancedFiltersOpen((value) => !value)}
@@ -1073,7 +1051,9 @@ export function DealsScreen({
             </section>
           }
         />
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Same list card as 문서 올리기: toolbar, 16px-inset table and pagination. */}
+        <Card size="sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-4">
           <Tabs
             value={view}
             onValueChange={(value) => {
@@ -1119,6 +1099,10 @@ export function DealsScreen({
             </Button>
           </div>
         </div>
+        <CardContent
+          data-layout={pipeline ? undefined : "flush-table"}
+          className="space-y-3 p-0"
+        >
         <section className="[container-type:inline-size]">
           {view === "finance" ? (
             <DealsFinanceTable
@@ -1141,7 +1125,7 @@ export function DealsScreen({
                     return (
                       <section
                         key={stageKey}
-                        className="rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-4 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]"
+                        className="rounded-[var(--r-lg)] border border-[var(--color-gray-9)] bg-[var(--color-gray-11)] p-3"
                       >
                         <h3 className="mb-3 flex justify-between text-sm font-semibold">
                           {label}
@@ -1153,7 +1137,7 @@ export function DealsScreen({
                           {rows.map((deal) => (
                             <button
                               key={deal.id}
-                              className="block w-full rounded-[var(--r-md)] border border-[var(--color-gray-9)] bg-[var(--color-gray-11)] p-3 text-left transition-colors hover:border-[var(--color-primary-4)] hover:bg-[var(--color-primary-10)]"
+                              className="block w-full rounded-[var(--r-md)] border border-[var(--color-gray-9)] bg-[var(--color-gray-12)] p-3 text-left transition-colors hover:border-[var(--color-primary-4)] hover:bg-[var(--color-primary-10)]"
                               onClick={() => onOpenDeal(deal.id)}
                             >
                               <strong className="block text-sm">
@@ -1504,6 +1488,8 @@ export function DealsScreen({
             }}
           />
         )}
+        </CardContent>
+        </Card>
 
         {role === "owner" ? (
           <section className="border-t pt-4">
@@ -2437,16 +2423,17 @@ function FulfillmentTab() {
           description="이 계약의 B/L 2건"
           action={
             <Button
-              size="sm"
+              size="icon-sm"
               variant="outline"
+              aria-label={refreshing ? "갱신 중" : "새로고침"}
+              title={refreshing ? "갱신 중" : "새로고침"}
               disabled={refreshing}
               onClick={refresh}
             >
               <RefreshCw
-                data-icon="inline-start"
+                aria-hidden="true"
                 className={cn(refreshing && "animate-spin")}
               />
-              {refreshing ? "갱신 중" : "새로고침"}
             </Button>
           }
         />

@@ -9,7 +9,9 @@ import { useSearchParams } from "@trade-os/operations/compat/navigation";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, Fragment, type CSSProperties, type ReactNode } from "react";
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
-import { FilterChipGroup } from "@trade-os/operations/components/FilterChipGroup";
+import { RefreshCw } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@shared/components/ui/tabs";
+import { Checkbox } from "@shared/components/ui/checkbox";
 import { LoadableSection, type LoadableSectionCopy } from "@trade-os/operations/components/LoadableSection";
 import { OperationalTableFrame } from "@trade-os/operations/components/OperationalTableFrame";
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
@@ -888,16 +890,19 @@ function TradeProfitabilityRollupPanel({
             <ProfitabilitySummaryCard caption={copy.topAssignee} copy={copy} row={topAssignee} />
             <ProfitabilitySummaryCard caption={copy.needsDecision} copy={copy} row={riskCounterparty} />
           </div>
-          <div className="grid min-w-0 gap-4 xl:grid-cols-2">
-            <div className="min-w-0">
-              <h4 className="mb-2 text-body-13 font-semibold text-ecoya-gray-3">{copy.counterpartyTitle}</h4>
+          {/* Figma 정산 4차 (5721:61511): the two rollups share one table behind a segment tab. */}
+          <Tabs defaultValue="counterparty" className="min-w-0">
+            <TabsList variant="segment">
+              <TabsTrigger value="counterparty">{copy.counterpartyTitle}</TabsTrigger>
+              <TabsTrigger value="assignee">{copy.assigneeTitle}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="counterparty" className="mt-3 min-w-0">
               <ProfitabilityRollupTable copy={copy} nameLabel={copy.counterparty} rows={counterpartyRows} />
-            </div>
-            <div className="min-w-0">
-              <h4 className="mb-2 text-body-13 font-semibold text-ecoya-gray-3">{copy.assigneeTitle}</h4>
+            </TabsContent>
+            <TabsContent value="assignee" className="mt-3 min-w-0">
               <ProfitabilityRollupTable copy={copy} nameLabel={copy.assignee} rows={assigneeRows} />
-            </div>
-          </div>
+            </TabsContent>
+          </Tabs>
         </>
       )}
     </SectionPanel>
@@ -2913,6 +2918,7 @@ function SettlementView({
   );
   const ledgerCellFilterActive = Boolean(ledgerBucket);
   const [refreshingManually, setRefreshingManually] = useState(false);
+  const [calendarDirection, setCalendarDirection] = useState<"receivable" | "payable">("receivable");
   const onManualRefresh = useCallback(() => {
     setRefreshingManually(true);
     onReload();
@@ -2931,16 +2937,20 @@ function SettlementView({
       aria-label="정산 필터"
       actions={
         <>
+          {/* HeroBanner controls rule: 새로고침 is an icon button. */}
           <Button
+            aria-label={copy.controls.refresh}
             data-ui="settlement-refresh"
             disabled={refreshingManually}
+            iconOnly
             intent="brand"
             onClick={onManualRefresh}
-            size="md"
+            size="lg"
+            title={copy.controls.refresh}
             type="button"
             variant="tertiary"
           >
-            {copy.controls.refresh}
+            <RefreshCw className="size-5" aria-hidden="true" />
           </Button>
           <BusinessFilterField label={copy.export.monthLabel}>
             <input
@@ -2999,12 +3009,11 @@ function SettlementView({
         />
       </BusinessFilterField>
       <label className="text-label-12 text-text-secondary flex items-center gap-1.5">
-        <input
+        <Checkbox
           checked={includeCancelled}
-          className="size-4"
+          className="border-white bg-white"
           data-ui="settlement-include-cancelled"
-          onChange={(ev) => onIncludeCancelledChange(ev.target.checked)}
-          type="checkbox"
+          onCheckedChange={(checked) => onIncludeCancelledChange(checked === true)}
         />
         {copy.controls.includeCancelled}
       </label>
@@ -3046,32 +3055,36 @@ function SettlementView({
         {byCurrencyBuckets.size === 0 ? (
           <p className="text-body-13 text-text-muted">{copy.calendar.empty}</p>
         ) : (
-        <div className="flex flex-col gap-4">
-          {[...byCurrencyBuckets.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([currency, buckets]) => (
-            <OperationalTableFrame
-              className="rounded-lg border border-border-muted bg-surface-card"
-              key={currency}
-              label={`${copy.calendar.title} · ${currency}`}
-            >
-              <HostTable className="reference-settlement-bucket-table text-body-13 tabular-nums" data-bucket-table="forecast">
-                  <colgroup>
-                    <col className="reference-settlement-bucket-label" />
-                    <col span={SETTLEMENT_BUCKETS.length} />
-                  </colgroup>
-                <HostTableHeader>
-                  <HostTableRow className="border-b border-border-muted bg-surface text-text-secondary">
-                    <HostTableHead scope="col" className="px-3 py-2 text-left font-medium">{currency}</HostTableHead>
-                    {SETTLEMENT_BUCKETS.map((b) => (
-                      <HostTableHead scope="col" key={b} className="px-3 py-2 text-right font-medium">
-                        {copy.calendar.buckets[b]}
-                      </HostTableHead>
-                    ))}
-                  </HostTableRow>
-                </HostTableHeader>
-                <HostTableBody>
-                  {(["receivable", "payable"] as const).map((t) => (
-                    <HostTableRow key={t} className="border-b border-border-subtle last:border-0">
-                      <HostTableHead scope="row" className="px-3 py-2 text-left font-normal text-text-muted">{copy.ledger.tabs[t]}</HostTableHead>
+        // Figma 정산 4차 (5721:60487): one table per direction (segment tab),
+        // a row per currency; cells still drill the ledger below.
+        <Tabs value={calendarDirection} onValueChange={(value) => setCalendarDirection(value as "receivable" | "payable")}>
+          <TabsList variant="segment" aria-label={copy.calendar.title}>
+            {(["receivable", "payable"] as const).map((t) => (
+              <TabsTrigger key={t} value={t}>{copy.ledger.tabs[t]}</TabsTrigger>
+            ))}
+          </TabsList>
+          <OperationalTableFrame className="mt-3" label={`${copy.calendar.title} · ${copy.ledger.tabs[calendarDirection]}`}>
+            <HostTable className="reference-settlement-bucket-table text-body-13 tabular-nums" data-bucket-table="forecast">
+              <colgroup>
+                <col className="reference-settlement-bucket-label" />
+                <col span={SETTLEMENT_BUCKETS.length} />
+              </colgroup>
+              <HostTableHeader>
+                <HostTableRow>
+                  <HostTableHead scope="col" className="px-3 py-2 text-left font-medium">{copy.controls.currencyLabel}</HostTableHead>
+                  {SETTLEMENT_BUCKETS.map((b) => (
+                    <HostTableHead scope="col" key={b} className="px-3 py-2 text-right font-medium">
+                      {copy.calendar.buckets[b]}
+                    </HostTableHead>
+                  ))}
+                </HostTableRow>
+              </HostTableHeader>
+              <HostTableBody>
+                {[...byCurrencyBuckets.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([currency, buckets]) => {
+                  const t = calendarDirection;
+                  return (
+                    <HostTableRow key={currency}>
+                      <HostTableHead scope="row" className="px-3 py-2 text-left font-semibold text-ecoya-gray-2">{currency}</HostTableHead>
                       {SETTLEMENT_BUCKETS.map((b) => {
                         const cell = buckets[b]?.[t];
                         const overdue = b === "overdue" && (cell?.total ?? FINANCE_ZERO) > FINANCE_ZERO;
@@ -3109,12 +3122,12 @@ function SettlementView({
                         );
                       })}
                     </HostTableRow>
-                  ))}
-                </HostTableBody>
-              </HostTable>
-            </OperationalTableFrame>
-          ))}
-        </div>
+                  );
+                })}
+              </HostTableBody>
+            </HostTable>
+          </OperationalTableFrame>
+        </Tabs>
         )}
       </SectionPanel>
 
@@ -3200,29 +3213,34 @@ function SettlementView({
         {overview.by_currency.length === 0 ? (
           <p className="text-body-13 text-text-muted">{copy.fx.empty}</p>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          // Figma 정산 4차 (5721:59286): one card per currency in a row, net
+          // amount on the right of the code, AR/AP as label–value rows.
+          <div
+            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:[grid-template-columns:repeat(var(--fx-count),minmax(0,1fr))]"
+            style={{ "--fx-count": Math.min(overview.by_currency.length, 6) } as CSSProperties}
+          >
             {overview.by_currency.map((c) => {
               const net = financeDecimalMagnitude(c.net);
               return (
-                <div key={c.currency} className="rounded-lg border border-border-muted bg-surface-card p-4">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-body-15 font-semibold text-text-primary">{c.currency}</span>
+                <div key={c.currency} className="flex min-w-0 flex-col gap-3 rounded-[var(--r-lg)] border border-[var(--color-gray-10)] bg-ecoya-gray-12 px-[18px] py-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[18px] leading-[1.45] font-bold text-ecoya-gray-2">{c.currency}</span>
                     <span
-                      className={`text-body-13 font-medium ${net >= FINANCE_ZERO ? "text-status-success" : "text-status-danger"}`}
+                      className={`text-[16px] leading-[1.45] font-semibold tabular-nums ${net >= FINANCE_ZERO ? "text-[#178c4d]" : "text-[#d63333]"}`}
                     >
-                      {copy.fx.net} <span aria-hidden="true">{financeSignGlyph(net)}</span>{exactMoney(c.net)}
+                      <span className="sr-only">{copy.fx.net} </span><span aria-hidden="true">{financeSignGlyph(net)} </span>{exactMoney(c.net)}
                     </span>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-body-13">
-                    <div>
-                      <div className="text-text-muted">{copy.kpi.receivable}</div>
-                      <div className="font-medium text-text-primary">{exactMoney(c.receivable)}</div>
+                  <dl className="grid gap-3 tabular-nums">
+                    <div className="flex justify-between gap-2">
+                      <dt className="text-[14px] leading-[1.45] text-[var(--color-gray-5)]">{copy.kpi.receivable}</dt>
+                      <dd className="text-[15px] leading-[1.45] font-medium text-ecoya-gray-2">{exactMoney(c.receivable)}</dd>
                     </div>
-                    <div>
-                      <div className="text-text-muted">{copy.kpi.payable}</div>
-                      <div className="font-medium text-text-primary">{exactMoney(c.payable)}</div>
+                    <div className="flex justify-between gap-2">
+                      <dt className="text-[14px] leading-[1.45] text-[var(--color-gray-5)]">{copy.kpi.payable}</dt>
+                      <dd className="text-[15px] leading-[1.45] font-medium text-ecoya-gray-2">{exactMoney(c.payable)}</dd>
                     </div>
-                  </div>
+                  </dl>
                 </div>
               );
             })}
@@ -3431,32 +3449,32 @@ function SettlementView({
         id="settlement-ledger"
         title={copy.ledger.title}
         action={
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3">
             <Button
               aria-label={copy.ledger.title}
               data-ui="settlement-manual-schedule"
               disabled={!canRecord}
-              intent="brand"
               onClick={openManualSchedule}
-              size="sm"
+              size="md"
               type="button"
+              variant="tertiary"
             >
               {copy.ledger.formSave}
             </Button>
-            <FilterChipGroup
-              aria-label={copy.ledger.tabsAria}
-              className="rounded-lg border border-border-muted p-1"
-              items={SETTLEMENT_LEDGER_TABS.map((ledgerTab) => ({
-                id: ledgerTab,
-                label: copy.ledger.tabs[ledgerTab],
-                tone: "gray",
-              }))}
-              onChange={(id) => {
+            <span aria-hidden="true" className="h-5 w-px bg-ecoya-gray-9" />
+            <Tabs
+              value={tab}
+              onValueChange={(id) => {
                 if (!SETTLEMENT_LEDGER_TABS.includes(id as SettlementLedgerTab)) return;
                 setTab(id as SettlementLedgerTab);
               }}
-              selectedId={tab}
-            />
+            >
+              <TabsList variant="segment" aria-label={copy.ledger.tabsAria}>
+                {SETTLEMENT_LEDGER_TABS.map((ledgerTab) => (
+                  <TabsTrigger key={ledgerTab} value={ledgerTab}>{copy.ledger.tabs[ledgerTab]}</TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
         }
       >

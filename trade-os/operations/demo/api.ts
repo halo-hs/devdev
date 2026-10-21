@@ -23,8 +23,12 @@ const hostDeals = deals.map((deal, index) => ({
   status: deal.stage, risks: [], documents: [], next_actions: [],
 }))
 const primary = hostDeals.find(d => d.display_id === 'DL-260708-01')!
-const seedShipments: Shipment[] = Array.from({ length: 14 }, (_, index) => {
-  const deal = index < 2 ? primary : hostDeals.filter(d => d.deal_id !== primary.deal_id)[(index - 2) % (hostDeals.length - 1)]
+// One deal usually ships in several lots: 3–4 shipments per deal.
+const shipmentsPerDeal = [4, 3, 4, 3, 4, 3, 4, 3]
+const shipmentDeals = [primary, ...hostDeals.filter(d => d.deal_id !== primary.deal_id)]
+  .slice(0, shipmentsPerDeal.length)
+  .flatMap((deal, dealIndex) => Array.from({ length: shipmentsPerDeal[dealIndex] }, () => deal))
+const seedShipments: Shipment[] = shipmentDeals.map((deal, index) => {
   return {
     id: `5e000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
     deal_id: deal.deal_id, deal_title: deal.title, deal_counterparty: deal.counterparty_name,
@@ -33,7 +37,7 @@ const seedShipments: Shipment[] = Array.from({ length: 14 }, (_, index) => {
     pol: index % 2 ? 'SGSIN' : 'KRPUS', pod: index % 2 ? 'KRPUS' : 'DEHAM',
     etd: date(-10), eta: date(index === 0 ? -2 : index < 5 ? 2 : index),
     edit_token: `shipment-${index}-initial`,
-    status: index > 11 ? 'arrived' : 'departed', source: 'manual',
+    status: index % 5 === 4 ? 'arrived' : 'departed', source: 'manual',
   }
 })
 function shipments() {

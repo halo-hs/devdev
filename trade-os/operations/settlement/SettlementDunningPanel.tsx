@@ -111,8 +111,6 @@ export function SettlementDunningPanel({
       );
   };
 
-  const buttonClass = "inline-flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-sm border border-border-muted bg-white px-2 text-xs font-medium text-text-primary hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600";
-
   const renderRow = (row: (typeof rows)[number]) => (
     <div
       key={row.entry.id}
@@ -129,22 +127,24 @@ export function SettlementDunningPanel({
       <div className="dunning-action-group" role="group" aria-label={`${row.counterparty} 초안 작업`}>
         <Popover open={previewId === row.entry.id} onOpenChange={(open) => setPreviewId(open ? row.entry.id : null)}>
           <PopoverTrigger asChild>
-            <button type="button" className={`${buttonClass} rounded-r-none border-r-0`} aria-label={`${row.counterparty} 초안 미리보기`}>미리보기</button>
+            <Button type="button" variant="tertiary" size="sm" className="rounded-r-none" aria-label={`${row.counterparty} 초안 미리보기`}>미리보기</Button>
           </PopoverTrigger>
           <PopoverContent align="end" sideOffset={8} className="w-96 p-4" aria-label={`${row.counterparty} 독촉 초안`}>
             <h3 className="text-sm font-semibold">{copy.title} · {copy.draft}</h3>
             <p className="whitespace-pre-wrap break-words text-[13px] leading-6">{row.draft}</p>
             <div className="flex flex-wrap items-center justify-end gap-2 border-t pt-3">
-              <button type="button" className={buttonClass} onClick={() => copyDraft(row.entry.id, row.draft)}>
-                <Copy className="size-3.5" aria-hidden="true" />복사하기
-              </button>
-              <a className={buttonClass} href={row.mailto}>{copy.openMail}<ExternalLink className="size-3.5" aria-hidden="true" /></a>
+              <Button type="button" variant="tertiary" size="sm" leadingIcon={<Copy className="size-4" aria-hidden="true" />} onClick={() => copyDraft(row.entry.id, row.draft)}>
+                복사하기
+              </Button>
+              <Button asChild variant="tertiary" size="sm">
+                <a href={row.mailto} className="inline-flex items-center gap-1 whitespace-nowrap">{copy.openMail}<ExternalLink className="size-4" aria-hidden="true" /></a>
+              </Button>
             </div>
           </PopoverContent>
         </Popover>
-        <button type="button" className={`${buttonClass} w-8 rounded-l-none px-0`} aria-label={`${row.counterparty} ${copy.copy}`} onClick={() => copyDraft(row.entry.id, row.draft)}>
-          {copyState?.id === row.entry.id && copyState.status === "copied" ? <Check className="size-3.5" aria-hidden="true" /> : <Copy className="size-3.5" aria-hidden="true" />}
-        </button>
+        <Button type="button" variant="tertiary" size="sm" iconOnly className="rounded-l-none" aria-label={`${row.counterparty} ${copy.copy}`} onClick={() => copyDraft(row.entry.id, row.draft)}>
+          {copyState?.id === row.entry.id && copyState.status === "copied" ? <Check className="size-4" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
+        </Button>
       </div>
     </div>
   );

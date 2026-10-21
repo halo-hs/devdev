@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react"
-import { Upload } from "lucide-react"
+import { ImagePlus, Upload, X } from "lucide-react"
 import { Button } from "@shared/components/ui/button"
 
 type LogoPreview = { url: string; name: string; size: number }
@@ -86,17 +86,44 @@ export function BrandLogoInput({ disabled, onChange }: { disabled: boolean; onCh
           if (file) void selectFile(file)
         }}
       />
-      <div className="flex h-24 items-center justify-center overflow-hidden rounded-lg border bg-white p-4">
+      {/* Image tile: shows the uploaded logo with a corner delete; when empty
+          the dashed tile itself opens the file dialog. */}
+      <div className="flex items-start justify-end gap-3">
         {logo ? (
-          <img src={logo.url} alt="문서 로고 미리보기" className="max-h-full max-w-full object-contain" />
-        ) : <span className="text-xs text-muted-foreground">등록된 로고 없음</span>}
+          <div className="relative flex h-24 w-40 items-center justify-center overflow-hidden rounded-[var(--r-lg)] border border-[var(--color-gray-9)] bg-white p-3">
+            <img src={logo.url} alt="문서 로고 미리보기" className="max-h-full max-w-full object-contain" />
+            {!disabled ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                aria-label="삭제"
+                title="삭제"
+                disabled={loading}
+                onClick={removeLogo}
+                className="absolute top-1.5 right-1.5 rounded-full bg-white/90 shadow-[var(--shadow-input)]"
+              >
+                <X />
+              </Button>
+            ) : null}
+          </div>
+        ) : (
+          <button
+            type="button"
+            disabled={disabled || loading}
+            onClick={() => input.current?.click()}
+            className="flex h-24 w-40 flex-col items-center justify-center gap-1.5 rounded-[var(--r-lg)] border border-dashed border-[var(--color-gray-7)] bg-[var(--color-gray-11)] text-xs text-muted-foreground outline-none hover:border-[var(--color-primary-4)] hover:text-[var(--color-primary-4)] focus-visible:ring-2 focus-visible:ring-[var(--color-primary-4)] disabled:cursor-default disabled:hover:border-[var(--color-gray-7)] disabled:hover:text-muted-foreground"
+          >
+            <ImagePlus className="size-5" aria-hidden="true" />
+            등록된 로고 없음
+          </button>
+        )}
       </div>
-      {logo ? <div className="flex min-w-0 items-center justify-between gap-3 text-xs text-muted-foreground">
+      {logo ? <div className="flex min-w-0 items-center justify-end gap-3 text-xs text-muted-foreground">
         <span className="truncate" title={logo.name}>{logo.name}</span>
         <span className="shrink-0 tabular-nums">{Math.max(1, Math.round(logo.size / 1024)).toLocaleString("ko-KR")} KB</span>
       </div> : null}
       <div className="flex flex-wrap items-center justify-end gap-2">
-        {logo && !disabled ? <Button type="button" variant="ghost" disabled={loading} onClick={removeLogo}>삭제</Button> : null}
         <Button type="button" variant="outline" disabled={disabled || loading} onClick={() => input.current?.click()}>
           <Upload /> {loading ? "이미지 확인 중" : logo ? "파일 변경" : "파일 선택"}
         </Button>

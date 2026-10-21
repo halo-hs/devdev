@@ -492,10 +492,11 @@ export function OrganizationMembers({
           <PendingInvitations items={invitations} onChange={setInvitations} />
         </section>
       )}
-      <div className="overflow-x-auto rounded-xl border bg-background">
+      {/* Same list card as the other screens: 16px card inset, gray header row. */}
+      <div className="overflow-x-auto rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-4 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
         <table className="settings-member-table w-full text-left text-sm">
           <thead className="hidden lg:table-header-group">
-            <tr className="border-b bg-muted/30">
+            <tr className="border-b bg-[var(--color-gray-11)] text-[var(--color-gray-4)]">
               <th className="p-4">이름 / 이메일</th>
               <th className="p-4">조직 역할</th>
               {products.map((p) => (
@@ -608,7 +609,9 @@ export function OrganizationMembers({
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="outline"
-                            className="h-10 w-full justify-between px-4"
+                            // Looks like the role Select beside it: same control
+                            // border, input shadow and Gray 2 chevron.
+                            className="h-10 w-full justify-between border-[var(--control-border)] bg-[var(--control-background)] px-4 font-normal text-[var(--control-foreground)] shadow-[var(--shadow-input)] hover:border-[var(--control-border-hover)] hover:bg-[var(--control-background)] [&>svg]:text-[var(--color-gray-2)]"
                             aria-label={`${member.name} ${names[product]}`}
                           >
                             {member[product]

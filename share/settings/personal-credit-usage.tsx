@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Input } from "@shared/components/ui/input"
+import { DateInput } from "@shared/components/date-input"
 import { Progress } from "@shared/components/ui/progress"
 
 // Design fixtures only: these are neither plan allowances nor billing records.
@@ -39,12 +39,12 @@ export function PersonalCreditUsage() {
         </div>
         <label className="flex items-center gap-3 text-sm">
           조회 기간
-          <Input
-            aria-label="조회 기간"
-            type="month"
+          <DateInput
+            mode="month"
+            ariaLabel="조회 기간"
             value={month}
             max={currentMonth}
-            onChange={(event) => setMonth(event.target.value)}
+            onValueChange={setMonth}
             className="w-44"
           />
         </label>

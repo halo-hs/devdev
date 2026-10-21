@@ -363,15 +363,12 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
         />
       }
       actions={
-        evidence.size > 0 ? (
-          <Link
-            href="/erp/snap-evidence"
-            data-ui="shipments-evidence-link"
-            className="text-label-12 text-ecoya-blue-5 ml-auto font-medium hover:underline"
-          >
+        // Design preview: shown to everyone for now; production limits it to SNAP subscribers.
+        <Button asChild variant="secondary" size="md" className="ml-auto rounded-full">
+          <Link href="/erp/snap-evidence" data-ui="shipments-evidence-link">
             {copy.evidenceLink}
           </Link>
-        ) : null
+        </Button>
       }
     />
   )
@@ -413,6 +410,8 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
   return (
     <div className="flex flex-col gap-4" data-component="ShipmentsConnected" data-state="ready">
       {dealId ? <h3 className="text-header-17 font-bold">선적 정보</h3> : renderHeader ? renderHeader(controls) : controls}
+      {/* The list page wraps the tabs and every deal group in one card. */}
+      <div className={dealId ? "contents" : "reference-shipment-list-card"}>
       {!dealId && listControls}
       <div
         id={`${tabsId}-panel`}
@@ -554,15 +553,18 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                       {delayed || arriving ? <div className="mt-1 text-body-13 text-text-muted">{copy.status[ship.status] ?? ship.status}</div> : null}
                     </HostTableCell>
                     <HostTableCell>
-                      <div className="flex flex-wrap gap-2">
+                      {/* The tracking action (갱신 or 선사 사이트) takes one fixed-width
+                          slot so 수정 lines up in every row. */}
+                      <div className="grid grid-cols-[112px_auto] items-center justify-start gap-2">
                         {trackingAction.kind === "refresh" && canRefresh ? (
-                          <HostButton title="추적 정보 갱신" aria-label={refreshing ? copy.refreshingTracking : copy.refreshTracking} disabled={refreshState.status === "pending"} onClick={() => void refreshTracking(ship.id)} size="sm" type="button" variant="outline">
+                          <HostButton className="w-full" title="추적 정보 갱신" aria-label={refreshing ? copy.refreshingTracking : copy.refreshTracking} disabled={refreshState.status === "pending"} onClick={() => void refreshTracking(ship.id)} size="sm" type="button" variant="outline">
                             <RefreshCw aria-hidden="true" className={refreshing ? "size-4 animate-spin" : "size-4"} />{refreshing ? "갱신 중" : "갱신"}
                           </HostButton>
                         ) : null}
                         {trackingAction.kind === "site" ? (
-                          <HostButton variant="outline" size="sm" asChild><a href={trackingAction.href} target="_blank" rel="noopener noreferrer">선사 사이트 ↗</a></HostButton>
+                          <HostButton className="w-full" variant="outline" size="sm" asChild><a href={trackingAction.href} target="_blank" rel="noopener noreferrer">선사 사이트 ↗</a></HostButton>
                         ) : null}
+                        {trackingAction.kind !== "site" && !(trackingAction.kind === "refresh" && canRefresh) ? <span aria-hidden="true" /> : null}
                         {canRefresh ? (
                           <HostButton title="일정 및 운송 상태 수정" aria-label="일정 및 운송 상태 수정" disabled={refreshState.status === "pending"} onClick={event => { editTrigger.current = event.currentTarget; setEditing(ship); }} size="sm" type="button" variant="outline"><Pencil aria-hidden="true" className="size-4" />수정</HostButton>
                         ) : null}
@@ -582,6 +584,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
           </section>
         ))
       )}
+      </div>
       </div>
       {editing ? <ShipmentConfirmationDialog shipment={editing} canWrite={canRefresh} copy={copy} returnFocus={() => editTrigger.current?.focus()} onReload={async () => { const result = await listAllShipments(getIdToken); const latest = result.shipments.find(row => row.id === editing.id); if (!latest) throw new Error("선적을 찾을 수 없습니다."); return latest; }} onClose={() => setEditing(null)} onSave={async (body) => {
         if (!canRefresh) throw new Error("수정 권한이 없습니다.");
