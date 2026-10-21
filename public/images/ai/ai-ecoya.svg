@@ -1,0 +1,16 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="icon/ai ecoya">
+<path id="&#237;&#129;&#176; &#235;&#179;&#132;" d="M9.25 4.25C9.662 2.525 10.338 2.525 10.75 4.25C11.275 7.25 13 8.975 16 9.5C17.725 9.912 17.725 10.588 16 11C13 11.525 11.275 13.25 10.75 16.25C10.338 17.975 9.662 17.975 9.25 16.25C8.725 13.25 7 11.525 4 11C2.275 10.588 2.275 9.912 4 9.5C7 8.975 8.725 7.25 9.25 4.25Z" fill="url(#paint0_linear_0_569)"/>
+<path id="&#236;&#158;&#145;&#236;&#157;&#128; &#235;&#179;&#132;" d="M17.65 14.95C17.843 14.145 18.157 14.145 18.35 14.95C18.595 16.35 19.4 17.155 20.8 17.4C21.605 17.593 21.605 17.907 20.8 18.1C19.4 18.345 18.595 19.15 18.35 20.55C18.157 21.355 17.843 21.355 17.65 20.55C17.405 19.15 16.6 18.345 15.2 18.1C14.395 17.907 14.395 17.593 15.2 17.4C16.6 17.155 17.405 16.35 17.65 14.95Z" fill="url(#paint1_linear_0_569)"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_569" x1="3" y1="2" x2="17" y2="18" gradientUnits="userSpaceOnUse">
+<stop stop-color="#C4A8FF"/>
+<stop offset="1" stop-color="#7C6CF7"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_569" x1="14" y1="14" x2="22" y2="21" gradientUnits="userSpaceOnUse">
+<stop stop-color="#C4A8FF"/>
+<stop offset="1" stop-color="#7C6CF7"/>
+</linearGradient>
+</defs>
+</svg>

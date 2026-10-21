@@ -38,6 +38,7 @@ import {
   Database,
   Download,
   ExternalLink,
+  SquarePen,
   FileCheck2,
   FileText,
   Loader2,
@@ -1421,24 +1422,25 @@ export function AskPrototype({
       <div className="flex items-center gap-1.5">
         <Button
           variant="ghost"
-          size="sm"
+          size="icon-lg"
           className="-ml-2 text-[var(--color-gray-4)]"
+          aria-label="파일 찾기"
+          title="파일 찾기"
           onClick={openFileFinder}
         >
-          <Paperclip /> 파일 찾기
+          <Paperclip />
         </Button>
         <div className="ml-auto flex items-center gap-2">
           <span className="hidden text-xs text-muted-foreground sm:inline">
             ⌘ + Enter
           </span>
           <Button
-            size="icon-lg"
-            className="size-11 rounded-[var(--r-lg)] bg-[var(--primary)] shadow-[0_1px_2px_rgb(5_29_57/0.1)]"
-            aria-label="질문하기"
+            size="lg"
+            className="h-11 min-w-[118px] rounded-[var(--r-lg)] bg-[var(--primary)] pr-5 pl-[18px] text-[17px] shadow-[0_1px_2px_rgb(5_29_57/0.1)]"
             disabled={!question.trim()}
             onClick={submit}
           >
-            <Send />
+            <Send data-icon="inline-start" /> 질문하기
           </Button>
         </div>
       </div>
@@ -1450,12 +1452,16 @@ export function AskPrototype({
 
     return (
       <article className="mt-8 flex gap-3 sm:gap-4">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-          <Sparkles className="size-4" />
-        </span>
-        <div className="min-w-0 flex-1 pt-0.5">
+        <img
+          src="/images/ai/ai-ecoya.svg"
+          alt=""
+          width={24}
+          height={24}
+          className="size-6 shrink-0"
+        />
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-semibold">ECOYA 업무 AI</span>
+            <span className="text-[15px] font-semibold text-[var(--color-gray-1)]">ECOYA 업무 AI</span>
             <Badge variant="secondary" className="font-normal">
               오전 9:30 기준
             </Badge>
@@ -1531,10 +1537,10 @@ export function AskPrototype({
             </div>
           ) : (
             <>
-              <h2 className="mt-4 text-base leading-7 font-semibold">
+              <h2 className="mt-3.5 text-[17px] leading-[26px] font-semibold text-[var(--color-gray-1)]">
                 {response.title}
               </h2>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">
+              <p className="mt-3.5 text-[15px] leading-6 text-[var(--color-gray-3)]">
                 {response.body}
               </p>
 
@@ -1548,7 +1554,7 @@ export function AskPrototype({
                     {response.sources.length}개
                   </span>
                 </div>
-                <div className="overflow-hidden rounded-[var(--r-lg)] border border-[var(--surface-border)]">
+                <div className="overflow-hidden rounded-[var(--r-lg)] border border-[var(--color-gray-10)]">
                   {response.sources.map((source, index) => (
                     <button
                       key={source.title}
@@ -1563,7 +1569,7 @@ export function AskPrototype({
                         index > 0 && "border-t border-[var(--surface-border)]"
                       )}
                     >
-                      <span className="flex size-8 shrink-0 items-center justify-center rounded-[var(--r-md)] bg-primary/8 text-primary">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-[var(--r-md)] bg-[var(--color-gray-11)] text-[var(--color-gray-4)]">
                         {source.label === "문서" ? (
                           <FileText className="size-4" />
                         ) : source.label === "정산" ||
@@ -1584,7 +1590,7 @@ export function AskPrototype({
                       <Badge variant="secondary" className="font-normal">
                         {source.label}
                       </Badge>
-                      <ExternalLink className="size-4 shrink-0 text-muted-foreground" />
+                      <ExternalLink className="size-[18px] shrink-0 text-[var(--color-primary-4)]" />
                     </button>
                   ))}
                 </div>
@@ -1846,14 +1852,8 @@ export function AskPrototype({
             </span>
           </div>
           <div className="ml-auto flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label="새 대화"
-              title="새 대화"
-              onClick={startNewChat}
-            >
-              <Plus />
+            <Button variant="outline" size="lg" onClick={startNewChat}>
+              <SquarePen data-icon="inline-start" /> 새 대화
             </Button>
             <Button
               variant="ghost"
@@ -1920,9 +1920,13 @@ export function AskPrototype({
         <div className={cn("min-h-0 flex-1", toolsOpen && "hidden")}>
           {turns.length === 0 ? (
             <div className="flex h-full w-full flex-col justify-center overflow-y-auto px-5 py-12">
-              <div className="mx-auto mb-8 flex size-24 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-10)] text-[var(--primary)]">
-                <Sparkles className="size-11" />
-              </div>
+              <img
+                src="/images/ai/ai-ecoya-logo.svg"
+                alt=""
+                width={96}
+                height={96}
+                className="mx-auto mb-8 size-24 shrink-0"
+              />
               <h1 className="text-center text-[22px] leading-[30px] font-bold text-[var(--color-gray-1)]">
                 {aiHandoffCopy.workspace.question}
               </h1>
@@ -1981,7 +1985,7 @@ export function AskPrototype({
                               ))}
                             </div>
                           ) : null}
-                          <div className="rounded-[var(--ui-radius-panel)] rounded-br-md bg-[var(--surface-muted-background)] px-4 py-3 text-sm leading-6">
+                          <div className="rounded-2xl bg-[var(--color-primary-10)] px-3.5 py-2 text-[15px] leading-[22px] text-[var(--primary)]">
                             {turn.question}
                           </div>
                         </div>
