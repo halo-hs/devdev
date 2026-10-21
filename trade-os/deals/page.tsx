@@ -1189,8 +1189,8 @@ export function DealsScreen({
                     거래번호 / 거래처
                   </TableHead>
                   <TableHead className="w-[13%]">품목 / 주문 이행</TableHead>
-                  <TableHead className="w-[13%]">참고 금액</TableHead>
-                  <TableHead className="w-[17%]">현재 금융</TableHead>
+                  <TableHead className="w-[13%] text-right!">참고 금액</TableHead>
+                  <TableHead className="w-[17%] text-right!">현재 금융</TableHead>
                   <TableHead className="w-[10%]">D-day / ETA</TableHead>
                   <TableHead className="w-[6%]">담당자</TableHead>
                   <TableHead className="w-[18%]">
