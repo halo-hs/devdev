@@ -311,3 +311,12 @@
   border-color: var(--color-gray-8);
   background: var(--color-gray-11);
 }
+
+/* Figma 정산 4차 HeroBanner (5721:59118): pill-shaped controls and white buttons. */
+.reference-3030 [data-component="SettlementConnected"] header[data-variant="hero"] :is([data-reference-button], [data-slot="select-trigger"], [data-ui="settlement-currency-filter"], [data-slot="popover-trigger"]) {
+  border-radius: var(--r-pill);
+}
+.reference-3030 [data-component="SettlementConnected"] header[data-variant="hero"] [data-slot="checkbox"] {
+  border-color: white;
+  background: white;
+}

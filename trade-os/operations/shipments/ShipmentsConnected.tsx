@@ -363,15 +363,12 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
         />
       }
       actions={
-        evidence.size > 0 ? (
-          <Link
-            href="/erp/snap-evidence"
-            data-ui="shipments-evidence-link"
-            className="text-label-12 text-ecoya-blue-5 ml-auto font-medium hover:underline"
-          >
+        // Design preview: shown to everyone for now; production limits it to SNAP subscribers.
+        <Button asChild variant="secondary" size="md" className="ml-auto rounded-full">
+          <Link href="/erp/snap-evidence" data-ui="shipments-evidence-link">
             {copy.evidenceLink}
           </Link>
-        ) : null
+        </Button>
       }
     />
   )
