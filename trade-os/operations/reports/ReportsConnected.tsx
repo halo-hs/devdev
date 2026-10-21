@@ -1,5 +1,4 @@
 "use client";
-import { RefreshCw } from "lucide-react";
 import { Badge } from "@shared/components/ui/badge";
 import { Button as ShadcnButton } from "@shared/components/ui/button";
 import { KpiCard } from "@shared/components/kpi-card";
@@ -1369,13 +1368,12 @@ function ReportsConnectedSession({
               data-ui="reports-refresh"
               disabled={reportsRefreshDisabled}
               onClick={() => void refreshReports()}
-              size="icon-lg"
-              title={reportsRefreshDisabled ? copy.loading : copy.refresh}
+              size="lg"
               type="button"
               variant="outline"
-              className="rounded-[var(--r-md)] [&_svg]:size-5"
+              className="rounded-[var(--r-md)] px-4"
             >
-              <RefreshCw aria-hidden className={cx(reportsRefreshDisabled && "animate-spin")} />
+              {reportsRefreshDisabled ? copy.loading : copy.refresh}
             </ShadcnButton>
           ) : null}
 
