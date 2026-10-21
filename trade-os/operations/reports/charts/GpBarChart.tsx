@@ -37,6 +37,26 @@ function chartValue(value: bigint | number): bigint {
   return typeof value === "bigint" ? value : BigInt(Math.round(value * Number(LEGACY_NUMBER_SCALE)));
 }
 
+/**
+ * Round a positive scaled amount up to 1·2·2.5·5·10 × 10^n, the same steps as
+ * `niceCeil` for the other report charts, without turning money into a Number.
+ */
+function niceCeilBig(value: bigint): bigint {
+  if (value <= BigInt(0)) return BigInt(0);
+  const base = BigInt(10) ** BigInt(value.toString().length - 1);
+  const steps: Array<[bigint, bigint]> = [
+    [BigInt(1), BigInt(1)],
+    [BigInt(2), BigInt(1)],
+    [BigInt(5), BigInt(2)],
+    [BigInt(5), BigInt(1)],
+  ];
+  for (const [num, den] of steps) {
+    const candidate = (base * num) / den;
+    if (candidate >= value) return candidate;
+  }
+  return base * BigInt(10);
+}
+
 /** SVG geometry needs finite coordinates, but never receives a money amount as a Number. */
 function GpGrid({
   ticks,
@@ -55,6 +75,27 @@ function GpGrid({
 }) {
   const { ih } = innerSize(width, height);
   const span = maxV - minV || BigInt(1);
+  // All-zero months: keep the same four-step grid as the other report charts,
+  // with only the 0 line labelled.
+  if (maxV === minV) {
+    return (
+      <>
+        {[4, 3, 2, 1, 0].map((step) => {
+          const y = CHART_PAD.t + ih - (step / 4) * ih;
+          return (
+            <g key={step}>
+              <line x1={CHART_PAD.l} x2={width - CHART_PAD.r} y1={y} y2={y} stroke={CHART_COLORS.grid} strokeWidth={1} />
+              {step === 0 ? (
+                <text x={CHART_PAD.l - 6} y={y + 4} textAnchor="end" fontSize="12" fill={CHART_COLORS.axisText}>
+                  {format(BigInt(0))}
+                </text>
+              ) : null}
+            </g>
+          );
+        })}
+      </>
+    );
+  }
   return (
     <>
       {ticks
@@ -111,13 +152,19 @@ export function GpBarChart({
   const n = points.length;
   const exact = points.every((point) => typeof point.gp === "bigint");
   const values = points.map((point) => chartValue(point.gp));
-  const maxV = values.reduce((max, value) => (value > max ? value : max), BigInt(0));
-  const minV = values.reduce((min, value) => (value < min ? value : min), BigInt(0));
+  const rawMax = values.reduce((max, value) => (value > max ? value : max), BigInt(0));
+  const rawMin = values.reduce((min, value) => (value < min ? value : min), BigInt(0));
+  // Same scale as the other report charts: nice upper bound, four steps above 0,
+  // and the same step size repeated below 0 for negative months.
+  const maxV = niceCeilBig(rawMax);
+  const step = maxV > BigInt(0) ? maxV / BigInt(4) : niceCeilBig(-rawMin) / BigInt(4);
+  const below = rawMin < BigInt(0) && step > BigInt(0) ? (-rawMin + step - BigInt(1)) / step : BigInt(0);
+  const minV = -below * step;
   const span = maxV - minV || BigInt(1);
-  const ticks =
-    minV < BigInt(0)
-      ? [maxV, maxV / BigInt(2), BigInt(0), minV / BigInt(2), minV]
-      : [maxV, maxV / BigInt(2), BigInt(0)];
+  const ticks: bigint[] = [];
+  if (step > BigInt(0)) {
+    for (let tick = maxV; tick >= minV; tick -= step) ticks.push(tick);
+  }
   const displayValue = (value: bigint): bigint | number =>
     exact ? value : Number(value) / Number(LEGACY_NUMBER_SCALE);
   const format = formatAxisValue as (value: bigint | number) => string;
