@@ -8599,13 +8599,13 @@ function TemplateStrip({ onResult, initialSelectedCode }: {
           </Button>
         </div>
       </div>
-      <div ref={viewportRef} aria-label="문서 유형 목록" className="flex min-w-0 snap-x snap-proximity gap-3 overflow-x-auto overscroll-x-contain px-0.5 pt-0.5 pb-3">
+      <div ref={viewportRef} aria-label="문서 유형 목록" className="-mx-1 flex min-w-0 snap-x snap-proximity scroll-px-1 gap-3 overflow-x-auto overscroll-x-contain px-1 pt-1 pb-3">
         {visibleTemplates.map(([kind, title, description]) => {
           const selected = selectedCode === kind
           return (
             <button key={kind} type="button" aria-pressed={selected}
               onClick={() => setSelectedCode(kind)}
-              className={cn("flex w-60 shrink-0 snap-start flex-col items-start rounded-lg border border-[var(--color-gray-9)] bg-[var(--color-gray-12)] p-4 text-left transition hover:border-[var(--color-primary-4)] focus-visible:outline-2 focus-visible:outline-primary", selected && "border-[var(--color-primary-4)] bg-[var(--color-primary-10)] ring-1 ring-[var(--color-primary-4)]")}
+              className={cn("flex w-60 shrink-0 snap-start flex-col items-start rounded-lg border border-[var(--color-gray-9)] bg-[var(--color-gray-12)] p-4 text-left transition hover:border-[var(--color-primary-4)] focus-visible:outline-2 focus-visible:outline-primary", selected && "border-[var(--color-primary-4)] bg-[var(--color-primary-10)] ring-1 ring-[var(--color-primary-4)] ring-inset")}
             >
               <span className="flex w-full items-center justify-between gap-2"><ToneBadge tone="blue">{kind}</ToneBadge>{selected && <Check className="size-4 text-[var(--color-primary-4)]" />}</span>
               <strong className="mt-2 text-sm">{title} <span className="text-xs font-normal text-muted-foreground">· {direction === "purchase" ? "구매" : "판매"}</span></strong>
