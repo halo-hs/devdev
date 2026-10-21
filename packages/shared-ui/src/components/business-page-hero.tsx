@@ -62,7 +62,7 @@ export function BusinessPageHero({
       >
         <header
           className={cn(
-            "relative z-10 flex items-start justify-between gap-5",
+            "relative z-10 flex items-start justify-between gap-5 max-sm:flex-col max-sm:gap-3",
             compact && "min-h-12",
             align === "center" && "justify-center text-center"
           )}

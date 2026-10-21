@@ -120,6 +120,7 @@ import {
 import { Textarea } from "@shared/components/ui/textarea"
 import { cn } from "@shared/lib/utils"
 import { StatusBadge } from "@shared/components/status-badge"
+import { DateInput } from "@shared/components/date-input"
 import { prototypeBackend, type MutationResult } from "@trade-os/lib/prototype-backend"
 import {
   DealHandoffProvider,
@@ -1286,6 +1287,7 @@ function SimpleSelect({
   className,
   icon,
   ariaLabel,
+  size,
 }: {
   value: string
   onValueChange: (value: string) => void
@@ -1294,6 +1296,7 @@ function SimpleSelect({
   className?: string
   icon?: ReactNode
   ariaLabel?: string
+  size?: "sm" | "default"
 }) {
   return (
     <Select
@@ -1302,6 +1305,7 @@ function SimpleSelect({
       disabled={disabled}
     >
       <SelectTrigger
+        size={size}
         className={cn("h-9 w-full", className)}
         aria-label={ariaLabel}
       >
@@ -3123,6 +3127,19 @@ function DealFieldsPanel({
                   />
                 ) : undefined}
             >
+              {field.inputType === "date" ? (
+                <DateInput
+                  id={`deal-field-${field.key}`}
+                  ariaLabel={field.label}
+                  value={field.value}
+                  disabled={!editable}
+                  invalid={field.match === "누락" || field.match === "확인 필요"}
+                  onValueChange={(value) => {
+                    onFieldChange(field.key, value)
+                    onFieldCommit(field.key, value, field.label)
+                  }}
+                />
+              ) : (
               <Input
                 className={cn(
                   "h-10",
@@ -3149,6 +3166,7 @@ function DealFieldsPanel({
                   onFieldCommit(field.key, field.value, field.label)
                 }
               />
+              )}
             </FormField>
           ))}
         </div>
@@ -6997,7 +7015,8 @@ export function DealDetailScreen({
         ? createPortal(
             <>
               <SimpleSelect
-                className="h-8 w-auto min-w-28"
+                size="sm"
+                className="h-8 w-auto min-w-24"
                 value={assignee}
                 disabled={!canMutate(role) || savingAssignee}
                 ariaLabel="거래 담당자"

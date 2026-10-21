@@ -578,6 +578,8 @@ function ModuleBody({ id, role, onNavigate }: { id: ModuleId; role: HomeRole; on
   }
 }
 
+const wideModules = new Set<ModuleId>(["summary", "overdue", "benchmark", "schedule", "documents", "shipments"])
+
 function ModuleCard({
   spec,
   role,
@@ -640,7 +642,11 @@ function ModuleCard({
       </div>
       <div className="min-h-0 flex-1 overflow-auto">
         {state === "default" ? (
-          <ModuleBody id={id} role={role} onNavigate={onNavigate} />
+          // Table-like modules keep their column layout below lg and scroll
+          // sideways inside the card instead of crushing the columns.
+          <div className={cn(wideModules.has(id) && "min-w-[600px] lg:min-w-0")}>
+            <ModuleBody id={id} role={role} onNavigate={onNavigate} />
+          </div>
         ) : (
           <ModuleState id={id} state={state} onRetry={onRetry} onUpload={() => onNavigate("inbox")} />
         )}

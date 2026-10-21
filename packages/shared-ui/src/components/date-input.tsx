@@ -20,6 +20,8 @@ function DateInput({
   ariaLabel,
   placeholder,
   disabled,
+  invalid,
+  id,
   className,
 }: {
   value: string
@@ -30,10 +32,14 @@ function DateInput({
   ariaLabel: string
   placeholder?: string
   disabled?: boolean
+  invalid?: boolean
+  id?: string
   className?: string
 }) {
   return (
     <DatePicker
+      id={id}
+      aria-invalid={invalid || undefined}
       mode={mode}
       ariaLabel={ariaLabel}
       placeholder={placeholder ?? (mode === "month" ? "연도. 월." : "연도. 월. 일.")}

@@ -338,6 +338,21 @@
   .business-filter-bar .business-filter-search {
     flex-basis: 100%;
   }
+  /* Phone width: the status pill stays one row and scrolls sideways instead
+     of wrapping triggers onto extra rows. */
+  .business-filter-bar [data-slot="tabs-list"] {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  .business-filter-bar [data-slot="tabs-list"]::-webkit-scrollbar {
+    display: none;
+  }
+  .business-filter-bar [data-slot="tabs-trigger"] {
+    flex: 0 0 auto;
+  }
   .business-filter-actions {
     margin-inline-start: 0;
   }

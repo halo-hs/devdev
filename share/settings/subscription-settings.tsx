@@ -374,7 +374,7 @@ export function OrganizationMembers({
         </p>
       )}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="relative min-w-0 flex-1 sm:max-w-sm">
+        <div className="relative min-w-0 basis-full sm:max-w-sm sm:flex-1 sm:basis-auto">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             aria-label="이름 또는 이메일 검색"

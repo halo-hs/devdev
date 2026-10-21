@@ -2455,7 +2455,11 @@ function WorkspaceHeader({
             />
             <nav
               aria-label="현재 위치"
-              className="flex min-w-0 items-center gap-1.5 text-[15px] leading-[22px]"
+              className={cn(
+                "flex min-w-0 items-center gap-1.5 text-[15px] leading-[22px]",
+                // Deal actions share the phone top bar: keep only the current page.
+                dealActionsRef && "max-sm:[&>:not([aria-current])]:hidden"
+              )}
             >
               {breadcrumbs.map((breadcrumb, index) => {
                 const isCurrent = index === breadcrumbs.length - 1
@@ -2499,7 +2503,7 @@ function WorkspaceHeader({
               })}
             </nav>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex shrink-0 items-center gap-1.5">
             {isMobile || sidebarCollapsed ? (
               <NotificationButton
                 unreadCount={unreadNotificationCount}
