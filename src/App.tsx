@@ -9608,7 +9608,7 @@ function CreateScreen({
                         </TabsTrigger>
                       ))}
                     </TabsList>
-                    <div className="ml-auto flex min-w-0 flex-1 justify-end">
+                    <div className="ml-auto flex min-w-[240px] flex-1 justify-end">
                       <BusinessFilterSearch
                         label="만든 문서 검색"
                         placeholder="문서번호, 거래처, 상태 검색"

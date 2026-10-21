@@ -613,7 +613,7 @@ function ModuleCard({
       onDragOver={(event) => event.preventDefault()}
       onDrop={onDrop}
       style={{ "--home-module-columns": spec.columns, "--home-module-rows": spec.rows } as CSSProperties}
-      className="col-span-full flex min-h-[360px] min-w-0 flex-col gap-4 overflow-hidden bg-[var(--color-gray-12)] p-5 shadow-[var(--shadow-modal)] ring-0 lg:col-[span_var(--home-module-columns)] lg:row-[span_var(--home-module-rows)] lg:min-h-0"
+      className="col-span-full flex min-h-[360px] min-w-0 flex-col gap-4 overflow-hidden bg-[var(--color-gray-12)] p-5 shadow-[var(--shadow-modal)] ring-0 xl:col-[span_var(--home-module-columns)] xl:row-[span_var(--home-module-rows)] xl:min-h-0"
     >
       <div className="flex min-h-[52px] items-start gap-1">
         <button
@@ -642,9 +642,9 @@ function ModuleCard({
       </div>
       <div className="min-h-0 flex-1 overflow-auto">
         {state === "default" ? (
-          // Table-like modules keep their column layout below lg and scroll
-          // sideways inside the card instead of crushing the columns.
-          <div className={cn(wideModules.has(id) && "min-w-[600px] lg:min-w-0")}>
+          // Below xl every module is full width (tablets were too narrow for the
+          // two-column board); table-like modules still scroll sideways on phones.
+          <div className={cn(wideModules.has(id) && "min-w-[600px] xl:min-w-0")}>
             <ModuleBody id={id} role={role} onNavigate={onNavigate} />
           </div>
         ) : (
@@ -719,7 +719,7 @@ export function RoleHomeBoard({
           </DropdownMenuContent>
         </DropdownMenu>
       </header>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-8 lg:auto-rows-[172px]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-8 xl:auto-rows-[172px]">
         {visible.map((spec) => (
           <ModuleCard
             key={spec.id}
