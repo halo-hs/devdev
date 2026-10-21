@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { DateInput } from "@shared/components/date-input"
 import { ArrowRight, Download, RefreshCw, Search } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@shared/components/ui/badge"
@@ -295,19 +296,11 @@ export function AiBusinessTools({
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="grid gap-2 text-sm">
                   {copy.from}
-                  <Input
-                    type="date"
-                    value={from}
-                    onChange={(event) => setFrom(event.target.value)}
-                  />
+                  <DateInput ariaLabel={copy.from} value={from} max={to || undefined} onValueChange={setFrom} />
                 </label>
                 <label className="grid gap-2 text-sm">
                   {copy.to}
-                  <Input
-                    type="date"
-                    value={to}
-                    onChange={(event) => setTo(event.target.value)}
-                  />
+                  <DateInput ariaLabel={copy.to} value={to} min={from || undefined} onValueChange={setTo} />
                 </label>
               </div>
             )}

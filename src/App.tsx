@@ -1,4 +1,5 @@
 import { NavigationIcon } from "@shared/components/navigation-icon"
+import { DateInput } from "@shared/components/date-input"
 import navigationWordmark from "@shared/assets/navigation/ecoya-wordmark.svg?url"
 import { SnapStartGuidePage, useSnapStartGuide } from "@snap/onboarding/start-guide"
 import { DocumentConnectionSummary, DocumentConnectionChangeDialog } from "@trade-os/components/document-connection-summary"
@@ -7912,13 +7913,10 @@ function DealConfirmPanel({
                                 <FieldLabel>
                                   입출금일
                                 </FieldLabel>
-                                <Input
-                                  type="date"
-                                  aria-label="입출금일"
+                                <DateInput
+                                  ariaLabel="입출금일"
                                   value={bankValueDate}
-                                  onChange={(event) =>
-                                    setBankValueDate(event.target.value)
-                                  }
+                                  onValueChange={setBankValueDate}
                                 />
                               </Field>
                             </div> : null}
@@ -11121,7 +11119,7 @@ function ShareDeliveryPanel({
                     <div className="mt-3 grid grid-cols-2 gap-3">
                       <label className="grid gap-1 text-xs">
                         <span>만료일</span>
-                        <Input type="date" className="h-8 bg-[var(--control-background)]" value={expires} onChange={(event) => setExpires(event.target.value)} />
+                        <DateInput ariaLabel="만료일" value={expires} onValueChange={setExpires} />
                       </label>
                       <label className="grid gap-1 text-xs">
                         <span>최대 열람 횟수</span>

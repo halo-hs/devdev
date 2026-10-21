@@ -1,4 +1,5 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shared/components/ui/tabs"
+import { DateInput } from "@shared/components/date-input"
 import { counterpartyPreview, counterpartyPreviewAccess, type CounterpartyAccess } from "@trade-os/counterparty-workspace"
 import { listDealDocuments } from "@trade-os/lib/deal-document-actions"
 import { orderProgress } from "@trade-os/lib/deal-finance-workspace"
@@ -2962,12 +2963,12 @@ export function SettlementPrototype({ onNavigate }: { onNavigate: Navigate }) {
       description="회계 소프트웨어가 아닙니다. 세무사·더존으로 넘길 AR/AP와 자금 일정을 정리합니다."
       action={
         <>
-          <Input
-            type="month"
+          <DateInput
+            mode="month"
             value={exportMonth}
-            onChange={(event) => setExportMonth(event.target.value)}
-            aria-label="내보낼 대상 월"
-            className="w-36"
+            onValueChange={setExportMonth}
+            ariaLabel="내보낼 대상 월"
+            className="w-40"
           />
           <Button
             variant="outline"
@@ -3667,13 +3668,13 @@ export function SettlementPrototype({ onNavigate }: { onNavigate: Navigate }) {
                       </label>
                       <label className="grid gap-1.5 text-sm">
                         <span>처리일</span>
-                        <Input
-                          type="date"
+                        <DateInput
+                          ariaLabel="처리일"
                           value={paymentDraft.paidAt}
-                          onChange={(event) =>
+                          onValueChange={(paidAt) =>
                             setPaymentDraft((draft) => ({
                               ...draft,
-                              paidAt: event.target.value,
+                              paidAt,
                             }))
                           }
                         />
