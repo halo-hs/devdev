@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Upload, X } from "lucide-react"
 import { Button } from "@shared/components/ui/button"
+import { Checkbox } from "@shared/components/ui/checkbox"
 import {
   FileDropZone,
   type FileDropZoneRef,
@@ -168,14 +169,13 @@ export function DeliveryAttachmentPicker({
                 <label
                   className={`flex min-h-12 items-center gap-3 py-2 transition-colors focus-within:ring-2 focus-within:ring-ring ${!item.allowed ? "cursor-not-allowed text-muted-foreground" : added ? "cursor-pointer text-primary" : "cursor-pointer hover:text-primary"}`}
                 >
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={added}
                     disabled={busy || !item.allowed}
                     aria-label={item.name}
                     aria-describedby={`${item.id}-reason`}
-                    className="size-4 shrink-0 cursor-pointer accent-primary disabled:cursor-not-allowed"
-                    onChange={() => {
+                    className="shrink-0"
+                    onCheckedChange={() => {
                       if (!item.allowed || busy) return
                       setError("")
                       onChange(

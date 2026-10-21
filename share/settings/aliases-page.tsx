@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shared/components/ui/select"
 import { toast } from "sonner"
 import { Button } from "@shared/components/ui/button"
 import { Badge } from "@shared/components/ui/badge"
@@ -70,7 +71,6 @@ export const aliasPreview = {
 }
 const roles = { both: "매입처·매출처", buyer: "매출처", seller: "매입처" }
 const statuses = { active: "사용 중", archived: "보관", merged: "병합됨" }
-const selectClass = "h-9 w-full rounded-md border bg-background px-3 text-sm"
 const newMaster = (): Master => ({
   id: crypto.randomUUID(),
   name: "",
@@ -441,38 +441,46 @@ export function AliasesPage({ role }: { role: SettingsRole }) {
               </label>
               <label className="grid gap-2 text-sm">
                 구분
-                <select
-                  className={selectClass}
+                <Select
                   value={editor.role}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setEditor({
                       ...editor,
-                      role: e.target.value as Master["role"],
+                      role: value as Master["role"],
                     })
                   }
                 >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
                   {Object.entries(roles).map(([value, label]) => (
-                    <option key={value} value={value}>
+                    <SelectItem key={value} value={value}>
                       {label}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
+                  </SelectContent>
+                </Select>
               </label>
               <label className="grid gap-2 text-sm">
                 상태
-                <select
-                  className={selectClass}
+                <Select
                   value={editor.status}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setEditor({
                       ...editor,
-                      status: e.target.value as Master["status"],
+                      status: value as Master["status"],
                     })
                   }
                 >
-                  <option value="active">사용 중</option>
-                  <option value="archived">보관</option>
-                </select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                  <SelectItem value="active">사용 중</SelectItem>
+                  <SelectItem value="archived">보관</SelectItem>
+                  </SelectContent>
+                </Select>
               </label>
             </div>
           )}
@@ -487,20 +495,24 @@ export function AliasesPage({ role }: { role: SettingsRole }) {
               </label>
               <label className="grid gap-2 text-sm">
                 기준 거래처
-                <select
-                  className={selectClass}
+                <Select
                   value={canonical}
-                  onChange={(e) => setCanonical(e.target.value)}
+                  onValueChange={(value) => setCanonical(value)}
                 >
-                  <option value="">거래처 선택</option>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="거래처 선택" />
+                  </SelectTrigger>
+                  <SelectContent>
+
                   {data?.masters
                     .filter((master) => master.status === "active")
                     .map((master) => (
-                      <option key={master.id} value={master.id}>
+                      <SelectItem key={master.id} value={master.id}>
                         {master.name}
-                      </option>
+                      </SelectItem>
                     ))}
-                </select>
+                  </SelectContent>
+                </Select>
               </label>
               {candidates.length > 0 && (
                 <div>

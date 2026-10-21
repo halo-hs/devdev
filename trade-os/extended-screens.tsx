@@ -1856,11 +1856,14 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
               </label>
               <label className="grid gap-1.5 text-sm font-medium">
                 구분
-                <select className="h-9 rounded-md border border-[var(--control-border)] bg-[var(--control-background)] px-3 text-sm" value={form.kind} onChange={(event) => setForm({ ...form, kind: event.target.value })}>
-                  <option value="counterparty">거래처 담당자</option>
-                  <option value="internal">조직 구성원</option>
-                  <option value="other">기타</option>
-                </select>
+                <Select value={form.kind} onValueChange={(value) => setForm({ ...form, kind: value })}>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="counterparty">거래처 담당자</SelectItem>
+                    <SelectItem value="internal">조직 구성원</SelectItem>
+                    <SelectItem value="other">기타</SelectItem>
+                  </SelectContent>
+                </Select>
               </label>
               <label className="grid gap-1.5 text-sm font-medium">
                 회사 <Input value={form.company} onChange={(event) => setForm({ ...form, company: event.target.value })} />

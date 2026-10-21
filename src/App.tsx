@@ -14253,7 +14253,7 @@ function DocumentReviewSharePanel({
 
             <section className="order-2 rounded-md border bg-background p-3">
               <div className="text-sm font-semibold">문서 형태</div>
-              <label className="mt-3 flex flex-wrap items-center gap-2 text-xs"><span className="w-16 shrink-0 font-medium text-muted-foreground">문서 구성</span><select aria-label="문서 구성" className="h-8 min-w-0 flex-1 rounded-md border border-[var(--control-border)] bg-[var(--control-background)] px-2" value={documentStyle.archetype} onChange={event => onStyleChange({ ...documentStyle, archetype: event.target.value as DocumentStyle["archetype"] })}>{[["table", "테이블형"], ["letter", "번호조항 레터"], ["spec", "컴팩트 확인서"], ["formal", "정식 계약서"]].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+              <label className="mt-3 flex flex-wrap items-center gap-2 text-xs"><span className="w-16 shrink-0 font-medium text-muted-foreground">문서 구성</span><Select value={documentStyle.archetype} onValueChange={value => onStyleChange({ ...documentStyle, archetype: value as DocumentStyle["archetype"] })}><SelectTrigger size="sm" className="min-w-0 flex-1" aria-label="문서 구성"><SelectValue /></SelectTrigger><SelectContent>{[["table", "테이블형"], ["letter", "번호조항 레터"], ["spec", "컴팩트 확인서"], ["formal", "정식 계약서"]].map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></label>
               <div className="mt-2">
                 {organizationLogo ? (
                   <div className="flex flex-wrap items-center gap-2">

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shared/components/ui/select"
 import { ArrowLeft, Check } from "lucide-react"
 import { Button } from "@shared/components/ui/button"
 import { Input } from "@shared/components/ui/input"
@@ -146,19 +147,23 @@ export function SubscriptionChangePanel({
           {intent.kind === "seats" && paidPlans.length > 1 ? (
             <label className="grid gap-2 text-sm font-medium">
               구독 중인 상품
-              <select
-                className="h-9 w-full rounded-md border border-[var(--control-border)] bg-[var(--control-background)] px-3 text-sm"
+              <Select
                 value={plan}
-                onChange={(event) =>
-                  selectPlan(event.target.value as SubscriptionPlan)
+                onValueChange={(value) =>
+                  selectPlan(value as SubscriptionPlan)
                 }
               >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
                 {paidPlans.map((id) => (
-                  <option key={id} value={id}>
+                  <SelectItem key={id} value={id}>
                     {names[id]}
-                  </option>
+                  </SelectItem>
                 ))}
-              </select>
+                </SelectContent>
+              </Select>
             </label>
           ) : (
             <div>
