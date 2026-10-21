@@ -206,6 +206,28 @@
 .reference-3030 .reference-shipment-group > [data-slot="table-container"] { margin-inline: 16px; width: auto; border-radius: 0; box-shadow: none; }
 .reference-3030 .reference-shipment-group :is([data-slot="table-head"], [data-slot="table-cell"]):first-child { padding-left: 20px; }
 .reference-3030 .reference-shipment-group :is([data-slot="table-head"], [data-slot="table-cell"]):last-child { padding-right: 20px; }
+/* List page: one card holds the tabs and all deal groups; groups split by a line. */
+.reference-3030 .reference-shipment-list-card {
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  background: var(--color-gray-12);
+  box-shadow: var(--shadow-section);
+  outline: 1px solid var(--color-gray-10);
+}
+.reference-3030 .reference-shipment-list-card [data-ui="shipments-list-controls"] {
+  padding: 16px 16px 0;
+  border-radius: 0;
+  box-shadow: none;
+  outline: 0;
+  background: transparent;
+}
+.reference-3030 .reference-shipment-list-card .reference-shipment-results { gap: 0; padding-top: 8px; }
+.reference-3030 .reference-shipment-list-card .reference-shipment-group {
+  border-radius: 0;
+  box-shadow: none;
+  outline: 0;
+}
+.reference-3030 .reference-shipment-list-card .reference-shipment-group + .reference-shipment-group { border-top: 1px solid var(--color-gray-10); }
 .reference-3030 .reference-shipment-table { min-width: 1040px; table-layout: fixed; }
 .reference-3030 .reference-shipment-table [data-slot="table-cell"] { white-space: normal; overflow-wrap: anywhere; padding-block: 16px; }
 .reference-3030 .reference-shipment-table tbody tr:last-child td { border-bottom: 0; }

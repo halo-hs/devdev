@@ -413,6 +413,8 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
   return (
     <div className="flex flex-col gap-4" data-component="ShipmentsConnected" data-state="ready">
       {dealId ? <h3 className="text-header-17 font-bold">선적 정보</h3> : renderHeader ? renderHeader(controls) : controls}
+      {/* The list page wraps the tabs and every deal group in one card. */}
+      <div className={dealId ? "contents" : "reference-shipment-list-card"}>
       {!dealId && listControls}
       <div
         id={`${tabsId}-panel`}
@@ -582,6 +584,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
           </section>
         ))
       )}
+      </div>
       </div>
       {editing ? <ShipmentConfirmationDialog shipment={editing} canWrite={canRefresh} copy={copy} returnFocus={() => editTrigger.current?.focus()} onReload={async () => { const result = await listAllShipments(getIdToken); const latest = result.shipments.find(row => row.id === editing.id); if (!latest) throw new Error("선적을 찾을 수 없습니다."); return latest; }} onClose={() => setEditing(null)} onSave={async (body) => {
         if (!canRefresh) throw new Error("수정 권한이 없습니다.");
