@@ -138,7 +138,7 @@ export function SeatSummary({
   const { members, capacity } = useSettingsDemo()
   if (compact) {
     return (
-      <section aria-label="구독 시트" className="grid xl:grid-cols-2 xl:border-b">
+      <section aria-label="구독 시트" className="grid rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:grid-cols-2">
         {products.map((product, index) => {
           const assigned = members.filter((member) => member[product]).length
           const available = Math.max(0, capacity[product] - assigned)
@@ -147,7 +147,7 @@ export function SeatSummary({
               key={product}
               role="region"
               aria-label={`${names[product]} 좌석`}
-              className={`flex flex-wrap items-center gap-x-3 gap-y-2 border-b py-3 xl:border-b-0 ${index > 0 ? "xl:border-l xl:pl-5" : "xl:pr-5"}`}
+              className={`flex flex-wrap items-center gap-x-3 gap-y-2 py-3 ${index > 0 ? "border-t xl:border-t-0 xl:border-l xl:pl-5" : "xl:pr-5"}`}
             >
               <strong className="min-w-18 text-sm font-medium">{names[product]}</strong>
               <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm whitespace-nowrap">
@@ -388,8 +388,12 @@ export function OrganizationMembers({
             }}
           />
         </div>
+        <span className="text-xs text-muted-foreground">
+          전체 멤버 {members.length}명 · 검색 결과 {filteredMembers.length}명
+        </span>
         <Button
           variant="outline"
+          className="ml-auto"
           onClick={() => setInviteOpen((value) => !value)}
           data-guide-target="invite"
           aria-expanded={inviteOpen}
@@ -718,9 +722,6 @@ export function OrganizationMembers({
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-muted-foreground">
-        전체 멤버 {members.length}명 · 검색 결과 {filteredMembers.length}명
-      </p>
       <Dialog
         open={!!confirmation}
         onOpenChange={(open) => {

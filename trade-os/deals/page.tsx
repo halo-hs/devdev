@@ -1016,38 +1016,37 @@ export function DealsScreen({
               <TabsTrigger value="finance">금융</TabsTrigger>
             </TabsList>
           </Tabs>
-          <span className="ml-auto text-xs text-muted-foreground">
-            {currentPage} / {totalPages} 페이지
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            aria-pressed={pipeline}
-            onClick={() => {
-              setPipeline((value) => !value)
-              setView("operations")
-            }}
-          >
-            {pipeline ? <List /> : <GitBranch />}
-            {pipeline ? "업무표로 보기" : "영업 파이프라인"}
-          </Button>
+          <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+            {view === "finance"
+              ? "송장·입출금은 누적 흐름, 받을 돈·줄 돈은 현재 잔액입니다. 통화별로 표시합니다."
+              : "금액은 출처 문서 기준입니다. 근거가 없는 값은 —로 표시합니다."}
+          </p>
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <BusinessFilterBar style={{ width: "auto" }}>
+              <SelectControl
+                label="정렬"
+                value={sort}
+                onChange={(value) => {
+                  setSort(value)
+                  setPage(1)
+                }}
+                options={sortOptions}
+              />
+            </BusinessFilterBar>
+            <Button
+              variant="outline"
+              size="lg"
+              aria-pressed={pipeline}
+              onClick={() => {
+                setPipeline((value) => !value)
+                setView("operations")
+              }}
+            >
+              {pipeline ? <List /> : <GitBranch />}
+              {pipeline ? "업무표로 보기" : "영업 파이프라인"}
+            </Button>
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground">
-          {view === "finance"
-            ? "송장·입출금은 누적 흐름, 받을 돈·줄 돈은 현재 잔액입니다. 통화별로 표시합니다."
-            : "금액은 출처 문서 기준입니다. 근거가 없는 값은 —로 표시합니다."}
-        </p>
-        <BusinessFilterBar style={{ width: "auto" }}>
-          <SelectControl
-            label="정렬"
-            value={sort}
-            onChange={(value) => {
-              setSort(value)
-              setPage(1)
-            }}
-            options={sortOptions}
-          />
-        </BusinessFilterBar>
         <section className="[container-type:inline-size]">
           {view === "finance" ? (
             <DealsFinanceTable
@@ -1070,7 +1069,7 @@ export function DealsScreen({
                     return (
                       <section
                         key={stageKey}
-                        className="rounded-lg border bg-muted/25 p-3"
+                        className="rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-4 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]"
                       >
                         <h3 className="mb-3 flex justify-between text-sm font-semibold">
                           {label}
@@ -1082,7 +1081,7 @@ export function DealsScreen({
                           {rows.map((deal) => (
                             <button
                               key={deal.id}
-                              className="block w-full rounded-md border bg-background p-3 text-left hover:border-primary/50"
+                              className="block w-full rounded-[var(--r-md)] border border-[var(--color-gray-9)] bg-[var(--color-gray-11)] p-3 text-left transition-colors hover:border-[var(--color-primary-4)] hover:bg-[var(--color-primary-10)]"
                               onClick={() => onOpenDeal(deal.id)}
                             >
                               <strong className="block text-sm">

@@ -1685,8 +1685,8 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
         </div>
       }
     >
-      <div className="grid min-h-[620px] overflow-hidden rounded-lg border lg:grid-cols-[340px_minmax(0,1fr)]">
-        <aside className="border-b bg-sidebar/40 lg:border-r lg:border-b-0">
+      <div className="grid min-h-[620px] overflow-hidden rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] lg:grid-cols-[340px_minmax(0,1fr)]">
+        <aside className="border-b border-[var(--color-gray-10)] bg-[var(--color-gray-12)] lg:border-r lg:border-b-0">
           <div className="border-b p-4">
             <div className="relative">
               <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -1779,7 +1779,7 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
                   dealStages.map((stage) => {
                     const stageDeals = relatedDeals.filter((deal) => deal.stage === stage)
                     return (
-                      <section key={stage} className="rounded-lg border bg-muted/25 p-3">
+                      <section key={stage} className="rounded-[var(--r-lg)] border border-[var(--color-gray-9)] bg-[var(--color-gray-11)] p-3">
                         <h3 className="mb-3 flex items-center justify-between text-sm font-semibold">
                           <span>{stage}</span>
                           <span className="text-xs font-normal text-muted-foreground">{stageDeals.length}건</span>

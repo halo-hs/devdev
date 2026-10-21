@@ -3457,7 +3457,9 @@ function EmailForwardQueue({
   onClose: () => void
   onImportFiles: (files: File[]) => void
 }) {
-  return (
+  // Portaled to body so the panel stacks above the shell header instead of
+  // inside the page's stacking context.
+  return createPortal(
     <div className="fixed inset-y-0 right-0 z-50 w-[min(560px,calc(100vw-24px))] border-l bg-background shadow-2xl">
       <div className="flex h-full min-h-0 flex-col">
         <div className="flex h-14 shrink-0 items-center justify-between border-b px-5">
@@ -3485,21 +3487,22 @@ function EmailForwardQueue({
           />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
 function AiDocumentProcessingNotice() {
   return (
-    <details className="group text-xs text-muted-foreground">
-      <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-2 gap-y-1 rounded-sm py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-        <Sparkles className="size-3.5 shrink-0 text-primary" />
+    // 문서 올리기 V2 note-group: Gray 5 13px note + Blue 4 11px "자세히" button.
+    <details className="group text-[13px] text-[var(--color-gray-6)]">
+      <summary className="flex cursor-pointer list-none flex-wrap items-center justify-end gap-x-1 gap-y-1 rounded-sm py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
         <span>AI 추출값은 원본과 확인한 뒤 확정하세요.</span>
-        <span className="ml-auto inline-flex items-center gap-1 text-primary">
+        <span className="inline-flex h-6 items-center gap-1 rounded-[var(--r-sm)] pr-1.5 pl-2 text-[11px] leading-4 text-[var(--color-primary-4)] hover:bg-[var(--color-primary-10)]">
           자세히 <ChevronDown className="size-3.5 transition-transform group-open:rotate-180" />
         </span>
       </summary>
-      <p className="mt-1 pl-5 leading-5">
+      <p className="mt-1 text-xs leading-5 text-[var(--color-gray-4)]">
         ECOYA는 PDF에서 필드를 읽고 추출하는 데 AI를 사용합니다. 추출값은
         부정확하거나 불완전할 수 있습니다. 확인한 값만 공식 기록이 됩니다.
         법률·세무·관세·재무 자문이 아닙니다.
@@ -5716,23 +5719,23 @@ function BeforeUploadState({
                 <div className="flex flex-wrap items-start gap-x-6 gap-y-2">
                   <ol
                     aria-label="문서 처리 순서"
-                    className="flex flex-wrap items-center gap-x-2 gap-y-2 py-1 text-xs text-[var(--color-gray-5)]"
+                    className="flex flex-wrap items-center gap-x-3 gap-y-2 py-1 text-sm text-[var(--color-gray-6)]"
                   >
                     {["파일 올리기", "추출값 검토", "거래 연결·확정"].map(
                       (title, index) => (
                         <li key={title} className="flex items-center gap-2">
                           {index > 0 && (
                             <ChevronRight
-                              className="mr-1 size-3.5 text-[var(--color-gray-3)]"
+                              className="mr-1 size-4 text-[var(--color-gray-4)]"
                               aria-hidden="true"
                             />
                           )}
                           <span
                             className={cn(
-                              "flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold",
+                              "flex size-[22px] shrink-0 items-center justify-center rounded-full text-xs font-bold",
                               index === 0
-                                ? "bg-[var(--primary)] text-white"
-                                : "bg-[var(--color-gray-10)] text-[var(--color-gray-5)]"
+                                ? "bg-[var(--color-primary-4)] text-white"
+                                : "bg-[var(--color-gray-10)] text-[var(--color-gray-6)]"
                             )}
                           >
                             {index + 1}
@@ -9590,12 +9593,14 @@ function CreateScreen({
                         </TabsTrigger>
                       ))}
                     </TabsList>
-                    <BusinessFilterSearch
-                      label="만든 문서 검색"
-                      placeholder="문서번호, 거래처, 상태 검색"
-                      value={documentSearch}
-                      onValueChange={setDocumentSearch}
-                    />
+                    <div className="ml-auto flex min-w-0 flex-1 justify-end">
+                      <BusinessFilterSearch
+                        label="만든 문서 검색"
+                        placeholder="문서번호, 거래처, 상태 검색"
+                        value={documentSearch}
+                        onValueChange={setDocumentSearch}
+                      />
+                    </div>
                   </BusinessListToolbar>
                   {documentTabs.map(({ value, docs }) => (
                     <TabsContent

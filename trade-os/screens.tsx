@@ -39,6 +39,7 @@ import {
   Download,
   ExternalLink,
   SquarePen,
+  Bookmark,
   FileCheck2,
   FileText,
   Loader2,
@@ -1788,7 +1789,18 @@ export function AskPrototype({
               </Button>
             </SheetClose>
           </div>
-          <div className="p-3">
+          <div className="space-y-2 p-3">
+            <Button
+              variant={toolsOpen ? "secondary" : "outline"}
+              className="w-full justify-start"
+              aria-pressed={toolsOpen}
+              onClick={() => {
+                setToolsOpen(true)
+                setMobileHistoryOpen(false)
+              }}
+            >
+              <Bookmark /> 저장한 답변과 상세 조회
+            </Button>
             <div className="relative">
               <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -1884,27 +1896,6 @@ export function AskPrototype({
           </div>
         </header>
 
-        <div
-          className="flex shrink-0 gap-2 border-b border-[var(--color-gray-10)] px-5 pb-3"
-          aria-label="AI 작업 선택"
-        >
-          <Button
-            size="sm"
-            variant={toolsOpen ? "ghost" : "secondary"}
-            aria-pressed={!toolsOpen}
-            onClick={() => setToolsOpen(false)}
-          >
-            질문하기
-          </Button>
-          <Button
-            size="sm"
-            variant={toolsOpen ? "secondary" : "ghost"}
-            aria-pressed={toolsOpen}
-            onClick={() => setToolsOpen(true)}
-          >
-            저장한 답변과 상세 조회
-          </Button>
-        </div>
         <div
           className={cn(
             "min-h-0 flex-1 overflow-y-auto",
@@ -2031,6 +2022,15 @@ export function AskPrototype({
             onClick={startNewChat}
           >
             <Plus /> 새 대화
+          </Button>
+          {/* Saved answers live with the conversations instead of a tab above the chat. */}
+          <Button
+            variant={toolsOpen ? "secondary" : "outline"}
+            className="w-full justify-start"
+            aria-pressed={toolsOpen}
+            onClick={() => setToolsOpen(true)}
+          >
+            <Bookmark /> 저장한 답변과 상세 조회
           </Button>
           <div className="relative">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />

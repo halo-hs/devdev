@@ -220,12 +220,12 @@ export function AliasesPage({ role }: { role: SettingsRole }) {
         {state === "loading" ? (
           <p
             role="status"
-            className="border-y py-8 text-sm text-muted-foreground"
+            className="rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] py-8 text-sm text-muted-foreground"
           >
             거래처와 별칭을 불러오는 중입니다.
           </p>
         ) : state === "error" ? (
-          <div role="alert" className="border-y py-6">
+          <div role="alert" className="rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] py-6">
             <p className="mb-3 text-sm">
               거래처와 별칭을 불러오지 못했습니다. 다시 확인해 주세요.
             </p>
@@ -235,7 +235,7 @@ export function AliasesPage({ role }: { role: SettingsRole }) {
           </div>
         ) : (
           data && (
-            <ul className="divide-y border-y">
+            <ul className="divide-y rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
               {data.masters.length === 0 && (
                 <li className="py-8 text-sm text-muted-foreground">
                   등록된 거래처가 없습니다. 거래처를 추가해 별칭을 연결하세요.
@@ -290,7 +290,7 @@ export function AliasesPage({ role }: { role: SettingsRole }) {
           </span>
         </h2>
         {ready && (
-          <ul className="divide-y border-y">
+          <ul className="divide-y rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
             {orphanAliases.length === 0 ? (
               <li className="py-5 text-sm text-muted-foreground">
                 모든 별칭이 거래처에 연결되어 있습니다.
@@ -331,7 +331,7 @@ export function AliasesPage({ role }: { role: SettingsRole }) {
             </h2>
             {ready &&
               (duplicate && target ? (
-                <div className="border-y py-5">
+                <div className="rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] py-5">
                   <p className="text-sm font-medium">
                     {duplicate.name} · {target.name}
                   </p>
@@ -359,12 +359,12 @@ export function AliasesPage({ role }: { role: SettingsRole }) {
                   </div>
                 </div>
               ) : (
-                <p className="border-y py-5 text-sm text-muted-foreground">
+                <p className="rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] py-5 text-sm text-muted-foreground">
                   확인할 중복 후보가 없습니다.
                 </p>
               ))}
           </section>
-          <section className="flex flex-wrap items-center justify-between gap-3 border-t pt-5">
+          <section className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] py-5">
             <div className="min-w-0 flex-1 basis-60">
               <h2 className="text-base font-semibold">기준 정보 유지보수</h2>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -535,7 +535,7 @@ export function AliasesPage({ role }: { role: SettingsRole }) {
               <p>
                 병합되는 거래처는 비활성 상태로 남고, 기존 이력은 보존됩니다.
               </p>
-              <div className="divide-y border-y">
+              <div className="divide-y rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
                 {[
                   "거래·문서·SNAP 연결",
                   "일정·정산·현금·조정",
