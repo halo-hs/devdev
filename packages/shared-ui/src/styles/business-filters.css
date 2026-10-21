@@ -97,8 +97,9 @@
 }
 .business-filter-bar .business-filter-search:focus-within {
   border-color: var(--control-border-hover);
+  /* Single 2px focus line drawn over the border instead of a second ring. */
   outline: 2px solid var(--hero-filter-focus-ring, var(--ring));
-  outline-offset: 2px;
+  outline-offset: -1px;
 }
 .business-filter-bar .business-filter-select {
   display: inline-flex;

@@ -9487,6 +9487,7 @@ function CreateScreen({
   const pageHeading = (
     <BusinessPageHero
       title="문서 만들기"
+      description="발행 문서를 검색·필터하고, 이어서 작성·PDF·복제·삭제·고객 전달을 한곳에서 처리합니다."
       className="mb-6"
       summary={<TemplateStrip onResult={openUnifiedWorkbench} initialSelectedCode={initialTemplateCode} />}
     />
