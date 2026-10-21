@@ -5698,7 +5698,7 @@ function BeforeUploadState({
 
   return (
     <div className="h-full min-h-0 overflow-y-auto bg-transparent">
-      <div className="mx-auto w-full max-w-ecoya-wide-xl px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
+      <div className="w-full px-4 py-5 sm:px-5 sm:py-6">
         <BusinessPageHero
           variant="ai"
           eyebrow="AI 파일 올리기"
@@ -5824,7 +5824,7 @@ function BeforeUploadState({
           </Card>
         </div>
       </div>
-      <div className="mx-auto w-full max-w-ecoya-wide-xl px-5 pb-10 sm:px-6 xl:px-8">
+      <div className="w-full px-4 pb-10 sm:px-5">
         <div className="mt-7">
           <PendingUploadDocumentsTable
             documents={documents}
@@ -9526,7 +9526,7 @@ function CreateScreen({
   if (showInitialTemplateState) {
     return (
       <div className="flex h-full min-h-0 flex-col overflow-auto bg-transparent">
-        <div className="mx-auto w-full max-w-ecoya-wide-xl shrink-0 px-5 pt-5 sm:px-6 sm:pt-6 xl:px-8">
+        <div className="w-full shrink-0 px-4 pt-5 sm:px-5 sm:pt-6">
           {relatedDeal ? <RelatedDealNotice deal={relatedDeal} /> : null}
           {pageHeading}
           <section className="space-y-5 pb-8">
@@ -9539,7 +9539,7 @@ function CreateScreen({
 
   return (
     <div className="h-full min-h-0 overflow-auto bg-transparent">
-      <section className="mx-auto w-full max-w-ecoya-wide-xl px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
+      <section className="w-full px-4 py-5 sm:px-5 sm:py-6">
         {relatedDeal ? <RelatedDealNotice deal={relatedDeal} compact /> : null}
         {pageHeading}
 
@@ -16061,8 +16061,8 @@ function ResultScreen({
 
   if (!templateSelected) {
     return (
-      <div className="h-full overflow-auto bg-background px-5 py-6 sm:px-6">
-        <div className="mx-auto w-full max-w-ecoya-wide-xl">
+      <div className="h-full overflow-auto bg-transparent px-4 py-6 sm:px-5">
+        <div className="w-full">
           <h1 className="mb-6 text-2xl font-semibold tracking-tight">문서 만들기</h1>
           <TemplateStrip onResult={(_mode, code, direction) => {
             if (!code || !templateSchemas[code]) return
