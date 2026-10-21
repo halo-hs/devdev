@@ -5773,17 +5773,15 @@ function BeforeUploadState({
                 instructions={`PDF 최대 ${TRADE_DOCUMENT_MAX_UPLOAD_FILES}개, 파일당 ${TRADE_DOCUMENT_MAX_UPLOAD_MB}MB`}
                 clickToSelect
                 onFiles={onFilesSelected}
-                className="min-h-36 flex-row gap-3 bg-[var(--surface-background)] px-4 text-left"
+                // 문서 올리기 V2 (6273:100113): Blue 10 drop area, stacked and centered.
+                className="min-h-[112px] flex-col gap-2 border-[var(--color-primary-6)] bg-[var(--color-primary-10)] px-4 text-center text-[var(--color-primary-4)]"
               >
-                <Upload
-                  className="text-[var(--file-drop-foreground)]"
-                  data-icon="inline-start"
-                />
-                <span className="text-[var(--surface-foreground)]">
-                  <span className="block text-sm font-semibold">
+                <Upload className="size-5" />
+                <span>
+                  <span className="block text-[15px] leading-[22px]">
                     파일을 끌어다 놓으세요
                   </span>
-                  <span className="text-xs text-[var(--surface-muted-foreground)]">
+                  <span className="mt-1 block text-[13px] leading-[18px]">
                     PDF 최대 {TRADE_DOCUMENT_MAX_UPLOAD_FILES}개, 파일당
                     {` ${TRADE_DOCUMENT_MAX_UPLOAD_MB}MB`}
                   </span>

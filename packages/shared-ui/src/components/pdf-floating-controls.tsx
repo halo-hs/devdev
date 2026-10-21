@@ -23,6 +23,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@shared/components/ui/popover"
+import { Separator } from "@shared/components/ui/separator"
+import { cn } from "@shared/lib/utils"
 
 export function PdfViewerToolbar({
   zoom,
@@ -139,54 +141,60 @@ export function PdfFloatingControls({
 
   return (
     <div className="absolute bottom-4 left-1/2 z-[var(--z-pagination-dropdown)] -translate-x-1/2">
-      <ButtonGroup className="shadow-[var(--shadow-filter)]">
+      {/* Figma DocumentViewer/Footer (2343:20892): white pill, ghost 32px
+          buttons split by Gray 8 separators. */}
+      <div className="flex h-[46px] items-center gap-1 rounded-[var(--r-pill)] border border-[var(--color-gray-8)] bg-[var(--color-gray-12)] px-[7px] shadow-[0_6px_10px_rgb(16_24_40/0.1)] [--button-ghost-foreground:var(--color-gray-2)]">
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon-sm"
           aria-label="이전 페이지"
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
         >
-          <ChevronLeft data-icon="inline-start" />
+          <ChevronLeft className="size-[18px]" />
         </Button>
+        <Separator orientation="vertical" className="h-5! self-center bg-[var(--color-gray-8)]" />
         <Popover open={pagePickerOpen} onOpenChange={setPagePickerOpen}>
           <PopoverTrigger asChild>
             <Button
-              variant="outline"
-              size="sm"
-              className="min-w-28 justify-center text-xs tabular-nums"
+              variant="ghost"
+              className="h-[34px] gap-2 rounded-[var(--r-pill)] px-3 text-[13px] leading-[18px] font-normal text-[var(--color-gray-1)] tabular-nums"
               aria-label={`페이지 목록 열기, 현재 ${page} / ${pageCount} 페이지`}
             >
-              <Files data-icon="inline-start" />
+              <Files className="size-[18px]" />
               {page} / {pageCount} 페이지
-              <ChevronUp data-icon="inline-end" />
+              <ChevronUp className={cn("size-4 transition-transform", !pagePickerOpen && "rotate-180")} />
             </Button>
           </PopoverTrigger>
           <PopoverContent
             side="top"
             align="center"
             sideOffset={8}
-            className="w-[min(42rem,calc(100vw-2rem))] gap-0 overflow-hidden p-0"
+            className="w-[min(420px,calc(100vw-2rem))] gap-0 overflow-hidden rounded-[var(--r-lg)] p-0"
           >
-            <div className="flex items-center justify-between border-b border-[var(--surface-border)] px-3 py-2.5">
-              <span>
-                <span className="block text-xs font-semibold">페이지 선택</span>
-                <span className="mt-0.5 block text-[10px] text-[var(--surface-muted-foreground)]">
+            <div className="flex items-start justify-between border-b border-[var(--color-gray-9)] px-5 pt-5 pb-3.5 text-[13px] leading-[18px]">
+              <span className="grid gap-1">
+                <span className="text-[var(--color-gray-1)]">페이지 선택</span>
+                <span className="text-[var(--color-gray-4)]">
                   가로로 스크롤해 페이지를 선택하세요.
                 </span>
               </span>
-              <span className="text-[11px] text-[var(--surface-muted-foreground)]">
+              <span className="text-[var(--color-gray-5)]">
                 전체 {pageCount}장
               </span>
             </div>
-            <div className="field-scrollbar flex snap-x gap-2 overflow-x-auto p-2 pb-3">
+            <div className="field-scrollbar flex snap-x gap-3 overflow-x-auto px-5 py-2.5">
               {Array.from({ length: pageCount }, (_, index) => index + 1).map(
                 (pageNumber) => (
                   <Button
                     key={pageNumber}
                     ref={pageNumber === page ? activePageRef : undefined}
-                    variant={pageNumber === page ? "secondary" : "ghost"}
-                    className="h-auto w-20 shrink-0 snap-start flex-col gap-1.5 px-2 py-2"
+                    variant="ghost"
+                    className={cn(
+                      "h-auto shrink-0 snap-start flex-col gap-2 rounded-[10px] border border-transparent p-[9px]",
+                      pageNumber === page &&
+                        "border-[var(--color-primary-8)] bg-[var(--color-primary-10)] hover:bg-[var(--color-primary-10)]"
+                    )}
                     aria-current={pageNumber === page ? "page" : undefined}
                     aria-label={`${pageNumber}페이지로 이동`}
                     onClick={() => {
@@ -194,32 +202,42 @@ export function PdfFloatingControls({
                       setPagePickerOpen(false)
                     }}
                   >
-                    <span className="relative flex aspect-[3/4] w-12 items-center justify-center rounded-[var(--r-sm)] border border-[var(--surface-border)] bg-[var(--surface-background)] text-[10px] text-[var(--surface-muted-foreground)]">
+                    <span
+                      className={cn(
+                        "relative flex h-[106px] w-20 items-center justify-center rounded-[6px] border border-[var(--color-gray-8)] bg-[var(--color-gray-12)] text-[15px] leading-[22px] text-[var(--color-gray-5)]",
+                        pageNumber === page &&
+                          "border-[var(--color-primary-4)] text-[var(--color-primary-4)]"
+                      )}
+                    >
                       {pageNumber}
                       {pageNumber === page ? (
-                        <Check className="absolute -top-1 -right-1 size-3.5 rounded-[var(--r-pill)] bg-[var(--control-selected-background)] p-0.5 text-[var(--control-selected-foreground)]" />
+                        <span className="absolute top-1.5 right-1.5 flex size-4 items-center justify-center rounded-full bg-[var(--color-primary-4)] text-white">
+                          <Check className="size-2.5" />
+                        </span>
                       ) : null}
                     </span>
-                    <span className="text-[11px]">{pageNumber}페이지</span>
+                    <span className="text-[13px] leading-[18px] font-normal text-[var(--color-gray-1)]">{pageNumber}페이지</span>
                   </Button>
                 )
               )}
             </div>
           </PopoverContent>
         </Popover>
+        <Separator orientation="vertical" className="h-5! self-center bg-[var(--color-gray-8)]" />
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon-sm"
           aria-label="다음 페이지"
           disabled={page >= pageCount}
           onClick={() => onPageChange(page + 1)}
         >
-          <ChevronRight data-icon="inline-start" />
+          <ChevronRight className="size-[18px]" />
         </Button>
         {variant === "full" ? (
           <>
+            <Separator orientation="vertical" className="h-5! self-center bg-[var(--color-gray-8)]" />
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon-sm"
               aria-label="축소"
               disabled={zoom <= 70}
@@ -231,7 +249,7 @@ export function PdfFloatingControls({
               {zoom}%
             </ButtonGroupText>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon-sm"
               aria-label="확대"
               disabled={zoom >= 150}
@@ -240,7 +258,7 @@ export function PdfFloatingControls({
               <Plus data-icon="inline-start" />
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon-sm"
               aria-label={isFullscreen ? "전체 화면 닫기" : "전체 화면"}
               title={isFullscreen ? "전체 화면 닫기" : "전체 화면"}
@@ -254,7 +272,7 @@ export function PdfFloatingControls({
             </Button>
             {onDownload ? (
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon-sm"
                 aria-label="다운로드"
                 disabled={isDownloading}
@@ -272,7 +290,7 @@ export function PdfFloatingControls({
             ) : null}
           </>
         ) : null}
-      </ButtonGroup>
+      </div>
     </div>
   )
 }
