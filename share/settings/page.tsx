@@ -32,7 +32,6 @@ import {
   ExternalLink,
 } from "lucide-react"
 
-import { SidebarProfileMenu } from "@shared/components/sidebar-profile-menu"
 import { WorkspaceSwitcher } from "@shared/components/workspace-switcher"
 import { Badge } from "@shared/components/ui/badge"
 import { Button } from "@shared/components/ui/button"
@@ -50,7 +49,6 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -850,7 +848,6 @@ function renderSection(
 
 function SettingsHubContent({
   onNavigate,
-  onLogout,
   workspaceId,
   onWorkspaceChange,
   availableProducts = ["erp", "snap"],
@@ -862,7 +859,7 @@ function SettingsHubContent({
   withdrawalGateway,
 }: {
   onNavigate: (target: SettingsTarget) => void
-  onLogout: () => void
+  onLogout?: () => void
   workspaceId: WorkspaceKey
   onWorkspaceChange: (workspaceId: WorkspaceKey) => void
   availableProducts?: readonly ProductEntitlement[]
@@ -1057,15 +1054,6 @@ function SettingsHubContent({
             ) : null}
           </nav>
         </SidebarContent>
-        <SidebarFooter className="border-t p-3">
-          <SidebarMenu>
-            <SidebarProfileMenu
-              onSettings={() => selectSection("account")}
-              onLogout={onLogout}
-              showProductSummary={false}
-            />
-          </SidebarMenu>
-        </SidebarFooter>
         <SidebarRail />
       </Sidebar>
       <SidebarInset className="min-h-0 min-w-0 overflow-hidden bg-transparent md:pt-(--header-height)">
