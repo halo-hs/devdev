@@ -788,7 +788,7 @@ export function DealsScreen({
                           ]}
                         />
                         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-                          <span className="flex items-center gap-0.5 text-sm text-white/80">
+                          <span className="flex items-center gap-0.5 text-[13px] font-semibold text-white">
                             ETA 기간
                             <Popover>
                               <PopoverTrigger asChild>

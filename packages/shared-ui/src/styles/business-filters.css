@@ -269,8 +269,7 @@
   color: var(--control-accessory-foreground);
 }
 :is(.business-hero-controls, .reference-hero-filters)
-  .business-filter-bar[data-layout]
-  input[type="month"]::-webkit-calendar-picker-indicator {
+  input:is([type="month"], [type="date"])::-webkit-calendar-picker-indicator {
   filter: invert(1);
   opacity: 0.72;
 }
