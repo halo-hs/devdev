@@ -380,7 +380,6 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
     <BusinessListToolbar
       data-ui="shipments-list-controls"
       aria-label="선적 상태 필터"
-      result={`거래 ${groups.length}건 · 선적 ${groups.reduce((sum, group) => sum + group.rows.length, 0)}건`}
     >
       <Tabs
         className="reference-shipment-tabs"
@@ -403,6 +402,9 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
           ))}
         </TabsList>
       </Tabs>
+      <span className="text-label-12 text-text-muted">
+        {`거래 ${groups.length}건 · 선적 ${groups.reduce((sum, group) => sum + group.rows.length, 0)}건`}
+      </span>
     </BusinessListToolbar>
   )
 
