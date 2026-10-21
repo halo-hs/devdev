@@ -1,4 +1,5 @@
 import { AccountWithdrawal, WithdrawalResultSurface } from "./account-withdrawal"
+import { NavigationIcon } from "@shared/components/navigation-icon"
 import { ColorPicker } from "@shared/components/color-picker"
 import { createWithdrawalPreview, withdrawalScenario, type WithdrawalGateway, type WithdrawalResult } from "./withdrawal-data"
 import { PageHeading, SettingsSection } from "./settings-layout"
@@ -102,6 +103,8 @@ type NavItem = {
   id: SectionId
   label: string
   icon: typeof CircleUserRound
+  /** Same Figma glyph as the main sidebar / profile menu, when one exists. */
+  navIcon?: Parameters<typeof NavigationIcon>[0]["name"]
   product?: ProductEntitlement
   roles?: readonly SettingsRole[]
   permission?: keyof ImportPermissions
@@ -133,7 +136,7 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
         roles: ["owner", "admin"],
       },
       { id: "products", label: "제품 및 구독", icon: CreditCard },
-      { id: "billing", label: "빌링", icon: ExternalLink, roles: ["owner"] },
+      { id: "billing", label: "빌링", icon: ExternalLink, navIcon: "billing", roles: ["owner"] },
     ],
   },
   {
@@ -163,6 +166,7 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
         label: "거래 일괄 등록",
         permission: "canImportDeals",
         icon: Upload,
+        navIcon: "upload",
         product: "erp",
       },
       {
@@ -171,8 +175,8 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
         icon: Landmark,
         product: "erp",
       },
-      { id: "trade-alerts", label: "알림 설정", icon: Bell, product: "erp" },
-      { id: "trade-usage", label: "AI 사용량", icon: Sparkles, product: "erp", keywords: ["토큰", "사용량"] },
+      { id: "trade-alerts", label: "알림 설정", icon: Bell, navIcon: "notification", product: "erp" },
+      { id: "trade-usage", label: "AI 사용량", icon: Sparkles, navIcon: "usage", product: "erp", keywords: ["토큰", "사용량"] },
       { id: "approvals", label: "결재 정책", icon: Check, product: "erp", roles: ["owner"] },
     ],
   },
@@ -190,6 +194,7 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
         id: "snap-localization",
         label: "지역화",
         icon: Globe2,
+        navIcon: "language",
         product: "snap",
       },
       {
@@ -202,6 +207,7 @@ const navigation: Array<{ label: string; items: NavItem[] }> = [
         id: "snap-usage",
         label: "사용량 및 기술 한도",
         icon: Sparkles,
+        navIcon: "usage",
         product: "snap",
       },
     ],
@@ -1022,7 +1028,11 @@ function SettingsHubContent({
                             }
                             className="text-sidebar-foreground/75 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 data-active:text-primary"
                           >
-                            <Icon strokeWidth={1.75} />
+                            {item.navIcon ? (
+                              <NavigationIcon name={item.navIcon} className="size-5 shrink-0" />
+                            ) : (
+                              <Icon strokeWidth={1.75} />
+                            )}
                             <span className="group-data-[collapsible=icon]:hidden">
                               {item.label}
                               {item.id === "billing" ? " ↗" : ""}
