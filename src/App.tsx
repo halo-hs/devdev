@@ -9577,13 +9577,15 @@ function CreateScreen({
         <section>
           {hasGeneratedDocuments ? (
             <>
-              <Card>
+              {/* Same list card as 문서 올리기: toolbar and table sit inside the
+                  16px card inset, no divider between them. */}
+              <Card size="sm">
                 <Tabs
                   value={documentListTab}
                   onValueChange={setDocumentListTab}
                 >
                   <BusinessListToolbar
-                    className="border-b px-4 py-3"
+                    className="px-4 pt-4"
                     aria-label="만든 문서 검색 필터"
                   >
                     <TabsList aria-label="만든 문서 상태">

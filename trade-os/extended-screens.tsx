@@ -1685,7 +1685,7 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
         </div>
       }
     >
-      <div className="grid min-h-[620px] overflow-hidden rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] lg:grid-cols-[340px_minmax(0,1fr)]">
+      <div className={cn("grid min-h-[620px] overflow-hidden rounded-[var(--r-lg)] bg-[var(--color-gray-12)] lg:grid-cols-[340px_minmax(0,1fr)]", embedded ? "border border-[var(--color-gray-9)]" : "shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]")}>
         <aside className="border-b border-[var(--color-gray-10)] bg-[var(--color-gray-12)] lg:border-r lg:border-b-0">
           <div className="border-b p-4">
             <div className="relative">

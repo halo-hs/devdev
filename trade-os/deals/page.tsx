@@ -83,6 +83,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/components/ui/select"
+import { Card, CardContent } from "@shared/components/ui/card"
 import { Separator } from "@shared/components/ui/separator"
 import {
   Table,
@@ -1073,7 +1074,9 @@ export function DealsScreen({
             </section>
           }
         />
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Same list card as 문서 올리기: toolbar, 16px-inset table and pagination. */}
+        <Card size="sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-4">
           <Tabs
             value={view}
             onValueChange={(value) => {
@@ -1119,6 +1122,10 @@ export function DealsScreen({
             </Button>
           </div>
         </div>
+        <CardContent
+          data-layout={pipeline ? undefined : "flush-table"}
+          className="space-y-3 p-0"
+        >
         <section className="[container-type:inline-size]">
           {view === "finance" ? (
             <DealsFinanceTable
@@ -1141,7 +1148,7 @@ export function DealsScreen({
                     return (
                       <section
                         key={stageKey}
-                        className="rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-4 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]"
+                        className="rounded-[var(--r-lg)] border border-[var(--color-gray-9)] bg-[var(--color-gray-11)] p-3"
                       >
                         <h3 className="mb-3 flex justify-between text-sm font-semibold">
                           {label}
@@ -1153,7 +1160,7 @@ export function DealsScreen({
                           {rows.map((deal) => (
                             <button
                               key={deal.id}
-                              className="block w-full rounded-[var(--r-md)] border border-[var(--color-gray-9)] bg-[var(--color-gray-11)] p-3 text-left transition-colors hover:border-[var(--color-primary-4)] hover:bg-[var(--color-primary-10)]"
+                              className="block w-full rounded-[var(--r-md)] border border-[var(--color-gray-9)] bg-[var(--color-gray-12)] p-3 text-left transition-colors hover:border-[var(--color-primary-4)] hover:bg-[var(--color-primary-10)]"
                               onClick={() => onOpenDeal(deal.id)}
                             >
                               <strong className="block text-sm">
@@ -1504,6 +1511,8 @@ export function DealsScreen({
             }}
           />
         )}
+        </CardContent>
+        </Card>
 
         {role === "owner" ? (
           <section className="border-t pt-4">
