@@ -731,7 +731,7 @@ export function DealsScreen({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="shrink-0 border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white sm:ml-auto"
+                    className="shrink-0 border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white"
                     aria-expanded={advancedFiltersOpen}
                     aria-controls="deal-advanced-filters"
                     onClick={() => setAdvancedFiltersOpen((value) => !value)}
