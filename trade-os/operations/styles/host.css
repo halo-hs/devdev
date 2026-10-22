@@ -291,6 +291,20 @@
   color: var(--color-primary-4);
 }
 
+/* Operations buttons keep their original label type on the shared Button:
+   medium weight, 13/18 at 24px and 15/20 at 32px and 40px. */
+.reference-3030 [data-variant][data-size]:is(button, a):not([id^="date-picker-"]) {
+  font-weight: var(--font-weight-medium, 500);
+}
+.reference-3030 [data-variant]:is([data-size="xs"], [data-size="icon-xs"]):is(button, a):not([id^="date-picker-"]) {
+  font-size: 13px;
+  line-height: 18px;
+}
+.reference-3030 [data-variant]:is([data-size="default"], [data-size="lg"]):is(button, a):not([id^="date-picker-"]) {
+  font-size: 15px;
+  line-height: 20px;
+}
+
 /* Figma HeroBanner buttons (결산리포트 v6): 40px, 15/22, radius 8; secondary
    actions are the white neutral button with the btn shadow. */
 .reference-3030 header[data-variant="hero"] [data-slot="button"] {
