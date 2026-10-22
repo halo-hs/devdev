@@ -1371,9 +1371,10 @@ export function AskPrototype({
     toast.success("의견을 반영했습니다.")
   }
 
+  // Figma 7차 (5729:60849): the question box is 760px wide, centered.
   const renderComposer = () => (
     <div
-      className="w-full rounded-[18px] border border-[var(--color-gray-6)] bg-[var(--color-gray-12)] px-4 pt-3 pb-2.5 shadow-[0_2px_4px_rgb(0_0_0/0.05)] transition-shadow focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-ring/30"
+      className="mx-auto w-full max-w-[760px] rounded-[18px] border border-[var(--color-gray-6)] bg-[var(--color-gray-12)] px-4 pt-3 pb-2.5 shadow-[0_2px_4px_rgb(0_0_0/0.05)] transition-shadow focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-ring/30"
     >
       {attachedFiles.length ? (
         // Figma 7차 (5729:61024): attached files as a list above a divider.
@@ -1659,7 +1660,7 @@ export function AskPrototype({
           split by a single line. */}
       <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
       <Dialog open={fileFinderOpen} onOpenChange={setFileFinderOpen}>
-        <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-[640px]">
+        <DialogContent className="grid-cols-[minmax(0,1fr)] gap-0 overflow-hidden p-0 sm:max-w-[640px]">
           <DialogHeader className="px-6 pt-6 pb-0 text-left">
             <DialogTitle>파일 찾기</DialogTitle>
             <DialogDescription>
@@ -1747,7 +1748,7 @@ export function AskPrototype({
             </div>
           </div>
 
-          <DialogFooter className="border-t border-[var(--color-gray-10)] px-6 py-4">
+          <DialogFooter className="mx-0 mb-0 border-t border-[var(--color-gray-10)] px-6 py-4">
             <Button variant="outline" onClick={() => setFileFinderOpen(false)}>
               취소
             </Button>
