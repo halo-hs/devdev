@@ -5,7 +5,6 @@ import {
   workLabels,
   type DealWorkKey,
 } from "@trade-os/lib/deal-workflow"
-import { SalesPrototype } from "@trade-os/extended-screens"
 import { DealsFinanceTable } from "@trade-os/deals/finance-table"
 import {
   filteredFinanceFacts,
@@ -27,7 +26,6 @@ import {
   ChevronRight,
   GitBranch,
   Info,
-  List,
   CircleAlert,
   Download,
   FilePlus2,
@@ -380,9 +378,11 @@ function optionLabel(options: FilterOptions, value: string) {
 
 export function DealsScreen({
   onOpenDeal,
+  onOpenContacts,
   role = "owner",
 }: {
   onOpenDeal: (dealId: string, tab?: DealWorkKey) => void
+  onOpenContacts?: () => void
   role?: DealsRole
 }) {
   const [view, setView] = useState("operations")
@@ -393,7 +393,6 @@ export function DealsScreen({
   const [dateStart, setDateStart] = useState("")
   const [dateEnd, setDateEnd] = useState("")
   const [lifecycle, setLifecycle] = useState(() => new URLSearchParams(window.location.search).get("lifecycle") === "all" ? "all" : "open")
-  const [pipeline, setPipeline] = useState(false)
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false)
   const [stage, setStage] = useState("active")
   const [assignee, setAssignee] = useState("all")
@@ -1062,7 +1061,6 @@ export function DealsScreen({
             value={view}
             onValueChange={(value) => {
               setView(value)
-              setPipeline(false)
               setPage(1)
             }}
             aria-label="거래 보기 방식"
@@ -1089,22 +1087,16 @@ export function DealsScreen({
                 options={sortOptions}
               />
             </BusinessFilterBar>
-            <Button
-              variant="outline"
-              size="lg"
-              aria-pressed={pipeline}
-              onClick={() => {
-                setPipeline((value) => !value)
-                setView("operations")
-              }}
-            >
-              {pipeline ? <List /> : <GitBranch />}
-              {pipeline ? "업무표로 보기" : "영업 파이프라인"}
+            {/* SSOT SC-14 / #443 P3: only moves to 연락처·파이프라인 (/erp/sales);
+                the deals list has no stage board. */}
+            <Button variant="outline" size="lg" onClick={onOpenContacts}>
+              <GitBranch />
+              연락처·파이프라인
             </Button>
           </div>
         </div>
         <CardContent
-          data-layout={pipeline ? undefined : "flush-table"}
+          data-layout="flush-table"
           className="space-y-3 p-0"
         >
         <section className="[container-type:inline-size]">
@@ -1115,69 +1107,6 @@ export function DealsScreen({
               deals={visibleDeals}
               onOpenDeal={(id) => onOpenDeal(id, "finance")}
             />
-          ) : pipeline ? (
-            <div className="grid gap-8">
-              <div
-                aria-label="영업 파이프라인"
-                className="grid gap-3 md:grid-cols-2 xl:grid-cols-4"
-              >
-                {(Object.entries(stageLabels) as [DealStage, string][]).map(
-                  ([stageKey, label]) => {
-                    const rows = filtered.filter(
-                      (deal) => deal.stage === stageKey
-                    )
-                    return (
-                      <section
-                        key={stageKey}
-                        className="rounded-[var(--r-lg)] border border-[var(--color-gray-9)] bg-[var(--color-gray-11)] p-3"
-                      >
-                        <h3 className="mb-3 flex justify-between text-sm font-semibold">
-                          {label}
-                          <span className="text-muted-foreground">
-                            {rows.length}건
-                          </span>
-                        </h3>
-                        <div className="space-y-2">
-                          {rows.map((deal) => (
-                            <button
-                              key={deal.id}
-                              className="block w-full rounded-[var(--r-md)] border border-[var(--color-gray-9)] bg-[var(--color-gray-12)] p-3 text-left transition-colors hover:border-[var(--color-primary-4)] hover:bg-[var(--color-primary-10)]"
-                              onClick={() => onOpenDeal(deal.id)}
-                            >
-                              <strong className="block text-sm">
-                                {deal.counterparty}
-                              </strong>
-                              <span className="mt-1 block text-xs text-muted-foreground">
-                                {prototypeBackend.deals.getTitle(
-                                  deal.id,
-                                  deal.title
-                                )}
-                              </span>
-                              <span className="mt-2 block space-y-1 text-xs text-muted-foreground">
-                                {dealStateDetails(deal).map((detail) => (
-                                  <span key={detail} className="block">
-                                    {detail}
-                                  </span>
-                                ))}
-                              </span>
-                              <span className="mt-3 block text-xs text-primary">
-                                {deal.nextAction}
-                              </span>
-                            </button>
-                          ))}
-                          {!rows.length && (
-                            <p className="py-6 text-center text-xs text-muted-foreground">
-                              해당 단계의 거래가 없습니다.
-                            </p>
-                          )}
-                        </div>
-                      </section>
-                    )
-                  }
-                )}
-              </div>
-              <SalesPrototype embedded onOpenDeal={onOpenDeal} />
-            </div>
           ) : (
             <Table
               aria-label="거래 업무표"
@@ -1479,19 +1408,17 @@ export function DealsScreen({
           조건에 맞는 전체 거래 기준입니다. 통화·단위가 다른 값은 합산하지
           않습니다.
         </p>
-        {!pipeline && (
-          <TablePagination
-            page={currentPage}
-            pageSize={pageSize}
-            total={filtered.length}
-            aria-label="거래 목록 페이지 이동"
-            onPageChange={setPage}
-            onPageSizeChange={(nextPageSize) => {
-              setPageSize(nextPageSize)
-              setPage(1)
-            }}
-          />
-        )}
+        <TablePagination
+          page={currentPage}
+          pageSize={pageSize}
+          total={filtered.length}
+          aria-label="거래 목록 페이지 이동"
+          onPageChange={setPage}
+          onPageSizeChange={(nextPageSize) => {
+            setPageSize(nextPageSize)
+            setPage(1)
+          }}
+        />
         </CardContent>
         </Card>
 

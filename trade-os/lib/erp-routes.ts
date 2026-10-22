@@ -24,7 +24,9 @@ const ERP_SCREEN_PATHS: Partial<Record<ErpRouteScreen, string>> = {
   settlement: "/erp/settlement",
   monitoring: "/erp/monitoring",
   reports: "/erp/reports",
-  sales: "/erp/sales",
+  // SSOT SC-25 / SC-27: 영업 성과 and 연락처·파이프라인 are separate screens.
+  sales: "/erp/sales-performance",
+  contacts: "/erp/sales",
   notifications: "/erp/notifications",
   counterparty: "/erp/counterparties",
   snap: "/erp/evidence",
@@ -38,7 +40,6 @@ const PLATFORM_ROUTE_ALIASES: Record<string, ErpRouteScreen> = {
   "/erp/documents": "create",
   "/erp/inbox": "inbox",
   "/erp/monitor": "monitoring",
-  "/erp/sales-performance": "sales",
   "/erp/snap-evidence": "snap",
 }
 
