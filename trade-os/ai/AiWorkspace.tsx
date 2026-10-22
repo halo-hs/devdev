@@ -1,5 +1,5 @@
 import { useState, useRef } from "react"
-import { aiHandoffCopy } from "@trade-os/lib/ai-handoff-copy"
+import { aiHandoffCopy } from "@trade-os/lib/aiHandoffCopy"
 import { toast } from "sonner"
 import { FileText, X, Paperclip, Send, Loader2, RefreshCw, Database, Building2, ExternalLink, Copy, RotateCcw, ThumbsUp, ThumbsDown, Search, Check, Plus, Bookmark, SquarePen, PanelRight, Sparkles } from "lucide-react"
 import { Textarea } from "@shared/components/ui/textarea"
@@ -10,8 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@shared/components/ui/input"
 import { Sheet, SheetContent, SheetTitle, SheetDescription, SheetClose } from "@shared/components/ui/sheet"
 import { AiBusinessTools } from "@trade-os/ai/AiBusinessTools"
-import { shipmentReviewSamples } from "@trade-os/lib/erp-menu-samples"
-import { type Navigate, type ErpMenuTarget, type Tone } from "@trade-os/screens"
+import { shipmentReviewSamples } from "@trade-os/lib/erpMenuSamples"
+import { type Navigate, type ErpMenuTarget, type Tone } from "@trade-os/ErpScreens"
 
 // Conversation layout reference: Open WebUI v0.6.5 (BSD-3-Clause).
 // See THIRD_PARTY_NOTICES.md for the pinned source and license notice.

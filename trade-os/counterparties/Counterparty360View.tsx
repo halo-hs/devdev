@@ -1,4 +1,4 @@
-import { deals, type Deal } from "@trade-os/lib/prototype-deals"
+import { deals, type Deal } from "@trade-os/lib/prototypeDeals"
 
 export type CounterpartyAccess = {
   userId: string

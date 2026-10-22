@@ -10,7 +10,7 @@ async function openDocuments(page: Page, id = source) {
 }
 async function mockAdapter(page: Page, method: string, failures = 1) {
   await page.evaluate(async ({ method, failures }) => {
-    const modulePath = performance.getEntriesByType("resource").map(entry => entry.name).find(url => url.includes("/trade-os/lib/prototype-backend.ts"))!
+    const modulePath = performance.getEntriesByType("resource").map(entry => entry.name).find(url => url.includes("/trade-os/lib/prototypeBackend.ts"))!
     const { prototypeBackend } = await import(/* @vite-ignore */ modulePath)
     const original = prototypeBackend.dealDocuments[method]
     prototypeBackend.dealDocuments[method] = async (...args: unknown[]) => {

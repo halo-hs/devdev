@@ -1,4 +1,4 @@
-import { appLocation } from "@/app/app-location"
+import { appLocation } from "@/app/appLocation"
 
 // State inspection is opt-in locally and never exposed by a production build.
 export function showPreviewControls() {

@@ -1,12 +1,12 @@
 import { type SettingsRole, type ProductEntitlement, type SubscriptionDisplayStatus } from "@share/settings/SettingsRoutePage"
-import { type SubscriptionChangeIntent, SubscriptionChangePanel } from "@share/settings/subscription-change-panel"
+import { type SubscriptionChangeIntent, SubscriptionChangePanel } from "@share/settings/SubscriptionChangePanel"
 import { type TrialProduct, type TrialStartState, type TrialPeriod } from "@auth/TrialStartCard"
 import { useState } from "react"
-import { appLocation } from "@/app/app-location"
+import { appLocation } from "@/app/appLocation"
 import { Button } from "@shared/components/ui/button"
-import { TrialStartDemo } from "@auth/components/trial-start-demo"
+import { TrialStartDemo } from "@auth/components/TrialStartDemo"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@shared/components/ui/dialog"
-import { useSettingsDemo, names } from "@share/settings/settingsDemoState"
+import { useSettingsDemo, names } from "@share/settings/useSettingsDemo"
 
 export function ProductsSubscriptions({
   role,

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ColorPicker } from "@shared/components/color-picker"
+import { ColorPicker } from "@shared/components/ColorPicker"
 import { PageHeading, SettingsSection } from "@share/settings/views/SettingsSection"
 import { Badge } from "@shared/components/ui/badge"
 import { SettingRow } from "@share/settings/views/SettingRow"

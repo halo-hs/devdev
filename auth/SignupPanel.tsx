@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { authFieldError } from "@auth/lib/auth-validation"
+import { authFieldError } from "@auth/lib/authValidation"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@shared/components/ui/select"
 import { Button } from "@shared/components/ui/button"
 import { RefreshCw, Mail, CheckCircle2, ArrowRight } from "lucide-react"

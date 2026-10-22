@@ -47,12 +47,12 @@ import {
   TableHeader,
   TableRow,
 } from "@shared/components/ui/table"
-import { snapApi } from "@snap/lib/snap-api"
+import { snapApi } from "@snap/lib/snapApi"
 import {
   snapApiConfigured,
   snapApiErrorMessage,
   type SnapJsonRecord,
-} from "@snap/lib/snap-report-api"
+} from "@snap/lib/snapReportApi"
 import { cn } from "@shared/lib/utils"
 
 type MemberRole = "owner" | "admin" | "manager" | "worker" | "viewer"

@@ -1,4 +1,4 @@
-import { appLocation } from "@/app/app-location"
+import { appLocation } from "@/app/appLocation"
 import { useMemo, useSyncExternalStore } from "react"
 import { referenceHref } from "./link"
 

@@ -1,6 +1,6 @@
-import { BusinessPageHero } from "@shared/components/business-page-hero"
+import { BusinessPageHero } from "@shared/components/HeroBanner"
 import { useEffect } from "react"
-import { useStartGuide } from "./runtime"
+import { useStartGuide } from "./StartGuideProvider"
 import { isDone, type GuideItem } from "./state"
 import {
   ArrowRight,
@@ -13,7 +13,7 @@ import {
 } from "lucide-react"
 import { Button } from "@shared/components/ui/button"
 import { Badge } from "@shared/components/ui/badge"
-import type { ErpMenuTarget } from "@trade-os/screens"
+import type { ErpMenuTarget } from "@trade-os/ErpScreens"
 
 const steps = [
   {

@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import { DateInput } from "@shared/components/date-input"
+import { DateInput } from "@shared/components/DateInput"
 import {
   AlertCircle,
   Building2,
@@ -56,14 +56,14 @@ import {
   TableRow,
 } from "@shared/components/ui/table"
 import { Textarea } from "@shared/components/ui/textarea"
-import type { SnapScreenKey } from "@snap/screens"
-import type { SnapNavigationOptions } from "@snap/operations/pages"
-import { snapApi, type SnapPage } from "@snap/lib/snap-api"
+import type { SnapScreenKey } from "@snap/SnapScreens"
+import type { SnapNavigationOptions } from "@snap/operations/SnapOperationsPages"
+import { snapApi, type SnapPage } from "@snap/lib/snapApi"
 import {
   snapApiConfigured,
   snapApiErrorMessage,
   type SnapJsonRecord,
-} from "@snap/lib/snap-report-api"
+} from "@snap/lib/snapReportApi"
 import { cn } from "@shared/lib/utils"
 
 type PlatformNavigate = (

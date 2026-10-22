@@ -1,1 +1,1 @@
-export { PageFrame, type PageFrameProps } from "./page-frame"
+export { PageFrame, type PageFrameProps } from "./PageFrame"

@@ -2,9 +2,9 @@ import { useState } from "react"
 import { Copy, RefreshCw, X } from "lucide-react"
 import { Button } from "@shared/components/ui/button"
 import { Badge } from "@shared/components/ui/badge"
-import { prototypeBackend } from "@trade-os/lib/prototype-backend"
+import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 
-import type { PendingInvitation } from "./invitation-data"
+import type { PendingInvitation } from "./invitationData"
 
 // Design preview mutations use the same local adapter as the legacy invite UI.
 // Live integration must return the invitation, expiry and URL from the server.

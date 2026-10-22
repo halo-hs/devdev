@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/components/ui/select"
-import { prototypeBackend } from "@trade-os/lib/prototype-backend"
+import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import { cn } from "@shared/lib/utils"
 
 export type ProductEntitlement = "erp" | "snap"

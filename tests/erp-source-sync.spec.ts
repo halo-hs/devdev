@@ -2,13 +2,13 @@ import { expect, test } from "@playwright/test"
 import {
   exactDocumentMoneyTotals,
   exactLineItemAmount,
-} from "../trade-os/lib/document-money"
-import { presentFinanceFact } from "../trade-os/lib/erp-finance"
+} from "../trade-os/lib/documentMoney"
+import { presentFinanceFact } from "../trade-os/lib/erpFinance"
 import {
   bankCashValidation,
   bankScheduleFixtures,
   eligibleBankSchedules,
-} from "../trade-os/lib/erp-document-workflow"
+} from "../trade-os/lib/erpDocumentWorkflow"
 
 test("document totals retain cents beyond Number precision and round each row", () => {
   expect(exactLineItemAmount("3", "0.335")).toBe("1.01")

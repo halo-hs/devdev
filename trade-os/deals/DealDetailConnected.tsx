@@ -1,10 +1,10 @@
 import { Tooltip, TooltipTrigger, TooltipContent } from "@shared/components/ui/tooltip"
-import { DealRefreshContext, useDealRefresh, useDealRefreshController } from "@trade-os/deals/deal-refresh"
-import { PostWriteRefreshNotice } from "@trade-os/components/post-write-refresh-notice"
-import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, type DealDocumentRecord } from "@trade-os/lib/deal-document-actions"
-import { DealDocumentActions } from "@trade-os/deals/document-actions"
+import { DealRefreshContext, useDealRefresh, useDealRefreshController } from "@trade-os/deals/useDealRefresh"
+import { PostWriteRefreshNotice } from "@trade-os/components/PostWriteRefreshNotice"
+import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, type DealDocumentRecord } from "@trade-os/lib/dealDocumentActions"
+import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
 import { ReferenceOperations } from "@trade-os/operations"
-import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@shared/components/form-field"
+import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@shared/components/FormItem"
 import {
   getDealWorkPlan,
   readStartedWork,
@@ -12,10 +12,10 @@ import {
   workLabels,
   type DealWorkKey,
   type DealWorkPlan,
-} from "@trade-os/lib/deal-workflow"
-import { orderProgress } from "@trade-os/lib/deal-finance-workspace"
-import { deals as dealFixtures } from "@trade-os/lib/prototype-deals"
-import { DealFinanceWorkspace } from "@trade-os/deals/finance-workspace"
+} from "@trade-os/lib/dealWorkflow"
+import { orderProgress } from "@trade-os/lib/dealFinanceWorkspace"
+import { deals as dealFixtures } from "@trade-os/lib/prototypeDeals"
+import { DealFinanceWorkspace } from "@trade-os/deals/DealFinanceWorkspace"
 import {
   useEffect,
   useMemo,
@@ -57,17 +57,17 @@ import {
 import {
   PdfFloatingControls,
   PdfViewerToolbar,
-} from "@shared/components/pdf-floating-controls"
+} from "@shared/components/PageNavigator"
 import {
   PdfPanelWorkspaceCard,
   ResponsivePdfPanelSplit,
-} from "@shared/components/pdf-panel-resize-handle"
-import { PannablePdfViewport } from "@shared/components/pannable-pdf-viewport"
-import { AutoSaveStatus } from "@shared/components/auto-save-status"
+} from "@shared/components/PdfPanelResizeHandle"
+import { PannablePdfViewport } from "@shared/components/DocumentViewerStage"
+import { AutoSaveStatus } from "@shared/components/AutoSaveStatus"
 import {
   DocumentTemplateOptions,
   type DocumentTemplateOption,
-} from "@trade-os/components/document-template-options"
+} from "@trade-os/components/DocumentTemplateOptions"
 import { Badge } from "@shared/components/ui/badge"
 import { Button } from "@shared/components/ui/button"
 import { Card } from "@shared/components/ui/card"
@@ -119,14 +119,14 @@ import {
 } from "@shared/components/ui/sheet"
 import { Textarea } from "@shared/components/ui/textarea"
 import { cn } from "@shared/lib/utils"
-import { StatusBadge } from "@shared/components/status-badge"
-import { DateInput } from "@shared/components/date-input"
-import { prototypeBackend, type MutationResult } from "@trade-os/lib/prototype-backend"
+import { StatusBadge } from "@shared/components/StatusBadge"
+import { DateInput } from "@shared/components/DateInput"
+import { prototypeBackend, type MutationResult } from "@trade-os/lib/prototypeBackend"
 import {
   DealHandoffProvider,
   DealContractTool,
   DealPartyTool,
-} from "@trade-os/deals/handoff-tools"
+} from "@trade-os/deals/DealHandoffTools"
 import type { NotificationDealTarget } from "@share/notifications/data"
 
 type Role = "owner" | "admin" | "member"

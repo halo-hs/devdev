@@ -1,4 +1,4 @@
-import { hostedUrl } from "@/app/app-location"
+import { hostedUrl } from "@/app/appLocation"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import {
   Activity,
@@ -43,15 +43,15 @@ import {
 } from "@shared/components/ui/select"
 import { Skeleton } from "@shared/components/ui/skeleton"
 import { Textarea } from "@shared/components/ui/textarea"
-import { snapApi } from "@snap/lib/snap-api"
+import { snapApi } from "@snap/lib/snapApi"
 import {
   snapApiConfigured,
   snapApiErrorMessage,
   type SnapJsonRecord,
-} from "@snap/lib/snap-report-api"
+} from "@snap/lib/snapReportApi"
 import { cn } from "@shared/lib/utils"
-import type { SnapScreenKey } from "@snap/screens"
-import type { SnapNavigationOptions } from "@snap/operations/pages"
+import type { SnapScreenKey } from "@snap/SnapScreens"
+import type { SnapNavigationOptions } from "@snap/operations/SnapOperationsPages"
 
 type SnapNavigate = (
   screen: SnapScreenKey,

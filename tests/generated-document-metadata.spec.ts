@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test"
 import {
   generatedDocumentSaveDetails,
   generatedDocumentStatusLabel,
-} from "../trade-os/lib/generated-document-metadata"
+} from "../trade-os/lib/generatedDocumentMetadata"
 
 test("document state follows the document response, with confirmed delivery kept separate", () => {
   expect(generatedDocumentStatusLabel("draft", false)).toBe("작성 중")
@@ -29,7 +29,7 @@ test("document save history displays returned metadata and keeps it on a later s
   await page.evaluate(async () => {
     // Mock the existing local adapter boundary, without adding a production test hook.
     const modulePath = performance.getEntriesByType("resource")
-      .map((entry) => entry.name).find((url) => url.includes("/trade-os/lib/prototype-backend.ts"))!
+      .map((entry) => entry.name).find((url) => url.includes("/trade-os/lib/prototypeBackend.ts"))!
     const { prototypeBackend } = await import(/* @vite-ignore */ modulePath)
     prototypeBackend.generatedDocuments.saveDraft = async ({ id }: { id: string }) => ({
       ok: true, id, updatedAt: "2026-10-09T07:30:00Z",
@@ -43,7 +43,7 @@ test("document save history displays returned metadata and keeps it on a later s
   await expect(summary).toContainText("박서윤")
   await page.evaluate(async () => {
     const modulePath = performance.getEntriesByType("resource")
-      .map((entry) => entry.name).find((url) => url.includes("/trade-os/lib/prototype-backend.ts"))!
+      .map((entry) => entry.name).find((url) => url.includes("/trade-os/lib/prototypeBackend.ts"))!
     const { prototypeBackend } = await import(/* @vite-ignore */ modulePath)
     prototypeBackend.generatedDocuments.saveDraft = async () => ({ ok: false, error: "저장 실패" })
   })

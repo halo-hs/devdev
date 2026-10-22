@@ -38,13 +38,13 @@ import {
 } from "@shared/components/ui/select"
 import { Skeleton } from "@shared/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@shared/components/ui/tabs"
-import { snapApi } from "@snap/lib/snap-api"
+import { snapApi } from "@snap/lib/snapApi"
 import {
   SnapApiError,
   snapApiConfigured,
   snapApiErrorMessage,
   type SnapJsonRecord,
-} from "@snap/lib/snap-report-api"
+} from "@snap/lib/snapReportApi"
 import { cn } from "@shared/lib/utils"
 
 const FOLDER_TYPES = [

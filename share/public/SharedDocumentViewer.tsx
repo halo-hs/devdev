@@ -1,4 +1,4 @@
-import { appLocation } from "@/app/app-location"
+import { appLocation } from "@/app/appLocation"
 import { useEffect, useState, type ReactNode } from "react"
 import {
   ArrowRight,
@@ -23,7 +23,7 @@ import {
   type PublicPackage,
   type ShareResult,
   type ShareState,
-} from "@trade-os/lib/public-share"
+} from "@trade-os/lib/publicShare"
 
 const states: [ShareState, string][] = [
   ["active", "정상 열람"],

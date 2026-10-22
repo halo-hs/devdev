@@ -1,4 +1,4 @@
-import { appLocation } from "@/app/app-location"
+import { appLocation } from "@/app/appLocation"
 import { Badge } from "@shared/components/ui/badge"
 import { useState, type ReactNode } from "react"
 import {
@@ -13,12 +13,12 @@ import {
   type LucideIcon,
 } from "lucide-react"
 
-import { BusinessPageHero } from "@shared/components/business-page-hero"
+import { BusinessPageHero } from "@shared/components/HeroBanner"
 import { Button } from "@shared/components/ui/button"
 import { Card } from "@shared/components/ui/card"
 import { Input } from "@shared/components/ui/input"
-import type { ErpMenuTarget } from "@trade-os/screens"
-import { PlatformHomeOverview } from "@share/home/overview"
+import type { ErpMenuTarget } from "@trade-os/ErpScreens"
+import { PlatformHomeOverview } from "@share/home/PlatformHomeOverview"
 import { cn } from "@shared/lib/utils"
 
 type Navigate = (

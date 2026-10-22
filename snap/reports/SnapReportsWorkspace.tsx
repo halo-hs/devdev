@@ -1,4 +1,4 @@
-import { appLocation } from "@/app/app-location"
+import { appLocation } from "@/app/appLocation"
 import {
   useCallback,
   useEffect,
@@ -58,16 +58,16 @@ import {
 } from "@shared/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@shared/components/ui/tabs"
 import { Textarea } from "@shared/components/ui/textarea"
-import type { SnapNavigationOptions } from "@snap/operations/pages"
-import type { SnapScreenKey } from "@snap/screens"
-import { snapApi, type SnapPage } from "@snap/lib/snap-api"
+import type { SnapNavigationOptions } from "@snap/operations/SnapOperationsPages"
+import type { SnapScreenKey } from "@snap/SnapScreens"
+import { snapApi, type SnapPage } from "@snap/lib/snapApi"
 import {
   snapApiConfigured,
   snapApiErrorMessage,
   snapReportApi,
   type PreSendCheck,
   type SnapJsonRecord,
-} from "@snap/lib/snap-report-api"
+} from "@snap/lib/snapReportApi"
 import { cn } from "@shared/lib/utils"
 
 type SnapNavigate = (

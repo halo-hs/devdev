@@ -1,11 +1,11 @@
-import { type WithdrawalGateway, type WithdrawalResult } from "@share/settings/withdrawal-data"
+import { type WithdrawalGateway, type WithdrawalResult } from "@share/settings/withdrawalData"
 import { useState } from "react"
 import { AccountWithdrawal } from "@share/settings/AccountWithdrawalPanel"
 import { PageHeading, SettingsSection } from "@share/settings/views/SettingsSection"
 import { SettingRow } from "@share/settings/views/SettingRow"
 import { Input } from "@shared/components/ui/input"
 import { Button } from "@shared/components/ui/button"
-import { appLocation } from "@/app/app-location"
+import { appLocation } from "@/app/appLocation"
 
 export function AccountPage({ withdrawal, onOrganizations, onResult }: {
   withdrawal: WithdrawalGateway

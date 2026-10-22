@@ -1,19 +1,19 @@
-import { BusinessFilterBar, BusinessListToolbar, BusinessFilterSearch, BusinessFilterSelect } from "@shared/components/business-filters"
+import { BusinessFilterBar, BusinessListToolbar, BusinessFilterSearch, BusinessFilterSelect } from "@shared/components/SearchFilterBar"
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@shared/components/ui/empty"
 import {
   getDealWorkPlan,
   workLabels,
   type DealWorkKey,
-} from "@trade-os/lib/deal-workflow"
-import { DealsFinanceTable } from "@trade-os/deals/finance-table"
+} from "@trade-os/lib/dealWorkflow"
+import { DealsFinanceTable } from "@trade-os/deals/DealsFinanceTable"
 import {
   filteredFinanceFacts,
   defaultFinanceFilters,
   csvCell,
   orderProgress,
   referenceAmount,
-} from "@trade-os/lib/deal-finance-workspace"
-import { exactFinanceMoney, presentFinanceFact } from "@trade-os/lib/erp-finance"
+} from "@trade-os/lib/dealFinanceWorkspace"
+import { exactFinanceMoney, presentFinanceFact } from "@trade-os/lib/erpFinance"
 import { decimalMagnitude, FINANCE_DECIMAL_SCALE } from "@trade-os/lib/financeDecimal"
 import { useMemo, useState } from "react"
 import { createPortal } from "react-dom"
@@ -45,8 +45,8 @@ import {
   AlertDialogTitle,
 } from "@shared/components/ui/alert-dialog"
 import { Button } from "@shared/components/ui/button"
-import { BusinessPageHero } from "@shared/components/business-page-hero"
-import { SummaryMetricStrip } from "@shared/components/summary-metric-strip"
+import { BusinessPageHero } from "@shared/components/HeroBanner"
+import { SummaryMetricStrip } from "@shared/components/SummaryMetricStrip"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,9 +70,9 @@ import {
 } from "@shared/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@shared/components/ui/tabs"
 import { cn } from "@shared/lib/utils"
-import { StatusBadge } from "@shared/components/status-badge"
+import { StatusBadge } from "@shared/components/StatusBadge"
 import { DatePicker } from "@ecoya/design-system/extensions/date-picker"
-import { prototypeBackend } from "@trade-os/lib/prototype-backend"
+import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 
 import {
   dealCreatedAt,
@@ -80,7 +80,7 @@ import {
   type Deal,
   type DealStage,
   type DealRisk,
-} from "@trade-os/lib/prototype-deals"
+} from "@trade-os/lib/prototypeDeals"
 
 type DealsRole = "owner" | "admin" | "member"
 

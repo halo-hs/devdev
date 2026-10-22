@@ -8,7 +8,7 @@ import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shared/components/ui/select";
 import { Button } from "@shared/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@shared/components/ui/dialog";
-import { DateInput } from "@shared/components/date-input";
+import { DateInput } from "@shared/components/DateInput";
 import { ApiError } from "../lib/api/client";
 import { effectiveShipmentEta, effectiveShipmentEtd, type Shipment, type ShipmentConfirmation, type ShipmentStatus } from "../lib/api/shipments";
 

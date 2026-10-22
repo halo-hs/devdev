@@ -1,11 +1,11 @@
-import { SnapStartGuidePage } from "@snap/onboarding/start-guide"
-import { dealDocumentFromReviewUrl } from "@trade-os/lib/deal-document-actions"
-import { appLocation } from "@/app/app-location"
-import { StartGuideProvider } from "@trade-os/onboarding/runtime"
-import { SettingsDemoProvider } from "@share/settings/subscription-settings"
-import { PageLoadingBoundary } from "@shared/components/page-loading-boundary"
-import { type DeliveryAttachment } from "@trade-os/documents/attachment-picker"
-import { type ReviewedField } from "@trade-os/lib/erp-document-workflow"
+import { SnapStartGuidePage } from "@snap/onboarding/SnapStartGuidePage"
+import { dealDocumentFromReviewUrl } from "@trade-os/lib/dealDocumentActions"
+import { appLocation } from "@/app/appLocation"
+import { StartGuideProvider } from "@trade-os/onboarding/StartGuideProvider"
+import { SettingsDemoProvider } from "@share/settings/SubscriptionSettings"
+import { PageLoadingBoundary } from "@shared/components/RouteLoading"
+import { type DeliveryAttachment } from "@trade-os/documents/DeliveryAttachmentPicker"
+import { type ReviewedField } from "@trade-os/lib/erpDocumentWorkflow"
 import {
   useEffect,
   useRef,
@@ -13,7 +13,7 @@ import {
   type CSSProperties,
 } from "react"
 
-import { type GeneratedDocumentMetadata } from "@trade-os/lib/generated-document-metadata"
+import { type GeneratedDocumentMetadata } from "@trade-os/lib/generatedDocumentMetadata"
 import { PageFrame } from "@ecoya/ui"
 import { SalesPrototype } from "@trade-os/sales/SalesPipelineView"
 import { workspaceOptions, type WorkspaceKey } from "@shared/lib/workspaces"
@@ -33,32 +33,32 @@ import {
 import { ReferenceOperations } from "@trade-os/operations/index"
 import { NotificationsPrototype } from "@share/notifications/page"
 import { notifications, type NotificationDealTarget } from "@share/notifications/data"
-import { BillingPrototype, CounterpartyPrototype, OnboardingPrototype, SettingsPrototype, SnapEvidencePrototype, TokenUsagePrototype, type ErpMenuTarget } from "@trade-os/screens"
+import { BillingPrototype, CounterpartyPrototype, OnboardingPrototype, SettingsPrototype, SnapEvidencePrototype, TokenUsagePrototype, type ErpMenuTarget } from "@trade-os/ErpScreens"
 import { AskPrototype } from "@trade-os/ai/AiWorkspace"
 import {
   SnapProductPrototype,
   type SnapScreenKey,
-} from "@snap/screens"
-import { SnapRouteAccessScreen } from "@snap/access/route-guard"
+} from "@snap/SnapScreens"
+import { SnapRouteAccessScreen } from "@snap/access/SnapRouteAccessScreen"
 import {
   resetSnapSessionAccessCache,
   useSnapRouteAccess,
-} from "@snap/lib/snap-route-access"
+} from "@snap/lib/snapRouteAccess"
 import {
   matchSnapRoute,
   normalizeSnapLocation,
   pathForSnapScreen,
   type SnapRouteMatch,
-} from "@snap/lib/snap-routes"
+} from "@snap/lib/snapRoutes"
 import {
   canonicalErpLocation,
   matchErpRoute,
   pathForErpScreen,
   type ErpRouteMatch,
   type ErpRouteScreen,
-} from "@trade-os/lib/erp-routes"
+} from "@trade-os/lib/erpRoutes"
 import { cn } from "@shared/lib/utils"
-import { prototypeBackend } from "@trade-os/lib/prototype-backend"
+import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import { toast } from "sonner"
 import { type Tone, templateSchemas } from "@trade-os/documents/documentTemplateModel"
 import { type PrototypeSlotKind, templates } from "@trade-os/documents/documentTemplateModel"

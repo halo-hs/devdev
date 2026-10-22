@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { DateInput } from "@shared/components/date-input"
+import { DateInput } from "@shared/components/DateInput"
 import { ArrowRight, Download, RefreshCw, Search } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@shared/components/ui/badge"
@@ -28,9 +28,9 @@ import {
   TableRow,
 } from "@shared/components/ui/table"
 import { Textarea } from "@shared/components/ui/textarea"
-import { aiHandoffCopy } from "@trade-os/lib/ai-handoff-copy"
-import { deals } from "@trade-os/lib/prototype-deals"
-import type { ErpMenuTarget } from "@trade-os/screens"
+import { aiHandoffCopy } from "@trade-os/lib/aiHandoffCopy"
+import { deals } from "@trade-os/lib/prototypeDeals"
+import type { ErpMenuTarget } from "@trade-os/ErpScreens"
 
 const copy = aiHandoffCopy.business
 

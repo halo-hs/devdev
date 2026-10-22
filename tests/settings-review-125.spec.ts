@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test"
 import { counterpartyPreview } from "../trade-os/counterparties/Counterparty360View"
-import { validEmailLimits } from "../share/settings/email-limits-data"
+import { validEmailLimits } from "../share/settings/emailLimitsData"
 
 async function settings(
   page: Page,
@@ -307,7 +307,7 @@ test("failed invitation actions retain state and never announce success", async 
   await page.goto("/login")
   await page.evaluate(async () => {
     const fixture = "/tests/fixtures/settings-review.tsx"
-    const backend = "/trade-os/lib/prototype-backend.ts"
+    const backend = "/trade-os/lib/prototypeBackend.ts"
     const { prototypeBackend } = await import(backend)
     prototypeBackend.settings.cancelInvite = async () => {
       throw new Error("offline")

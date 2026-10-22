@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from "react"
-import { languageOptions, SearchableSetting, countryOptions, timeZoneOptions } from "@share/settings/region-controls"
+import { languageOptions, SearchableSetting, countryOptions, timeZoneOptions } from "@share/settings/RegionControls"
 import { PageHeading } from "@share/settings/views/SettingsSection"
 import { Card, CardContent } from "@shared/components/ui/card"
 import { Input } from "@shared/components/ui/input"

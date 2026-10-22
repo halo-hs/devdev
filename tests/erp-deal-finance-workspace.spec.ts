@@ -47,7 +47,7 @@ import {
   initialDealCosts,
   isValidCostAmount,
   csvCell,
-} from "../trade-os/lib/deal-finance-workspace"
+} from "../trade-os/lib/dealFinanceWorkspace"
 
 test("costs use exact decimals, currency buckets and exclude already-in-price costs", () => {
   const costs = initialDealCosts("DL-260708-01")

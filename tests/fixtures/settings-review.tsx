@@ -4,8 +4,8 @@ import { PendingInvitations } from "../../share/settings/MemberInviteSettings"
 import {
   invitationExamples,
   type PendingInvitation,
-} from "../../share/settings/invitation-data"
-import { CounterpartyPrototype } from "../../trade-os/screens"
+} from "../../share/settings/invitationData"
+import { CounterpartyPrototype } from "../../trade-os/ErpScreens"
 import type { CounterpartyAccess } from "../../trade-os/counterparties/Counterparty360View"
 import { TooltipProvider } from "../../packages/shared-ui/src/components/ui/tooltip"
 

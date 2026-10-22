@@ -8,7 +8,7 @@ import {
 import {
   authGridColumns,
   type AuthLayoutVariant,
-} from "@auth/lib/auth-validation"
+} from "@auth/lib/authValidation"
 import { cn } from "@shared/lib/utils"
 import { AccountGuide, CommonPublicFooter } from "@auth/AuthCommonShell"
 

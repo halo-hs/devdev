@@ -1,10 +1,10 @@
-import { type EmailLimitsLoader } from "@share/settings/email-limits-data"
+import { type EmailLimitsLoader } from "@share/settings/emailLimitsData"
 import { useState } from "react"
 import { PageHeading, SettingsSection } from "@share/settings/views/SettingsSection"
 import { SettingRow } from "@share/settings/views/SettingRow"
 import { Button } from "@shared/components/ui/button"
 import { Copy } from "lucide-react"
-import { EmailLimits } from "@share/settings/email-limits"
+import { EmailLimits } from "@share/settings/EmailLimits"
 
 export function EmailPage({ loadLimits }: { loadLimits: EmailLimitsLoader }) {
   const [copied, setCopied] = useState(false)

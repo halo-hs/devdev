@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react"
-import { authFieldError } from "@auth/lib/auth-validation"
+import { authFieldError } from "@auth/lib/authValidation"
 import { Button } from "@shared/components/ui/button"
 import { Loader2, Building2, MapPin, AlertCircle, RefreshCw, ArrowRight } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@shared/components/ui/card"

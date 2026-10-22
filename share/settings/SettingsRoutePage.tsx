@@ -1,12 +1,12 @@
 import { WithdrawalResultSurface } from "./AccountWithdrawalPanel"
-import { NavigationIcon } from "@shared/components/navigation-icon"
-import { createWithdrawalPreview, withdrawalScenario, type WithdrawalGateway, type WithdrawalResult } from "./withdrawal-data"
+import { NavigationIcon } from "@shared/components/NavigationIcon"
+import { createWithdrawalPreview, withdrawalScenario, type WithdrawalGateway, type WithdrawalResult } from "./withdrawalData"
 import { PageHeading, SettingsSection } from "./views/SettingsSection"
-import { emailLimitsPreview, type EmailLimitsLoader } from "./email-limits-data"
-import { resolveImportPermissions, type ImportPermissions } from "./import-permissions"
+import { emailLimitsPreview, type EmailLimitsLoader } from "./emailLimitsData"
+import { resolveImportPermissions, type ImportPermissions } from "./importPermissions"
 import { ApprovalPolicySettings } from "./ApprovalPolicySettingsView"
 import { AliasesPage } from "./CounterpartyAliasSettingsView"
-import { appLocation } from "@/app/app-location"
+import { appLocation } from "@/app/appLocation"
 import { useEffect, useMemo, useState } from "react"
 import {
   ArrowLeft,
@@ -28,7 +28,7 @@ import {
   ExternalLink,
 } from "lucide-react"
 
-import { WorkspaceSwitcher } from "@shared/components/workspace-switcher"
+import { WorkspaceSwitcher } from "@shared/components/WorkspaceSwitcher"
 import { Button } from "@shared/components/ui/button"
 import { Input } from "@shared/components/ui/input"
 import {
@@ -44,8 +44,8 @@ import {
   SidebarRail,
   useSidebar,
 } from "@shared/components/ui/sidebar"
-import { SettingsDemoProvider } from "./subscription-settings"
-import { useSettingsDemoPresent } from "@share/settings/settingsDemoState"
+import { SettingsDemoProvider } from "./SubscriptionSettings"
+import { useSettingsDemoPresent } from "@share/settings/useSettingsDemo"
 import { ProductsSubscriptions } from "@share/settings/BillingSettingsView"
 import { OrganizationMembers } from "@share/settings/MemberRosterSettings"
 import { OrganizationAiUsage } from "./TokenUsageSettingsView"

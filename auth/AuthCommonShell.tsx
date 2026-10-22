@@ -8,7 +8,7 @@ import {
   X,
 } from "lucide-react"
 import { LandingHeader } from "@landing/shared/layout"
-import { type AuthLayoutVariant } from "@auth/lib/auth-validation"
+import { type AuthLayoutVariant } from "@auth/lib/authValidation"
 import { cn } from "@shared/lib/utils"
 import cargoOperationsBanner from "@/assets/home/cargo-operations-banner.jpg"
 import ecoyaWhiteLogo from "@ecoya/design-system/assets/logos/logo-ecoya-white.png"

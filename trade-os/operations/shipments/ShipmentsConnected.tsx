@@ -1,5 +1,5 @@
 "use client";
-import { BusinessListToolbar, BusinessFilterSearch } from "@shared/components/business-filters";
+import { BusinessListToolbar, BusinessFilterSearch } from "@shared/components/SearchFilterBar";
 
 import { RefreshCw, Pencil } from "lucide-react";
 import { ShipmentConfirmationDialog } from "./ShipmentConfirmationDialog";

@@ -33,12 +33,12 @@ import {
 import { Input } from "@shared/components/ui/input"
 import { Skeleton } from "@shared/components/ui/skeleton"
 import { Textarea } from "@shared/components/ui/textarea"
-import { snapApi } from "@snap/lib/snap-api"
+import { snapApi } from "@snap/lib/snapApi"
 import {
   snapApiConfigured,
   snapApiErrorMessage,
   type SnapJsonRecord,
-} from "@snap/lib/snap-report-api"
+} from "@snap/lib/snapReportApi"
 import { cn } from "@shared/lib/utils"
 
 type Customer = {
