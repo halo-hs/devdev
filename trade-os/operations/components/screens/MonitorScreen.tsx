@@ -20,8 +20,8 @@ import {
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
 import { StatusBadge } from "@trade-os/operations/components/StatusBadge";
 import { TaskQueue, type TaskQueueItem } from "@trade-os/operations/components/TaskQueue";
-import { Button } from "@trade-os/operations/components/ui/button";
-import { DataTable, type DataTableColumn } from "@trade-os/operations/components/ui/table";
+import { Button } from "@trade-os/operations/components/ui/Button";
+import { DataTable, type DataTableColumn } from "@trade-os/operations/components/ui/Table";
 
 import { ErpScreenFrame } from "./ErpScreenFrame";
 

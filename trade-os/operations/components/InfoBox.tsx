@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 
-import { InfoList, type InfoListVariant } from "@trade-os/operations/components/ui/info-list";
+import { InfoList, type InfoListVariant } from "@trade-os/operations/components/ui/InfoList";
 
 type InfoBoxTone = "positive" | "neutral" | "caution" | "risk";
 

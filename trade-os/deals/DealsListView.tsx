@@ -1,5 +1,5 @@
 import { BusinessFilterBar, BusinessListToolbar, BusinessFilterSearch, BusinessFilterSelect } from "@/components/platform/SearchFilterBar"
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/Empty"
 import {
   getDealWorkPlan,
   workLabels,
@@ -32,7 +32,7 @@ import {
   X,
 } from "lucide-react"
 
-import { TablePagination } from "@/components/ui/table-pagination"
+import { TablePagination } from "@/components/ui/TablePagination"
 
 import {
   AlertDialog,
@@ -43,8 +43,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/AlertDialog"
+import { Button } from "@/components/ui/Button"
 import { BusinessPageHero } from "@/components/platform/HeroBanner"
 import { SummaryMetricStrip } from "@/components/platform/SummaryMetricStrip"
 import {
@@ -52,14 +52,14 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/DropdownMenu"
+import { Input } from "@/components/ui/Input"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { Card, CardContent } from "@/components/ui/card"
+} from "@/components/ui/Popover"
+import { Card, CardContent } from "@/components/ui/Card"
 import {
   Table,
   TableBody,
@@ -67,11 +67,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+} from "@/components/ui/Table"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import { cn } from "@/lib/utils"
 import { StatusBadge } from "@/components/platform/StatusBadge"
-import { DatePicker } from "@/components/ds2/extensions/date-picker"
+import { DateInput } from "@/components/platform/DateInput"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 
 import {
@@ -91,12 +91,6 @@ function dDayBasisLabel(basis: Deal["dDayBasis"]) {
     case "etd": return "ETD"
     default: return ""
   }
-}
-
-// "YYYY-MM-DD" filter value → local Date for the DatePicker (null when empty).
-function isoDate(value: string) {
-  const [year, month, day] = value.split("-").map(Number)
-  return year && month && day ? new Date(year, month - 1, day) : null
 }
 
 const stageLabels: Record<DealStage, string> = {
@@ -786,30 +780,24 @@ export function DealsScreen({
                             </Popover>
                           </span>
                           <div className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:flex sm:w-auto">
-                            <DatePicker
+                            <DateInput
                               ariaLabel="ETA 기간 시작일"
-                              className="min-w-0 sm:w-40 [&>button]:w-full"
-                              placeholder="연도. 월. 일."
-                              allowClear={false}
-                              showToday={false}
-                              value={isoDate(dateStart)}
-                              maxDate={isoDate(dateEnd) ?? undefined}
-                              onChange={(_value, formatted) => {
-                                setDateStart(formatted ?? "")
+                              className="sm:w-40"
+                              value={dateStart}
+                              max={dateEnd || undefined}
+                              onValueChange={(value) => {
+                                setDateStart(value)
                                 setPage(1)
                               }}
                             />
                             <span className="text-white/70">~</span>
-                            <DatePicker
+                            <DateInput
                               ariaLabel="ETA 기간 종료일"
-                              className="min-w-0 sm:w-40 [&>button]:w-full"
-                              placeholder="연도. 월. 일."
-                              allowClear={false}
-                              showToday={false}
-                              value={isoDate(dateEnd)}
-                              minDate={isoDate(dateStart) ?? undefined}
-                              onChange={(_value, formatted) => {
-                                setDateEnd(formatted ?? "")
+                              className="sm:w-40"
+                              value={dateEnd}
+                              min={dateStart || undefined}
+                              onValueChange={(value) => {
+                                setDateEnd(value)
                                 setPage(1)
                               }}
                             />

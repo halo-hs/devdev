@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react"
 
-import { Progress } from "@/components/ui/progress"
+import { Progress } from "@/components/ui/Progress"
 import { cn } from "@/lib/utils"
 
 type RankingRowProps = Omit<ComponentProps<"span">, "children"> & {

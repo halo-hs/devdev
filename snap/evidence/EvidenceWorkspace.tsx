@@ -17,8 +17,8 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/Badge"
+import { Button } from "@/components/ui/Button"
 import {
   Dialog,
   DialogContent,
@@ -26,18 +26,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { SubmittedSearchInput } from "@/components/ui/submitted-search-input"
+} from "@/components/ui/Dialog"
+import { Input } from "@/components/ui/Input"
+import { SubmittedSearchInput } from "@/components/ui/SubmittedSearchInput"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+} from "@/components/ui/Select"
+import { Skeleton } from "@/components/ui/Skeleton"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import { snapApi } from "@snap/lib/snapApi"
 import {
   SnapApiError,

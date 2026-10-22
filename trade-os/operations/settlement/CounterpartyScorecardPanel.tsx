@@ -1,14 +1,14 @@
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 "use client";
 
-import Link from "@trade-os/operations/compat/link";
+import Link from "@trade-os/operations/compat/Link";
 import { useEffect, useState, type CSSProperties } from "react";
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { OperationalTableFrame } from "@trade-os/operations/components/OperationalTableFrame";
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
 import { StatusBadge, type StatusTone } from "@trade-os/operations/components/StatusBadge";
-import { Button } from "@trade-os/operations/components/ui/button";
+import { Button } from "@trade-os/operations/components/ui/Button";
 import { getCounterpartyScorecards, type CounterpartyScorecard } from "@trade-os/operations/lib/api/settlement";
 import { withRetry } from "@trade-os/operations/lib/api/retry";
 

@@ -2,23 +2,23 @@ import { useState } from "react"
 import { DateInput } from "@/components/platform/DateInput"
 import { ArrowRight, Download, RefreshCw, Search } from "lucide-react"
 import { toast } from "sonner"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/Badge"
+import { Button } from "@/components/ui/Button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/Card"
+import { Input } from "@/components/ui/Input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/Select"
 import {
   Table,
   TableBody,
@@ -26,8 +26,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/Table"
+import { Textarea } from "@/components/ui/Textarea"
 import { aiHandoffCopy } from "@trade-os/lib/aiHandoffCopy"
 import { deals } from "@trade-os/lib/prototypeDeals"
 import type { ErpMenuTarget } from "@trade-os/ErpScreens"

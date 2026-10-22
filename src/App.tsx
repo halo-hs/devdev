@@ -20,7 +20,7 @@ import { workspaceOptions, type WorkspaceKey } from "@/lib/workspaces"
 import {
   SidebarInset,
   SidebarProvider,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/Sidebar"
 import {
   DealDetailScreen,
   DealsScreen,
@@ -62,7 +62,7 @@ import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import { toast } from "sonner"
 import { type Tone, templateSchemas } from "@trade-os/documents/documentTemplateModel"
 import { type PrototypeSlotKind, templates } from "@trade-os/documents/documentTemplateModel"
-import { AppNav } from "@/shell/erpNav"
+import { AppNav } from "@/shell/ErpNav"
 import { WorkspaceHeader } from "@/shell/ErpTopNavSlot"
 import { InboxScreen } from "@trade-os/inbox/InboxView"
 import { ResultScreen } from "@trade-os/documents/DocumentCreateConnected"

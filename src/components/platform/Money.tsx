@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip"
 import { cn } from "@/lib/utils"
 
 type NumericDisplayMode = "list" | "detail" | "currency"

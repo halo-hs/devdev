@@ -1,12 +1,12 @@
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 "use client";
 
-import Link from "@trade-os/operations/compat/link";
+import Link from "@trade-os/operations/compat/Link";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
 import { StatusBadge } from "@trade-os/operations/components/StatusBadge";
-import { Button } from "@trade-os/operations/components/ui/button";
+import { Button } from "@trade-os/operations/components/ui/Button";
 import { usePlatformAuth } from "@trade-os/operations/session/PlatformSessionContext";
 import { type DealSummaryResponse } from "@trade-os/operations/lib/api/deals";
 import { listAllDeals } from "@trade-os/operations/lib/api/listAllDeals";

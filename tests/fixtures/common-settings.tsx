@@ -7,8 +7,8 @@ import {
 } from "../../share/settings/SettingsRoutePage"
 import type { ImportPermissions } from "../../share/settings/importPermissions"
 import type { EmailLimitsLoader } from "../../share/settings/emailLimitsData"
-import { SidebarProvider } from "../../src/components/ui/sidebar"
-import { TooltipProvider } from "../../src/components/ui/tooltip"
+import { SidebarProvider } from "../../src/components/ui/Sidebar"
+import { TooltipProvider } from "../../src/components/ui/Tooltip"
 
 import type { WithdrawalGateway } from "../../share/settings/withdrawalData"
 

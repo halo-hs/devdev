@@ -1,4 +1,4 @@
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs"
 import { counterpartyPreview, counterpartyPreviewAccess, type CounterpartyAccess } from "@trade-os/counterparties/Counterparty360View"
 import { listDealDocuments } from "@trade-os/lib/dealDocumentActions"
 import { orderProgress } from "@trade-os/lib/dealFinanceWorkspace"
@@ -19,10 +19,10 @@ import {
   WalletCards,
 } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/Badge"
 import { SummaryMetricStrip } from "@/components/platform/SummaryMetricStrip"
 import { BusinessPageHero } from "@/components/platform/HeroBanner"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import {
   Card,
   CardAction,
@@ -30,14 +30,14 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/Card"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/Select"
 import {
   Table,
   TableBody,
@@ -45,8 +45,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/Table"
+import { Textarea } from "@/components/ui/Textarea"
 import { cn } from "@/lib/utils"
 import {
   SettingsHubV2,

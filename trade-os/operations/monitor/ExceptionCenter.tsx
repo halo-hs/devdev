@@ -1,12 +1,12 @@
 "use client";
 
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
-import Link from "@trade-os/operations/compat/link";
+import Link from "@trade-os/operations/compat/Link";
 import { useEffect, useState } from "react";
 import { useMessages } from "@trade-os/operations/compat/intl";
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
-import { Button } from "@trade-os/operations/components/ui/button";
+import { Button } from "@trade-os/operations/components/ui/Button";
 import { usePlatformAuth } from "@trade-os/operations/session/PlatformSessionContext";
 import { getExceptions, type ExceptionsResponse } from "@trade-os/operations/lib/api/exceptions";
 import { withRetry } from "@trade-os/operations/lib/api/retry";

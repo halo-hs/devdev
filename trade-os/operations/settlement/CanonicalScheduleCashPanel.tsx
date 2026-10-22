@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Button } from "@trade-os/operations/components/ui/button";
-import { TextLink } from "@trade-os/operations/components/ui/text-link";
+import { Button } from "@trade-os/operations/components/ui/Button";
+import { TextLink } from "@trade-os/operations/components/ui/TextLink";
 import { DateInput } from "@/components/platform/DateInput";
 import { ApiError } from "@trade-os/operations/lib/api/client";
 import {

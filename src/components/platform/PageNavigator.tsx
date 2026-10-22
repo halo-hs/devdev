@@ -13,17 +13,17 @@ import {
   Plus,
 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import {
   ButtonGroup,
   ButtonGroupText,
-} from "@/components/ui/button-group"
+} from "@/components/ui/ButtonGroup"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/Popover"
+import { Separator } from "@/components/ui/Separator"
 import { cn } from "@/lib/utils"
 
 export function PdfViewerToolbar({

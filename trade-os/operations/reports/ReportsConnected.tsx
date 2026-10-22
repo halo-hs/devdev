@@ -1,10 +1,10 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
-import { Button as ShadcnButton } from "@/components/ui/button";
+import { Badge } from "@/components/ui/Badge";
+import { Button as ShadcnButton } from "@/components/ui/Button";
 import { KpiCard } from "@/components/platform/StatTile";
 import { RankingRow } from "@/components/platform/RankingRow";
 import { PeriodCloseRow } from "@/components/platform/PeriodCloseRow";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/SearchFilterBar";
 
@@ -18,9 +18,9 @@ import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { AnalyticsSkeleton } from "@trade-os/operations/components/AnalyticsSkeleton";
 import { SkeletonList } from "@trade-os/operations/components/Skeletons";
 import { useToast } from "@trade-os/operations/components/toast/useToast";
-import { Button } from "@trade-os/operations/components/ui/button";
-import { Dialog } from "@trade-os/operations/components/ui/dialog";
-import { Select } from "@trade-os/operations/components/ui/dropdown";
+import { Button } from "@trade-os/operations/components/ui/Button";
+import { Dialog } from "@trade-os/operations/components/ui/Dialog";
+import { Select } from "@trade-os/operations/components/ui/Dropdown";
 import { cx } from "@trade-os/operations/components/ui/utils";
 // erp-v2-adapt: begin — QA-1352 defers the gate reason to BE #495 instead of the boolean projection.
 import { usePlatformSession } from "@trade-os/operations/session/PlatformSessionContext";

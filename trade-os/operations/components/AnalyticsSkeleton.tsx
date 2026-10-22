@@ -1,4 +1,4 @@
-import { Skeleton } from "@trade-os/operations/components/ui/skeleton";
+import { Skeleton } from "@trade-os/operations/components/ui/Skeleton";
 import { cx } from "@trade-os/operations/components/ui/utils";
 
 import { SkeletonList, SkeletonTable } from "./Skeletons";

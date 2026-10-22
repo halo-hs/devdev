@@ -5,9 +5,9 @@ import { useRef, useState, useEffect } from "react";
 
 import type { HTMLAttributes, LabelHTMLAttributes } from "react";
 import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import { Button } from "@/components/ui/Button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
 import { DateInput } from "@/components/platform/DateInput";
 import { ApiError } from "../lib/api/client";
 import { effectiveShipmentEta, effectiveShipmentEtd, type Shipment, type ShipmentConfirmation, type ShipmentStatus } from "../lib/api/shipments";

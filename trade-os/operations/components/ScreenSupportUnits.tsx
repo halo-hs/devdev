@@ -4,7 +4,7 @@ import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { MetricCard } from "@trade-os/operations/components/MetricCard";
 import { SectionPanel, type SectionPanelProps } from "@trade-os/operations/components/SectionPanel";
 import { StatusBadge } from "@trade-os/operations/components/StatusBadge";
-import { DataTable, type DataTableColumn } from "@trade-os/operations/components/ui/table";
+import { DataTable, type DataTableColumn } from "@trade-os/operations/components/ui/Table";
 
 type UnitPanelProps = Omit<SectionPanelProps, "title"> & {
   title?: ReactNode;

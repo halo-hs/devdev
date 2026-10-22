@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/Button"
+import { Textarea } from "@/components/ui/Textarea"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/Dialog"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import type { DocumentConnection, DocumentDealLink, ConnectionChangePreview } from "@trade-os/lib/documentDealConnection"
 

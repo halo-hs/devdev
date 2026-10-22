@@ -55,26 +55,26 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/Badge"
+import { Button } from "@/components/ui/Button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
+} from "@/components/ui/Card"
+import { Checkbox } from "@/components/ui/Checkbox"
+import { Input } from "@/components/ui/Input"
+import { Progress } from "@/components/ui/Progress"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/Select"
+import { Separator } from "@/components/ui/Separator"
 import {
   Sheet,
   SheetContent,
@@ -82,7 +82,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"
+} from "@/components/ui/Sheet"
 import {
   Table,
   TableBody,
@@ -90,9 +90,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/Table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
+import { Textarea } from "@/components/ui/Textarea"
 import {
   demoPreSendCheck,
   demoShareLink,

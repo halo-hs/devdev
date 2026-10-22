@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 
 import { ChartTooltip, useChartTooltip } from "./ChartTooltip";
-import { innerSize, XLabels, type ChartPad } from "./chartFrame";
+import { innerSize, XLabels, type ChartPad } from "./ChartFrame";
 import {
   barPathBottom,
   barPathTop,

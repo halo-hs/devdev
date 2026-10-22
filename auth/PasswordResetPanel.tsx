@@ -1,6 +1,6 @@
 import { type ReactNode, useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/Input"
+import { Button } from "@/components/ui/Button"
 import { EyeOff, Eye, ArrowLeft, Mail, Clock3, ArrowRight, RefreshCw, KeyRound, LogOut } from "lucide-react"
 import { type CommonPrototypeScreenProps, AuthSurface, InlineFeedback } from "@auth/AuthSurface"
 import { showPreviewControls } from "@auth/authNavigation"

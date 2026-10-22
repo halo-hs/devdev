@@ -6,8 +6,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import "@/components/platform/business-filters.css"
+} from "@/components/ui/Select"
+import "@/components/platform/businessFilters.css"
 
 type ContainerProps = ComponentProps<"div">
 

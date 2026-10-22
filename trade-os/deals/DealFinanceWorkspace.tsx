@@ -3,18 +3,18 @@ import {
   EmptyHeader,
   EmptyTitle,
   EmptyDescription,
-} from "@/components/ui/empty"
+} from "@/components/ui/Empty"
 import { DealClaimTool } from "@trade-os/deals/DealHandoffTools"
 import { useRef, useState, type ReactNode } from "react"
 import { Info, Pencil, Plus, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
+import { Badge } from "@/components/ui/Badge"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/Popover"
 import {
   Table,
   TableBody,
@@ -22,14 +22,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/Table"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/Select"
 import { exactFinanceMoney, presentFinanceFact } from "@trade-os/lib/erpFinance"
 import {
   calculateDealFinance,

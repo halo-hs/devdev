@@ -11,8 +11,8 @@ import {
   MessageSquare,
   Users,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/Button"
+import { Badge } from "@/components/ui/Badge"
 import type { ErpMenuTarget } from "@trade-os/ErpScreens"
 
 const steps = [

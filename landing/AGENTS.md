@@ -18,7 +18,7 @@
 - `shared/base.css`, `shared/theme.css`, `shared/pages.css`: `shared/layout.tsx`에서 함께 import하는 CSS입니다. 홈 전용 파일이 아닙니다.
 - `.trade-landing`, `.trade-container`, `.trade-section-label` 등은 여러 공개 페이지가 사용하는 선택자입니다. `.trade-landing`은 인증 헤더에도 사용됩니다.
 - `data-landing-product="home"`은 홈만 구분하지 않습니다. 페이지 구분에는 `data-landing-page`를 사용합니다.
-- `src/components/`, `src/app/theme.css`·`tokens-ds2.css`, 디자인 시스템 로고는 업무 화면에서도 사용하는 공통 자원입니다.
+- `src/components/`, `src/app/theme.css`·`tokensDs2.css`, 디자인 시스템 로고는 업무 화면에서도 사용하는 공통 자원입니다.
 
 ## 마케터의 홈 수정 기본 범위
 

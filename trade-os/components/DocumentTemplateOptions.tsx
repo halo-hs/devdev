@@ -1,9 +1,9 @@
 import { Check, Search } from "lucide-react"
 import type { ReactNode } from "react"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
+import { ScrollArea } from "@/components/ui/ScrollArea"
 import { cn } from "@/lib/utils"
 
 export type DocumentTemplateOption = readonly [

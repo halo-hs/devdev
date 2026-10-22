@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from "react"
 
-import { Card } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { Card } from "@/components/ui/Card"
+import { Separator } from "@/components/ui/Separator"
 import { cn } from "@/lib/utils"
 
 type KpiCardTone = "positive" | "negative" | "neutral"

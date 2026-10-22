@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils"
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "@/components/ui/Separator"
 import { type ReactNode, useRef, useState, useEffect } from "react"
 import { FileText, Check } from "lucide-react"
 import { PdfViewerToolbar, PdfFloatingControls } from "@/components/platform/PageNavigator"
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip"
+import { Button } from "@/components/ui/Button"
 import { PannablePdfViewport } from "@/components/platform/DocumentViewerStage"
 import { type PrototypeSlot, sampleValueForSlot, isNumericInputKind, type DocumentStyle, type DocumentLogo, templateMeta, templateSchemas, type Tone, downloadRenderedDocumentPdf } from "@trade-os/documents/documentTemplateModel"
 

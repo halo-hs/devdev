@@ -1,4 +1,4 @@
-import Link from "@trade-os/operations/compat/link";
+import Link from "@trade-os/operations/compat/Link";
 
 import { cx } from "@trade-os/operations/components/ui/utils";
 

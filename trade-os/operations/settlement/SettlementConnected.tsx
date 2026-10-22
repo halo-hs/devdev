@@ -3,15 +3,15 @@
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/SearchFilterBar";
 
-import Link from "@trade-os/operations/compat/link";
+import Link from "@trade-os/operations/compat/Link";
 import { useMessages } from "@trade-os/operations/compat/intl";
 import { useSearchParams } from "@trade-os/operations/compat/navigation";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, Fragment, type CSSProperties, type ReactNode } from "react";
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { RefreshCw } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { DateInput } from "@/components/platform/DateInput";
 import { LoadableSection, type LoadableSectionCopy } from "@trade-os/operations/components/LoadableSection";
 import { OperationalTableFrame } from "@trade-os/operations/components/OperationalTableFrame";
@@ -19,11 +19,11 @@ import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
 import { SkeletonCards, SkeletonTable } from "@trade-os/operations/components/Skeletons";
 import { StatusBadge, type StatusTone } from "@trade-os/operations/components/StatusBadge";
 import { useScreenToast } from "@trade-os/operations/components/toast/useToast";
-import { Button } from "@trade-os/operations/components/ui/button";
-import { Dialog, DialogFooterContainer } from "@trade-os/operations/components/ui/dialog";
-import { Select } from "@trade-os/operations/components/ui/dropdown";
-import { TextArea } from "@trade-os/operations/components/ui/input";
-import { TextLink } from "@trade-os/operations/components/ui/text-link";
+import { Button } from "@trade-os/operations/components/ui/Button";
+import { Dialog, DialogFooterContainer } from "@trade-os/operations/components/ui/Dialog";
+import { Select } from "@trade-os/operations/components/ui/Dropdown";
+import { TextArea } from "@trade-os/operations/components/ui/Input";
+import { TextLink } from "@trade-os/operations/components/ui/TextLink";
 import { useEntitlements, useIdentity, usePlatformAuth } from "@trade-os/operations/session/PlatformSessionContext";
 import {
   CASH_CALENDAR_BUCKETS,

@@ -1,4 +1,4 @@
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip"
 import { DealRefreshContext, useDealRefresh, useDealRefreshController } from "@trade-os/deals/useDealRefresh"
 import { PostWriteRefreshNotice } from "@trade-os/components/PostWriteRefreshNotice"
 import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, type DealDocumentRecord } from "@trade-os/lib/dealDocumentActions"
@@ -68,9 +68,9 @@ import {
   DocumentTemplateOptions,
   type DocumentTemplateOption,
 } from "@trade-os/components/DocumentTemplateOptions"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/Badge"
+import { Button } from "@/components/ui/Button"
+import { Card } from "@/components/ui/Card"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -80,7 +80,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/AlertDialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -88,36 +88,36 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/DropdownMenu"
+import { Input } from "@/components/ui/Input"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/Popover"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/Select"
+import { Separator } from "@/components/ui/Separator"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
+} from "@/components/ui/Dialog"
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from "@/components/ui/sheet"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/Sheet"
+import { Textarea } from "@/components/ui/Textarea"
 import { cn } from "@/lib/utils"
 import { StatusBadge } from "@/components/platform/StatusBadge"
 import { DateInput } from "@/components/platform/DateInput"

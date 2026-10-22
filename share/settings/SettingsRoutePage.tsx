@@ -29,8 +29,8 @@ import {
 } from "lucide-react"
 
 import { WorkspaceSwitcher } from "@/components/platform/WorkspaceSwitcher"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
 import {
   Sidebar,
   SidebarContent,
@@ -43,7 +43,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/Sidebar"
 import { SettingsDemoProvider } from "./SubscriptionSettings"
 import { useSettingsDemoPresent } from "@share/settings/useSettingsDemo"
 import { ProductsSubscriptions } from "@share/settings/BillingSettingsView"

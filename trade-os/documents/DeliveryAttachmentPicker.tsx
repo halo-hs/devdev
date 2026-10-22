@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from "react"
 import { Upload, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/Button"
+import { Checkbox } from "@/components/ui/Checkbox"
 import {
   FileDropZone,
   type FileDropZoneRef,
-} from "@/components/ds2/extensions/file-drop-zone"
+} from "@/components/ds2/extensions/FileDropZone"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/Dialog"
 
 export type DeliveryAttachment = {
   id: string

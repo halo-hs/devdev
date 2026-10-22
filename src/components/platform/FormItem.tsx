@@ -1,6 +1,6 @@
 import { type ComponentProps, type ReactNode } from "react"
 import { AlertCircle, CheckCircle2, Info } from "lucide-react"
-import { Field, FieldLabel } from "@/components/ui/field"
+import { Field, FieldLabel } from "@/components/ui/Field"
 import { cn } from "@/lib/utils"
 
 type FieldTone = "neutral" | "warning" | "danger" | "success"

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import { Check } from "lucide-react"
 
 export function SaveRow({ label = "변경사항 저장" }: { label?: string }) {

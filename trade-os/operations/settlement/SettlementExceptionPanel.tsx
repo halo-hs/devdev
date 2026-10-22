@@ -6,9 +6,9 @@ import { ApiError } from "@trade-os/operations/lib/api/client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Button } from "@trade-os/operations/components/ui/button";
+import { Button } from "@trade-os/operations/components/ui/Button";
 import { Select, TextInput } from "@trade-os/operations/components/ui/index";
-import { TextLink } from "@trade-os/operations/components/ui/text-link";
+import { TextLink } from "@trade-os/operations/components/ui/TextLink";
 import {
   listOverpaymentRefunds,
   listSchedulePayments,

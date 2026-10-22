@@ -4,7 +4,7 @@
    2) 히어로 필터 토큰 (구 hero-filter-tokens.css)
    3) Figma 값 덮어쓰기 (구 figma-prototype-tokens.css)
    순서가 화면 결과를 정하므로 바꾸지 않습니다. */
-@import "./tokens-ds2.css";
+@import "./tokensDs2.css";
 
 /* ---- 1) 제품 공통 별칭·레이아웃 ---- */
 

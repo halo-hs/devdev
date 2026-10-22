@@ -19,9 +19,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/AlertDialog"
+import { Badge } from "@/components/ui/Badge"
+import { Button } from "@/components/ui/Button"
 import {
   Dialog,
   DialogContent,
@@ -29,10 +29,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/Dialog"
+import { Input } from "@/components/ui/Input"
+import { Skeleton } from "@/components/ui/Skeleton"
+import { Textarea } from "@/components/ui/Textarea"
 import { snapApi } from "@snap/lib/snapApi"
 import {
   snapApiConfigured,

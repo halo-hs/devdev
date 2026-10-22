@@ -5,15 +5,15 @@ import { RefreshCw, Pencil } from "lucide-react";
 import { ShipmentConfirmationDialog } from "./ShipmentConfirmationDialog";
 import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
 import { carrierTrackingAction } from "./carrierSites";
-import Link from "@trade-os/operations/compat/link";
+import Link from "@trade-os/operations/compat/Link";
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { Button as HostButton } from "@/components/ui/button";
+import { Button as HostButton } from "@/components/ui/Button";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { SkeletonTable } from "@trade-os/operations/components/Skeletons";
 import { StatusBadge, type StatusTone } from "@trade-os/operations/components/StatusBadge";
-import { Button } from "@trade-os/operations/components/ui/button";
+import { Button } from "@trade-os/operations/components/ui/Button";
 import { usePlatformSession } from "@trade-os/operations/session/PlatformSessionContext";
 import { ApiError } from "@trade-os/operations/lib/api/client";
 import {

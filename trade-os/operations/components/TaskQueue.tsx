@@ -1,8 +1,8 @@
-import Link from "@trade-os/operations/compat/link";
+import Link from "@trade-os/operations/compat/Link";
 import type { ReactNode } from "react";
 
-import { Button } from "@trade-os/operations/components/ui/button";
-import { EtcDivider } from "@trade-os/operations/components/ui/etc";
+import { Button } from "@trade-os/operations/components/ui/Button";
+import { EtcDivider } from "@trade-os/operations/components/ui/Etc";
 
 import { DdayBadge, StatusBadge, type DdayTone, type StatusTone } from "@trade-os/operations/components/StatusBadge";
 import { SectionPanel, type SectionPanelProps } from "@trade-os/operations/components/SectionPanel";

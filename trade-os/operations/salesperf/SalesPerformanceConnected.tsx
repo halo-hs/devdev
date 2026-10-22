@@ -20,8 +20,8 @@ import {
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { AnalyticsSkeleton } from "@trade-os/operations/components/AnalyticsSkeleton";
-import { Button } from "@trade-os/operations/components/ui/button";
-import { Select } from "@trade-os/operations/components/ui/dropdown";
+import { Button } from "@trade-os/operations/components/ui/Button";
+import { Select } from "@trade-os/operations/components/ui/Dropdown";
 import { cx } from "@trade-os/operations/components/ui/utils";
 // erp-v2-adapt: begin — QA-1352 defers the gate reason to BE #495 instead of the boolean projection.
 import { usePlatformSession } from "@trade-os/operations/session/PlatformSessionContext";

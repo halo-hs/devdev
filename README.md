@@ -68,6 +68,6 @@ Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run bui
 
 각 페이지 폴더의 `page.tsx`가 시작점입니다. 마케터의 홈 문구·배치는 `landing/home/page.tsx`, 홈 전용 스타일은 `landing/home/styles.css`에서 수정합니다. `landing/shared/`와 `src/components/`는 여러 페이지가 사용하는 공통 영역입니다.
 
-`share/`는 공통 업무 화면, `src/components/`는 공통 UI 부품입니다. 토큰은 `src/app/tokens-ds2.css`(기본)와 `src/app/theme.css`(Figma 덮어쓰기)입니다. `src/app/PublicEntry.tsx`는 공개 페이지 연결을 담당합니다.
+`share/`는 공통 업무 화면, `src/components/`는 공통 UI 부품입니다. 토큰은 `src/app/tokensDs2.css`(기본)와 `src/app/theme.css`(Figma 덮어쓰기)입니다. `src/app/PublicEntry.tsx`는 공개 페이지 연결을 담당합니다.
 
-업무 화면 파일 이름은 제품 프론트엔드(`ecoya-platform-user-frontend`의 `src/features/<기능>/`)와 맞춥니다. 예: 거래 목록 `trade-os/deals/DealsListView.tsx`, 문서 올리기 `trade-os/inbox/InboxView.tsx`, 업로드 검토 `trade-os/confirm/ConfirmFlowConnected.tsx`, 문서 만들기 `trade-os/documents/DocumentCreateConnected.tsx`, AI에게 묻기 `trade-os/ai/AiWorkspace.tsx`, 설정 `share/settings/SettingsRoutePage.tsx`, 로그인 `auth/LoginPanel.tsx`. `src/App.tsx`는 라우팅과 앱 상태, `src/shell/`은 사이드바(`erpNav.tsx`)와 상단 바(`ErpTopNavSlot.tsx`)를 담당합니다. SNAP 통합 화면 일부(`snap/screens.tsx`, `snap/operations/pages.tsx`)는 아직 한 파일에 남아 있습니다. 모든 기능의 코드·빌드가 독립된 것은 아닙니다.
+업무 화면 파일 이름은 제품 프론트엔드(`ecoya-platform-user-frontend`의 `src/features/<기능>/`)와 맞춥니다. 예: 거래 목록 `trade-os/deals/DealsListView.tsx`, 문서 올리기 `trade-os/inbox/InboxView.tsx`, 업로드 검토 `trade-os/confirm/ConfirmFlowConnected.tsx`, 문서 만들기 `trade-os/documents/DocumentCreateConnected.tsx`, AI에게 묻기 `trade-os/ai/AiWorkspace.tsx`, 설정 `share/settings/SettingsRoutePage.tsx`, 로그인 `auth/LoginPanel.tsx`. `src/App.tsx`는 라우팅과 앱 상태, `src/shell/`은 사이드바(`ErpNav.tsx`)와 상단 바(`ErpTopNavSlot.tsx`)를 담당합니다. SNAP 통합 화면 일부(`snap/SnapScreens.tsx`, `snap/operations/SnapOperationsPages.tsx`)는 아직 한 파일에 남아 있습니다. 모든 기능의 코드·빌드가 독립된 것은 아닙니다.

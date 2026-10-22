@@ -2,7 +2,7 @@
 @source not "../**/*.test.{ts,tsx}";
 @import "tw-animate-css";
 /* DS 2.0 병존 토큰 레이어 — [data-ds="2"] 스코프. 상세는 파일 헤더 주석 참조. */
-@import "./tokens-ds2.css";
+@import "./tokensDs2.css";
 @import "../../public/fonts/noto-sans-kr/font-face.css";
 
 @custom-variant dark (&:is(.dark *));

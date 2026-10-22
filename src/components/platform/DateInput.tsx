@@ -1,4 +1,4 @@
-import { DatePicker } from "@/components/ds2/extensions/date-picker"
+import { DatePicker } from "@/components/ds2/extensions/DatePicker"
 import { cn } from "@/lib/utils"
 
 function parse(value: string | undefined, mode: "date" | "month") {

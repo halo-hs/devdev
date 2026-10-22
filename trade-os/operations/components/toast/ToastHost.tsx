@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
-import { createPortal } from "@trade-os/operations/compat/portal";
+import { createPortal } from "@trade-os/operations/compat/Portal";
 
 import { ToastAdapter } from "@trade-os/operations/components/ToastAdapter";
-import { Button } from "@trade-os/operations/components/ui/button";
-import { Icon } from "@trade-os/operations/components/ui/icon";
+import { Button } from "@trade-os/operations/components/ui/Button";
+import { Icon } from "@trade-os/operations/components/ui/Icon";
 
 import {
   dismissToast,

@@ -1,5 +1,5 @@
 import { appLocation } from "@/app/appLocation"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/Badge"
 import { useState, type ReactNode } from "react"
 import {
   Bot,
@@ -14,9 +14,9 @@ import {
 } from "lucide-react"
 
 import { BusinessPageHero } from "@/components/platform/HeroBanner"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/Button"
+import { Card } from "@/components/ui/Card"
+import { Input } from "@/components/ui/Input"
 import type { ErpMenuTarget } from "@trade-os/ErpScreens"
 import { PlatformHomeOverview } from "@share/home/PlatformHomeOverview"
 import { cn } from "@/lib/utils"

@@ -1,12 +1,12 @@
 import { appLocation } from "@/app/appLocation"
 import { useEffect, useState, type FormEvent } from "react"
 import { ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
+import { Textarea } from "@/components/ui/Textarea"
 import { FormField, FormFieldMessage } from "@/components/platform/FormItem"
 import { LandingShell } from "../shared/layout"
-import { useT } from "../shared/locale"
+import { useT } from "../shared/Locale"
 
 export function ContactLanding() {
   const t = useT()

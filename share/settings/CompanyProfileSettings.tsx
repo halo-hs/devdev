@@ -1,12 +1,12 @@
 import { useState } from "react"
 import { ColorPicker } from "@/components/platform/ColorPicker"
 import { PageHeading, SettingsSection } from "@share/settings/views/SettingsSection"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/Badge"
 import { SettingRow } from "@share/settings/views/SettingRow"
-import { Input } from "@/components/ui/input"
+import { Input } from "@/components/ui/Input"
 import { BrandLogoInput } from "@share/settings/CompanyProfileAssetUploadField"
 import { SaveRow } from "@share/settings/views/SettingsSaveRow"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import { type SettingsRole } from "@share/settings/SettingsRoutePage"
 
 export function TradeDefaultsPage({ role }: { role: SettingsRole }) {

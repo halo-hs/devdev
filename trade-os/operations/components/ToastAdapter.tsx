@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
 
-import { Button } from "@trade-os/operations/components/ui/button";
-import { Icon } from "@trade-os/operations/components/ui/icon";
+import { Button } from "@trade-os/operations/components/ui/Button";
+import { Icon } from "@trade-os/operations/components/ui/Icon";
 import { cx } from "@trade-os/operations/components/ui/utils";
 
 type ToastAdapterTone = "info" | "success" | "warning" | "danger" | "neutral";

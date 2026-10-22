@@ -1,7 +1,7 @@
 import { useId, useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/Input"
+import { Button } from "@/components/ui/Button"
 
 export function AuthInputField({
   label,

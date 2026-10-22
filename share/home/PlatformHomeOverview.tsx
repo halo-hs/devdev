@@ -1,8 +1,8 @@
 import { useStartGuide } from "@trade-os/onboarding/StartGuideProvider"
 import { useRef, useState } from "react"
 import { FileUp, Send } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
 import type { ErpMenuTarget } from "@trade-os/ErpScreens"
 import { RoleHomeBoard, type HomeBoardState, type HomeRole } from "@share/home/RoleHomeBoard"
 

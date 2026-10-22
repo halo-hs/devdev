@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Button } from "@/components/ui/Button"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover"
 
 export type DocumentBlockingIssue = {
   key: string

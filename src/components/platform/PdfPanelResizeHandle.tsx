@@ -4,8 +4,8 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable"
-import { Card } from "@/components/ui/card"
+} from "@/components/ui/Resizable"
+import { Card } from "@/components/ui/Card"
 import { useIsCompactWorkspace } from "@/hooks/useIsMobile"
 import { cn } from "@/lib/utils"
 

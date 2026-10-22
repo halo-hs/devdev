@@ -12,7 +12,7 @@ import { PageHeader } from "./components/PageHeader"
 import { ToastHost } from "./components/toast/ToastHost"
 import { messages } from "./i18n/messages"
 import "./styles/scoped.css"
-import "./styles/host-tokens.css"
+import "./styles/hostTokens.css"
 import "./styles/host.css"
 
 export type ReferenceOperationsScreen = "monitor" | "reports" | "sales" | "settlement" | "shipments"

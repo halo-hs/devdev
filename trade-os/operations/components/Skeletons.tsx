@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
 
-import { Skeleton } from "@trade-os/operations/components/ui/skeleton";
+import { Skeleton } from "@trade-os/operations/components/ui/Skeleton";
 import { cx } from "@trade-os/operations/components/ui/utils";
 
 type SkeletonPresetProps = ComponentProps<"div"> & {

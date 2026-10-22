@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { SkeletonCards } from "@trade-os/operations/components/Skeletons";
-import { Button } from "@trade-os/operations/components/ui/button";
+import { Button } from "@trade-os/operations/components/ui/Button";
 
 import type { Loadable } from "@trade-os/operations/lib/loadable";
 

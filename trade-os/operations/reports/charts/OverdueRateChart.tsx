@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 
 import { ChartTooltip, useChartTooltip } from "./ChartTooltip";
-import { innerSize, XLabels, YGrid } from "./chartFrame";
+import { innerSize, XLabels, YGrid } from "./ChartFrame";
 import { CHART_COLORS, CHART_PAD, linePath, makeTicks, niceCeil } from "./chartGeometry";
 import { useMeasuredWidth } from "./useMeasuredWidth";
 

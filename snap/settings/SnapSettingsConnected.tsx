@@ -20,15 +20,15 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/Badge"
+import { Button } from "@/components/ui/Button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/Card"
 import {
   Dialog,
   DialogContent,
@@ -36,17 +36,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
+} from "@/components/ui/Dialog"
+import { Input } from "@/components/ui/Input"
+import { Progress } from "@/components/ui/Progress"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@/components/ui/Select"
+import { Skeleton } from "@/components/ui/Skeleton"
 import {
   Table,
   TableBody,
@@ -54,8 +54,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/Table"
+import { Textarea } from "@/components/ui/Textarea"
 import type { SnapScreenKey } from "@snap/SnapScreens"
 import type { SnapNavigationOptions } from "@snap/operations/SnapOperationsPages"
 import { snapApi, type SnapPage } from "@snap/lib/snapApi"

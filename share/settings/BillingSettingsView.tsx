@@ -3,9 +3,9 @@ import { type SubscriptionChangeIntent, SubscriptionChangePanel } from "@share/s
 import { type TrialProduct, type TrialStartState, type TrialPeriod } from "@auth/TrialStartCard"
 import { useState } from "react"
 import { appLocation } from "@/app/appLocation"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import { TrialStartDemo } from "@auth/components/TrialStartDemo"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/Dialog"
 import { useSettingsDemo, names } from "@share/settings/useSettingsDemo"
 
 export function ProductsSubscriptions({

@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { SnapIndustryLabels, SnapHeroPreview } from "./hero"
+import { SnapIndustryLabels, SnapHeroPreview } from "./Hero"
 import {
   ArrowRight,
   Camera,
@@ -11,10 +11,10 @@ import {
   Play,
 } from "lucide-react"
 import { LandingShell, StartButton } from "../shared/layout"
-import { useT } from "../shared/locale"
+import { useT } from "../shared/Locale"
 import { snapUseCases, moreSnapUses, snapFaq } from "./content"
-import { useSnapPreviewPlayback } from "@landing/snap/use-preview-playback"
-import { SnapScreen, type SnapScreenName } from "./illustrations"
+import { useSnapPreviewPlayback } from "@landing/snap/usePreviewPlayback"
+import { SnapScreen, type SnapScreenName } from "./Illustrations"
 
 const snapSteps = [
   {

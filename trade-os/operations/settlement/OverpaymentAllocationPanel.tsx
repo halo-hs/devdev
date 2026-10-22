@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button } from '../components/ui/button';
+import { Button } from '../components/ui/Button';
 import { operationsDemo } from '../demo/mode';
 import { demoAllocate, demoAllocationCandidates, demoAllocations } from '../demo/settlementExceptions';
 
