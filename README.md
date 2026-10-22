@@ -43,8 +43,8 @@ share/
   public/        고객 공유 링크
 src/components/  공통 UI(ui·ds2·platform)·디자인 시스템
 src/          앱 진입·통합 화면·라우팅 연결
-public/       정적 파일(이미지·폰트·운영 아이콘)
-scripts/      운영 CSS 생성·배포 파일 정리
+public/       정적 파일(이미지·폰트)
+scripts/      배포 파일 정리
 docs/         설계·화면 설명
 tests/        자동 검사(로컬 전용, Git 제외)
 ```
@@ -98,4 +98,62 @@ Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run bui
 
 ## 로컬 전용 폴더
 
-`tests/`(Playwright 화면 검사), `feedback/`(화면 캡처), `doc/`·`docs/`(메모), `output/`은 Git 올리지 않습니다. 앱·빌드·배포는 이 폴더들을 쓰지 않습니다. `npm run test:e2e`는 로컬에 `tests/`가 있을 때만 동작합니다.
+`tests/`(Playwright 화면 검사), `feedback/`(화면 캡처), `doc/`·`docs/`(메모), `output/`은 Git에 올리지 않습니다. 앱·빌드·배포는 이 폴더들을 쓰지 않습니다. `npm run test:e2e`는 로컬에 `tests/`가 있을 때만 동작합니다.
+
+## 개발자 핸드오프 (2026-10-22)
+
+공통 UI와 디자인 시스템을 `src/`로 모으고, 원본(제품 프론트엔드)에서 통째로 가져왔던 operations 화면을 devdev 부품·구조로 합쳤습니다(PR #170, #171). 화면은 예시 데이터로만 동작하고, 제품 프론트엔드나 로컬 3030 백엔드 없이 빌드·실행됩니다.
+
+### 옮긴 위치
+
+| 전 | 지금 |
+| --- | --- |
+| `packages/design-system-2.0/` | `src/components/ds2/`, 토큰 `src/app/tokensDs2.css` |
+| `packages/shared-ui/` 래퍼·조합 부품 | `src/components/ui/`, `src/components/platform/` |
+| `trade-os/operations/index.tsx` | `trade-os/OperationsScreens.tsx` (화면 진입점) |
+| `trade-os/operations/styles/host.css` | `trade-os/OperationsScreens.css` (화면별 레이아웃 규칙) |
+| `trade-os/operations/shipments/`, `settlement/`, `monitor/`, `reports/`, `salesperf/` | `trade-os/shipments/`, `settlement/`, `monitor/`, `reports/`, `salesperf/` |
+| `trade-os/operations/components/`, `shared/` | `trade-os/components/` |
+| `trade-os/operations/components/screens/MonitorScreen.tsx` | `trade-os/monitor/MonitorScreen.tsx` |
+| `trade-os/operations/lib/` | `trade-os/lib/` (`api/`, `deals/`, `session/` 등) |
+| `trade-os/operations/demo/` | `trade-os/lib/demo/` (예시 데이터·가짜 API) |
+| `trade-os/operations/i18n/`, `messages/ko/` | `trade-os/lib/i18n/`, `trade-os/lib/i18n/ko/` (쓰는 문구 9개만) |
+| `trade-os/operations/compat/Link.tsx` | `trade-os/lib/AppLink.tsx`, `src/hooks/useSearchParams.ts` |
+| `platform/DateInput` | `ui/DatePicker` |
+| `public/assets/operations/illustrations/Bag_Gray.svg` | `public/images/illustrations/Bag_Gray.svg` |
+
+### 지운 것
+
+- operations 자체 부품 30개(Button·Dialog·Select·Table 등): 공통 shadcn 부품으로 교체
+- 원본 CSS·토큰 사본(약 370KB)과 생성 스크립트: 클래스는 같은 값의 devdev 토큰으로 교체
+- 원본 Next.js 흉내 코드(`compat/`), 로컬 3030 백엔드 연결과 Vite 프록시, 백엔드 전용 거래 상세 화면
+- 원본 아이콘·폰트 사본(`public/assets/operations/`, 2.2MB), 쓰지 않는 문구 JSON 20개
+- operations 전용 상태 뱃지·세그먼트 버튼: `platform/StatusBadge`, `BusinessFilterSegments` 하나로
+- `AGENTS.md`의 디자인 시스템 수정 금지 규칙, 원본 대조 규칙(TRADE:OD-047)
+
+이름도 devdev 기준으로 바꿨습니다: `ReferenceOperations` → `OperationsScreen`, CSS `.reference-3030`·`.reference-*` → `.ops-screen`·`.ops-*`.
+
+### 실행·검사·배포
+
+| 명령 | 하는 일 |
+| --- | --- |
+| `npm run dev` | 개발 서버 |
+| `npm run build` | 타입 검사(`tsc -b`) + 빌드 + 배포 파일 정리 |
+| `npm run lint` | ESLint (현재 오류 98개, 이번 작업 전부터 있던 것) |
+| `npm run test:e2e` | Playwright 화면 검사(로컬 `tests/` 필요) |
+
+배포 순서: PR → main 병합 → 브랜치 삭제 → Cloudflare 배포 확인. 배포가 "initialize"에서 멈추면 다시 배포(retry)합니다.
+
+### 검증 결과
+
+- 42개 화면 × 데스크톱(1440)·모바일(390): 화면 오류·깨진 이미지 0
+- devdev 기존 화면은 배포 사이트와 캡처 동일. operations 화면은 배너·버튼·선택칸이 devdev 공통 디자인(거래 목록과 같은 배너)으로 바뀜
+- 관련 Playwright 15개 파일: 154 통과 / 36 실패. 36개는 모두 이전 main에서도 실패하던 낡은 검사
+
+### 알려진 문제·남은 일
+
+- [ ] 정산 "회계용 CSV 내려받기": 원본 백엔드 주소를 직접 불러 배포 사이트에서 CSV 대신 HTML이 받아짐(이전부터 있던 문제)
+- [ ] 낡은 Playwright 검사 36개를 지금 화면·예시 데이터 기준으로 고치거나 지우기
+- [ ] operations에서 온 조합 부품 일부(`SectionPanel`, `ChipGroup`, `HostTable`)를 공통 부품(Card 등)과 합칠지 결정
+- [ ] `platform/` 파일 9개는 파일 이름과 안에 든 부품 이름이 다름(예: `StatTile.tsx` → `KpiCard`, `HeroBanner.tsx` → `BusinessPageHero`)
+- [ ] ESLint 오류 98개 정리
