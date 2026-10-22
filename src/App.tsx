@@ -145,6 +145,7 @@ import { PageFrame } from "@ecoya/ui"
 import ecoyaWhiteLogoSrc from "@ecoya/design-system/assets/logos/logo-ecoya-white.png"
 import { SidebarProfileMenu } from "@shared/components/sidebar-profile-menu"
 import { WorkspaceSwitcher } from "@shared/components/workspace-switcher"
+import { SalesPrototype } from "@trade-os/extended-screens"
 import { workspaceOptions, type WorkspaceKey } from "@shared/lib/workspaces"
 import {
   Sheet,
@@ -2176,7 +2177,7 @@ function AppNav({
                       const active =
                         key === screen ||
                         (key === "deals" &&
-                          (screen === "deals" || screen === "deal")) ||
+                          (screen === "deals" || screen === "deal" || screen === "contacts")) ||
                         (key === "create" && screen === "result") ||
                         (key === "shipments" && screen === "snap")
                       return (
@@ -2338,6 +2339,7 @@ function WorkspaceHeader({
     monitoring: "운영 감시",
     reports: "결산 리포트",
     sales: "영업 성과",
+    contacts: "연락처·파이프라인",
     notifications: "알림",
     settings: "설정",
     counterparty: "거래처 360",
@@ -2356,6 +2358,7 @@ function WorkspaceHeader({
     ask: "AI 서류 처리",
     deals: "기록",
     deal: "기록",
+    contacts: "기록",
     shipments: "기록",
     settlement: "기록",
     counterparty: "기록",
@@ -2377,7 +2380,7 @@ function WorkspaceHeader({
       ? [...activeSnapRoute.breadcrumb]
       : settingsLabel
         ? ["설정", settingsLabel]
-      : screen === "deal"
+      : screen === "deal" || screen === "contacts"
         ? ["기록", "거래", title]
         : section !== title
           ? [section, title]
@@ -17330,6 +17333,7 @@ export function App() {
                   ) : screen === "deals" ? (
                     <DealsScreen
                       role={erpHomeRole}
+                      onOpenContacts={() => navigateTo("contacts")}
                       onOpenDeal={(dealId, tab) => {
                         setDealNotificationTarget(tab ? { tab: tab === "documents" ? "overview" : tab, sectionId: tab === "documents" ? "deal-documents" : tab === "fulfillment" ? "deal-fulfillment" : tab === "customs" ? "deal-customs" : "deal-finance" } : null)
                         setSelectedDealId(dealId)
@@ -17366,6 +17370,22 @@ export function App() {
                     <ReferenceOperations screen="reports" />
                   ) : screen === "sales" ? (
                     <ReferenceOperations screen="sales" />
+                  ) : screen === "contacts" ? (
+                    // SSOT SC-27: its own screen with its own contact search;
+                    // it does not inherit the deals list filters.
+                    <div data-slot="business-page" className="h-full overflow-y-auto bg-transparent">
+                      <div className="w-full p-4 sm:p-5">
+                        <div className="rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
+                          <SalesPrototype
+                            embedded
+                            onOpenDeal={(dealId) => {
+                              setSelectedDealId(dealId)
+                              navigateTo("deal", { dealId })
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   ) : screen === "notifications" ? (
                     <NotificationsPrototype
                       readIds={readNotificationIds}
