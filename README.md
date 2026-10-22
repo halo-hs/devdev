@@ -13,16 +13,19 @@ landing/
 auth/         인증 화면·레이아웃·입력 검증
 trade-os/
   home/       Trade OS 업무 홈
+  inbox/      문서 올리기
+  confirm/    업로드 검토
   deals/      거래 목록·상세·정산·전달
-  documents/  문서 전달·첨부
-  ask/        AI 업무 도구
-  operations/ 선적·정산·감시·리포트·매출
+  documents/  문서 만들기·전달·첨부
+  ai/         AI 업무 도구
+  sales/      매출
+  counterparties/ 거래처
+  operations/ 선적·정산·감시·리포트
   components/ 제품 전용 UI
   lib/        업무 로직
 snap/
   tasks/      업무 상세
-  customers/  고객
-  workers/    작업자
+  directory/  고객·작업자
   evidence/   증거
   reports/    리포트
   operations/ 운영
