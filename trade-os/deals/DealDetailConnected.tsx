@@ -3,7 +3,7 @@ import { DealRefreshContext, useDealRefresh, useDealRefreshController } from "@t
 import { PostWriteRefreshNotice } from "@trade-os/components/PostWriteRefreshNotice"
 import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, type DealDocumentRecord } from "@trade-os/lib/dealDocumentActions"
 import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
-import { ReferenceOperations } from "@trade-os/operations"
+import { ReferenceOperations } from "@trade-os/OperationsScreens"
 import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@/components/platform/FormItem"
 import {
   getDealWorkPlan,

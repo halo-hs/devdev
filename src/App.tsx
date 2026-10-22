@@ -30,7 +30,7 @@ import {
   HomePrototype as V2HomePrototype,
   type HomePreviewState,
 } from "@trade-os/home/HomeProtectedPage"
-import { ReferenceOperations } from "@trade-os/operations/index"
+import { ReferenceOperations } from "@trade-os/OperationsScreens"
 import { NotificationsPrototype } from "@share/notifications/page"
 import { notifications, type NotificationDealTarget } from "@share/notifications/data"
 import { BillingPrototype, CounterpartyPrototype, OnboardingPrototype, SettingsPrototype, SnapEvidencePrototype, TokenUsagePrototype, type ErpMenuTarget } from "@trade-os/ErpScreens"
