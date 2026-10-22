@@ -4,7 +4,6 @@ import { InfoBox } from "@trade-os/components/InfoBox";
 import { MetricCard } from "@trade-os/components/MetricCard";
 import { SectionPanel, type SectionPanelProps } from "@trade-os/components/SectionPanel";
 import { StatusBadge } from "@trade-os/components/StatusBadge";
-import { ecoyaIllustration } from "@trade-os/lib/assets";
 import { ChevronsUpDown } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { cn } from "@/lib/utils";
@@ -112,7 +111,7 @@ function ColumnTable<Row extends { key: string | number }>({
               <span
                 aria-hidden="true"
                 className="mx-auto block size-14 bg-contain bg-center bg-no-repeat"
-                style={{ backgroundImage: `url("${ecoyaIllustration("Bag_Gray")}")` }}
+                style={{ backgroundImage: `url("/images/illustrations/Bag_Gray.svg")` }}
               />
             </TableCell>
           </TableRow>
