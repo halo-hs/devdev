@@ -2,7 +2,8 @@ import { type ReactNode, useState } from "react"
 import { Input } from "@shared/components/ui/input"
 import { Button } from "@shared/components/ui/button"
 import { EyeOff, Eye, ArrowLeft, Mail, Clock3, ArrowRight, RefreshCw, KeyRound, LogOut } from "lucide-react"
-import { type CommonPrototypeScreenProps, AuthSurface, InlineFeedback, showPreviewControls } from "@auth/AuthSurface"
+import { type CommonPrototypeScreenProps, AuthSurface, InlineFeedback } from "@auth/AuthSurface"
+import { showPreviewControls } from "@auth/authNavigation"
 
 function FormField({
   label,

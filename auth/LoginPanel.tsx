@@ -7,7 +7,8 @@ import { AuthInputField } from "@auth/AuthInputField"
 import googleIcon from "@ecoya/design-system/assets/icons/icon-google.svg"
 import appleIcon from "@ecoya/design-system/assets/icons/icon-apple.svg"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "@shared/components/ui/select"
-import { type CommonPrototypeScreenProps, type CommonAuthState, type Feedback, AuthSurface, showPreviewControls, InlineFeedback } from "@auth/AuthSurface"
+import { type CommonPrototypeScreenProps, type CommonAuthState, type Feedback, AuthSurface, InlineFeedback } from "@auth/AuthSurface"
+import { showPreviewControls } from "@auth/authNavigation"
 
 export function CommonLoginPrototype({
   onNavigate,

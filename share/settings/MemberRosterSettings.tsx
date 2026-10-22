@@ -10,7 +10,8 @@ import { Badge } from "@shared/components/ui/badge"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem } from "@shared/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@shared/components/ui/dialog"
 import { appLocation } from "@/app/app-location"
-import { useSettingsDemo, type Member, type Request, names, SeatSummary } from "@share/settings/subscription-settings"
+import { type Member, type Request, SeatSummary } from "@share/settings/subscription-settings"
+import { useSettingsDemo, names } from "@share/settings/settingsDemoState"
 
 export function OrganizationMembers({
   role,

@@ -6,7 +6,8 @@ import { RefreshCw, Mail, CheckCircle2, ArrowRight } from "lucide-react"
 import { cn } from "@shared/lib/utils"
 import { AuthInputField } from "@auth/AuthInputField"
 import googleIcon from "@ecoya/design-system/assets/icons/icon-google.svg"
-import { type CommonPrototypeScreenProps, type Feedback, AuthSurface, showPreviewControls, InlineFeedback } from "@auth/AuthSurface"
+import { type CommonPrototypeScreenProps, type Feedback, AuthSurface, InlineFeedback } from "@auth/AuthSurface"
+import { showPreviewControls } from "@auth/authNavigation"
 
 type SignupStep = "identity" | "verification" | "organization" | "complete"
 

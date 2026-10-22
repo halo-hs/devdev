@@ -1,7 +1,8 @@
 import { invitationExamples } from "./invitation-data"
-import { createContext, useContext, useState, type ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import { Button } from "@shared/components/ui/button"
 import type { ProductEntitlement, SettingsRole } from "./SettingsRoutePage"
+import { SettingsDemoContext, useSettingsDemo, names } from "@share/settings/settingsDemoState"
 
 export type Member = {
   id: string
@@ -19,7 +20,6 @@ export type Request = {
   status: "pending" | "rejected" | "assigned"
   requester: SettingsRole
 }
-export const names = { erp: "Trade OS", snap: "SNAP" }
 const initialMembers: Member[] = [
   {
     id: "owner",
@@ -46,7 +46,7 @@ const initialMembers: Member[] = [
     snap: false,
   },
 ]
-function useDemoState(subscriptionKind: "separate" | "bundle") {
+export function useDemoState(subscriptionKind: "separate" | "bundle") {
   const [members, setMembers] = useState(initialMembers)
   const [invitations, setInvitations] = useState(invitationExamples)
   const [requests, setRequests] = useState<Request[]>([
@@ -63,9 +63,6 @@ function useDemoState(subscriptionKind: "separate" | "bundle") {
   const capacity = subscriptionKind === "bundle" ? { erp: 8, snap: 8 } : { erp: 8, snap: 5 }
   return { members, setMembers, requests, setRequests, capacity, invitations, setInvitations }
 }
-const SettingsDemoContext = createContext<ReturnType<
-  typeof useDemoState
-> | null>(null)
 export function SettingsDemoProvider({ children, subscriptionKind = "separate" }: { children: ReactNode; subscriptionKind?: "separate" | "bundle" }) {
   const value = useDemoState(subscriptionKind)
   return (
@@ -73,18 +70,6 @@ export function SettingsDemoProvider({ children, subscriptionKind = "separate" }
       {children}
     </SettingsDemoContext.Provider>
   )
-}
-export function useSettingsDemo() {
-  const value = useContext(SettingsDemoContext)
-  if (!value) throw new Error("SettingsDemoProvider is required")
-  return value
-}
-export function useTradeSeatAssigned(role: SettingsRole) {
-  const state = useContext(SettingsDemoContext)
-  return state?.members.find((member) => member.id === role)?.erp ?? true
-}
-export function useSettingsDemoPresent() {
-  return useContext(SettingsDemoContext) !== null
 }
 export function SeatSummary({
   products,

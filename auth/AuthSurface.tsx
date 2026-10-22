@@ -1,4 +1,3 @@
-import { appLocation } from "@/app/app-location"
 import { type ReactNode } from "react"
 import {
   AlertCircle,
@@ -12,14 +11,6 @@ import {
 } from "@auth/lib/auth-validation"
 import { cn } from "@shared/lib/utils"
 import { AccountGuide, CommonPublicFooter } from "@auth/AuthCommonShell"
-
-// State inspection is opt-in locally and never exposed by a production build.
-export function showPreviewControls() {
-  return (
-    import.meta.env.DEV &&
-    new URLSearchParams(appLocation.search).get("preview") === "1"
-  )
-}
 
 export type CommonScreenKey =
   | "login"

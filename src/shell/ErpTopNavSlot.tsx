@@ -13,7 +13,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@shared/components/ui/p
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@shared/components/ui/select"
 import { Separator } from "@shared/components/ui/separator"
 import { type Screen, type ProductKey, type ErpPreviewRole, type DocumentApprovalPreviewState } from "@/App"
-import { snapNavGroups } from "@/shell/erpNav"
+import { snapNavGroups } from "@/shell/erpRouteMeta"
 
 const snapScreenLabels = Object.fromEntries(
   snapNavGroups.flatMap((group) =>

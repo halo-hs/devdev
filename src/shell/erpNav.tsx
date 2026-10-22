@@ -1,4 +1,4 @@
-import { Wand2, Home, Upload, Sparkles, Bot, Building2, Ship, Calculator, Monitor, ClipboardList, History, Camera, LayoutDashboard, FileText, Users, CalendarDays, Workflow, ShieldCheck } from "lucide-react"
+import { Wand2, Home, Upload, Sparkles, Bot, Building2, Ship, Calculator, Monitor, ClipboardList, History, Camera } from "lucide-react"
 import ecoyaWhiteLogoSrc from "@ecoya/design-system/assets/logos/logo-ecoya-white.png"
 import { cn } from "@shared/lib/utils"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@shared/components/ui/select"
@@ -14,6 +14,7 @@ import { NavigationIcon } from "@shared/components/navigation-icon"
 import { WorkspaceSwitcher } from "@shared/components/workspace-switcher"
 import { SidebarProfileMenu } from "@shared/components/sidebar-profile-menu"
 import { type ProductKey, type Screen, type ErpPreviewRole } from "@/App"
+import { snapNavGroups } from "@/shell/erpRouteMeta"
 
 const erpNavigationIcons = { onboarding: "start", home: "home", inbox: "upload", create: "document", ask: "chat", deals: "deals", shipments: "ship", settlement: "settlement", monitoring: "monitoring", reports: "report", sales: "sales" } as const
 
@@ -429,35 +430,3 @@ export function NotificationButton({
     </Button>
   )
 }
-
-export const snapNavGroups = [
-  {
-    label: "",
-    items: [["처음 시작하기", Wand2, "SC-10"]],
-  },
-  {
-    label: "현장 업무",
-    items: [
-      ["대시보드", LayoutDashboard, "SC-17"],
-      ["업무", ClipboardList, "SC-18"],
-      ["보고서", FileText, "SC-22"],
-    ],
-  },
-  {
-    label: "증거·고객",
-    items: [
-      ["증빙 보관함", Camera, "SC-23"],
-      ["고객", Users, "SC-24"],
-    ],
-  },
-  {
-    label: "연결·운영",
-    items: [
-      ["캘린더", CalendarDays, "SC-25"],
-      ["워크플로우", Workflow, "SC-26"],
-      ["내보내기·연동", Building2, "SC-27"],
-      ["작업자 · 작업 매니저", Users, "SC-28"],
-      ["시정조치", ShieldCheck, "SC-29"],
-    ],
-  },
-] as const

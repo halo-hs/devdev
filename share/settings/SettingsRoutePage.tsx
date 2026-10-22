@@ -44,7 +44,8 @@ import {
   SidebarRail,
   useSidebar,
 } from "@shared/components/ui/sidebar"
-import { SettingsDemoProvider, useSettingsDemoPresent } from "./subscription-settings"
+import { SettingsDemoProvider } from "./subscription-settings"
+import { useSettingsDemoPresent } from "@share/settings/settingsDemoState"
 import { ProductsSubscriptions } from "@share/settings/BillingSettingsView"
 import { OrganizationMembers } from "@share/settings/MemberRosterSettings"
 import { OrganizationAiUsage } from "./TokenUsageSettingsView"
