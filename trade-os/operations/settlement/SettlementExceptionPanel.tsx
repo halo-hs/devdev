@@ -8,8 +8,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { AsyncButton } from "@/components/ds2/extensions/AsyncButton";
-import { Select } from "@trade-os/operations/components/ui/Dropdown";
-import { TextInput } from "@trade-os/operations/components/ui/Input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import { Input } from "@/components/ui/Input";
 import { TextLink } from "@trade-os/operations/components/ui/TextLink";
 import {
   listOverpaymentRefunds,
@@ -680,11 +680,9 @@ export function SettlementExceptionPanel({
                           </p>
                           <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
                             {copy.overpayments.refundAmount}
-                            <TextInput
-                              className="w-24"
+                            <Input
+                              className="h-8 px-3 w-24"
                               inputMode="decimal"
-                              showClearIcon={false}
-                              size="sm"
                               value={refundDraft.amount}
                               ref={(element) => {
                                 refundAmountRefs.current[overpayment.id] = element;
@@ -696,10 +694,8 @@ export function SettlementExceptionPanel({
                           </label>
                           <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
                             {copy.overpayments.refundEvidence}
-                            <TextInput
-                              className="w-32"
-                              showClearIcon={false}
-                              size="sm"
+                            <Input
+                              className="h-8 px-3 w-32"
                               value={refundDraft.evidence}
                               ref={(element) => {
                                 refundEvidenceRefs.current[overpayment.id] = element;
@@ -711,10 +707,8 @@ export function SettlementExceptionPanel({
                           </label>
                           <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
                             {copy.overpayments.refundReason}
-                            <TextInput
-                              className="w-40"
-                              showClearIcon={false}
-                              size="sm"
+                            <Input
+                              className="h-8 px-3 w-40"
                               value={refundDraft.reason}
                               ref={(element) => {
                                 refundReasonRefs.current[overpayment.id] = element;
@@ -726,10 +720,8 @@ export function SettlementExceptionPanel({
                           </label>
                           <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
                             {copy.overpayments.refundDocument}
-                            <TextInput
-                              className="w-32"
-                              showClearIcon={false}
-                              size="sm"
+                            <Input
+                              className="h-8 px-3 w-32"
                               value={refundDraft.document}
                               onChange={(event) => updateRefundDraft(overpayment.id, "document", event.target.value)}
                             />
@@ -788,11 +780,9 @@ export function SettlementExceptionPanel({
               <div className="flex flex-wrap items-end gap-2">
                 <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
                   {copy.overpayments.amount}
-                  <TextInput
-                    className="w-24"
+                  <Input
+                    className="h-8 px-3 w-24"
                     inputMode="decimal"
-                    showClearIcon={false}
-                    size="sm"
                     value={overpaymentDraft.amount}
                     ref={overpaymentAmountRef}
                     aria-describedby={validationField === "overpayment.amount" ? exceptionErrorId : undefined}
@@ -805,10 +795,8 @@ export function SettlementExceptionPanel({
                 </label>
                 <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
                   {copy.overpayments.currency}
-                  <TextInput
-                    className="w-20 uppercase"
-                    showClearIcon={false}
-                    size="sm"
+                  <Input
+                    className="h-8 px-3 w-20 uppercase"
                     value={overpaymentDraft.currency}
                     ref={overpaymentCurrencyRef}
                     aria-describedby={validationField === "overpayment.currency" ? exceptionErrorId : undefined}
@@ -821,23 +809,21 @@ export function SettlementExceptionPanel({
                 </label>
                 <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
                   {copy.overpayments.kind}
-                  <Select
-                    aria-label={copy.overpayments.kind}
-                    className="w-44"
-                    options={entry.type === "payable"
+                  <Select value={overpaymentDraft.kind} onValueChange={(value) => setOverpaymentDraft((current) => ({ ...current, kind: value as SettlementOverpaymentKind }))}>
+                    <SelectTrigger aria-label={copy.overpayments.kind} className="h-8 w-44"><SelectValue /></SelectTrigger>
+                    <SelectContent align="start">
+                      {(entry.type === "payable"
                       ? [{ label: copy.overpayments.advancePayable, value: "advance" }]
-                      : [{ label: copy.overpayments.overpay, value: "overpay" }]}
-                    size="sm"
-                    value={overpaymentDraft.kind}
-                    onValueChange={(value) => setOverpaymentDraft((current) => ({ ...current, kind: value as SettlementOverpaymentKind }))}
-                  />
+                      : [{ label: copy.overpayments.overpay, value: "overpay" }]).map((option) => (
+                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </label>
                 <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
                   {copy.overpayments.paymentId}
-                  <TextInput
-                    className="w-56 font-mono"
-                    showClearIcon={false}
-                    size="sm"
+                  <Input
+                    className="h-8 px-3 w-56 font-mono"
                     value={overpaymentDraft.paymentId}
                     ref={overpaymentPaymentRef}
                     aria-describedby={validationField === "overpayment.paymentId" ? exceptionErrorId : undefined}
@@ -906,11 +892,9 @@ export function SettlementExceptionPanel({
               <div className="flex flex-wrap items-end gap-2">
                 <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
                   {copy.adjustments.amount}
-                  <TextInput
-                    className="w-24"
+                  <Input
+                    className="h-8 px-3 w-24"
                     inputMode="decimal"
-                    showClearIcon={false}
-                    size="sm"
                     value={adjustmentDraft.amount}
                     ref={adjustmentAmountRef}
                     aria-describedby={validationField === "adjustment.amount" ? exceptionErrorId : undefined}
@@ -923,10 +907,8 @@ export function SettlementExceptionPanel({
                 </label>
                 <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
                   {copy.adjustments.currency}
-                  <TextInput
-                    className="w-20 uppercase"
-                    showClearIcon={false}
-                    size="sm"
+                  <Input
+                    className="h-8 px-3 w-20 uppercase"
                     value={adjustmentDraft.currency}
                     ref={adjustmentCurrencyRef}
                     aria-describedby={validationField === "adjustment.currency" ? exceptionErrorId : undefined}
@@ -939,27 +921,24 @@ export function SettlementExceptionPanel({
                 </label>
                 <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
                   {copy.adjustments.kind}
-                  <Select
-                    aria-label={copy.adjustments.kind}
-                    aria-describedby={`settlement-adjustment-hint-${entry.id}`}
-                    className="w-44"
-                    options={[
+                  <Select value={adjustmentDraft.kind} onValueChange={(value) => setAdjustmentDraft((current) => ({ ...current, kind: value as SettlementAdjustmentKind }))}>
+                    <SelectTrigger aria-label={copy.adjustments.kind} aria-describedby={`settlement-adjustment-hint-${entry.id}`} className="h-8 w-44"><SelectValue /></SelectTrigger>
+                    <SelectContent align="start">
+                      {([
                       { label: copy.adjustments.credit, value: "credit" },
                       { label: copy.adjustments.adjustment, value: "adjustment" },
                       { label: copy.adjustments.refund, value: "refund" },
                       { label: copy.adjustments.return, value: "return" },
-                    ]}
-                    size="sm"
-                    value={adjustmentDraft.kind}
-                    onValueChange={(value) => setAdjustmentDraft((current) => ({ ...current, kind: value as SettlementAdjustmentKind }))}
-                  />
+                    ]).map((option) => (
+                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </label>
                 <label className="flex min-w-44 flex-1 flex-col gap-0.5 text-label-12 text-text-secondary">
                   {copy.adjustments.reason}
-                  <TextInput
-                    className="w-full"
-                    showClearIcon={false}
-                    size="sm"
+                  <Input
+                    className="h-8 px-3 w-full"
                     value={adjustmentDraft.reason}
                     ref={adjustmentReasonRef}
                     aria-describedby={validationField === "adjustment.reason" ? exceptionErrorId : undefined}
@@ -972,20 +951,16 @@ export function SettlementExceptionPanel({
                 </label>
                 <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
                   {copy.adjustments.evidence}
-                  <TextInput
-                    className="w-32"
-                    showClearIcon={false}
-                    size="sm"
+                  <Input
+                    className="h-8 px-3 w-32"
                     value={adjustmentDraft.evidence}
                     onChange={(event) => setAdjustmentDraft((current) => ({ ...current, evidence: event.target.value }))}
                   />
                 </label>
                 <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
                   {copy.adjustments.document}
-                  <TextInput
-                    className="w-32"
-                    showClearIcon={false}
-                    size="sm"
+                  <Input
+                    className="h-8 px-3 w-32"
                     value={adjustmentDraft.document}
                     onChange={(event) => setAdjustmentDraft((current) => ({ ...current, document: event.target.value }))}
                   />

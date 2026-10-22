@@ -21,7 +21,7 @@ import {
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { AnalyticsSkeleton } from "@trade-os/operations/components/AnalyticsSkeleton";
 import { Button } from "@/components/ui/Button";
-import { Select } from "@trade-os/operations/components/ui/Dropdown";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { cx } from "@trade-os/operations/components/ui/utils";
 // erp-v2-adapt: begin — QA-1352 defers the gate reason to BE #495 instead of the boolean projection.
 import { usePlatformSession } from "@trade-os/operations/session/PlatformSessionContext";
@@ -1113,14 +1113,7 @@ function SalesPerformanceIdentityScope({
           label={copy.controls.assigneeAria}
           data-ui="salesperf-assignee-filter"
         >
-          <Select
-            aria-label={copy.controls.assigneeAria}
-            options={assigneeOptions}
-            placeholder={copy.controls.assigneeAll}
-            registerControl={registerAssigneeControl}
-            size="sm"
-            value={assigneeFilter ?? ASSIGNEE_ALL}
-            onValueChange={(value) => {
+          <Select value={assigneeFilter ?? ASSIGNEE_ALL} onValueChange={(value) => {
               const next = value === ASSIGNEE_ALL ? null : value
               // 동일 항목 재선택은 no-op — load 의존성이 안 바뀌어 refetch 가
               // 없으므로 loading 으로 두면 영구 로딩에 갇힌다(적대 리뷰).
@@ -1133,8 +1126,14 @@ function SalesPerformanceIdentityScope({
                   ? { ...current, refreshing: true, refreshError: null }
                   : { status: "loading" }
               )
-            }}
-          />
+            }}>
+            <SelectTrigger ref={registerAssigneeControl} aria-label={copy.controls.assigneeAria} className="h-8"><SelectValue placeholder={copy.controls.assigneeAll} /></SelectTrigger>
+            <SelectContent align="start">
+              {(assigneeOptions).map((option) => (
+                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </BusinessFilterField>
       ) : null}
     </BusinessListToolbar>

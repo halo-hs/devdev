@@ -20,7 +20,7 @@ import { SkeletonList } from "@trade-os/operations/components/Skeletons";
 import { useToast } from "@trade-os/operations/components/toast/useToast";
 import { Button } from "@/components/ui/Button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
-import { Select } from "@trade-os/operations/components/ui/Dropdown";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { cx } from "@trade-os/operations/components/ui/utils";
 // erp-v2-adapt: begin — QA-1352 defers the gate reason to BE #495 instead of the boolean projection.
 import { usePlatformSession } from "@trade-os/operations/session/PlatformSessionContext";
@@ -1436,13 +1436,14 @@ function ReportsConnectedSession({
       {currencies.length > 0 ? (
         <BusinessFilterField label={copy.controls.currencyAria}>
           {/* Figma 결산리포트 v6 hero: currency is a Select, not a tab row. */}
-          <Select
-            aria-label={copy.controls.currencyAria}
-            onValueChange={setCurrencyChoice}
-            options={currencies.map((ccy) => ({ value: ccy, label: ccy }))}
-            size="sm"
-            value={currency ?? ""}
-          />
+          <Select value={currency ?? ""} onValueChange={setCurrencyChoice}>
+            <SelectTrigger aria-label={copy.controls.currencyAria} className="h-8"><SelectValue /></SelectTrigger>
+            <SelectContent align="start">
+              {(currencies.map((ccy) => ({ value: ccy, label: ccy }))).map((option) => (
+                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </BusinessFilterField>
       ) : null}
       {isManager ? (
@@ -1450,14 +1451,14 @@ function ReportsConnectedSession({
           label={copy.controls.assigneeAria}
           data-ui="reports-assignee-filter"
         >
-          <Select
-            aria-label={copy.controls.assigneeAria}
-            onValueChange={(value) => changeAssignee(value)}
-            options={assigneeOptions}
-            placeholder={copy.controls.assigneeAll}
-            size="sm"
-            value={assigneeFilter ?? ASSIGNEE_ALL}
-          />
+          <Select value={assigneeFilter ?? ASSIGNEE_ALL} onValueChange={(value) => changeAssignee(value)}>
+            <SelectTrigger aria-label={copy.controls.assigneeAria} className="h-8"><SelectValue placeholder={copy.controls.assigneeAll} /></SelectTrigger>
+            <SelectContent align="start">
+              {(assigneeOptions).map((option) => (
+                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </BusinessFilterField>
       ) : null}
     </BusinessListToolbar>

@@ -22,8 +22,8 @@ import { useScreenToast } from "@trade-os/operations/components/toast/useToast";
 import { Button } from "@/components/ui/Button";
 import { AsyncButton } from "@/components/ds2/extensions/AsyncButton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
-import { Select } from "@trade-os/operations/components/ui/Dropdown";
-import { TextArea } from "@trade-os/operations/components/ui/Input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
 import { TextLink } from "@trade-os/operations/components/ui/TextLink";
 import { useEntitlements, useIdentity, usePlatformAuth } from "@trade-os/operations/session/PlatformSessionContext";
 import {
@@ -975,21 +975,21 @@ function TradeFinanceFactPanel({
       ) : (
         <>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <Select
-              aria-label={copy.filterLabel}
-              className="w-full sm:w-52"
-              onValueChange={(value) => {
+            <Select value={statusFilter} onValueChange={(value) => {
                 setStatusFilter(value as "all" | "attention" | "ready");
                 setPageIndex(0);
-              }}
-              options={[
+              }}>
+              <SelectTrigger aria-label={copy.filterLabel} className="h-8 w-full sm:w-52"><SelectValue /></SelectTrigger>
+              <SelectContent align="start">
+                {([
                 { label: copy.filterAll, value: "all" },
                 { label: copy.filterAttention, value: "attention" },
                 { label: copy.filterReady, value: "ready" },
-              ]}
-              size="sm"
-              value={statusFilter}
-            />
+              ]).map((option) => (
+                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <span aria-live="polite" className="text-label-12 text-text-muted">
               {showingLabel}
             </span>
@@ -2980,20 +2980,20 @@ function SettlementView({
       }
     >
       <BusinessFilterField label={copy.controls.currencyLabel}>
-        <Select
-          aria-label={copy.controls.currencyLabel}
-          className="min-w-24"
-          data-ui="settlement-currency-filter"
-          onValueChange={(value) => onLedgerCurrencyChange(value || undefined)}
-          options={[
-            { label: copy.controls.currencyAll, value: "" },
+        <Select value={ledgerCurrency ?? "all"} onValueChange={(value) => onLedgerCurrencyChange(value === "all" ? undefined : value)}>
+          <SelectTrigger aria-label={copy.controls.currencyLabel} data-ui="settlement-currency-filter" className="min-w-24"><SelectValue /></SelectTrigger>
+          <SelectContent align="start">
+            {([
+            { label: copy.controls.currencyAll, value: "all" },
             ...availableLedgerCurrencies.map((currency) => ({
               label: currency,
               value: currency,
             })),
-          ]}
-          value={ledgerCurrency ?? ""}
-        />
+          ]).map((option) => (
+              <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </BusinessFilterField>
       <label className="text-label-12 text-text-secondary flex items-center gap-1.5">
         <Checkbox
@@ -4347,19 +4347,19 @@ function SettlementView({
           </label>
           <div className="flex flex-col gap-1 text-label-12 text-text-secondary">
             <span>{copy.ledger.type}</span>
-            <Select
-              aria-label={copy.ledger.type}
-              className="w-full"
-              disabled={manualScheduleBusy}
-              onValueChange={(value) => {
+            <Select value={manualScheduleType} onValueChange={(value) => {
                 if (value === "receivable" || value === "payable") setManualScheduleType(value);
-              }}
-              options={[
+              }} disabled={manualScheduleBusy}>
+              <SelectTrigger aria-label={copy.ledger.type} className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent align="start">
+                {([
                 { label: copy.ledger.tabs.receivable, value: "receivable" },
                 { label: copy.ledger.tabs.payable, value: "payable" },
-              ]}
-              value={manualScheduleType}
-            />
+              ]).map((option) => (
+                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           {manualScheduleError ? (
             <p className="m-0 text-body-13 text-status-danger" role="alert">
@@ -4712,31 +4712,30 @@ function SettlementView({
             </p>
             <div className="flex flex-col gap-1 text-label-12 text-text-secondary">
               <span>{copy.ledger.closeType}</span>
-              <Select
-                aria-label={copy.ledger.closeType}
-                className="w-full"
-                disabled={lifecycleBusy !== null}
-                onValueChange={(value) => {
+              <Select value={closeDraft.closureType} onValueChange={(value) => {
                   if (!isCloseType(value)) return;
                   setCloseDraft((previous) => ({
                     ...previous,
                     closureType: value,
                   }));
-                }}
-                options={CLOSE_TYPES.map((type) => ({
+                }} disabled={lifecycleBusy !== null}>
+                <SelectTrigger aria-label={copy.ledger.closeType} className="w-full"><SelectValue /></SelectTrigger>
+                <SelectContent align="start">
+                  {(CLOSE_TYPES.map((type) => ({
                   label: copy.ledger.closeTypes[type],
                   value: type,
-                }))}
-                value={closeDraft.closureType}
-              />
+                }))).map((option) => (
+                    <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <label className="flex flex-col gap-1 text-label-12 text-text-secondary">
               {copy.ledger.closeNote}
-              <TextArea
+              <Textarea
                 aria-label={copy.ledger.closeNote}
                 className="w-full"
                 disabled={lifecycleBusy !== null}
-                fullWidth
                 onChange={(event) =>
                   setCloseDraft((previous) => ({
                     ...previous,
