@@ -16,7 +16,7 @@ import { LoadableSection, type LoadableSectionCopy } from "@trade-os/components/
 import { OperationalTableFrame } from "@trade-os/components/OperationalTableFrame";
 import { SectionPanel } from "@trade-os/components/SectionPanel";
 import { SkeletonCards, SkeletonTable } from "@trade-os/components/Skeletons";
-import { StatusBadge, type StatusTone } from "@trade-os/components/StatusBadge";
+import { StatusBadge, type StatusTone } from "@/components/platform/StatusBadge";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { AsyncButton } from "@/components/ds2/extensions/AsyncButton";
@@ -728,7 +728,7 @@ function ProfitabilitySummaryCard({
     <div className="rounded-lg border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold uppercase text-[var(--color-gray-6)]">{caption}</div>
-        <StatusBadge
+        <StatusBadge size="sm"
           className="px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]"
           meaning="state"
           style={profitabilityDecisionStyle(decision.tone)}
@@ -829,7 +829,7 @@ function ProfitabilityRollupTable({
                 </HostTableCell>
                 <HostTableCell className="whitespace-nowrap px-3 py-2 text-right text-[var(--color-gray-2)]">{formatMarginPercent(row, copy)}</HostTableCell>
                 <HostTableCell className="px-3 py-2">
-                  <StatusBadge
+                  <StatusBadge size="sm"
                     className="px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]"
                     meaning="state"
                     style={profitabilityDecisionStyle(decision.tone)}
@@ -1061,7 +1061,7 @@ function TradeFinanceFactPanel({
                       <span className="block text-[var(--color-gray-5)]">{copy.payableOutstanding}: {fmtExact(fact.payable_outstanding_amount, fact.currency, moneyLocale)}</span>
                     </HostTableCell>
                     <HostTableCell className="px-3 py-2">
-                      <StatusBadge
+                      <StatusBadge size="sm"
                         className="px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-normal"
                         meaning="state"
                         style={profitabilityDecisionStyle(ready ? "success" : "warning")}
@@ -2719,7 +2719,7 @@ function SettlementView({
             {exactMoney(d.amount, d.currency)} · {formatDate(d.due_date, moneyLocale)}
           </span>
           {d.overdue ? (
-            <StatusBadge data-testid="settlement-drill-overdue" tone="danger">
+            <StatusBadge size="sm" data-testid="settlement-drill-overdue" tone="danger">
               {copy.ledger.overdueBadge}
             </StatusBadge>
           ) : null}
@@ -3556,7 +3556,7 @@ function SettlementView({
                         ) : null}
                       </HostTableCell>
                       <HostTableCell className="px-3 py-2">
-                        <StatusBadge data-testid="settlement-ledger-direction" tone={ledgerTypeTone(e.type)}>
+                        <StatusBadge size="sm" data-testid="settlement-ledger-direction" tone={ledgerTypeTone(e.type)}>
                           {ledgerTypeLabel(e.type, copy)}
                         </StatusBadge>
                       </HostTableCell>
@@ -3579,7 +3579,7 @@ function SettlementView({
                             {copy.ledger.manualReference}: {e.manual_reference.number}
                           </span>
                         ) : (
-                          <StatusBadge
+                          <StatusBadge size="sm"
                             data-testid="settlement-ledger-source-document-state"
                             tone={sourceDocumentStateTone(e.source_document_state)}
                           >
@@ -3618,7 +3618,7 @@ function SettlementView({
                             </span>
                           )}
                           {isLedgerEntryOverdue(e) ? (
-                            <StatusBadge data-testid="settlement-ledger-overdue" tone="danger">
+                            <StatusBadge size="sm" data-testid="settlement-ledger-overdue" tone="danger">
                               {copy.ledger.overdueBadge}
                             </StatusBadge>
                           ) : null}

@@ -20,7 +20,7 @@ import {
   type ColumnTableColumn,
 } from "@trade-os/components/ScreenSupportUnits";
 import { SectionPanel } from "@trade-os/components/SectionPanel";
-import { StatusBadge } from "@trade-os/components/StatusBadge";
+import { StatusBadge } from "@/components/platform/StatusBadge";
 import { TaskQueue, type TaskQueueItem } from "@trade-os/components/TaskQueue";
 import { Button } from "@/components/ui/Button";
 
@@ -199,9 +199,9 @@ type ThroughputRow = {
 };
 
 const throughputRows: ThroughputRow[] = [
-  { key: "kim", owner: "김철수", uploads: "42", confirms: "31", rate: <StatusBadge tone="success">74%</StatusBadge> },
-  { key: "lee", owner: "이박사", uploads: "36", confirms: "19", rate: <StatusBadge tone="warning">53%</StatusBadge> },
-  { key: "choi", owner: "최팀장", uploads: "28", confirms: "12", rate: <StatusBadge tone="danger">43%</StatusBadge> },
+  { key: "kim", owner: "김철수", uploads: "42", confirms: "31", rate: <StatusBadge size="sm" tone="success">74%</StatusBadge> },
+  { key: "lee", owner: "이박사", uploads: "36", confirms: "19", rate: <StatusBadge size="sm" tone="warning">53%</StatusBadge> },
+  { key: "choi", owner: "최팀장", uploads: "28", confirms: "12", rate: <StatusBadge size="sm" tone="danger">43%</StatusBadge> },
 ];
 
 function buildThroughputColumns(copy: MonitorBodyCopy): ColumnTableColumn<ThroughputRow>[] {
@@ -496,10 +496,8 @@ function withAreaFreshness(
  */
 function areaFailureBadge(label: string | undefined, area: string): ReactNode | null {
   if (!label) return null;
-  // StatusBadge 는 자체 `data-ui="status-badge"` 를 props 뒤에 덮어쓰므로
-  // 식별자는 data-testid 로 단다.
   return (
-    <StatusBadge data-testid={`monitor-area-failed-${area}`} tone="danger">
+    <StatusBadge size="sm" data-testid={`monitor-area-failed-${area}`} tone="danger">
       {label}
     </StatusBadge>
   );
@@ -586,7 +584,7 @@ function MonitorRightPanel({
       {!ops && (
         <TaskQueue
           title={copy.nextAction}
-          action={<StatusBadge tone={empty ? "neutral" : "danger"}>{empty ? "—" : "P0"}</StatusBadge>}
+          action={<StatusBadge size="sm" tone={empty ? "neutral" : "danger"}>{empty ? "—" : "P0"}</StatusBadge>}
           empty={copy.taskQueueEmpty}
           items={empty ? [] : monitorPanelItems}
         />
@@ -634,9 +632,9 @@ function ThroughputPanel({
       action={
         throughputFailure ?? (
           empty || showLiveEmpty ? (
-            <StatusBadge tone="neutral">—</StatusBadge>
+            <StatusBadge size="sm" tone="neutral">—</StatusBadge>
           ) : ops ? undefined : (
-            <StatusBadge tone="info">{String(rateBadge)}</StatusBadge>
+            <StatusBadge size="sm" tone="info">{String(rateBadge)}</StatusBadge>
           )
         )
       }
@@ -717,7 +715,7 @@ function FlagFeedSection({
       contentProps={{ tabIndex: 0, role: "region", "aria-label": `${copy.flagTitle} 목록` }}
       title={copy.flagTitle}
       description={checked ? copy.flagDescChecked : copy.flagDesc}
-      action={areaFailureBadge(failure, "flags") ?? <StatusBadge tone={checked || resolvedBadge === "—" ? "neutral" : "danger"}>{resolvedBadge}</StatusBadge>}
+      action={areaFailureBadge(failure, "flags") ?? <StatusBadge size="sm" tone={checked || resolvedBadge === "—" ? "neutral" : "danger"}>{resolvedBadge}</StatusBadge>}
     >
       {onCheckedChange ? (
         <ChipGroup
@@ -762,7 +760,7 @@ function PendingActionSection({
       title={copy.pendingTitle}
       description={withAreaFreshness(copy.pendingDesc, [{ area: "pending", value: freshness }])}
       action={
-        areaFailureBadge(failure, "pending") ?? <StatusBadge tone={resolvedBadge === "—" ? "neutral" : "info"}>{resolvedBadge}</StatusBadge>
+        areaFailureBadge(failure, "pending") ?? <StatusBadge size="sm" tone={resolvedBadge === "—" ? "neutral" : "info"}>{resolvedBadge}</StatusBadge>
       }
     >
       <TaskQueue empty={copy.taskQueueEmpty} items={empty ? [] : resolved} />
@@ -882,7 +880,7 @@ function MonitorBody({
               live?.areaFailures?.blockedP0 ?? live?.areaFailures?.blockedP1,
               "blocked",
             ) ?? (
-              <StatusBadge tone={isEmpty || live?.blockedBadge === "—" ? "neutral" : "danger"}>{isEmpty ? "—" : live ? live.blockedBadge : "P0 3건"}</StatusBadge>
+              <StatusBadge size="sm" tone={isEmpty || live?.blockedBadge === "—" ? "neutral" : "danger"}>{isEmpty ? "—" : live ? live.blockedBadge : "P0 3건"}</StatusBadge>
             )
           }
         >
@@ -897,7 +895,7 @@ function MonitorBody({
           ])}
           action={
             areaFailureBadge(live?.areaFailures?.risks, "risks") ?? (
-              <StatusBadge tone={isEmpty || live?.riskBadge === "—" ? "neutral" : "warning"}>{isEmpty ? "—" : live ? live.riskBadge : "2건"}</StatusBadge>
+              <StatusBadge size="sm" tone={isEmpty || live?.riskBadge === "—" ? "neutral" : "warning"}>{isEmpty ? "—" : live ? live.riskBadge : "2건"}</StatusBadge>
             )
           }
         >

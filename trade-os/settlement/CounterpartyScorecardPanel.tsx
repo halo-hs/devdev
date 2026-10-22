@@ -7,7 +7,7 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { InfoBox } from "@trade-os/components/InfoBox";
 import { OperationalTableFrame } from "@trade-os/components/OperationalTableFrame";
 import { SectionPanel } from "@trade-os/components/SectionPanel";
-import { StatusBadge, type StatusTone } from "@trade-os/components/StatusBadge";
+import { StatusBadge, type StatusTone } from "@/components/platform/StatusBadge";
 import { Button } from "@/components/ui/Button";
 import { getCounterpartyScorecards, type CounterpartyScorecard } from "@trade-os/lib/api/settlement";
 import { withRetry } from "@trade-os/lib/api/retry";
@@ -100,7 +100,7 @@ export function CounterpartyScorecardPanel({
   const gradeCell = (r: CounterpartyScorecard) => {
     if (r.grade_basis === "no_history_overdue") {
       return (
-        <StatusBadge
+        <StatusBadge size="sm"
           className="rounded-md px-1.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold"
           meaning="risk"
           shape="square"
@@ -113,7 +113,7 @@ export function CounterpartyScorecardPanel({
     }
     if (r.grade_basis === "insufficient_history") {
       return (
-        <StatusBadge
+        <StatusBadge size="sm"
           className="rounded-md px-1.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-normal"
           meaning="classification"
           shape="square"
@@ -126,7 +126,7 @@ export function CounterpartyScorecardPanel({
     }
     const presentation = GRADE_PRESENTATION[r.grade] ?? GRADE_PRESENTATION.B;
     return (
-      <StatusBadge
+      <StatusBadge size="sm"
         className="rounded-md px-1.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold"
         meaning="classification"
         shape="square"

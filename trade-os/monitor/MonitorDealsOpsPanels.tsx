@@ -5,7 +5,7 @@ import Link from "@trade-os/lib/AppLink";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { SectionPanel } from "@trade-os/components/SectionPanel";
-import { StatusBadge } from "@trade-os/components/StatusBadge";
+import { StatusBadge } from "@/components/platform/StatusBadge";
 import { Button } from "@/components/ui/Button";
 import { usePlatformAuth } from "@trade-os/lib/session/PlatformSessionContext";
 import { type DealSummaryResponse } from "@trade-os/lib/api/deals";
@@ -180,7 +180,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
         title={copy.docGap.title}
         action={
           docGaps.length > 0 ? (
-            <StatusBadge tone="danger">{formatBadge(copy.docGap, docGaps.length)}</StatusBadge>
+            <StatusBadge size="sm" tone="danger">{formatBadge(copy.docGap, docGaps.length)}</StatusBadge>
           ) : null
         }
       >
@@ -211,7 +211,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
         title={copy.openRemaining.title}
         action={
           openRemaining.length > 0 ? (
-            <StatusBadge tone="warning">{formatBadge(copy.openRemaining, openRemaining.length)}</StatusBadge>
+            <StatusBadge size="sm" tone="warning">{formatBadge(copy.openRemaining, openRemaining.length)}</StatusBadge>
           ) : null
         }
       >
@@ -243,7 +243,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
         title={copy.qtyMismatch.title}
         action={
           qtyMismatch.length > 0 ? (
-            <StatusBadge tone="danger">{formatBadge(copy.qtyMismatch, qtyMismatch.length)}</StatusBadge>
+            <StatusBadge size="sm" tone="danger">{formatBadge(copy.qtyMismatch, qtyMismatch.length)}</StatusBadge>
           ) : null
         }
       >

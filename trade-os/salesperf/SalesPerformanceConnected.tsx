@@ -1,7 +1,7 @@
 "use client";
 
 import { counterpartyDisplayState } from "./counterpartyDisplayState";
-import { StatusBadge } from "@trade-os/components/StatusBadge";
+import { StatusBadge } from "@/components/platform/StatusBadge";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/SearchFilterBar";
 import { Search } from "lucide-react";
@@ -1465,7 +1465,7 @@ function SalesPerformanceIdentityScope({
                                     </span>
                                   </HostTableCell>
                                   <HostTableCell className="py-1.5 pr-3" data-ui="counterparty-status-evidence">
-                                    <StatusBadge tone={displayState.tone}>{displayState.label}</StatusBadge>
+                                    <StatusBadge size="sm" tone={displayState.tone}>{displayState.label}</StatusBadge>
                                     <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{!displayState.writtenOff.valid || displayState.writtenOff.scaled < 0n ? "상각 확인 필요" : displayState.writtenOff.scaled > 0n ? `상각 처리됨 · ${fmtAmount(displayState.writtenOff.raw, item.currency)} ${item.currency}` : null}</p>
                                   </HostTableCell>
                                   <HostTableCell className="py-1.5 pr-3 text-[var(--color-gray-4)]">{item.currency}</HostTableCell>

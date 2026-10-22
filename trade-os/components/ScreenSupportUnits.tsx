@@ -3,7 +3,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { InfoBox } from "@trade-os/components/InfoBox";
 import { MetricCard } from "@trade-os/components/MetricCard";
 import { SectionPanel, type SectionPanelProps } from "@trade-os/components/SectionPanel";
-import { StatusBadge } from "@trade-os/components/StatusBadge";
+import { StatusBadge } from "@/components/platform/StatusBadge";
 import { ChevronsUpDown } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { cn } from "@/lib/utils";
@@ -137,7 +137,7 @@ const simpleColumns: ColumnTableColumn<SimpleRow>[] = [
     key: "status",
     header: "상태",
     align: "center",
-    render: (row) => <StatusBadge tone="info">{row.status}</StatusBadge>,
+    render: (row) => <StatusBadge size="sm" tone="info">{row.status}</StatusBadge>,
   },
   { key: "owner", header: "담당자", align: "center", render: (row) => row.owner },
 ];

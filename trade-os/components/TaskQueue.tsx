@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { Separator } from "@/components/ui/Separator";
 
-import { DdayBadge, StatusBadge, type DdayTone, type StatusTone } from "@trade-os/components/StatusBadge";
+import { DdayBadge, StatusBadge, type DdayTone, type StatusTone } from "@/components/platform/StatusBadge";
 import { SectionPanel, type SectionPanelProps } from "@trade-os/components/SectionPanel";
 
 type TaskQueueItem = {
@@ -60,10 +60,10 @@ function TaskQueue({
                   {/* TitleRow: min-w-0 flex items-center gap-6 + typo.b9m(14/500) gray2 */}
                   <div className="flex min-w-0 items-center gap-1.5 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-medium text-[var(--color-gray-2)]">
                     {item.serviceLabel && (
-                      <StatusBadge tone={item.serviceTone ?? "neutral"}>{item.serviceLabel}</StatusBadge>
+                      <StatusBadge size="sm" tone={item.serviceTone ?? "neutral"}>{item.serviceLabel}</StatusBadge>
                     )}
                     {item.typeLabel && (
-                      <StatusBadge tone={item.typeTone ?? "neutral"}>{item.typeLabel}</StatusBadge>
+                      <StatusBadge size="sm" tone={item.typeTone ?? "neutral"}>{item.typeLabel}</StatusBadge>
                     )}
                     {/* TitleText: min-w-0 truncate */}
                     {item.href ? (
@@ -81,7 +81,7 @@ function TaskQueue({
                 </div>
                 {/* Right: flex items-center gap-8 */}
                 <div className="flex items-center gap-2">
-                  {item.dueLabel && <DdayBadge ddayTone={item.dueTone}>{item.dueLabel}</DdayBadge>}
+                  {item.dueLabel && <DdayBadge size="sm" ddayTone={item.dueTone}>{item.dueLabel}</DdayBadge>}
                   {item.actionLabel && (
                     // 정본 Button buttonSize=24(→sm) black+tertiary → variant=tertiary intent=brand
                     <Button variant="outline" size="xs"

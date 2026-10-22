@@ -12,7 +12,7 @@ import { Button as HostButton } from "@/components/ui/Button";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/components/HostTable";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { SkeletonTable } from "@trade-os/components/Skeletons";
-import { StatusBadge, type StatusTone } from "@trade-os/components/StatusBadge";
+import { StatusBadge, type StatusTone } from "@/components/platform/StatusBadge";
 import { Button } from "@/components/ui/Button";
 import { usePlatformSession } from "@trade-os/lib/session/PlatformSessionContext";
 import { ApiError } from "@trade-os/lib/api/client";
@@ -547,7 +547,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                       </HostButton> : <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">증거 미확인</div>}
                     </HostTableCell>
                     <HostTableCell>
-                      <StatusBadge meaning="state" tone={delayed ? "danger" : arriving ? "warning" : STATUS_TONE[ship.status]}>
+                      <StatusBadge size="sm" meaning="state" tone={delayed ? "danger" : arriving ? "warning" : STATUS_TONE[ship.status]}>
                         {delayed ? copy.filters.delayed : arriving ? copy.filters.arriving : copy.status[ship.status] ?? ship.status}
                       </StatusBadge>
                       {delayed || arriving ? <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.status[ship.status] ?? ship.status}</div> : null}
