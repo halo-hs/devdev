@@ -1,4 +1,4 @@
-import { SimpleFormField } from "@/components/ds2/molecule/FormItem"
+import { SimpleFormField } from "@/components/platform/FormItem"
 import {
   Empty,
   EmptyHeader,

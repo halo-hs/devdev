@@ -4,7 +4,7 @@ import { PostWriteRefreshNotice } from "@trade-os/components/PostWriteRefreshNot
 import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, type DealDocumentRecord } from "@trade-os/lib/dealDocumentActions"
 import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
 import { ReferenceOperations } from "@trade-os/operations"
-import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@/components/ds2/molecule/FormItem"
+import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@/components/platform/FormItem"
 import {
   getDealWorkPlan,
   readStartedWork,
@@ -57,12 +57,12 @@ import {
 import {
   PdfFloatingControls,
   PdfViewerToolbar,
-} from "@/components/ds2/molecule/PageNavigator"
+} from "@/components/platform/PageNavigator"
 import {
   PdfPanelWorkspaceCard,
   ResponsivePdfPanelSplit,
 } from "@/components/platform/PdfPanelResizeHandle"
-import { PannablePdfViewport } from "@/components/ds2/molecule/DocumentViewerStage"
+import { PannablePdfViewport } from "@/components/platform/DocumentViewerStage"
 import { AutoSaveStatus } from "@/components/platform/AutoSaveStatus"
 import {
   DocumentTemplateOptions,
@@ -119,8 +119,8 @@ import {
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { StatusBadge } from "@/components/ds2/molecule/StatusBadge"
-import { DateInput } from "@/components/ds2/atom/DateInput"
+import { StatusBadge } from "@/components/platform/StatusBadge"
+import { DateInput } from "@/components/platform/DateInput"
 import { prototypeBackend, type MutationResult } from "@trade-os/lib/prototypeBackend"
 import {
   DealHandoffProvider,

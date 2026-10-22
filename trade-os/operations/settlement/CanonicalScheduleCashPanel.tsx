@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@trade-os/operations/components/ui/button";
 import { TextLink } from "@trade-os/operations/components/ui/text-link";
-import { DateInput } from "@/components/ds2/atom/DateInput";
+import { DateInput } from "@/components/platform/DateInput";
 import { ApiError } from "@trade-os/operations/lib/api/client";
 import {
   getScheduleCashApplications,

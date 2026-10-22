@@ -49,8 +49,8 @@ Figma(SNAP 2.0 작업)를 코드에 반영할 때 지키는 기준입니다. Fig
 
 **컴포넌트 적용**
 - shadcn 기본 컴포넌트는 `src/components/ui/`의 래퍼를 최대한 씁니다. 화면에서 같은 모양을 손으로 다시 그리지 않습니다.
-- shadcn에 없는 Figma 조합 컴포넌트(KPI 카드, 순위 행 등)는 `src/components/ds2/molecule/`(디자인 시스템 대응) 또는 `src/components/platform/`(업무 공통)에 공용 컴포넌트로 만들되, 안쪽은 shadcn 기본 컴포넌트(Card·Separator·Progress·Badge·Button 등)로 조립합니다.
-- 디자인 시스템 기본 부품 `src/components/ds2/`(ui·extensions·assets)와 기본 토큰 `src/app/tokens-ds2.css`는 수정하지 않습니다. DS 확장 컴포넌트를 통째로 복사한 래퍼도 만들지 않습니다.
+- shadcn에 없는 Figma 조합 컴포넌트(KPI 카드, 순위 행 등)는 `src/components/platform/`에 공용 컴포넌트로 만들되, 안쪽은 shadcn 기본 컴포넌트(Card·Separator·Progress·Badge·Button 등)로 조립합니다.
+- 디자인 시스템 기본 부품은 `src/components/ds2/`(ui·extensions·assets), 기본 토큰은 `src/app/tokens-ds2.css`입니다. DS 확장 컴포넌트를 통째로 복사한 래퍼는 만들지 않습니다.
 - 다른 작업자가 같은 이름의 컴포넌트를 만들고 있는지 먼저 확인하고 겹치지 않게 합니다.
 
 **토큰과 크기**

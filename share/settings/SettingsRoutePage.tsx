@@ -28,7 +28,7 @@ import {
   ExternalLink,
 } from "lucide-react"
 
-import { WorkspaceSwitcher } from "@/components/ds2/molecule/WorkspaceSwitcher"
+import { WorkspaceSwitcher } from "@/components/platform/WorkspaceSwitcher"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {

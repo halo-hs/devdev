@@ -33,7 +33,7 @@ import { PdfPanelWorkspaceCard } from "@/components/platform/PdfPanelResizeHandl
 import { DocumentReviewWorkspace } from "@trade-os/confirm/ConfirmFlowConnected"
 import { TablePagination } from "@/components/ui/table-pagination"
 import { type FileDropZoneRef, FileDropZone } from "@/components/ds2/extensions/file-drop-zone"
-import { BusinessPageHero } from "@/components/ds2/molecule/HeroBanner"
+import { BusinessPageHero } from "@/components/platform/HeroBanner"
 import { type RecentDocument, type UploadDocumentType, type UploadDetailStep, type UploadDocumentDealLinks, type UploadDocumentDealLink, type DocumentStageKey } from "@/App"
 import { uploadDocumentTypeLabel, manualUploadDocumentTypeOptions, reviewFieldsForDocument, resolvedReviewFields, isUploadDocumentTypeUnresolved } from "@trade-os/inbox/uploadDocumentModel"
 

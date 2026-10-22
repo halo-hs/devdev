@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import { DateInput } from "@/components/ds2/atom/DateInput"
+import { DateInput } from "@/components/platform/DateInput"
 import {
   AlertCircle,
   Building2,

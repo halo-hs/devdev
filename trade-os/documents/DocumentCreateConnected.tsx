@@ -13,7 +13,7 @@ import { FileText, ChevronLeft, ChevronRight, Building2, Check, Search } from "l
 import { DocumentStage } from "@trade-os/components/DocumentStage"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
 import { DocumentReviewSharePanel } from "@trade-os/documents/DocumentSharePanel"
-import { BusinessPageHero } from "@/components/ds2/molecule/HeroBanner"
+import { BusinessPageHero } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/button"
 import { DocumentSaveSummary } from "@trade-os/components/DocumentSaveSummary"
 import { PdfPanelWorkspaceCard, PdfPanelResizeHandle } from "@/components/platform/PdfPanelResizeHandle"

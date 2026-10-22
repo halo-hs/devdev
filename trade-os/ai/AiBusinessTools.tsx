@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { DateInput } from "@/components/ds2/atom/DateInput"
+import { DateInput } from "@/components/platform/DateInput"
 import { ArrowRight, Download, RefreshCw, Search } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"

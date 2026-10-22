@@ -45,7 +45,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { BusinessPageHero } from "@/components/ds2/molecule/HeroBanner"
+import { BusinessPageHero } from "@/components/platform/HeroBanner"
 import { SummaryMetricStrip } from "@/components/platform/SummaryMetricStrip"
 import {
   DropdownMenu,
@@ -70,7 +70,7 @@ import {
 } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
-import { StatusBadge } from "@/components/ds2/molecule/StatusBadge"
+import { StatusBadge } from "@/components/platform/StatusBadge"
 import { DatePicker } from "@/components/ds2/extensions/date-picker"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 

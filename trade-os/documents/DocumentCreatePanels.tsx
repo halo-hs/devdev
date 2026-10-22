@@ -10,7 +10,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { decimalMagnitude, FINANCE_DECIMAL_SCALE } from "@trade-os/lib/financeDecimal"
 import { normalizeDecimalInput } from "@trade-os/lib/money"
 import { exactDocumentMoneyTotals, exactLineItemAmount } from "@trade-os/lib/documentMoney"
-import { FormField } from "@/components/ds2/molecule/FormItem"
+import { FormField } from "@/components/platform/FormItem"
 import { Input } from "@/components/ui/input"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"

@@ -1,7 +1,7 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Button as ShadcnButton } from "@/components/ui/button";
-import { KpiCard } from "@/components/ds2/molecule/StatTile";
+import { KpiCard } from "@/components/platform/StatTile";
 import { RankingRow } from "@/components/platform/RankingRow";
 import { PeriodCloseRow } from "@/components/platform/PeriodCloseRow";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

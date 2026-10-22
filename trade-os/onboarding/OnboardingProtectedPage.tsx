@@ -1,4 +1,4 @@
-import { BusinessPageHero } from "@/components/ds2/molecule/HeroBanner"
+import { BusinessPageHero } from "@/components/platform/HeroBanner"
 import { useEffect } from "react"
 import { useStartGuide } from "./StartGuideProvider"
 import { isDone, type GuideItem } from "./state"

@@ -13,7 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 
-import { BusinessPageHero } from "@/components/ds2/molecule/HeroBanner"
+import { BusinessPageHero } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"

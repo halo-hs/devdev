@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { FormField, FormFieldMessage } from "@/components/ds2/molecule/FormItem"
+import { FormField, FormFieldMessage } from "@/components/platform/FormItem"
 import { LandingShell } from "../shared/layout"
 import { useT } from "../shared/locale"
 

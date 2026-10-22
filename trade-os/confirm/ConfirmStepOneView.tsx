@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent } from "react"
 import { History, ChevronUp, ChevronDown, Check } from "lucide-react"
 import { type ReviewedField } from "@trade-os/lib/erpDocumentWorkflow"
-import { FormField } from "@/components/ds2/molecule/FormItem"
+import { FormField } from "@/components/platform/FormItem"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"

@@ -12,7 +12,7 @@ import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { RefreshCw } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DateInput } from "@/components/ds2/atom/DateInput";
+import { DateInput } from "@/components/platform/DateInput";
 import { LoadableSection, type LoadableSectionCopy } from "@trade-os/operations/components/LoadableSection";
 import { OperationalTableFrame } from "@trade-os/operations/components/OperationalTableFrame";
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";

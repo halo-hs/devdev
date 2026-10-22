@@ -21,7 +21,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import { SummaryMetricStrip } from "@/components/platform/SummaryMetricStrip"
-import { BusinessPageHero } from "@/components/ds2/molecule/HeroBanner"
+import { BusinessPageHero } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/button"
 import {
   Card,
