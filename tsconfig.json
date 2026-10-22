@@ -27,12 +27,6 @@
       ],
       "@shared/*": [
         "./packages/shared-ui/src/*"
-      ],
-      "@ecoya/ui": [
-        "./packages/ecoya-ui/src/index.ts"
-      ],
-      "@ecoya/ui/*": [
-        "./packages/ecoya-ui/src/*"
       ]
     }
   }

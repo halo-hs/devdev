@@ -8,8 +8,6 @@ import { defineConfig, globalIgnores } from "eslint/config"
 export default defineConfig([
   globalIgnores([
     "dist",
-    "packages/ecoya-ui/dist",
-    "packages/design-system-2.0/**/*.test.{ts,tsx}",
   ]),
   {
     files: ["**/*.{ts,tsx}"],

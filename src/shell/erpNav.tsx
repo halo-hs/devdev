@@ -15,6 +15,7 @@ import { WorkspaceSwitcher } from "@shared/components/WorkspaceSwitcher"
 import { SidebarProfileMenu } from "@shared/components/AccountButton"
 import { type ProductKey, type Screen, type ErpPreviewRole } from "@/App"
 import { snapNavGroups } from "@/shell/erpRouteMeta"
+import ecoyaSnapColorLogo from "@ecoya/design-system/assets/logos/logo-ecoya-snap-color.png"
 
 const erpNavigationIcons = { onboarding: "start", home: "home", inbox: "upload", create: "document", ask: "chat", deals: "deals", shipments: "ship", settlement: "settlement", monitoring: "monitoring", reports: "report", sales: "sales" } as const
 
@@ -49,7 +50,7 @@ const erpNavGroups = [
 
 const ECOYA_SYMBOL_SRC = "/assets/logos/ecoya-favicon.svg"
 
-const ECOYA_SNAP_LOGO_SRC = "/assets/logos/logo-ecoya-snap-color.png"
+const ECOYA_SNAP_LOGO_SRC = ecoyaSnapColorLogo
 
 export function EcoyaTradeOsLogo({
   size = "header",

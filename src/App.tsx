@@ -14,7 +14,7 @@ import {
 } from "react"
 
 import { type GeneratedDocumentMetadata } from "@trade-os/lib/generatedDocumentMetadata"
-import { PageFrame } from "@ecoya/ui"
+import { PageFrame } from "@shared/components/PageFrame"
 import { SalesPrototype } from "@trade-os/sales/SalesPipelineView"
 import { workspaceOptions, type WorkspaceKey } from "@shared/lib/workspaces"
 import {

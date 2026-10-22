@@ -11,8 +11,7 @@
     "predev": "npm run sync:design-system",
     "dev": "vite",
     "prebuild": "npm run sync:design-system",
-    "build:ui": "npm --prefix packages/ecoya-ui run build",
-    "build": "npm run build:ui && tsc -b && vite build",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "test:e2e": "playwright test",
@@ -23,7 +22,6 @@
   "dependencies": {
     "@base-ui/react": "^1.6.0",
     "@ecoya/design-system": "*",
-    "@ecoya/ui": "*",
     "@fontsource-variable/geist": "^5.2.9",
     "@ibm/plex-sans-kr": "^1.1.0",
     "@tailwindcss/vite": "^4",
