@@ -24,19 +24,19 @@ type GradePresentation = {
 // Keep the established scorecard colors while exposing a shared semantic badge contract.
 const GRADE_PRESENTATION: Record<string, GradePresentation> = {
   A: {
-    style: { backgroundColor: "var(--ecoya-system-green-1)", color: "var(--ecoya-system-green-6)" },
+    style: { backgroundColor: "var(--color-green-1)", color: "var(--color-green-6)" },
     tone: "success",
   },
   B: {
-    style: { backgroundColor: "var(--ecoya-surface-muted)", color: "var(--ecoya-text-disabled)" },
+    style: { backgroundColor: "var(--color-gray-11)", color: "var(--color-gray-6)" },
     tone: "neutral",
   },
   C: {
-    style: { backgroundColor: "var(--ecoya-system-yellow-1)", color: "var(--ecoya-system-yellow-6)" },
+    style: { backgroundColor: "var(--color-yellow-1)", color: "var(--color-yellow-6)" },
     tone: "warning",
   },
   D: {
-    style: { backgroundColor: "var(--ecoya-system-red-1)", color: "var(--ecoya-system-red-5)" },
+    style: { backgroundColor: "var(--color-red-1)", color: "var(--color-red-5)" },
     tone: "danger",
   },
 };
@@ -104,7 +104,7 @@ export function CounterpartyScorecardPanel({
           className="rounded-md px-1.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold"
           meaning="risk"
           shape="square"
-          style={{ backgroundColor: "var(--ecoya-system-red-1)", color: "var(--ecoya-system-red-5)" }}
+          style={{ backgroundColor: "var(--color-red-1)", color: "var(--color-red-5)" }}
           tone="danger"
         >
           {copy.noHistoryOverdue}
@@ -117,7 +117,7 @@ export function CounterpartyScorecardPanel({
           className="rounded-md px-1.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-normal"
           meaning="classification"
           shape="square"
-          style={{ backgroundColor: "var(--ecoya-surface-muted)", color: "var(--ecoya-text-muted)" }}
+          style={{ backgroundColor: "var(--color-gray-11)", color: "var(--color-gray-5)" }}
           tone="neutral"
         >
           {copy.insufficientHistory.replace("{n}", String(r.completed_count))}

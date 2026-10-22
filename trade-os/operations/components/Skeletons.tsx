@@ -37,7 +37,7 @@ function SkeletonList({
       label={label}
       {...props}
     >
-      <div className="flex flex-col divide-y divide-border-subtle">
+      <div className="flex flex-col divide-y divide-[var(--color-gray-11)]">
         {Array.from({ length: rows }, (_, index) => (
           <div className="flex h-[44px] items-center gap-3" key={index}>
             <Skeleton aria-hidden="true" className="rounded-full size-6 shrink-0" />
@@ -72,7 +72,7 @@ function SkeletonTable({
         <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] w-1/6" />
         <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] ml-auto w-14" />
       </div>
-      <div className="flex flex-col divide-y divide-border-subtle px-3">
+      <div className="flex flex-col divide-y divide-[var(--color-gray-11)] px-3">
         {Array.from({ length: rows }, (_, index) => (
           <div className="flex h-[43px] items-center gap-6" key={index}>
             <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] w-1/6" />

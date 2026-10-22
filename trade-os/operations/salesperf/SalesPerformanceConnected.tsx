@@ -1315,7 +1315,7 @@ function SalesPerformanceIdentityScope({
                                 <span>{name}</span>
                                 <a
                                   aria-label={`${name} 담당 거래 보기`}
-                                  className="inline-flex size-6 shrink-0 items-center justify-center rounded text-[var(--color-primary-4)] hover:bg-[var(--color-gray-11)] focus-visible:outline-2 focus-visible:outline-ecoya-accent"
+                                  className="inline-flex size-6 shrink-0 items-center justify-center rounded text-[var(--color-primary-4)] hover:bg-[var(--color-gray-11)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary-4)]"
                                   href={dealListHref("assignee", dealAssignee, role)}
                                   title={`${name} 담당 거래 보기`}
                                 >
@@ -1456,7 +1456,7 @@ function SalesPerformanceIdentityScope({
                                       <span>{item.counterparty}</span>
                                       <a
                                         aria-label={`${item.counterparty} 거래 보기`}
-                                        className="inline-flex size-6 shrink-0 items-center justify-center rounded text-[var(--color-primary-4)] hover:bg-[var(--color-gray-11)] focus-visible:outline-2 focus-visible:outline-ecoya-accent"
+                                        className="inline-flex size-6 shrink-0 items-center justify-center rounded text-[var(--color-primary-4)] hover:bg-[var(--color-gray-11)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary-4)]"
                                         href={dealListHref("counterparty", item.counterparty, role)}
                                         title={`${item.counterparty} 거래 보기`}
                                       >

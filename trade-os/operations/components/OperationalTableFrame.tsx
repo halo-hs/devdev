@@ -35,7 +35,7 @@ const OperationalTableFrame = forwardRef<HTMLDivElement, OperationalTableFramePr
         {...props}
         aria-label={keyboardScrollable ? label : undefined}
         className={cn(
-          "relative min-w-0 max-w-full overflow-x-auto overscroll-x-contain focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ecoya-accent",
+          "relative min-w-0 max-w-full overflow-x-auto overscroll-x-contain focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary-4)]",
           className,
         )}
         data-operational-table-frame="true"

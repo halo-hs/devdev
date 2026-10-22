@@ -45,7 +45,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/AlertDialog"
 import { Button } from "@/components/ui/Button"
-import { BusinessPageHero } from "@/components/platform/HeroBanner"
+import { BusinessPageHero, heroOutlineButtonClass } from "@/components/platform/HeroBanner"
 import { SummaryMetricStrip } from "@/components/platform/SummaryMetricStrip"
 import {
   DropdownMenu,
@@ -645,7 +645,7 @@ export function DealsScreen({
             <>
               <Button
                 variant="outline"
-                className="border-white/25 bg-white/10 text-white shadow-none hover:border-white/50 hover:bg-white/15 hover:text-white active:border-white/50 active:bg-white/20 active:text-white"
+                className={heroOutlineButtonClass}
                 onClick={exportCsv}
               >
                 <Download data-icon="inline-start" />

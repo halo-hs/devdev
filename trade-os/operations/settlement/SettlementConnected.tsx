@@ -616,13 +616,13 @@ function profitabilityRollupDecision(
 function profitabilityDecisionStyle(tone: ProfitabilityRollupDecision["tone"]): CSSProperties {
   switch (tone) {
     case "danger":
-      return { backgroundColor: "var(--ecoya-system-red-1)", color: "var(--ecoya-system-red-5)" };
+      return { backgroundColor: "var(--color-red-1)", color: "var(--color-red-5)" };
     case "warning":
-      return { backgroundColor: "var(--ecoya-status-warning-bg)", color: "var(--ecoya-status-warning)" };
+      return { backgroundColor: "var(--color-yellow-6)", color: "var(--color-yellow-1)" };
     case "success":
-      return { backgroundColor: "var(--ecoya-system-green-1)", color: "var(--ecoya-system-green-6)" };
+      return { backgroundColor: "var(--color-green-1)", color: "var(--color-green-6)" };
     default:
-      return { backgroundColor: "var(--ecoya-surface-muted)", color: "var(--ecoya-text-muted)" };
+      return { backgroundColor: "var(--color-gray-11)", color: "var(--color-gray-5)" };
   }
 }
 

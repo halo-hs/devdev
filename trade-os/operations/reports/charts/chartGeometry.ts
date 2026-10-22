@@ -60,16 +60,16 @@ export function xLabelEvery(pointCount: number): number {
   return Math.ceil(pointCount / 6);
 }
 
-// 디자인 토큰 직결 색 상수(라이트 고정, D12) — globals.css 의 ecoya 토큰만 사용.
+// 디자인 토큰 직결 색 상수(라이트 고정, D12).
 export const CHART_COLORS = {
   /** AR 적용액·미수·GP 양수 = 블루 (시안 --blue #166dd7). */
-  blue: "var(--ecoya-blue-4)",
+  blue: "var(--color-primary-4)",
   /** 수취 예정(계획) = 동일 블루의 연한 스텝 (시안 --blue-soft #dceefa). */
-  planned: "var(--ecoya-blue-9)",
+  planned: "var(--color-primary-9)",
   /** 미지급 = 오렌지 (시안 --orange #e8590c, CVD 분리 검증). */
-  orange: "var(--ecoya-system-orange-1)",
+  orange: "var(--color-orange-1)",
   /** 연체율·음수 GP = 리스크 레드 (시안 --red #bf4040). */
-  red: "var(--ecoya-system-red-1)",
+  red: "var(--color-red-1)",
   /** Figma 결산리포트 v6 (2026-10): 수취 계획 vs 수금 적용 = indigo light/dark. */
   plannedSoft: "#e2e7f8",
   appliedIndigo: "#3251ca",
@@ -83,6 +83,6 @@ export const CHART_COLORS = {
   grid: "rgb(42 44 50 / 0.16)",
   gridStrong: "var(--color-gray-5)",
   axisText: "var(--color-gray-5)",
-  labelText: "var(--ecoya-gray-3)",
-  surface: "var(--ecoya-gray-12)",
+  labelText: "var(--color-gray-3)",
+  surface: "var(--color-gray-12)",
 } as const;

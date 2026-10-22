@@ -130,7 +130,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
   const qtyMismatch = state.deals.filter((deal) => hasQtyMismatchRisk(deal));
 
   const docGapRows = docGaps.slice(0, 6).map((deal) => (
-    <HostTableRow key={deal.deal_id} className="border-t border-[var(--color-gray-10)] hover:bg-surface-muted/60">
+    <HostTableRow key={deal.deal_id} className="border-t border-[var(--color-gray-10)] hover:bg-[var(--color-gray-11)]/60">
       <HostTableCell className="px-4 py-3 font-medium text-[var(--color-gray-2)]">
         <Link className="text-[var(--color-primary-4)] hover:underline" href={`/erp/deals/${deal.deal_id}`}>
           {counterpartyLabel(deal)}
@@ -145,7 +145,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
   ));
 
   const remainingRows = openRemaining.slice(0, 6).map((deal) => (
-    <HostTableRow key={deal.deal_id} className="border-t border-[var(--color-gray-10)] hover:bg-surface-muted/60">
+    <HostTableRow key={deal.deal_id} className="border-t border-[var(--color-gray-10)] hover:bg-[var(--color-gray-11)]/60">
       <HostTableCell className="px-4 py-3 font-medium text-[var(--color-gray-2)]">
         <Link className="text-[var(--color-primary-4)] hover:underline" href={`/erp/deals/${deal.deal_id}`}>
           {counterpartyLabel(deal)}
@@ -158,7 +158,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
   ));
 
   const qtyRows = qtyMismatch.slice(0, 6).map((deal) => (
-    <HostTableRow key={deal.deal_id} className="border-t border-[var(--color-gray-10)] hover:bg-surface-muted/60">
+    <HostTableRow key={deal.deal_id} className="border-t border-[var(--color-gray-10)] hover:bg-[var(--color-gray-11)]/60">
       <HostTableCell className="px-4 py-3 font-medium text-[var(--color-gray-2)]">
         <Link className="text-[var(--color-primary-4)] hover:underline" href={`/erp/deals/${deal.deal_id}`}>
           {counterpartyLabel(deal)}

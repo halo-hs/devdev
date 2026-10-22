@@ -1919,7 +1919,7 @@ function ReportsConnectedSession({
                           aria-controls={evidenceId}
                           aria-expanded={selected}
                           className={cn(
-                            "flex h-auto w-full flex-col items-stretch justify-start overflow-visible whitespace-normal rounded-lg border px-2.5 py-2 text-left font-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ecoya-blue-3",
+                            "flex h-auto w-full flex-col items-stretch justify-start overflow-visible whitespace-normal rounded-lg border px-2.5 py-2 text-left font-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-3)]",
                             selected
                               ? "border-[var(--color-primary-4)] bg-[var(--color-primary-10)]"
                               : "border-transparent hover:bg-[var(--color-gray-11)]",

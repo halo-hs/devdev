@@ -7,7 +7,7 @@ import { Segmented } from "@trade-os/operations/components/SegmentedControl";
 import { ChipGroup } from "@trade-os/operations/components/ChipGroup";
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { MetricCard, type MetricTone } from "@trade-os/operations/components/MetricCard";
-import { PageHeader } from "@trade-os/operations/components/PageHeader";
+import { BusinessPageHero, heroOutlineButtonClass } from "@/components/platform/HeroBanner";
 import { DashboardLayout } from "@trade-os/operations/components/ScreenLayouts";
 import {
   BlockedCard,
@@ -520,19 +520,19 @@ function MonitorActions({
     <div className="flex flex-wrap items-center gap-2">
       {variant === "ops" ? (
         <>
-          <Button variant="outline" size="xs" disabled={live && !actions?.onSummary} onClick={actions?.onSummary}>
+          <Button variant="outline" className={heroOutlineButtonClass} disabled={live && !actions?.onSummary} onClick={actions?.onSummary}>
             {copy.actionsSummary}
           </Button>
-          <Button variant="secondary" size="xs" disabled={live && !actions?.onThisWeek} onClick={actions?.onThisWeek}>
+          <Button variant="outline" className={heroOutlineButtonClass} disabled={live && !actions?.onThisWeek} onClick={actions?.onThisWeek}>
             {copy.actionsThisWeek}
           </Button>
         </>
       ) : (
         <>
-          <Button variant="outline" size="xs" disabled={live && !actions?.onOpsDetail} onClick={actions?.onOpsDetail}>
+          <Button variant="outline" className={heroOutlineButtonClass} disabled={live && !actions?.onOpsDetail} onClick={actions?.onOpsDetail}>
             {copy.actionsOpsDetail}
           </Button>
-          <Button variant="secondary" size="xs" disabled={live && !actions?.onDealsList} onClick={actions?.onDealsList}>
+          <Button variant="outline" className={heroOutlineButtonClass} disabled={live && !actions?.onDealsList} onClick={actions?.onDealsList}>
             {copy.actionsDealsList}
           </Button>
         </>
@@ -818,14 +818,11 @@ function MonitorBody({
   const titleBar = useMemo(
     () => (
       <div className="reference-content-width w-full px-5 pt-1.5">
-      <PageHeader
-        data-component="PageTitleBar"
-        variant="hero"
+      <BusinessPageHero
         actions={<MonitorActions actions={actions} variant={variant} copy={copy} live={Boolean(live)} />}
-        className="max-[600px]:grid-cols-1 max-[600px]:items-start max-[600px]:gap-2"
         title={ops ? copy.titleOps : copy.titleDefault}
         description={ops ? copy.descriptionOps : copy.description}
-        filters={<MonitorFilters actions={actions} copy={copy} />}
+        controls={<MonitorFilters actions={actions} copy={copy} />}
         summary={<MonitorMetricGrid items={metrics} empty={isEmpty} />}
       />
       </div>

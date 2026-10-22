@@ -41,16 +41,16 @@ type ChipTokens = { color: string; badgeColor: string; borderColor: string };
  */
 const toneMap: Record<ChipTone, ChipTokens> = {
   neutral: { color: "gray-4", badgeColor: "gray-12", borderColor: "gray-10" },
-  blue: { color: "blue-4", badgeColor: "blue-10", borderColor: "blue-4" },
-  green: { color: "system-green-1", badgeColor: "system-green-6", borderColor: "system-green-5" },
-  yellow: { color: "system-yellow-1", badgeColor: "system-yellow-6", borderColor: "system-yellow-5" },
-  red: { color: "system-red-2", badgeColor: "system-red-8", borderColor: "system-red-7" },
-  purple: { color: "system-grape-2", badgeColor: "system-grape-6", borderColor: "system-grape-5" },
+  blue: { color: "primary-4", badgeColor: "primary-10", borderColor: "primary-4" },
+  green: { color: "green-1", badgeColor: "green-6", borderColor: "green-5" },
+  yellow: { color: "yellow-1", badgeColor: "yellow-6", borderColor: "yellow-5" },
+  red: { color: "red-2", badgeColor: "red-8", borderColor: "red-7" },
+  purple: { color: "grape-2", badgeColor: "grape-6", borderColor: "grape-5" },
   gray: { color: "gray-4", badgeColor: "gray-10", borderColor: "gray-10" },
 };
 
-function ecoyaVar(token: string): string {
-  return `var(--ecoya-${token})`;
+function colorVar(token: string): string {
+  return `var(--color-${token})`;
 }
 
 /**
@@ -75,16 +75,16 @@ function ChipBadge({
   const style: CSSProperties = {
     color:
       active && selectionAppearance === "solid"
-        ? ecoyaVar("gray-12")
-        : ecoyaVar(tokens.color),
+        ? colorVar("gray-12")
+        : colorVar(tokens.color),
     ...(active && selectionAppearance === "solid"
       ? {
-          backgroundColor: ecoyaVar(tokens.borderColor),
-          border: `1px solid ${ecoyaVar(tokens.borderColor)}`,
+          backgroundColor: colorVar(tokens.borderColor),
+          border: `1px solid ${colorVar(tokens.borderColor)}`,
         }
       : active
-      ? { backgroundColor: "transparent", border: `1px solid ${ecoyaVar(tokens.borderColor)}` }
-      : { backgroundColor: ecoyaVar(tokens.badgeColor) }),
+      ? { backgroundColor: "transparent", border: `1px solid ${colorVar(tokens.borderColor)}` }
+      : { backgroundColor: colorVar(tokens.badgeColor) }),
   };
 
   return (

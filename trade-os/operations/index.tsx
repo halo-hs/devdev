@@ -8,10 +8,8 @@ import { ReportsConnected } from "./reports/ReportsConnected"
 import { SalesPerformanceConnected } from "./salesperf/SalesPerformanceConnected"
 import { SettlementConnected } from "./settlement/SettlementConnected"
 import { ShipmentsConnected, type ShipmentSummary } from "./shipments/ShipmentsConnected"
-import { PageHeader } from "./components/PageHeader"
+import { BusinessPageHero } from "@/components/platform/HeroBanner"
 import { messages } from "./i18n/messages"
-import "./styles/scoped.css"
-import "./styles/hostTokens.css"
 import "./styles/host.css"
 
 export type ReferenceOperationsScreen = "monitor" | "reports" | "sales" | "settlement" | "shipments"
@@ -55,17 +53,15 @@ function Body({ screen }: { screen: ReferenceOperationsScreen }) {
   return <div className="reference-page-scroll">
     <div className="reference-content-width w-full space-y-4 px-5 pt-1.5 pb-10">
       {screen === "reports" ? <ReportsConnected copy={messages.erpReports.reports} role={identity.role}
-          renderHeader={(controls, summary) => <PageHeader variant="hero" title={copy.title} description={description}
-            meta={<span className="rounded-full bg-[var(--color-primary-9)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-bold text-[var(--color-indigo)]">{messages.erpReports.reports.proBadge}</span>}
-            filters={controls} summary={summary} />} />
+          renderHeader={(controls, summary) => <BusinessPageHero title={<span className="inline-flex items-baseline gap-2.5">{copy.title}<span className="rounded-full bg-[var(--color-primary-9)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-bold text-[var(--color-indigo)]">{messages.erpReports.reports.proBadge}</span></span>} description={description}
+            controls={controls} summary={summary} />} />
         : screen === "sales" ? <SalesPerformanceConnected copy={messages.erpSalesPerformance.cockpit} role={identity.role}
-          renderHeader={(controls, summary) => <PageHeader variant="hero" title={copy.title} description={description}
-            meta={<span className="rounded-full bg-[var(--color-primary-9)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-bold text-[var(--color-indigo)]">{messages.erpReports.reports.proBadge}</span>}
-            filters={controls} summary={summary} />} />
+          renderHeader={(controls, summary) => <BusinessPageHero title={<span className="inline-flex items-baseline gap-2.5">{copy.title}<span className="rounded-full bg-[var(--color-primary-9)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-bold text-[var(--color-indigo)]">{messages.erpReports.reports.proBadge}</span></span>} description={description}
+            controls={controls} summary={summary} />} />
         : screen === "settlement" ? <SettlementConnected copy={messages.erpSettlement.settlement}
-          renderHeader={(controls, summary) => <PageHeader variant="hero" title={copy.title} description={description} filters={controls} summary={summary} />} />
+          renderHeader={(controls, summary) => <BusinessPageHero title={copy.title} description={description} controls={controls} summary={summary} />} />
         : <ShipmentsConnected copy={messages.erpShipments.shipments}
-          renderHeader={controls => <PageHeader variant="hero" title={copy.title} description={description} filters={controls} />} />}
+          renderHeader={controls => <BusinessPageHero title={copy.title} description={description} controls={controls} />} />}
     </div>
   </div>
 }

@@ -3,6 +3,10 @@ import { Sparkles } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// Outline buttons on the blue hero: translucent white instead of the white fill.
+export const heroOutlineButtonClass =
+  "border-white/25 bg-white/10 text-white shadow-none hover:border-white/50 hover:bg-white/15 hover:text-white active:border-white/50 active:bg-white/20 active:text-white"
+
 type BusinessPageHeroProps = {
   title: ReactNode
   description?: ReactNode
