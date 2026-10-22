@@ -1659,7 +1659,7 @@ export function AskPrototype({
           split by a single line. */}
       <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
       <Dialog open={fileFinderOpen} onOpenChange={setFileFinderOpen}>
-        <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-[640px]">
+        <DialogContent className="grid-cols-[minmax(0,1fr)] gap-0 overflow-hidden p-0 sm:max-w-[640px]">
           <DialogHeader className="px-6 pt-6 pb-0 text-left">
             <DialogTitle>파일 찾기</DialogTitle>
             <DialogDescription>
@@ -1747,7 +1747,7 @@ export function AskPrototype({
             </div>
           </div>
 
-          <DialogFooter className="border-t border-[var(--color-gray-10)] px-6 py-4">
+          <DialogFooter className="mx-0 mb-0 border-t border-[var(--color-gray-10)] px-6 py-4">
             <Button variant="outline" onClick={() => setFileFinderOpen(false)}>
               취소
             </Button>
