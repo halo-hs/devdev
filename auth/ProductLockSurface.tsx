@@ -1,7 +1,7 @@
 import { Building2 } from "lucide-react"
 import { Typography } from "@ecoya/design-system/extensions/typography"
 import { cn } from "@shared/lib/utils"
-import { TrialStartCard, type TrialProduct, type TrialRole, type TrialStartState } from "./components/trial-start-card"
+import { TrialStartCard, type TrialProduct, type TrialRole, type TrialStartState } from "./TrialStartCard"
 
 export interface ProductTrialPresentation {
   product: TrialProduct

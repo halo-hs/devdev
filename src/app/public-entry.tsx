@@ -2,7 +2,7 @@ import { appLocation } from "@/app/app-location"
 import { useEffect, useState, type ReactNode } from "react"
 import { ArrowRight, Building2, MapPin } from "lucide-react"
 import { Button } from "@shared/components/ui/button"
-import { CommonPublicLayout } from "@auth/layout"
+import { CommonPublicLayout } from "@auth/AuthCommonShell"
 import {
   Card,
   CardContent,
@@ -10,15 +10,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@shared/components/ui/card"
-import {
-  CommonLoginPrototype,
-  CommonSignupPrototype,
-  CommonPasswordRecoveryPrototype,
-  CommonTermsPrototype,
-  CommonPrivacyPrototype,
-  type CommonProduct,
-  type CommonScreenKey,
-} from "@auth/screens"
+import { type CommonProduct, type CommonScreenKey } from "@auth/AuthSurface"
+import { CommonTermsPrototype, CommonPrivacyPrototype } from "@auth/LegalDocumentView"
+import { CommonPasswordRecoveryPrototype } from "@auth/PasswordResetPanel"
+import { CommonSignupPrototype } from "@auth/SignupPanel"
+import { CommonLoginPrototype } from "@auth/LoginPanel"
 import { PublicSharePage } from "@share/public/SharedDocumentViewer"
 import { resetSnapSessionAccessCache } from "@snap/lib/snap-route-access"
 

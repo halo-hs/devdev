@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
-import { TrialStartCard, type TrialStartCardProps, type TrialStartState } from "./trial-start-card"
+import { TrialStartCard, type TrialStartCardProps, type TrialStartState } from "../TrialStartCard"
 import { trialProducts } from "./trial-products"
 
 /** Only used by devdev's screen demo. Does not create a trial or imply API success. */

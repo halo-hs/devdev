@@ -7,11 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Typography } from "@ecoya/design-system/extensions/typography"
 import { appLocation } from "@/app/app-location"
 import { cn } from "@shared/lib/utils"
-import { ProductsSubscriptions, SettingsDemoProvider } from "@share/settings/subscription-settings"
+import { SettingsDemoProvider } from "@share/settings/subscription-settings"
+import { ProductsSubscriptions } from "@share/settings/BillingSettingsView"
 import type { SubscriptionChangeIntent } from "@share/settings/subscription-change-panel"
-import { ProductAccessScreen } from "@auth/product-access"
+import { ProductAccessScreen } from "@auth/ProductLockSurface"
 import { TrialStartDemo } from "@auth/components/trial-start-demo"
-import { type TrialProduct, type TrialRole, type TrialStartState } from "@auth/components/trial-start-card"
+import { type TrialProduct, type TrialRole, type TrialStartState } from "@auth/TrialStartCard"
 
 type PreviewView = "access" | "organization" | "states"
 type ProductSelection = "both" | TrialProduct

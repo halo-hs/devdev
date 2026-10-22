@@ -1,5 +1,5 @@
 import { appLocation } from "@/app/app-location"
-import { CommonPublicLayout } from "@auth/layout"
+import { CommonPublicLayout } from "@auth/AuthCommonShell"
 import {
   useEffect,
   useMemo,
@@ -114,16 +114,16 @@ import { snapApi } from "@snap/lib/snap-api"
 import { resetSnapSessionAccessCache } from "@snap/lib/snap-route-access"
 import { cn } from "@shared/lib/utils"
 import cargoOperationsBanner from "@/assets/home/cargo-operations-banner.jpg"
-import { SnapCustomersPage } from "@snap/customers/page"
-import { SnapPlatformPages } from "@snap/settings/pages"
-import { SnapEvidenceLibrary } from "@snap/evidence/page"
+import { SnapCustomersPage } from "@snap/directory/CustomersConnected"
+import { SnapPlatformPages } from "@snap/settings/SnapSettingsConnected"
+import { SnapEvidenceLibrary } from "@snap/evidence/EvidenceWorkspace"
 import {
   SnapOperationsPage,
   type SnapNavigationOptions,
 } from "@snap/operations/pages"
-import { SnapReportsPage } from "@snap/reports/page"
-import { SnapTaskWorkspace } from "@snap/tasks/workspace"
-import { SnapWorkersPage } from "@snap/workers/page"
+import { SnapReportsPage } from "@snap/reports/SnapReportsWorkspace"
+import { SnapTaskWorkspace } from "@snap/tasks/TasksConnected"
+import { SnapWorkersPage } from "@snap/directory/WorkersConnected"
 
 export type SnapScreenKey =
   | "SC-01"
