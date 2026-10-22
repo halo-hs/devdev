@@ -1,5 +1,5 @@
 import { type ReactNode } from "react"
-import { StatusBadge } from "@shared/components/StatusBadge"
+import { StatusBadge } from "@/components/platform/StatusBadge"
 import { type Tone } from "@trade-os/documents/documentTemplateModel"
 
 export function ToneBadge({ tone, children }: { tone: Tone; children: ReactNode }) {

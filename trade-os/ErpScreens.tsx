@@ -1,4 +1,4 @@
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shared/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs"
 import { counterpartyPreview, counterpartyPreviewAccess, type CounterpartyAccess } from "@trade-os/counterparties/Counterparty360View"
 import { listDealDocuments } from "@trade-os/lib/dealDocumentActions"
 import { orderProgress } from "@trade-os/lib/dealFinanceWorkspace"
@@ -19,10 +19,10 @@ import {
   WalletCards,
 } from "lucide-react"
 
-import { Badge } from "@shared/components/ui/badge"
-import { SummaryMetricStrip } from "@shared/components/SummaryMetricStrip"
-import { BusinessPageHero } from "@shared/components/HeroBanner"
-import { Button } from "@shared/components/ui/button"
+import { Badge } from "@/components/ui/Badge"
+import { SummaryMetricStrip } from "@/components/platform/SummaryMetricStrip"
+import { BusinessPageHero } from "@/components/platform/HeroBanner"
+import { Button } from "@/components/ui/Button"
 import {
   Card,
   CardAction,
@@ -30,14 +30,14 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@shared/components/ui/card"
+} from "@/components/ui/Card"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@shared/components/ui/select"
+} from "@/components/ui/Select"
 import {
   Table,
   TableBody,
@@ -45,15 +45,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shared/components/ui/table"
-import { Textarea } from "@shared/components/ui/textarea"
-import { cn } from "@shared/lib/utils"
+} from "@/components/ui/Table"
+import { Textarea } from "@/components/ui/Textarea"
+import { cn } from "@/lib/utils"
 import {
   SettingsHubV2,
   type ProductEntitlement,
   type SettingsRole,
 } from "@share/settings/SettingsRoutePage"
-import type { WorkspaceKey } from "@shared/lib/workspaces"
+import type { WorkspaceKey } from "@/lib/workspaces"
 
 export type ErpMenuTarget =
   | "onboarding"

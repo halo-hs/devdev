@@ -1,15 +1,15 @@
 import { type DeliveryAttachment, DeliveryAttachmentPicker, DeliveryAttachmentPreview } from "@trade-os/documents/DeliveryAttachmentPicker"
 import { templateMeta, createSamplePdf, type Tone } from "@trade-os/documents/documentTemplateModel"
 import { useState, useEffect } from "react"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import { X, Download, Building2, Plus, ChevronDown, FileText, Check, Copy, Maximize2, Link2, Mail, LoaderCircle, RefreshCw } from "lucide-react"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
-import { DateInput } from "@shared/components/DateInput"
-import { Input } from "@shared/components/ui/input"
-import { FormField } from "@shared/components/FormItem"
-import { Textarea } from "@shared/components/ui/textarea"
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@shared/components/ui/alert-dialog"
+import { DatePicker } from "@/components/ui/DatePicker"
+import { Input } from "@/components/ui/Input"
+import { FormField } from "@/components/platform/FormItem"
+import { Textarea } from "@/components/ui/Textarea"
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/AlertDialog"
 import { type DeliveryLink, type EmailRecord, type DealDocumentContext } from "@/App"
 
 // Kept as a reference fallback for the earlier three-step document prototype.
@@ -337,7 +337,7 @@ export function ShareDeliveryPanel({
                     <div className="mt-3 grid grid-cols-2 gap-3">
                       <label className="grid gap-1 text-xs">
                         <span>만료일</span>
-                        <DateInput ariaLabel="만료일" value={expires} onValueChange={setExpires} />
+                        <DatePicker ariaLabel="만료일" value={expires} onValueChange={setExpires} />
                       </label>
                       <label className="grid gap-1 text-xs">
                         <span>최대 열람 횟수</span>

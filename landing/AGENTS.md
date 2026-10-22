@@ -5,8 +5,8 @@
 | 요청 | 먼저 수정할 파일 | 페이지 범위 |
 | --- | --- | --- |
 | 홈·브랜드 스토리 | `home/page.tsx`, `home/styles.css` | `[data-landing-page="story"]` |
-| Trade OS 소개 | `trade-os/page.tsx`, `trade-os/sections.tsx`, `trade-os/content.ts` | `[data-landing-page="trade"]` |
-| SNAP 소개 | `snap/page.tsx`, `snap/content.ts`, `snap/hero.tsx`, `snap/illustrations.tsx` | `[data-landing-page="snap"]` |
+| Trade OS 소개 | `trade-os/page.tsx`, `trade-os/Sections.tsx`, `trade-os/content.ts` | `[data-landing-page="trade"]` |
+| SNAP 소개 | `snap/page.tsx`, `snap/content.ts`, `snap/Hero.tsx`, `snap/Illustrations.tsx` | `[data-landing-page="snap"]` |
 | 가격 | `pricing/page.tsx`, `pricing/styles.css` | `[data-landing-page="pricing"]` |
 | 도입 문의 | `contact/page.tsx` | `[data-landing-page="contact"]` |
 
@@ -14,11 +14,11 @@
 
 ## 현재 공유되는 부분 — 수정 시 주의
 
-- `shared/layout.tsx`: 공개 페이지의 공통 헤더·푸터·CTA. `auth/layout.tsx`도 여기의 `LandingHeader`를 사용합니다. 수정하면 로그인·회원가입·법률 페이지 등에도 영향이 갈 수 있습니다.
+- `shared/layout.tsx`: 공개 페이지의 공통 헤더·푸터·CTA. `auth/AuthCommonShell.tsx`도 여기의 `LandingHeader`를 사용합니다. 수정하면 로그인·회원가입·법률 페이지 등에도 영향이 갈 수 있습니다.
 - `shared/base.css`, `shared/theme.css`, `shared/pages.css`: `shared/layout.tsx`에서 함께 import하는 CSS입니다. 홈 전용 파일이 아닙니다.
 - `.trade-landing`, `.trade-container`, `.trade-section-label` 등은 여러 공개 페이지가 사용하는 선택자입니다. `.trade-landing`은 인증 헤더에도 사용됩니다.
 - `data-landing-product="home"`은 홈만 구분하지 않습니다. 페이지 구분에는 `data-landing-page`를 사용합니다.
-- `@shared/*`, `@ecoya/ui`, 디자인 시스템의 토큰·로고는 업무 화면에서도 사용하는 공통 자원입니다.
+- `src/components/`, `src/app/theme.css`·`tokensDs2.css`, 디자인 시스템 로고는 업무 화면에서도 사용하는 공통 자원입니다.
 
 ## 마케터의 홈 수정 기본 범위
 

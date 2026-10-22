@@ -1,0 +1,273 @@
+/* Only host-shell adaptations. Body components and their layout are from 3030. */
+/* Let the shell's Gray 9 canvas show through the operations screens. */
+.ops-screen.ops-screen { background: transparent; }
+/* The host main owns page scrolling. Tables keep their horizontal overflow. */
+.ops-screen .ops-page-scroll { min-height: 0; background: transparent; }
+.ops-screen .ops-monitor-shell { display: grid; min-height: 0; grid-template-columns: minmax(0, 1fr); background: var(--color-gray-12); }
+.ops-screen .ops-monitor-shell [data-component="MonitorConnected"],
+.ops-screen .ops-monitor-shell [data-layout="dashboard"],
+.ops-screen .ops-monitor-shell [data-layout="dashboard"] > div:has(> [data-ui="dashboard-body"]) {
+  height: auto;
+  overflow: visible;
+}
+.ops-screen .ops-monitor-shell [data-layout="dashboard"] > div:has(> [data-ui="dashboard-body"]) {
+  flex: none;
+}
+
+/* Queue length follows the existing count filter and scrolls with the page. */
+.ops-screen .monitor-operation-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+.ops-screen .monitor-operation-columns [data-ui="section-panel-content"] > [data-ui="section-panel"] {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.ops-screen .monitor-operation-columns [data-ui="section-panel-content"] > [data-ui="section-panel"] > [data-ui="section-panel-content"] {
+  padding: 0;
+}
+.ops-screen .monitor-operation-columns [data-ui="task-queue-list"] {
+  overflow-wrap: anywhere;
+}
+
+
+.ops-screen .business-hero-controls [data-ui="reports-close-note"] {
+  color: rgb(255 255 255 / 78%);
+}
+.ops-screen .business-hero-controls [data-ui="reports-assignee-filter"] {
+  max-width: 100%;
+}
+@media (max-width: 767px) {
+  .ops-screen .business-hero-controls [data-ui="reports-close-note"] { flex-basis: 100%; }
+}
+.ops-screen .ops-report-actions {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+
+.ops-screen .business-hero-controls [data-ui="shipments-evidence-link"] {
+  color: white;
+}
+
+.ops-screen .business-hero-controls [data-ui="salesperf-scope"] {
+  color: rgb(255 255 255 / 78%);
+}
+.ops-screen .business-hero-controls [data-ui="salesperf-assignee-filter"] { max-width: 100%; }
+
+
+
+
+/* Reuse the document list's host Tabs immediately above shipment results. */
+.ops-screen .ops-shipment-tabs { min-width: 0; max-width: 100%; }
+.ops-screen .ops-shipment-tabs [data-slot="tabs-list"] {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.ops-screen .ops-shipment-tabs [data-slot="tabs-list"]::-webkit-scrollbar { display: none; }
+.ops-screen [data-ui="shipments-list-controls"] {
+  padding: 16px 20px;
+  border: 0;
+  border-radius: var(--r-lg);
+  background: var(--color-gray-12);
+  box-shadow: var(--shadow-section);
+  outline: 1px solid var(--color-gray-10);
+}
+.ops-screen .ops-shipment-results { display: flex; flex-direction: column; gap: 16px; }
+
+.ops-screen .business-hero-controls [data-ui="settlement-controls"] {
+  align-items: stretch;
+  gap: var(--filter-gap);
+}
+.ops-screen .business-hero-controls [data-ui="settlement-controls"] > .business-filter-row {
+  justify-content: flex-start;
+  min-width: 0;
+}
+.ops-screen .business-hero-controls [data-ui="settlement-controls"] label,
+.ops-screen .business-hero-controls [data-ui="settlement-balance-as-of"] {
+  color: rgb(255 255 255 / 78%);
+  white-space: nowrap;
+}
+.ops-screen [data-slot="business-page-hero"] [data-component="SettlementDecisionCards"] {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+.ops-screen [data-slot="business-page-hero"] [data-component="SettlementDecisionCards"] > header {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.ops-screen [data-slot="business-page-hero"] [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] { padding: 0; }
+.ops-screen [data-slot="business-page-hero"] [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 1023px) {
+  .ops-screen [data-slot="business-page-hero"] [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 639px) {
+  .ops-screen [data-slot="business-page-hero"] [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ops-screen .business-hero-controls [data-ui="settlement-controls"] > .business-filter-row { justify-content: flex-start; }
+}
+
+
+
+
+.ops-screen .business-hero-controls [data-ui="settlement-balance-as-of"] {
+  font-size: var(--filter-font-size);
+}
+@media (max-width: 639px) {
+  .ops-screen .business-hero-controls [data-ui="settlement-balance-as-of"] { margin-left: 0; }
+}
+
+.ops-screen { font-size: var(--text-body-9); line-height: var(--leading-body-9); }
+.ops-screen .ops-content-width { width: 100%; max-width: none; min-width: 0; }
+@media (max-width: 639px) {
+  .ops-screen .ops-content-width { padding-inline: 16px; }
+}
+
+.ops-screen .ops-deal-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 20px; }
+.ops-screen .ops-deal-fields dd { margin-inline-start: 0; overflow-wrap: anywhere; }
+.ops-screen .ops-deal-shipments { display: grid; gap: 20px; }
+.ops-screen .ops-deal-shipments article { border-bottom: 1px solid var(--control-border); padding-bottom: 20px; }
+.ops-screen .ops-deal-shipments article:last-child { border-bottom: 0; padding-bottom: 0; }
+.ops-screen .ops-deal-shipment-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.ops-screen .ops-deal-shipment-heading > button { margin-left: auto; }
+
+/* Source text utilities must not shrink the shared table primitives. */
+.ops-screen [data-slot="table-head"],
+.ops-screen [data-slot="table-cell"] {
+  font-size: var(--text-body-9);
+  line-height: var(--leading-body-9);
+}
+
+/* The source's text-secondary means muted text, not the host's secondary fill. */
+.ops-screen .text-secondary { color: var(--table-caption-foreground); }
+.ops-screen .text-xs { font-size: var(--text-body-10); line-height: var(--leading-body-10); }
+
+/* A transaction owns a table of shipments; each row keeps its own actions. */
+/* Same list card as 문서 올리기: 16px card inset around the heading and table,
+   flat table inside, 20px outer cell inset. */
+.ops-screen .ops-shipment-group { min-width: 0; overflow: hidden; border: 0; border-radius: var(--r-lg); background: var(--color-gray-12); box-shadow: var(--shadow-section); outline: 1px solid var(--color-gray-10); padding-bottom: 16px; }
+.ops-screen .ops-shipment-group-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 16px 16px; }
+.ops-screen .ops-shipment-group-heading h2 { overflow-wrap: anywhere; }
+.ops-screen .ops-shipment-group > [data-slot="table-container"] { margin-inline: 16px; width: auto; border-radius: 0; box-shadow: none; }
+.ops-screen .ops-shipment-group :is([data-slot="table-head"], [data-slot="table-cell"]):first-child { padding-left: 20px; }
+.ops-screen .ops-shipment-group :is([data-slot="table-head"], [data-slot="table-cell"]):last-child { padding-right: 20px; }
+/* List page: one card holds the tabs and all deal groups; groups split by a line. */
+.ops-screen .ops-shipment-list-card {
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  background: var(--color-gray-12);
+  box-shadow: var(--shadow-section);
+  outline: 1px solid var(--color-gray-10);
+}
+.ops-screen .ops-shipment-list-card [data-ui="shipments-list-controls"] {
+  padding: 16px 16px 0;
+  border-radius: 0;
+  box-shadow: none;
+  outline: 0;
+  background: transparent;
+}
+.ops-screen .ops-shipment-list-card .ops-shipment-results { gap: 0; padding-top: 8px; }
+.ops-screen .ops-shipment-list-card .ops-shipment-group {
+  border-radius: 0;
+  box-shadow: none;
+  outline: 0;
+}
+.ops-screen .ops-shipment-list-card .ops-shipment-group + .ops-shipment-group { border-top: 1px solid var(--color-gray-10); }
+.ops-screen .ops-shipment-table { min-width: 1040px; table-layout: fixed; }
+.ops-screen .ops-shipment-table [data-slot="table-cell"] { white-space: normal; overflow-wrap: anywhere; padding-block: 16px; }
+.ops-screen .ops-shipment-table tbody tr:last-child td { border-bottom: 0; }
+.ops-screen .ops-shipment-date-details { margin-top: 4px; }
+.ops-screen .ops-shipment-date-details summary { cursor: pointer; }
+@media (max-width: 639px) { .ops-screen .ops-shipment-group-heading { padding: 16px; } }
+
+/* Currency tables share the same columns, regardless of empty cells or amount length. */
+.ops-screen .ops-settlement-bucket-table {
+  width: 100%;
+  min-width: 1080px;
+  table-layout: fixed;
+}
+.ops-screen .ops-settlement-bucket-label { width: 160px; }
+.ops-screen .ops-settlement-bucket-table :is(th, td) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.ops-screen .ops-settlement-bucket-table [data-ui="settlement-calendar-cell"] {
+  max-width: 100%;
+  white-space: normal;
+}
+
+/* Figma 정산 4차 (6224:188699): card headers drop the divider (title 18/26), tables
+   sit flat in the card — no inner boxes or grey head rows, Gray 9 row lines, Gray 4
+   regular headings, and drill links in Blue 4 (overdue stays red). Style only. */
+.ops-screen [data-component="SettlementConnected"] [data-ui="section-panel-header"] {
+  min-height: 0;
+  padding: 20px 20px 0;
+  border-bottom: 0;
+}
+.ops-screen [data-component="SettlementConnected"] [data-ui="section-panel-header"] h2 {
+  font-size: 18px;
+  line-height: 26px;
+}
+.ops-screen [data-component="SettlementConnected"] [data-ui="section-panel-content"] { padding: 16px 20px 20px; }
+.ops-screen [data-component="SettlementConnected"] [data-operational-table-frame] {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.ops-screen [data-component="SettlementConnected"] [data-operational-table-frame] [data-slot="table-container"] {
+  border-radius: 0;
+  box-shadow: none;
+}
+.ops-screen [data-component="SettlementConnected"] [data-operational-table-frame] :is(thead, thead tr) {
+  background: transparent;
+  border-bottom-color: var(--color-gray-10);
+}
+.ops-screen [data-component="SettlementConnected"] [data-operational-table-frame] thead th:not([class*="danger"]) {
+  color: var(--color-gray-4);
+  font-weight: 400;
+}
+.ops-screen [data-component="SettlementConnected"] [data-operational-table-frame] :is(th, td) {
+  background-color: transparent;
+}
+.ops-screen [data-component="SettlementConnected"] [data-operational-table-frame] tbody tr {
+  border-bottom: 1px solid var(--color-gray-10);
+}
+
+/* Operations buttons keep their original label type on the shared Button:
+   medium weight, 13/18 at 24px and 15/20 at 32px and 40px. */
+.ops-screen [data-variant][data-size]:is(button, a):not([id^="date-picker-"]) {
+  font-weight: var(--font-weight-medium, 500);
+}
+.ops-screen [data-variant]:is([data-size="xs"], [data-size="icon-xs"]):is(button, a):not([id^="date-picker-"]) {
+  font-size: 13px;
+  line-height: 18px;
+}
+.ops-screen [data-variant]:is([data-size="default"], [data-size="lg"]):is(button, a):not([id^="date-picker-"]) {
+  font-size: 15px;
+  line-height: 20px;
+}
+

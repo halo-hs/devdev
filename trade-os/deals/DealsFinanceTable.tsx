@@ -1,5 +1,5 @@
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@shared/components/ui/empty"
-import { Button } from "@shared/components/ui/button"
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/Empty"
+import { Button } from "@/components/ui/Button"
 import {
   Table,
   TableBody,
@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shared/components/ui/table"
+} from "@/components/ui/Table"
 import { presentFinanceFact } from "@trade-os/lib/erpFinance"
 import {
   filteredFinanceFacts,

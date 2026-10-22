@@ -2,35 +2,35 @@ import { templateSchemas, type Tone, templates } from "@trade-os/documents/docum
 import { decimalMagnitude, FINANCE_DECIMAL_SCALE } from "@trade-os/lib/financeDecimal"
 import { normalizeDecimalInput, formatScaledDecimal } from "@trade-os/lib/money"
 import { exactDocumentMoneyTotals, exactLineItemAmount } from "@trade-os/lib/documentMoney"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 import { useState, useRef, useCallback } from "react"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import { toast } from "sonner"
-import { Card } from "@shared/components/ui/card"
-import { Button } from "@shared/components/ui/button"
+import { Card } from "@/components/ui/Card"
+import { Button } from "@/components/ui/Button"
 import { Settings2, ChevronRight, Trash2, Plus, ChevronUp, ChevronDown, Sparkles, Check, FileText, Building2, Search } from "lucide-react"
-import { AutoSaveStatus } from "@shared/components/AutoSaveStatus"
-import { AsyncButton } from "@ecoya/design-system/extensions/async-button"
+import { AutoSaveStatus } from "@/components/platform/AutoSaveStatus"
+import { AsyncButton } from "@/components/ds2/extensions/AsyncButton"
 import { RelatedDealNotice } from "@trade-os/documents/DocumentCreatePanels"
-import { ResizablePanelGroup, ResizablePanel } from "@shared/components/ui/resizable"
-import { FieldGroup, Field, FieldLabel, FieldDescription } from "@shared/components/ui/field"
-import { Input } from "@shared/components/ui/input"
-import { DatePicker } from "@ecoya/design-system/extensions/date-picker"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@shared/components/ui/table"
-import { Textarea } from "@shared/components/ui/textarea"
-import { PdfPanelResizeHandle } from "@shared/components/PdfPanelResizeHandle"
+import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/Resizable"
+import { FieldGroup, Field, FieldLabel, FieldDescription } from "@/components/ui/Field"
+import { Input } from "@/components/ui/Input"
+import { DatePicker } from "@/components/ui/DatePicker"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/Table"
+import { Textarea } from "@/components/ui/Textarea"
+import { PdfPanelResizeHandle } from "@/components/platform/PdfPanelResizeHandle"
 import { DocumentStage } from "@trade-os/components/DocumentStage"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@shared/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/Sheet"
 import { AppSelect } from "@trade-os/components/AppSelect"
-import { Alert, AlertDescription } from "@shared/components/ui/alert"
-import { Separator } from "@shared/components/ui/separator"
+import { Alert, AlertDescription } from "@/components/ui/Alert"
+import { Separator } from "@/components/ui/Separator"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
-import { ScrollArea } from "@shared/components/ui/scroll-area"
-import { Popover, PopoverTrigger, PopoverContent } from "@shared/components/ui/popover"
+import { ScrollArea } from "@/components/ui/ScrollArea"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/Popover"
 import { DocumentTemplateOptions } from "@trade-os/components/DocumentTemplateOptions"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@shared/components/ui/select"
-import { FormFieldHeader } from "@shared/components/FormItem"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shared/components/ui/tabs"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select"
+import { FormFieldHeader } from "@/components/platform/FormItem"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs"
 import { type CreateStartMode, type DealDocumentContext, type DocumentDirection, type DocumentSourceMode } from "@/App"
 import { quotationMoney, templateDirections, documentSourceDeals } from "@trade-os/documents/documentTemplateModel"
 
@@ -105,12 +105,6 @@ type QuotationDraft = {
 function quotationDecimal(value: string) {
   const amount = decimalMagnitude(normalizeDecimalInput(value), FINANCE_DECIMAL_SCALE)
   return amount === null ? "—" : formatScaledDecimal(amount, FINANCE_DECIMAL_SCALE)
-}
-
-function quotationDate(value: string) {
-  const [year, month, day] = value.split("-").map(Number)
-  if (!year || !month || !day) return null
-  return new Date(year, month - 1, day)
 }
 
 function QuotationPreviewPaper({
@@ -490,14 +484,11 @@ export function StructuredDocumentCreateEditor({
                         </div>
                         <div className="min-w-0">
                           <DatePicker
-                            className="w-full [&>button]:w-full"
-                            value={quotationDate(draft.issuedAt)}
+                            className="w-full"
+                            value={draft.issuedAt}
                             ariaLabel="견적일"
-                            allowClear={false}
-                            showToday={false}
-                            onChange={(_value, formattedValue) =>
-                              formattedValue &&
-                              updateDraft("issuedAt", formattedValue)
+                            onValueChange={(value) =>
+                              value && updateDraft("issuedAt", value)
                             }
                           />
                         </div>
@@ -511,14 +502,11 @@ export function StructuredDocumentCreateEditor({
                         </div>
                         <div className="min-w-0">
                           <DatePicker
-                            className="w-full [&>button]:w-full [&>button]:border-[var(--color-orange-2)]!"
-                            value={quotationDate(draft.validUntil)}
+                            className="w-full [&>button]:border-[var(--color-orange-2)]!"
+                            value={draft.validUntil}
                             ariaLabel="유효기간"
-                            allowClear={false}
-                            showToday={false}
-                            onChange={(_value, formattedValue) =>
-                              formattedValue &&
-                              updateDraft("validUntil", formattedValue)
+                            onValueChange={(value) =>
+                              value && updateDraft("validUntil", value)
                             }
                           />
                           <FieldDescription className="text-[10px] text-[var(--color-orange-2)]">

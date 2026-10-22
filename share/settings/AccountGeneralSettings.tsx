@@ -3,8 +3,8 @@ import { useState } from "react"
 import { AccountWithdrawal } from "@share/settings/AccountWithdrawalPanel"
 import { PageHeading, SettingsSection } from "@share/settings/views/SettingsSection"
 import { SettingRow } from "@share/settings/views/SettingRow"
-import { Input } from "@shared/components/ui/input"
-import { Button } from "@shared/components/ui/button"
+import { Input } from "@/components/ui/Input"
+import { Button } from "@/components/ui/Button"
 import { appLocation } from "@/app/appLocation"
 
 export function AccountPage({ withdrawal, onOrganizations, onResult }: {

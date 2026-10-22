@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { PageHeading, SettingsSection } from "@share/settings/views/SettingsSection"
 import { SettingRow } from "@share/settings/views/SettingRow"
-import { Checkbox } from "@shared/components/ui/checkbox"
-import { Button } from "@shared/components/ui/button"
+import { Checkbox } from "@/components/ui/Checkbox"
+import { Button } from "@/components/ui/Button"
 
 export function AlertsPage() {
   const [saved, setSaved] = useState(false)

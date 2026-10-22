@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react"
 import { RefreshCw } from "lucide-react"
-import { Button } from "@shared/components/ui/button"
-import { Badge } from "@shared/components/ui/badge"
-import { Input } from "@shared/components/ui/input"
-import { Textarea } from "@shared/components/ui/textarea"
+import { Button } from "@/components/ui/Button"
+import { Badge } from "@/components/ui/Badge"
+import { Input } from "@/components/ui/Input"
+import { Textarea } from "@/components/ui/Textarea"
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@shared/components/ui/dialog"
+} from "@/components/ui/Dialog"
 import {
   Table,
   TableBody,
@@ -19,7 +19,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shared/components/ui/table"
+} from "@/components/ui/Table"
 
 type Container = {
   id: string

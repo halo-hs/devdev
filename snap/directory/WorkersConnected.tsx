@@ -20,9 +20,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@shared/components/ui/alert-dialog"
-import { Badge } from "@shared/components/ui/badge"
-import { Button } from "@shared/components/ui/button"
+} from "@/components/ui/AlertDialog"
+import { Badge } from "@/components/ui/Badge"
+import { Button } from "@/components/ui/Button"
 import {
   Dialog,
   DialogContent,
@@ -30,15 +30,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@shared/components/ui/dialog"
-import { Input } from "@shared/components/ui/input"
+} from "@/components/ui/Dialog"
+import { Input } from "@/components/ui/Input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-} from "@shared/components/ui/select"
-import { Skeleton } from "@shared/components/ui/skeleton"
+} from "@/components/ui/Select"
+import { Skeleton } from "@/components/ui/Skeleton"
 import {
   Table,
   TableBody,
@@ -46,14 +46,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shared/components/ui/table"
+} from "@/components/ui/Table"
 import { snapApi } from "@snap/lib/snapApi"
 import {
   snapApiConfigured,
   snapApiErrorMessage,
   type SnapJsonRecord,
 } from "@snap/lib/snapReportApi"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 
 type MemberRole = "owner" | "admin" | "manager" | "worker" | "viewer"
 type WorkRole = "manager" | "worker"

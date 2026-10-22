@@ -23,8 +23,8 @@ export default defineConfig([
   },
   {
     files: [
-      "packages/shared-ui/src/components/ui/**/*.{ts,tsx}",
-      "packages/design-system-2.0/**/*.{ts,tsx}",
+      "src/components/ui/**/*.{ts,tsx}",
+      "src/components/ds2/**/*.{ts,tsx}",
     ],
     rules: {
       "react-refresh/only-export-components": "off",

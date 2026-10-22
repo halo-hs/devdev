@@ -3,7 +3,7 @@ import { dealDocumentFromReviewUrl } from "@trade-os/lib/dealDocumentActions"
 import { appLocation } from "@/app/appLocation"
 import { StartGuideProvider } from "@trade-os/onboarding/StartGuideProvider"
 import { SettingsDemoProvider } from "@share/settings/SubscriptionSettings"
-import { PageLoadingBoundary } from "@shared/components/RouteLoading"
+import { PageLoadingBoundary } from "@/components/platform/RouteLoading"
 import { type DeliveryAttachment } from "@trade-os/documents/DeliveryAttachmentPicker"
 import { type ReviewedField } from "@trade-os/lib/erpDocumentWorkflow"
 import {
@@ -14,13 +14,13 @@ import {
 } from "react"
 
 import { type GeneratedDocumentMetadata } from "@trade-os/lib/generatedDocumentMetadata"
-import { PageFrame } from "@shared/components/PageFrame"
+import { PageFrame } from "@/components/platform/PageFrame"
 import { SalesPrototype } from "@trade-os/sales/SalesPipelineView"
-import { workspaceOptions, type WorkspaceKey } from "@shared/lib/workspaces"
+import { workspaceOptions, type WorkspaceKey } from "@/lib/workspaces"
 import {
   SidebarInset,
   SidebarProvider,
-} from "@shared/components/ui/sidebar"
+} from "@/components/ui/Sidebar"
 import {
   DealDetailScreen,
   DealsScreen,
@@ -30,7 +30,7 @@ import {
   HomePrototype as V2HomePrototype,
   type HomePreviewState,
 } from "@trade-os/home/HomeProtectedPage"
-import { ReferenceOperations } from "@trade-os/operations/index"
+import { OperationsScreen } from "@trade-os/OperationsScreens"
 import { NotificationsPrototype } from "@share/notifications/page"
 import { notifications, type NotificationDealTarget } from "@share/notifications/data"
 import { BillingPrototype, CounterpartyPrototype, OnboardingPrototype, SettingsPrototype, SnapEvidencePrototype, TokenUsagePrototype, type ErpMenuTarget } from "@trade-os/ErpScreens"
@@ -57,12 +57,12 @@ import {
   type ErpRouteMatch,
   type ErpRouteScreen,
 } from "@trade-os/lib/erpRoutes"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import { toast } from "sonner"
 import { type Tone, templateSchemas } from "@trade-os/documents/documentTemplateModel"
 import { type PrototypeSlotKind, templates } from "@trade-os/documents/documentTemplateModel"
-import { AppNav } from "@/shell/erpNav"
+import { AppNav } from "@/shell/ErpNav"
 import { WorkspaceHeader } from "@/shell/ErpTopNavSlot"
 import { InboxScreen } from "@trade-os/inbox/InboxView"
 import { ResultScreen } from "@trade-os/documents/DocumentCreateConnected"
@@ -1177,8 +1177,6 @@ export function App() {
                         navigateTo("deal", { dealId })
                       }}
                     />
-                  ) : screen === "deal" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(selectedDealId) ? (
-                    <ReferenceOperations screen="deal" dealId={selectedDealId} />
                   ) : screen === "deal" ? (
                     <DealDetailScreen
                       key={selectedDealId}
@@ -1198,15 +1196,15 @@ export function App() {
                       workspaceActionsTarget={dealHeaderActionsTarget}
                     />
                   ) : screen === "shipments" ? (
-                    <ReferenceOperations screen="shipments" />
+                    <OperationsScreen screen="shipments" />
                   ) : screen === "settlement" ? (
-                    <ReferenceOperations screen="settlement" />
+                    <OperationsScreen screen="settlement" />
                   ) : screen === "monitoring" ? (
-                    <ReferenceOperations screen="monitor" />
+                    <OperationsScreen screen="monitor" />
                   ) : screen === "reports" ? (
-                    <ReferenceOperations screen="reports" />
+                    <OperationsScreen screen="reports" />
                   ) : screen === "sales" ? (
-                    <ReferenceOperations screen="sales" />
+                    <OperationsScreen screen="sales" />
                   ) : screen === "contacts" ? (
                     // SSOT SC-27: its own screen with its own contact search;
                     // it does not inherit the deals list filters.

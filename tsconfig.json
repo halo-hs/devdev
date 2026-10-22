@@ -24,9 +24,6 @@
       ],
       "@snap/*": [
         "./snap/*"
-      ],
-      "@shared/*": [
-        "./packages/shared-ui/src/*"
       ]
     }
   }

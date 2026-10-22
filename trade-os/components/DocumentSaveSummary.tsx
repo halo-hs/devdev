@@ -1,5 +1,5 @@
-import { cn } from "@shared/lib/utils"
-import { AutoSaveStatus, type AutoSaveStatusState } from "@shared/components/AutoSaveStatus"
+import { cn } from "@/lib/utils"
+import { AutoSaveStatus, type AutoSaveStatusState } from "@/components/platform/AutoSaveStatus"
 import {
   formatDocumentSavedAt,
   generatedDocumentSaveDetails,

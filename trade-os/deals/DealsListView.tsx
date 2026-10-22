@@ -1,5 +1,5 @@
-import { BusinessFilterBar, BusinessListToolbar, BusinessFilterSearch, BusinessFilterSelect } from "@shared/components/SearchFilterBar"
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@shared/components/ui/empty"
+import { BusinessFilterBar, BusinessListToolbar, BusinessFilterSearch, BusinessFilterSelect } from "@/components/platform/SearchFilterBar"
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/Empty"
 import {
   getDealWorkPlan,
   workLabels,
@@ -32,7 +32,7 @@ import {
   X,
 } from "lucide-react"
 
-import { TablePagination } from "@shared/components/ui/table-pagination"
+import { TablePagination } from "@/components/ui/TablePagination"
 
 import {
   AlertDialog,
@@ -43,23 +43,23 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@shared/components/ui/alert-dialog"
-import { Button } from "@shared/components/ui/button"
-import { BusinessPageHero } from "@shared/components/HeroBanner"
-import { SummaryMetricStrip } from "@shared/components/SummaryMetricStrip"
+} from "@/components/ui/AlertDialog"
+import { Button } from "@/components/ui/Button"
+import { BusinessPageHero, heroOutlineButtonClass } from "@/components/platform/HeroBanner"
+import { SummaryMetricStrip } from "@/components/platform/SummaryMetricStrip"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@shared/components/ui/dropdown-menu"
-import { Input } from "@shared/components/ui/input"
+} from "@/components/ui/DropdownMenu"
+import { Input } from "@/components/ui/Input"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@shared/components/ui/popover"
-import { Card, CardContent } from "@shared/components/ui/card"
+} from "@/components/ui/Popover"
+import { Card, CardContent } from "@/components/ui/Card"
 import {
   Table,
   TableBody,
@@ -67,11 +67,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shared/components/ui/table"
-import { Tabs, TabsList, TabsTrigger } from "@shared/components/ui/tabs"
-import { cn } from "@shared/lib/utils"
-import { StatusBadge } from "@shared/components/StatusBadge"
-import { DatePicker } from "@ecoya/design-system/extensions/date-picker"
+} from "@/components/ui/Table"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs"
+import { cn } from "@/lib/utils"
+import { StatusBadge } from "@/components/platform/StatusBadge"
+import { DatePicker } from "@/components/ui/DatePicker"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 
 import {
@@ -91,12 +91,6 @@ function dDayBasisLabel(basis: Deal["dDayBasis"]) {
     case "etd": return "ETD"
     default: return ""
   }
-}
-
-// "YYYY-MM-DD" filter value → local Date for the DatePicker (null when empty).
-function isoDate(value: string) {
-  const [year, month, day] = value.split("-").map(Number)
-  return year && month && day ? new Date(year, month - 1, day) : null
 }
 
 const stageLabels: Record<DealStage, string> = {
@@ -651,7 +645,7 @@ export function DealsScreen({
             <>
               <Button
                 variant="outline"
-                className="border-white/25 bg-white/10 text-white shadow-none hover:border-white/50 hover:bg-white/15 hover:text-white active:border-white/50 active:bg-white/20 active:text-white"
+                className={heroOutlineButtonClass}
                 onClick={exportCsv}
               >
                 <Download data-icon="inline-start" />
@@ -788,28 +782,22 @@ export function DealsScreen({
                           <div className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:flex sm:w-auto">
                             <DatePicker
                               ariaLabel="ETA 기간 시작일"
-                              className="min-w-0 sm:w-40 [&>button]:w-full"
-                              placeholder="연도. 월. 일."
-                              allowClear={false}
-                              showToday={false}
-                              value={isoDate(dateStart)}
-                              maxDate={isoDate(dateEnd) ?? undefined}
-                              onChange={(_value, formatted) => {
-                                setDateStart(formatted ?? "")
+                              className="sm:w-40"
+                              value={dateStart}
+                              max={dateEnd || undefined}
+                              onValueChange={(value) => {
+                                setDateStart(value)
                                 setPage(1)
                               }}
                             />
                             <span className="text-white/70">~</span>
                             <DatePicker
                               ariaLabel="ETA 기간 종료일"
-                              className="min-w-0 sm:w-40 [&>button]:w-full"
-                              placeholder="연도. 월. 일."
-                              allowClear={false}
-                              showToday={false}
-                              value={isoDate(dateEnd)}
-                              minDate={isoDate(dateStart) ?? undefined}
-                              onChange={(_value, formatted) => {
-                                setDateEnd(formatted ?? "")
+                              className="sm:w-40"
+                              value={dateEnd}
+                              min={dateStart || undefined}
+                              onValueChange={(value) => {
+                                setDateEnd(value)
                                 setPage(1)
                               }}
                             />

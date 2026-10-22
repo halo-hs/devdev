@@ -1,8 +1,8 @@
 import { useEffect } from "react"
 import { ArrowRight, Check } from "lucide-react"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import { LandingShell, StartButton } from "../shared/layout"
-import { useT } from "../shared/locale"
+import { useT } from "../shared/Locale"
 
 const principles = [
   [

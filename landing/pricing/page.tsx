@@ -2,7 +2,7 @@ import { appLocation } from "@/app/appLocation"
 import { useEffect } from "react"
 import { ArrowRight, Check } from "lucide-react"
 import { LandingShell } from "../shared/layout"
-import { useT } from "../shared/locale"
+import { useT } from "../shared/Locale"
 import "./styles.css"
 
 const includedMembers = 5

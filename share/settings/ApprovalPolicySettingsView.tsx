@@ -16,20 +16,20 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@shared/components/ui/alert-dialog"
-import { Badge } from "@shared/components/ui/badge"
-import { Button } from "@shared/components/ui/button"
-import { Checkbox } from "@shared/components/ui/checkbox"
-import { Input } from "@shared/components/ui/input"
+} from "@/components/ui/AlertDialog"
+import { Badge } from "@/components/ui/Badge"
+import { Button } from "@/components/ui/Button"
+import { Checkbox } from "@/components/ui/Checkbox"
+import { Input } from "@/components/ui/Input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@shared/components/ui/select"
+} from "@/components/ui/Select"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 
 export type ProductEntitlement = "erp" | "snap"
 

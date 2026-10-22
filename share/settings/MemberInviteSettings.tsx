@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Copy, RefreshCw, X } from "lucide-react"
-import { Button } from "@shared/components/ui/button"
-import { Badge } from "@shared/components/ui/badge"
+import { Button } from "@/components/ui/Button"
+import { Badge } from "@/components/ui/Badge"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 
 import type { PendingInvitation } from "./invitationData"

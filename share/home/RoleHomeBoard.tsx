@@ -20,16 +20,16 @@ import {
   type LucideIcon,
 } from "lucide-react"
 
-import { Badge } from "@shared/components/ui/badge"
-import { Button } from "@shared/components/ui/button"
-import { Card } from "@shared/components/ui/card"
+import { Badge } from "@/components/ui/Badge"
+import { Button } from "@/components/ui/Button"
+import { Card } from "@/components/ui/Card"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@shared/components/ui/dropdown-menu"
+} from "@/components/ui/DropdownMenu"
 import {
   Empty,
   EmptyContent,
@@ -37,8 +37,8 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@shared/components/ui/empty"
-import { cn } from "@shared/lib/utils"
+} from "@/components/ui/Empty"
+import { cn } from "@/lib/utils"
 import type { ErpMenuTarget } from "@trade-os/ErpScreens"
 
 export type HomeRole = "owner" | "admin" | "member"

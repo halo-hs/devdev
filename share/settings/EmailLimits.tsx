@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/Button"
 
 import {
   emailLimitsPreview,

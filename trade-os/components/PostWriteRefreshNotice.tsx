@@ -1,5 +1,5 @@
 import { RefreshCw } from "lucide-react"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import type { RefreshFailure } from "@trade-os/lib/usePostWriteRefresh"
 
 export function PostWriteRefreshNotice({ failure, busy, onRetry }: {

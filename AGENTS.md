@@ -11,8 +11,8 @@
 | Trade OS 업무 | `trade-os/` | `/erp/*` 업무 화면과 로직 |
 | SNAP 업무 | `snap/` | 현장 업무 화면과 로직 |
 | 공통 업무·공개 링크 | `share/` | 업무 홈 모듈, 설정, 알림, 고객 공유 링크 |
-| 공통 UI | `packages/shared-ui/`, `packages/ecoya-ui/` | 여러 영역이 소비하는 컴포넌트·훅·유틸리티 |
-| 디자인 시스템 | `packages/design-system-2.0/` | 공통 토큰·브랜드 자산 |
+| 공통 UI | `src/components/ui/`, `src/components/platform/`, `src/lib/`, `src/hooks/` | 여러 영역이 소비하는 컴포넌트·훅·유틸리티 |
+| 디자인 시스템 | `src/components/ds2/`, `src/app/tokensDs2.css`, `src/app/theme.css` | 기본 컴포넌트·공통 토큰·브랜드 자산 |
 | 앱 연결 | `src/` | 진입점, 라우팅, 전역 스타일 |
 
 ## 한 페이지 요청은 해당 페이지에 한정
@@ -25,18 +25,6 @@
 - API 주소, 로그인·가입·시작하기 링크, 라우팅, 결제·인증 로직은 문구·이미지·레이아웃 수정의 범위에 포함하지 않습니다.
 - 공용 이미지·로고 파일을 덮어쓰면 여러 화면이 바뀝니다. 한 페이지용 이미지는 새 이름으로 저장해 해당 페이지에서만 참조합니다.
 
-## 운영·성과 네 화면의 원본 대조 기준
-
-정산·운영 감시·결산 리포트·영업 성과의 동기화 작업에는 사용자 결정 `TRADE:OD-047`을 적용합니다. 이 범위의 문구·필터·지표·기능은 제품 프론트엔드 원본에서 문서 UI와 SSOT로 반영합니다.
-
-- 원본 `ecoya-platform-user-frontend`는 읽기 전용입니다. 원본 코드·설정·작업 지침을 수정하지 않습니다. 구현 수정은 이 저장소의 해당 UI에만, 기획 수정은 `ecoya-products/ecoya 2.0/`의 해당 SSOT에 반영합니다.
-- 원본의 제목·문장·띄어쓰기·기호·치환 변수와 실제 역할별 표시 분기를 함께 대조합니다. 메시지 파일만 같다는 이유로 화면·기능까지 일치한다고 판정하지 않습니다.
-- 이 동기화 범위에서는 일반적인 `devdev 문구 우선` 설명이나 과거 Pilot 제안·Prototype을 근거로 원본 문구를 바꾸거나 필터·기능을 줄이지 않습니다. 기존 디자인의 장식·외형은 SSOT가 허용한 범위에서 유지합니다.
-- 원본을 고쳐야 한다는 과거 실행 계획은 이번 작업의 수정 권한이 아닙니다. 원본과 승인된 권한·산식·API 계약이 충돌하면 확인된 차이를 기록하고, 이미 확정된 결정으로 해결되는 항목은 같은 결정에 연결합니다. 새로운 정책 선택만 별도 결정으로 다룹니다.
-- 현재 비교 리비전·화면별 원문·역할별 계약은 Trade OS SSOT의 `FS-17 > 문구 기준과 원본 대조 방향` 및 SC-13·21·24·25를 확인합니다. 결정 변경은 날짜별 원장과 가까운 README에 함께 연결합니다.
-
-대조 근거와 검증 범위는 [운영·성과 원문 및 기획서 대조](./docs/operations-source-ssot-alignment-2026-10-08.md)를 참고합니다. 이 지침은 네 화면의 동기화 작업에만 적용하며 다른 제품·화면의 계약을 바꾸지 않습니다.
-
 ## Figma 디자인 반영 시 유의점
 
 Figma(SNAP 2.0 작업)를 코드에 반영할 때 지키는 기준입니다. Figma는 읽기만 하고 소스를 고칩니다.
@@ -45,16 +33,15 @@ Figma(SNAP 2.0 작업)를 코드에 반영할 때 지키는 기준입니다. Fig
 - 화면 문구·라벨·버튼 이름·안내 텍스트·예시 값은 Figma 예시 문구로 바꾸지 않습니다. 반영 대상은 색·글자 크기·간격·모서리·그림자·배치입니다.
 - 버튼 글자를 아이콘으로 바꾸거나, 화면에 없던 라벨·설명을 추가하거나, 기존 바로가기·안내를 빼는 것도 문구 변경으로 봅니다.
 - 예외는 사용자가 디자인을 그대로 따르라고 지정한 화면뿐입니다(현재: 홈 업무판). 그 외 화면은 문구를 유지합니다.
-- 운영·성과 화면은 위 `TRADE:OD-047` 기준을 따릅니다.
 
 **컴포넌트 적용**
-- shadcn 기본 컴포넌트는 `packages/shared-ui/src/components/ui/`의 래퍼를 최대한 씁니다. 화면에서 같은 모양을 손으로 다시 그리지 않습니다.
-- shadcn에 없는 Figma 조합 컴포넌트(KPI 카드, 순위 행 등)는 `packages/shared-ui/src/components/`에 공용 컴포넌트로 만들되, 안쪽은 shadcn 기본 컴포넌트(Card·Separator·Progress·Badge·Button 등)로 조립합니다.
-- `packages/design-system-2.0/`은 수정하지 않습니다. DS 확장 컴포넌트를 통째로 복사한 래퍼도 만들지 않습니다.
+- shadcn 기본 컴포넌트는 `src/components/ui/`의 래퍼를 최대한 씁니다. 화면에서 같은 모양을 손으로 다시 그리지 않습니다.
+- shadcn에 없는 Figma 조합 컴포넌트(KPI 카드, 순위 행 등)는 `src/components/platform/`에 공용 컴포넌트로 만들되, 안쪽은 shadcn 기본 컴포넌트(Card·Separator·Progress·Badge·Button 등)로 조립합니다.
+- 디자인 시스템 기본 부품은 `src/components/ds2/`(ui·extensions·assets), 기본 토큰은 `src/app/tokensDs2.css`입니다. DS 확장 컴포넌트를 통째로 복사한 래퍼는 만들지 않습니다.
 - 다른 작업자가 같은 이름의 컴포넌트를 만들고 있는지 먼저 확인하고 겹치지 않게 합니다.
 
 **토큰과 크기**
-- 새 토큰 이름을 만들지 않습니다. 기존 토큰 값만 `packages/shared-ui/src/styles/figma-prototype-tokens.css`에서 덮어씁니다.
+- 새 토큰 이름을 만들지 않습니다. 기존 토큰 값만 `src/app/theme.css`에서 덮어씁니다.
 - 색 대응: Figma Gray N → `--color-gray-(N+1)`, Blue N → `--color-primary-N`, Indigo 1 → `--primary`.
 - 글자 크기 단계는 Figma 그대로입니다: 캡션 11, 보조 13, 본문 15, 입력값 17, 제목 16·18·20. 전체 글자 크기를 일괄로 올리거나 내리지 않고, 역할별로 Figma 값에 맞춥니다.
 - Figma 시안과 화면에서 같은 부분을 실측해 대조한 뒤 반영합니다.
@@ -88,7 +75,7 @@ Figma(SNAP 2.0 작업)를 코드에 반영할 때 지키는 기준입니다. Fig
 - Cloudflare의 브랜치 미리보기는 비활성화합니다. main 이외 브랜치는 Cloudflare에 배포하지 않습니다.
 - GitHub Pages 공용 미리보기: `https://halo-hs.github.io/devdev/`. 작업 브랜치 push 시 `.github/workflows/github-pages-preview.yml`이 갱신합니다.
 - 로컬 실행은 `npm run dev`만 사용합니다. 로컬 실행을 위해 PR을 만들거나 push·배포하지 않습니다.
-- `doc/`와 `docs/`는 로컬 문서 전용이며 Git에 올리지 않습니다. `git add -f`로 강제 추가하지 않습니다.
+- `doc/`, `docs/`, `tests/`, `feedback/`(캡처)는 로컬 전용이며 Git에 올리지 않습니다. `git add -f`로 강제 추가하지 않습니다.
 - 상세 배포 메모는 로컬 `docs/deployment-preview.md`를 참고합니다.
 
 ## GitHub 변경 제출 규칙

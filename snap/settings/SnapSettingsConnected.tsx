@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import { DateInput } from "@shared/components/DateInput"
+import { DatePicker } from "@/components/ui/DatePicker"
 import {
   AlertCircle,
   Building2,
@@ -20,15 +20,15 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@shared/components/ui/badge"
-import { Button } from "@shared/components/ui/button"
+import { Badge } from "@/components/ui/Badge"
+import { Button } from "@/components/ui/Button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@shared/components/ui/card"
+} from "@/components/ui/Card"
 import {
   Dialog,
   DialogContent,
@@ -36,17 +36,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@shared/components/ui/dialog"
-import { Input } from "@shared/components/ui/input"
-import { Progress } from "@shared/components/ui/progress"
+} from "@/components/ui/Dialog"
+import { Input } from "@/components/ui/Input"
+import { Progress } from "@/components/ui/Progress"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@shared/components/ui/select"
-import { Skeleton } from "@shared/components/ui/skeleton"
+} from "@/components/ui/Select"
+import { Skeleton } from "@/components/ui/Skeleton"
 import {
   Table,
   TableBody,
@@ -54,8 +54,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shared/components/ui/table"
-import { Textarea } from "@shared/components/ui/textarea"
+} from "@/components/ui/Table"
+import { Textarea } from "@/components/ui/Textarea"
 import type { SnapScreenKey } from "@snap/SnapScreens"
 import type { SnapNavigationOptions } from "@snap/operations/SnapOperationsPages"
 import { snapApi, type SnapPage } from "@snap/lib/snapApi"
@@ -64,7 +64,7 @@ import {
   snapApiErrorMessage,
   type SnapJsonRecord,
 } from "@snap/lib/snapReportApi"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 
 type PlatformNavigate = (
   screen: SnapScreenKey,
@@ -474,7 +474,7 @@ function PlatformSignupsPage() {
           </label>
           <label className="text-xs font-medium text-muted-foreground">
             신청일 이후
-            <DateInput className="mt-1 sm:w-44" ariaLabel="신청일 이후" value={since} onValueChange={setSince} />
+            <DatePicker className="mt-1 sm:w-44" ariaLabel="신청일 이후" value={since} onValueChange={setSince} />
           </label>
         </div>
         <Card className="rounded-md shadow-none">

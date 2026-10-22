@@ -1,12 +1,12 @@
-import { SimpleFormField } from "@shared/components/FormItem"
+import { SimpleFormField } from "@/components/platform/FormItem"
 import {
   Empty,
   EmptyHeader,
   EmptyTitle,
   EmptyDescription,
-} from "@shared/components/ui/empty"
+} from "@/components/ui/Empty"
 import { createContext, useContext, useState, type ReactNode } from "react"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import {
   Dialog,
   DialogContent,
@@ -14,16 +14,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@shared/components/ui/dialog"
-import { Input } from "@shared/components/ui/input"
-import { Textarea } from "@shared/components/ui/textarea"
+} from "@/components/ui/Dialog"
+import { Input } from "@/components/ui/Input"
+import { Textarea } from "@/components/ui/Textarea"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@shared/components/ui/select"
+} from "@/components/ui/Select"
 import {
   Table,
   TableBody,
@@ -31,7 +31,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shared/components/ui/table"
+} from "@/components/ui/Table"
 import { settlementLedgerRows } from "@trade-os/lib/erpMenuSamples"
 
 type Document = { code: string; type: string; file: string }

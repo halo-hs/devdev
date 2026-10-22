@@ -6,21 +6,21 @@ import { normalizeDecimalInput } from "@trade-os/lib/money"
 import { toast } from "sonner"
 import { focusDocumentRequirement } from "@trade-os/lib/documentRequirementNavigation"
 import { type DocumentBlockingIssue, DocumentBlockingAlerts } from "@trade-os/components/DocumentBlockingAlerts"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import { LoaderCircle, AlertTriangle, Sparkles, Building2, RefreshCw, Plus, Search } from "lucide-react"
-import { Tooltip, TooltipTrigger, TooltipContent } from "@shared/components/ui/tooltip"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip"
 import { createPortal } from "react-dom"
-import { ScrollArea } from "@shared/components/ui/scroll-area"
-import { Alert, AlertTitle, AlertDescription, AlertAction } from "@shared/components/ui/alert"
+import { ScrollArea } from "@/components/ui/ScrollArea"
+import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/Alert"
 import { DocumentConnectionSummary, DocumentConnectionChangeDialog } from "@trade-os/components/DocumentConnectionSummary"
-import { Badge } from "@shared/components/ui/badge"
+import { Badge } from "@/components/ui/Badge"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
-import { Skeleton } from "@shared/components/ui/skeleton"
-import { Field, FieldLabel } from "@shared/components/ui/field"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@shared/components/ui/select"
-import { Input } from "@shared/components/ui/input"
-import { cn } from "@shared/lib/utils"
-import { DateInput } from "@shared/components/DateInput"
+import { Skeleton } from "@/components/ui/Skeleton"
+import { Field, FieldLabel } from "@/components/ui/Field"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select"
+import { Input } from "@/components/ui/Input"
+import { cn } from "@/lib/utils"
+import { DatePicker } from "@/components/ui/DatePicker"
 import { type RecentDocument, type ReviewField, type DocumentSourceDeal } from "@/App"
 import { documentSourceDeals, quotationMoney } from "@trade-os/documents/documentTemplateModel"
 import { resolvedReviewFields, readUploadDocumentDealLinks } from "@trade-os/inbox/uploadDocumentModel"
@@ -803,7 +803,7 @@ export function DealConfirmPanel({
                                 <FieldLabel>
                                   입출금일
                                 </FieldLabel>
-                                <DateInput
+                                <DatePicker
                                   ariaLabel="입출금일"
                                   value={bankValueDate}
                                   onValueChange={setBankValueDate}

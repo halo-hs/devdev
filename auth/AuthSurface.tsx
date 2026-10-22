@@ -9,7 +9,7 @@ import {
   authGridColumns,
   type AuthLayoutVariant,
 } from "@auth/lib/authValidation"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 import { AccountGuide, CommonPublicFooter } from "@auth/AuthCommonShell"
 
 export type CommonScreenKey =

@@ -9,10 +9,10 @@ import {
 } from "lucide-react"
 import { LandingHeader } from "@landing/shared/layout"
 import { type AuthLayoutVariant } from "@auth/lib/authValidation"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 import cargoOperationsBanner from "@/assets/home/cargo-operations-banner.jpg"
-import ecoyaWhiteLogo from "@ecoya/design-system/assets/logos/logo-ecoya-white.png"
-import ecoyaColorLogo from "@ecoya/design-system/assets/logos/logo-ecoya-snap-color.png"
+import ecoyaWhiteLogo from "@/components/ds2/assets/logos/logo-ecoya-white.png"
+import ecoyaColorLogo from "@/components/ds2/assets/logos/logo-ecoya-snap-color.png"
 
 const linkClass =
   "rounded-sm text-base text-muted-foreground transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"

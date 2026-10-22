@@ -17,17 +17,17 @@ import {
   TradeFeaturePreview,
   TradeTrustVisual,
   TradeUploadPreview,
-} from "./demo"
-import { TradeLottie } from "@landing/shared/trade-lottie"
-import { InspoFeatureOverview } from "@landing/shared/feature-overview"
+} from "./Demo"
+import { TradeLottie } from "@landing/shared/TradeLottie"
+import { InspoFeatureOverview } from "@landing/shared/FeatureOverview"
 import {
   TradeDealPreview,
   TradeClosingPreview,
   TradeMarketPreview,
   TradeQuestionPreview,
-} from "./sections"
+} from "./Sections"
 import { LandingShell, StartButton } from "../shared/layout"
-import { useT } from "../shared/locale"
+import { useT } from "../shared/Locale"
 
 function WorkflowGuide() {
   const t = useT()

@@ -55,26 +55,26 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@shared/components/ui/badge"
-import { Button } from "@shared/components/ui/button"
+import { Badge } from "@/components/ui/Badge"
+import { Button } from "@/components/ui/Button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@shared/components/ui/card"
-import { Checkbox } from "@shared/components/ui/checkbox"
-import { Input } from "@shared/components/ui/input"
-import { Progress } from "@shared/components/ui/progress"
+} from "@/components/ui/Card"
+import { Checkbox } from "@/components/ui/Checkbox"
+import { Input } from "@/components/ui/Input"
+import { Progress } from "@/components/ui/Progress"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@shared/components/ui/select"
-import { Separator } from "@shared/components/ui/separator"
+} from "@/components/ui/Select"
+import { Separator } from "@/components/ui/Separator"
 import {
   Sheet,
   SheetContent,
@@ -82,7 +82,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@shared/components/ui/sheet"
+} from "@/components/ui/Sheet"
 import {
   Table,
   TableBody,
@@ -90,9 +90,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shared/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@shared/components/ui/tabs"
-import { Textarea } from "@shared/components/ui/textarea"
+} from "@/components/ui/Table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
+import { Textarea } from "@/components/ui/Textarea"
 import {
   demoPreSendCheck,
   demoShareLink,
@@ -112,7 +112,7 @@ import {
 } from "@snap/lib/snapReportApi"
 import { snapApi } from "@snap/lib/snapApi"
 import { resetSnapSessionAccessCache } from "@snap/lib/snapRouteAccess"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 import cargoOperationsBanner from "@/assets/home/cargo-operations-banner.jpg"
 import { SnapCustomersPage } from "@snap/directory/CustomersConnected"
 import { SnapPlatformPages } from "@snap/settings/SnapSettingsConnected"

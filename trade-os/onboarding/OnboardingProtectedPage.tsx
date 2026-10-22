@@ -1,4 +1,4 @@
-import { BusinessPageHero } from "@shared/components/HeroBanner"
+import { BusinessPageHero } from "@/components/platform/HeroBanner"
 import { useEffect } from "react"
 import { useStartGuide } from "./StartGuideProvider"
 import { isDone, type GuideItem } from "./state"
@@ -11,8 +11,8 @@ import {
   MessageSquare,
   Users,
 } from "lucide-react"
-import { Button } from "@shared/components/ui/button"
-import { Badge } from "@shared/components/ui/badge"
+import { Button } from "@/components/ui/Button"
+import { Badge } from "@/components/ui/Badge"
 import type { ErpMenuTarget } from "@trade-os/ErpScreens"
 
 const steps = [

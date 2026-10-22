@@ -47,9 +47,9 @@ coverage/
 .cache/
 *.tsbuildinfo
 
-# Local documentation (keep files locally; do not publish)
+# Local documentation and browser tests (keep files locally; do not publish)
 /doc/
 /docs/
+/tests/
+/feedback/
 
-# Copied from packages/design-system-2.0/public/fonts by npm run sync:design-system
-/public/fonts/
