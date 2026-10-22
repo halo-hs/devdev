@@ -153,7 +153,7 @@ export function PdfFloatingControls({
         >
           <ChevronLeft className="size-[18px]" />
         </Button>
-        <Separator orientation="vertical" className="h-5! self-center bg-[var(--color-gray-8)]" />
+        <Separator orientation="vertical" className="h-5! self-center! bg-[var(--color-gray-8)]" />
         <Popover open={pagePickerOpen} onOpenChange={setPagePickerOpen}>
           <PopoverTrigger asChild>
             <Button
@@ -223,7 +223,7 @@ export function PdfFloatingControls({
             </div>
           </PopoverContent>
         </Popover>
-        <Separator orientation="vertical" className="h-5! self-center bg-[var(--color-gray-8)]" />
+        <Separator orientation="vertical" className="h-5! self-center! bg-[var(--color-gray-8)]" />
         <Button
           variant="ghost"
           size="icon-sm"
@@ -235,7 +235,7 @@ export function PdfFloatingControls({
         </Button>
         {variant === "full" ? (
           <>
-            <Separator orientation="vertical" className="h-5! self-center bg-[var(--color-gray-8)]" />
+            <Separator orientation="vertical" className="h-5! self-center! bg-[var(--color-gray-8)]" />
             <Button
               variant="ghost"
               size="icon-sm"
