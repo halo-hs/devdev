@@ -1,7 +1,7 @@
 "use client";
 
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
-import { BusinessListToolbar, BusinessFilterField } from "@shared/components/business-filters";
+import { BusinessListToolbar, BusinessFilterField } from "@shared/components/SearchFilterBar";
 
 import Link from "@trade-os/operations/compat/link";
 import { useMessages } from "@trade-os/operations/compat/intl";
@@ -12,7 +12,7 @@ import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { RefreshCw } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@shared/components/ui/tabs";
 import { Checkbox } from "@shared/components/ui/checkbox";
-import { DateInput } from "@shared/components/date-input";
+import { DateInput } from "@shared/components/DateInput";
 import { LoadableSection, type LoadableSectionCopy } from "@trade-os/operations/components/LoadableSection";
 import { OperationalTableFrame } from "@trade-os/operations/components/OperationalTableFrame";
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";

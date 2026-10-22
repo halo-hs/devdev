@@ -41,12 +41,6 @@
       "@shared/*": [
         "./packages/shared-ui/src/*"
       ],
-      "@ecoya/ui": [
-        "./packages/ecoya-ui/src/index.ts"
-      ],
-      "@ecoya/ui/*": [
-        "./packages/ecoya-ui/src/*"
-      ],
       "@share/*": [
         "./share/*"
       ]
@@ -59,7 +53,6 @@
     "trade-os",
     "snap",
     "packages/shared-ui/src",
-    "packages/ecoya-ui/src",
     "packages/design-system-2.0/src/types",
     "share"
   ]

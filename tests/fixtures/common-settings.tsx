@@ -4,13 +4,13 @@ import {
   type ProductEntitlement,
   type SettingsRole,
   type SubscriptionDisplayStatus,
-} from "../../share/settings/page"
-import type { ImportPermissions } from "../../share/settings/import-permissions"
-import type { EmailLimitsLoader } from "../../share/settings/email-limits-data"
+} from "../../share/settings/SettingsRoutePage"
+import type { ImportPermissions } from "../../share/settings/importPermissions"
+import type { EmailLimitsLoader } from "../../share/settings/emailLimitsData"
 import { SidebarProvider } from "../../packages/shared-ui/src/components/ui/sidebar"
 import { TooltipProvider } from "../../packages/shared-ui/src/components/ui/tooltip"
 
-import type { WithdrawalGateway } from "../../share/settings/withdrawal-data"
+import type { WithdrawalGateway } from "../../share/settings/withdrawalData"
 
 let root: Root | undefined
 export function renderSettings(

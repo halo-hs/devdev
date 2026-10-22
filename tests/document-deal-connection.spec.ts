@@ -9,7 +9,7 @@ const target = "DL-260704-02"
 const state = (page: Page) => page.evaluate(key => JSON.parse(localStorage.getItem(key) ?? "null"), key)
 async function failOnce(page: Page, method: string, returnsResult = false, failures = 1) {
   await page.evaluate(async ({ method, returnsResult, failures }) => {
-    const url = performance.getEntriesByType("resource").map(entry => entry.name).find(url => url.includes("/trade-os/lib/prototype-backend.ts"))!
+    const url = performance.getEntriesByType("resource").map(entry => entry.name).find(url => url.includes("/trade-os/lib/prototypeBackend.ts"))!
     const { prototypeBackend } = await import(/* @vite-ignore */ url)
     const original = prototypeBackend.tradeDocuments[method]
     ;(window as any).__connectionOriginals ??= {}
@@ -26,7 +26,7 @@ async function failOnce(page: Page, method: string, returnsResult = false, failu
 }
 async function restore(page: Page, method: string) {
   await page.evaluate(async method => {
-    const url = performance.getEntriesByType("resource").map(entry => entry.name).find(url => url.includes("/trade-os/lib/prototype-backend.ts"))!
+    const url = performance.getEntriesByType("resource").map(entry => entry.name).find(url => url.includes("/trade-os/lib/prototypeBackend.ts"))!
     const { prototypeBackend } = await import(/* @vite-ignore */ url)
     prototypeBackend.tradeDocuments[method] = (window as any).__connectionOriginals[method]
   }, method)

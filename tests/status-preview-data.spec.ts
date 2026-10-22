@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { calculateDealFinance } from "../trade-os/lib/deal-finance-workspace"
+import { calculateDealFinance } from "../trade-os/lib/dealFinanceWorkspace"
 
 test("upload queue exposes every seeded processing state and linked documents", async ({
   page,

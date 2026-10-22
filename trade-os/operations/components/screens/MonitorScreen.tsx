@@ -1,5 +1,5 @@
 "use client";
-import { BusinessListToolbar, BusinessFilterField } from "@shared/components/business-filters";
+import { BusinessListToolbar, BusinessFilterField } from "@shared/components/SearchFilterBar";
 
 import { useMemo, type ReactNode } from "react";
 

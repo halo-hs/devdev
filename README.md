@@ -55,14 +55,10 @@ Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run bui
 ## 파일 정리 기준
 
 - `scripts/assets/`: 폰트·애니메이션·운영 CSS 생성과 배포 파일 정리.
-- `scripts/capture/`: 화면 캡처 도구.
-- `scripts/checks/`: 화면·HTML·링크 검사 도구.
-- `scripts/handoff/`: 디자인 전달 HTML·색인 생성 도구와 관련 데이터.
 - `trade-os/operations/`: 선적·정산·운영 감시·리포트의 실제 실행 코드.
-- `public/assets/operations/`: 위 화면과 기존 공개 HTML에 필요한 아이콘·폰트.
+- `public/assets/operations/`: 위 화면에 필요한 아이콘·폰트.
 - `reference-3030/`: 원본 참고 자료를 로컬에만 보관하며 Git·배포에서 제외.
 - `output/`: 작업 메모·캡처·임시 산출물. Git·배포에서 제외.
-- `public/html/`: 이미 공유 중인 디자인 전달 링크이므로 유지.
 
 루트의 `package*.json`, `vite.config.ts`, `tsconfig*.json`, `index.html`, lint·format·Playwright 설정은 설치·빌드·검사에 필요한 파일입니다. `THIRD_PARTY_NOTICES.md`는 라이선스 고지이므로 유지합니다. Netlify 설정은 사용하지 않습니다.
 
@@ -74,4 +70,4 @@ Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run bui
 
 `share/`는 공통 업무 화면, `packages/shared-ui/`는 공통 UI 부품입니다. `src/app/public-entry.tsx`는 공개 페이지 연결을 담당합니다.
 
-기존의 통합 화면 구현은 `auth/screens.tsx`, `trade-os/screens.tsx`, `trade-os/extended-screens.tsx`, `snap/screens.tsx`, `src/App.tsx`에 남아 있습니다. 이번 정리는 파일 위치와 수정 책임을 정리한 것이며, 모든 기능의 코드·빌드가 독립된 것은 아닙니다.
+업무 화면 파일 이름은 제품 프론트엔드(`ecoya-platform-user-frontend`의 `src/features/<기능>/`)와 맞춥니다. 예: 거래 목록 `trade-os/deals/DealsListView.tsx`, 문서 올리기 `trade-os/inbox/InboxView.tsx`, 업로드 검토 `trade-os/confirm/ConfirmFlowConnected.tsx`, 문서 만들기 `trade-os/documents/DocumentCreateConnected.tsx`, AI에게 묻기 `trade-os/ai/AiWorkspace.tsx`, 설정 `share/settings/SettingsRoutePage.tsx`, 로그인 `auth/LoginPanel.tsx`. `src/App.tsx`는 라우팅과 앱 상태, `src/shell/`은 사이드바(`erpNav.tsx`)와 상단 바(`ErpTopNavSlot.tsx`)를 담당합니다. SNAP 통합 화면 일부(`snap/screens.tsx`, `snap/operations/pages.tsx`)는 아직 한 파일에 남아 있습니다. 모든 기능의 코드·빌드가 독립된 것은 아닙니다.

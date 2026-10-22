@@ -1,18 +1,18 @@
 /* eslint react-refresh/only-export-components: off -- Vite entrypoint renders the app and is not a Fast Refresh module. */
-import "./app/project-base"
+import "./app/projectBase.ts"
 import { lazy, StrictMode, Suspense } from "react"
 import { createRoot } from "react-dom/client"
 import { ThemeProvider } from "next-themes"
 
 import "./index.css"
 import App from "./App.tsx"
-import { CommonEntry } from "@/app/public-entry"
+import { CommonEntry } from "@/app/PublicEntry.tsx"
 import { Toaster } from "../packages/shared-ui/src/components/ui/sonner"
 import { TooltipProvider } from "../packages/shared-ui/src/components/ui/tooltip"
-import { configureSnapRuntime } from "@snap/lib/snap-runtime"
-import { appLocation } from "@/app/app-location"
+import { configureSnapRuntime } from "@snap/lib/snapRuntime.ts"
+import { appLocation } from "@/app/appLocation.ts"
 
-const TrialDesignPreview = lazy(() => import("@auth/preview/trial-design-preview"))
+const TrialDesignPreview = lazy(() => import("@auth/preview/TrialDesignPreview.tsx"))
 const trialDesignPreview = (import.meta.env.DEV || import.meta.env.MODE === "design-preview") && appLocation.pathname === "/preview/trial-start"
 
 configureSnapRuntime()

@@ -1,12 +1,12 @@
 import { useState } from "react"
 import { createRoot } from "react-dom/client"
-import { PendingInvitations } from "../../share/settings/pending-invitations"
+import { PendingInvitations } from "../../share/settings/MemberInviteSettings"
 import {
   invitationExamples,
   type PendingInvitation,
-} from "../../share/settings/invitation-data"
-import { CounterpartyPrototype } from "../../trade-os/screens"
-import type { CounterpartyAccess } from "../../trade-os/counterparty-workspace"
+} from "../../share/settings/invitationData"
+import { CounterpartyPrototype } from "../../trade-os/ErpScreens"
+import type { CounterpartyAccess } from "../../trade-os/counterparties/Counterparty360View"
 import { TooltipProvider } from "../../packages/shared-ui/src/components/ui/tooltip"
 
 function mount(element: React.ReactNode) {

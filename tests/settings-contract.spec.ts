@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test"
-import type { SubscriptionDisplayStatus } from "../share/settings/page"
+import type { SubscriptionDisplayStatus } from "../share/settings/SettingsRoutePage"
 
 async function openSettings(
   page: Page,
@@ -162,7 +162,7 @@ test("branding logo previews raster files, rejects SVG content, and respects mem
   const input = page.getByLabel("문서 로고 파일", { exact: true })
   const preview = page.getByRole("img", { name: "문서 로고 미리보기" })
   await expect(input).toHaveAttribute("accept", ".png,.jpg,.jpeg,image/png,image/jpeg")
-  await input.setInputFiles("public/assets/logos/logo-ecoya-snap-color.png")
+  await input.setInputFiles("packages/design-system-2.0/src/assets/logos/logo-ecoya-snap-color.png")
   await expect(preview).toBeVisible()
   await expect.poll(() => preview.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0)
   const previousUrl = await preview.getAttribute("src")

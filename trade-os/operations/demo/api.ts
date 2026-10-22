@@ -2,7 +2,7 @@ import { demoExceptionResponse } from "./settlementExceptions"
 import captured from './responses.json'
 import reportFixtures from './reports.json'
 import monthCloseFixtures from './month-closes.json'
-import { deals } from '@trade-os/lib/prototype-deals'
+import { deals } from '@trade-os/lib/prototypeDeals'
 import type { Shipment, ShipmentConfirmation } from '../lib/api/shipments'
 import type { MonthClose, MonthCloseRequest, MonthCloseReopenRequest, MonthCloseSnapshotV1 } from '../lib/api/reports'
 import { ApiError } from '../lib/api/client'

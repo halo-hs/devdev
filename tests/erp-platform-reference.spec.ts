@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises"
 import { expect, test } from "@playwright/test"
-import { matchErpRoute } from "../trade-os/lib/erp-routes"
+import { matchErpRoute } from "../trade-os/lib/erpRoutes"
 
 test("Platform menu links resolve to their corresponding prototype screens", () => {
   for (const [path, screen] of [

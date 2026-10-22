@@ -1,4 +1,4 @@
-import { deals } from "@trade-os/lib/prototype-deals"
+import { deals } from "@trade-os/lib/prototypeDeals"
 import { operationsDemo } from "../demo/mode"
 import type { AnchorHTMLAttributes } from "react"
 

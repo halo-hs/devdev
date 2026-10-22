@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { getGeneratedDocumentListStage } from "../trade-os/lib/generated-document-list-stage"
+import { getGeneratedDocumentListStage } from "../trade-os/lib/generatedDocumentListStage"
 
 for (const view of ["운영", "금융"]) {
 test(`mobile ${view} empty table notice stays in the visible area while scrolling horizontally`, async ({

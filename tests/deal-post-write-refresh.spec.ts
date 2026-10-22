@@ -8,7 +8,7 @@ async function open(page: Page) {
 }
 async function instrument(page: Page, mode: "fail" | "delay" | "ok" | 403 | 404 = "fail") {
   await page.evaluate(async mode => {
-    const path = performance.getEntriesByType("resource").map(e => e.name).find(url => url.includes("/trade-os/lib/prototype-backend.ts"))!
+    const path = performance.getEntriesByType("resource").map(e => e.name).find(url => url.includes("/trade-os/lib/prototypeBackend.ts"))!
     const { prototypeBackend: backend } = await import(/* @vite-ignore */ path)
     const state = { mode, writes: {} as Record<string, number>, reads: 0, resolve: null as null | (() => void) }
     ;(window as any).__refreshTest = state
@@ -132,7 +132,7 @@ test("write failure keeps editor and never starts a follow-up read", async ({ pa
   await open(page)
   await instrument(page)
   await page.evaluate(async () => {
-    const path = performance.getEntriesByType("resource").map(e => e.name).find(url => url.includes("/trade-os/lib/prototype-backend.ts"))!
+    const path = performance.getEntriesByType("resource").map(e => e.name).find(url => url.includes("/trade-os/lib/prototypeBackend.ts"))!
     const { prototypeBackend } = await import(/* @vite-ignore */ path)
     prototypeBackend.deals.updateIdentity = async () => ({ ok: false, error: "저장 요청 실패" })
   })
@@ -148,7 +148,7 @@ for (const outcome of ["stale-data", "late-failure"]) {
     await open(page)
     await instrument(page, "ok")
     await page.evaluate(async outcome => {
-      const path = performance.getEntriesByType("resource").map(e => e.name).find(url => url.includes("/trade-os/lib/prototype-backend.ts"))!
+      const path = performance.getEntriesByType("resource").map(e => e.name).find(url => url.includes("/trade-os/lib/prototypeBackend.ts"))!
       const { prototypeBackend: backend } = await import(/* @vite-ignore */ path)
       const original = backend.deals.read
       let first = true
@@ -178,7 +178,7 @@ test("changing to a read-only actor while saving suppresses the old actor's comp
   await open(page)
   await instrument(page, "ok")
   await page.evaluate(async () => {
-    const path = performance.getEntriesByType("resource").map(e => e.name).find(url => url.includes("/trade-os/lib/prototype-backend.ts"))!
+    const path = performance.getEntriesByType("resource").map(e => e.name).find(url => url.includes("/trade-os/lib/prototypeBackend.ts"))!
     const { prototypeBackend: backend } = await import(/* @vite-ignore */ path)
     const original = backend.deals.updateIdentity
     backend.deals.updateIdentity = (...args: unknown[]) => new Promise(resolve => {

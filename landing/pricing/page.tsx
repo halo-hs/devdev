@@ -1,4 +1,4 @@
-import { appLocation } from "@/app/app-location"
+import { appLocation } from "@/app/appLocation"
 import { useEffect } from "react"
 import { ArrowRight, Check } from "lucide-react"
 import { LandingShell } from "../shared/layout"

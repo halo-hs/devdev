@@ -1,12 +1,12 @@
 "use client";
 import { Badge } from "@shared/components/ui/badge";
 import { Button as ShadcnButton } from "@shared/components/ui/button";
-import { KpiCard } from "@shared/components/kpi-card";
-import { RankingRow } from "@shared/components/ranking-row";
-import { PeriodCloseRow } from "@shared/components/period-close-row";
+import { KpiCard } from "@shared/components/StatTile";
+import { RankingRow } from "@shared/components/RankingRow";
+import { PeriodCloseRow } from "@shared/components/PeriodCloseRow";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@shared/components/ui/card";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
-import { BusinessListToolbar, BusinessFilterField } from "@shared/components/business-filters";
+import { BusinessListToolbar, BusinessFilterField } from "@shared/components/SearchFilterBar";
 
 import { Segmented } from "@trade-os/operations/components/SegmentedControl";
 export { Segmented } from "@trade-os/operations/components/SegmentedControl";

@@ -1,4 +1,4 @@
-import { appLocation } from "@/app/app-location"
+import { appLocation } from "@/app/appLocation"
 /**
  * Product entitlement gate — API-first (Wave 7) with env fallback (Wave 6).
  * SSOT: _ssot/ECOYA_PLATFORM_ENTITLEMENT_AND_EXPOSURE.md Part A.

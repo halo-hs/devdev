@@ -336,7 +336,7 @@ async function customGateway(
   await page.goto("/login?section=account")
   await page.evaluate(async (mode) => {
     const fixturePath = "/tests/fixtures/common-settings.tsx"
-    const gatewayPath = "/share/settings/withdrawal-data.ts"
+    const gatewayPath = "/share/settings/withdrawalData.ts"
     const { renderSettings } = await import(fixturePath)
     const { createWithdrawalPreview } = await import(gatewayPath)
     const gateway = createWithdrawalPreview("password")

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { LottieLight, type LottieHandle } from "lottie-react"
-import { useReducedMotion } from "@shared/lib/use-reduced-motion"
+import { useReducedMotion } from "@shared/lib/useReducedMotion"
 import { FileText, Pause, Play } from "lucide-react"
 import { useT } from "./locale"
 

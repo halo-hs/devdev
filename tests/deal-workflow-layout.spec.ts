@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { getDealWorkPlan } from "../trade-os/lib/deal-workflow"
+import { getDealWorkPlan } from "../trade-os/lib/dealWorkflow"
 
 test("next work wins over the deal stage, completed work retains chronological order", () => {
   const finance = getDealWorkPlan("DL-260629-03")

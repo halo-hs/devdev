@@ -1,10 +1,10 @@
-import { appLocation } from "@/app/app-location"
+import { appLocation } from "@/app/appLocation"
 import { useEffect, useState, type FormEvent } from "react"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@shared/components/ui/button"
 import { Input } from "@shared/components/ui/input"
 import { Textarea } from "@shared/components/ui/textarea"
-import { FormField, FormFieldMessage } from "@shared/components/form-field"
+import { FormField, FormFieldMessage } from "@shared/components/FormItem"
 import { LandingShell } from "../shared/layout"
 import { useT } from "../shared/locale"
 

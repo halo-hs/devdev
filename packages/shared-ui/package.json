@@ -9,7 +9,6 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "@ecoya/design-system": "*",
-    "@ecoya/ui": "*"
+    "@ecoya/design-system": "*"
   }
 }
