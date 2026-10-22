@@ -3,7 +3,7 @@ import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/
 
 import { useMemo, type ReactNode } from "react";
 
-import { Segmented } from "@trade-os/components/SegmentedControl";
+import { BusinessFilterSegments } from "@/components/platform/SearchFilterBar";
 import { ChipGroup } from "@trade-os/components/ChipGroup";
 import { InfoBox } from "@trade-os/components/InfoBox";
 import { MetricCard, type MetricTone } from "@trade-os/components/MetricCard";
@@ -428,7 +428,7 @@ function MonitorFilters({
     >
       {onPeriodChange ? (
         <BusinessFilterField label={copy.periodLabel}>
-          <Segmented
+          <BusinessFilterSegments
             ariaLabel={copy.periodLabel}
             disabled={busy}
             options={[
@@ -444,7 +444,7 @@ function MonitorFilters({
       ) : null}
       {onLimitChange ? (
         <BusinessFilterField label={copy.limitFilterLabel}>
-          <Segmented
+          <BusinessFilterSegments
             ariaLabel={copy.limitFilterLabel}
             disabled={busy}
             options={MONITOR_LIMIT_CHOICES.map((count) => ({

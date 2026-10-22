@@ -26,7 +26,8 @@ import { cn } from "@/lib/utils";
 import { usePlatformSession } from "@trade-os/lib/session/PlatformSessionContext";
 // erp-v2-adapt: end
 import { GpBarChart } from "@trade-os/reports/charts/GpBarChart";
-import { KpiTile, ReportCard, Segmented } from "@trade-os/reports/ReportsConnected";
+import { KpiTile, ReportCard } from "@trade-os/reports/ReportsConnected";
+import { BusinessFilterSegments } from "@/components/platform/SearchFilterBar";
 import {
   computeGpKpi,
   gpForCurrency,
@@ -1084,7 +1085,7 @@ function SalesPerformanceIdentityScope({
       }
     >
       <BusinessFilterField label={copy.controls.rangeAria}>
-        <Segmented
+        <BusinessFilterSegments
           ariaLabel={copy.controls.rangeAria}
           options={SALES_PERFORMANCE_RANGES.map((months) => ({
             id: String(months),
@@ -1098,7 +1099,7 @@ function SalesPerformanceIdentityScope({
       </BusinessFilterField>
       {currencies.length > 0 ? (
         <BusinessFilterField label={copy.controls.currencyAria}>
-          <Segmented
+          <BusinessFilterSegments
             ariaLabel={copy.controls.currencyAria}
             options={currencies.map((ccy) => ({ id: ccy, label: ccy }))}
             value={currency ?? ""}

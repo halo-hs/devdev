@@ -8,8 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/SearchFilterBar";
 
-import { Segmented } from "@trade-os/components/SegmentedControl";
-export { Segmented } from "@trade-os/components/SegmentedControl";
+import { BusinessFilterSegments } from "@/components/platform/SearchFilterBar";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
@@ -1407,7 +1406,7 @@ function ReportsConnectedSession({
       }
     >
       <BusinessFilterField label={copy.controls.granularityAria}>
-        <Segmented
+        <BusinessFilterSegments
           ariaLabel={copy.controls.granularityAria}
           options={[
             { id: "month", label: copy.controls.month },
@@ -1418,7 +1417,7 @@ function ReportsConnectedSession({
         />
       </BusinessFilterField>
       <BusinessFilterField label={copy.controls.rangeAria}>
-        <Segmented
+        <BusinessFilterSegments
           ariaLabel={copy.controls.rangeAria}
           options={rangesForGranularity(granularity).map((months) => ({
             id: String(months),
