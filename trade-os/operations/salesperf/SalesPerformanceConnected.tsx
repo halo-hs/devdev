@@ -6,7 +6,6 @@ import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead,
 import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/SearchFilterBar";
 import { Search } from "lucide-react";
 
-import { useLocale } from "@trade-os/operations/compat/intl";
 import {
   useCallback,
   useEffect,
@@ -297,8 +296,7 @@ function SalesPerformanceIdentityScope({
   const { getIdToken, identity } = usePlatformSession();
   // erp-v2-adapt: begin — QA-1352 removes the lossy entitlement-projection read.
   // erp-v2-adapt: end
-  const locale = useLocale();
-  const tag = localeTag(locale);
+  const tag = localeTag("ko");
 
   // member 는 BE 가 본인으로 강제(서비스 레이어) — FE 는 그 전제로 오너/관리자에게만
   // 담당자 필터·담당자별 GP 섹션을 노출한다(D10: 전체 범위 + 담당자 필터).

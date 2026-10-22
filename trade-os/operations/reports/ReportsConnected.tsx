@@ -11,7 +11,6 @@ import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/
 import { Segmented } from "@trade-os/operations/components/SegmentedControl";
 export { Segmented } from "@trade-os/operations/components/SegmentedControl";
 
-import { useLocale } from "@trade-os/operations/compat/intl";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
@@ -363,8 +362,7 @@ function ReportsConnectedSession({
 }) {
   // erp-v2-adapt: begin — QA-1352 removes the lossy entitlement-projection read.
   // erp-v2-adapt: end
-  const locale = useLocale();
-  const tag = localeTag(locale);
+  const tag = localeTag("ko");
 
   // erp-v2-adapt: begin — QA-1352 removes the projection-derived preflight gate.
   // erp-v2-adapt: end

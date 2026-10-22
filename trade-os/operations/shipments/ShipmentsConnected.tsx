@@ -5,7 +5,7 @@ import { RefreshCw, Pencil } from "lucide-react";
 import { ShipmentConfirmationDialog } from "./ShipmentConfirmationDialog";
 import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
 import { carrierTrackingAction } from "./carrierSites";
-import Link from "@trade-os/operations/compat/Link";
+import Link from "@trade-os/lib/AppLink";
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { Button as HostButton } from "@/components/ui/Button";

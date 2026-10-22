@@ -1,4 +1,4 @@
-import Link from "@trade-os/operations/compat/Link";
+import Link from "@trade-os/lib/AppLink";
 
 import { cn } from "@/lib/utils";
 

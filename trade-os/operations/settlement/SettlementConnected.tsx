@@ -3,9 +3,8 @@
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/SearchFilterBar";
 
-import Link from "@trade-os/operations/compat/Link";
-import { useMessages } from "@trade-os/operations/compat/intl";
-import { useSearchParams } from "@trade-os/operations/compat/navigation";
+import Link from "@trade-os/lib/AppLink";
+import { useSearchParams } from "@/hooks/useSearchParams";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, Fragment, type CSSProperties, type ReactNode } from "react";
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
@@ -99,7 +98,7 @@ import type { SettlementDrillTarget } from "@trade-os/operations/settlement/sett
 import { findTopOverdueCounterparty } from "@trade-os/operations/settlement/settlementDecisionCardData";
 import { useLocaleTag } from "@trade-os/operations/i18n/useLocaleTag";
 
-import type { AppMessages } from "@trade-os/operations/i18n/messages";
+import { messages, type AppMessages } from "@trade-os/operations/i18n/messages";
 
 type SettlementCopy = AppMessages["erpSettlement"]["settlement"];
 type EntitlementCopy = AppMessages["common"]["entitlement"]["missingCapability"];
@@ -1247,7 +1246,7 @@ export function SettlementConnected({ copy, renderHeader }: { copy: SettlementCo
   const { getIdToken } = usePlatformAuth();
   const identity = useIdentity();
   const entitlements = useEntitlements();
-  const entitlementCopy = (useMessages() as AppMessages).common.entitlement.missingCapability;
+  const entitlementCopy = messages.common.entitlement.missingCapability;
   const canRecord = canRecordMoney(entitlements);
   const canFinalize =
     (identity.role === "owner" || identity.role === "admin") &&
@@ -1727,7 +1726,7 @@ function SettlementView({
   onRecordStatus: (message: string, tone?: "green" | "red") => void;
 }) {
   const moneyLocale = useLocaleTag();
-  const loadableCopy = (useMessages() as AppMessages).common.loadable;
+  const loadableCopy = messages.common.loadable;
   const profitabilityDecision = useMemo(() => {
     if (!financeFactsComplete) return null;
     const rows = buildProfitabilityRollups(financeFacts, "counterparty", copy.financeFacts.unknown);

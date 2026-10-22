@@ -1,4 +1,4 @@
-import Link from "@trade-os/operations/compat/Link";
+import Link from "@trade-os/lib/AppLink";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/Button";

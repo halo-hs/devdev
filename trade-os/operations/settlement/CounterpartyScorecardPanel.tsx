@@ -1,7 +1,7 @@
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
 "use client";
 
-import Link from "@trade-os/operations/compat/Link";
+import Link from "@trade-os/lib/AppLink";
 import { useEffect, useState, type CSSProperties } from "react";
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";

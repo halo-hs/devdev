@@ -1,9 +1,8 @@
 "use client";
 
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
-import Link from "@trade-os/operations/compat/Link";
+import Link from "@trade-os/lib/AppLink";
 import { useEffect, useState } from "react";
-import { useMessages } from "@trade-os/operations/compat/intl";
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { Button } from "@/components/ui/Button";
@@ -15,7 +14,7 @@ import { riskDetailLine } from "@trade-os/operations/lib/deals/riskDetail";
 import { createRiskLabeler } from "@trade-os/operations/lib/deals/riskLabels";
 import { riskSeverityLabel } from "@trade-os/operations/lib/deals/riskSeverityLabels";
 
-import type { AppMessages } from "@trade-os/operations/i18n/messages";
+import { messages } from "@trade-os/operations/i18n/messages";
 
 // severity → tone (critical worse than warning), mirroring the deal risk badge.
 const SEV_TONE: Record<string, string> = {
@@ -28,11 +27,10 @@ const SEV_TONE: Record<string, string> = {
  * Self-fetches GET /trade/exceptions (every active risk across deals, worst-first)
  * and renders it as a single triage table with deal links. Loading stays inline;
  * request failure is explicit and retryable; zero exceptions has a teaching state. Self-contained
- * (useMessages + usePlatformAuth) — mounted inside MonitorConnected, which already
+ * (messages + usePlatformAuth) — mounted inside MonitorConnected, which already
  * runs within the auth + i18n providers.
  */
 export function ExceptionCenter() {
-  const messages = useMessages() as AppMessages;
   const copy = messages.erpDeals.exceptionCenter;
   const riskCopy = messages.erpDeals.detail.view.risk;
   const localeTag = useLocaleTag();
