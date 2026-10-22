@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
 
-import { Skeleton } from "@trade-os/operations/components/ui/Skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { cx } from "@trade-os/operations/components/ui/utils";
 
 type SkeletonPresetProps = ComponentProps<"div"> & {
@@ -40,9 +40,9 @@ function SkeletonList({
       <div className="flex flex-col divide-y divide-border-subtle">
         {Array.from({ length: rows }, (_, index) => (
           <div className="flex h-[44px] items-center gap-3" key={index}>
-            <Skeleton className="size-6 shrink-0" variant="circle" />
-            <Skeleton className={index % 2 === 0 ? "w-2/5" : "w-1/3"} variant="line" />
-            <Skeleton className="ml-auto w-16" variant="line" />
+            <Skeleton aria-hidden="true" className="rounded-full size-6 shrink-0" />
+            <Skeleton aria-hidden="true" className={`h-[14px] rounded-[8px] ${index % 2 === 0 ? "w-2/5" : "w-1/3"}`} />
+            <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] ml-auto w-16" />
           </div>
         ))}
       </div>
@@ -67,18 +67,18 @@ function SkeletonTable({
       {...props}
     >
       <div className="flex h-10 items-center gap-6 rounded-[8px] bg-surface-muted px-3">
-        <Skeleton className="w-1/6" variant="line" />
-        <Skeleton className="w-1/4" variant="line" />
-        <Skeleton className="w-1/6" variant="line" />
-        <Skeleton className="ml-auto w-14" variant="line" />
+        <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] w-1/6" />
+        <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] w-1/4" />
+        <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] w-1/6" />
+        <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] ml-auto w-14" />
       </div>
       <div className="flex flex-col divide-y divide-border-subtle px-3">
         {Array.from({ length: rows }, (_, index) => (
           <div className="flex h-[43px] items-center gap-6" key={index}>
-            <Skeleton className="w-1/6" variant="line" />
-            <Skeleton className={index % 3 === 0 ? "w-1/3" : "w-1/4"} variant="line" />
-            <Skeleton className="w-1/6" variant="line" />
-            <Skeleton className="ml-auto w-14" variant="line" />
+            <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] w-1/6" />
+            <Skeleton aria-hidden="true" className={`h-[14px] rounded-[8px] ${index % 3 === 0 ? "w-1/3" : "w-1/4"}`} />
+            <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] w-1/6" />
+            <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] ml-auto w-14" />
           </div>
         ))}
       </div>
@@ -106,8 +106,8 @@ function SkeletonCards({
           className="flex h-[92px] flex-col justify-center gap-2.5 rounded-lg border border-border-subtle bg-surface-card px-4 shadow-section"
           key={index}
         >
-          <Skeleton className="h-[12px] w-20" variant="line" />
-          <Skeleton className="h-[22px] w-24" variant="block" />
+          <Skeleton aria-hidden="true" className="h-[12px] rounded-[8px] w-20" />
+          <Skeleton aria-hidden="true" className="rounded-[8px] h-[22px] w-24" />
         </div>
       ))}
     </StatusRoot>
