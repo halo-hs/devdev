@@ -4,7 +4,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import { createPortal } from "@trade-os/operations/compat/Portal";
 
 import { ToastAdapter } from "@trade-os/operations/components/ToastAdapter";
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Icon } from "@trade-os/operations/components/ui/Icon";
 
 import {
@@ -57,18 +57,15 @@ function ToastHostItem({ closeLabel, record }: { closeLabel: string; record: Toa
           {record.action.label}
         </button>
       ) : null}
-      <Button
+      <Button size="icon" variant="ghost"
         aria-label={closeLabel}
         className={
           isCard
             ? "size-6 bg-transparent p-0 text-ecoya-gray-6 shadow-none enabled:hover:text-ecoya-gray-6 enabled:active:text-ecoya-gray-6"
             : "size-6 bg-transparent p-0 text-ecoya-gray-2 shadow-none enabled:hover:text-ecoya-gray-3 enabled:active:text-ecoya-gray-4"
         }
-        iconOnly
-        intent="brand"
         onClick={() => dismissToast(id)}
         type="button"
-        variant="ghost"
       >
         <Icon name={isCard ? "icon-close" : record.tone === "error" ? "icon-alert-close-red" : "icon-alert-close-blue"} size={isCard ? 20 : 24} />
       </Button>

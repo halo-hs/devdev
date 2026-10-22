@@ -1,7 +1,7 @@
 import Link from "@trade-os/operations/compat/Link";
 import type { ReactNode } from "react";
 
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { EtcDivider } from "@trade-os/operations/components/ui/Etc";
 
 import { DdayBadge, StatusBadge, type DdayTone, type StatusTone } from "@trade-os/operations/components/StatusBadge";
@@ -85,11 +85,8 @@ function TaskQueue({
                   {item.dueLabel && <DdayBadge ddayTone={item.dueTone}>{item.dueLabel}</DdayBadge>}
                   {item.actionLabel && (
                     // 정본 Button buttonSize=24(→sm) black+tertiary → variant=tertiary intent=brand
-                    <Button
+                    <Button variant="outline" size="xs"
                       type="button"
-                      size="sm"
-                      intent="brand"
-                      variant="tertiary"
                       disabled={item.actionDisabled}
                       onClick={item.onAction}
                     >

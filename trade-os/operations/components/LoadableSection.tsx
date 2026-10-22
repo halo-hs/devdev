@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { SkeletonCards } from "@trade-os/operations/components/Skeletons";
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 
 import type { Loadable } from "@trade-os/operations/lib/loadable";
 
@@ -63,7 +63,7 @@ function LoadableSection<T>({
           <InfoBox
             action={
               state.retryable && onRetry ? (
-                <Button intent="danger" onClick={onRetry} size="sm" type="button" variant="ghost">
+                <Button variant="ghost" size="xs" className="text-[var(--button-destructive-background)]" onClick={onRetry} type="button">
                   {copy.retry}
                 </Button>
               ) : undefined

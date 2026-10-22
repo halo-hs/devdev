@@ -6,7 +6,8 @@ import { ApiError } from "@trade-os/operations/lib/api/client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
+import { AsyncButton } from "@/components/ds2/extensions/AsyncButton";
 import { Select } from "@trade-os/operations/components/ui/Dropdown";
 import { TextInput } from "@trade-os/operations/components/ui/Input";
 import { TextLink } from "@trade-os/operations/components/ui/TextLink";
@@ -157,7 +158,7 @@ function loadableError<T>(state: Loadable<T>, error: string, retry: string, onRe
     <div className="flex flex-wrap items-center gap-2" role="alert">
       <span className="text-label-12 text-status-danger">{error}</span>
       {state.retryable ? (
-        <Button onClick={onRetry} size="sm" type="button" variant="tertiary">
+        <Button variant="outline" size="xs" onClick={onRetry} type="button">
           {retry}
         </Button>
       ) : null}
@@ -652,7 +653,7 @@ export function SettlementExceptionPanel({
                     </div>
                     {pendingRefundIds.includes(overpayment.id) && <div role="status" className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-amber-950">
                       <p>이전 환불 기록 결과를 확인 중입니다. 결과가 확인될 때까지 같은 환불을 다시 기록할 수 없습니다.</p>
-                      <Button size="sm" variant="tertiary" onClick={() => retryRefund(overpayment.id)}>결과 다시 확인</Button>
+                      <Button variant="outline" size="xs" onClick={() => retryRefund(overpayment.id)}>결과 다시 확인</Button>
                     </div>}
                     <div className="mt-2">
                       <span className="font-medium text-text-secondary">{copy.overpayments.refundTitle}</span>
@@ -733,18 +734,16 @@ export function SettlementExceptionPanel({
                               onChange={(event) => updateRefundDraft(overpayment.id, "document", event.target.value)}
                             />
                           </label>
-                          <Button
+                          <AsyncButton variant="secondary" size="xs"
                             aria-label={busy === `refund:${overpayment.id}` ? copy.saving : undefined}
                             disabled={busy !== null || pendingRefundIds.includes(overpayment.id) || !["ready", "empty"].includes(refundState.status)}
                             loading={busy === `refund:${overpayment.id}`}
                             onClick={() => void submitRefund(overpayment)}
                             aria-describedby={`settlement-refund-hint-${overpayment.id}`}
-                            size="sm"
                             type="button"
-                            variant="secondary"
                           >
                             {entry.type === "payable" ? copy.overpayments.return : copy.overpayments.refund}
-                          </Button>
+                          </AsyncButton>
                         </div>
                       ) : null}
                     </div>
@@ -849,17 +848,15 @@ export function SettlementExceptionPanel({
                     }}
                   />
                 </label>
-                <Button
+                <AsyncButton variant="secondary" size="xs"
                   aria-label={busy === "overpayment" ? copy.saving : undefined}
                   disabled={busy !== null}
                   loading={busy === "overpayment"}
                   onClick={() => void submitOverpayment()}
-                  size="sm"
                   type="button"
-                  variant="secondary"
                 >
                   {copy.overpayments.record}
-                </Button>
+                </AsyncButton>
               </div>
             </div>
           ) : null}
@@ -993,18 +990,16 @@ export function SettlementExceptionPanel({
                     onChange={(event) => setAdjustmentDraft((current) => ({ ...current, document: event.target.value }))}
                   />
                 </label>
-                <Button
+                <AsyncButton variant="secondary" size="xs"
                   aria-label={busy === "adjustment" ? copy.saving : undefined}
                   disabled={busy !== null}
                   loading={busy === "adjustment"}
                   onClick={() => void submitAdjustment()}
                   aria-describedby={`settlement-adjustment-hint-${entry.id}`}
-                  size="sm"
                   type="button"
-                  variant="secondary"
                 >
                   {copy.adjustments.record}
-                </Button>
+                </AsyncButton>
               </div>
             </div>
           ) : null}

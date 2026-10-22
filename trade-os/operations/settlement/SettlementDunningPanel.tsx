@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Check, ChevronDown, ChevronUp, Copy, ExternalLink } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
 
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
 import { formatDate } from "@trade-os/operations/lib/orgDate";
 import type { LedgerEntry } from "@trade-os/operations/lib/api/settlement";
@@ -127,22 +127,23 @@ export function SettlementDunningPanel({
       <div className="dunning-action-group" role="group" aria-label={`${row.counterparty} 초안 작업`}>
         <Popover open={previewId === row.entry.id} onOpenChange={(open) => setPreviewId(open ? row.entry.id : null)}>
           <PopoverTrigger asChild>
-            <Button type="button" variant="tertiary" size="sm" className="rounded-r-none" aria-label={`${row.counterparty} 초안 미리보기`}>미리보기</Button>
+            <Button variant="outline" size="xs" type="button" className="rounded-r-none" aria-label={`${row.counterparty} 초안 미리보기`}>미리보기</Button>
           </PopoverTrigger>
           <PopoverContent align="end" sideOffset={8} className="w-96 p-4" aria-label={`${row.counterparty} 독촉 초안`}>
             <h3 className="text-sm font-semibold">{copy.title} · {copy.draft}</h3>
             <p className="whitespace-pre-wrap break-words text-[13px] leading-6">{row.draft}</p>
             <div className="flex flex-wrap items-center justify-end gap-2 border-t pt-3">
-              <Button type="button" variant="tertiary" size="sm" leadingIcon={<Copy className="size-4" aria-hidden="true" />} onClick={() => copyDraft(row.entry.id, row.draft)}>
+              <Button variant="outline" size="xs" type="button" onClick={() => copyDraft(row.entry.id, row.draft)}>
+                <Copy data-icon="inline-start" aria-hidden="true" />
                 복사하기
               </Button>
-              <Button asChild variant="tertiary" size="sm">
+              <Button variant="outline" size="xs" asChild>
                 <a href={row.mailto} className="inline-flex items-center gap-1 whitespace-nowrap">{copy.openMail}<ExternalLink className="size-4" aria-hidden="true" /></a>
               </Button>
             </div>
           </PopoverContent>
         </Popover>
-        <Button type="button" variant="tertiary" size="sm" iconOnly className="rounded-l-none" aria-label={`${row.counterparty} ${copy.copy}`} onClick={() => copyDraft(row.entry.id, row.draft)}>
+        <Button variant="outline" size="icon-xs" type="button" className="rounded-l-none" aria-label={`${row.counterparty} ${copy.copy}`} onClick={() => copyDraft(row.entry.id, row.draft)}>
           {copyState?.id === row.entry.id && copyState.status === "copied" ? <Check className="size-4" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
         </Button>
       </div>
@@ -183,7 +184,7 @@ export function SettlementDunningPanel({
       ) : status === "error" ? (
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4" role="alert">
           <p className="text-[13px] text-status-danger">{copy.error}</p>
-          <Button onClick={onRetry} size="sm" type="button" variant="tertiary">{copy.retry}</Button>
+          <Button variant="outline" size="xs" onClick={onRetry} type="button">{copy.retry}</Button>
         </div>
       ) : rows.length === 0 ? <p className="pb-4 text-[13px] text-text-muted">{copy.empty}</p> : null}
     </SectionPanel>

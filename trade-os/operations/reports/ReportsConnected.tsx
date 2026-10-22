@@ -18,7 +18,7 @@ import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { AnalyticsSkeleton } from "@trade-os/operations/components/AnalyticsSkeleton";
 import { SkeletonList } from "@trade-os/operations/components/Skeletons";
 import { useToast } from "@trade-os/operations/components/toast/useToast";
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Dialog } from "@trade-os/operations/components/ui/Dialog";
 import { Select } from "@trade-os/operations/components/ui/Dropdown";
 import { cx } from "@trade-os/operations/components/ui/utils";
@@ -1506,11 +1506,9 @@ function ReportsConnectedSession({
             title={copy.errorTitle}
             description={settlementState.message ?? copy.loadFailed}
           />
-          <Button
+          <Button variant="outline"
             onClick={retrySettlement}
-            size="md"
             type="button"
-            variant="tertiary"
           >
             {copy.retry}
           </Button>
@@ -1919,7 +1917,7 @@ function ReportsConnectedSession({
                         counterparty: row.counterparty,
                       });
                       const rowElement = row.status ? (
-                        <Button
+                        <Button variant="ghost"
                           aria-controls={evidenceId}
                           aria-expanded={selected}
                           className={cx(
@@ -1930,7 +1928,6 @@ function ReportsConnectedSession({
                           )}
                           data-ui="reports-topn-row"
                           onClick={() => setSelectedTopKey(selected ? null : rowKey)}
-                          variant="ghost"
                         >
                           {content}
                         </Button>
@@ -2051,7 +2048,7 @@ function ReportsConnectedSession({
                             />
                           </button>
                           {canCloseMonth && close.reopened ? (
-                            <Button
+                            <Button variant="outline" size="xs"
                               aria-label={`${monthPeriodOf(close.period_start)} ${copy.closes.recloseButton}`}
                               data-ui="reports-reclose-button"
                               onClick={() => {
@@ -2059,15 +2056,13 @@ function ReportsConnectedSession({
                                 setReclosePeriod(monthPeriodOf(close.period_start));
                                 setCloseDialogOpen(true);
                               }}
-                              size="sm"
                               type="button"
-                              variant="tertiary"
                             >
                               {copy.closes.recloseButton}
                             </Button>
                           ) : null}
                           {canCloseMonth && !close.reopened ? (
-                            <Button
+                            <Button variant="outline" size="xs"
                               aria-label={replaceTokens(copy.closes.reopenDialogTitle, {
                                 period: monthPeriodOf(close.period_start),
                               })}
@@ -2077,9 +2072,7 @@ function ReportsConnectedSession({
                                 setReopenReason("");
                                 setReopenTarget(close);
                               }}
-                              size="sm"
                               type="button"
-                              variant="tertiary"
                             >
                               {copy.closes.reopenButton}
                             </Button>
@@ -2336,7 +2329,7 @@ function CardLoadError({
   return (
     <div className="flex flex-col items-start gap-2 py-2" data-ui="reports-card-error" role="alert">
       <p className="text-body-13 text-status-danger">{message}</p>
-      <Button onClick={onRetry} size="md" type="button" variant="tertiary">
+      <Button variant="outline" onClick={onRetry} type="button">
         {retryLabel}
       </Button>
     </div>
@@ -2363,7 +2356,7 @@ function CardStaleNotice({
       role="status"
     >
       <p className="text-body-13 text-text-secondary">{message}</p>
-      <Button onClick={onRetry} size="md" type="button" variant="tertiary">
+      <Button variant="outline" onClick={onRetry} type="button">
         {retryLabel}
       </Button>
     </div>

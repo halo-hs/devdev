@@ -20,7 +20,7 @@ import {
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
 import { StatusBadge } from "@trade-os/operations/components/StatusBadge";
 import { TaskQueue, type TaskQueueItem } from "@trade-os/operations/components/TaskQueue";
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { DataTable, type DataTableColumn } from "@trade-os/operations/components/ui/Table";
 
 import { ErpScreenFrame } from "./ErpScreenFrame";
@@ -414,13 +414,11 @@ function MonitorFilters({
       aria-label={copy.filtersLabel}
       actions={
         onRefresh ? (
-          <Button
+          <Button variant="outline" size="xs"
             data-ui="monitor-refresh"
             disabled={busy}
             onClick={onRefresh}
-            size="sm"
             type="button"
-            variant="tertiary"
           >
             {copy.refresh}
           </Button>
@@ -521,19 +519,19 @@ function MonitorActions({
     <div className="flex flex-wrap items-center gap-2">
       {variant === "ops" ? (
         <>
-          <Button disabled={live && !actions?.onSummary} onClick={actions?.onSummary} size="sm" variant="tertiary">
+          <Button variant="outline" size="xs" disabled={live && !actions?.onSummary} onClick={actions?.onSummary}>
             {copy.actionsSummary}
           </Button>
-          <Button disabled={live && !actions?.onThisWeek} onClick={actions?.onThisWeek} size="sm" variant="secondary">
+          <Button variant="secondary" size="xs" disabled={live && !actions?.onThisWeek} onClick={actions?.onThisWeek}>
             {copy.actionsThisWeek}
           </Button>
         </>
       ) : (
         <>
-          <Button disabled={live && !actions?.onOpsDetail} onClick={actions?.onOpsDetail} size="sm" variant="tertiary">
+          <Button variant="outline" size="xs" disabled={live && !actions?.onOpsDetail} onClick={actions?.onOpsDetail}>
             {copy.actionsOpsDetail}
           </Button>
-          <Button disabled={live && !actions?.onDealsList} onClick={actions?.onDealsList} size="sm" variant="secondary">
+          <Button variant="secondary" size="xs" disabled={live && !actions?.onDealsList} onClick={actions?.onDealsList}>
             {copy.actionsDealsList}
           </Button>
         </>
@@ -864,11 +862,9 @@ function MonitorBody({
           </span>
         ) : undefined}
         action={
-          <Button
+          <Button variant="outline" size="xs"
             disabled={Boolean(live) && !actions?.onStatusFilter}
             onClick={actions?.onStatusFilter}
-            size="sm"
-            variant="tertiary"
           >
             {ops ? copy.statusFilter : copy.statusFilterList}
           </Button>

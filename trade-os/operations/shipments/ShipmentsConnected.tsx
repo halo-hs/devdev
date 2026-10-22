@@ -13,7 +13,7 @@ import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead,
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { SkeletonTable } from "@trade-os/operations/components/Skeletons";
 import { StatusBadge, type StatusTone } from "@trade-os/operations/components/StatusBadge";
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { usePlatformSession } from "@trade-os/operations/session/PlatformSessionContext";
 import { ApiError } from "@trade-os/operations/lib/api/client";
 import {
@@ -342,7 +342,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
         role="alert"
       >
         <p className="text-body-14 text-status-danger">{copy.loadError}</p>
-        <Button onClick={loadShipments} size="md" type="button" variant="tertiary">
+        <Button variant="outline" onClick={loadShipments} type="button">
           {copy.retry}
         </Button>
       </section>
@@ -364,7 +364,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
       }
       actions={
         // Design preview: shown to everyone for now; production limits it to SNAP subscribers.
-        <Button asChild variant="secondary" size="md" className="ml-auto rounded-full">
+        <Button variant="secondary" asChild className="ml-auto rounded-full">
           <Link href="/erp/snap-evidence" data-ui="shipments-evidence-link">
             {copy.evidenceLink}
           </Link>
@@ -439,7 +439,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
           role="status"
         >
           <p className="text-body-13 text-status-warning">{copy.staleBanner}</p>
-          <Button onClick={loadShipments} size="sm" type="button" variant="tertiary">
+          <Button variant="outline" size="xs" onClick={loadShipments} type="button">
             {copy.retry}
           </Button>
         </div>
@@ -461,7 +461,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
             role="alert"
           >
             <p className="text-body-14 text-status-danger">{copy.staleEmpty}</p>
-            <Button onClick={loadShipments} size="md" type="button" variant="tertiary">
+            <Button variant="outline" onClick={loadShipments} type="button">
               {copy.retry}
             </Button>
           </section>

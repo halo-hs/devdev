@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { AnalyticsSkeleton } from "@trade-os/operations/components/AnalyticsSkeleton";
 import { useScreenToast } from "@trade-os/operations/components/toast/useToast";
@@ -634,7 +634,7 @@ export function MonitorConnected({
           <p className="text-sm text-secondary" data-ui="monitor-error-scope">
             {stateCopy.errorScope}
           </p>
-          <Button onClick={() => loadMonitor()} size="md" type="button" variant="tertiary">
+          <Button variant="outline" onClick={() => loadMonitor()} type="button">
             {retryLabel}
           </Button>
         </div>
@@ -689,7 +689,7 @@ export function MonitorConnected({
             {state.partialErrors.map((message) => <li key={message}>{message}</li>)}
           </ul>
           {partialRetryAreas.length > 0 ? (
-            <Button disabled={flagsPending} onClick={retryPartialMonitor} size="md" type="button" variant="tertiary">
+            <Button variant="outline" disabled={flagsPending} onClick={retryPartialMonitor} type="button">
               {retryLabel}
             </Button>
           ) : null}
@@ -702,7 +702,7 @@ export function MonitorConnected({
             title={bodyCopy?.flagTitle ?? stateCopy.errorTitle}
             description={flagRefreshError.message}
           />
-          <Button disabled={flagsPending} onClick={retryFlagRefresh} size="md" type="button" variant="tertiary">
+          <Button variant="outline" disabled={flagsPending} onClick={retryFlagRefresh} type="button">
             {retryLabel}
           </Button>
         </div>

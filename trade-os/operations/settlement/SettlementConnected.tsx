@@ -19,7 +19,8 @@ import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
 import { SkeletonCards, SkeletonTable } from "@trade-os/operations/components/Skeletons";
 import { StatusBadge, type StatusTone } from "@trade-os/operations/components/StatusBadge";
 import { useScreenToast } from "@trade-os/operations/components/toast/useToast";
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
+import { AsyncButton } from "@/components/ds2/extensions/AsyncButton";
 import { Dialog, DialogFooterContainer } from "@trade-os/operations/components/ui/Dialog";
 import { Select } from "@trade-os/operations/components/ui/Dropdown";
 import { TextArea } from "@trade-os/operations/components/ui/Input";
@@ -1107,12 +1108,10 @@ function TradeFinanceFactPanel({
               className="mt-4 flex items-center justify-center gap-3"
               data-ui="trade-finance-fact-pagination"
             >
-              <Button
+              <Button variant="outline" size="xs"
                 disabled={currentPageIndex === 0}
                 onClick={() => setPageIndex(Math.max(0, currentPageIndex - 1))}
-                size="sm"
                 type="button"
-                variant="tertiary"
               >
                 {copy.previousPage}
               </Button>
@@ -1121,12 +1120,10 @@ function TradeFinanceFactPanel({
                   .replace("{page}", String(currentPageIndex + 1))
                   .replace("{total}", String(pageCount))}
               </span>
-              <Button
+              <Button variant="outline" size="xs"
                 disabled={currentPageIndex >= pageCount - 1}
                 onClick={() => setPageIndex(Math.min(pageCount - 1, currentPageIndex + 1))}
-                size="sm"
                 type="button"
-                variant="tertiary"
               >
                 {copy.nextPage}
               </Button>
@@ -1569,7 +1566,7 @@ export function SettlementConnected({ copy, renderHeader }: { copy: SettlementCo
         role="alert"
       >
         <p className="text-body-14 text-status-danger">{copy.loadError}</p>
-        <Button onClick={loadSettlement} size="md" type="button" variant="tertiary">
+        <Button variant="outline" onClick={loadSettlement} type="button">
           {copy.retry}
         </Button>
       </section>
@@ -1597,7 +1594,7 @@ export function SettlementConnected({ copy, renderHeader }: { copy: SettlementCo
         {refreshError && (
           <InfoBox
             action={
-              <Button onClick={loadSettlement} size="sm" type="button" variant="tertiary">
+              <Button variant="outline" size="xs" onClick={loadSettlement} type="button">
                 {copy.retry}
               </Button>
             }
@@ -2939,17 +2936,13 @@ function SettlementView({
       actions={
         <>
           {/* HeroBanner controls rule: 새로고침 is an icon button. */}
-          <Button
+          <Button variant="outline" size="icon-lg"
             aria-label={copy.controls.refresh}
             data-ui="settlement-refresh"
             disabled={refreshingManually}
-            iconOnly
-            intent="brand"
             onClick={onManualRefresh}
-            size="lg"
             title={copy.controls.refresh}
             type="button"
-            variant="tertiary"
           >
             <RefreshCw className="size-5" aria-hidden="true" />
           </Button>
@@ -2961,20 +2954,14 @@ function SettlementView({
               onValueChange={setTaxMonth}
             />
           </BusinessFilterField>
-          <Button
-            size="md"
-            intent="brand"
-            variant="secondary"
+          <Button variant="secondary"
             type="button"
             onClick={onExportTaxCsv}
             disabled={exporting || !effectiveTaxMonth}
           >
             {copy.export.taxCsv}
           </Button>
-          <Button
-            size="md"
-            intent="brand"
-            variant="secondary"
+          <Button variant="secondary"
             type="button"
             onClick={onExportCsv}
             disabled={exporting}
@@ -3450,14 +3437,12 @@ function SettlementView({
         title={copy.ledger.title}
         action={
           <div className="flex flex-wrap items-center gap-3">
-            <Button
+            <Button variant="outline"
               aria-label={copy.ledger.title}
               data-ui="settlement-manual-schedule"
               disabled={!canRecord}
               onClick={openManualSchedule}
-              size="md"
               type="button"
-              variant="tertiary"
             >
               {copy.ledger.formSave}
             </Button>
@@ -3496,7 +3481,7 @@ function SettlementView({
         {writeoffProposals.status === "error" ? (
           <InfoBox
             action={
-              <Button onClick={onReload} size="sm" type="button" variant="tertiary">
+              <Button variant="outline" size="xs" onClick={onReload} type="button">
                 {copy.ledger.writeoff.retry}
               </Button>
             }
@@ -3879,13 +3864,11 @@ function SettlementView({
                                     {copy.ledger.dispute.errors.historyLoadFailed}
                                   </span>
                                   {e.deal_id ? (
-                                    <Button
+                                    <Button variant="outline" size="xs"
                                       onClick={() => {
                                         if (e.deal_id) void loadDealDisputes(e.deal_id, true);
                                       }}
-                                      size="sm"
                                       type="button"
-                                      variant="tertiary"
                                     >
                                       {copy.retry}
                                     </Button>
@@ -3965,30 +3948,24 @@ function SettlementView({
                                       </div>
                                       {isOpenSettlementDispute(dispute) ? (
                                         <div className="mt-2 flex flex-wrap gap-2">
-                                          <Button
+                                          <Button variant="outline" size="xs"
                                             disabled={disputeBusy || !canRecord}
                                             onClick={() => void resolveDispute(e, dispute, "resume")}
-                                            size="sm"
                                             type="button"
-                                            variant="tertiary"
                                           >
                                             {copy.ledger.dispute.resolveResume}
                                           </Button>
-                                          <Button
+                                          <Button variant="outline" size="xs"
                                             disabled={disputeBusy || !canFinalize || !hasWriteOffEvidence}
                                             onClick={() => void resolveDispute(e, dispute, "write_off")}
-                                            size="sm"
                                             type="button"
-                                            variant="tertiary"
                                           >
                                             {copy.ledger.dispute.resolveWriteOff}
                                           </Button>
-                                          <Button
+                                          <Button variant="outline" size="xs"
                                             disabled={disputeBusy || !canRecord}
                                             onClick={() => void resolveDispute(e, dispute, "adjust")}
-                                            size="sm"
                                             type="button"
-                                            variant="tertiary"
                                           >
                                             {copy.ledger.dispute.resolveAdjust}
                                           </Button>
@@ -4089,13 +4066,10 @@ function SettlementView({
                                   className="h-9 rounded-md border border-border bg-surface-card px-2 text-body-13 text-text-primary"
                                 />
                               </label>
-                              <Button
+                              <Button variant="secondary" size="xs"
                                 disabled={disputeBusy || !canRecord}
                                 onClick={() => void submitDispute(e)}
-                                size="sm"
-                                intent="brand"
                                 type="button"
-                                variant="secondary"
                               >
                                 {copy.ledger.dispute.open}
                               </Button>
@@ -4264,12 +4238,10 @@ function SettlementView({
             className="mt-4 flex items-center justify-center gap-3"
             data-ui="settlement-ledger-pagination"
           >
-            <Button
+            <Button variant="outline" size="xs"
               disabled={ledgerCurrentPage <= 1}
               onClick={() => onLedgerPageChange((ledgerCurrentPage - 2) * ledgerPageSize)}
-              size="sm"
               type="button"
-              variant="tertiary"
             >
               {copy.ledger.previousPage}
             </Button>
@@ -4278,12 +4250,10 @@ function SettlementView({
                 .replace("{page}", String(ledgerCurrentPage))
                 .replace("{total}", String(ledgerPageCount))}
             </span>
-            <Button
+            <Button variant="outline" size="xs"
               disabled={ledgerCurrentPage >= ledgerPageCount}
               onClick={() => onLedgerPageChange(ledgerCurrentPage * ledgerPageSize)}
-              size="sm"
               type="button"
-              variant="tertiary"
             >
               {copy.ledger.nextPage}
             </Button>
@@ -4300,7 +4270,7 @@ function SettlementView({
       {financeFactsUnavailable ? (
         <InfoBox
           action={
-            <Button onClick={onRetryFinanceFacts} size="sm" type="button" variant="tertiary">
+            <Button variant="outline" size="xs" onClick={onRetryFinanceFacts} type="button">
               {copy.retry}
             </Button>
           }
@@ -4332,25 +4302,21 @@ function SettlementView({
         okText={copy.ledger.formSave}
         footer={
           <DialogFooterContainer>
-            <Button
+            <Button variant="outline" size="lg"
               disabled={manualScheduleBusy}
               onClick={() => setManualScheduleOpen(false)}
-              size="lg"
               type="button"
-              variant="tertiary"
             >
               {copy.ledger.formCancel}
             </Button>
-            <Button
+            <AsyncButton size="lg"
               disabled={manualScheduleBusy}
-              intent="brand"
               loading={manualScheduleBusy}
               onClick={() => void saveManualSchedule()}
-              size="lg"
               type="button"
             >
               {copy.ledger.formSave}
-            </Button>
+            </AsyncButton>
           </DialogFooterContainer>
         }
         onOpenChange={(open) => {
@@ -4433,63 +4399,53 @@ function SettlementView({
         okText={copy.ledger.writeoff.finalize}
         footer={
           <DialogFooterContainer>
-            <Button
+            <Button variant="outline" size="lg"
               disabled={writeoffBusy}
               onClick={closeWriteoffDialog}
-              size="lg"
               type="button"
-              variant="tertiary"
             >
               {copy.ledger.writeoff.cancel}
             </Button>
             {canWithdrawWriteoff ? (
-              <Button
+              <Button variant="secondary" size="lg"
                 disabled={writeoffBusy}
                 onClick={() => void withdrawWriteoff()}
-                size="lg"
                 type="button"
-                variant="secondary"
               >
                 {copy.ledger.writeoff.withdraw}
               </Button>
             ) : null}
             {canRejectWriteoff ? (
-              <Button
+              <Button variant="destructive" size="lg"
                 disabled={writeoffBusy}
-                intent="danger"
                 onClick={() => void rejectWriteoff()}
-                size="lg"
                 type="button"
               >
                 {copy.ledger.writeoff.reject}
               </Button>
             ) : null}
             {canProposeWriteoff ? (
-              <Button
+              <Button size="lg"
                 disabled={writeoffBusy}
                 onClick={() => void submitWriteoffProposal()}
-                size="lg"
                 type="button"
               >
                 {copy.ledger.writeoff.propose}
               </Button>
             ) : null}
             {canFinalizeWriteoff ? (
-              <Button
+              <Button variant="destructive" size="lg"
                 disabled={writeoffBusy}
-                intent="danger"
                 onClick={() => void finalizeWriteoff()}
-                size="lg"
                 type="button"
               >
                 {copy.ledger.writeoff.finalize}
               </Button>
             ) : null}
             {canReopenWriteoff ? (
-              <Button
+              <Button size="lg"
                 disabled={writeoffBusy}
                 onClick={() => void reopenWriteoff()}
-                size="lg"
                 type="button"
               >
                 {copy.ledger.writeoff.reopen}
@@ -4550,13 +4506,11 @@ function SettlementView({
             ) : writeoffDialogState.status === "error" ? (
               <InfoBox
                 action={
-                  <Button
+                  <Button variant="outline" size="xs"
                     onClick={() =>
                       void loadWriteoffDetails(writeoffTarget.entry.id)
                     }
-                    size="sm"
                     type="button"
-                    variant="tertiary"
                   >
                     {copy.ledger.writeoff.retry}
                   </Button>
@@ -4758,20 +4712,16 @@ function SettlementView({
         okText={copy.ledger.closeConfirm}
         footer={
           <DialogFooterContainer>
-            <Button
+            <Button variant="outline" size="lg"
               disabled={lifecycleBusy !== null}
               onClick={() => setCloseTarget(null)}
-              size="lg"
               type="button"
-              variant="tertiary"
             >
               {copy.ledger.closeCancel}
             </Button>
-            <Button
+            <Button variant="destructive" size="lg"
               disabled={lifecycleBusy !== null}
-              intent="danger"
               onClick={() => void confirmCloseSchedule()}
-              size="lg"
               type="button"
             >
               {copy.ledger.closeConfirm}
@@ -4847,19 +4797,16 @@ function SettlementView({
         okText={copy.ledger.reopenConfirm}
         footer={
           <DialogFooterContainer>
-            <Button
+            <Button variant="outline" size="lg"
               disabled={lifecycleBusy !== null}
               onClick={() => setReopenTarget(null)}
-              size="lg"
               type="button"
-              variant="tertiary"
             >
               {copy.ledger.reopenCancel}
             </Button>
-            <Button
+            <Button size="lg"
               disabled={lifecycleBusy !== null}
               onClick={() => void confirmReopenSchedule()}
-              size="lg"
               type="button"
             >
               {copy.ledger.reopenConfirm}
@@ -4897,20 +4844,16 @@ function SettlementView({
         okText={copy.ledger.uncompleteConfirm}
         footer={
           <DialogFooterContainer>
-            <Button
+            <Button variant="outline" size="lg"
               disabled={uncompleting !== null}
               onClick={() => setUncompleteTarget(null)}
-              size="lg"
               type="button"
-              variant="tertiary"
             >
               {copy.ledger.uncompleteCancel}
             </Button>
-            <Button
+            <Button variant="destructive" size="lg"
               disabled={uncompleting !== null}
-              intent="danger"
               onClick={() => void confirmUncomplete()}
-              size="lg"
               type="button"
             >
               {copy.ledger.uncompleteConfirm}

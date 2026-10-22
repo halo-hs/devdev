@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useMessages } from "@trade-os/operations/compat/intl";
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { usePlatformAuth } from "@trade-os/operations/session/PlatformSessionContext";
 import { getExceptions, type ExceptionsResponse } from "@trade-os/operations/lib/api/exceptions";
 import { withRetry } from "@trade-os/operations/lib/api/retry";
@@ -70,15 +70,13 @@ export function ExceptionCenter() {
         role="alert"
       >
         <InfoBox tone="risk" title={copy.title} description={messages.auth.loadError} />
-        <Button
+        <Button variant="outline"
           onClick={() => {
             setFailed(false);
             setData(null);
             setRequestVersion((version) => version + 1);
           }}
-          size="md"
           type="button"
-          variant="tertiary"
         >
           {messages.auth.retry}
         </Button>

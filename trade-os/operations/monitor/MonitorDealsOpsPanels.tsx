@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
 import { StatusBadge } from "@trade-os/operations/components/StatusBadge";
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { usePlatformAuth } from "@trade-os/operations/session/PlatformSessionContext";
 import { type DealSummaryResponse } from "@trade-os/operations/lib/api/deals";
 import { listAllDeals } from "@trade-os/operations/lib/api/listAllDeals";
@@ -199,7 +199,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
         )}
         {docGaps.length > 0 ? (
           <div className="mt-3">
-            <Button asChild size="sm" variant="tertiary">
+            <Button variant="outline" size="xs" asChild>
               <Link href="/erp/deals?ops=doc_gap">{copy.docGap.viewAll}</Link>
             </Button>
           </div>
@@ -230,7 +230,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
         )}
         {openRemaining.length > 0 ? (
           <div className="mt-3">
-            <Button asChild size="sm" variant="tertiary">
+            <Button variant="outline" size="xs" asChild>
               <Link href="/erp/deals?ops=remaining">{copy.openRemaining.viewAll}</Link>
             </Button>
           </div>
@@ -262,7 +262,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
         )}
         {qtyMismatch.length > 0 ? (
           <div className="mt-3">
-            <Button asChild size="sm" variant="tertiary">
+            <Button variant="outline" size="xs" asChild>
               <Link href="/erp/deals?ops=qty_mismatch">{copy.qtyMismatch.viewAll}</Link>
             </Button>
           </div>

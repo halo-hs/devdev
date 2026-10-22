@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Icon } from "@trade-os/operations/components/ui/Icon";
 import { cx } from "@trade-os/operations/components/ui/utils";
 
@@ -71,7 +71,7 @@ function ToastAdapter({ tone = "neutral", title, description, action, className,
       {action ?? (
         // CloseButton: Button ghost+black (G9 amended — gray-2/hover gray-3/active gray-4)
         // 24x24, padding 0, transparent bg, no shadow. neutral 톤은 정본이 gray5 강제.
-        <Button
+        <Button size="icon" variant="ghost"
           aria-label="닫기"
           className={cx(
             "size-6 bg-transparent p-0 shadow-none",
@@ -79,10 +79,7 @@ function ToastAdapter({ tone = "neutral", title, description, action, className,
               ? "text-ecoya-gray-5 enabled:hover:text-ecoya-gray-5 enabled:active:text-ecoya-gray-5"
               : "text-ecoya-gray-2 enabled:hover:text-ecoya-gray-3 enabled:active:text-ecoya-gray-4",
           )}
-          iconOnly
-          intent="brand"
           type="button"
-          variant="ghost"
         >
           <Icon name={tone === "danger" ? "icon-alert-close-red" : "icon-alert-close-blue"} size={24} />
         </Button>
@@ -130,13 +127,10 @@ function ToastAdapterCard({
         {description && <div className="text-body-13 text-ecoya-gray-5">{description}</div>}
       </div>
       {action ?? (
-        <Button
+        <Button size="icon" variant="ghost"
           aria-label="닫기"
           className="size-6 bg-transparent p-0 text-ecoya-gray-6 shadow-none enabled:hover:text-ecoya-gray-6 enabled:active:text-ecoya-gray-6"
-          iconOnly
-          intent="brand"
           type="button"
-          variant="ghost"
         >
           <Icon name="icon-close" size={20} />
         </Button>

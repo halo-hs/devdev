@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { TextLink } from "@trade-os/operations/components/ui/TextLink";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { ApiError } from "@trade-os/operations/lib/api/client";
@@ -380,7 +380,7 @@ export function CanonicalScheduleCashPanel({
       {ledger.status === "error" ? (
         <div className="flex flex-wrap items-center gap-2" role="alert">
           <span>{copy.loadError}</span>
-          <Button onClick={() => void load()} size="sm" type="button" variant="tertiary">
+          <Button variant="outline" size="xs" onClick={() => void load()} type="button">
             {copy.retry}
           </Button>
         </div>
@@ -418,12 +418,10 @@ export function CanonicalScheduleCashPanel({
                 String(readyLedger.reconciliation.pre_lineage_application_count),
               )}
           </p>
-          <Button
+          <Button variant="outline" size="xs"
             className="mt-2"
             onClick={() => void load()}
-            size="sm"
             type="button"
-            variant="tertiary"
           >
             {copy.reconciliationRefresh}
           </Button>
@@ -535,23 +533,20 @@ export function CanonicalScheduleCashPanel({
                 </label>
               ) : null}
               <div className="flex flex-wrap gap-2">
-                <Button
+                <Button size="xs"
                   disabled={busy}
                   onClick={() => void submitCorrection()}
-                  size="sm"
                   type="button"
                 >
                   {correction.kind === "reversal" ? copy.reverse : copy.replace}
                 </Button>
-                <Button
+                <Button variant="outline" size="xs"
                   disabled={busy}
                   onClick={() => {
                     setCorrection(null);
                     setError(null);
                   }}
-                  size="sm"
                   type="button"
-                  variant="tertiary"
                 >
                   {copy.cancel}
                 </Button>
@@ -622,10 +617,9 @@ export function CanonicalScheduleCashPanel({
                   onChange={(event) => setSourceDocumentId(event.target.value)}
                 />
               </label>
-              <Button
+              <Button size="xs"
                 disabled={busy}
                 onClick={() => void recordCash()}
-                size="sm"
                 type="button"
               >
                 {copy.save}
@@ -703,12 +697,10 @@ export function CanonicalScheduleCashPanel({
 
       {notice ? <p className="text-label-12 text-status-success" role="status">{notice}</p> : null}
       {error ? <p className="text-label-12 text-status-danger" role="alert">{error}</p> : null}
-      <Button
+      <Button variant="outline" size="xs"
         disabled={busy}
         onClick={onClose}
-        size="sm"
         type="button"
-        variant="tertiary"
       >
         {copy.cancel}
       </Button>

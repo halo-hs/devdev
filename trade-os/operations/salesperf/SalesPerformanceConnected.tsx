@@ -20,7 +20,7 @@ import {
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { AnalyticsSkeleton } from "@trade-os/operations/components/AnalyticsSkeleton";
-import { Button } from "@trade-os/operations/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Select } from "@trade-os/operations/components/ui/Dropdown";
 import { cx } from "@trade-os/operations/components/ui/utils";
 // erp-v2-adapt: begin — QA-1352 defers the gate reason to BE #495 instead of the boolean projection.
@@ -841,14 +841,12 @@ function SalesPerformanceIdentityScope({
       >
         {renderHeader?.(null)}
         <InfoBox tone="risk" title={copy.errorTitle} description={state.message} />
-        <Button
+        <Button variant="outline"
           onClick={() => {
             setState({ status: "loading" });
             load();
           }}
-          size="md"
           type="button"
-          variant="tertiary"
         >
           {copy.retry}
         </Button>
@@ -1163,11 +1161,9 @@ function SalesPerformanceIdentityScope({
             title={copy.directoryErrorTitle ?? copy.errorTitle}
             description={memberDirectory.message}
           />
-          <Button
+          <Button variant="outline"
             onClick={retryManagerDirectory}
-            size="md"
             type="button"
-            variant="tertiary"
           >
             {copy.directoryRetry ?? copy.retry}
           </Button>
@@ -1186,7 +1182,7 @@ function SalesPerformanceIdentityScope({
             title={copy.errorTitle}
             description={state.refreshError.message}
           />
-          <Button
+          <Button variant="outline"
             disabled={state.refreshing}
             onClick={() => {
               if (state.refreshing || refreshRetryInFlightRef.current) return;
@@ -1199,9 +1195,7 @@ function SalesPerformanceIdentityScope({
               load();
             }}
             data-ui="salesperf-refresh-retry"
-            size="md"
             type="button"
-            variant="tertiary"
           >
             {copy.retry}
           </Button>
