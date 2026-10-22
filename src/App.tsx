@@ -144,7 +144,7 @@ import { PageFrame } from "@ecoya/ui"
 import ecoyaWhiteLogoSrc from "@ecoya/design-system/assets/logos/logo-ecoya-white.png"
 import { SidebarProfileMenu } from "@shared/components/sidebar-profile-menu"
 import { WorkspaceSwitcher } from "@shared/components/workspace-switcher"
-import { SalesPrototype } from "@trade-os/extended-screens"
+import { SalesPrototype } from "@trade-os/sales/SalesPipelineView"
 import { workspaceOptions, type WorkspaceKey } from "@shared/lib/workspaces"
 import {
   Sheet,
@@ -227,16 +227,8 @@ import {
 import { ReferenceOperations } from "@trade-os/operations/index"
 import { NotificationsPrototype } from "@share/notifications/page"
 import { notifications, type NotificationDealTarget } from "@share/notifications/data"
-import {
-  AskPrototype,
-  BillingPrototype,
-  CounterpartyPrototype,
-  OnboardingPrototype,
-  SettingsPrototype,
-  SnapEvidencePrototype,
-  TokenUsagePrototype,
-  type ErpMenuTarget,
-} from "@trade-os/screens"
+import { BillingPrototype, CounterpartyPrototype, OnboardingPrototype, SettingsPrototype, SnapEvidencePrototype, TokenUsagePrototype, type ErpMenuTarget } from "@trade-os/screens"
+import { AskPrototype } from "@trade-os/ai/AiWorkspace"
 import {
   SnapProductPrototype,
   type SnapScreenKey,
