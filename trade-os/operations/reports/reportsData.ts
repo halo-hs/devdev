@@ -19,7 +19,7 @@ import {
   ratioPermyriad,
   roundedPercentage,
   type AmountCell,
-} from "@trade-os/operations/lib/financeDecimal";
+} from "@trade-os/lib/financeDecimal";
 
 export type ReportRangeMonths = 6 | 12 | 24;
 const REPORT_RANGES: ReportRangeMonths[] = [6, 12, 24];

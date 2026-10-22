@@ -1,5 +1,5 @@
 import type { CounterpartyStatusItem } from "../lib/api/reports";
-import { amountCell } from "../lib/financeDecimal";
+import { amountCell } from "@trade-os/lib/financeDecimal";
 
 // Optional presentation evidence: absence must never be interpreted as no write-off.
 export type CounterpartyWithWriteoff = CounterpartyStatusItem & { written_off_total?: string };

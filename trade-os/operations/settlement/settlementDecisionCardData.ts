@@ -3,7 +3,7 @@ import {
   financeDecimalMagnitude,
   type SettlementOverview,
 } from "@trade-os/operations/lib/api/settlement";
-import { formatScaledMoney } from "@trade-os/operations/lib/money";
+import { formatScaledMoney } from "@trade-os/lib/money";
 
 import type { MetricTone } from "@trade-os/operations/components/MetricCard";
 

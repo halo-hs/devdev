@@ -19,9 +19,9 @@ import {
   type ScheduleSettlement,
 } from "@trade-os/operations/lib/api/settlement";
 import { isUuidLike } from "@trade-os/operations/lib/api/erpExtraction";
-import { financeDecimalMagnitude, isFinanceDecimal } from "@trade-os/operations/lib/financeDecimal";
+import { financeDecimalMagnitude, isFinanceDecimal } from "@trade-os/lib/financeDecimal";
 import type { Loadable } from "@trade-os/operations/lib/loadable";
-import { normalizeDecimalInput } from "@trade-os/operations/lib/money";
+import { normalizeDecimalInput } from "@trade-os/lib/money";
 
 import {
   moneyCommandSlot,

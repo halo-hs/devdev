@@ -10,7 +10,7 @@ import {
   ratioPermyriad,
   roundedPercentage,
   type AmountCell,
-} from "@trade-os/operations/lib/financeDecimal";
+} from "@trade-os/lib/financeDecimal";
 
 import type {
   AssigneeGPItem,

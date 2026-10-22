@@ -1,47 +1,19 @@
 import type { ComponentProps, CSSProperties, ReactNode } from "react";
 
-import { PageHeader } from "@trade-os/operations/components/PageHeader";
+
 import { cn } from "@/lib/utils";
 
-type PageTitleBarProps = Omit<ComponentProps<"header">, "title"> & {
-  title: ReactNode;
-  description?: ReactNode;
-  meta?: ReactNode;
-  action?: ReactNode;
-};
 
 type ScreenLayoutProps = ComponentProps<"section"> & {
   titleBar: ReactNode;
   children: ReactNode;
 };
 
-type SettingsLayoutProps = Omit<ComponentProps<"section">, "title"> & {
-  titleBar?: ReactNode;
-  title?: ReactNode;
-  description?: ReactNode;
-  meta?: ReactNode;
-  action?: ReactNode;
-  children: ReactNode;
-};
 
 type BodyProps = ComponentProps<"div"> & {
   maxWidth?: number | "none";
 };
 
-function PageTitleBar({ title, description, meta, action, className, ...props }: PageTitleBarProps) {
-  return (
-    <PageHeader
-      actions={action}
-      className={className}
-      data-component="PageTitleBar"
-      data-source="design-system/src/components/platform/ScreenLayouts.tsx"
-      description={description}
-      meta={meta}
-      title={title}
-      {...props}
-    />
-  );
-}
 
 // erp-v2 deviation: the canonical class was `min-h-full`, which lets the section
 // grow to content height so the inner `flex-1 min-h-0 overflow-y-auto` body never
@@ -71,16 +43,6 @@ function ConstrainedBody({ maxWidth = 1440, className, children, ...props }: Bod
   );
 }
 
-function ListPageLayout({ titleBar, children, className, ...props }: ScreenLayoutProps) {
-  return (
-    <section className={cn(layoutRootClass, className)} data-layout="list-page" {...props}>
-      {titleBar}
-      <div className={scrollableBodyClass}>
-        <ConstrainedBody>{children}</ConstrainedBody>
-      </div>
-    </section>
-  );
-}
 
 function DashboardLayout({ titleBar, children, className, ...props }: ScreenLayoutProps) {
   return (
@@ -93,56 +55,8 @@ function DashboardLayout({ titleBar, children, className, ...props }: ScreenLayo
   );
 }
 
-function DetailPageLayout({ titleBar, children, className, ...props }: ScreenLayoutProps) {
-  return (
-    <section className={cn(layoutRootClass, className)} data-layout="detail-page" {...props}>
-      {titleBar}
-      <div className={scrollableBodyClass}>
-        <ConstrainedBody maxWidth="none">{children}</ConstrainedBody>
-      </div>
-    </section>
-  );
-}
 
-function SettingsLayout({ titleBar, title, description, meta, action, children, className, ...props }: SettingsLayoutProps) {
-  return (
-    <section className={cn(layoutRootClass, className)} data-layout="settings" {...props}>
-      {titleBar ?? <PageTitleBar action={action} description={description} meta={meta} title={title} />}
-      <div className={scrollableBodyClass}>
-        <ConstrainedBody>{children}</ConstrainedBody>
-      </div>
-    </section>
-  );
-}
 
-function WorkbenchLayout({ titleBar, children, className, ...props }: ScreenLayoutProps) {
-  return (
-    <section
-      className={cn("flex h-full min-h-0 flex-col bg-[var(--color-gray-12)]", className)}
-      data-layout="workbench"
-      {...props}
-    >
-      {titleBar}
-      {children}
-    </section>
-  );
-}
 
-function ScreenBody({ maxWidth, children, ...props }: BodyProps) {
-  return (
-    <ConstrainedBody maxWidth={maxWidth ?? 1440} {...props}>
-      {children}
-    </ConstrainedBody>
-  );
-}
 
-export {
-  DashboardLayout,
-  DetailPageLayout,
-  ListPageLayout,
-  PageTitleBar,
-  ScreenBody,
-  SettingsLayout,
-  WorkbenchLayout,
-};
-export type { PageTitleBarProps, ScreenLayoutProps, SettingsLayoutProps };
+export { DashboardLayout };

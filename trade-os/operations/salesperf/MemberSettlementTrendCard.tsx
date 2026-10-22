@@ -2,7 +2,7 @@
 
 import { PlanActualBarChart } from "@trade-os/operations/reports/charts/PlanActualBarChart";
 import { ReportCard } from "@trade-os/operations/reports/ReportsConnected";
-import type { AmountCell } from "@trade-os/operations/lib/financeDecimal";
+import type { AmountCell } from "@trade-os/lib/financeDecimal";
 import type { SeriesPointView } from "@trade-os/operations/reports/reportsData";
 
 import type { SalesPerfCopy } from "./SalesPerformanceConnected";

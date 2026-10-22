@@ -1,6 +1,6 @@
 import captured from './responses.json';
 import { ApiError } from '../lib/api/client';
-import { FINANCE_DECIMAL_SCALE, financeDecimalMagnitude, isFinanceDecimal } from '../lib/financeDecimal';
+import { FINANCE_DECIMAL_SCALE, financeDecimalMagnitude, isFinanceDecimal } from '@trade-os/lib/financeDecimal';
 import type { LedgerEntry, SettlementOverpaymentRefund, RecordSettlementOverpaymentRefundBody } from '../lib/api/settlement';
 export type DemoAllocation = { id: string; overpayment_id: string; schedule_id: string; amount: string; reason: string; evidence: string };
 const data = captured as Record<string, unknown>;

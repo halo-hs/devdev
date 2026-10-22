@@ -1,8 +1,8 @@
 import { ApiError, apiRequest, DEFAULT_PLATFORM_API_BASE_URL } from "./client";
 import { withRetry } from "./retry";
-import { financeDecimalMagnitude, isFinanceDecimal } from "../financeDecimal";
+import { financeDecimalMagnitude, isFinanceDecimal } from "@trade-os/lib/financeDecimal";
 
-export { FINANCE_DECIMAL_SCALE, financeDecimalMagnitude } from "../financeDecimal";
+export { FINANCE_DECIMAL_SCALE, financeDecimalMagnitude } from "@trade-os/lib/financeDecimal";
 
 // V2-3 정산(SAP-lite) client. NOT accounting software — data-for-handoff:
 // AR/AP by currency, fund-calendar forecast, FX exposure, and a flat ledger for

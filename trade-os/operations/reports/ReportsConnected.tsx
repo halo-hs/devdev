@@ -62,7 +62,7 @@ import {
   formatScaledDecimal,
   formatScaledMoney,
   formatScaledPct,
-} from "@trade-os/operations/lib/money";
+} from "@trade-os/lib/money";
 import { formatDateTime, localTodayISO, todayISOIn } from "@trade-os/operations/lib/orgDate";
 import {
   FINANCE_DECIMAL_SCALE,
@@ -70,7 +70,7 @@ import {
   decimalMagnitude,
   financeDecimalMagnitude,
   type AmountCell,
-} from "@trade-os/operations/lib/financeDecimal";
+} from "@trade-os/lib/financeDecimal";
 
 import { BalanceLineChart } from "./charts/BalanceLineChart";
 import { GpBarChart } from "./charts/GpBarChart";

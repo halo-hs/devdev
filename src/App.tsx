@@ -1177,8 +1177,6 @@ export function App() {
                         navigateTo("deal", { dealId })
                       }}
                     />
-                  ) : screen === "deal" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(selectedDealId) ? (
-                    <ReferenceOperations screen="deal" dealId={selectedDealId} />
                   ) : screen === "deal" ? (
                     <DealDetailScreen
                       key={selectedDealId}

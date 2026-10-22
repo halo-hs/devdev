@@ -29,8 +29,8 @@ import {
   type SettlementOverpaymentRefund,
   type SettlementPaymentEntry,
 } from "@trade-os/operations/lib/api/settlement";
-import { normalizeDecimalInput } from "@trade-os/operations/lib/money";
-import { financeDecimalMagnitude, isFinanceDecimal } from "@trade-os/operations/lib/financeDecimal";
+import { normalizeDecimalInput } from "@trade-os/lib/money";
+import { financeDecimalMagnitude, isFinanceDecimal } from "@trade-os/lib/financeDecimal";
 import type { Loadable } from "@trade-os/operations/lib/loadable";
 
 export type SettlementExceptionCopy = {

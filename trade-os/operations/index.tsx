@@ -1,4 +1,3 @@
-import { ReferenceDealDetail } from "./deals/ReferenceDealDetail"
 import { useEffect, useState } from "react"
 import { PlatformSessionProvider, useIdentity } from "./session/PlatformSessionContext"
 import { getPlatformIdentity, type PlatformIdentityResponse } from "./lib/api/me"
@@ -66,7 +65,7 @@ function Body({ screen }: { screen: ReferenceOperationsScreen }) {
   </div>
 }
 
-export function ReferenceOperations({ screen, dealId, onShipmentSummary }: { screen: ReferenceOperationsScreen | "deal" | "deal-shipments"; dealId?: string; onShipmentSummary?: (summary: ShipmentSummary) => void }) {
+export function ReferenceOperations({ screen, dealId, onShipmentSummary }: { screen: ReferenceOperationsScreen | "deal-shipments"; dealId?: string; onShipmentSummary?: (summary: ShipmentSummary) => void }) {
   const [session, setSession] = useState<{ identity: PlatformIdentityResponse; entitlements: EntitlementsResponse } | null>(null)
   const [error, setError] = useState("")
   const [attempt, setAttempt] = useState(0)
@@ -87,7 +86,7 @@ export function ReferenceOperations({ screen, dealId, onShipmentSummary }: { scr
       <p>화면 데이터를 불러오지 못했습니다.</p><p>{error}</p>
       <button className="mt-3 underline" onClick={() => setAttempt(n => n + 1)}>다시 시도</button>
     </div> : session ? <PlatformSessionProvider {...session} getIdToken={getIdToken}>
-      {screen === "deal-shipments" && dealId ? <ShipmentsConnected key={dealId} copy={messages.erpShipments.shipments} dealId={dealId} onSummaryChange={onShipmentSummary} /> : screen === "deal" && dealId ? <ReferenceDealDetail key={dealId} dealId={dealId} /> : screen !== "deal" && screen !== "deal-shipments" ? <Body screen={screen} /> : null}
+      {screen === "deal-shipments" && dealId ? <ShipmentsConnected key={dealId} copy={messages.erpShipments.shipments} dealId={dealId} onSummaryChange={onShipmentSummary} /> : screen !== "deal-shipments" ? <Body screen={screen} /> : null}
     </PlatformSessionProvider> : <div className="p-6" role="status">화면 데이터를 불러오는 중입니다…</div>}
   </div></div>
 }

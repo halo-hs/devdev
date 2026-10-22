@@ -1,5 +1,5 @@
-import { decimalMagnitude, FINANCE_DECIMAL_SCALE } from "@trade-os/operations/lib/financeDecimal";
-import { formatScaledDecimal } from "@trade-os/operations/lib/money";
+import { decimalMagnitude, FINANCE_DECIMAL_SCALE } from "@trade-os/lib/financeDecimal";
+import { formatScaledDecimal } from "@trade-os/lib/money";
 
 // FE #1937 item 5 — temporary until BE #2269 (structured detail fields). The risk feed's `detail` is a
 // server-built English free sentence (BE risk_detail.go:202-214, deals.go scheduleDelayDelta /

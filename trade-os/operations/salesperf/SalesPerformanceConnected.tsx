@@ -44,7 +44,7 @@ import {
   formatPermyriadPct,
   formatScaledMoney,
   formatScaledPct,
-} from "@trade-os/operations/lib/money";
+} from "@trade-os/lib/money";
 import { ApiError } from "@trade-os/operations/lib/api/client";
 // erp-v2-adapt: begin — QA-1352 consumes the unremapped BE #495 status/code pair.
 import { classifyEntitlementGate, type EntitlementGateReason } from "@trade-os/operations/lib/api/entitlements";
@@ -65,7 +65,7 @@ import {
   FINANCE_DECIMAL_SCALE,
   amountCell,
   type AmountCell,
-} from "@trade-os/operations/lib/financeDecimal";
+} from "@trade-os/lib/financeDecimal";
 
 import {
   activeDealsSummary,

@@ -7,7 +7,7 @@ import { SETTLEMENT_DRILL_OVERDUE_HREF } from "@trade-os/operations/settlement/s
 import type { MonitorAreaMeta, MonitorRisks, MonitorSnapshot, MonitorSnapshotArea } from "@trade-os/operations/lib/api/monitor";
 import type { DealFlag } from "@trade-os/operations/lib/api/flags";
 import { countOverdueReceivables, type AgingCell } from "@trade-os/operations/lib/api/settlement";
-import { formatMoney } from "@trade-os/operations/lib/money";
+import { formatMoney } from "@trade-os/lib/money";
 
 import { isMonitorAreaTimestampEnabled } from "./monitorRollout";
 

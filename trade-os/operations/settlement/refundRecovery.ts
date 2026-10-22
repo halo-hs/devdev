@@ -1,4 +1,4 @@
-import { financeDecimalMagnitude } from "../lib/financeDecimal";
+import { financeDecimalMagnitude } from "@trade-os/lib/financeDecimal";
 import type { RecordSettlementOverpaymentRefundBody, SettlementOverpaymentRefund } from '../lib/api/settlement';
 export type PendingRefund = { body: RecordSettlementOverpaymentRefundBody; previousIds: string[] };
 const key = (id: string) => `ecoya:settlement:pending-refund:v1:${id}`;

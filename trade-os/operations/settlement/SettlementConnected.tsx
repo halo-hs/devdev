@@ -68,8 +68,8 @@ import {
   type RecordScheduleCashResponse,
   type ScheduleCashLedger,
 } from "@trade-os/operations/lib/api/scheduleCash";
-import { isFinanceDecimal } from "@trade-os/operations/lib/financeDecimal";
-import { formatScaledMoney, normalizeDecimalInput } from "@trade-os/operations/lib/money";
+import { isFinanceDecimal } from "@trade-os/lib/financeDecimal";
+import { formatScaledMoney, normalizeDecimalInput } from "@trade-os/lib/money";
 import { formatDate, formatDateTime, localTodayISO, todayISOIn } from "@trade-os/operations/lib/orgDate";
 import { withRetry } from "@trade-os/operations/lib/api/retry";
 import { ApiError } from "@trade-os/operations/lib/api/client";
