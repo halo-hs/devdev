@@ -120,7 +120,7 @@ import {
 import { Textarea } from "@/components/ui/Textarea"
 import { cn } from "@/lib/utils"
 import { StatusBadge } from "@/components/platform/StatusBadge"
-import { DateInput } from "@/components/platform/DateInput"
+import { DatePicker } from "@/components/ui/DatePicker"
 import { prototypeBackend, type MutationResult } from "@trade-os/lib/prototypeBackend"
 import {
   DealHandoffProvider,
@@ -3128,7 +3128,7 @@ function DealFieldsPanel({
                 ) : undefined}
             >
               {field.inputType === "date" ? (
-                <DateInput
+                <DatePicker
                   className="w-full"
                   id={`deal-field-${field.key}`}
                   ariaLabel={field.label}

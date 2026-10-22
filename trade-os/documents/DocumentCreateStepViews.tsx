@@ -15,7 +15,7 @@ import { RelatedDealNotice } from "@trade-os/documents/DocumentCreatePanels"
 import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/Resizable"
 import { FieldGroup, Field, FieldLabel, FieldDescription } from "@/components/ui/Field"
 import { Input } from "@/components/ui/Input"
-import { DateInput } from "@/components/platform/DateInput"
+import { DatePicker } from "@/components/ui/DatePicker"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/Table"
 import { Textarea } from "@/components/ui/Textarea"
 import { PdfPanelResizeHandle } from "@/components/platform/PdfPanelResizeHandle"
@@ -483,7 +483,7 @@ export function StructuredDocumentCreateEditor({
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <DateInput
+                          <DatePicker
                             className="w-full"
                             value={draft.issuedAt}
                             ariaLabel="견적일"
@@ -501,7 +501,7 @@ export function StructuredDocumentCreateEditor({
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <DateInput
+                          <DatePicker
                             className="w-full [&>button]:border-[var(--color-orange-2)]!"
                             value={draft.validUntil}
                             ariaLabel="유효기간"

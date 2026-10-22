@@ -71,7 +71,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import { cn } from "@/lib/utils"
 import { StatusBadge } from "@/components/platform/StatusBadge"
-import { DateInput } from "@/components/platform/DateInput"
+import { DatePicker } from "@/components/ui/DatePicker"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 
 import {
@@ -780,7 +780,7 @@ export function DealsScreen({
                             </Popover>
                           </span>
                           <div className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:flex sm:w-auto">
-                            <DateInput
+                            <DatePicker
                               ariaLabel="ETA 기간 시작일"
                               className="sm:w-40"
                               value={dateStart}
@@ -791,7 +791,7 @@ export function DealsScreen({
                               }}
                             />
                             <span className="text-white/70">~</span>
-                            <DateInput
+                            <DatePicker
                               ariaLabel="ETA 기간 종료일"
                               className="sm:w-40"
                               value={dateEnd}

@@ -80,10 +80,10 @@ Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run bui
 | 폴더 | 역할 | 화면에서 직접 import |
 | --- | --- | --- |
 | `src/components/ds2/ui/` | shadcn 기반 기본 부품 원본 | 안 함 — `ui/` 래퍼를 씀 |
-| `src/components/ds2/extensions/` | 디자인 시스템 확장 부품 | `DatePicker`는 `platform/DateInput`으로만, 나머지는 직접 |
+| `src/components/ds2/extensions/` | 디자인 시스템 팀이 기본 부품을 조합해 만든 확장 부품 | `DatePicker`는 `ui/DatePicker` 래퍼로, 나머지는 직접 |
 | `src/components/ds2/assets/` | 로고·아이콘·애니메이션 | 함 |
 | `src/components/ui/` | 같은 이름의 ds2 부품에 Figma 색·간격만 입힌 래퍼 | 함 |
-| `src/components/platform/` | 여러 화면이 쓰는 조합 부품(DateInput, StatusBadge, SearchFilterBar 등) | 함 |
+| `src/components/platform/` | 여러 화면이 쓰는 조합 부품(StatusBadge, SearchFilterBar 등) | 함 |
 
 한 기능에서만 쓰는 부품은 그 기능 폴더(예: `trade-os/components/`)에 두고, 여러 화면이 쓰게 되면 `platform/`으로 옮깁니다. 색·간격 기본값은 `src/app/tokensDs2.css`, Figma 덮어쓰기는 `src/app/theme.css`에서 고칩니다.
 

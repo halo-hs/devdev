@@ -12,7 +12,7 @@ import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { RefreshCw } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { DateInput } from "@/components/platform/DateInput";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { LoadableSection, type LoadableSectionCopy } from "@trade-os/operations/components/LoadableSection";
 import { OperationalTableFrame } from "@trade-os/operations/components/OperationalTableFrame";
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
@@ -2954,7 +2954,7 @@ function SettlementView({
             <RefreshCw className="size-5" aria-hidden="true" />
           </Button>
           <BusinessFilterField label={copy.export.monthLabel}>
-            <DateInput
+            <DatePicker
               mode="month"
               ariaLabel={copy.export.monthLabel}
               value={effectiveTaxMonth}
@@ -4395,7 +4395,7 @@ function SettlementView({
           </label>
           <label className="flex flex-col gap-1 text-label-12 text-text-secondary">
             {copy.ledger.due}
-            <DateInput
+            <DatePicker
               ariaLabel={copy.ledger.due}
               className="w-full"
               disabled={manualScheduleBusy}

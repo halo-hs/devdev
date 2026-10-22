@@ -8,7 +8,7 @@ import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
-import { DateInput } from "@/components/platform/DateInput";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { ApiError } from "../lib/api/client";
 import { effectiveShipmentEta, effectiveShipmentEtd, type Shipment, type ShipmentConfirmation, type ShipmentStatus } from "../lib/api/shipments";
 
@@ -130,7 +130,7 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
                     <SelectContent position="popper" style={{ zIndex: "calc(var(--z-dialog) + 2)" }}>{statuses.map((status) => <SelectItem key={status} value={status}>{copy.status[status]}</SelectItem>)}</SelectContent>
                   </Select>
                 ) : (
-                  <DateInput ariaLabel={label} className="w-full" disabled={pending || released || !writable} id={`shipment-${field}`} invalid={changed && !released && !draft[field]} onValueChange={(value) => setField(field, value)} value={draft[field] ?? ""} />
+                  <DatePicker ariaLabel={label} className="w-full" disabled={pending || released || !writable} id={`shipment-${field}`} invalid={changed && !released && !draft[field]} onValueChange={(value) => setField(field, value)} value={draft[field] ?? ""} />
                 )}
                 {field === "confirmed_status" ? <ShipmentConfirmationRecord shipment={baseline} /> : null}
                 {field === "confirmed_status" ? <FieldDescription className="text-[var(--color-gray-4)]" id="shipment-status-hint">{c.statusHint}</FieldDescription> : null}

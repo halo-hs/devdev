@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { DateInput } from "@/components/platform/DateInput"
+import { DatePicker } from "@/components/ui/DatePicker"
 
 /** CS-21: only the server's current Organization aggregate may populate this view. */
 export function OrganizationAiUsage({ organizationName }: { organizationName: string }) {
@@ -19,7 +19,7 @@ export function OrganizationAiUsage({ organizationName }: { organizationName: st
         </div>
         <label className="flex items-center gap-3 text-sm">
           조회 기간
-          <DateInput
+          <DatePicker
             mode="month"
             ariaLabel="조회 기간"
             value={month}

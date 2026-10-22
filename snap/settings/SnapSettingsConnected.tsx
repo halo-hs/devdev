@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import { DateInput } from "@/components/platform/DateInput"
+import { DatePicker } from "@/components/ui/DatePicker"
 import {
   AlertCircle,
   Building2,
@@ -474,7 +474,7 @@ function PlatformSignupsPage() {
           </label>
           <label className="text-xs font-medium text-muted-foreground">
             신청일 이후
-            <DateInput className="mt-1 sm:w-44" ariaLabel="신청일 이후" value={since} onValueChange={setSince} />
+            <DatePicker className="mt-1 sm:w-44" ariaLabel="신청일 이후" value={since} onValueChange={setSince} />
           </label>
         </div>
         <Card className="rounded-md shadow-none">

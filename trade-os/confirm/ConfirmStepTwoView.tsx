@@ -20,7 +20,7 @@ import { Field, FieldLabel } from "@/components/ui/Field"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select"
 import { Input } from "@/components/ui/Input"
 import { cn } from "@/lib/utils"
-import { DateInput } from "@/components/platform/DateInput"
+import { DatePicker } from "@/components/ui/DatePicker"
 import { type RecentDocument, type ReviewField, type DocumentSourceDeal } from "@/App"
 import { documentSourceDeals, quotationMoney } from "@trade-os/documents/documentTemplateModel"
 import { resolvedReviewFields, readUploadDocumentDealLinks } from "@trade-os/inbox/uploadDocumentModel"
@@ -803,7 +803,7 @@ export function DealConfirmPanel({
                                 <FieldLabel>
                                   입출금일
                                 </FieldLabel>
-                                <DateInput
+                                <DatePicker
                                   ariaLabel="입출금일"
                                   value={bankValueDate}
                                   onValueChange={setBankValueDate}

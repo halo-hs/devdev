@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@trade-os/operations/components/ui/Button";
 import { TextLink } from "@trade-os/operations/components/ui/TextLink";
-import { DateInput } from "@/components/platform/DateInput";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { ApiError } from "@trade-os/operations/lib/api/client";
 import {
   getScheduleCashApplications,
@@ -589,7 +589,7 @@ export function CanonicalScheduleCashPanel({
               </label>
               <label className="text-label-12 text-text-secondary">
                 {copy.date}
-                <DateInput
+                <DatePicker
                   ariaLabel={copy.date}
                   className="mt-1 w-full"
                   value={valueDate}

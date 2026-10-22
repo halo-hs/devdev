@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button"
 import { X, Download, Building2, Plus, ChevronDown, FileText, Check, Copy, Maximize2, Link2, Mail, LoaderCircle, RefreshCw } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
-import { DateInput } from "@/components/platform/DateInput"
+import { DatePicker } from "@/components/ui/DatePicker"
 import { Input } from "@/components/ui/Input"
 import { FormField } from "@/components/platform/FormItem"
 import { Textarea } from "@/components/ui/Textarea"
@@ -337,7 +337,7 @@ export function ShareDeliveryPanel({
                     <div className="mt-3 grid grid-cols-2 gap-3">
                       <label className="grid gap-1 text-xs">
                         <span>만료일</span>
-                        <DateInput ariaLabel="만료일" value={expires} onValueChange={setExpires} />
+                        <DatePicker ariaLabel="만료일" value={expires} onValueChange={setExpires} />
                       </label>
                       <label className="grid gap-1 text-xs">
                         <span>최대 열람 횟수</span>
