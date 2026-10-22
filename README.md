@@ -74,3 +74,26 @@ Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run bui
 `share/`는 공통 업무 화면, `src/components/`는 공통 UI 부품입니다. 토큰은 `src/app/tokensDs2.css`(기본)와 `src/app/theme.css`(Figma 덮어쓰기)입니다. `src/app/PublicEntry.tsx`는 공개 페이지 연결을 담당합니다.
 
 업무 화면 파일 이름은 제품 프론트엔드(`ecoya-platform-user-frontend`의 `src/features/<기능>/`)와 맞춥니다. 예: 거래 목록 `trade-os/deals/DealsListView.tsx`, 문서 올리기 `trade-os/inbox/InboxView.tsx`, 업로드 검토 `trade-os/confirm/ConfirmFlowConnected.tsx`, 문서 만들기 `trade-os/documents/DocumentCreateConnected.tsx`, AI에게 묻기 `trade-os/ai/AiWorkspace.tsx`, 설정 `share/settings/SettingsRoutePage.tsx`, 로그인 `auth/LoginPanel.tsx`. `src/App.tsx`는 라우팅과 앱 상태, `src/shell/`은 사이드바(`ErpNav.tsx`)와 상단 바(`ErpTopNavSlot.tsx`)를 담당합니다. SNAP 통합 화면 일부(`snap/SnapScreens.tsx`, `snap/operations/SnapOperationsPages.tsx`)는 아직 한 파일에 남아 있습니다. 모든 기능의 코드·빌드가 독립된 것은 아닙니다.
+
+## 공통 UI 부품 기준
+
+| 폴더 | 역할 | 화면에서 직접 import |
+| --- | --- | --- |
+| `src/components/ds2/ui/` | shadcn 기반 기본 부품 원본 | 안 함 — `ui/` 래퍼를 씀 |
+| `src/components/ds2/extensions/` | 디자인 시스템 확장 부품 | `DatePicker`는 `platform/DateInput`으로만, 나머지는 직접 |
+| `src/components/ds2/assets/` | 로고·아이콘·애니메이션 | 함 |
+| `src/components/ui/` | 같은 이름의 ds2 부품에 Figma 색·간격만 입힌 래퍼 | 함 |
+| `src/components/platform/` | 여러 화면이 쓰는 조합 부품(DateInput, StatusBadge, SearchFilterBar 등) | 함 |
+
+한 기능에서만 쓰는 부품은 그 기능 폴더(예: `trade-os/components/`)에 두고, 여러 화면이 쓰게 되면 `platform/`으로 옮깁니다. 색·간격 기본값은 `src/app/tokensDs2.css`, Figma 덮어쓰기는 `src/app/theme.css`에서 고칩니다.
+
+## 파일 이름 규칙
+
+- 화면·부품(`.tsx`)은 PascalCase(`DealsListView.tsx`), 훅·로직·데이터(`.ts`)와 CSS는 camelCase(`usePreviewPlayback.ts`, `tokensDs2.css`). 제품 프론트엔드의 `-` 이름 규칙은 따르지 않습니다.
+- 예외: `page.tsx`, `layout.tsx`, `main.tsx`, `index.tsx`.
+- `ui/` 래퍼는 감싸는 ds2 부품과 파일 이름이 같습니다(`ui/Tooltip.tsx` → `ds2/ui/Tooltip.tsx`).
+- import 경로는 대소문자까지 파일 이름과 같아야 합니다. 맥에서는 틀려도 동작하지만 배포 빌드(Linux)는 실패합니다. 대소문자만 바꾸는 이름 변경은 `git mv a.tsx a.tmp` → `git mv a.tmp A.tsx` 두 단계로 합니다.
+
+## 로컬 전용 폴더
+
+`tests/`(Playwright 화면 검사), `feedback/`(화면 캡처), `doc/`·`docs/`(메모), `output/`, `reference-3030/`은 Git에 올리지 않습니다. 앱·빌드·배포는 이 폴더들을 쓰지 않습니다. `npm run test:e2e`는 로컬에 `tests/`가 있을 때만 동작합니다.
