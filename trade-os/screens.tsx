@@ -1371,9 +1371,10 @@ export function AskPrototype({
     toast.success("의견을 반영했습니다.")
   }
 
+  // Figma 7차 (5729:60849): the question box is 760px wide, centered.
   const renderComposer = () => (
     <div
-      className="w-full rounded-[18px] border border-[var(--color-gray-6)] bg-[var(--color-gray-12)] px-4 pt-3 pb-2.5 shadow-[0_2px_4px_rgb(0_0_0/0.05)] transition-shadow focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-ring/30"
+      className="mx-auto w-full max-w-[760px] rounded-[18px] border border-[var(--color-gray-6)] bg-[var(--color-gray-12)] px-4 pt-3 pb-2.5 shadow-[0_2px_4px_rgb(0_0_0/0.05)] transition-shadow focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-ring/30"
     >
       {attachedFiles.length ? (
         // Figma 7차 (5729:61024): attached files as a list above a divider.
