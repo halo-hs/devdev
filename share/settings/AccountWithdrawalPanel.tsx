@@ -13,7 +13,7 @@ import GoogleIcon from "@ecoya/design-system/assets/icons/icon-google.svg"
 import { appLocation } from "@/app/app-location"
 import { Button } from "@shared/components/ui/button"
 import { Input } from "@shared/components/ui/input"
-import { PageHeading, SettingsSection } from "./settings-layout"
+import { PageHeading, SettingsSection } from "./views/SettingsSection"
 import type {
   WithdrawalGateway,
   WithdrawalMembership,

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { createRoot } from "react-dom/client"
-import { PendingInvitations } from "../../share/settings/pending-invitations"
+import { PendingInvitations } from "../../share/settings/MemberInviteSettings"
 import {
   invitationExamples,
   type PendingInvitation,
