@@ -20,7 +20,11 @@ trade-os/
   ai/         AI 업무 도구
   sales/      매출
   counterparties/ 거래처
-  operations/ 선적·정산·감시·리포트
+  shipments/  선적
+  settlement/ 정산
+  monitor/    운영 감시
+  reports/    결산 리포트
+  salesperf/  영업 성과
   components/ 제품 전용 UI
   lib/        업무 로직
 snap/
@@ -57,10 +61,8 @@ Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run bui
 
 ## 파일 정리 기준
 
-- `scripts/assets/`: 폰트·애니메이션·운영 CSS 생성과 배포 파일 정리.
-- `trade-os/operations/`: 선적·정산·운영 감시·리포트의 실제 실행 코드.
-- `public/assets/operations/`: 위 화면에 필요한 아이콘·폰트.
-- `reference-3030/`: 원본 참고 자료를 로컬에만 보관하며 Git·배포에서 제외.
+- `scripts/assets/`: 폰트·애니메이션 생성과 배포 파일 정리.
+- `trade-os/OperationsScreens.tsx`: 선적·정산·운영 감시·결산 리포트·영업 성과 화면의 진입점. 화면은 예시 데이터(`trade-os/lib/demo/`)로 동작합니다.
 - `output/`: 작업 메모·캡처·임시 산출물. Git·배포에서 제외.
 
 루트의 `package*.json`, `vite.config.ts`, `tsconfig*.json`, `index.html`, lint·format·Playwright 설정은 설치·빌드·검사에 필요한 파일입니다. `THIRD_PARTY_NOTICES.md`는 라이선스 고지이므로 유지합니다. Netlify 설정은 사용하지 않습니다.
@@ -96,4 +98,4 @@ Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run bui
 
 ## 로컬 전용 폴더
 
-`tests/`(Playwright 화면 검사), `feedback/`(화면 캡처), `doc/`·`docs/`(메모), `output/`, `reference-3030/`은 Git에 올리지 않습니다. 앱·빌드·배포는 이 폴더들을 쓰지 않습니다. `npm run test:e2e`는 로컬에 `tests/`가 있을 때만 동작합니다.
+`tests/`(Playwright 화면 검사), `feedback/`(화면 캡처), `doc/`·`docs/`(메모), `output/`은 Git 올리지 않습니다. 앱·빌드·배포는 이 폴더들을 쓰지 않습니다. `npm run test:e2e`는 로컬에 `tests/`가 있을 때만 동작합니다.

@@ -4,4 +4,4 @@
 
 | 폴더 | 역할 | 결과 |
 | --- | --- | --- |
-| `assets/` | 운영 CSS 생성, 배포 파일 정리 | `trade-os/operations/styles`, `dist` |
+| `assets/` | 배포 파일 정리 | `dist` |
