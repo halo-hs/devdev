@@ -55,14 +55,10 @@ Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run bui
 ## 파일 정리 기준
 
 - `scripts/assets/`: 폰트·애니메이션·운영 CSS 생성과 배포 파일 정리.
-- `scripts/capture/`: 화면 캡처 도구.
-- `scripts/checks/`: 화면·HTML·링크 검사 도구.
-- `scripts/handoff/`: 디자인 전달 HTML·색인 생성 도구와 관련 데이터.
 - `trade-os/operations/`: 선적·정산·운영 감시·리포트의 실제 실행 코드.
-- `public/assets/operations/`: 위 화면과 기존 공개 HTML에 필요한 아이콘·폰트.
+- `public/assets/operations/`: 위 화면에 필요한 아이콘·폰트.
 - `reference-3030/`: 원본 참고 자료를 로컬에만 보관하며 Git·배포에서 제외.
 - `output/`: 작업 메모·캡처·임시 산출물. Git·배포에서 제외.
-- `public/html/`: 이미 공유 중인 디자인 전달 링크이므로 유지.
 
 루트의 `package*.json`, `vite.config.ts`, `tsconfig*.json`, `index.html`, lint·format·Playwright 설정은 설치·빌드·검사에 필요한 파일입니다. `THIRD_PARTY_NOTICES.md`는 라이선스 고지이므로 유지합니다. Netlify 설정은 사용하지 않습니다.
 
