@@ -14,7 +14,7 @@ import { LabeledProgress } from "@ecoya/design-system/extensions/labeled-progres
 import { BusinessListToolbar, BusinessFilterField } from "@shared/components/business-filters"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@shared/components/ui/select"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@shared/components/ui/alert-dialog"
-import { useTradeSeatAssigned } from "@share/settings/subscription-settings"
+import { useTradeSeatAssigned } from "@share/settings/settingsDemoState"
 import { useStartGuide } from "@trade-os/onboarding/runtime"
 import { type DealDocumentRecord, dealDocumentFromReviewUrl } from "@trade-os/lib/deal-document-actions"
 import { readDocumentReview, type ReviewedField, type BankCashInput } from "@trade-os/lib/erp-document-workflow"
