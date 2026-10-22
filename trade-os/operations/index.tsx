@@ -9,7 +9,6 @@ import { SalesPerformanceConnected } from "./salesperf/SalesPerformanceConnected
 import { SettlementConnected } from "./settlement/SettlementConnected"
 import { ShipmentsConnected, type ShipmentSummary } from "./shipments/ShipmentsConnected"
 import { PageHeader } from "./components/PageHeader"
-import { ToastHost } from "./components/toast/ToastHost"
 import { messages } from "./i18n/messages"
 import "./styles/scoped.css"
 import "./styles/hostTokens.css"
@@ -93,7 +92,6 @@ export function ReferenceOperations({ screen, dealId, onShipmentSummary }: { scr
       <button className="mt-3 underline" onClick={() => setAttempt(n => n + 1)}>다시 시도</button>
     </div> : session ? <PlatformSessionProvider {...session} getIdToken={getIdToken}>
       {screen === "deal-shipments" && dealId ? <ShipmentsConnected key={dealId} copy={messages.erpShipments.shipments} dealId={dealId} onSummaryChange={onShipmentSummary} /> : screen === "deal" && dealId ? <ReferenceDealDetail key={dealId} dealId={dealId} /> : screen !== "deal" && screen !== "deal-shipments" ? <Body screen={screen} /> : null}
-      <ToastHost closeLabel="닫기" />
     </PlatformSessionProvider> : <div className="p-6" role="status">화면 데이터를 불러오는 중입니다…</div>}
   </div></div>
 }

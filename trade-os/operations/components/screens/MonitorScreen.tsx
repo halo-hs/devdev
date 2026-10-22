@@ -11,17 +11,18 @@ import { PageHeader } from "@trade-os/operations/components/PageHeader";
 import { DashboardLayout } from "@trade-os/operations/components/ScreenLayouts";
 import {
   BlockedCard,
+  ColumnTable,
   FlagFeedCard,
   MonitorEmptyStates,
   PendingActionCard,
   RiskCard,
   ThroughputDrilldown,
+  type ColumnTableColumn,
 } from "@trade-os/operations/components/ScreenSupportUnits";
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
 import { StatusBadge } from "@trade-os/operations/components/StatusBadge";
 import { TaskQueue, type TaskQueueItem } from "@trade-os/operations/components/TaskQueue";
 import { Button } from "@/components/ui/Button";
-import { DataTable, type DataTableColumn } from "@trade-os/operations/components/ui/Table";
 
 import { ErpScreenFrame } from "./ErpScreenFrame";
 
@@ -203,9 +204,9 @@ const throughputRows: ThroughputRow[] = [
   { key: "choi", owner: "최팀장", uploads: "28", confirms: "12", rate: <StatusBadge tone="danger">43%</StatusBadge> },
 ];
 
-function buildThroughputColumns(copy: MonitorBodyCopy): DataTableColumn<ThroughputRow>[] {
+function buildThroughputColumns(copy: MonitorBodyCopy): ColumnTableColumn<ThroughputRow>[] {
   return [
-    { key: "owner", header: copy.throughputOwner, align: "left", sort: "inactive", render: (row) => row.owner },
+    { key: "owner", header: copy.throughputOwner, align: "left", sortable: true, render: (row) => row.owner },
     { key: "uploads", header: copy.throughputUploads, align: "center", render: (row) => row.uploads },
     { key: "confirms", header: copy.throughputConfirms, align: "center", render: (row) => row.confirms },
     { key: "rate", header: copy.throughputRate, align: "center", render: (row) => row.rate },
@@ -665,7 +666,7 @@ function ThroughputPanel({
             })}
           </div>
           <div className="min-w-0 overflow-x-auto" data-ui="monitor-throughput-table-scroll">
-            <DataTable className="min-w-[560px]" columns={throughputColumns} rows={empty ? [] : rows} />
+            <ColumnTable className="min-w-[560px]" columns={throughputColumns} rows={empty ? [] : rows} />
           </div>
         </div>
       )}

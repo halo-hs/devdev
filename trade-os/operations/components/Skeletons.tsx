@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
 
 import { Skeleton } from "@/components/ui/Skeleton";
-import { cx } from "@trade-os/operations/components/ui/utils";
+import { cn } from "@/lib/utils";
 
 type SkeletonPresetProps = ComponentProps<"div"> & {
   label?: string;
@@ -29,7 +29,7 @@ function SkeletonList({
 }: SkeletonPresetProps & { rows?: number }) {
   return (
     <StatusRoot
-      className={cx(
+      className={cn(
         "rounded-lg border border-border-subtle bg-surface-card p-4 shadow-section",
         className,
       )}
@@ -58,7 +58,7 @@ function SkeletonTable({
 }: SkeletonPresetProps & { rows?: number }) {
   return (
     <StatusRoot
-      className={cx(
+      className={cn(
         "rounded-lg border border-border-subtle bg-surface-card p-2 shadow-section",
         className,
       )}
@@ -95,7 +95,7 @@ function SkeletonCards({
 }: SkeletonPresetProps & { cards?: number }) {
   return (
     <StatusRoot
-      className={cx("grid gap-3", className)}
+      className={cn("grid gap-3", className)}
       data-ui="skeleton-cards"
       label={label}
       style={{ gridTemplateColumns: `repeat(${cards}, minmax(0, 1fr))`, ...style }}

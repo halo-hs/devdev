@@ -1,7 +1,7 @@
 import type { ComponentProps, CSSProperties, ReactNode } from "react";
 
 import { PageHeader } from "@trade-os/operations/components/PageHeader";
-import { cx } from "@trade-os/operations/components/ui/utils";
+import { cn } from "@/lib/utils";
 
 type PageTitleBarProps = Omit<ComponentProps<"header">, "title"> & {
   title: ReactNode;
@@ -62,7 +62,7 @@ function ConstrainedBody({ maxWidth = 1440, className, children, ...props }: Bod
 
   return (
     <div
-      className={cx("mx-auto grid w-full gap-4 px-7 pb-14 pt-6", className)}
+      className={cn("mx-auto grid w-full gap-4 px-7 pb-14 pt-6", className)}
       style={style}
       {...props}
     >
@@ -73,7 +73,7 @@ function ConstrainedBody({ maxWidth = 1440, className, children, ...props }: Bod
 
 function ListPageLayout({ titleBar, children, className, ...props }: ScreenLayoutProps) {
   return (
-    <section className={cx(layoutRootClass, className)} data-layout="list-page" {...props}>
+    <section className={cn(layoutRootClass, className)} data-layout="list-page" {...props}>
       {titleBar}
       <div className={scrollableBodyClass}>
         <ConstrainedBody>{children}</ConstrainedBody>
@@ -84,7 +84,7 @@ function ListPageLayout({ titleBar, children, className, ...props }: ScreenLayou
 
 function DashboardLayout({ titleBar, children, className, ...props }: ScreenLayoutProps) {
   return (
-    <section className={cx(layoutRootClass, className)} data-layout="dashboard" {...props}>
+    <section className={cn(layoutRootClass, className)} data-layout="dashboard" {...props}>
       {titleBar}
       <div className={scrollableBodyClass}>
         <ConstrainedBody maxWidth="none" className="reference-content-width px-5 pt-4" data-ui="dashboard-body">{children}</ConstrainedBody>
@@ -95,7 +95,7 @@ function DashboardLayout({ titleBar, children, className, ...props }: ScreenLayo
 
 function DetailPageLayout({ titleBar, children, className, ...props }: ScreenLayoutProps) {
   return (
-    <section className={cx(layoutRootClass, className)} data-layout="detail-page" {...props}>
+    <section className={cn(layoutRootClass, className)} data-layout="detail-page" {...props}>
       {titleBar}
       <div className={scrollableBodyClass}>
         <ConstrainedBody maxWidth="none">{children}</ConstrainedBody>
@@ -106,7 +106,7 @@ function DetailPageLayout({ titleBar, children, className, ...props }: ScreenLay
 
 function SettingsLayout({ titleBar, title, description, meta, action, children, className, ...props }: SettingsLayoutProps) {
   return (
-    <section className={cx(layoutRootClass, className)} data-layout="settings" {...props}>
+    <section className={cn(layoutRootClass, className)} data-layout="settings" {...props}>
       {titleBar ?? <PageTitleBar action={action} description={description} meta={meta} title={title} />}
       <div className={scrollableBodyClass}>
         <ConstrainedBody>{children}</ConstrainedBody>
@@ -118,7 +118,7 @@ function SettingsLayout({ titleBar, title, description, meta, action, children, 
 function WorkbenchLayout({ titleBar, children, className, ...props }: ScreenLayoutProps) {
   return (
     <section
-      className={cx("flex h-full min-h-0 flex-col bg-ecoya-gray-12", className)}
+      className={cn("flex h-full min-h-0 flex-col bg-ecoya-gray-12", className)}
       data-layout="workbench"
       {...props}
     >

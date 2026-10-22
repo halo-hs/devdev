@@ -22,7 +22,7 @@ import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { AnalyticsSkeleton } from "@trade-os/operations/components/AnalyticsSkeleton";
 import { Button } from "@/components/ui/Button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-import { cx } from "@trade-os/operations/components/ui/utils";
+import { cn } from "@/lib/utils";
 // erp-v2-adapt: begin — QA-1352 defers the gate reason to BE #495 instead of the boolean projection.
 import { usePlatformSession } from "@trade-os/operations/session/PlatformSessionContext";
 // erp-v2-adapt: end
@@ -1225,7 +1225,7 @@ function SalesPerformanceIdentityScope({
 
           {/* ── GP: 내 월별 추세 + (org 전체 뷰) 담당자별 랭킹 ── */}
           {showManagerGp ? <div
-            className={cx(
+            className={cn(
               "grid items-start gap-4 max-lg:grid-cols-1",
               showByAssignee ? "grid-cols-[minmax(0,1.9fr)_minmax(0,1.1fr)]" : "grid-cols-1",
             )}
@@ -1325,7 +1325,7 @@ function SalesPerformanceIdentityScope({
                                 </a>
                               </span>
                               <span
-                                className={cx(
+                                className={cn(
                                   "tabular-nums",
                                   row.gp.scaled < BigInt(0) ? "text-status-danger" : "text-text-secondary",
                                 )}
@@ -1335,7 +1335,7 @@ function SalesPerformanceIdentityScope({
                             </div>
                             <div className="rounded-r bg-surface-muted">
                               <div
-                                className={cx(
+                                className={cn(
                                   "h-3.5 rounded-r",
                                   row.gp.scaled < BigInt(0)
                                     ? "bg-ecoya-system-red-1"
@@ -1478,7 +1478,7 @@ function SalesPerformanceIdentityScope({
                                     {fmtAmount(item.outstanding, item.currency)}
                                   </HostTableCell>
                                   <HostTableCell
-                                    className={cx(
+                                    className={cn(
                                       "py-1.5 pr-3 text-right",
                                       overdue.valid && overdue.scaled > BigInt(0) && "font-semibold text-status-danger",
                                     )}

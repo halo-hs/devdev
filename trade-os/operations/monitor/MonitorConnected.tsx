@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { AnalyticsSkeleton } from "@trade-os/operations/components/AnalyticsSkeleton";
-import { useScreenToast } from "@trade-os/operations/components/toast/useToast";
+import { toast } from "sonner";
 import { MonitorBody, type MonitorBodyCopy } from "@trade-os/operations/components/screens/MonitorScreen";
 import { MonitorDealsOpsPanels, type MonitorOpsCopy } from "@trade-os/operations/monitor/MonitorDealsOpsPanels";
 import { usePlatformAuth } from "@trade-os/operations/session/PlatformSessionContext";
@@ -228,7 +228,6 @@ export function MonitorConnected({
 }: MonitorConnectedProps) {
   const { getIdToken } = usePlatformAuth();
   const moneyLocale = useLocaleTag();
-  const toast = useScreenToast();
   const [state, setState] = useState<LoadState>(
     canAccess ? { status: "loading" } : { status: "forbidden" },
   );

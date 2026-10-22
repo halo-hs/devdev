@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
 
 import { KpiCard } from "@/components/platform/StatTile";
-import { cx } from "@trade-os/operations/components/ui/utils";
+import { cn } from "@/lib/utils";
 
 type MetricTone = "neutral" | "info" | "success" | "warning" | "danger" | "indigo";
 
@@ -37,12 +37,12 @@ function MetricCard({
 }: MetricCardProps) {
   return (
     <KpiCard
-      className={cx("min-w-0 bg-[var(--color-gray-12)]", className)}
+      className={cn("min-w-0 bg-[var(--color-gray-12)]", className)}
       data-ui="metric-card"
       label={
         icon ? (
           <span className="flex items-center gap-2">
-            <span className={cx("inline-flex flex-none", toneTextClass[tone])} data-ui="metric-card-icon">
+            <span className={cn("inline-flex flex-none", toneTextClass[tone])} data-ui="metric-card-icon">
               {icon}
             </span>
             {label}

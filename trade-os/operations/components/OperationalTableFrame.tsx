@@ -1,6 +1,6 @@
 import { forwardRef, type ComponentPropsWithoutRef } from "react";
 
-import { cx } from "@trade-os/operations/components/ui/utils";
+import { cn } from "@/lib/utils";
 
 type OperationalTableFrameProps = Omit<
   ComponentPropsWithoutRef<"div">,
@@ -34,7 +34,7 @@ const OperationalTableFrame = forwardRef<HTMLDivElement, OperationalTableFramePr
       <div
         {...props}
         aria-label={keyboardScrollable ? label : undefined}
-        className={cx(
+        className={cn(
           "relative min-w-0 max-w-full overflow-x-auto overscroll-x-contain focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ecoya-accent",
           className,
         )}

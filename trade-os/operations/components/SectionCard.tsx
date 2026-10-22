@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 
-import { cx } from "@trade-os/operations/components/ui/utils";
+import { cn } from "@/lib/utils";
 
 type SectionCardDensity = "default" | "compact";
 type SectionCardTone = "default" | "hero";
@@ -83,7 +83,7 @@ function SectionCard({
 }: SectionCardProps) {
   return (
     <section
-      className={cx(
+      className={cn(
         "overflow-hidden rounded-[12px] text-text-primary",
         variant === "module" ? "shadow-[0_4px_12px_rgba(0,0,0,0.1)]" : "border shadow-[0_2px_8px_rgba(0,0,0,0.08)]",
         TONE_CLASS[tone],
@@ -94,7 +94,7 @@ function SectionCard({
     >
       {title || description || action ? (
         <header
-          className={cx(
+          className={cn(
             "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3",
             variant === "module" ? "px-5 pt-5 pb-4" : density === "compact" ? "min-h-12 px-4 py-3" : "min-h-12 px-5 py-3",
           )}
@@ -102,7 +102,7 @@ function SectionCard({
         >
           <div className="flex min-w-0 flex-col gap-1">
             {title ? (
-              <h2 className={cx("m-0 font-bold text-text-primary", variant === "module" ? "text-header-22 leading-normal" : "text-[length:var(--text-header-6,17px)] leading-[var(--leading-header-6,24px)]")}>
+              <h2 className={cn("m-0 font-bold text-text-primary", variant === "module" ? "text-header-22 leading-normal" : "text-[length:var(--text-header-6,17px)] leading-[var(--leading-header-6,24px)]")}>
                 {title}
               </h2>
             ) : null}

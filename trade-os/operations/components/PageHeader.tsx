@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 
-import { cx } from "@trade-os/operations/components/ui/utils";
+import { cn } from "@/lib/utils";
 
 type PageHeaderProps = Omit<ComponentProps<"header">, "title"> & {
   variant?: "default" | "hero";
@@ -15,7 +15,7 @@ type PageHeaderProps = Omit<ComponentProps<"header">, "title"> & {
 function PageHeader({ variant = "default", title, description, meta, actions, filters, summary, className, style, ...props }: PageHeaderProps) {
   const header = (
     <header
-      className={cx(
+      className={cn(
         "grid min-h-[76px] flex-none grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-border-muted bg-surface px-7 py-4",
         // Figma HeroBanner (결산리포트 v6 · 5789:54378): 26/30/20 padding, radius 22,
         // title Bold 20/28, description 15/22.
@@ -29,7 +29,7 @@ function PageHeader({ variant = "default", title, description, meta, actions, fi
     >
       <div className="min-w-0">
         <div className="flex min-w-0 items-baseline gap-2.5">
-          <h1 className={cx("m-0 font-bold text-text-primary", variant === "hero" ? "text-[20px] leading-7" : "text-header-24")}>{title}</h1>
+          <h1 className={cn("m-0 font-bold text-text-primary", variant === "hero" ? "text-[20px] leading-7" : "text-header-24")}>{title}</h1>
           {meta ? (
             <div className="text-label-12 font-semibold uppercase tracking-[0.04em] text-text-disabled">
               {meta}
@@ -37,10 +37,10 @@ function PageHeader({ variant = "default", title, description, meta, actions, fi
           ) : null}
         </div>
         {description ? (
-          <p className={cx("mb-0 mt-1 font-regular text-text-muted", variant === "hero" ? "text-[15px] leading-[22px]" : "text-body-14")}>{description}</p>
+          <p className={cn("mb-0 mt-1 font-regular text-text-muted", variant === "hero" ? "text-[15px] leading-[22px]" : "text-body-14")}>{description}</p>
         ) : null}
       </div>
-      {actions ? <div className={cx("inline-flex items-center justify-end gap-2", variant === "hero" && "flex-wrap max-sm:justify-start")}>{actions}</div> : null}
+      {actions ? <div className={cn("inline-flex items-center justify-end gap-2", variant === "hero" && "flex-wrap max-sm:justify-start")}>{actions}</div> : null}
       {filters ? <div className="reference-hero-filters">{filters}</div> : null}
     </header>
   );

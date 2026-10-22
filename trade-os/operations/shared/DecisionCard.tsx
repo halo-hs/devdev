@@ -1,6 +1,6 @@
 import Link from "@trade-os/operations/compat/Link";
 
-import { cx } from "@trade-os/operations/components/ui/utils";
+import { cn } from "@/lib/utils";
 
 import type { ReactNode } from "react";
 
@@ -54,7 +54,7 @@ function DecisionCardBody({
         <span className="shrink-0 text-[11px] leading-4 text-[var(--color-primary-4)] group-hover:underline">{cta} →</span>
       </span>
       <span aria-hidden="true" className="my-2.5 h-px w-full bg-[var(--color-gray-10)]" />
-      <p className={cx("flex items-baseline gap-1.5 text-[26px] leading-[1.45] font-bold tabular-nums", toneValue[tone])}>
+      <p className={cn("flex items-baseline gap-1.5 text-[26px] leading-[1.45] font-bold tabular-nums", toneValue[tone])}>
         {money ? (
           <>
             {money[2]}

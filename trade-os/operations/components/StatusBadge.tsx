@@ -1,6 +1,6 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
-import { cx } from "@trade-os/operations/components/ui/utils";
+import { cn } from "@/lib/utils";
 
 type StatusTone =
   | "neutral"
@@ -125,7 +125,7 @@ function StatusBadge({
   return (
     <span
       {...props}
-      className={cx(
+      className={cn(
         "inline-flex shrink-0 items-center justify-center",
         resolvedShape === "square" ? "rounded whitespace-nowrap font-bold" : "rounded-[24px] whitespace-nowrap font-medium",
         size === "md"

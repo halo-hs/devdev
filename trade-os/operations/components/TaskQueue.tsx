@@ -2,7 +2,7 @@ import Link from "@trade-os/operations/compat/Link";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/Button";
-import { EtcDivider } from "@trade-os/operations/components/ui/Etc";
+import { Separator } from "@/components/ui/Separator";
 
 import { DdayBadge, StatusBadge, type DdayTone, type StatusTone } from "@trade-os/operations/components/StatusBadge";
 import { SectionPanel, type SectionPanelProps } from "@trade-os/operations/components/SectionPanel";
@@ -52,8 +52,7 @@ function TaskQueue({
         <div className="flex flex-col" data-ui="task-queue-list">
           {items.map((item, index) => (
             <div key={item.id}>
-              {/* 정본 Divider → EtcDivider (gray9 1px horizontal) */}
-              {index > 0 && <EtcDivider />}
+              {index > 0 && <Separator />}
               {/* QueueItem: grid minmax(0,1fr)·auto / items-center / gap-12 / min-h-56 / py-10 */}
               <div className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-2.5">
                 {/* Main: min-w-0 flex-col gap-4 */}

@@ -17,11 +17,11 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { AnalyticsSkeleton } from "@trade-os/operations/components/AnalyticsSkeleton";
 import { SkeletonList } from "@trade-os/operations/components/Skeletons";
-import { useToast } from "@trade-os/operations/components/toast/useToast";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-import { cx } from "@trade-os/operations/components/ui/utils";
+import { cn } from "@/lib/utils";
 // erp-v2-adapt: begin — QA-1352 defers the gate reason to BE #495 instead of the boolean projection.
 import { usePlatformSession } from "@trade-os/operations/session/PlatformSessionContext";
 import { InsightsGateNotice } from "@trade-os/operations/shared/InsightsGateNotice";
@@ -418,7 +418,6 @@ function ReportsConnectedSession({
   const [closeNote, setCloseNote] = useState("");
   const [closeSubmitting, setCloseSubmitting] = useState(false);
   const [closeError, setCloseError] = useState<string | null>(null);
-  const toast = useToast();
 
   // ── 월마감 재개방 상태 (OD-011 — 영향 안내 확인 + 사유 입력) ──
   const [reopenTarget, setReopenTarget] = useState<MonthClose | null>(null);
@@ -1190,7 +1189,7 @@ function ReportsConnectedSession({
 
   const summary = settlementState.status !== "loading" && !settlementEmpty && (settlementState.status !== "error" || settlementSnapshot != null) ? (
 <div
-            className={cx(
+            className={cn(
               // Figma 결산리포트 v6 KPI 7 · 2줄: 4 cards, then GP (2 columns) + 2.
               "grid grid-cols-4 gap-x-4 gap-y-3 max-lg:grid-cols-2 max-sm:grid-cols-1",
             )}
@@ -1921,7 +1920,7 @@ function ReportsConnectedSession({
                         <Button variant="ghost"
                           aria-controls={evidenceId}
                           aria-expanded={selected}
-                          className={cx(
+                          className={cn(
                             "flex h-auto w-full flex-col items-stretch justify-start overflow-visible whitespace-normal rounded-lg border px-2.5 py-2 text-left font-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ecoya-blue-3",
                             selected
                               ? "border-ecoya-accent bg-accent-soft"
@@ -2282,7 +2281,7 @@ export function KpiTile({
 }) {
   return (
     <KpiCard
-      className={cx("bg-[var(--color-gray-12)]", className)}
+      className={cn("bg-[var(--color-gray-12)]", className)}
       data-ui="reports-kpi"
       label={label}
       value={value}
@@ -2382,8 +2381,8 @@ function LegendKey({
 }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      {swatchClass ? <span aria-hidden className={cx("h-2.5 w-2.5 rounded-[3px]", swatchClass)} /> : null}
-      {lineClass ? <span aria-hidden className={cx("h-0.5 w-3.5 rounded-[1px]", lineClass)} /> : null}
+      {swatchClass ? <span aria-hidden className={cn("h-2.5 w-2.5 rounded-[3px]", swatchClass)} /> : null}
+      {lineClass ? <span aria-hidden className={cn("h-0.5 w-3.5 rounded-[1px]", lineClass)} /> : null}
       {label}
     </span>
   );

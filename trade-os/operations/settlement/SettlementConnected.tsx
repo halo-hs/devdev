@@ -18,7 +18,7 @@ import { OperationalTableFrame } from "@trade-os/operations/components/Operation
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
 import { SkeletonCards, SkeletonTable } from "@trade-os/operations/components/Skeletons";
 import { StatusBadge, type StatusTone } from "@trade-os/operations/components/StatusBadge";
-import { useScreenToast } from "@trade-os/operations/components/toast/useToast";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { AsyncButton } from "@/components/ds2/extensions/AsyncButton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
@@ -1294,7 +1294,6 @@ export function SettlementConnected({ copy, renderHeader }: { copy: SettlementCo
     setIncludeCancelled(value);
     setLedgerOffset(0);
   }, []);
-  const toast = useScreenToast();
   const announceRecordStatus = useCallback((message: string, tone: "green" | "red" = "green") => {
     if (tone === "red") {
       toast.error(message);

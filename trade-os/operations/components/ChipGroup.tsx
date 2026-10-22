@@ -2,7 +2,7 @@
 
 import type { ComponentProps, CSSProperties, ReactNode } from "react";
 
-import { cx } from "@trade-os/operations/components/ui/utils";
+import { cn } from "@/lib/utils";
 
 type ChipTone = "neutral" | "blue" | "green" | "yellow" | "red" | "purple" | "gray";
 
@@ -119,7 +119,7 @@ function ChipGroup({
 
   return (
     <div
-      className={cx("flex flex-wrap items-center gap-2", className)}
+      className={cn("flex flex-wrap items-center gap-2", className)}
       data-ui="chip-group"
       role={rootRole}
       {...props}

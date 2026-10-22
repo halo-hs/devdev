@@ -4,7 +4,10 @@ import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { MetricCard } from "@trade-os/operations/components/MetricCard";
 import { SectionPanel, type SectionPanelProps } from "@trade-os/operations/components/SectionPanel";
 import { StatusBadge } from "@trade-os/operations/components/StatusBadge";
-import { DataTable, type DataTableColumn } from "@trade-os/operations/components/ui/Table";
+import { ecoyaIllustration } from "@trade-os/operations/lib/assets";
+import { ChevronsUpDown } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
+import { cn } from "@/lib/utils";
 
 type UnitPanelProps = Omit<SectionPanelProps, "title"> & {
   title?: ReactNode;
@@ -63,8 +66,74 @@ const simpleRows: SimpleRow[] = [
   { key: "row-2", name: "MAEU-031", status: "확인 필요", owner: "이서연" },
 ];
 
-const simpleColumns: DataTableColumn<SimpleRow>[] = [
-  { key: "name", header: "이름", align: "left", sort: "inactive", render: (row) => row.name },
+type ColumnTableColumn<Row> = {
+  key: string;
+  header: ReactNode;
+  align?: "left" | "center" | "right";
+  /** Shows the inactive sort caret next to the header; display only, no sorting. */
+  sortable?: boolean;
+  render: (row: Row) => ReactNode;
+};
+
+const columnAlignClass = { left: "text-left", center: "text-center", right: "text-right" } as const;
+
+/** Read-only column table on the shared Table parts; an empty `rows` shows the bag illustration. */
+function ColumnTable<Row extends { key: string | number }>({
+  className,
+  columns,
+  rows,
+}: {
+  className?: string;
+  columns: ColumnTableColumn<Row>[];
+  rows: Row[];
+}) {
+  return (
+    <Table className={cn("table-fixed", className)} data-ui="data-table">
+      <TableHeader>
+        <TableRow>
+          {columns.map((column) => (
+            <TableHead className={columnAlignClass[column.align ?? "center"]} key={column.key}>
+              {column.sortable ? (
+                <span className="inline-flex max-w-full items-center gap-1">
+                  <span className="truncate">{column.header}</span>
+                  <ChevronsUpDown aria-hidden="true" className="size-3 shrink-0 text-[var(--color-gray-7)]" />
+                </span>
+              ) : (
+                column.header
+              )}
+            </TableHead>
+          ))}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.length === 0 ? (
+          <TableRow className="hover:[&>td]:bg-transparent">
+            <TableCell className="h-[418px]" colSpan={columns.length} data-ui="empty-table-state">
+              <span
+                aria-hidden="true"
+                className="mx-auto block size-14 bg-contain bg-center bg-no-repeat"
+                style={{ backgroundImage: `url("${ecoyaIllustration("Bag_Gray")}")` }}
+              />
+            </TableCell>
+          </TableRow>
+        ) : (
+          rows.map((row) => (
+            <TableRow key={row.key}>
+              {columns.map((column) => (
+                <TableCell className={cn("truncate", columnAlignClass[column.align ?? "center"])} key={column.key}>
+                  {column.render(row)}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))
+        )}
+      </TableBody>
+    </Table>
+  );
+}
+
+const simpleColumns: ColumnTableColumn<SimpleRow>[] = [
+  { key: "name", header: "이름", align: "left", sortable: true, render: (row) => row.name },
   {
     key: "status",
     header: "상태",
@@ -75,7 +144,7 @@ const simpleColumns: DataTableColumn<SimpleRow>[] = [
 ];
 
 function SimpleDataTable({ rows = simpleRows }: { rows?: SimpleRow[] }) {
-  return <DataTable columns={simpleColumns} rows={rows} />;
+  return <ColumnTable columns={simpleColumns} rows={rows} />;
 }
 
 function CopilotIntentPolicy(props: UnitPanelProps) {
@@ -333,6 +402,7 @@ function SettlementRuleNote({ children, ...props }: UnitPanelProps) {
 export {
   AdminJoinScreen,
   BlockedCard,
+  ColumnTable,
   ConfirmTooltipTour,
   CopilotIntentPolicy,
   CopilotPhase1InlineSearch,
@@ -387,4 +457,4 @@ export {
   ThroughputDrilldown,
   TokenUsagePanel,
 };
-export type { MetricItem, UnitPanelProps };
+export type { ColumnTableColumn, MetricItem, UnitPanelProps };

@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/Skeleton";
-import { cx } from "@trade-os/operations/components/ui/utils";
+import { cn } from "@/lib/utils";
 
 import { SkeletonList, SkeletonTable } from "./Skeletons";
 
@@ -45,7 +45,7 @@ function AnalyticsSkeleton({ kind, label, header = false, metricsOnly = false }:
           {[32, 40, 28].map((width) => <Skeleton aria-hidden="true" className="rounded-[8px] h-8 max-w-full" key={width} style={{ width: `${width * 4}px` }} />)}
         </div>
       ) : null}
-      <div className={cx("grid gap-3", monitor ? "grid-cols-2 max-[900px]:grid-cols-1" : reports ? "grid-cols-6 max-lg:grid-cols-2 max-sm:grid-cols-1" : "grid-cols-4 max-lg:grid-cols-2 max-sm:grid-cols-1")} data-ui="skeleton-metrics">
+      <div className={cn("grid gap-3", monitor ? "grid-cols-2 max-[900px]:grid-cols-1" : reports ? "grid-cols-6 max-lg:grid-cols-2 max-sm:grid-cols-1" : "grid-cols-4 max-lg:grid-cols-2 max-sm:grid-cols-1")} data-ui="skeleton-metrics">
         {Array.from({ length: count }, (_, index) => (
           <div className="flex min-w-0 flex-col gap-3 rounded-lg border border-border-subtle bg-surface-card p-4" key={index}>
             <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] w-3/4" />

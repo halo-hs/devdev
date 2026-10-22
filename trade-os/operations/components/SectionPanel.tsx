@@ -1,6 +1,6 @@
 import type { ComponentProps, CSSProperties, ReactNode } from "react";
 
-import { cx } from "@trade-os/operations/components/ui/utils";
+import { cn } from "@/lib/utils";
 
 type PanelSurface = "neutral" | "information" | "warning" | "danger";
 type PanelDensity = "default" | "compact";
@@ -45,7 +45,7 @@ function SectionPanel({
 
   return (
     <section
-      className={cx(
+      className={cn(
         "gap-0 overflow-hidden rounded-lg border p-0 text-ecoya-gray-2 shadow-section",
         surfaceClass[surface],
         className,
@@ -55,7 +55,7 @@ function SectionPanel({
     >
       {(title || description || action) && (
         <header
-          className={cx(
+          className={cn(
             "flex flex-wrap items-center justify-between gap-3 border-b border-ecoya-gray-10",
             density === "compact" ? "min-h-11 px-3.5 py-2.5" : "min-h-12 px-5 py-3",
             headerSurface === "muted" ? "bg-ecoya-gray-11" : "bg-ecoya-gray-12",
