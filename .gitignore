@@ -47,7 +47,8 @@ coverage/
 .cache/
 *.tsbuildinfo
 
-# Local documentation (keep files locally; do not publish)
+# Local documentation and browser tests (keep files locally; do not publish)
 /doc/
 /docs/
+/tests/
 

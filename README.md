@@ -42,7 +42,7 @@ src/          앱 진입·통합 화면·라우팅 연결
 public/       정적 파일(이미지·폰트·운영 아이콘)
 scripts/      운영 CSS 생성·배포 파일 정리
 docs/         설계·화면 설명
-tests/        자동 검사
+tests/        자동 검사(로컬 전용, Git 제외)
 ```
 
 Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run build`로 타입 검사와 프로덕션 빌드를 수행합니다.
