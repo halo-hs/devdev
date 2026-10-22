@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test"
-import type { SubscriptionDisplayStatus } from "../share/settings/page"
+import type { SubscriptionDisplayStatus } from "../share/settings/SettingsRoutePage"
 
 async function openSettings(
   page: Page,

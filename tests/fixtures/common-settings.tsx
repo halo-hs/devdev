@@ -4,7 +4,7 @@ import {
   type ProductEntitlement,
   type SettingsRole,
   type SubscriptionDisplayStatus,
-} from "../../share/settings/page"
+} from "../../share/settings/SettingsRoutePage"
 import type { ImportPermissions } from "../../share/settings/import-permissions"
 import type { EmailLimitsLoader } from "../../share/settings/email-limits-data"
 import { SidebarProvider } from "../../packages/shared-ui/src/components/ui/sidebar"

@@ -8,7 +8,7 @@ import { dealDocumentPreviews, dealDocumentFromReviewUrl, type DealDocumentRecor
 import { appLocation } from "@/app/app-location"
 import { StartGuideProvider, useStartGuide } from "@trade-os/onboarding/runtime"
 import { SettingsDemoProvider, useTradeSeatAssigned } from "@share/settings/subscription-settings"
-import { settingsSectionLabel } from "@share/settings/page"
+import { settingsSectionLabel } from "@share/settings/SettingsRoutePage"
 import { BusinessListToolbar, BusinessFilterSearch, BusinessFilterField } from "@shared/components/business-filters"
 import { FormField, FormFieldHeader } from "@shared/components/form-field"
 import { PageLoadingBoundary } from "@shared/components/page-loading-boundary"
@@ -219,11 +219,11 @@ import {
   DealDetailScreen,
   DealsScreen,
   type GeneratedDealDocumentSummary,
-} from "@trade-os/deals/page"
+} from "@trade-os/deals/DealsListView"
 import {
   HomePrototype as V2HomePrototype,
   type HomePreviewState,
-} from "@trade-os/home/page"
+} from "@trade-os/home/HomeProtectedPage"
 import { ReferenceOperations } from "@trade-os/operations/index"
 import { NotificationsPrototype } from "@share/notifications/page"
 import { notifications, type NotificationDealTarget } from "@share/notifications/data"

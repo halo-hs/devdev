@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test"
-import { counterpartyPreview } from "../trade-os/counterparty-workspace"
+import { counterpartyPreview } from "../trade-os/counterparties/Counterparty360View"
 import { validEmailLimits } from "../share/settings/email-limits-data"
 
 async function settings(

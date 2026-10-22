@@ -6,7 +6,7 @@ import {
   type PendingInvitation,
 } from "../../share/settings/invitation-data"
 import { CounterpartyPrototype } from "../../trade-os/screens"
-import type { CounterpartyAccess } from "../../trade-os/counterparty-workspace"
+import type { CounterpartyAccess } from "../../trade-os/counterparties/Counterparty360View"
 import { TooltipProvider } from "../../packages/shared-ui/src/components/ui/tooltip"
 
 function mount(element: React.ReactNode) {

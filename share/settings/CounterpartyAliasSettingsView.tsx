@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@shared/components/ui/dialog"
-import type { SettingsRole } from "./page"
+import type { SettingsRole } from "./SettingsRoutePage"
 
 type Master = {
   id: string

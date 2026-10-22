@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@shared/components/ui/dialog"
-import type { ProductEntitlement, SettingsRole } from "./page"
+import type { ProductEntitlement, SettingsRole } from "./SettingsRoutePage"
 
 export type SubscriptionPlan = "erp" | "snap" | "bundle" | "separate"
 export type SubscriptionChangeIntent = {

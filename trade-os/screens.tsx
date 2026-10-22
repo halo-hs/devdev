@@ -1,8 +1,8 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shared/components/ui/tabs"
-import { counterpartyPreview, counterpartyPreviewAccess, type CounterpartyAccess } from "@trade-os/counterparty-workspace"
+import { counterpartyPreview, counterpartyPreviewAccess, type CounterpartyAccess } from "@trade-os/counterparties/Counterparty360View"
 import { listDealDocuments } from "@trade-os/lib/deal-document-actions"
 import { orderProgress } from "@trade-os/lib/deal-finance-workspace"
-import { SnapEvidenceWorkspace } from "./components/snap-evidence-workspace"
+import { SnapEvidenceWorkspace } from "./snapevidence/SnapEvidencePanel"
 import {
   shipmentReviewSamples,
 } from "@trade-os/lib/erp-menu-samples"
@@ -88,10 +88,10 @@ import {
   SettingsHubV2,
   type ProductEntitlement,
   type SettingsRole,
-} from "@share/settings/page"
+} from "@share/settings/SettingsRoutePage"
 import type { WorkspaceKey } from "@shared/lib/workspaces"
 import { toast } from "sonner"
-import { AiBusinessTools } from "@trade-os/ask/business-tools"
+import { AiBusinessTools } from "@trade-os/ai/AiBusinessTools"
 import { aiHandoffCopy } from "@trade-os/lib/ai-handoff-copy"
 
 export type ErpMenuTarget =
@@ -288,7 +288,7 @@ function PanelTable({
   )
 }
 
-export { OnboardingPrototype } from "@trade-os/onboarding/page"
+export { OnboardingPrototype } from "@trade-os/onboarding/OnboardingProtectedPage"
 
 const workItems = [
   {

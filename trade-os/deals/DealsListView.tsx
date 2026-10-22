@@ -1588,4 +1588,4 @@ export function DealsScreen({
 export {
   DealDetailScreen,
   type GeneratedDealDocumentSummary,
-} from "./detail"
+} from "./DealDetailConnected"

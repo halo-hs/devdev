@@ -19,7 +19,7 @@ import {
   type CommonProduct,
   type CommonScreenKey,
 } from "@auth/screens"
-import { PublicSharePage } from "@share/public-link/page"
+import { PublicSharePage } from "@share/public/SharedDocumentViewer"
 import { resetSnapSessionAccessCache } from "@snap/lib/snap-route-access"
 
 // Public pages render with the entry bundle to avoid a full-screen loading flash.

@@ -37,7 +37,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@shared/components/ui/dropdown-menu"
-import type { ProductEntitlement, SettingsRole, SubscriptionDisplayStatus } from "./page"
+import type { ProductEntitlement, SettingsRole, SubscriptionDisplayStatus } from "./SettingsRoutePage"
 import { SubscriptionChangePanel, type SubscriptionChangeIntent } from "./subscription-change-panel"
 
 type Member = {

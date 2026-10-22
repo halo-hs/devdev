@@ -7,7 +7,7 @@ import { EmailLimits } from "./email-limits"
 import { emailLimitsPreview, type EmailLimitsLoader } from "./email-limits-data"
 import { resolveImportPermissions, type ImportPermissions } from "./import-permissions"
 import { ApprovalPolicySettings } from "./legacy"
-import { AliasesPage } from "./aliases-page"
+import { AliasesPage } from "./CounterpartyAliasSettingsView"
 import { appLocation } from "@/app/app-location"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import {
