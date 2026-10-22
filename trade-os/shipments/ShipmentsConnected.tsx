@@ -379,7 +379,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
       aria-label="선적 상태 필터"
     >
       <Tabs
-        className="reference-shipment-tabs"
+        className="ops-shipment-tabs"
         value={kind}
         onValueChange={(value) => {
           if (FILTER_KINDS.includes(value as typeof kind))
@@ -411,7 +411,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
     <div className="flex flex-col gap-4" data-component="ShipmentsConnected" data-state="ready">
       {dealId ? <h3 className="text-[length:var(--text-body-6)] leading-[var(--leading-body-6)] font-bold">선적 정보</h3> : renderHeader ? renderHeader(controls) : controls}
       {/* The list page wraps the tabs and every deal group in one card. */}
-      <div className={dealId ? "contents" : "reference-shipment-list-card"}>
+      <div className={dealId ? "contents" : "ops-shipment-list-card"}>
       {!dealId && listControls}
       <div
         id={`${tabsId}-panel`}
@@ -419,7 +419,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
         aria-label={dealId ? "거래 선적 정보" : undefined}
         aria-labelledby={dealId ? undefined : `${tabsId}-${kind}`}
         tabIndex={0}
-        className="reference-shipment-results"
+        className="ops-shipment-results"
       >
       {!canRefresh ? (
         <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">{refreshUnavailableMessage}</p>
@@ -473,8 +473,8 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
         // erp-v2-adapt: end
       ) : (
         groups.map((group) => (
-          <section key={group.key} className="reference-shipment-group" data-deal-id={group.key}>
-            <div className="reference-shipment-group-heading">
+          <section key={group.key} className="ops-shipment-group" data-deal-id={group.key}>
+            <div className="ops-shipment-group-heading">
               <div className="min-w-0">
                 <h2 className="text-[length:var(--text-body-6)] leading-[var(--leading-body-6)] font-bold text-[var(--color-gray-2)]">{group.label}</h2>
                 <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
@@ -487,7 +487,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                 </HostButton>
               ) : null}
             </div>
-            <HostTable className="reference-shipment-table" aria-label={`${group.label} 선적 정보`}>
+            <HostTable className="ops-shipment-table" aria-label={`${group.label} 선적 정보`}>
               <colgroup><col style={{ width: "19%" }} /><col style={{ width: "21%" }} /><col style={{ width: "24%" }} /><col style={{ width: "12%" }} /><col style={{ width: "9%" }} /><col style={{ width: "15%" }} /></colgroup>
               <HostTableHeader><HostTableRow>
                 <HostTableHead>B/L · 컨테이너</HostTableHead>
@@ -526,7 +526,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                       <div className="tabular-nums">{effectiveEtd ? formatDate(effectiveEtd, dateTag) : "—"} / {effectiveEta ? formatDate(effectiveEta, dateTag) : "—"}</div>
                       <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{ship.confirmed_eta || ship.confirmed_etd ? "확정 일정 기준" : copy.source[ship.source]}{dday !== null ? ` · ${ddayLabel(dday)}` : ""}</div>
                       {ship.confirmed_eta || ship.provider_eta || ship.confirmed_etd || ship.provider_etd || ship.confirmed_status_at || ship.confirmed_status_by ? (
-                        <details className="reference-shipment-date-details text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" data-ui="shipment-eta-basis">
+                        <details className="ops-shipment-date-details text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" data-ui="shipment-eta-basis">
                           <summary>일정 근거</summary>
                           {ship.confirmed_etd ? <p>확정 ETD {formatDate(ship.confirmed_etd, dateTag)}</p> : null}
                           {ship.confirmed_eta ? <p>확정 ETA {formatDate(ship.confirmed_eta, dateTag)}</p> : null}

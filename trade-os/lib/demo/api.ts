@@ -113,7 +113,7 @@ const identity = {
 }
 
 export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promise<T> {
-  const url = new URL(rawPath.replace(/^\/(?:__reference3030\/)?api\/(?:platform|v1)/, ''), 'https://demo.invalid')
+  const url = new URL(rawPath.replace(/^\/api\/(?:platform|v1)/, ''), 'https://demo.invalid')
   const path = url.pathname, query = url.searchParams
   const method = (init?.method || 'GET').toUpperCase()
   const exception = demoExceptionResponse(path, method, typeof init?.body === "string" ? init.body : undefined)

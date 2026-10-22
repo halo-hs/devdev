@@ -11,16 +11,16 @@ import { BusinessPageHero } from "@/components/platform/HeroBanner"
 import { messages } from "./lib/i18n/messages"
 import "./OperationsScreens.css"
 
-export type ReferenceOperationsScreen = "monitor" | "reports" | "sales" | "settlement" | "shipments"
+export type OperationsScreenName = "monitor" | "reports" | "sales" | "settlement" | "shipments"
 // The development relay attaches the existing local reference credential on the
 // server. No credential is shipped to or persisted by this browser adapter.
-const getIdToken = async () => "local-reference-session"
+const getIdToken = async () => "demo-session"
 
-function Body({ screen }: { screen: ReferenceOperationsScreen }) {
+function Body({ screen }: { screen: OperationsScreenName }) {
   const identity = useIdentity()
   if (screen === "monitor") {
     const copy = messages.erpMonitor.monitor
-    return <div className="reference-monitor-shell">
+    return <div className="ops-monitor-shell">
       <div className="min-h-0 min-w-0">
         <MonitorConnected
           canAccess={identity.role === "owner"}
@@ -49,8 +49,8 @@ function Body({ screen }: { screen: ReferenceOperationsScreen }) {
       ? messages.erpSalesPerformance.cockpit.subtitleOrg
       : messages.erpSalesPerformance.cockpit.subtitleMember
     : "subtitle" in copy ? copy.subtitle : undefined
-  return <div className="reference-page-scroll">
-    <div className="reference-content-width w-full space-y-4 px-5 pt-1.5 pb-10">
+  return <div className="ops-page-scroll">
+    <div className="ops-content-width w-full space-y-4 px-5 pt-1.5 pb-10">
       {screen === "reports" ? <ReportsConnected copy={messages.erpReports.reports} role={identity.role}
           renderHeader={(controls, summary) => <BusinessPageHero title={<span className="inline-flex items-baseline gap-2.5">{copy.title}<span className="rounded-full bg-[var(--color-primary-9)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-bold text-[var(--color-indigo)]">{messages.erpReports.reports.proBadge}</span></span>} description={description}
             controls={controls} summary={summary} />} />
@@ -65,7 +65,7 @@ function Body({ screen }: { screen: ReferenceOperationsScreen }) {
   </div>
 }
 
-export function ReferenceOperations({ screen, dealId, onShipmentSummary }: { screen: ReferenceOperationsScreen | "deal-shipments"; dealId?: string; onShipmentSummary?: (summary: ShipmentSummary) => void }) {
+export function OperationsScreen({ screen, dealId, onShipmentSummary }: { screen: OperationsScreenName | "deal-shipments"; dealId?: string; onShipmentSummary?: (summary: ShipmentSummary) => void }) {
   const [session, setSession] = useState<{ identity: PlatformIdentityResponse; entitlements: EntitlementsResponse } | null>(null)
   const [error, setError] = useState("")
   const [attempt, setAttempt] = useState(0)
@@ -81,7 +81,7 @@ export function ReferenceOperations({ screen, dealId, onShipmentSummary }: { scr
       .catch((e: unknown) => { if (active) setError(e instanceof Error ? e.message : "3030 연결을 확인해 주세요.") })
     return () => { active = false }
   }, [attempt])
-  return <div className="reference-host" style={{ minHeight: 0, minWidth: 0 }}><div className="reference-3030" data-reference-screen={screen} style={{ minHeight: 0, minWidth: 0 }}>
+  return <div className="ops-host" style={{ minHeight: 0, minWidth: 0 }}><div className="ops-screen" data-ops-screen={screen} style={{ minHeight: 0, minWidth: 0 }}>
     {error ? <div role="alert" className="m-6 rounded-lg border p-6">
       <p>화면 데이터를 불러오지 못했습니다.</p><p>{error}</p>
       <button className="mt-3 underline" onClick={() => setAttempt(n => n + 1)}>다시 시도</button>

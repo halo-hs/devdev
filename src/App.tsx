@@ -30,7 +30,7 @@ import {
   HomePrototype as V2HomePrototype,
   type HomePreviewState,
 } from "@trade-os/home/HomeProtectedPage"
-import { ReferenceOperations } from "@trade-os/OperationsScreens"
+import { OperationsScreen } from "@trade-os/OperationsScreens"
 import { NotificationsPrototype } from "@share/notifications/page"
 import { notifications, type NotificationDealTarget } from "@share/notifications/data"
 import { BillingPrototype, CounterpartyPrototype, OnboardingPrototype, SettingsPrototype, SnapEvidencePrototype, TokenUsagePrototype, type ErpMenuTarget } from "@trade-os/ErpScreens"
@@ -1196,15 +1196,15 @@ export function App() {
                       workspaceActionsTarget={dealHeaderActionsTarget}
                     />
                   ) : screen === "shipments" ? (
-                    <ReferenceOperations screen="shipments" />
+                    <OperationsScreen screen="shipments" />
                   ) : screen === "settlement" ? (
-                    <ReferenceOperations screen="settlement" />
+                    <OperationsScreen screen="settlement" />
                   ) : screen === "monitoring" ? (
-                    <ReferenceOperations screen="monitor" />
+                    <OperationsScreen screen="monitor" />
                   ) : screen === "reports" ? (
-                    <ReferenceOperations screen="reports" />
+                    <OperationsScreen screen="reports" />
                   ) : screen === "sales" ? (
-                    <ReferenceOperations screen="sales" />
+                    <OperationsScreen screen="sales" />
                   ) : screen === "contacts" ? (
                     // SSOT SC-27: its own screen with its own contact search;
                     // it does not inherit the deals list filters.

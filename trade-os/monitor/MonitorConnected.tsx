@@ -720,7 +720,7 @@ export function MonitorConnected({
       {/* §7.8 Exception Center: every active risk across deals in one triage
           list. Self-contained (self-fetches /trade/exceptions). */}
       {/* Same 20px page gutter as MonitorBody. */}
-      <div className="reference-content-width w-full px-5 pb-6">
+      <div className="ops-content-width w-full px-5 pb-6">
         <ExceptionCenter />
       </div>
     </div>

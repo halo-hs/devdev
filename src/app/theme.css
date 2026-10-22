@@ -554,8 +554,7 @@
 
 /* ---- 2) 히어로 필터 토큰 ---- */
 /* Shared with the transaction list's BusinessPageHero. */
-.business-hero-controls,
-.reference-hero-filters {
+.business-hero-controls {
   --control-background: rgba(255, 255, 255, 0.12);
   --control-background-hover: rgba(255, 255, 255, 0.16);
   --control-background-active: rgba(255, 255, 255, 0.2);
@@ -572,13 +571,13 @@
 
 /* The shared Select wrapper pins its chevron to Gray 2; on the hero it follows
    the light accessory color like the date picker icon. */
-:is(.business-hero-controls, .reference-hero-filters) [data-slot="select-trigger"] > svg {
+.business-hero-controls [data-slot="select-trigger"] > svg {
   color: var(--control-accessory-foreground);
 }
 
 /* One focus line on the hero: the ring replaces the translucent border instead
    of drawing a second line outside it. */
-:is(.business-hero-controls, .reference-hero-filters)
+.business-hero-controls
   :is([data-slot="select-trigger"], [data-slot="popover-trigger"]):is(:focus-visible, [aria-expanded="true"]) {
   border-color: var(--hero-filter-focus-ring) !important;
   box-shadow: 0 0 0 1px var(--hero-filter-focus-ring) !important;
@@ -877,7 +876,7 @@
 [data-slot="command-item"][data-selected="true"] { color: var(--accent-foreground); }
 
 /* DatePicker (153:992): value at 17/24 like Input (hero filters keep their own size). */
-:not(:is(.business-hero-controls, .reference-hero-filters) *) > [data-slot="date-picker"] > button[aria-haspopup="dialog"] {
+:not(.business-hero-controls *) > [data-slot="date-picker"] > button[aria-haspopup="dialog"] {
   font-size: var(--text-body-6);
   line-height: var(--leading-body-6);
 }

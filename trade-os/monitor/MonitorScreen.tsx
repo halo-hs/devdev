@@ -817,7 +817,7 @@ function MonitorBody({
   const copy = useMemo(() => ({ ...DEFAULT_MONITOR_BODY_COPY, ...copyOverride }), [copyOverride]);
   const titleBar = useMemo(
     () => (
-      <div className="reference-content-width w-full px-5 pt-1.5">
+      <div className="ops-content-width w-full px-5 pt-1.5">
       <BusinessPageHero
         actions={<MonitorActions actions={actions} variant={variant} copy={copy} live={Boolean(live)} />}
         title={ops ? copy.titleOps : copy.titleDefault}

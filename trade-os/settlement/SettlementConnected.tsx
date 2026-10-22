@@ -3047,9 +3047,9 @@ function SettlementView({
             ))}
           </TabsList>
           <OperationalTableFrame className="mt-3" label={`${copy.calendar.title} · ${copy.ledger.tabs[calendarDirection]}`}>
-            <HostTable className="reference-settlement-bucket-table text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums" data-bucket-table="forecast">
+            <HostTable className="ops-settlement-bucket-table text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums" data-bucket-table="forecast">
               <colgroup>
-                <col className="reference-settlement-bucket-label" />
+                <col className="ops-settlement-bucket-label" />
                 <col span={SETTLEMENT_BUCKETS.length} />
               </colgroup>
               <HostTableHeader>
@@ -3135,9 +3135,9 @@ function SettlementView({
                         key={currency}
                         label={`${copy.cashCalendar.title} · ${currency}`}
                       >
-                        <HostTable className="reference-settlement-bucket-table text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums" data-bucket-table="cash">
+                        <HostTable className="ops-settlement-bucket-table text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums" data-bucket-table="cash">
                   <colgroup>
-                    <col className="reference-settlement-bucket-label" />
+                    <col className="ops-settlement-bucket-label" />
                     <col span={CASH_CALENDAR_BUCKETS.length} />
                   </colgroup>
                           <HostTableHeader>
@@ -3238,9 +3238,9 @@ function SettlementView({
                 key={currency}
                 label={`${copy.aging.title} · ${currency}`}
               >
-                <HostTable className="reference-settlement-bucket-table text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums" data-bucket-table="aging">
+                <HostTable className="ops-settlement-bucket-table text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums" data-bucket-table="aging">
                   <colgroup>
-                    <col className="reference-settlement-bucket-label" />
+                    <col className="ops-settlement-bucket-label" />
                     <col span={AGING_BUCKETS.length} />
                   </colgroup>
                   <HostTableHeader>
