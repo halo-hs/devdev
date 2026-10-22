@@ -11,9 +11,9 @@ import {
   Upload,
 } from "lucide-react"
 
-import { useReducedMotion } from "@shared/lib/useReducedMotion"
+import { useReducedMotion } from "@/lib/useReducedMotion"
 import { TradeLottie } from "@landing/shared/trade-lottie"
-import ocrAnimation from "@ecoya/design-system/assets/lottie/ocr-document.json?url"
+import ocrAnimation from "@/components/ds2/assets/lottie/ocr-document.json?url"
 
 import { tradeFunctions } from "@landing/trade-os/content"
 import { useT } from "../shared/locale"

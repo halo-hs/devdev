@@ -1,6 +1,6 @@
 import { PageHeading, SettingsSection } from "@share/settings/views/SettingsSection"
 import { Upload } from "lucide-react"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/button"
 
 export function ImportPage({ kind }: { kind: "counterparty" | "deal" }) {
   const title = kind === "counterparty" ? "거래처 일괄 등록" : "거래 일괄 등록"

@@ -1,7 +1,7 @@
 "use client";
 
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
-import { BusinessListToolbar, BusinessFilterField } from "@shared/components/SearchFilterBar";
+import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/SearchFilterBar";
 
 import Link from "@trade-os/operations/compat/link";
 import { useMessages } from "@trade-os/operations/compat/intl";
@@ -10,9 +10,9 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState, Fragment
 
 import { InfoBox } from "@trade-os/operations/components/InfoBox";
 import { RefreshCw } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@shared/components/ui/tabs";
-import { Checkbox } from "@shared/components/ui/checkbox";
-import { DateInput } from "@shared/components/DateInput";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DateInput } from "@/components/ds2/atom/DateInput";
 import { LoadableSection, type LoadableSectionCopy } from "@trade-os/operations/components/LoadableSection";
 import { OperationalTableFrame } from "@trade-os/operations/components/OperationalTableFrame";
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";

@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import { DateInput } from "@shared/components/DateInput"
+import { DateInput } from "@/components/ds2/atom/DateInput"
 import {
   AlertCircle,
   Building2,
@@ -20,15 +20,15 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@shared/components/ui/badge"
-import { Button } from "@shared/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@shared/components/ui/card"
+} from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -36,17 +36,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@shared/components/ui/dialog"
-import { Input } from "@shared/components/ui/input"
-import { Progress } from "@shared/components/ui/progress"
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Progress } from "@/components/ui/progress"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@shared/components/ui/select"
-import { Skeleton } from "@shared/components/ui/skeleton"
+} from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -54,8 +54,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shared/components/ui/table"
-import { Textarea } from "@shared/components/ui/textarea"
+} from "@/components/ui/table"
+import { Textarea } from "@/components/ui/textarea"
 import type { SnapScreenKey } from "@snap/SnapScreens"
 import type { SnapNavigationOptions } from "@snap/operations/SnapOperationsPages"
 import { snapApi, type SnapPage } from "@snap/lib/snapApi"
@@ -64,7 +64,7 @@ import {
   snapApiErrorMessage,
   type SnapJsonRecord,
 } from "@snap/lib/snapReportApi"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 
 type PlatformNavigate = (
   screen: SnapScreenKey,

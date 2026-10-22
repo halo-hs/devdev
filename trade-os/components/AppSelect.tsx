@@ -1,5 +1,5 @@
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@shared/components/ui/select"
-import { cn } from "@shared/lib/utils"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { cn } from "@/lib/utils"
 
 export function AppSelect({
   value,

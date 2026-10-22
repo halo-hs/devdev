@@ -1,6 +1,6 @@
 import { Children, useRef, useState, type ReactNode } from "react"
 import { ArrowLeft, ArrowRight, Check } from "lucide-react"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { useT } from "./locale"
 
 /* Product-led composition based on the selected Glide reference.

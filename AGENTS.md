@@ -11,8 +11,8 @@
 | Trade OS 업무 | `trade-os/` | `/erp/*` 업무 화면과 로직 |
 | SNAP 업무 | `snap/` | 현장 업무 화면과 로직 |
 | 공통 업무·공개 링크 | `share/` | 업무 홈 모듈, 설정, 알림, 고객 공유 링크 |
-| 공통 UI | `packages/shared-ui/`, `packages/ecoya-ui/` | 여러 영역이 소비하는 컴포넌트·훅·유틸리티 |
-| 디자인 시스템 | `packages/design-system-2.0/` | 공통 토큰·브랜드 자산 |
+| 공통 UI | `src/components/ui/`, `src/components/platform/`, `src/lib/`, `src/hooks/` | 여러 영역이 소비하는 컴포넌트·훅·유틸리티 |
+| 디자인 시스템 | `src/components/ds2/`, `src/app/tokens-ds2.css`, `src/app/theme.css` | 기본 컴포넌트·공통 토큰·브랜드 자산 |
 | 앱 연결 | `src/` | 진입점, 라우팅, 전역 스타일 |
 
 ## 한 페이지 요청은 해당 페이지에 한정
@@ -48,13 +48,13 @@ Figma(SNAP 2.0 작업)를 코드에 반영할 때 지키는 기준입니다. Fig
 - 운영·성과 화면은 위 `TRADE:OD-047` 기준을 따릅니다.
 
 **컴포넌트 적용**
-- shadcn 기본 컴포넌트는 `packages/shared-ui/src/components/ui/`의 래퍼를 최대한 씁니다. 화면에서 같은 모양을 손으로 다시 그리지 않습니다.
-- shadcn에 없는 Figma 조합 컴포넌트(KPI 카드, 순위 행 등)는 `packages/shared-ui/src/components/`에 공용 컴포넌트로 만들되, 안쪽은 shadcn 기본 컴포넌트(Card·Separator·Progress·Badge·Button 등)로 조립합니다.
-- `packages/design-system-2.0/`은 수정하지 않습니다. DS 확장 컴포넌트를 통째로 복사한 래퍼도 만들지 않습니다.
+- shadcn 기본 컴포넌트는 `src/components/ui/`의 래퍼를 최대한 씁니다. 화면에서 같은 모양을 손으로 다시 그리지 않습니다.
+- shadcn에 없는 Figma 조합 컴포넌트(KPI 카드, 순위 행 등)는 `src/components/ds2/molecule/`(디자인 시스템 대응) 또는 `src/components/platform/`(업무 공통)에 공용 컴포넌트로 만들되, 안쪽은 shadcn 기본 컴포넌트(Card·Separator·Progress·Badge·Button 등)로 조립합니다.
+- 디자인 시스템 기본 부품 `src/components/ds2/`(ui·extensions·assets)와 기본 토큰 `src/app/tokens-ds2.css`는 수정하지 않습니다. DS 확장 컴포넌트를 통째로 복사한 래퍼도 만들지 않습니다.
 - 다른 작업자가 같은 이름의 컴포넌트를 만들고 있는지 먼저 확인하고 겹치지 않게 합니다.
 
 **토큰과 크기**
-- 새 토큰 이름을 만들지 않습니다. 기존 토큰 값만 `packages/shared-ui/src/styles/figma-prototype-tokens.css`에서 덮어씁니다.
+- 새 토큰 이름을 만들지 않습니다. 기존 토큰 값만 `src/app/theme.css`에서 덮어씁니다.
 - 색 대응: Figma Gray N → `--color-gray-(N+1)`, Blue N → `--color-primary-N`, Indigo 1 → `--primary`.
 - 글자 크기 단계는 Figma 그대로입니다: 캡션 11, 보조 13, 본문 15, 입력값 17, 제목 16·18·20. 전체 글자 크기를 일괄로 올리거나 내리지 않고, 역할별로 Figma 값에 맞춥니다.
 - Figma 시안과 화면에서 같은 부분을 실측해 대조한 뒤 반영합니다.

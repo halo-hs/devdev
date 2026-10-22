@@ -38,9 +38,6 @@
       "@snap/*": [
         "./snap/*"
       ],
-      "@shared/*": [
-        "./packages/shared-ui/src/*"
-      ],
       "@share/*": [
         "./share/*"
       ]
@@ -52,8 +49,6 @@
     "auth",
     "trade-os",
     "snap",
-    "packages/shared-ui/src",
-    "packages/design-system-2.0/src/types",
     "share"
   ]
 }

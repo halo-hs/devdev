@@ -5,10 +5,10 @@ import { useRef, useState, useEffect } from "react";
 
 import type { HTMLAttributes, LabelHTMLAttributes } from "react";
 import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shared/components/ui/select";
-import { Button } from "@shared/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@shared/components/ui/dialog";
-import { DateInput } from "@shared/components/DateInput";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DateInput } from "@/components/ds2/atom/DateInput";
 import { ApiError } from "../lib/api/client";
 import { effectiveShipmentEta, effectiveShipmentEtd, type Shipment, type ShipmentConfirmation, type ShipmentStatus } from "../lib/api/shipments";
 

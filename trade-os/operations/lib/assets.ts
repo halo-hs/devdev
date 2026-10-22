@@ -7,7 +7,7 @@ function withExtension(fileName: string, extension: string) {
 // Icons the design system already ships are served from there; the rest
 // stay in public/assets/operations/icons. Same files, one copy each.
 const designSystemIcons = import.meta.glob<string>(
-  "../../../packages/design-system-2.0/src/assets/icons/*.svg",
+  "../../../src/components/ds2/assets/icons/*.svg",
   { eager: true, query: "?url", import: "default" }
 );
 const iconAliases: Record<string, string> = {
@@ -17,7 +17,7 @@ const iconAliases: Record<string, string> = {
 
 export function ecoyaIcon(fileName: string) {
   const name = withExtension(fileName, svgExtension);
-  const shipped = designSystemIcons[`../../../packages/design-system-2.0/src/assets/icons/${iconAliases[name] ?? name}`];
+  const shipped = designSystemIcons[`../../../src/components/ds2/assets/icons/${iconAliases[name] ?? name}`];
   return shipped ?? `/assets/operations/icons/${name}`;
 }
 

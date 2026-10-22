@@ -3,7 +3,7 @@ import { dealDocumentFromReviewUrl } from "@trade-os/lib/dealDocumentActions"
 import { appLocation } from "@/app/appLocation"
 import { StartGuideProvider } from "@trade-os/onboarding/StartGuideProvider"
 import { SettingsDemoProvider } from "@share/settings/SubscriptionSettings"
-import { PageLoadingBoundary } from "@shared/components/RouteLoading"
+import { PageLoadingBoundary } from "@/components/platform/RouteLoading"
 import { type DeliveryAttachment } from "@trade-os/documents/DeliveryAttachmentPicker"
 import { type ReviewedField } from "@trade-os/lib/erpDocumentWorkflow"
 import {
@@ -14,13 +14,13 @@ import {
 } from "react"
 
 import { type GeneratedDocumentMetadata } from "@trade-os/lib/generatedDocumentMetadata"
-import { PageFrame } from "@shared/components/PageFrame"
+import { PageFrame } from "@/components/platform/PageFrame"
 import { SalesPrototype } from "@trade-os/sales/SalesPipelineView"
-import { workspaceOptions, type WorkspaceKey } from "@shared/lib/workspaces"
+import { workspaceOptions, type WorkspaceKey } from "@/lib/workspaces"
 import {
   SidebarInset,
   SidebarProvider,
-} from "@shared/components/ui/sidebar"
+} from "@/components/ui/sidebar"
 import {
   DealDetailScreen,
   DealsScreen,
@@ -57,7 +57,7 @@ import {
   type ErpRouteMatch,
   type ErpRouteScreen,
 } from "@trade-os/lib/erpRoutes"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import { toast } from "sonner"
 import { type Tone, templateSchemas } from "@trade-os/documents/documentTemplateModel"

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { Card, CardContent } from "@shared/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 
 export function PageHeading({
   title,

@@ -3,7 +3,7 @@
 import { counterpartyDisplayState } from "./counterpartyDisplayState";
 import { StatusBadge } from "@trade-os/operations/components/StatusBadge";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
-import { BusinessListToolbar, BusinessFilterField } from "@shared/components/SearchFilterBar";
+import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/SearchFilterBar";
 import { Search } from "lucide-react";
 
 import { useLocale } from "@trade-os/operations/compat/intl";

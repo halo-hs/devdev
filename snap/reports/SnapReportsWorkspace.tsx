@@ -35,19 +35,19 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@shared/components/ui/alert-dialog"
-import { Badge } from "@shared/components/ui/badge"
-import { Button } from "@shared/components/ui/button"
-import { Input } from "@shared/components/ui/input"
-import { SubmittedSearchInput } from "@shared/components/ui/submitted-search-input"
+} from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { SubmittedSearchInput } from "@/components/ui/submitted-search-input"
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@shared/components/ui/sheet"
-import { Skeleton } from "@shared/components/ui/skeleton"
+} from "@/components/ui/sheet"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -55,9 +55,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shared/components/ui/table"
-import { Tabs, TabsList, TabsTrigger } from "@shared/components/ui/tabs"
-import { Textarea } from "@shared/components/ui/textarea"
+} from "@/components/ui/table"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import type { SnapNavigationOptions } from "@snap/operations/SnapOperationsPages"
 import type { SnapScreenKey } from "@snap/SnapScreens"
 import { snapApi, type SnapPage } from "@snap/lib/snapApi"
@@ -68,7 +68,7 @@ import {
   type PreSendCheck,
   type SnapJsonRecord,
 } from "@snap/lib/snapReportApi"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 
 type SnapNavigate = (
   screen: SnapScreenKey,

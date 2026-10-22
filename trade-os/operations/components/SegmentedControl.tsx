@@ -1,1 +1,1 @@
-export { BusinessFilterSegments as Segmented } from "@shared/components/SearchFilterBar";
+export { BusinessFilterSegments as Segmented } from "@/components/platform/SearchFilterBar";

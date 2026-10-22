@@ -1,10 +1,10 @@
-import { Tooltip, TooltipTrigger, TooltipContent } from "@shared/components/ui/tooltip"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { DealRefreshContext, useDealRefresh, useDealRefreshController } from "@trade-os/deals/useDealRefresh"
 import { PostWriteRefreshNotice } from "@trade-os/components/PostWriteRefreshNotice"
 import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, type DealDocumentRecord } from "@trade-os/lib/dealDocumentActions"
 import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
 import { ReferenceOperations } from "@trade-os/operations"
-import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@shared/components/FormItem"
+import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@/components/ds2/molecule/FormItem"
 import {
   getDealWorkPlan,
   readStartedWork,
@@ -57,20 +57,20 @@ import {
 import {
   PdfFloatingControls,
   PdfViewerToolbar,
-} from "@shared/components/PageNavigator"
+} from "@/components/ds2/molecule/PageNavigator"
 import {
   PdfPanelWorkspaceCard,
   ResponsivePdfPanelSplit,
-} from "@shared/components/PdfPanelResizeHandle"
-import { PannablePdfViewport } from "@shared/components/DocumentViewerStage"
-import { AutoSaveStatus } from "@shared/components/AutoSaveStatus"
+} from "@/components/platform/PdfPanelResizeHandle"
+import { PannablePdfViewport } from "@/components/ds2/molecule/DocumentViewerStage"
+import { AutoSaveStatus } from "@/components/platform/AutoSaveStatus"
 import {
   DocumentTemplateOptions,
   type DocumentTemplateOption,
 } from "@trade-os/components/DocumentTemplateOptions"
-import { Badge } from "@shared/components/ui/badge"
-import { Button } from "@shared/components/ui/button"
-import { Card } from "@shared/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -80,7 +80,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@shared/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -88,39 +88,39 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@shared/components/ui/dropdown-menu"
-import { Input } from "@shared/components/ui/input"
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@shared/components/ui/popover"
+} from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@shared/components/ui/select"
-import { Separator } from "@shared/components/ui/separator"
+} from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@shared/components/ui/dialog"
+} from "@/components/ui/dialog"
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from "@shared/components/ui/sheet"
-import { Textarea } from "@shared/components/ui/textarea"
-import { cn } from "@shared/lib/utils"
-import { StatusBadge } from "@shared/components/StatusBadge"
-import { DateInput } from "@shared/components/DateInput"
+} from "@/components/ui/sheet"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
+import { StatusBadge } from "@/components/ds2/molecule/StatusBadge"
+import { DateInput } from "@/components/ds2/atom/DateInput"
 import { prototypeBackend, type MutationResult } from "@trade-os/lib/prototypeBackend"
 import {
   DealHandoffProvider,

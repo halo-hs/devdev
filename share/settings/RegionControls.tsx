@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   Combobox,
   ComboboxContent,
@@ -8,7 +8,7 @@ import {
   ComboboxItem,
   ComboboxList,
   ComboboxTrigger,
-} from "@shared/components/ui/combobox"
+} from "@/components/ui/combobox"
 
 type Option = { value: string; label: string; search?: string }
 

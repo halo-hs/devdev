@@ -17,8 +17,8 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@shared/components/ui/badge"
-import { Button } from "@shared/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -26,18 +26,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@shared/components/ui/dialog"
-import { Input } from "@shared/components/ui/input"
-import { SubmittedSearchInput } from "@shared/components/ui/submitted-search-input"
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { SubmittedSearchInput } from "@/components/ui/submitted-search-input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@shared/components/ui/select"
-import { Skeleton } from "@shared/components/ui/skeleton"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@shared/components/ui/tabs"
+} from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { snapApi } from "@snap/lib/snapApi"
 import {
   SnapApiError,
@@ -45,7 +45,7 @@ import {
   snapApiErrorMessage,
   type SnapJsonRecord,
 } from "@snap/lib/snapReportApi"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 
 const FOLDER_TYPES = [
   "customer",

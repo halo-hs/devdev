@@ -1,5 +1,5 @@
 "use client";
-import { BusinessListToolbar, BusinessFilterSearch } from "@shared/components/SearchFilterBar";
+import { BusinessListToolbar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar";
 
 import { RefreshCw, Pencil } from "lucide-react";
 import { ShipmentConfirmationDialog } from "./ShipmentConfirmationDialog";
@@ -8,9 +8,9 @@ import { carrierTrackingAction } from "./carrierSites";
 import Link from "@trade-os/operations/compat/link";
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { Button as HostButton } from "@shared/components/ui/button";
+import { Button as HostButton } from "@/components/ui/button";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/operations/components/HostTable";
-import { Tabs, TabsList, TabsTrigger } from "@shared/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SkeletonTable } from "@trade-os/operations/components/Skeletons";
 import { StatusBadge, type StatusTone } from "@trade-os/operations/components/StatusBadge";
 import { Button } from "@trade-os/operations/components/ui/button";

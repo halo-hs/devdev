@@ -33,19 +33,19 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@shared/components/ui/badge"
-import { Button } from "@shared/components/ui/button"
-import { Card } from "@shared/components/ui/card"
-import { Input } from "@shared/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@shared/components/ui/select"
-import { Skeleton } from "@shared/components/ui/skeleton"
-import { SubmittedSearchInput } from "@shared/components/ui/submitted-search-input"
+} from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
+import { SubmittedSearchInput } from "@/components/ui/submitted-search-input"
 import {
   Sheet,
   SheetContent,
@@ -53,7 +53,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@shared/components/ui/sheet"
+} from "@/components/ui/sheet"
 import {
   Table,
   TableBody,
@@ -61,21 +61,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shared/components/ui/table"
-import { TablePagination } from "@shared/components/ui/table-pagination"
-import { Textarea } from "@shared/components/ui/textarea"
+} from "@/components/ui/table"
+import { TablePagination } from "@/components/ui/table-pagination"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@shared/components/ui/tooltip"
+} from "@/components/ui/tooltip"
 import { snapApi, type SnapPage } from "@snap/lib/snapApi"
 import {
   snapApiConfigured,
   snapApiErrorMessage,
   type SnapJsonRecord,
 } from "@snap/lib/snapReportApi"
-import { cn } from "@shared/lib/utils"
+import { cn } from "@/lib/utils"
 import type { SnapScreenKey } from "@snap/SnapScreens"
 
 export type SnapNavigationOptions = {

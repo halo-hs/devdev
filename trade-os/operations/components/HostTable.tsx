@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react"
-import { cn } from "@shared/lib/utils"
-import { Table, TableHead, TableCell } from "@shared/components/ui/table"
-export { TableHeader as HostTableHeader, TableBody as HostTableBody, TableRow as HostTableRow, TableFooter as HostTableFooter, TableCaption as HostTableCaption } from "@shared/components/ui/table"
+import { cn } from "@/lib/utils"
+import { Table, TableHead, TableCell } from "@/components/ui/table"
+export { TableHeader as HostTableHeader, TableBody as HostTableBody, TableRow as HostTableRow, TableFooter as HostTableFooter, TableCaption as HostTableCaption } from "@/components/ui/table"
 
 // Preserve columns, query state and semantic status colors while using the
 // same table anatomy and density as the host transaction/document lists.

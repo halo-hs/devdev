@@ -1,7 +1,7 @@
 import { appLocation } from "@/app/appLocation"
 import { useEffect, useState, type ReactNode } from "react"
 import { ArrowRight, Building2, MapPin } from "lucide-react"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { CommonPublicLayout } from "@auth/AuthCommonShell"
 import {
   Card,
@@ -9,7 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@shared/components/ui/card"
+} from "@/components/ui/card"
 import { type CommonProduct, type CommonScreenKey } from "@auth/AuthSurface"
 import { CommonTermsPrototype, CommonPrivacyPrototype } from "@auth/LegalDocumentView"
 import { CommonPasswordRecoveryPrototype } from "@auth/PasswordResetPanel"

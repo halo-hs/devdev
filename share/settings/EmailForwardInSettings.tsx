@@ -2,7 +2,7 @@ import { type EmailLimitsLoader } from "@share/settings/emailLimitsData"
 import { useState } from "react"
 import { PageHeading, SettingsSection } from "@share/settings/views/SettingsSection"
 import { SettingRow } from "@share/settings/views/SettingRow"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Copy } from "lucide-react"
 import { EmailLimits } from "@share/settings/EmailLimits"
 

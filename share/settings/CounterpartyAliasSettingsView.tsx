@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shared/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Button } from "@shared/components/ui/button"
-import { Badge } from "@shared/components/ui/badge"
-import { Input } from "@shared/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@shared/components/ui/dialog"
+} from "@/components/ui/dialog"
 import type { SettingsRole } from "./SettingsRoutePage"
 
 type Master = {

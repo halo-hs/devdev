@@ -1,5 +1,5 @@
 import { WithdrawalResultSurface } from "./AccountWithdrawalPanel"
-import { NavigationIcon } from "@shared/components/NavigationIcon"
+import { NavigationIcon } from "@/components/platform/NavigationIcon"
 import { createWithdrawalPreview, withdrawalScenario, type WithdrawalGateway, type WithdrawalResult } from "./withdrawalData"
 import { PageHeading, SettingsSection } from "./views/SettingsSection"
 import { emailLimitsPreview, type EmailLimitsLoader } from "./emailLimitsData"
@@ -28,9 +28,9 @@ import {
   ExternalLink,
 } from "lucide-react"
 
-import { WorkspaceSwitcher } from "@shared/components/WorkspaceSwitcher"
-import { Button } from "@shared/components/ui/button"
-import { Input } from "@shared/components/ui/input"
+import { WorkspaceSwitcher } from "@/components/ds2/molecule/WorkspaceSwitcher"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Sidebar,
   SidebarContent,
@@ -43,13 +43,13 @@ import {
   SidebarMenuItem,
   SidebarRail,
   useSidebar,
-} from "@shared/components/ui/sidebar"
+} from "@/components/ui/sidebar"
 import { SettingsDemoProvider } from "./SubscriptionSettings"
 import { useSettingsDemoPresent } from "@share/settings/useSettingsDemo"
 import { ProductsSubscriptions } from "@share/settings/BillingSettingsView"
 import { OrganizationMembers } from "@share/settings/MemberRosterSettings"
 import { OrganizationAiUsage } from "./TokenUsageSettingsView"
-import { workspaceOptions, type WorkspaceKey } from "@shared/lib/workspaces"
+import { workspaceOptions, type WorkspaceKey } from "@/lib/workspaces"
 import { SettingRow } from "@share/settings/views/SettingRow"
 import { AccountPage } from "@share/settings/AccountGeneralSettings"
 import { OrganizationPage } from "@share/settings/OrganizationProfilePanel"

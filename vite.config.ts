@@ -23,7 +23,6 @@ export default defineConfig(({ command }) => {
       "@trade-os": path.resolve(__dirname, "./trade-os"),
       "@snap": path.resolve(__dirname, "./snap"),
       "@share": path.resolve(__dirname, "./share"),
-      "@shared": path.resolve(__dirname, "./packages/shared-ui/src"),
       "@": path.resolve(__dirname, "./src"),
     },
   },

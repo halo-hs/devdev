@@ -7,7 +7,7 @@ import {
   Pause,
   Play,
 } from "lucide-react"
-import { useReducedMotion } from "@shared/lib/useReducedMotion"
+import { useReducedMotion } from "@/lib/useReducedMotion"
 import { useSnapPreviewPlayback } from "@landing/snap/use-preview-playback"
 import { useT } from "../shared/locale"
 import { moreSnapUses, snapUseCases } from "./content"

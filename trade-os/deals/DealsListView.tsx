@@ -1,5 +1,5 @@
-import { BusinessFilterBar, BusinessListToolbar, BusinessFilterSearch, BusinessFilterSelect } from "@shared/components/SearchFilterBar"
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@shared/components/ui/empty"
+import { BusinessFilterBar, BusinessListToolbar, BusinessFilterSearch, BusinessFilterSelect } from "@/components/platform/SearchFilterBar"
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import {
   getDealWorkPlan,
   workLabels,
@@ -32,7 +32,7 @@ import {
   X,
 } from "lucide-react"
 
-import { TablePagination } from "@shared/components/ui/table-pagination"
+import { TablePagination } from "@/components/ui/table-pagination"
 
 import {
   AlertDialog,
@@ -43,23 +43,23 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@shared/components/ui/alert-dialog"
-import { Button } from "@shared/components/ui/button"
-import { BusinessPageHero } from "@shared/components/HeroBanner"
-import { SummaryMetricStrip } from "@shared/components/SummaryMetricStrip"
+} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
+import { BusinessPageHero } from "@/components/ds2/molecule/HeroBanner"
+import { SummaryMetricStrip } from "@/components/platform/SummaryMetricStrip"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@shared/components/ui/dropdown-menu"
-import { Input } from "@shared/components/ui/input"
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@shared/components/ui/popover"
-import { Card, CardContent } from "@shared/components/ui/card"
+} from "@/components/ui/popover"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -67,11 +67,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shared/components/ui/table"
-import { Tabs, TabsList, TabsTrigger } from "@shared/components/ui/tabs"
-import { cn } from "@shared/lib/utils"
-import { StatusBadge } from "@shared/components/StatusBadge"
-import { DatePicker } from "@ecoya/design-system/extensions/date-picker"
+} from "@/components/ui/table"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { cn } from "@/lib/utils"
+import { StatusBadge } from "@/components/ds2/molecule/StatusBadge"
+import { DatePicker } from "@/components/ds2/extensions/date-picker"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 
 import {

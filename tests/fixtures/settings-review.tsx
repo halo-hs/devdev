@@ -7,7 +7,7 @@ import {
 } from "../../share/settings/invitationData"
 import { CounterpartyPrototype } from "../../trade-os/ErpScreens"
 import type { CounterpartyAccess } from "../../trade-os/counterparties/Counterparty360View"
-import { TooltipProvider } from "../../packages/shared-ui/src/components/ui/tooltip"
+import { TooltipProvider } from "../../src/components/ui/tooltip"
 
 function mount(element: React.ReactNode) {
   document.getElementById("root")?.remove()

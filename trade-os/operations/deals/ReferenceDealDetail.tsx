@@ -1,6 +1,6 @@
 import { subscribeShipmentUpdates } from "../lib/shipmentUpdates"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { PageHeader } from "../components/PageHeader"
 import { SectionCard } from "../components/SectionCard"
 import { usePlatformSession } from "../session/PlatformSessionContext"

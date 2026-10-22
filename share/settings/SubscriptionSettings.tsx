@@ -1,6 +1,6 @@
 import { invitationExamples } from "./invitationData"
 import { useState, type ReactNode } from "react"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/button"
 import type { ProductEntitlement, SettingsRole } from "./SettingsRoutePage"
 import { SettingsDemoContext, useSettingsDemo, names } from "@share/settings/useSettingsDemo"
 

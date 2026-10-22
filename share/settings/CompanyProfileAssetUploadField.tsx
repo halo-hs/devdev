@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react"
 import { ImagePlus, Upload, X } from "lucide-react"
-import { Button } from "@shared/components/ui/button"
+import { Button } from "@/components/ui/button"
 
 type LogoPreview = { url: string; name: string; size: number }
 

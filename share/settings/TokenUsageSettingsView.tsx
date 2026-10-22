@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { DateInput } from "@shared/components/DateInput"
+import { DateInput } from "@/components/ds2/atom/DateInput"
 
 /** CS-21: only the server's current Organization aggregate may populate this view. */
 export function OrganizationAiUsage({ organizationName }: { organizationName: string }) {

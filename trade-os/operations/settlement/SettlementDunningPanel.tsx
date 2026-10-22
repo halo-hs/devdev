@@ -5,7 +5,7 @@ import "./SettlementDunningPanel.css";
 import { useId, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Check, ChevronDown, ChevronUp, Copy, ExternalLink } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@shared/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 import { Button } from "@trade-os/operations/components/ui/button";
 import { SectionPanel } from "@trade-os/operations/components/SectionPanel";
