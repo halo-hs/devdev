@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
-import { TextLink } from "@trade-os/operations/components/ui/TextLink";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { ApiError } from "@trade-os/operations/lib/api/client";
 import {
@@ -652,20 +651,18 @@ export function CanonicalScheduleCashPanel({
                       </div>
                       {event.current && canFinalize ? (
                         <div className="flex gap-2">
-                          <TextLink
+                          <Button variant="link" type="button" className="h-auto p-0 font-normal text-[length:inherit] leading-[inherit] text-[var(--color-gray-4)] hover:text-[var(--color-gray-2)]"
                             disabled={writerLocked || correction !== null}
                             onClick={() => openCorrection(event, "replacement")}
-                            size="inherit"
                           >
                             {copy.replace}
-                          </TextLink>
-                          <TextLink
+                          </Button>
+                          <Button variant="link" type="button" className="h-auto p-0 font-normal text-[length:inherit] leading-[inherit] text-[var(--color-gray-4)] hover:text-[var(--color-gray-2)]"
                             disabled={writerLocked || correction !== null}
                             onClick={() => openCorrection(event, "reversal")}
-                            size="inherit"
                           >
                             {copy.reverse}
-                          </TextLink>
+                          </Button>
                         </div>
                       ) : null}
                     </div>

@@ -24,7 +24,6 @@ import { AsyncButton } from "@/components/ds2/extensions/AsyncButton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
-import { TextLink } from "@trade-os/operations/components/ui/TextLink";
 import { useEntitlements, useIdentity, usePlatformAuth } from "@trade-os/operations/session/PlatformSessionContext";
 import {
   CASH_CALENDAR_BUCKETS,
@@ -1170,18 +1169,17 @@ function DrillOnlyCounterpartyRow({
         onClick={onCollapse}
       >
         <HostTableCell className="px-3 py-2 text-text-primary">
-          <TextLink
-            className="mr-2"
+          <Button variant="link" type="button"
+            className="h-auto p-0 font-normal text-[length:inherit] leading-[inherit] text-[var(--color-gray-4)] hover:text-[var(--color-gray-2)] mr-2"
             aria-expanded={true}
             aria-label={copy.counterparty.collapse}
             onClick={(e) => {
               e.stopPropagation();
               onCollapse();
             }}
-            size="inherit"
           >
             ▼
-          </TextLink>
+          </Button>
           {target.name || copy.counterparty.unassigned}
           {target.name ? (
             <Link
@@ -3086,22 +3084,19 @@ function SettlementView({
                               // cell drills the ledger below to exactly the
                               // schedules it summarizes — same tab, currency,
                               // and bucket, server-filtered.
-                              <TextLink
+                              <Button variant="link" type="button" className="h-auto p-0 font-normal underline text-[length:inherit] leading-[inherit] text-inherit hover:text-inherit"
                                 data-ui="settlement-calendar-cell"
                                 onClick={() => {
                                   onSelectLedgerCell(t, b, currency);
                                   scrollToSettlementSection("settlement-ledger");
                                 }}
-                                size="inherit"
-                                tone="inherit"
-                                underline="always"
                                 aria-label={copy.calendar.cellAriaLabel
                                   .replace("{currency}", currency)
                                   .replace("{bucket}", copy.calendar.buckets[b])
                                   .replace("{type}", copy.ledger.tabs[t])}
                               >
                                 {`${exactMoney(cell!.total, currency)} (${cell!.count})`}
-                              </TextLink>
+                              </Button>
                             ) : (
                               "—"
                             )}
@@ -3327,14 +3322,14 @@ function SettlementView({
                         onClick={() => void toggleCounterparty(c.counterparty_name, c.currency, c.counterparty_id)}
                       >
                         <HostTableCell className="px-3 py-2 text-text-primary">
-                          <TextLink className="mr-2" aria-expanded={expanded}
+                          <Button variant="link" type="button" className="h-auto p-0 font-normal text-[length:inherit] leading-[inherit] text-[var(--color-gray-4)] hover:text-[var(--color-gray-2)] mr-2" aria-expanded={expanded}
                             aria-label={expanded ? copy.counterparty.collapse : copy.counterparty.expand}
                             onClick={(e) => {
                               e.stopPropagation();
                               void toggleCounterparty(c.counterparty_name, c.currency, c.counterparty_id);
-                            }} size="inherit">
+                            }}>
                             {expanded ? "▼" : "▶"}
-                          </TextLink>
+                          </Button>
                           {c.counterparty_name || copy.counterparty.unassigned}
                           {c.counterparty_name ? (
                             <Link
@@ -3473,9 +3468,9 @@ function SettlementView({
                 .replace("{currency}", ledgerCurrency ?? "")
                 .replace("{bucket}", copy.calendar.buckets[ledgerBucket ?? "overdue"])}
             </span>
-            <TextLink onClick={onClearLedgerCellFilter} size="inherit">
+            <Button variant="link" type="button" className="h-auto p-0 font-normal text-[length:inherit] leading-[inherit] text-[var(--color-gray-4)] hover:text-[var(--color-gray-2)]" onClick={onClearLedgerCellFilter}>
               {copy.controls.clearCellFilter}
-            </TextLink>
+            </Button>
           </p>
         ) : null}
         {writeoffProposals.status === "error" ? (
@@ -3666,10 +3661,10 @@ function SettlementView({
                       </HostTableCell>
                       <HostTableCell className="px-3 py-2 text-right">
                         <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1">
-                          <TextLink
+                          <Button variant="link" type="button"
                             aria-controls={`settlement-exceptions-panel-${e.id}`}
                             aria-expanded={exceptionFor === e.id}
-                            className="whitespace-nowrap"
+                            className="h-auto p-0 font-normal text-[length:inherit] leading-[inherit] text-inherit hover:text-inherit whitespace-nowrap"
                             data-ui="settlement-exceptions-action"
                             disabled={recBusy || exceptionBusy}
                             onClick={(event) =>
@@ -3677,15 +3672,13 @@ function SettlementView({
                                 ? closeExceptions()
                                 : openExceptions(e.id, event.currentTarget)
                             }
-                            size="inherit"
-                            tone="inherit"
                           >
                             {copy.exceptions.title}
-                          </TextLink>
+                          </Button>
                           {e.closure_type ? (
                             e.closure_type === "written_off" && e.type === "receivable" ? (
-                              <TextLink
-                                className="whitespace-nowrap font-medium"
+                              <Button variant="link" type="button"
+                                className="h-auto p-0 font-normal text-[12px] leading-[18px] whitespace-nowrap font-medium"
                                 data-ui="settlement-locked-action"
                                 disabled={writeoffBusy || lifecycleBusy !== null || recBusy || exceptionBusy}
                                 onClick={(event) =>
@@ -3694,14 +3687,13 @@ function SettlementView({
                                 ref={(element) => {
                                   lockedActionRefs.current[e.id] = element;
                                 }}
-                                tone="accent"
                               >
                                 {copy.ledger.writeoff.reviewAction}
-                              </TextLink>
+                              </Button>
                             ) : canFinalize ? (
-                              <TextLink
+                              <Button variant="link" type="button"
                                 aria-label={`${copy.ledger.reopen} — ${e.counterparty_name ?? "—"}`}
-                                className="whitespace-nowrap font-medium"
+                                className="h-auto p-0 font-normal text-[12px] leading-[18px] whitespace-nowrap font-medium"
                                 data-ui="settlement-reopen-action"
                                 disabled={writeoffBusy || lifecycleBusy !== null}
                                 onClick={(event) =>
@@ -3710,10 +3702,9 @@ function SettlementView({
                                 ref={(element) => {
                                   lockedActionRefs.current[e.id] = element;
                                 }}
-                                tone="accent"
                               >
                                 {copy.ledger.reopen}
-                              </TextLink>
+                              </Button>
                             ) : (
                               <span
                                 className="text-text-muted"
@@ -3729,8 +3720,8 @@ function SettlementView({
                           ) : (
                             <>
                               {e.status === "completed" && canFinalize ? (
-                                <TextLink
-                                  className="whitespace-nowrap font-medium text-text-muted hover:text-ecoya-system-red-2"
+                                <Button variant="link" type="button"
+                                  className="h-auto p-0 font-normal text-[12px] leading-[18px] text-inherit hover:text-inherit whitespace-nowrap font-medium text-text-muted hover:text-ecoya-system-red-2"
                                   data-ui="settlement-uncomplete-action"
                                   disabled={uncompleting !== null || lifecycleBusy !== null || recBusy || exceptionBusy}
                                   onClick={(event) =>
@@ -3742,14 +3733,13 @@ function SettlementView({
                                   ref={(element) => {
                                     lockedActionRefs.current[e.id] = element;
                                   }}
-                                  tone="inherit"
                                 >
                                   {copy.ledger.uncomplete}
-                                </TextLink>
+                                </Button>
                               ) : null}
                               {e.status !== "completed" && canRecord && !e.deal_cancelled ? (
-                                <TextLink
-                                  className="whitespace-nowrap font-medium"
+                                <Button variant="link" type="button"
+                                  className="h-auto p-0 font-normal text-[12px] leading-[18px] whitespace-nowrap font-medium"
                                   disabled={recBusy || writeoffBusy || lifecycleBusy !== null || exceptionBusy}
                                   onClick={(event) =>
                                     openRecord(e, event.currentTarget)
@@ -3757,17 +3747,16 @@ function SettlementView({
                                   ref={(element) => {
                                     lockedActionRefs.current[e.id] = element;
                                   }}
-                                  tone="accent"
                                 >
                                   {e.type === "receivable"
                                     ? copy.ledger.recordReceipt
                                     : copy.ledger.recordPayment}
-                                </TextLink>
+                                </Button>
                               ) : null}
                               {e.status !== "completed" && canFinalize ? (
-                                <TextLink
+                                <Button variant="link" type="button"
                                   aria-label={`${copy.ledger.close} — ${e.counterparty_name ?? "—"}`}
-                                  className="whitespace-nowrap font-medium text-text-muted hover:text-ecoya-system-red-2"
+                                  className="h-auto p-0 font-normal text-[12px] leading-[18px] text-inherit hover:text-inherit whitespace-nowrap font-medium text-text-muted hover:text-ecoya-system-red-2"
                                   data-ui="settlement-close-action"
                                   disabled={recBusy || writeoffBusy || lifecycleBusy !== null}
                                   onClick={(event) =>
@@ -3776,14 +3765,13 @@ function SettlementView({
                                   ref={(element) => {
                                     lockedActionRefs.current[e.id] = element;
                                   }}
-                                  tone="inherit"
                                 >
                                   {copy.ledger.close}
-                                </TextLink>
+                                </Button>
                               ) : null}
                               {e.type === "receivable" ? (
-                                <TextLink
-                                  className="whitespace-nowrap font-medium"
+                                <Button variant="link" type="button"
+                                  className="h-auto p-0 font-normal text-[12px] leading-[18px] whitespace-nowrap font-medium"
                                   data-ui="settlement-writeoff-action"
                                   disabled={writeoffBusy || lifecycleBusy !== null || recBusy || exceptionBusy}
                                   onClick={(event) =>
@@ -3798,7 +3786,6 @@ function SettlementView({
                                         }
                                       : undefined
                                   }
-                                  tone="accent"
                                 >
                                   {e.status === "completed" ||
                                   writeoffProposalById.has(e.id)
@@ -3808,7 +3795,7 @@ function SettlementView({
                                       : canRecord && e.deal_id
                                         ? copy.ledger.writeoff.proposalAction
                                         : copy.ledger.writeoff.reviewAction}
-                                </TextLink>
+                                </Button>
                               ) : null}
                               {e.type !== "receivable" &&
                               ((e.status === "completed" && !canFinalize) ||
@@ -3825,16 +3812,15 @@ function SettlementView({
                                 </span>
                               ) : null}
                               {e.status !== "completed" && !e.closure_type ? (
-                                <TextLink
+                                <Button variant="link" type="button"
                                   aria-controls={`settlement-dispute-panel-${e.id}`}
                                   aria-expanded={disputeFor === e.id}
-                                  className="whitespace-nowrap font-medium"
+                                  className="h-auto p-0 font-normal text-[12px] leading-[18px] whitespace-nowrap font-medium"
                                   data-ui="settlement-dispute-action"
                                   onClick={(event) => openDisputePanel(e, event.currentTarget)}
-                                  tone="accent"
                                 >
                                   {copy.ledger.dispute.action}
-                                </TextLink>
+                                </Button>
                               ) : null}
                             </>
                           )}
@@ -4073,15 +4059,15 @@ function SettlementView({
                               >
                                 {copy.ledger.dispute.open}
                               </Button>
-                              <TextLink onClick={cancelDisputePanel} disabled={disputeBusy}>
+                              <Button variant="link" type="button" className="h-auto p-0 font-normal text-[12px] leading-[18px] text-[var(--color-gray-4)] hover:text-[var(--color-gray-2)]" onClick={cancelDisputePanel} disabled={disputeBusy}>
                                 {copy.ledger.formCancel}
-                              </TextLink>
+                              </Button>
                             </div> : null}
                             {hasOpenDispute ? (
                               <div className="flex justify-end">
-                                <TextLink onClick={cancelDisputePanel} disabled={disputeBusy}>
+                                <Button variant="link" type="button" className="h-auto p-0 font-normal text-[12px] leading-[18px] text-[var(--color-gray-4)] hover:text-[var(--color-gray-2)]" onClick={cancelDisputePanel} disabled={disputeBusy}>
                                   {copy.ledger.formCancel}
-                                </TextLink>
+                                </Button>
                               </div>
                             ) : null}
                             {disputeError ? (

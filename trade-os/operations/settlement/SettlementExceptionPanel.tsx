@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/Button";
 import { AsyncButton } from "@/components/ds2/extensions/AsyncButton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";
-import { TextLink } from "@trade-os/operations/components/ui/TextLink";
 import {
   listOverpaymentRefunds,
   listSchedulePayments,
@@ -606,9 +605,9 @@ export function SettlementExceptionPanel({
             ) : copy.subtitle}
           </p>
         </div>
-        <TextLink disabled={busy !== null} onClick={onClose} size="inherit">
+        <Button variant="link" type="button" className="h-auto p-0 font-normal text-[length:inherit] leading-[inherit] text-[var(--color-gray-4)] hover:text-[var(--color-gray-2)]" disabled={busy !== null} onClick={onClose}>
           {copy.close}
-        </TextLink>
+        </Button>
       </div>
       {error ? (
         <p className="mb-3 text-pretty text-label-12 text-status-danger" id={exceptionErrorId} role="alert">{error}</p>
@@ -755,14 +754,12 @@ export function SettlementExceptionPanel({
                 {paymentHistory.data.map((payment) => (
                   <li className="flex flex-wrap items-baseline gap-x-2 gap-y-1" key={payment.id}>
                     {canRecord && allowLegacyOverpaymentRecord ? (
-                      <TextLink
-                        className="font-mono"
+                      <Button variant="link" type="button"
+                        className="h-auto p-0 font-normal text-[length:inherit] leading-[inherit] text-[var(--color-gray-3)] hover:text-[var(--color-gray-2)] font-mono"
                         onClick={() => setOverpaymentDraft((current) => ({ ...current, paymentId: payment.id }))}
-                        size="inherit"
-                        tone="secondary"
                       >
                         {payment.id}
-                      </TextLink>
+                      </Button>
                     ) : (
                       <span className="font-mono">{payment.id}</span>
                     )}
