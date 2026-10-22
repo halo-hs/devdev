@@ -21,7 +21,7 @@ import { StatusBadge, type StatusTone } from "@trade-os/operations/components/St
 import { useScreenToast } from "@trade-os/operations/components/toast/useToast";
 import { Button } from "@/components/ui/Button";
 import { AsyncButton } from "@/components/ds2/extensions/AsyncButton";
-import { Dialog, DialogFooterContainer } from "@trade-os/operations/components/ui/Dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
 import { Select } from "@trade-os/operations/components/ui/Dropdown";
 import { TextArea } from "@trade-os/operations/components/ui/Input";
 import { TextLink } from "@trade-os/operations/components/ui/TextLink";
@@ -4295,37 +4295,13 @@ function SettlementView({
         </>
       ) : null}
 
-      <Dialog
-        className="max-w-[calc(100vw-2rem)]"
-        cancelText={copy.ledger.formCancel}
-        closeLabel={copy.ledger.dialogCloseLabel}
-        okText={copy.ledger.formSave}
-        footer={
-          <DialogFooterContainer>
-            <Button variant="outline" size="lg"
-              disabled={manualScheduleBusy}
-              onClick={() => setManualScheduleOpen(false)}
-              type="button"
-            >
-              {copy.ledger.formCancel}
-            </Button>
-            <AsyncButton size="lg"
-              disabled={manualScheduleBusy}
-              loading={manualScheduleBusy}
-              onClick={() => void saveManualSchedule()}
-              type="button"
-            >
-              {copy.ledger.formSave}
-            </AsyncButton>
-          </DialogFooterContainer>
-        }
-        onOpenChange={(open) => {
+      <Dialog open={manualScheduleOpen} onOpenChange={(open) => {
           if (!open && !manualScheduleBusy) setManualScheduleOpen(false);
-        }}
-        open={manualScheduleOpen}
-        title={copy.ledger.title}
-        width={480}
-      >
+        }}>
+        <DialogContent className="gap-5 sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>{copy.ledger.title}</DialogTitle>
+          </DialogHeader>
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-label-12 text-text-secondary">
             {copy.ledger.counterparty}
@@ -4391,78 +4367,35 @@ function SettlementView({
             </p>
           ) : null}
         </div>
-      </Dialog>
-      <Dialog
-        className="max-w-[calc(100vw-2rem)]"
-        cancelText={copy.ledger.writeoff.cancel}
-        closeLabel={copy.ledger.dialogCloseLabel}
-        okText={copy.ledger.writeoff.finalize}
-        footer={
-          <DialogFooterContainer>
+          <DialogFooter>
             <Button variant="outline" size="lg"
-              disabled={writeoffBusy}
-              onClick={closeWriteoffDialog}
+              disabled={manualScheduleBusy}
+              onClick={() => setManualScheduleOpen(false)}
               type="button"
             >
-              {copy.ledger.writeoff.cancel}
+              {copy.ledger.formCancel}
             </Button>
-            {canWithdrawWriteoff ? (
-              <Button variant="secondary" size="lg"
-                disabled={writeoffBusy}
-                onClick={() => void withdrawWriteoff()}
-                type="button"
-              >
-                {copy.ledger.writeoff.withdraw}
-              </Button>
-            ) : null}
-            {canRejectWriteoff ? (
-              <Button variant="destructive" size="lg"
-                disabled={writeoffBusy}
-                onClick={() => void rejectWriteoff()}
-                type="button"
-              >
-                {copy.ledger.writeoff.reject}
-              </Button>
-            ) : null}
-            {canProposeWriteoff ? (
-              <Button size="lg"
-                disabled={writeoffBusy}
-                onClick={() => void submitWriteoffProposal()}
-                type="button"
-              >
-                {copy.ledger.writeoff.propose}
-              </Button>
-            ) : null}
-            {canFinalizeWriteoff ? (
-              <Button variant="destructive" size="lg"
-                disabled={writeoffBusy}
-                onClick={() => void finalizeWriteoff()}
-                type="button"
-              >
-                {copy.ledger.writeoff.finalize}
-              </Button>
-            ) : null}
-            {canReopenWriteoff ? (
-              <Button size="lg"
-                disabled={writeoffBusy}
-                onClick={() => void reopenWriteoff()}
-                type="button"
-              >
-                {copy.ledger.writeoff.reopen}
-              </Button>
-            ) : null}
-          </DialogFooterContainer>
-        }
-        onOpenChange={(open) => {
+            <AsyncButton size="lg"
+              disabled={manualScheduleBusy}
+              loading={manualScheduleBusy}
+              onClick={() => void saveManualSchedule()}
+              type="button"
+            >
+              {copy.ledger.formSave}
+            </AsyncButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={writeoffTarget !== null} onOpenChange={(open) => {
           if (!open) closeWriteoffDialog();
-        }}
-        open={writeoffTarget !== null}
-        title={copy.ledger.writeoff.title.replace(
+        }}>
+        <DialogContent className="gap-5 sm:max-w-[640px]">
+          <DialogHeader>
+            <DialogTitle>{copy.ledger.writeoff.title.replace(
           "{counterparty}",
           writeoffTarget?.entry.counterparty_name ?? "—",
-        )}
-        width={640}
-      >
+        )}</DialogTitle>
+          </DialogHeader>
         {writeoffTarget ? (
           <div className="flex flex-col gap-4">
             <p className="m-0 text-body-14 text-text-primary">
@@ -4703,41 +4636,73 @@ function SettlementView({
             ) : null}
           </div>
         ) : null}
+          <DialogFooter>
+            <Button variant="outline" size="lg"
+              disabled={writeoffBusy}
+              onClick={closeWriteoffDialog}
+              type="button"
+            >
+              {copy.ledger.writeoff.cancel}
+            </Button>
+            {canWithdrawWriteoff ? (
+              <Button variant="secondary" size="lg"
+                disabled={writeoffBusy}
+                onClick={() => void withdrawWriteoff()}
+                type="button"
+              >
+                {copy.ledger.writeoff.withdraw}
+              </Button>
+            ) : null}
+            {canRejectWriteoff ? (
+              <Button variant="destructive" size="lg"
+                disabled={writeoffBusy}
+                onClick={() => void rejectWriteoff()}
+                type="button"
+              >
+                {copy.ledger.writeoff.reject}
+              </Button>
+            ) : null}
+            {canProposeWriteoff ? (
+              <Button size="lg"
+                disabled={writeoffBusy}
+                onClick={() => void submitWriteoffProposal()}
+                type="button"
+              >
+                {copy.ledger.writeoff.propose}
+              </Button>
+            ) : null}
+            {canFinalizeWriteoff ? (
+              <Button variant="destructive" size="lg"
+                disabled={writeoffBusy}
+                onClick={() => void finalizeWriteoff()}
+                type="button"
+              >
+                {copy.ledger.writeoff.finalize}
+              </Button>
+            ) : null}
+            {canReopenWriteoff ? (
+              <Button size="lg"
+                disabled={writeoffBusy}
+                onClick={() => void reopenWriteoff()}
+                type="button"
+              >
+                {copy.ledger.writeoff.reopen}
+              </Button>
+            ) : null}
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
 
-      <Dialog
-        cancelText={copy.ledger.closeCancel}
-        className="max-w-[calc(100vw-2rem)]"
-        closeLabel={copy.ledger.dialogCloseLabel}
-        okText={copy.ledger.closeConfirm}
-        footer={
-          <DialogFooterContainer>
-            <Button variant="outline" size="lg"
-              disabled={lifecycleBusy !== null}
-              onClick={() => setCloseTarget(null)}
-              type="button"
-            >
-              {copy.ledger.closeCancel}
-            </Button>
-            <Button variant="destructive" size="lg"
-              disabled={lifecycleBusy !== null}
-              onClick={() => void confirmCloseSchedule()}
-              type="button"
-            >
-              {copy.ledger.closeConfirm}
-            </Button>
-          </DialogFooterContainer>
-        }
-        onOpenChange={(open) => {
+      <Dialog open={closeTarget !== null} onOpenChange={(open) => {
           if (!open && lifecycleBusy === null) {
             setCloseTarget(null);
             setCloseDraft(EMPTY_CLOSE_DRAFT);
           }
-        }}
-        open={closeTarget !== null}
-        title={copy.ledger.closeConfirmTitle}
-        width={480}
-      >
+        }}>
+        <DialogContent className="gap-5 sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>{copy.ledger.closeConfirmTitle}</DialogTitle>
+          </DialogHeader>
         {closeTarget ? (
           <div className="flex flex-col gap-3">
             <p className="m-0 break-keep [overflow-wrap:anywhere] text-body-14 font-regular text-text-primary">
@@ -4788,15 +4753,48 @@ function SettlementView({
             ) : null}
           </div>
         ) : null}
+          <DialogFooter>
+            <Button variant="outline" size="lg"
+              disabled={lifecycleBusy !== null}
+              onClick={() => setCloseTarget(null)}
+              type="button"
+            >
+              {copy.ledger.closeCancel}
+            </Button>
+            <Button variant="destructive" size="lg"
+              disabled={lifecycleBusy !== null}
+              onClick={() => void confirmCloseSchedule()}
+              type="button"
+            >
+              {copy.ledger.closeConfirm}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
 
-      <Dialog
-        cancelText={copy.ledger.reopenCancel}
-        className="max-w-[calc(100vw-2rem)]"
-        closeLabel={copy.ledger.dialogCloseLabel}
-        okText={copy.ledger.reopenConfirm}
-        footer={
-          <DialogFooterContainer>
+      <Dialog open={reopenTarget !== null} onOpenChange={(open) => {
+          if (!open && lifecycleBusy === null) {
+            setReopenTarget(null);
+            setReopenError(null);
+          }
+        }}>
+        <DialogContent className="gap-5 sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>{copy.ledger.reopenConfirmTitle}</DialogTitle>
+          </DialogHeader>
+        {reopenTarget ? (
+          <div className="flex flex-col gap-3">
+            <p className="m-0 break-keep [overflow-wrap:anywhere] text-body-14 font-regular text-text-primary">
+              {reopenBody}
+            </p>
+            {reopenError ? (
+              <p className="m-0 text-body-13 text-status-danger" role="alert">
+                {reopenError}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+          <DialogFooter>
             <Button variant="outline" size="lg"
               disabled={lifecycleBusy !== null}
               onClick={() => setReopenTarget(null)}
@@ -4811,39 +4809,25 @@ function SettlementView({
             >
               {copy.ledger.reopenConfirm}
             </Button>
-          </DialogFooterContainer>
-        }
-        onOpenChange={(open) => {
-          if (!open && lifecycleBusy === null) {
-            setReopenTarget(null);
-            setReopenError(null);
-          }
-        }}
-        open={reopenTarget !== null}
-        title={copy.ledger.reopenConfirmTitle}
-        width={400}
-      >
-        {reopenTarget ? (
-          <div className="flex flex-col gap-3">
-            <p className="m-0 break-keep [overflow-wrap:anywhere] text-body-14 font-regular text-text-primary">
-              {reopenBody}
-            </p>
-            {reopenError ? (
-              <p className="m-0 text-body-13 text-status-danger" role="alert">
-                {reopenError}
-              </p>
-            ) : null}
-          </div>
-        ) : null}
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
 
-      <Dialog
-        className="max-w-[calc(100vw-2rem)]"
-        cancelText={copy.ledger.uncompleteCancel}
-        closeLabel={copy.ledger.dialogCloseLabel}
-        okText={copy.ledger.uncompleteConfirm}
-        footer={
-          <DialogFooterContainer>
+      <Dialog open={uncompleteTarget !== null} onOpenChange={(open) => {
+          if (!open) setUncompleteTarget(null);
+        }}>
+        <DialogContent className="gap-5 sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>{copy.ledger.uncompleteConfirmTitle}</DialogTitle>
+          </DialogHeader>
+        {uncompleteTarget ? (
+          <p className="m-0 text-body-14 font-regular text-text-primary">
+            {copy.ledger.uncompleteConfirmBody
+              .replace("{counterparty}", uncompleteTarget.entry.counterparty_name ?? "—")
+              .replace("{amount}", exactMoney(uncompleteTarget.entry.amount, uncompleteTarget.entry.currency))}
+          </p>
+        ) : null}
+          <DialogFooter>
             <Button variant="outline" size="lg"
               disabled={uncompleting !== null}
               onClick={() => setUncompleteTarget(null)}
@@ -4858,22 +4842,8 @@ function SettlementView({
             >
               {copy.ledger.uncompleteConfirm}
             </Button>
-          </DialogFooterContainer>
-        }
-        onOpenChange={(open) => {
-          if (!open) setUncompleteTarget(null);
-        }}
-        open={uncompleteTarget !== null}
-        title={copy.ledger.uncompleteConfirmTitle}
-        width={400}
-      >
-        {uncompleteTarget ? (
-          <p className="m-0 text-body-14 font-regular text-text-primary">
-            {copy.ledger.uncompleteConfirmBody
-              .replace("{counterparty}", uncompleteTarget.entry.counterparty_name ?? "—")
-              .replace("{amount}", exactMoney(uncompleteTarget.entry.amount, uncompleteTarget.entry.currency))}
-          </p>
-        ) : null}
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button } from '../components/ui/Button';
+import { Button } from '@/components/ui/Button';
 import { operationsDemo } from '../demo/mode';
 import { demoAllocate, demoAllocationCandidates, demoAllocations } from '../demo/settlementExceptions';
 
@@ -25,7 +25,7 @@ export function OverpaymentAllocationPanel({id, canRecord, disabled, onSaved}: {
         <label>배정 사유<input className={input} value={draft.reason} disabled={disabled} onChange={e=>setDraft({...draft,reason:e.target.value})}/></label>
         <label className="sm:col-span-2">배정 근거<input className={input} value={draft.evidence} disabled={disabled} onChange={e=>setDraft({...draft,evidence:e.target.value})}/></label>
         {error && <p role="alert" className="text-status-danger sm:col-span-2">{error}</p>}
-        <Button size="sm" type="button" disabled={disabled} onClick={submit}>나눠 넣기</Button>
+        <Button size="xs" type="button" disabled={disabled} onClick={submit}>나눠 넣기</Button>
       </div> : candidates.length===0 ? <p className="mt-2 text-text-muted">나눠 넣을 수 있는 일정이 없습니다.</p> : null}
       <h6 className="mt-3 font-medium">나눠 넣은 기록</h6>
       {history.length===0 ? <p className="mt-1 text-text-muted">아직 나눠 넣은 기록이 없습니다.</p> : <ul className="mt-1 space-y-2">{history.map(row=><li className="break-words" key={row.id}><span>{row.amount} · {row.reason}</span><span className="block break-all">일정 {row.schedule_id} · 근거 {row.evidence}</span></li>)}</ul>}

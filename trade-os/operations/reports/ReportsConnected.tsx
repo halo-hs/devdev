@@ -19,7 +19,7 @@ import { AnalyticsSkeleton } from "@trade-os/operations/components/AnalyticsSkel
 import { SkeletonList } from "@trade-os/operations/components/Skeletons";
 import { useToast } from "@trade-os/operations/components/toast/useToast";
 import { Button } from "@/components/ui/Button";
-import { Dialog } from "@trade-os/operations/components/ui/Dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
 import { Select } from "@trade-os/operations/components/ui/Dropdown";
 import { cx } from "@trade-os/operations/components/ui/utils";
 // erp-v2-adapt: begin — QA-1352 defers the gate reason to BE #495 instead of the boolean projection.
@@ -2088,24 +2088,14 @@ function ReportsConnectedSession({
 
       {/* ── 월마감 확인 다이얼로그 ── */}
       {closeDialogPeriod ? (
-        <Dialog
-          className="max-w-[calc(100vw-2rem)]"
-          closeLabel={copy.closes.dialogCloseLabel}
-          open={closeDialogOpen}
-          onOpenChange={(open) => {
+        <Dialog open={closeDialogOpen} onOpenChange={(open) => {
             setCloseDialogOpen(open);
             if (!open) setReclosePeriod(null);
-          }}
-          title={replaceTokens(reclosePeriod ? copy.closes.recloseDialogTitle : copy.closes.dialogTitle, { period: closeDialogPeriod })}
-          okText={reclosePeriod ? copy.closes.recloseConfirm : copy.closes.confirm}
-          cancelText={copy.closes.cancel}
-          onOk={() => void submitClose()}
-          onCancel={() => {
-            setCloseDialogOpen(false);
-            setReclosePeriod(null);
-          }}
-          width={440}
-        >
+          }}>
+          <DialogContent className="gap-5 sm:max-w-[440px]">
+            <DialogHeader>
+              <DialogTitle>{replaceTokens(reclosePeriod ? copy.closes.recloseDialogTitle : copy.closes.dialogTitle, { period: closeDialogPeriod })}</DialogTitle>
+            </DialogHeader>
           <div className="flex flex-col gap-3">
             <p className="text-body-14 text-ecoya-gray-3">
               {replaceTokens(copy.closes.dialogBody, { period: closeDialogPeriod })}
@@ -2134,27 +2124,28 @@ function ReportsConnectedSession({
               </Badge>
             ) : null}
           </div>
+            <DialogFooter>
+              <Button onClick={() => {
+                setCloseDialogOpen(false);
+                setReclosePeriod(null);
+              }} size="lg" type="button" variant="outline">{copy.closes.cancel}</Button>
+              <Button onClick={() => void submitClose()} size="lg" type="button">{reclosePeriod ? copy.closes.recloseConfirm : copy.closes.confirm}</Button>
+            </DialogFooter>
+          </DialogContent>
         </Dialog>
       ) : null}
 
       {/* ── 월마감 재개방 다이얼로그 (OD-011 — 영향 안내 + 필수 사유) ── */}
       {reopenTarget ? (
-        <Dialog
-          className="max-w-[calc(100vw-2rem)]"
-          closeLabel={copy.closes.dialogCloseLabel}
-          open
-          onOpenChange={(open) => {
+        <Dialog open onOpenChange={(open) => {
             if (!open) setReopenTarget(null);
-          }}
-          title={replaceTokens(copy.closes.reopenDialogTitle, {
+          }}>
+          <DialogContent className="gap-5 sm:max-w-[440px]">
+            <DialogHeader>
+              <DialogTitle>{replaceTokens(copy.closes.reopenDialogTitle, {
             period: monthPeriodOf(reopenTarget.period_start),
-          })}
-          okText={copy.closes.reopenConfirm}
-          cancelText={copy.closes.cancel}
-          onOk={() => void submitReopen()}
-          onCancel={() => setReopenTarget(null)}
-          width={440}
-        >
+          })}</DialogTitle>
+            </DialogHeader>
           <div className="flex flex-col gap-3">
             <p className="text-body-14 text-text-secondary" data-ui="reports-reopen-impact">
               {replaceTokens(copy.closes.reopenImpact, {
@@ -2177,28 +2168,26 @@ function ReportsConnectedSession({
               </p>
             ) : null}
           </div>
+            <DialogFooter>
+              <Button onClick={() => setReopenTarget(null)} size="lg" type="button" variant="outline">{copy.closes.cancel}</Button>
+              <Button onClick={() => void submitReopen()} size="lg" type="button">{copy.closes.reopenConfirm}</Button>
+            </DialogFooter>
+          </DialogContent>
         </Dialog>
       ) : null}
 
       {/* ── 마감 스냅샷 뷰 (동결 숫자 그대로 렌더 — 라이브 재계산 없음) ── */}
-      <Dialog
-        className="max-w-[calc(100vw-2rem)]"
-        cancelText={copy.closes.cancel}
-        closeLabel={copy.closes.dialogCloseLabel}
-        open={snapshotState.status !== "closed"}
-        onOpenChange={(open) => {
+      <Dialog open={snapshotState.status !== "closed"} onOpenChange={(open) => {
           if (!open) closeSnapshot();
-        }}
-        title={
+        }}>
+        <DialogContent className="gap-5 sm:max-w-[560px]">
+          <DialogHeader>
+            <DialogTitle>{
           snapshotState.status === "closed"
             ? ""
             : replaceTokens(copy.closes.snapshot.title, { period: snapshotState.period })
-        }
-        okText={copy.closes.snapshot.close}
-        onOk={closeSnapshot}
-        hideCancelButton
-        width={560}
-      >
+        }</DialogTitle>
+          </DialogHeader>
         {snapshotState.status === "loading" ? (
           <p className="text-body-13 text-text-muted">{copy.closes.snapshot.loading}</p>
         ) : snapshotState.status === "error" ? (
@@ -2216,6 +2205,10 @@ function ReportsConnectedSession({
             monthDay={monthDay}
           />
         ) : null}
+          <DialogFooter>
+            <Button onClick={closeSnapshot} size="lg" type="button">{copy.closes.snapshot.close}</Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
   );
