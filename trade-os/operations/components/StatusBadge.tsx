@@ -129,8 +129,8 @@ function StatusBadge({
         "inline-flex shrink-0 items-center justify-center",
         resolvedShape === "square" ? "rounded whitespace-nowrap font-bold" : "rounded-[24px] whitespace-nowrap font-medium",
         size === "md"
-          ? "px-[14px] py-1 text-badge-16"
-          : "px-2.5 py-0.5 text-badge-12",
+          ? "px-[14px] py-1 text-[length:var(--text-body-7)] leading-[var(--leading-body-8)]"
+          : "px-2.5 py-0.5 text-[12px] leading-[16px]",
         className,
       )}
       data-ui="status-badge"

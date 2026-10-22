@@ -7,13 +7,13 @@ import type { ReactNode } from "react";
 import type { MetricTone } from "@trade-os/operations/components/MetricCard";
 
 const toneValue: Record<MetricTone, string> = {
-  neutral: "text-text-primary",
-  danger: "text-status-danger",
-  warning: "text-ecoya-gray-2",
-  success: "text-ecoya-gray-2",
-  info: "text-ecoya-gray-2",
+  neutral: "text-[var(--color-gray-2)]",
+  danger: "text-[var(--color-red-1)]",
+  warning: "text-[var(--color-gray-2)]",
+  success: "text-[var(--color-gray-2)]",
+  info: "text-[var(--color-gray-2)]",
   // erp-v2-adapt: begin — superset MetricTone (see above).
-  indigo: "text-ecoya-indigo",
+  indigo: "text-[var(--color-indigo)]",
   // erp-v2-adapt: end
 };
 
@@ -48,7 +48,7 @@ function DecisionCardBody({
     <>
       <span className="flex w-full items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-2">
-          <p className="text-[14px] leading-[1.45] font-semibold text-ecoya-gray-2">{title}</p>
+          <p className="text-[14px] leading-[1.45] font-semibold text-[var(--color-gray-2)]">{title}</p>
           {badge}
         </span>
         <span className="shrink-0 text-[11px] leading-4 text-[var(--color-primary-4)] group-hover:underline">{cta} →</span>

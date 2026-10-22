@@ -32,7 +32,7 @@ function UnitPanel({ title = "Component unit", description, children, ...props }
   return (
     <SectionPanel title={title} description={description} density="compact" {...props}>
       {children ?? (
-        <div className="text-body-14 font-regular text-ecoya-gray-5">
+        <div className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-normal text-[var(--color-gray-5)]">
           reference/plan 기준으로 화면에 배치되는 제품 UI 단위입니다.
         </div>
       )}

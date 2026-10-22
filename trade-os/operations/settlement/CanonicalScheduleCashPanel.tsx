@@ -106,7 +106,7 @@ type CorrectionDraft = {
 
 const ZERO = BigInt(0);
 const inputClass =
-  "h-9 rounded-md border border-border bg-surface-card px-2 text-body-13 text-text-primary";
+  "h-9 rounded-md border border-border bg-[var(--color-gray-12)] px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]";
 
 function isPositiveMoney(value: string) {
   return isFinanceDecimal(value) && financeDecimalMagnitude(value) > ZERO;
@@ -371,8 +371,8 @@ export function CanonicalScheduleCashPanel({
       data-ui="canonical-schedule-cash"
     >
       <div>
-        <h3 className="text-body-14 font-medium text-text-primary">{copy.title}</h3>
-        <p className="text-label-12 text-text-secondary">{copy.scope}</p>
+        <h3 className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-medium text-[var(--color-gray-2)]">{copy.title}</h3>
+        <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">{copy.scope}</p>
       </div>
 
       {ledger.status === "loading" ? <p role="status">{copy.loading}</p> : null}
@@ -386,20 +386,20 @@ export function CanonicalScheduleCashPanel({
       ) : null}
 
       {readyLedger && !readyLedger.writer_enabled ? (
-        <p className="text-label-12 text-status-warning" role="status">
+        <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-yellow-1)]" role="status">
           {copy.writerDisabled}
         </p>
       ) : null}
 
       {readyLedger?.reconciliation_required ? (
-        <div className="rounded-md border border-status-warning bg-surface-muted p-3">
-          <h4 className="text-body-14 font-medium text-text-primary">
+        <div className="rounded-md border border-[var(--color-yellow-1)] bg-[var(--color-gray-11)] p-3">
+          <h4 className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-medium text-[var(--color-gray-2)]">
             {copy.reconciliationTitle}
           </h4>
-          <p className="mt-1 text-label-12 text-text-secondary">
+          <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
             {copy.reconciliationBody}
           </p>
-          <p className="mt-1 text-label-12 text-text-secondary">
+          <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
             {copy.reconciliationCounts
               .replace(
                 "{payments}",
@@ -429,26 +429,26 @@ export function CanonicalScheduleCashPanel({
 
       {readyLedger?.reconciliation_required ? (
         <div>
-          <h4 className="text-label-12 font-medium text-text-secondary">
+          <h4 className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-medium text-[var(--color-gray-4)]">
             {copy.legacyHistory}
           </h4>
           {legacyHistory.status === "loading" ? (
-            <p className="text-label-12 text-text-muted">{copy.loading}</p>
+            <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.loading}</p>
           ) : null}
           {legacyHistory.status === "error" ? (
-            <p className="text-label-12 text-status-danger" role="alert">
+            <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]" role="alert">
               {copy.legacyHistoryLoadError}
             </p>
           ) : null}
           {legacyHistory.status === "ready" &&
           legacyHistory.data.payments.length === 0 ? (
-            <p className="text-label-12 text-text-muted">{copy.legacyHistoryEmpty}</p>
+            <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.legacyHistoryEmpty}</p>
           ) : null}
           {legacyHistory.status === "ready" &&
           legacyHistory.data.payments.length > 0 ? (
             <ul className="mt-2 space-y-1" data-ui="legacy-cash-history-read-only">
               {legacyHistory.data.payments.map((payment) => (
-                <li className="text-label-12 text-text-secondary" key={payment.id}>
+                <li className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]" key={payment.id}>
                   {formatValueDate(payment.value_date)} · {formatMoney(payment.amount, currency)}
                   {payment.note ? ` · ${payment.note}` : ""}
                 </li>
@@ -461,30 +461,30 @@ export function CanonicalScheduleCashPanel({
       {readyLedger && !readyLedger.reconciliation_required ? (
         <>
           <dl
-            className="grid grid-cols-2 gap-2 rounded-md bg-surface-muted p-3 text-label-12 sm:grid-cols-4"
+            className="grid grid-cols-2 gap-2 rounded-md bg-[var(--color-gray-11)] p-3 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] sm:grid-cols-4"
             data-ui="canonical-schedule-position"
           >
             <div>
-              <dt className="text-text-muted">{copy.scheduled}</dt>
-              <dd className="font-medium text-text-primary">
+              <dt className="text-[var(--color-gray-5)]">{copy.scheduled}</dt>
+              <dd className="font-medium text-[var(--color-gray-2)]">
                 {formatMoney(readyLedger.amount, currency)}
               </dd>
             </div>
             <div>
-              <dt className="text-text-muted">{copy.applied}</dt>
-              <dd className="font-medium text-text-primary">
+              <dt className="text-[var(--color-gray-5)]">{copy.applied}</dt>
+              <dd className="font-medium text-[var(--color-gray-2)]">
                 {formatMoney(readyLedger.paid, currency)}
               </dd>
             </div>
             <div>
-              <dt className="text-text-muted">{copy.outstanding}</dt>
-              <dd className="font-medium text-text-primary">
+              <dt className="text-[var(--color-gray-5)]">{copy.outstanding}</dt>
+              <dd className="font-medium text-[var(--color-gray-2)]">
                 {formatMoney(readyLedger.outstanding, currency)}
               </dd>
             </div>
             <div>
-              <dt className="text-text-muted">{copy.history}</dt>
-              <dd className="font-medium text-text-primary">
+              <dt className="text-[var(--color-gray-5)]">{copy.history}</dt>
+              <dd className="font-medium text-[var(--color-gray-2)]">
                 {readyLedger.events.length}
               </dd>
             </div>
@@ -495,13 +495,13 @@ export function CanonicalScheduleCashPanel({
               className="space-y-2 rounded-md border border-border p-3"
               disabled={writerLocked || !canFinalize}
             >
-              <legend className="px-1 text-body-14 font-medium text-text-primary">
+              <legend className="px-1 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-medium text-[var(--color-gray-2)]">
                 {correction.kind === "reversal" ? copy.reverse : copy.replace}
               </legend>
-              <p className="text-label-12 text-text-secondary">
+              <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                 {copy.cashFactUnchanged}
               </p>
-              <label className="block text-label-12 text-text-secondary">
+              <label className="block text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                 {copy.correctionReason}
                 <input
                   className={`${inputClass} mt-1 w-full`}
@@ -515,7 +515,7 @@ export function CanonicalScheduleCashPanel({
                 />
               </label>
               {correction.kind === "replacement" ? (
-                <label className="block text-label-12 text-text-secondary">
+                <label className="block text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.replacementAmount}
                   <input
                     className={`${inputClass} mt-1 w-40`}
@@ -557,7 +557,7 @@ export function CanonicalScheduleCashPanel({
               disabled={writerLocked}
             >
               <legend className="sr-only">{copy.save}</legend>
-              <label className="text-label-12 text-text-secondary">
+              <label className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                 {copy.actual}
                 <input
                   // The panel is mounted only after the operator explicitly opens
@@ -572,7 +572,7 @@ export function CanonicalScheduleCashPanel({
                   onChange={(event) => setActualAmount(event.target.value)}
                 />
               </label>
-              <label className="text-label-12 text-text-secondary">
+              <label className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                 {copy.applied}
                 <input
                   className={`${inputClass} mt-1 w-full`}
@@ -581,7 +581,7 @@ export function CanonicalScheduleCashPanel({
                   onChange={(event) => setApplicationAmount(event.target.value)}
                 />
               </label>
-              <label className="text-label-12 text-text-secondary">
+              <label className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                 {copy.date}
                 <DatePicker
                   ariaLabel={copy.date}
@@ -590,7 +590,7 @@ export function CanonicalScheduleCashPanel({
                   onValueChange={setValueDate}
                 />
               </label>
-              <label className="text-label-12 text-text-secondary">
+              <label className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                 {copy.fee}
                 <input
                   className={`${inputClass} mt-1 w-full`}
@@ -599,7 +599,7 @@ export function CanonicalScheduleCashPanel({
                   onChange={(event) => setFee(event.target.value)}
                 />
               </label>
-              <label className="text-label-12 text-text-secondary">
+              <label className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                 {copy.memo}
                 <input
                   className={`${inputClass} mt-1 w-full`}
@@ -608,7 +608,7 @@ export function CanonicalScheduleCashPanel({
                   onChange={(event) => setMemo(event.target.value)}
                 />
               </label>
-              <label className="text-label-12 text-text-secondary">
+              <label className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                 {copy.sourceDocument}
                 <input
                   className={`${inputClass} mt-1 w-full`}
@@ -627,25 +627,25 @@ export function CanonicalScheduleCashPanel({
           ) : null}
 
           <div>
-            <h4 className="text-label-12 font-medium text-text-secondary">
+            <h4 className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-medium text-[var(--color-gray-4)]">
               {copy.history}
             </h4>
             {readyLedger.events.length === 0 ? (
-              <p className="mt-1 text-label-12 text-text-muted">{copy.historyEmpty}</p>
+              <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.historyEmpty}</p>
             ) : (
               <ul className="mt-2 space-y-2">
                 {readyLedger.events.map((event) => (
                   <li
-                    className="rounded-md border border-border p-3 text-label-12"
+                    className="rounded-md border border-border p-3 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]"
                     data-current={event.current ? "true" : "false"}
                     key={event.id}
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div>
-                        <p className="font-medium text-text-primary">
+                        <p className="font-medium text-[var(--color-gray-2)]">
                           {copy.eventTypes[event.event_type]} · {formatMoney(event.amount, event.currency)}
                         </p>
-                        <p className="text-text-secondary">
+                        <p className="text-[var(--color-gray-4)]">
                           {formatValueDate(event.value_date)} · {event.current ? copy.current : copy.superseded} · r{event.revision}
                         </p>
                       </div>
@@ -667,10 +667,10 @@ export function CanonicalScheduleCashPanel({
                       ) : null}
                     </div>
                     <details className="mt-2">
-                      <summary className="cursor-pointer text-text-secondary">
+                      <summary className="cursor-pointer text-[var(--color-gray-4)]">
                         {copy.cashFact}: {formatMoney(event.cash_amount, event.currency)} · {copy.unapplied}: {formatMoney(event.cash_unapplied, event.currency)}
                       </summary>
-                      <dl className="mt-2 space-y-1 break-all text-text-muted">
+                      <dl className="mt-2 space-y-1 break-all text-[var(--color-gray-5)]">
                         <div><dt className="inline">{copy.fee}: </dt><dd className="inline">{formatMoney(event.cash_fee, event.currency)}</dd></div>
                         <div><dt className="inline">{copy.cashFact}: </dt><dd className="inline font-mono">{event.cash_receipt_id}</dd></div>
                         <div><dt className="inline">{copy.applicationLineage}: </dt><dd className="inline font-mono">{event.root_application_id}</dd></div>
@@ -684,7 +684,7 @@ export function CanonicalScheduleCashPanel({
               </ul>
             )}
             {readyLedger.truncated ? (
-              <p className="mt-2 text-label-12 text-status-warning" role="status">
+              <p className="mt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-yellow-1)]" role="status">
                 {copy.truncated}
               </p>
             ) : null}
@@ -692,8 +692,8 @@ export function CanonicalScheduleCashPanel({
         </>
       ) : null}
 
-      {notice ? <p className="text-label-12 text-status-success" role="status">{notice}</p> : null}
-      {error ? <p className="text-label-12 text-status-danger" role="alert">{error}</p> : null}
+      {notice ? <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-green-1)]" role="status">{notice}</p> : null}
+      {error ? <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]" role="alert">{error}</p> : null}
       <Button variant="outline" size="xs"
         disabled={busy}
         onClick={onClose}

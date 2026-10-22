@@ -1396,7 +1396,7 @@ function ReportsConnectedSession({
       }
       result={
         <span
-          className="text-label-12 text-text-disabled"
+          className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-6)]"
           data-ui="reports-close-note"
         >
           {replaceTokens(copy.closes.controlsNote, {
@@ -1536,7 +1536,7 @@ function ReportsConnectedSession({
                   <LegendKey swatchClass="bg-[#3251ca]" label={copy.charts.planVsActual.received} />
                 </div>
                 {points.some((point) => point.fxConversionState === "환산 불가") ? (
-                  <p className="mt-2 text-body-13 font-medium text-status-danger" data-ui="reports-fx-unconvertible">
+                  <p className="mt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-medium text-[var(--color-red-1)]" data-ui="reports-fx-unconvertible">
                     {replaceTokens(copy.charts.fxConversionState, { state: "환산 불가" })}
                   </p>
                 ) : null}
@@ -1582,12 +1582,12 @@ function ReportsConnectedSession({
                   sub={
                     <>
                       {replaceTokens(copy.charts.gp.sub, { currency: currencyLabel })}
-                      <span className="mt-1 block text-label-12 text-text-muted">{copy.charts.gp.basis}</span>
+                      <span className="mt-1 block text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.charts.gp.basis}</span>
                       {gpExclusion.text ? (
                         <>
                           {" — "}
                           <span
-                            className={gpExclusion.unknown ? "text-text-muted" : "text-status-danger"}
+                            className={gpExclusion.unknown ? "text-[var(--color-gray-5)]" : "text-[var(--color-red-1)]"}
                             data-ui={
                               gpExclusion.unknown ? "reports-gp-excluded-unknown" : "reports-gp-excluded"
                             }
@@ -1627,13 +1627,13 @@ function ReportsConnectedSession({
                       retryLabel={copy.retry}
                     />
                   ) : gpPoints.every((point) => !point.hasData) ? (
-                    <p className="mt-3 text-body-13 text-text-muted" data-ui="reports-gp-empty">
+                    <p className="mt-3 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" data-ui="reports-gp-empty">
                       {copy.charts.noData}
                     </p>
                   ) : (
                     <>
                     {gpPoints.some((point) => point.fxConversionState === "환산 불가") ? (
-                    <p className="mt-2 text-body-13 font-medium text-status-danger" data-ui="reports-gp-fx-unconvertible">
+                    <p className="mt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-medium text-[var(--color-red-1)]" data-ui="reports-gp-fx-unconvertible">
                       {replaceTokens(copy.charts.fxConversionState, { state: "환산 불가" })}
                     </p>
                   ) : null}
@@ -1814,7 +1814,7 @@ function ReportsConnectedSession({
                   // legitimately returns 200 with items:[] ("이 담당자에게 데이터
                   // 없음"), not an error. Say so plainly instead of reusing the
                   // org-wide empty copy, which would read as "no data anywhere".
-                  <p className="mt-3 text-body-13 text-text-muted" data-ui="reports-topn-empty">
+                  <p className="mt-3 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" data-ui="reports-topn-empty">
                     {assigneeFilter != null ? copy.topn.emptyAssignee : copy.topn.empty}
                   </p>
                 ) : (
@@ -1855,7 +1855,7 @@ function ReportsConnectedSession({
                             ) : null}
                           {row.fxConversionState === "환산 불가" ? (
                             <span
-                              className="text-status-danger"
+                              className="text-[var(--color-red-1)]"
                               data-ui="reports-topn-fx-unconvertible"
                             >
                               {replaceTokens(copy.charts.fxConversionState, {
@@ -1863,7 +1863,7 @@ function ReportsConnectedSession({
                               })}
                             </span>
                           ) : row.fxConversionEvidence ? (
-                            <span className="text-text-muted" data-ui="reports-topn-fx-evidence">
+                            <span className="text-[var(--color-gray-5)]" data-ui="reports-topn-fx-evidence">
                               {fxEvidenceLine(row.fxConversionEvidence)}
                             </span>
                           ) : null}
@@ -1881,7 +1881,7 @@ function ReportsConnectedSession({
                           </span>
                           {row.status ? (
                             <span
-                              className="mt-1 rounded-md border border-[var(--color-gray-10)] bg-surface-card px-2 py-1.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-3)]"
+                              className="mt-1 rounded-md border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] px-2 py-1.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-3)]"
                               data-ui="reports-topn-evidence"
                               id={evidenceId}
                               hidden={!selected}
@@ -1921,8 +1921,8 @@ function ReportsConnectedSession({
                           className={cn(
                             "flex h-auto w-full flex-col items-stretch justify-start overflow-visible whitespace-normal rounded-lg border px-2.5 py-2 text-left font-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ecoya-blue-3",
                             selected
-                              ? "border-ecoya-accent bg-accent-soft"
-                              : "border-transparent hover:bg-surface-muted",
+                              ? "border-[var(--color-primary-4)] bg-[var(--color-primary-10)]"
+                              : "border-transparent hover:bg-[var(--color-gray-11)]",
                           )}
                           data-ui="reports-topn-row"
                           onClick={() => setSelectedTopKey(selected ? null : rowKey)}
@@ -1996,7 +1996,7 @@ function ReportsConnectedSession({
                       />
                     </div>
                     {closesData.length === 0 ? (
-                      <p className="text-body-13 text-text-muted">{copy.closes.empty}</p>
+                      <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.closes.empty}</p>
                     ) : (
                       closesData.map((close) => (
                         <div
@@ -2095,13 +2095,13 @@ function ReportsConnectedSession({
               <DialogTitle>{replaceTokens(reclosePeriod ? copy.closes.recloseDialogTitle : copy.closes.dialogTitle, { period: closeDialogPeriod })}</DialogTitle>
             </DialogHeader>
           <div className="flex flex-col gap-3">
-            <p className="text-body-14 text-ecoya-gray-3">
+            <p className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-3)]">
               {replaceTokens(copy.closes.dialogBody, { period: closeDialogPeriod })}
             </p>
-            <label className="flex flex-col gap-1 text-label-12 text-text-secondary">
+            <label className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
               {copy.closes.noteLabel}
               <textarea
-                className="min-h-20 rounded-md border border-border p-2 text-body-13 text-text-primary"
+                className="min-h-20 rounded-md border border-border p-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]"
                 maxLength={500}
                 onChange={(event) => setCloseNote(event.target.value)}
                 placeholder={copy.closes.notePlaceholder}
@@ -2113,7 +2113,7 @@ function ReportsConnectedSession({
                 <Badge palette="red" size="sm" tone="fill">
                   {copy.closes.closeFailed}
                 </Badge>
-                <p className="text-body-13 text-status-danger">{closeError}</p>
+                <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]">{closeError}</p>
               </div>
             ) : null}
             {closeSubmitting ? (
@@ -2145,15 +2145,15 @@ function ReportsConnectedSession({
           })}</DialogTitle>
             </DialogHeader>
           <div className="flex flex-col gap-3">
-            <p className="text-body-14 text-text-secondary" data-ui="reports-reopen-impact">
+            <p className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-4)]" data-ui="reports-reopen-impact">
               {replaceTokens(copy.closes.reopenImpact, {
                 period: monthPeriodOf(reopenTarget.period_start),
               })}
             </p>
-            <label className="flex flex-col gap-1 text-label-12 text-text-secondary">
+            <label className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
               {copy.closes.reopenReasonLabel}
               <textarea
-                className="min-h-20 rounded-md border border-border p-2 text-body-13 text-text-primary"
+                className="min-h-20 rounded-md border border-border p-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]"
                 maxLength={500}
                 onChange={(event) => setReopenReason(event.target.value)}
                 placeholder={copy.closes.reopenReasonPlaceholder}
@@ -2161,7 +2161,7 @@ function ReportsConnectedSession({
               />
             </label>
             {reopenError ? (
-              <p className="text-body-13 text-status-danger" role="alert" data-ui="reports-reopen-error">
+              <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]" role="alert" data-ui="reports-reopen-error">
                 {reopenError}
               </p>
             ) : null}
@@ -2187,9 +2187,9 @@ function ReportsConnectedSession({
         }</DialogTitle>
           </DialogHeader>
         {snapshotState.status === "loading" ? (
-          <p className="text-body-13 text-text-muted">{copy.closes.snapshot.loading}</p>
+          <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.closes.snapshot.loading}</p>
         ) : snapshotState.status === "error" ? (
-          <p className="text-body-13 text-status-danger" role="alert">
+          <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]" role="alert">
             {copy.closes.snapshot.loadFailed}
           </p>
         ) : snapshotState.status === "ready" ? (
@@ -2293,12 +2293,12 @@ export function KpiTile({
         <>
           {basis ? <span data-ui="reports-kpi-basis">{basis}</span> : null}
           {caution ? (
-            <span className="text-ecoya-system-orange-1" data-ui="reports-kpi-caution">
+            <span className="text-[var(--color-orange-1)]" data-ui="reports-kpi-caution">
               {caution}
             </span>
           ) : null}
           {errorMessage ? (
-            <span className="text-status-danger" data-ui="reports-kpi-error" role="status">
+            <span className="text-[var(--color-red-1)]" data-ui="reports-kpi-error" role="status">
               {errorMessage}
             </span>
           ) : null}
@@ -2319,7 +2319,7 @@ function CardLoadError({
 }) {
   return (
     <div className="flex flex-col items-start gap-2 py-2" data-ui="reports-card-error" role="alert">
-      <p className="text-body-13 text-status-danger">{message}</p>
+      <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]">{message}</p>
       <Button variant="outline" onClick={onRetry} type="button">
         {retryLabel}
       </Button>
@@ -2342,11 +2342,11 @@ function CardStaleNotice({
 }) {
   return (
     <div
-      className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-border-subtle bg-surface-muted px-3 py-2"
+      className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-[var(--color-gray-11)] bg-[var(--color-gray-11)] px-3 py-2"
       data-ui="reports-card-stale"
       role="status"
     >
-      <p className="text-body-13 text-text-secondary">{message}</p>
+      <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">{message}</p>
       <Button variant="outline" onClick={onRetry} type="button">
         {retryLabel}
       </Button>
@@ -2414,7 +2414,7 @@ function SnapshotView({
   // comment 가 약속한 "생략되지 않는다"가 깨진다. 헬퍼 호출과 마크업을 한
   // 번만 만들어 아래 세 분기가 전부 공유한다(중복 금지).
   const functionalCurrencyLine = (
-    <p className="text-body-13 text-text-secondary" data-ui="reports-snapshot-functional-currency">
+    <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]" data-ui="reports-snapshot-functional-currency">
       {monthCloseFunctionalCurrencyLine(snapshot, copy)}
     </p>
   );
@@ -2437,11 +2437,11 @@ function SnapshotView({
   if (rows.length === 0 && topItems.length === 0 && close.note) {
     return (
       <div className="flex flex-col gap-4" data-ui="reports-snapshot">
-        <p className="text-body-13 text-text-secondary">
+        <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
           <span className="font-semibold">{copy.closes.snapshot.note}</span> · {close.note}
         </p>
         {functionalCurrencyLine}
-        <p className="text-body-13 text-text-muted">{copy.closes.snapshot.empty}</p>
+        <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.closes.snapshot.empty}</p>
         {reconciliation}
       </div>
     );
@@ -2452,7 +2452,7 @@ function SnapshotView({
     return (
       <div className="flex flex-col gap-4" data-ui="reports-snapshot">
         {functionalCurrencyLine}
-        <p className="text-body-13 text-text-muted">{copy.closes.snapshot.empty}</p>
+        <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.closes.snapshot.empty}</p>
         {reconciliation}
       </div>
     );
@@ -2461,16 +2461,16 @@ function SnapshotView({
   return (
     <div className="flex flex-col gap-4" data-ui="reports-snapshot">
       {close.note ? (
-        <p className="text-body-13 text-text-secondary">
+        <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
           <span className="font-semibold">{copy.closes.snapshot.note}</span> · {close.note}
         </p>
       ) : null}
       {functionalCurrencyLine}
       {rows.length > 0 ? (
         <div className="overflow-x-auto">
-          <HostTable className="w-full border-collapse text-body-13 tabular-nums">
+          <HostTable className="w-full border-collapse text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums">
             <HostTableHeader>
-              <HostTableRow className="border-b border-border-muted text-left text-label-12 text-text-muted">
+              <HostTableRow className="border-b border-[var(--color-gray-10)] text-left text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                 <HostTableHead className="py-1.5 pr-3 font-medium">{copy.closes.snapshot.currency}</HostTableHead>
                 <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.closes.snapshot.receivableDue}</HostTableHead>
                 <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.closes.snapshot.received}</HostTableHead>
@@ -2486,17 +2486,17 @@ function SnapshotView({
                   ? monthCloseAppliedByLine(row.fx_conversion.evidence, members, copy)
                   : null;
                 return (
-                  <HostTableRow key={row.currency} className="border-b border-border-muted last:border-b-0">
-                    <HostTableCell className="py-1.5 pr-3 font-semibold text-text-primary">
+                  <HostTableRow key={row.currency} className="border-b border-[var(--color-gray-10)] last:border-b-0">
+                    <HostTableCell className="py-1.5 pr-3 font-semibold text-[var(--color-gray-2)]">
                       {row.currency}
                       {row.fx_conversion?.state === "환산 불가" ? (
-                        <span className="block text-label-12 font-medium text-status-danger">
+                        <span className="block text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-medium text-[var(--color-red-1)]">
                           {replaceTokens(copy.charts.fxConversionState, {
                             state: row.fx_conversion.state,
                           })}
                         </span>
                       ) : row.fx_conversion?.evidence ? (
-                        <span className="block text-label-12 font-normal text-text-muted">
+                        <span className="block text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-normal text-[var(--color-gray-5)]">
                           {fxEvidenceLine(row.fx_conversion.evidence)}
                           {appliedByLine ? (
                             <>
@@ -2529,7 +2529,7 @@ function SnapshotView({
       ) : null}
       {topItems.length > 0 ? (
         <div>
-          <h3 className="m-0 text-body-14 font-semibold text-text-primary">{copy.closes.snapshot.topTitle}</h3>
+          <h3 className="m-0 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-semibold text-[var(--color-gray-2)]">{copy.closes.snapshot.topTitle}</h3>
           <div className="mt-2 grid gap-2">
             {topItems.map((item) => {
               const appliedByLine = item.fx_conversion?.evidence
@@ -2537,15 +2537,15 @@ function SnapshotView({
                 : null;
               return (
                 <div key={`${item.counterparty}-${item.currency}`} className="grid gap-1">
-                  <div className="flex justify-between text-body-13">
-                    <span className="font-medium text-ecoya-gray-3">{item.counterparty}</span>
-                    <span className="text-text-secondary tabular-nums">
+                  <div className="flex justify-between text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]">
+                    <span className="font-medium text-[var(--color-gray-3)]">{item.counterparty}</span>
+                    <span className="text-[var(--color-gray-4)] tabular-nums">
                       {fmtAmount(item.amount, item.currency)} {item.currency}
                     </span>
                   </div>
                   {item.fx_conversion?.state === "환산 불가" ? (
                     <span
-                      className="text-label-12 font-medium text-status-danger"
+                      className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-medium text-[var(--color-red-1)]"
                       data-ui="reports-snapshot-topn-fx-unconvertible"
                     >
                       {replaceTokens(copy.charts.fxConversionState, {
@@ -2554,7 +2554,7 @@ function SnapshotView({
                     </span>
                   ) : item.fx_conversion?.evidence ? (
                     <span
-                      className="text-label-12 font-normal text-text-muted"
+                      className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-normal text-[var(--color-gray-5)]"
                       data-ui="reports-snapshot-topn-fx-evidence"
                     >
                       {fxEvidenceLine(item.fx_conversion.evidence)}
@@ -2566,9 +2566,9 @@ function SnapshotView({
                       ) : null}
                     </span>
                   ) : null}
-                  <div className="rounded-r bg-surface-muted">
+                  <div className="rounded-r bg-[var(--color-gray-11)]">
                     <div
-                      className="h-2.5 rounded-r bg-ecoya-accent"
+                      className="h-2.5 rounded-r bg-[var(--color-primary-4)]"
                       style={{ width: `${maxTop > 0 ? (num(item.amount) / maxTop) * 100 : 0}%` }}
                     />
                   </div>
@@ -2619,25 +2619,25 @@ function SnapshotReconciliation({
   return (
     <div className="flex flex-col gap-4" data-ui="reports-snapshot-reconciliation">
       <div>
-        <h3 className="m-0 text-body-14 font-semibold text-text-primary">{snapCopy.schedulesTitle}</h3>
+        <h3 className="m-0 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-semibold text-[var(--color-gray-2)]">{snapCopy.schedulesTitle}</h3>
         {schedules == null ? (
-          <p className="mt-2 text-body-13 text-text-muted" data-ui="reports-snapshot-schedules-missing">
+          <p className="mt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" data-ui="reports-snapshot-schedules-missing">
             {snapCopy.schedulesNotRecorded}
           </p>
         ) : (
           <>
             {schedules.as_of ? (
-              <p className="mt-1 text-label-12 text-text-muted" data-ui="reports-snapshot-schedules-as-of">
+              <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" data-ui="reports-snapshot-schedules-as-of">
                 {replaceTokens(snapCopy.schedulesAsOf, { date: monthDay(schedules.as_of.slice(0, 10)) })}
               </p>
             ) : null}
             {scheduleItems.length === 0 ? (
-              <p className="mt-2 text-body-13 text-text-muted">{snapCopy.empty}</p>
+              <p className="mt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{snapCopy.empty}</p>
             ) : (
               <div className="mt-2 overflow-x-auto">
-                <HostTable className="w-full border-collapse text-body-13 tabular-nums" data-ui="reports-snapshot-schedules">
+                <HostTable className="w-full border-collapse text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums" data-ui="reports-snapshot-schedules">
                   <HostTableHeader>
-                    <HostTableRow className="border-b border-border-muted text-left text-label-12 text-text-muted">
+                    <HostTableRow className="border-b border-[var(--color-gray-10)] text-left text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                       <HostTableHead className="py-1.5 pr-3 font-medium">{snapCopy.scheduleType}</HostTableHead>
                       <HostTableHead className="py-1.5 pr-3 font-medium">{snapCopy.scheduleDue}</HostTableHead>
                       <HostTableHead className="py-1.5 pr-3 text-right font-medium">{snapCopy.scheduleAmount}</HostTableHead>
@@ -2652,7 +2652,7 @@ function SnapshotReconciliation({
                     {scheduleItems.map((item) => (
                       <HostTableRow
                         key={item.schedule_id}
-                        className="border-b border-border-muted last:border-b-0"
+                        className="border-b border-[var(--color-gray-10)] last:border-b-0"
                         data-ui="reports-snapshot-schedule-row"
                       >
                         <HostTableCell className="py-1.5 pr-3">{scheduleTypeLabel(item.type)}</HostTableCell>
@@ -2674,13 +2674,13 @@ function SnapshotReconciliation({
       </div>
 
       <div>
-        <h3 className="m-0 text-body-14 font-semibold text-text-primary">{snapCopy.adjustmentsTitle}</h3>
+        <h3 className="m-0 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-semibold text-[var(--color-gray-2)]">{snapCopy.adjustmentsTitle}</h3>
         {adjustments.length === 0 ? (
-          <p className="mt-2 text-body-13 text-text-muted">{snapCopy.adjustmentsEmpty}</p>
+          <p className="mt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{snapCopy.adjustmentsEmpty}</p>
         ) : (
           <ul className="mt-2 grid gap-1" data-ui="reports-snapshot-adjustments">
             {adjustments.map((event) => (
-              <li key={event.id} className="text-body-13 text-text-secondary">
+              <li key={event.id} className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                 {replaceTokens(snapCopy.adjustmentLine, {
                   date: monthDay(event.created_at.slice(0, 10)),
                   amount: fmtAmount(event.amount, event.currency),
@@ -2694,13 +2694,13 @@ function SnapshotReconciliation({
       </div>
 
       <div>
-        <h3 className="m-0 text-body-14 font-semibold text-text-primary">{snapCopy.writeoffsTitle}</h3>
+        <h3 className="m-0 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-semibold text-[var(--color-gray-2)]">{snapCopy.writeoffsTitle}</h3>
         {writeoffs.length === 0 ? (
-          <p className="mt-2 text-body-13 text-text-muted">{snapCopy.writeoffsEmpty}</p>
+          <p className="mt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{snapCopy.writeoffsEmpty}</p>
         ) : (
           <ul className="mt-2 grid gap-1" data-ui="reports-snapshot-writeoffs">
             {writeoffs.map((event) => (
-              <li key={event.id} className="text-body-13 text-text-secondary">
+              <li key={event.id} className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                 {replaceTokens(snapCopy.writeoffLine, {
                   date: monthDay(event.occurred_at.slice(0, 10)),
                   amount: fmtAmount(event.written_off_amount, event.currency),

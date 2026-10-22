@@ -56,11 +56,11 @@ function Body({ screen }: { screen: ReferenceOperationsScreen }) {
     <div className="reference-content-width w-full space-y-4 px-5 pt-1.5 pb-10">
       {screen === "reports" ? <ReportsConnected copy={messages.erpReports.reports} role={identity.role}
           renderHeader={(controls, summary) => <PageHeader variant="hero" title={copy.title} description={description}
-            meta={<span className="rounded-full bg-ecoya-blue-9 px-2 py-0.5 text-body-13 font-bold text-ecoya-indigo">{messages.erpReports.reports.proBadge}</span>}
+            meta={<span className="rounded-full bg-[var(--color-primary-9)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-bold text-[var(--color-indigo)]">{messages.erpReports.reports.proBadge}</span>}
             filters={controls} summary={summary} />} />
         : screen === "sales" ? <SalesPerformanceConnected copy={messages.erpSalesPerformance.cockpit} role={identity.role}
           renderHeader={(controls, summary) => <PageHeader variant="hero" title={copy.title} description={description}
-            meta={<span className="rounded-full bg-ecoya-blue-9 px-2 py-0.5 text-body-13 font-bold text-ecoya-indigo">{messages.erpReports.reports.proBadge}</span>}
+            meta={<span className="rounded-full bg-[var(--color-primary-9)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-bold text-[var(--color-indigo)]">{messages.erpReports.reports.proBadge}</span>}
             filters={controls} summary={summary} />} />
         : screen === "settlement" ? <SettlementConnected copy={messages.erpSettlement.settlement}
           renderHeader={(controls, summary) => <PageHeader variant="hero" title={copy.title} description={description} filters={controls} summary={summary} />} />

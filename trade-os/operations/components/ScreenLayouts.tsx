@@ -49,7 +49,7 @@ function PageTitleBar({ title, description, meta, action, className, ...props }:
 // `h-full min-h-0` gives the section a definite bounded height — matching the
 // already-correct WorkbenchLayout below — so the inner body scrolls as designed.
 const layoutRootClass =
-  "flex h-full min-h-0 flex-col bg-ecoya-gray-12 max-sm:h-auto max-sm:min-h-0";
+  "flex h-full min-h-0 flex-col bg-[var(--color-gray-12)] max-sm:h-auto max-sm:min-h-0";
 const scrollableBodyClass =
   "min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:auto] max-sm:flex-none max-sm:overflow-visible";
 
@@ -118,7 +118,7 @@ function SettingsLayout({ titleBar, title, description, meta, action, children, 
 function WorkbenchLayout({ titleBar, children, className, ...props }: ScreenLayoutProps) {
   return (
     <section
-      className={cn("flex h-full min-h-0 flex-col bg-ecoya-gray-12", className)}
+      className={cn("flex h-full min-h-0 flex-col bg-[var(--color-gray-12)]", className)}
       data-layout="workbench"
       {...props}
     >

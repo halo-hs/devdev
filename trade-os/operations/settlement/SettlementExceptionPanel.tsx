@@ -155,7 +155,7 @@ function loadableError<T>(state: Loadable<T>, error: string, retry: string, onRe
   if (state.status !== "error") return null;
   return (
     <div className="flex flex-wrap items-center gap-2" role="alert">
-      <span className="text-label-12 text-status-danger">{error}</span>
+      <span className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]">{error}</span>
       {state.retryable ? (
         <Button variant="outline" size="xs" onClick={onRetry} type="button">
           {retry}
@@ -595,8 +595,8 @@ export function SettlementExceptionPanel({
     >
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h4 className="text-header-16 font-semibold text-text-primary">{copy.title}</h4>
-          <p className="mt-1 break-keep text-label-12 text-pretty text-text-muted">
+          <h4 className="text-[length:var(--text-body-7)] leading-[var(--leading-body-6)] font-semibold text-[var(--color-gray-2)]">{copy.title}</h4>
+          <p className="mt-1 break-keep text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-pretty text-[var(--color-gray-5)]">
             {subtitleParts ? (
               <>
                 {subtitleParts[1]}{" "}
@@ -610,42 +610,42 @@ export function SettlementExceptionPanel({
         </Button>
       </div>
       {error ? (
-        <p className="mb-3 text-pretty text-label-12 text-status-danger" id={exceptionErrorId} role="alert">{error}</p>
+        <p className="mb-3 text-pretty text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]" id={exceptionErrorId} role="alert">{error}</p>
       ) : null}
       {busy ? (
-        <p aria-live="polite" className="mb-3 text-pretty text-label-12 text-text-muted" role="status">
+        <p aria-live="polite" className="mb-3 text-pretty text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" role="status">
           {copy.saving}
         </p>
       ) : null}
       {saved && !busy ? (
-        <p aria-live="polite" className="mb-3 text-pretty text-label-12 text-status-success" role="status">{copy.saved}</p>
+        <p aria-live="polite" className="mb-3 text-pretty text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-green-1)]" role="status">{copy.saved}</p>
       ) : null}
       {!canRecord ? (
-        <p className="mb-3 text-pretty text-label-12 text-text-muted">{copy.restricted}</p>
+        <p className="mb-3 text-pretty text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.restricted}</p>
       ) : null}
       <div className="grid gap-4 lg:grid-cols-2">
-        <section aria-labelledby={`settlement-overpayments-${entry.id}`} className="rounded-md border border-border-muted bg-surface-card p-3">
-          <h5 className="text-body-14 font-semibold text-text-primary" id={`settlement-overpayments-${entry.id}`}>
+        <section aria-labelledby={`settlement-overpayments-${entry.id}`} className="rounded-md border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] p-3">
+          <h5 className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-semibold text-[var(--color-gray-2)]" id={`settlement-overpayments-${entry.id}`}>
             {copy.overpayments.title}
           </h5>
-          {overpayments.status === "loading" ? <p className="mt-2 text-label-12 text-text-muted">{copy.loading}</p> : null}
+          {overpayments.status === "loading" ? <p className="mt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.loading}</p> : null}
           {loadableError(overpayments, copy.error, copy.retry, retryLoad)}
-          {overpayments.status === "empty" ? <p className="mt-2 text-label-12 text-text-muted">{copy.overpayments.empty}</p> : null}
+          {overpayments.status === "empty" ? <p className="mt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.overpayments.empty}</p> : null}
           {overpayments.status === "ready" ? (
             <ul className="mt-2 space-y-3">
               {refundRows.map((overpayment) => {
                 const refundState = refunds[overpayment.id] ?? { status: "loading" as const };
                 const refundDraft = refundDrafts[overpayment.id] ?? EMPTY_REFUND_DRAFT;
                 return (
-                  <li className="border-t border-border-subtle pt-2 text-label-12 first:border-t-0 first:pt-0" key={overpayment.id}>
-                    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-text-primary">
+                  <li className="border-t border-[var(--color-gray-11)] pt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] first:border-t-0 first:pt-0" key={overpayment.id}>
+                    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[var(--color-gray-2)]">
                       <span className="font-medium">{kindLabel(overpayment.kind, entry.type, copy.overpayments)}</span>
                       <span>{formatMoney(overpayment.amount, overpayment.currency)}</span>
                     </div>
-                    <p className="mt-1 break-all text-text-muted">
+                    <p className="mt-1 break-all text-[var(--color-gray-5)]">
                       {copy.overpayments.paymentId}: <span className="font-mono">{overpayment.payment_id}</span>
                     </p>
-                    <div className="mt-1 grid gap-x-3 gap-y-1 text-text-muted sm:grid-cols-3">
+                    <div className="mt-1 grid gap-x-3 gap-y-1 text-[var(--color-gray-5)] sm:grid-cols-3">
                       <span>{copy.overpayments.remaining}: {formatMoney(overpayment.remaining, overpayment.currency)}</span>
                       <span>{copy.overpayments.allocated}: {formatMoney(overpayment.allocated_amount, overpayment.currency)}</span>
                       <span>{copy.overpayments.refunded}: {formatMoney(overpayment.refunded_total, overpayment.currency)}</span>
@@ -655,12 +655,12 @@ export function SettlementExceptionPanel({
                       <Button variant="outline" size="xs" onClick={() => retryRefund(overpayment.id)}>결과 다시 확인</Button>
                     </div>}
                     <div className="mt-2">
-                      <span className="font-medium text-text-secondary">{copy.overpayments.refundTitle}</span>
-                      {refundState.status === "loading" ? <p className="mt-1 text-text-muted">{copy.loading}</p> : null}
+                      <span className="font-medium text-[var(--color-gray-4)]">{copy.overpayments.refundTitle}</span>
+                      {refundState.status === "loading" ? <p className="mt-1 text-[var(--color-gray-5)]">{copy.loading}</p> : null}
                       {loadableError(refundState, copy.error, copy.retry, () => retryRefund(overpayment.id))}
-                      {refundState.status === "empty" ? <p className="mt-1 text-text-muted">{copy.overpayments.refundEmpty}</p> : null}
+                      {refundState.status === "empty" ? <p className="mt-1 text-[var(--color-gray-5)]">{copy.overpayments.refundEmpty}</p> : null}
                       {refundState.status === "ready" ? (
-                        <ul className="mt-1 space-y-1 text-text-muted">
+                        <ul className="mt-1 space-y-1 text-[var(--color-gray-5)]">
                           {refundState.data.map((refund) => (
                             <li className="break-words" key={refund.id}>
                               <span>{formatMoney(refund.amount, refund.currency)} · {refund.reason}</span>
@@ -674,10 +674,10 @@ export function SettlementExceptionPanel({
                       ) : null}
                       {canRecord ? (
                         <div className="mt-2 flex flex-wrap items-end gap-2">
-                          <p className="w-full text-pretty text-text-muted" id={`settlement-refund-hint-${overpayment.id}`}>
+                          <p className="w-full text-pretty text-[var(--color-gray-5)]" id={`settlement-refund-hint-${overpayment.id}`}>
                             {entry.type === "payable" ? copy.overpayments.returnHint : copy.overpayments.refundHint}
                           </p>
-                          <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                          <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                             {copy.overpayments.refundAmount}
                             <Input
                               className="h-8 px-3 w-24"
@@ -691,7 +691,7 @@ export function SettlementExceptionPanel({
                               onChange={(event) => updateRefundDraft(overpayment.id, "amount", event.target.value)}
                             />
                           </label>
-                          <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                          <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                             {copy.overpayments.refundEvidence}
                             <Input
                               className="h-8 px-3 w-32"
@@ -704,7 +704,7 @@ export function SettlementExceptionPanel({
                               onChange={(event) => updateRefundDraft(overpayment.id, "evidence", event.target.value)}
                             />
                           </label>
-                          <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                          <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                             {copy.overpayments.refundReason}
                             <Input
                               className="h-8 px-3 w-40"
@@ -717,7 +717,7 @@ export function SettlementExceptionPanel({
                               onChange={(event) => updateRefundDraft(overpayment.id, "reason", event.target.value)}
                             />
                           </label>
-                          <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                          <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                             {copy.overpayments.refundDocument}
                             <Input
                               className="h-8 px-3 w-32"
@@ -744,13 +744,13 @@ export function SettlementExceptionPanel({
               })}
             </ul>
           ) : null}
-          <div className="mt-3 border-t border-border-subtle pt-3">
-            <p className="mb-2 text-label-12 font-medium text-text-secondary">{copy.overpayments.paymentHistory}</p>
-            {paymentHistory.status === "loading" ? <p className="text-label-12 text-text-muted">{copy.loading}</p> : null}
+          <div className="mt-3 border-t border-[var(--color-gray-11)] pt-3">
+            <p className="mb-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-medium text-[var(--color-gray-4)]">{copy.overpayments.paymentHistory}</p>
+            {paymentHistory.status === "loading" ? <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.loading}</p> : null}
             {loadableError(paymentHistory, copy.error, copy.retry, retryLoad)}
-            {paymentHistory.status === "empty" ? <p className="text-label-12 text-text-muted">{copy.overpayments.paymentHistoryEmpty}</p> : null}
+            {paymentHistory.status === "empty" ? <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.overpayments.paymentHistoryEmpty}</p> : null}
             {paymentHistory.status === "ready" ? (
-              <ul className="space-y-1 text-label-12 text-text-muted">
+              <ul className="space-y-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                 {paymentHistory.data.map((payment) => (
                   <li className="flex flex-wrap items-baseline gap-x-2 gap-y-1" key={payment.id}>
                     {canRecord && allowLegacyOverpaymentRecord ? (
@@ -772,10 +772,10 @@ export function SettlementExceptionPanel({
             ) : null}
           </div>
           {canRecord && allowLegacyOverpaymentRecord ? (
-            <div className="mt-3 border-t border-border-subtle pt-3">
-              <p className="mb-2 text-label-12 font-medium text-text-secondary">{copy.overpayments.recordTitle}</p>
+            <div className="mt-3 border-t border-[var(--color-gray-11)] pt-3">
+              <p className="mb-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-medium text-[var(--color-gray-4)]">{copy.overpayments.recordTitle}</p>
               <div className="flex flex-wrap items-end gap-2">
-                <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.overpayments.amount}
                   <Input
                     className="h-8 px-3 w-24"
@@ -790,7 +790,7 @@ export function SettlementExceptionPanel({
                     }}
                   />
                 </label>
-                <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.overpayments.currency}
                   <Input
                     className="h-8 px-3 w-20 uppercase"
@@ -804,7 +804,7 @@ export function SettlementExceptionPanel({
                     }}
                   />
                 </label>
-                <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.overpayments.kind}
                   <Select value={overpaymentDraft.kind} onValueChange={(value) => setOverpaymentDraft((current) => ({ ...current, kind: value as SettlementOverpaymentKind }))}>
                     <SelectTrigger aria-label={copy.overpayments.kind} className="h-8 w-44"><SelectValue /></SelectTrigger>
@@ -817,7 +817,7 @@ export function SettlementExceptionPanel({
                     </SelectContent>
                   </Select>
                 </label>
-                <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.overpayments.paymentId}
                   <Input
                     className="h-8 px-3 w-56 font-mono"
@@ -845,12 +845,12 @@ export function SettlementExceptionPanel({
           ) : null}
         </section>
 
-        <section aria-labelledby={`settlement-adjustments-${entry.id}`} className="rounded-md border border-border-muted bg-surface-card p-3">
-          <h5 className="text-body-14 font-semibold text-text-primary" id={`settlement-adjustments-${entry.id}`}>
+        <section aria-labelledby={`settlement-adjustments-${entry.id}`} className="rounded-md border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] p-3">
+          <h5 className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-semibold text-[var(--color-gray-2)]" id={`settlement-adjustments-${entry.id}`}>
             {copy.adjustments.title}
           </h5>
           {adjustmentSummary ? (
-            <div className="mt-2 grid gap-1 text-label-12 text-text-muted sm:grid-cols-3">
+            <div className="mt-2 grid gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)] sm:grid-cols-3">
               <span>{copy.adjustments.original}: {formatMoney(adjustmentSummary.original, entry.currency)}</span>
               <span>{copy.adjustments.current}: {formatMoney(adjustmentSummary.current, entry.currency)}</span>
               <span>{copy.adjustments.total}: {formatMoney(adjustmentSummary.total, entry.currency)}</span>
@@ -859,13 +859,13 @@ export function SettlementExceptionPanel({
               ) : null}
             </div>
           ) : null}
-          {adjustments.status === "loading" ? <p className="mt-2 text-label-12 text-text-muted">{copy.loading}</p> : null}
+          {adjustments.status === "loading" ? <p className="mt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.loading}</p> : null}
           {loadableError(adjustments, copy.error, copy.retry, retryLoad)}
-          {adjustments.status === "empty" ? <p className="mt-2 text-label-12 text-text-muted">{copy.adjustments.empty}</p> : null}
+          {adjustments.status === "empty" ? <p className="mt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.adjustments.empty}</p> : null}
           {adjustments.status === "ready" ? (
-            <ul className="mt-2 space-y-1 text-label-12 text-text-muted">
+            <ul className="mt-2 space-y-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
               {adjustments.data.map((adjustment) => (
-                <li className="flex flex-wrap justify-between gap-x-3 gap-y-1 border-t border-border-subtle pt-1 first:border-t-0 first:pt-0" key={adjustment.id}>
+                <li className="flex flex-wrap justify-between gap-x-3 gap-y-1 border-t border-[var(--color-gray-11)] pt-1 first:border-t-0 first:pt-0" key={adjustment.id}>
                   <span className="min-w-0 break-words">
                     <span>{adjustmentKindLabel(adjustment.kind, copy.adjustments)} · {adjustment.reason}</span>
                     {adjustment.evidence ? (
@@ -875,19 +875,19 @@ export function SettlementExceptionPanel({
                       <span className="block break-all">{copy.adjustments.document}: {adjustment.document_no}</span>
                     ) : null}
                   </span>
-                  <span className="font-medium text-text-primary">{formatMoney(adjustment.amount, adjustment.currency)}</span>
+                  <span className="font-medium text-[var(--color-gray-2)]">{formatMoney(adjustment.amount, adjustment.currency)}</span>
                 </li>
               ))}
             </ul>
           ) : null}
           {canRecord ? (
-            <div className="mt-3 border-t border-border-subtle pt-3">
-              <p className="mb-2 text-label-12 font-medium text-text-secondary">{copy.adjustments.recordTitle}</p>
-              <p className="mb-2 text-pretty text-label-12 text-text-muted" id={`settlement-adjustment-hint-${entry.id}`}>
+            <div className="mt-3 border-t border-[var(--color-gray-11)] pt-3">
+              <p className="mb-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-medium text-[var(--color-gray-4)]">{copy.adjustments.recordTitle}</p>
+              <p className="mb-2 text-pretty text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" id={`settlement-adjustment-hint-${entry.id}`}>
                 {copy.adjustments.recordHint}
               </p>
               <div className="flex flex-wrap items-end gap-2">
-                <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.adjustments.amount}
                   <Input
                     className="h-8 px-3 w-24"
@@ -902,7 +902,7 @@ export function SettlementExceptionPanel({
                     }}
                   />
                 </label>
-                <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.adjustments.currency}
                   <Input
                     className="h-8 px-3 w-20 uppercase"
@@ -916,7 +916,7 @@ export function SettlementExceptionPanel({
                     }}
                   />
                 </label>
-                <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.adjustments.kind}
                   <Select value={adjustmentDraft.kind} onValueChange={(value) => setAdjustmentDraft((current) => ({ ...current, kind: value as SettlementAdjustmentKind }))}>
                     <SelectTrigger aria-label={copy.adjustments.kind} aria-describedby={`settlement-adjustment-hint-${entry.id}`} className="h-8 w-44"><SelectValue /></SelectTrigger>
@@ -932,7 +932,7 @@ export function SettlementExceptionPanel({
                     </SelectContent>
                   </Select>
                 </label>
-                <label className="flex min-w-44 flex-1 flex-col gap-0.5 text-label-12 text-text-secondary">
+                <label className="flex min-w-44 flex-1 flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.adjustments.reason}
                   <Input
                     className="h-8 px-3 w-full"
@@ -946,7 +946,7 @@ export function SettlementExceptionPanel({
                     }}
                   />
                 </label>
-                <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.adjustments.evidence}
                   <Input
                     className="h-8 px-3 w-32"
@@ -954,7 +954,7 @@ export function SettlementExceptionPanel({
                     onChange={(event) => setAdjustmentDraft((current) => ({ ...current, evidence: event.target.value }))}
                   />
                 </label>
-                <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.adjustments.document}
                   <Input
                     className="h-8 px-3 w-32"

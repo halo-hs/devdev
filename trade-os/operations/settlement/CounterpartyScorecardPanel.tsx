@@ -101,7 +101,7 @@ export function CounterpartyScorecardPanel({
     if (r.grade_basis === "no_history_overdue") {
       return (
         <StatusBadge
-          className="rounded-md px-1.5 text-label-12 font-semibold"
+          className="rounded-md px-1.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold"
           meaning="risk"
           shape="square"
           style={{ backgroundColor: "var(--ecoya-system-red-1)", color: "var(--ecoya-system-red-5)" }}
@@ -114,7 +114,7 @@ export function CounterpartyScorecardPanel({
     if (r.grade_basis === "insufficient_history") {
       return (
         <StatusBadge
-          className="rounded-md px-1.5 text-label-12 font-normal"
+          className="rounded-md px-1.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-normal"
           meaning="classification"
           shape="square"
           style={{ backgroundColor: "var(--ecoya-surface-muted)", color: "var(--ecoya-text-muted)" }}
@@ -127,7 +127,7 @@ export function CounterpartyScorecardPanel({
     const presentation = GRADE_PRESENTATION[r.grade] ?? GRADE_PRESENTATION.B;
     return (
       <StatusBadge
-        className="rounded-md px-1.5 text-label-12 font-semibold"
+        className="rounded-md px-1.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold"
         meaning="classification"
         shape="square"
         style={presentation.style}
@@ -146,31 +146,31 @@ export function CounterpartyScorecardPanel({
       description={copy.subtitle}
     >
       {rows.length === 0 ? (
-        <p className="text-body-13 text-text-muted">{copy.empty}</p>
+        <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.empty}</p>
       ) : (
         <>
           <ul className="grid gap-3 lg:hidden">
             {rows.map((row) => (
               <li
                 key={`${row.counterparty}|${row.currency}`}
-                className="rounded-lg border border-border-muted bg-surface-card p-3"
+                className="rounded-lg border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] p-3"
               >
                 <div className="flex min-w-0 items-start justify-between gap-3">
                   <div className="min-w-0">
                     <Link
                       href={`/erp/counterparties/${encodeURIComponent(row.counterparty)}`}
-                      className="block truncate text-body-13 font-semibold text-ecoya-accent hover:underline"
+                      className="block truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold text-[var(--color-primary-4)] hover:underline"
                       data-ui="scorecard-open-customer360"
                     >
                       {row.counterparty}
                     </Link>
-                    <span className="text-button-11 text-text-muted">
+                    <span className="text-[length:var(--text-body-11)] leading-[var(--leading-body-11)] text-[var(--color-gray-5)]">
                       {copy.historyCount.replace("{n}", String(row.completed_count))}
                     </span>
                   </div>
                   {gradeCell(row)}
                 </div>
-                <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-label-12">
+                <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]">
                   {[
                     [copy.cols.score, String(row.payment_reliability_score)],
                     [copy.cols.currency, row.currency],
@@ -181,8 +181,8 @@ export function CounterpartyScorecardPanel({
                     [copy.cols.volume, row.transaction_volume],
                   ].map(([label, value]) => (
                     <div key={label} className="min-w-0">
-                      <dt className="truncate text-text-muted">{label}</dt>
-                      <dd className="mt-0.5 break-words font-medium tabular-nums text-text-primary">
+                      <dt className="truncate text-[var(--color-gray-5)]">{label}</dt>
+                      <dd className="mt-0.5 break-words font-medium tabular-nums text-[var(--color-gray-2)]">
                         {value}
                       </dd>
                     </div>
@@ -192,9 +192,9 @@ export function CounterpartyScorecardPanel({
             ))}
           </ul>
           <OperationalTableFrame keyboardScrollable className="hidden lg:block" label={copy.title}>
-          <HostTable className="min-w-[980px] w-full border-collapse text-label-12">
+          <HostTable className="min-w-[980px] w-full border-collapse text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]">
             <HostTableHeader>
-              <HostTableRow className="border-b border-border-muted text-text-secondary">
+              <HostTableRow className="border-b border-[var(--color-gray-10)] text-[var(--color-gray-4)]">
                 <HostTableHead scope="col" className="px-2 py-1.5 text-left font-medium">{copy.cols.counterparty}</HostTableHead>
                 <HostTableHead scope="col" className="px-2 py-1.5 text-left font-medium">{copy.cols.currency}</HostTableHead>
                 <HostTableHead scope="col" className="px-2 py-1.5 text-center font-medium">{copy.cols.grade}</HostTableHead>
@@ -208,29 +208,29 @@ export function CounterpartyScorecardPanel({
             </HostTableHeader>
             <HostTableBody>
               {rows.map((r) => (
-                <HostTableRow key={`${r.counterparty}|${r.currency}`} className="border-b border-border-subtle">
-                  <HostTableCell className="px-2 py-1.5 text-text-primary">
+                <HostTableRow key={`${r.counterparty}|${r.currency}`} className="border-b border-[var(--color-gray-11)]">
+                  <HostTableCell className="px-2 py-1.5 text-[var(--color-gray-2)]">
                     <Link
                       href={`/erp/counterparties/${encodeURIComponent(r.counterparty)}`}
-                      className="text-ecoya-accent hover:underline"
+                      className="text-[var(--color-primary-4)] hover:underline"
                       data-ui="scorecard-open-customer360"
                     >
                       {r.counterparty}
                     </Link>
-                    <span className="ml-2 text-button-11 text-text-muted">
+                    <span className="ml-2 text-[length:var(--text-body-11)] leading-[var(--leading-body-11)] text-[var(--color-gray-5)]">
                       {copy.historyCount.replace("{n}", String(r.completed_count))}
                     </span>
                   </HostTableCell>
-                  <HostTableCell className="px-2 py-1.5 font-mono text-text-primary">{r.currency}</HostTableCell>
+                  <HostTableCell className="px-2 py-1.5 font-mono text-[var(--color-gray-2)]">{r.currency}</HostTableCell>
                   <HostTableCell className="px-2 py-1.5 text-center">{gradeCell(r)}</HostTableCell>
-                  <HostTableCell className="px-2 py-1.5 text-right tabular-nums text-text-primary">{r.payment_reliability_score}</HostTableCell>
-                  <HostTableCell className="px-2 py-1.5 text-right font-mono tabular-nums text-text-primary">{formatMoney(r.open_receivable, r.currency)}</HostTableCell>
-                  <HostTableCell className="px-2 py-1.5 text-right font-mono tabular-nums text-text-primary">{formatMoney(r.open_payable, r.currency)}</HostTableCell>
-                  <HostTableCell className="px-2 py-1.5 text-right tabular-nums text-text-primary">
+                  <HostTableCell className="px-2 py-1.5 text-right tabular-nums text-[var(--color-gray-2)]">{r.payment_reliability_score}</HostTableCell>
+                  <HostTableCell className="px-2 py-1.5 text-right font-mono tabular-nums text-[var(--color-gray-2)]">{formatMoney(r.open_receivable, r.currency)}</HostTableCell>
+                  <HostTableCell className="px-2 py-1.5 text-right font-mono tabular-nums text-[var(--color-gray-2)]">{formatMoney(r.open_payable, r.currency)}</HostTableCell>
+                  <HostTableCell className="px-2 py-1.5 text-right tabular-nums text-[var(--color-gray-2)]">
                     {r.avg_days_late === null ? "—" : copy.daysSuffix.replace("{n}", r.avg_days_late.toFixed(1))}
                   </HostTableCell>
-                  <HostTableCell className="px-2 py-1.5 text-right tabular-nums text-text-primary">{r.overdue_count}</HostTableCell>
-                  <HostTableCell className="px-2 py-1.5 text-right tabular-nums text-text-primary">{r.transaction_volume}</HostTableCell>
+                  <HostTableCell className="px-2 py-1.5 text-right tabular-nums text-[var(--color-gray-2)]">{r.overdue_count}</HostTableCell>
+                  <HostTableCell className="px-2 py-1.5 text-right tabular-nums text-[var(--color-gray-2)]">{r.transaction_volume}</HostTableCell>
                 </HostTableRow>
               ))}
             </HostTableBody>

@@ -37,13 +37,13 @@ export function MemberSettlementTrendCard({
         title={trendCopy.title}
         sub={replaceTokens(trendCopy.sub, { currency: currencyLabel })}
       >
-        <div className="mb-3 flex flex-wrap gap-4 text-label-12 text-text-secondary" aria-label={trendCopy.title}>
+        <div className="mb-3 flex flex-wrap gap-4 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]" aria-label={trendCopy.title}>
           <span className="inline-flex items-center gap-1.5">
-            <span aria-hidden className="h-2.5 w-2.5 rounded-[3px] bg-ecoya-blue-4" />
+            <span aria-hidden className="h-2.5 w-2.5 rounded-[3px] bg-[var(--color-primary-4)]" />
             {trendCopy.planned}
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span aria-hidden className="h-2.5 w-2.5 rounded-[3px] bg-ecoya-blue-8" />
+            <span aria-hidden className="h-2.5 w-2.5 rounded-[3px] bg-[var(--color-primary-8)]" />
             {trendCopy.received}
           </span>
         </div>
@@ -56,7 +56,7 @@ export function MemberSettlementTrendCard({
             planned: point.planned.approx,
             received: point.received.approx,
             tooltip: (
-              <div className="grid gap-1 text-body-13">
+              <div className="grid gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]">
                 <strong>{yearMonth(point.periodStart)}</strong>
                 <span>{trendCopy.planned} {fmtAmount(point.planned)} {currencyLabel}</span>
                 <span>{trendCopy.received} {fmtAmount(point.received)} {currencyLabel}</span>

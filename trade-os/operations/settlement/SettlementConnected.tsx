@@ -716,20 +716,20 @@ function ProfitabilitySummaryCard({
   const moneyLocale = useLocaleTag();
   if (!row) {
     return (
-      <div className="rounded-lg border border-border-muted bg-surface-card p-4">
-        <div className="text-label-12 font-semibold uppercase text-text-disabled">{caption}</div>
-        <div className="mt-2 text-body-14 text-text-muted">{copy.noEligibleInvoiceBasis}</div>
+      <div className="rounded-lg border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] p-4">
+        <div className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold uppercase text-[var(--color-gray-6)]">{caption}</div>
+        <div className="mt-2 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-5)]">{copy.noEligibleInvoiceBasis}</div>
       </div>
     );
   }
   const coverage = coveragePercent(row);
   const decision = profitabilityRollupDecision(row, copy);
   return (
-    <div className="rounded-lg border border-border-muted bg-surface-card p-4">
+    <div className="rounded-lg border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] p-4">
       <div className="flex items-start justify-between gap-2">
-        <div className="text-label-12 font-semibold uppercase text-text-disabled">{caption}</div>
+        <div className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold uppercase text-[var(--color-gray-6)]">{caption}</div>
         <StatusBadge
-          className="px-2 text-label-12"
+          className="px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]"
           meaning="state"
           style={profitabilityDecisionStyle(decision.tone)}
           tone={decision.tone}
@@ -737,12 +737,12 @@ function ProfitabilitySummaryCard({
           {decision.label}
         </StatusBadge>
       </div>
-      <div className="mt-2 truncate text-body-15 font-semibold text-text-primary" title={row.label}>
+      <div className="mt-2 truncate text-[length:var(--text-body-8)] leading-[var(--leading-body-8)] font-semibold text-[var(--color-gray-2)]" title={row.label}>
         {row.label}
       </div>
       <div
-        className={`mt-1 text-body-20 font-semibold ${
-          row.incompleteInvoiceBasisCount > 0 ? "text-text-muted" : row.adjustedGp < FINANCE_ZERO ? "text-status-danger" : "text-status-success"
+        className={`mt-1 text-[length:var(--text-body-4)] leading-[var(--leading-body-4)] font-semibold ${
+          row.incompleteInvoiceBasisCount > 0 ? "text-[var(--color-gray-5)]" : row.adjustedGp < FINANCE_ZERO ? "text-[var(--color-red-1)]" : "text-[var(--color-green-1)]"
         }`}
       >
         {row.incompleteInvoiceBasisCount > 0 ? copy.missingInvoiceBasis : <>
@@ -750,20 +750,20 @@ function ProfitabilitySummaryCard({
           {fmtExact(row.adjustedGp, row.currency, moneyLocale)}
         </>}
       </div>
-      <div className="mt-1 text-label-12 text-text-muted">
+      <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
         {formatMarginPercent(row, copy)} - {copy.blockedFacts.replace("{count}", String(row.blockedCount))}
       </div>
-      <p className="mt-2 text-label-12 leading-relaxed text-text-muted">{decision.body}</p>
+      <p className="mt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] leading-relaxed text-[var(--color-gray-5)]">{decision.body}</p>
       <div className="mt-2">
-        <div className="flex items-center justify-between gap-2 text-label-12">
-          <span className="text-text-muted">{copy.coverage}</span>
-          <span className={coverage === 100 ? "text-status-success" : "text-status-warning"}>
+        <div className="flex items-center justify-between gap-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]">
+          <span className="text-[var(--color-gray-5)]">{copy.coverage}</span>
+          <span className={coverage === 100 ? "text-[var(--color-green-1)]" : "text-[var(--color-yellow-1)]"}>
             {coverageLabel(row, copy)}
           </span>
         </div>
-        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-muted">
+        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--color-gray-11)]">
           <div
-            className={coverage === 100 ? "h-full bg-status-success-bg" : "h-full bg-status-warning-bg"}
+            className={coverage === 100 ? "h-full bg-[var(--color-green-6)]" : "h-full bg-[var(--color-yellow-6)]"}
             style={{ width: `${coverage}%` }}
           />
         </div>
@@ -784,20 +784,20 @@ function ProfitabilityRollupTable({
   const moneyLocale = useLocaleTag();
   if (rows.length === 0) {
     return (
-      <p className="rounded-lg border border-border-muted bg-surface-card px-4 py-3 text-body-13 text-text-muted">
+      <p className="rounded-lg border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] px-4 py-3 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
         {copy.empty}
       </p>
     );
   }
   return (
     <OperationalTableFrame
-      className="rounded-lg border border-border-muted bg-surface-card"
+      className="rounded-lg border border-[var(--color-gray-10)] bg-[var(--color-gray-12)]"
       keyboardScrollable
       label={nameLabel}
     >
-      <HostTable className="w-full border-collapse text-body-13 tabular-nums">
+      <HostTable className="w-full border-collapse text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums">
         <HostTableHeader>
-          <HostTableRow className="whitespace-nowrap border-b border-border-muted bg-surface text-text-secondary">
+          <HostTableRow className="whitespace-nowrap border-b border-[var(--color-gray-10)] bg-[var(--color-gray-12)] text-[var(--color-gray-4)]">
             <HostTableHead scope="col" className="px-3 py-2 text-left font-medium">{nameLabel}</HostTableHead>
             <HostTableHead scope="col" className="px-3 py-2 text-right font-medium">{copy.deals}</HostTableHead>
             <HostTableHead scope="col" className="px-3 py-2 text-right font-medium">{copy.revenue}</HostTableHead>
@@ -813,13 +813,13 @@ function ProfitabilityRollupTable({
             const coverage = coveragePercent(row);
             const decision = profitabilityRollupDecision(row, copy);
             return (
-              <HostTableRow className="border-b border-border-subtle last:border-0" key={row.key}>
-                <HostTableCell className="px-3 py-2 text-text-primary">{row.label}</HostTableCell>
-                <HostTableCell className="whitespace-nowrap px-3 py-2 text-right text-text-primary">{row.dealCount}</HostTableCell>
-                <HostTableCell className="whitespace-nowrap px-3 py-2 text-right text-text-primary">{row.incompleteInvoiceBasisCount > 0 ? copy.missingInvoiceBasis : fmtExact(row.revenue, row.currency, moneyLocale)}</HostTableCell>
+              <HostTableRow className="border-b border-[var(--color-gray-11)] last:border-0" key={row.key}>
+                <HostTableCell className="px-3 py-2 text-[var(--color-gray-2)]">{row.label}</HostTableCell>
+                <HostTableCell className="whitespace-nowrap px-3 py-2 text-right text-[var(--color-gray-2)]">{row.dealCount}</HostTableCell>
+                <HostTableCell className="whitespace-nowrap px-3 py-2 text-right text-[var(--color-gray-2)]">{row.incompleteInvoiceBasisCount > 0 ? copy.missingInvoiceBasis : fmtExact(row.revenue, row.currency, moneyLocale)}</HostTableCell>
                 <HostTableCell
                   className={`whitespace-nowrap px-3 py-2 text-right font-medium ${
-                    row.incompleteInvoiceBasisCount > 0 ? "text-text-muted" : row.adjustedGp < FINANCE_ZERO ? "text-status-danger" : "text-status-success"
+                    row.incompleteInvoiceBasisCount > 0 ? "text-[var(--color-gray-5)]" : row.adjustedGp < FINANCE_ZERO ? "text-[var(--color-red-1)]" : "text-[var(--color-green-1)]"
                   }`}
                 >
                   {row.incompleteInvoiceBasisCount > 0 ? copy.missingInvoiceBasis : <>
@@ -827,10 +827,10 @@ function ProfitabilityRollupTable({
                     {fmtExact(row.adjustedGp, row.currency, moneyLocale)}
                   </>}
                 </HostTableCell>
-                <HostTableCell className="whitespace-nowrap px-3 py-2 text-right text-text-primary">{formatMarginPercent(row, copy)}</HostTableCell>
+                <HostTableCell className="whitespace-nowrap px-3 py-2 text-right text-[var(--color-gray-2)]">{formatMarginPercent(row, copy)}</HostTableCell>
                 <HostTableCell className="px-3 py-2">
                   <StatusBadge
-                    className="px-2 text-label-12"
+                    className="px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]"
                     meaning="state"
                     style={profitabilityDecisionStyle(decision.tone)}
                     tone={decision.tone}
@@ -838,14 +838,14 @@ function ProfitabilityRollupTable({
                     {decision.label}
                   </StatusBadge>
                 </HostTableCell>
-                <HostTableCell className="whitespace-nowrap px-3 py-2 text-right text-text-primary">
+                <HostTableCell className="whitespace-nowrap px-3 py-2 text-right text-[var(--color-gray-2)]">
                   <span className="block">{copy.receivable}: {fmtExact(row.receivableOutstanding, row.currency, moneyLocale)}</span>
-                  <span className="block text-text-muted">{copy.payable}: {fmtExact(row.payableOutstanding, row.currency, moneyLocale)}</span>
+                  <span className="block text-[var(--color-gray-5)]">{copy.payable}: {fmtExact(row.payableOutstanding, row.currency, moneyLocale)}</span>
                 </HostTableCell>
-                <HostTableCell className="px-3 py-2 text-right text-text-primary">
+                <HostTableCell className="px-3 py-2 text-right text-[var(--color-gray-2)]">
                   <div className="flex flex-col items-end gap-1">
                     <span className="whitespace-nowrap">{row.readyCount}/{row.readyCount + row.blockedCount}</span>
-                    <span className={`whitespace-nowrap ${coverage === 100 ? "text-label-12 text-status-success" : "text-label-12 text-status-warning"}`}>
+                    <span className={`whitespace-nowrap ${coverage === 100 ? "text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-green-1)]" : "text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-yellow-1)]"}`}>
                       {coverageLabel(row, copy)}
                     </span>
                   </div>
@@ -882,7 +882,7 @@ function TradeProfitabilityRollupPanel({
       description={copy.subtitle}
     >
       {facts.length === 0 ? (
-        <p className="text-body-13 text-text-muted">{copy.empty}</p>
+        <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.empty}</p>
       ) : (
         <>
           <div className="mb-4 grid gap-3 md:grid-cols-3">
@@ -966,10 +966,10 @@ function TradeFinanceFactPanel({
       data-component="TradeFinanceFactPanel"
       title={copy.title}
       description={copy.subtitle}
-      action={<span className="text-label-12 text-text-secondary">{facts.length}</span>}
+      action={<span className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">{facts.length}</span>}
     >
       {facts.length === 0 ? (
-        <p className="text-body-13 text-text-muted">{copy.empty}</p>
+        <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.empty}</p>
       ) : (
         <>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -988,17 +988,17 @@ function TradeFinanceFactPanel({
                 ))}
               </SelectContent>
             </Select>
-            <span aria-live="polite" className="text-label-12 text-text-muted">
+            <span aria-live="polite" className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
               {showingLabel}
             </span>
           </div>
           {rows.length === 0 ? (
-            <p className="text-body-13 text-text-muted">{copy.filteredEmpty}</p>
+            <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.filteredEmpty}</p>
           ) : (
           <OperationalTableFrame keyboardScrollable label={copy.title}>
-          <HostTable className="w-full border-collapse text-body-13 tabular-nums">
+          <HostTable className="w-full border-collapse text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums">
             <HostTableHeader>
-              <HostTableRow className="border-b border-border-muted bg-surface text-text-secondary">
+              <HostTableRow className="border-b border-[var(--color-gray-10)] bg-[var(--color-gray-12)] text-[var(--color-gray-4)]">
                 <HostTableHead scope="col" className="px-3 py-2 text-left font-medium">{copy.deal}</HostTableHead>
                 <HostTableHead scope="col" className="px-3 py-2 text-left font-medium">{copy.counterparty}</HostTableHead>
                 <HostTableHead scope="col" className="px-3 py-2 text-left font-medium">{copy.assignee}</HostTableHead>
@@ -1019,33 +1019,33 @@ function TradeFinanceFactPanel({
                 const ready = fact.handoff_ready && !missingInvoiceBasis;
                 return (
                   <HostTableRow
-                    className="border-b border-border-subtle last:border-0"
+                    className="border-b border-[var(--color-gray-11)] last:border-0"
                     data-ui="trade-finance-fact-row"
                     key={`${fact.deal_id ?? "none"}-${fact.currency}-${index}`}
                   >
                     <HostTableCell className="px-3 py-2">
                       {fact.deal_id ? (
-                        <Link href={`/erp/deals/${fact.deal_id}`} className="text-ecoya-accent hover:underline">
+                        <Link href={`/erp/deals/${fact.deal_id}`} className="text-[var(--color-primary-4)] hover:underline">
                           {fact.deal_id.slice(0, 8)}
                         </Link>
                       ) : (
-                        <span className="text-text-muted">{copy.unknown}</span>
+                        <span className="text-[var(--color-gray-5)]">{copy.unknown}</span>
                       )}
                     </HostTableCell>
-                    <HostTableCell className="px-3 py-2 text-text-primary">{fact.counterparty_name || copy.unknown}</HostTableCell>
-                    <HostTableCell className="px-3 py-2 text-text-primary">{fact.assignee_name || copy.unknown}</HostTableCell>
-                    <HostTableCell className="px-3 py-2 text-right text-text-primary">
+                    <HostTableCell className="px-3 py-2 text-[var(--color-gray-2)]">{fact.counterparty_name || copy.unknown}</HostTableCell>
+                    <HostTableCell className="px-3 py-2 text-[var(--color-gray-2)]">{fact.assignee_name || copy.unknown}</HostTableCell>
+                    <HostTableCell className="px-3 py-2 text-right text-[var(--color-gray-2)]">
                       {missingInvoiceBasis ? copy.missingInvoiceBasis : fmtExact(fact.revenue_amount, fact.currency, moneyLocale)}
                     </HostTableCell>
-                    <HostTableCell className="px-3 py-2 text-right text-text-primary">
+                    <HostTableCell className="px-3 py-2 text-right text-[var(--color-gray-2)]">
                       {missingInvoiceBasis ? copy.missingInvoiceBasis : fmtExact(fact.goods_cost_amount, fact.currency, moneyLocale)}
                     </HostTableCell>
-                    <HostTableCell className="px-3 py-2 text-right text-text-primary">
+                    <HostTableCell className="px-3 py-2 text-right text-[var(--color-gray-2)]">
                       {fmtExact(fact.landed_cost_amount, fact.currency, moneyLocale)}
                     </HostTableCell>
                     <HostTableCell
                       className={`px-3 py-2 text-right font-medium ${
-                        missingInvoiceBasis ? "text-text-muted" : adjusted < FINANCE_ZERO ? "text-status-danger" : "text-status-success"
+                        missingInvoiceBasis ? "text-[var(--color-gray-5)]" : adjusted < FINANCE_ZERO ? "text-[var(--color-red-1)]" : "text-[var(--color-green-1)]"
                       }`}
                     >
                       {missingInvoiceBasis ? copy.missingInvoiceBasis : <>
@@ -1053,33 +1053,33 @@ function TradeFinanceFactPanel({
                         {fmtExact(fact.adjusted_gp_amount ?? "0", fact.currency, moneyLocale)}
                       </>}
                       {!missingInvoiceBasis && fact.adjusted_gp_pct ? (
-                        <span className="ml-1 text-text-muted">({fact.adjusted_gp_pct}%)</span>
+                        <span className="ml-1 text-[var(--color-gray-5)]">({fact.adjusted_gp_pct}%)</span>
                       ) : null}
                     </HostTableCell>
-                    <HostTableCell className="whitespace-nowrap px-3 py-2 text-right text-text-primary">
+                    <HostTableCell className="whitespace-nowrap px-3 py-2 text-right text-[var(--color-gray-2)]">
                       <span className="block">{copy.receivableOutstanding}: {fmtExact(fact.receivable_outstanding_amount, fact.currency, moneyLocale)}</span>
-                      <span className="block text-text-muted">{copy.payableOutstanding}: {fmtExact(fact.payable_outstanding_amount, fact.currency, moneyLocale)}</span>
+                      <span className="block text-[var(--color-gray-5)]">{copy.payableOutstanding}: {fmtExact(fact.payable_outstanding_amount, fact.currency, moneyLocale)}</span>
                     </HostTableCell>
                     <HostTableCell className="px-3 py-2">
                       <StatusBadge
-                        className="px-2 text-label-12 font-normal"
+                        className="px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-normal"
                         meaning="state"
                         style={profitabilityDecisionStyle(ready ? "success" : "warning")}
                         tone={ready ? "success" : "warning"}
                       >
                         {ready ? copy.ready : copy.blocked}
                       </StatusBadge>
-                      {missingInvoiceBasis ? <p className="mt-1 min-w-48 text-label-12 text-text-muted">{fact.handoff_blockers.includes("invalid_invoice_basis") ? copy.invalidInvoiceBasisBody : copy.missingInvoiceBasisBody}</p>
-                        : missingPaymentSchedule ? <p className="mt-1 min-w-48 text-label-12 text-text-muted">{copy.missingPaymentScheduleBody}</p>
-                          : <span className="ml-2 text-text-muted">{fact.data_quality}</span>}
+                      {missingInvoiceBasis ? <p className="mt-1 min-w-48 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{fact.handoff_blockers.includes("invalid_invoice_basis") ? copy.invalidInvoiceBasisBody : copy.missingInvoiceBasisBody}</p>
+                        : missingPaymentSchedule ? <p className="mt-1 min-w-48 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.missingPaymentScheduleBody}</p>
+                          : <span className="ml-2 text-[var(--color-gray-5)]">{fact.data_quality}</span>}
                     </HostTableCell>
-                    <HostTableCell className="max-w-56 px-3 py-2 text-text-muted">
+                    <HostTableCell className="max-w-56 px-3 py-2 text-[var(--color-gray-5)]">
                       {(fact.source_document_numbers ?? []).length > 0 ? (
                         <span className="flex flex-wrap gap-x-2 gap-y-0.5">
                           {(fact.source_document_numbers ?? []).map((docNumber) => (
                             <Link
                               key={docNumber}
-                              className="whitespace-nowrap text-ecoya-accent hover:underline"
+                              className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline"
                               data-ui="finance-fact-source-link"
                               href={`/erp/documents?q=${encodeURIComponent(docNumber)}${
                                 fact.deal_id ? `&deal_id=${encodeURIComponent(fact.deal_id)}` : ""
@@ -1113,7 +1113,7 @@ function TradeFinanceFactPanel({
               >
                 {copy.previousPage}
               </Button>
-              <span className="text-label-12 text-text-muted">
+              <span className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                 {copy.pageOf
                   .replace("{page}", String(currentPageIndex + 1))
                   .replace("{total}", String(pageCount))}
@@ -1161,13 +1161,13 @@ function DrillOnlyCounterpartyRow({
   return (
     <Fragment>
       <HostTableRow
-        className="cursor-pointer border-b border-border-subtle bg-surface-muted hover:bg-surface last:border-0"
+        className="cursor-pointer border-b border-[var(--color-gray-11)] bg-[var(--color-gray-11)] hover:bg-[var(--color-gray-12)] last:border-0"
         data-outside-summary="true"
         data-ui="settlement-counterparty-row"
         data-expanded="true"
         onClick={onCollapse}
       >
-        <HostTableCell className="px-3 py-2 text-text-primary">
+        <HostTableCell className="px-3 py-2 text-[var(--color-gray-2)]">
           <Button variant="link" type="button"
             className="h-auto p-0 font-normal text-[length:inherit] leading-[inherit] text-[var(--color-gray-4)] hover:text-[var(--color-gray-2)] mr-2"
             aria-expanded={true}
@@ -1183,7 +1183,7 @@ function DrillOnlyCounterpartyRow({
           {target.name ? (
             <Link
               href={`/erp/counterparties/${encodeURIComponent(target.counterpartyId || target.name)}`}
-              className="ml-2 text-label-12 text-ecoya-accent hover:underline"
+              className="ml-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-primary-4)] hover:underline"
               data-ui="settlement-open-customer360"
               onClick={(event) => event.stopPropagation()}
             >
@@ -1191,22 +1191,22 @@ function DrillOnlyCounterpartyRow({
             </Link>
           ) : null}
         </HostTableCell>
-        <HostTableCell className="px-3 py-2 text-ecoya-gray-3">{target.currency}</HostTableCell>
+        <HostTableCell className="px-3 py-2 text-[var(--color-gray-3)]">{target.currency}</HostTableCell>
         {/* No receivable/payable/overdue numbers: by definition this
             counterparty is not in the by_counterparty aggregate this render,
             so those figures are not known — showing "—" or 0 here would
             fabricate a number, not report one. */}
-        <HostTableCell className="px-3 py-2 text-right italic text-text-muted" colSpan={3}>
+        <HostTableCell className="px-3 py-2 text-right italic text-[var(--color-gray-5)]" colSpan={3}>
           {copy.counterparty.outsideSummaryNote}
         </HostTableCell>
       </HostTableRow>
       <HostTableRow
         aria-label={loadableCopy.sections.settlementCounterpartyDeals}
-        className="border-b border-border-subtle bg-surface"
+        className="border-b border-[var(--color-gray-11)] bg-[var(--color-gray-12)]"
       >
         <HostTableCell colSpan={5} className="px-6 py-3">
           {loadingDeals ? (
-            <p className="text-body-13 text-text-muted">{copy.counterparty.loadingDeals}</p>
+            <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.counterparty.loadingDeals}</p>
           ) : (
             <LoadableSection
               copy={sectionLoadableCopy(
@@ -1556,12 +1556,12 @@ export function SettlementConnected({ copy, renderHeader }: { copy: SettlementCo
   } else if (state.status === "error") {
     content = (
       <section
-        className="flex flex-col gap-3 rounded-lg border border-border-muted bg-surface-card px-4 py-6"
+        className="flex flex-col gap-3 rounded-lg border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] px-4 py-6"
         data-component="SettlementConnected"
         data-state="error"
         role="alert"
       >
-        <p className="text-body-14 text-status-danger">{copy.loadError}</p>
+        <p className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-red-1)]">{copy.loadError}</p>
         <Button variant="outline" onClick={loadSettlement} type="button">
           {copy.retry}
         </Button>
@@ -2712,10 +2712,10 @@ function SettlementView({
   // reconciling schedule looks the same regardless of which row it renders
   // under.
   const renderCounterpartyDealsList = (deals: SettlementDealItem[]) => (
-    <ul className="flex flex-col gap-2 text-body-13">
+    <ul className="flex flex-col gap-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]">
       {deals.map((d) => (
         <li key={d.schedule_id} className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <span className={d.overdue ? "font-medium text-status-danger" : "text-text-primary"}>
+          <span className={d.overdue ? "font-medium text-[var(--color-red-1)]" : "text-[var(--color-gray-2)]"}>
             {exactMoney(d.amount, d.currency)} · {formatDate(d.due_date, moneyLocale)}
           </span>
           {d.overdue ? (
@@ -2723,19 +2723,19 @@ function SettlementView({
               {copy.ledger.overdueBadge}
             </StatusBadge>
           ) : null}
-          <span className="text-text-muted">
+          <span className="text-[var(--color-gray-5)]">
             {d.type === "receivable" ? copy.kpi.receivable : copy.kpi.payable}
           </span>
           {d.deal_id ? (
             <Link
               href={`/erp/deals/${d.deal_id}`}
-              className="text-ecoya-accent hover:underline"
+              className="text-[var(--color-primary-4)] hover:underline"
               onClick={(e) => e.stopPropagation()}
             >
               {d.deal_title || copy.counterparty.dealLink}
             </Link>
           ) : (
-            <span className="text-text-muted">—</span>
+            <span className="text-[var(--color-gray-5)]">—</span>
           )}
         </li>
       ))}
@@ -2968,7 +2968,7 @@ function SettlementView({
       }
       result={
         <p
-          className="text-body-13 text-text-muted"
+          className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]"
           data-ui="settlement-balance-as-of"
         >
           {copy.asOf.replace("{date}", asOf)}
@@ -2991,7 +2991,7 @@ function SettlementView({
           </SelectContent>
         </Select>
       </BusinessFilterField>
-      <label className="text-label-12 text-text-secondary flex items-center gap-1.5">
+      <label className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)] flex items-center gap-1.5">
         <Checkbox
           checked={includeCancelled}
           className="border-white bg-white"
@@ -3036,7 +3036,7 @@ function SettlementView({
           from overview.cells. No client-side net7/net30 recomputation. */}
       <SectionPanel id="settlement-forecast" title={copy.calendar.title}>
         {byCurrencyBuckets.size === 0 ? (
-          <p className="text-body-13 text-text-muted">{copy.calendar.empty}</p>
+          <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.calendar.empty}</p>
         ) : (
         // Figma 정산 4차 (5721:60487): one table per direction (segment tab),
         // a row per currency; cells still drill the ledger below.
@@ -3047,7 +3047,7 @@ function SettlementView({
             ))}
           </TabsList>
           <OperationalTableFrame className="mt-3" label={`${copy.calendar.title} · ${copy.ledger.tabs[calendarDirection]}`}>
-            <HostTable className="reference-settlement-bucket-table text-body-13 tabular-nums" data-bucket-table="forecast">
+            <HostTable className="reference-settlement-bucket-table text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums" data-bucket-table="forecast">
               <colgroup>
                 <col className="reference-settlement-bucket-label" />
                 <col span={SETTLEMENT_BUCKETS.length} />
@@ -3067,7 +3067,7 @@ function SettlementView({
                   const t = calendarDirection;
                   return (
                     <HostTableRow key={currency}>
-                      <HostTableHead scope="row" className="px-3 py-2 text-left font-semibold text-ecoya-gray-2">{currency}</HostTableHead>
+                      <HostTableHead scope="row" className="px-3 py-2 text-left font-semibold text-[var(--color-gray-2)]">{currency}</HostTableHead>
                       {SETTLEMENT_BUCKETS.map((b) => {
                         const cell = buckets[b]?.[t];
                         const overdue = b === "overdue" && (cell?.total ?? FINANCE_ZERO) > FINANCE_ZERO;
@@ -3075,14 +3075,14 @@ function SettlementView({
                         return (
                           <HostTableCell
                             key={b}
-                            className={`px-3 py-2 text-right ${overdue ? "font-medium text-status-danger" : "text-ecoya-gray-3"}`}
+                            className={`px-3 py-2 text-right ${overdue ? "font-medium text-[var(--color-red-1)]" : "text-[var(--color-gray-3)]"}`}
                           >
                             {clickable ? (
                               // #409 (일정 구간 선택 → 원장 조건 변경): a populated
                               // cell drills the ledger below to exactly the
                               // schedules it summarizes — same tab, currency,
                               // and bucket, server-filtered.
-                              <Button variant="link" type="button" className="h-auto p-0 font-normal underline text-[length:inherit] leading-[inherit] text-inherit hover:text-inherit"
+                              <Button variant="link" type="button" className={`h-auto p-0 font-normal underline text-[length:inherit] leading-[inherit] ${overdue ? "text-inherit hover:text-inherit" : "text-[var(--color-primary-4)] hover:text-[var(--color-primary-4)]"}`}
                                 data-ui="settlement-calendar-cell"
                                 onClick={() => {
                                   onSelectLedgerCell(t, b, currency);
@@ -3124,24 +3124,24 @@ function SettlementView({
           {() => (
             <>
               {byCurrencyCashCalendar.size === 0 ? (
-                <p className="text-body-13 text-text-muted">{copy.cashCalendar.empty}</p>
+                <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.cashCalendar.empty}</p>
               ) : (
                 <div className="flex flex-col gap-4">
                   {[...byCurrencyCashCalendar.entries()]
                     .sort(([a], [b]) => a.localeCompare(b))
                     .map(([currency, buckets]) => (
                       <OperationalTableFrame
-                        className="rounded-lg border border-border-muted bg-surface-card"
+                        className="rounded-lg border border-[var(--color-gray-10)] bg-[var(--color-gray-12)]"
                         key={currency}
                         label={`${copy.cashCalendar.title} · ${currency}`}
                       >
-                        <HostTable className="reference-settlement-bucket-table text-body-13 tabular-nums" data-bucket-table="cash">
+                        <HostTable className="reference-settlement-bucket-table text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums" data-bucket-table="cash">
                   <colgroup>
                     <col className="reference-settlement-bucket-label" />
                     <col span={CASH_CALENDAR_BUCKETS.length} />
                   </colgroup>
                           <HostTableHeader>
-                            <HostTableRow className="border-b border-border-muted bg-surface text-text-secondary">
+                            <HostTableRow className="border-b border-[var(--color-gray-10)] bg-[var(--color-gray-12)] text-[var(--color-gray-4)]">
                               <HostTableHead scope="col" className="px-3 py-2 text-left font-medium">{currency}</HostTableHead>
                               {CASH_CALENDAR_BUCKETS.map((bucket) => (
                                 <HostTableHead scope="col" key={bucket} className="px-3 py-2 text-right font-medium">
@@ -3152,8 +3152,8 @@ function SettlementView({
                           </HostTableHeader>
                           <HostTableBody>
                             {(["receivable", "payable"] as const).map((type) => (
-                              <HostTableRow key={type} className="border-b border-border-subtle last:border-0">
-                                <HostTableHead scope="row" className="px-3 py-2 text-left font-normal text-text-muted">
+                              <HostTableRow key={type} className="border-b border-[var(--color-gray-11)] last:border-0">
+                                <HostTableHead scope="row" className="px-3 py-2 text-left font-normal text-[var(--color-gray-5)]">
                                   {copy.ledger.tabs[type]}
                                 </HostTableHead>
                                 {CASH_CALENDAR_BUCKETS.map((bucket) => {
@@ -3162,7 +3162,7 @@ function SettlementView({
                                   return (
                                     <HostTableCell
                                       key={bucket}
-                                      className={`px-3 py-2 text-right ${overdue ? "font-medium text-status-danger" : "text-ecoya-gray-3"}`}
+                                      className={`px-3 py-2 text-right ${overdue ? "font-medium text-[var(--color-red-1)]" : "text-[var(--color-gray-3)]"}`}
                                     >
                                       {cell && cell.count > 0
                                         ? `${exactMoney(cell.total, currency)} (${cell.count})`
@@ -3179,7 +3179,7 @@ function SettlementView({
                 </div>
               )}
               {pendingCashCalendarCount > 0 ? (
-                <p className="mt-3 text-label-12 text-text-muted" data-ui="settlement-cash-calendar-pending-note">
+                <p className="mt-3 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" data-ui="settlement-cash-calendar-pending-note">
                   {copy.cashCalendar.pendingNote.replace("{count}", String(pendingCashCalendarCount))}
                 </p>
               ) : null}
@@ -3191,7 +3191,7 @@ function SettlementView({
       {/* FX exposure — per-currency AR/AP/net */}
       <SectionPanel title={copy.fx.title}>
         {overview.by_currency.length === 0 ? (
-          <p className="text-body-13 text-text-muted">{copy.fx.empty}</p>
+          <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.fx.empty}</p>
         ) : (
           // Figma 정산 4차 (5721:59286): one card per currency in a row, net
           // amount on the right of the code, AR/AP as label–value rows.
@@ -3202,9 +3202,9 @@ function SettlementView({
             {overview.by_currency.map((c) => {
               const net = financeDecimalMagnitude(c.net);
               return (
-                <div key={c.currency} className="flex min-w-0 flex-col gap-3 rounded-[var(--r-lg)] border border-[var(--color-gray-10)] bg-ecoya-gray-12 px-[18px] py-4">
+                <div key={c.currency} className="flex min-w-0 flex-col gap-3 rounded-[var(--r-lg)] border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] px-[18px] py-4">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[18px] leading-[1.45] font-bold text-ecoya-gray-2">{c.currency}</span>
+                    <span className="text-[18px] leading-[1.45] font-bold text-[var(--color-gray-2)]">{c.currency}</span>
                     <span
                       className={`text-[16px] leading-[1.45] font-semibold tabular-nums ${net >= FINANCE_ZERO ? "text-[#178c4d]" : "text-[#d63333]"}`}
                     >
@@ -3214,11 +3214,11 @@ function SettlementView({
                   <dl className="grid gap-3 tabular-nums">
                     <div className="flex justify-between gap-2">
                       <dt className="text-[14px] leading-[1.45] text-[var(--color-gray-5)]">{copy.kpi.receivable}</dt>
-                      <dd className="text-[15px] leading-[1.45] font-medium text-ecoya-gray-2">{exactMoney(c.receivable)}</dd>
+                      <dd className="text-[15px] leading-[1.45] font-medium text-[var(--color-gray-2)]">{exactMoney(c.receivable)}</dd>
                     </div>
                     <div className="flex justify-between gap-2">
                       <dt className="text-[14px] leading-[1.45] text-[var(--color-gray-5)]">{copy.kpi.payable}</dt>
-                      <dd className="text-[15px] leading-[1.45] font-medium text-ecoya-gray-2">{exactMoney(c.payable)}</dd>
+                      <dd className="text-[15px] leading-[1.45] font-medium text-[var(--color-gray-2)]">{exactMoney(c.payable)}</dd>
                     </div>
                   </dl>
                 </div>
@@ -3234,22 +3234,22 @@ function SettlementView({
           <div className="flex flex-col gap-4">
             {[...agingByCurrency.entries()].map(([currency, byType]) => (
               <OperationalTableFrame
-                className="rounded-lg border border-border-muted bg-surface-card"
+                className="rounded-lg border border-[var(--color-gray-10)] bg-[var(--color-gray-12)]"
                 key={currency}
                 label={`${copy.aging.title} · ${currency}`}
               >
-                <HostTable className="reference-settlement-bucket-table text-body-13 tabular-nums" data-bucket-table="aging">
+                <HostTable className="reference-settlement-bucket-table text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums" data-bucket-table="aging">
                   <colgroup>
                     <col className="reference-settlement-bucket-label" />
                     <col span={AGING_BUCKETS.length} />
                   </colgroup>
                   <HostTableHeader>
-                    <HostTableRow className="border-b border-border-muted bg-surface text-text-secondary">
+                    <HostTableRow className="border-b border-[var(--color-gray-10)] bg-[var(--color-gray-12)] text-[var(--color-gray-4)]">
                       <HostTableHead scope="col" className="px-3 py-2 text-left font-medium">{currency}</HostTableHead>
                       {AGING_BUCKETS.map((b) => (
                         <HostTableHead scope="col"
                           key={b}
-                          className={`px-3 py-2 text-right font-medium ${b === "d90_plus" ? "text-status-danger" : ""}`}
+                          className={`px-3 py-2 text-right font-medium ${b === "d90_plus" ? "text-[var(--color-red-1)]" : ""}`}
                         >
                           {(copy.aging as Record<string, string>)[b]}
                         </HostTableHead>
@@ -3258,8 +3258,8 @@ function SettlementView({
                   </HostTableHeader>
                   <HostTableBody>
                     {(["receivable", "payable"] as const).map((t) => (
-                      <HostTableRow key={t} className="border-b border-border-subtle last:border-0">
-                        <HostTableHead scope="row" className="px-3 py-2 text-left font-normal text-ecoya-gray-3">
+                      <HostTableRow key={t} className="border-b border-[var(--color-gray-11)] last:border-0">
+                        <HostTableHead scope="row" className="px-3 py-2 text-left font-normal text-[var(--color-gray-3)]">
                           {t === "receivable" ? copy.kpi.receivable : copy.kpi.payable}
                         </HostTableHead>
                         {AGING_BUCKETS.map((b) => {
@@ -3268,7 +3268,7 @@ function SettlementView({
                           return (
                             <HostTableCell
                               key={b}
-                              className={`px-3 py-2 text-right ${overdue ? "text-status-danger" : "text-text-primary"}`}
+                              className={`px-3 py-2 text-right ${overdue ? "text-[var(--color-red-1)]" : "text-[var(--color-gray-2)]"}`}
                             >
                               {v !== FINANCE_ZERO ? exactMoney(v) : "—"}
                             </HostTableCell>
@@ -3294,14 +3294,14 @@ function SettlementView({
       {(overview.by_counterparty?.length ?? 0) > 0 || drillOnlyCounterparty ? (
         <SectionPanel id="settlement-counterparty" title={copy.counterparty.title}>
           <OperationalTableFrame keyboardScrollable label={copy.counterparty.title}>
-            <HostTable className="w-full min-w-[52rem] border-collapse text-body-13 whitespace-nowrap tabular-nums">
+            <HostTable className="w-full min-w-[52rem] border-collapse text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] whitespace-nowrap tabular-nums">
               <HostTableHeader>
-                <HostTableRow className="border-b border-border-muted bg-surface text-text-secondary">
+                <HostTableRow className="border-b border-[var(--color-gray-10)] bg-[var(--color-gray-12)] text-[var(--color-gray-4)]">
                   <HostTableHead scope="col" className="px-3 py-2 text-left font-medium">{copy.counterparty.name}</HostTableHead>
                   <HostTableHead scope="col" className="px-3 py-2 text-left font-medium">{copy.fx.currency}</HostTableHead>
                   <HostTableHead scope="col" className="px-3 py-2 text-right font-medium">{copy.kpi.receivable}</HostTableHead>
                   <HostTableHead scope="col" className="px-3 py-2 text-right font-medium">{copy.kpi.payable}</HostTableHead>
-                  <HostTableHead scope="col" className="px-3 py-2 text-right font-medium text-status-danger">{copy.counterparty.overdue}</HostTableHead>
+                  <HostTableHead scope="col" className="px-3 py-2 text-right font-medium text-[var(--color-red-1)]">{copy.counterparty.overdue}</HostTableHead>
                 </HostTableRow>
               </HostTableHeader>
               <HostTableBody>
@@ -3314,12 +3314,12 @@ function SettlementView({
                   return (
                     <Fragment key={key}>
                       <HostTableRow
-                        className="cursor-pointer border-b border-border-subtle hover:bg-surface last:border-0"
+                        className="cursor-pointer border-b border-[var(--color-gray-11)] hover:bg-[var(--color-gray-12)] last:border-0"
                         data-ui="settlement-counterparty-row"
                         data-expanded={expanded ? "true" : "false"}
                         onClick={() => void toggleCounterparty(c.counterparty_name, c.currency, c.counterparty_id)}
                       >
-                        <HostTableCell className="px-3 py-2 text-text-primary">
+                        <HostTableCell className="px-3 py-2 text-[var(--color-gray-2)]">
                           <Button variant="link" type="button" className="h-auto p-0 font-normal text-[length:inherit] leading-[inherit] text-[var(--color-gray-4)] hover:text-[var(--color-gray-2)] mr-2" aria-expanded={expanded}
                             aria-label={expanded ? copy.counterparty.collapse : copy.counterparty.expand}
                             onClick={(e) => {
@@ -3332,7 +3332,7 @@ function SettlementView({
                           {c.counterparty_name ? (
                             <Link
                               href={`/erp/counterparties/${encodeURIComponent(c.counterparty_id || c.counterparty_name)}`}
-                              className="ml-2 text-label-12 text-ecoya-accent hover:underline"
+                              className="ml-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-primary-4)] hover:underline"
                               data-ui="settlement-open-customer360"
                               onClick={(event) => event.stopPropagation()}
                             >
@@ -3340,26 +3340,26 @@ function SettlementView({
                             </Link>
                           ) : null}
                           {mixedCurrencyParties.has(c.counterparty_name ?? "") ? (
-                            <span className="ml-2 inline-flex items-center rounded-full bg-status-warning-bg px-2 py-0.5 text-button-11 font-medium text-ecoya-system-yellow-2">
+                            <span className="ml-2 inline-flex items-center rounded-full bg-[var(--color-yellow-6)] px-2 py-0.5 text-[length:var(--text-body-11)] leading-[var(--leading-body-11)] font-medium text-[var(--color-system-yellow2)]">
                               {copy.counterparty.currencyMixed}
                             </span>
                           ) : null}
                         </HostTableCell>
-                        <HostTableCell className="px-3 py-2 text-ecoya-gray-3">{c.currency}</HostTableCell>
-                        <HostTableCell className="px-3 py-2 text-right text-text-primary">{exactMoney(c.receivable)}</HostTableCell>
-                        <HostTableCell className="px-3 py-2 text-right text-text-primary">{exactMoney(c.payable)}</HostTableCell>
-                        <HostTableCell className={`px-3 py-2 text-right ${overdue > FINANCE_ZERO ? "font-medium text-status-danger" : "text-text-muted"}`}>
+                        <HostTableCell className="px-3 py-2 text-[var(--color-gray-3)]">{c.currency}</HostTableCell>
+                        <HostTableCell className="px-3 py-2 text-right text-[var(--color-gray-2)]">{exactMoney(c.receivable)}</HostTableCell>
+                        <HostTableCell className="px-3 py-2 text-right text-[var(--color-gray-2)]">{exactMoney(c.payable)}</HostTableCell>
+                        <HostTableCell className={`px-3 py-2 text-right ${overdue > FINANCE_ZERO ? "font-medium text-[var(--color-red-1)]" : "text-[var(--color-gray-5)]"}`}>
                           {overdue > FINANCE_ZERO ? exactMoney(c.overdue_receivable) : "—"}
                         </HostTableCell>
                       </HostTableRow>
                       {expanded ? (
                         <HostTableRow
                           aria-label={loadableCopy.sections.settlementCounterpartyDeals}
-                          className="border-b border-border-subtle bg-surface"
+                          className="border-b border-[var(--color-gray-11)] bg-[var(--color-gray-12)]"
                         >
                           <HostTableCell colSpan={5} className="px-6 py-3">
                             {loadingDeals ? (
-                              <p className="text-body-13 text-text-muted">{copy.counterparty.loadingDeals}</p>
+                              <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.counterparty.loadingDeals}</p>
                             ) : (
                               <LoadableSection
                                 copy={sectionLoadableCopy(
@@ -3381,7 +3381,7 @@ function SettlementView({
                                   deals.length > 0 ? (
                                     renderCounterpartyDealsList(deals)
                                   ) : (
-                                    <p className="text-body-13 text-text-muted">
+                                    <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                                       {copy.counterparty.noDeals}
                                     </p>
                                   )
@@ -3439,7 +3439,7 @@ function SettlementView({
             >
               {copy.ledger.formSave}
             </Button>
-            <span aria-hidden="true" className="h-5 w-px bg-ecoya-gray-9" />
+            <span aria-hidden="true" className="h-5 w-px bg-[var(--color-gray-9)]" />
             <Tabs
               value={tab}
               onValueChange={(id) => {
@@ -3458,7 +3458,7 @@ function SettlementView({
       >
         {ledgerCellFilterActive ? (
           <p
-            className="mb-3 flex flex-wrap items-center gap-2 text-label-12 text-text-secondary"
+            className="mb-3 flex flex-wrap items-center gap-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]"
             data-ui="settlement-ledger-cell-filter"
           >
             <span>
@@ -3486,16 +3486,16 @@ function SettlementView({
         {!ledgerReady ? (
           <SkeletonTable rows={8} />
         ) : ledger.length === 0 ? (
-          <p className="text-body-13 text-text-muted">{copy.ledger.empty}</p>
+          <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.ledger.empty}</p>
         ) : (
           <OperationalTableFrame
             data-ui="settlement-ledger-scroll"
             keyboardScrollable
             label={copy.ledger.title}
           >
-            <HostTable className="w-full min-w-[72rem] border-collapse text-body-13 tabular-nums">
+            <HostTable className="w-full min-w-[72rem] border-collapse text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums">
               <HostTableHeader>
-                <HostTableRow className="border-b border-border-muted bg-surface text-text-secondary">
+                <HostTableRow className="border-b border-[var(--color-gray-10)] bg-[var(--color-gray-12)] text-[var(--color-gray-4)]">
                   <HostTableHead scope="col" className="px-3 py-2 text-left font-medium">{copy.ledger.counterparty}</HostTableHead>
                   <HostTableHead scope="col" className="px-3 py-2 text-left font-medium">{copy.ledger.type}</HostTableHead>
                   <HostTableHead scope="col" className="px-3 py-2 text-right font-medium">{copy.ledger.amount}</HostTableHead>
@@ -3538,16 +3538,16 @@ function SettlementView({
                   return (
                   <Fragment key={e.id}>
                     <HostTableRow
-                      className="border-b border-border-subtle last:border-0"
+                      className="border-b border-[var(--color-gray-11)] last:border-0"
                       data-ui="settlement-ledger-row"
                       data-ledger-type={e.type}
                       data-ledger-cancelled={e.deal_cancelled ? "true" : "false"}
                     >
-                      <HostTableCell className="px-3 py-2 text-text-primary">
+                      <HostTableCell className="px-3 py-2 text-[var(--color-gray-2)]">
                         {e.counterparty_name ?? "—"}
                         {e.deal_cancelled ? (
                           <span
-                            className="ml-2 inline-flex items-center rounded-full bg-surface-muted px-2 py-0.5 text-button-11 font-medium text-text-muted"
+                            className="ml-2 inline-flex items-center rounded-full bg-[var(--color-gray-11)] px-2 py-0.5 text-[length:var(--text-body-11)] leading-[var(--leading-body-11)] font-medium text-[var(--color-gray-5)]"
                             data-ui="settlement-cancelled-badge"
                             title={copy.ledger.cancelledReadOnly}
                           >
@@ -3560,22 +3560,22 @@ function SettlementView({
                           {ledgerTypeLabel(e.type, copy)}
                         </StatusBadge>
                       </HostTableCell>
-                      <HostTableCell className="px-3 py-2 text-right text-text-primary">{exactMoney(e.amount, e.currency)}</HostTableCell>
-                      <HostTableCell className="px-3 py-2 text-right text-text-muted">{exactMoney(e.paid, e.currency)}</HostTableCell>
-                      <HostTableCell className="px-3 py-2 text-right font-medium text-text-primary">{exactMoney(e.outstanding, e.currency)}</HostTableCell>
-                      <HostTableCell className="px-3 py-2 text-ecoya-gray-3">{formatDate(e.due_date, moneyLocale)}</HostTableCell>
+                      <HostTableCell className="px-3 py-2 text-right text-[var(--color-gray-2)]">{exactMoney(e.amount, e.currency)}</HostTableCell>
+                      <HostTableCell className="px-3 py-2 text-right text-[var(--color-gray-5)]">{exactMoney(e.paid, e.currency)}</HostTableCell>
+                      <HostTableCell className="px-3 py-2 text-right font-medium text-[var(--color-gray-2)]">{exactMoney(e.outstanding, e.currency)}</HostTableCell>
+                      <HostTableCell className="px-3 py-2 text-[var(--color-gray-3)]">{formatDate(e.due_date, moneyLocale)}</HostTableCell>
                       <HostTableCell className="px-3 py-2">
                         {e.source_document_number ? (
                           <Link
                             href={`/erp/documents?q=${encodeURIComponent(e.source_document_number)}${
                               e.deal_id ? `&deal_id=${encodeURIComponent(e.deal_id)}` : ""
                             }`}
-                            className="text-ecoya-accent hover:underline"
+                            className="text-[var(--color-primary-4)] hover:underline"
                           >
                             {e.source_document_number}
                           </Link>
                         ) : e.manual_reference?.number ? (
-                          <span className="text-text-muted">
+                          <span className="text-[var(--color-gray-5)]">
                             {copy.ledger.manualReference}: {e.manual_reference.number}
                           </span>
                         ) : (
@@ -3589,7 +3589,7 @@ function SettlementView({
                       </HostTableCell>
                       <HostTableCell className="px-3 py-2">
                         {e.deal_id ? (
-                          <Link href={`/erp/deals/${e.deal_id}`} className="text-ecoya-accent hover:underline">
+                          <Link href={`/erp/deals/${e.deal_id}`} className="text-[var(--color-primary-4)] hover:underline">
                             {copy.counterparty.dealLink}
                           </Link>
                         ) : (
@@ -3599,17 +3599,17 @@ function SettlementView({
                       <HostTableCell className="px-3 py-2">
                         <div className="flex flex-wrap items-center gap-1">
                           {e.closure_type ? (
-                            <span className="rounded-full bg-surface-muted px-2 py-0.5 text-label-12 text-text-disabled">
+                            <span className="rounded-full bg-[var(--color-gray-11)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-6)]">
                               {copy.ledger.statusClosed} · {Object.hasOwn(copy.ledger.closeTypes, e.closure_type)
                                 ? copy.ledger.closeTypes[e.closure_type as keyof typeof copy.ledger.closeTypes]
                                 : copy.ledger.closeTypeUnknown}
                             </span>
                           ) : (
                             <span
-                              className={`rounded-full px-2 py-0.5 text-label-12 ${
+                              className={`rounded-full px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] ${
                                 e.status === "completed"
                                   ? "bg-ecoya-system-green-1 text-ecoya-system-green-6"
-                                  : "bg-surface-muted text-text-disabled"
+                                  : "bg-[var(--color-gray-11)] text-[var(--color-gray-6)]"
                               }`}
                             >
                               {e.status === "completed"
@@ -3623,7 +3623,7 @@ function SettlementView({
                             </StatusBadge>
                           ) : null}
                           {!e.closure_type && writeoffProposalById.has(e.id) ? (
-                            <span className="rounded-full bg-status-warning-bg px-2 py-0.5 text-label-12 text-ecoya-system-yellow-2">
+                            <span className="rounded-full bg-[var(--color-yellow-6)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-system-yellow2)]">
                               {copy.ledger.writeoff.pendingTitle}
                             </span>
                           ) : null}
@@ -3633,28 +3633,28 @@ function SettlementView({
                         {e.deal_id || projectedOpenDispute || entryDisputes.length > 0 ? (
                           <div className="flex flex-wrap items-center gap-1">
                             {disputeState?.status === "error" && !projectedOpenDispute ? (
-                              <span className="rounded-full bg-status-danger-bg px-2 py-0.5 text-label-12 text-status-danger">
+                              <span className="rounded-full bg-[var(--color-red-8)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]">
                                 {copy.ledger.dispute.errors.generic}
                               </span>
                             ) : openDisputeCount > 0 ? (
-                              <span className="rounded-full bg-status-danger-bg px-2 py-0.5 text-label-12 text-status-danger">
+                              <span className="rounded-full bg-[var(--color-red-8)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]">
                                 {copy.ledger.dispute.openBadge.replace("{count}", String(openDisputeCount))}
                               </span>
                             ) : entryDisputes.length > 0 ? (
-                              <span className="rounded-full bg-surface-muted px-2 py-0.5 text-label-12 text-text-disabled">
+                              <span className="rounded-full bg-[var(--color-gray-11)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-6)]">
                                 {copy.ledger.dispute.historyBadge}
                               </span>
                             ) : (
-                              <span className="text-text-muted">—</span>
+                              <span className="text-[var(--color-gray-5)]">—</span>
                             )}
                             {projectedOpenDispute && e.open_disputed_amount ? (
-                              <span className="text-label-12 text-text-secondary">
+                              <span className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                                 {copy.ledger.dispute.disputedAmount}: {exactMoney(e.open_disputed_amount, e.currency)}
                               </span>
                             ) : null}
                           </div>
                         ) : (
-                          <span className="text-text-muted">—</span>
+                          <span className="text-[var(--color-gray-5)]">—</span>
                         )}
                       </HostTableCell>
                       <HostTableCell className="px-3 py-2 text-right">
@@ -3705,7 +3705,7 @@ function SettlementView({
                               </Button>
                             ) : (
                               <span
-                                className="text-text-muted"
+                                className="text-[var(--color-gray-5)]"
                                 data-ui="settlement-locked-action"
                                 ref={(element) => {
                                   lockedActionRefs.current[e.id] = element;
@@ -3719,7 +3719,7 @@ function SettlementView({
                             <>
                               {e.status === "completed" && canFinalize ? (
                                 <Button variant="link" type="button"
-                                  className="h-auto p-0 font-normal text-[12px] leading-[18px] text-inherit hover:text-inherit whitespace-nowrap font-medium text-text-muted hover:text-ecoya-system-red-2"
+                                  className="h-auto p-0 font-normal text-[12px] leading-[18px] text-inherit hover:text-inherit whitespace-nowrap font-medium text-[var(--color-gray-5)] hover:text-[var(--color-red-2)]"
                                   data-ui="settlement-uncomplete-action"
                                   disabled={uncompleting !== null || lifecycleBusy !== null || recBusy || exceptionBusy}
                                   onClick={(event) =>
@@ -3754,7 +3754,7 @@ function SettlementView({
                               {e.status !== "completed" && canFinalize ? (
                                 <Button variant="link" type="button"
                                   aria-label={`${copy.ledger.close} — ${e.counterparty_name ?? "—"}`}
-                                  className="h-auto p-0 font-normal text-[12px] leading-[18px] text-inherit hover:text-inherit whitespace-nowrap font-medium text-text-muted hover:text-ecoya-system-red-2"
+                                  className="h-auto p-0 font-normal text-[12px] leading-[18px] text-inherit hover:text-inherit whitespace-nowrap font-medium text-[var(--color-gray-5)] hover:text-[var(--color-red-2)]"
                                   data-ui="settlement-close-action"
                                   disabled={recBusy || writeoffBusy || lifecycleBusy !== null}
                                   onClick={(event) =>
@@ -3799,7 +3799,7 @@ function SettlementView({
                               ((e.status === "completed" && !canFinalize) ||
                                 (e.status !== "completed" && !canRecord && !canFinalize)) ? (
                                 <span
-                                  className="text-text-muted"
+                                  className="text-[var(--color-gray-5)]"
                                   data-ui="settlement-capability-locked-action"
                                   ref={(element) => {
                                     lockedActionRefs.current[e.id] = element;
@@ -3827,7 +3827,7 @@ function SettlementView({
                     </HostTableRow>
                     {disputeFor === e.id ? (
                       <HostTableRow
-                        className="border-b border-border-subtle bg-surface"
+                        className="border-b border-[var(--color-gray-11)] bg-[var(--color-gray-12)]"
                         data-ui="settlement-dispute-panel"
                       >
                         <HostTableCell colSpan={11} className="px-3 py-3 whitespace-normal">
@@ -3838,13 +3838,13 @@ function SettlementView({
                             role="region"
                             tabIndex={-1}
                           >
-                            <div className="mb-3 rounded-md border border-border-muted bg-surface-card p-3">
-                              <h4 className="text-label-12 font-semibold text-text-primary">
+                            <div className="mb-3 rounded-md border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] p-3">
+                              <h4 className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold text-[var(--color-gray-2)]">
                                 {copy.ledger.dispute.historyTitle}
                               </h4>
                               {historyLoadError ? (
                                 <div className="mt-2 flex flex-wrap items-center gap-2" role="alert">
-                                  <span className="text-label-12 text-status-danger">
+                                  <span className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]">
                                     {copy.ledger.dispute.errors.historyLoadFailed}
                                   </span>
                                   {e.deal_id ? (
@@ -3860,7 +3860,7 @@ function SettlementView({
                                 </div>
                               ) : null}
                               {disputesForDisplay.length === 0 && !historyLoadError ? (
-                                <p className="mt-1 text-label-12 text-text-muted">
+                                <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                                   {copy.ledger.dispute.historyEmpty}
                                 </p>
                               ) : disputesForDisplay.length > 0 ? (
@@ -3885,11 +3885,11 @@ function SettlementView({
                                     return (
                                     <li
                                       key={dispute.id}
-                                      className="rounded-md border border-border-subtle bg-surface px-3 py-2 text-label-12"
+                                      className="rounded-md border border-[var(--color-gray-11)] bg-[var(--color-gray-12)] px-3 py-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]"
                                     >
                                       <div className="flex flex-wrap items-start justify-between gap-2">
                                         <div>
-                                          <p className="font-medium text-text-primary">
+                                          <p className="font-medium text-[var(--color-gray-2)]">
                                             {projectionOnly
                                               ? `${copy.ledger.dispute.disputedAmount}: ${
                                                   dispute.disputed_amount
@@ -3902,20 +3902,20 @@ function SettlementView({
                                                   .replace("{original}", exactMoney(dispute.original_amount, dispute.currency))}
                                           </p>
                                           {!projectionOnly ? (
-                                            <p className="mt-1 text-text-muted">{dispute.reason}</p>
+                                            <p className="mt-1 text-[var(--color-gray-5)]">{dispute.reason}</p>
                                           ) : null}
                                           {!projectionOnly && dispute.evidence ? (
-                                            <p className="mt-1 text-text-muted">
+                                            <p className="mt-1 text-[var(--color-gray-5)]">
                                               {copy.ledger.dispute.evidenceLabel}: {dispute.evidence}
                                             </p>
                                           ) : null}
                                           {openedAudit ? (
-                                            <p className="mt-1 text-text-muted">
+                                            <p className="mt-1 text-[var(--color-gray-5)]">
                                               {copy.ledger.dispute.openedAudit.replace("{value}", openedAudit)}
                                             </p>
                                           ) : null}
                                           {resolvedAudit ? (
-                                            <p className="mt-1 text-text-muted">
+                                            <p className="mt-1 text-[var(--color-gray-5)]">
                                               {copy.ledger.dispute.resolvedAudit.replace("{value}", resolvedAudit)}
                                             </p>
                                           ) : null}
@@ -3923,8 +3923,8 @@ function SettlementView({
                                         <span
                                           className={`rounded-full px-2 py-0.5 ${
                                             isOpenSettlementDispute(dispute)
-                                              ? "bg-status-warning-bg text-status-warning"
-                                              : "bg-surface-muted text-text-secondary"
+                                              ? "bg-[var(--color-yellow-6)] text-[var(--color-yellow-1)]"
+                                              : "bg-[var(--color-gray-11)] text-[var(--color-gray-4)]"
                                           }`}
                                         >
                                           {disputeResolutionLabel(dispute.resolution, copy.ledger.dispute)}
@@ -3956,7 +3956,7 @@ function SettlementView({
                                         </div>
                                       ) : null}
                                       {isOpenSettlementDispute(dispute) && !hasWriteOffEvidence ? (
-                                        <p className="mt-2 text-label-12 text-text-muted">
+                                        <p className="mt-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                                           {copy.ledger.dispute.errors.writeOffEvidenceRequired}
                                         </p>
                                       ) : null}
@@ -3967,7 +3967,7 @@ function SettlementView({
                               ) : null}
                             </div>
                             {!hasOpenDispute ? <div className="flex flex-wrap items-end gap-3">
-                              <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                              <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                                 {copy.ledger.dispute.normalAmount}
                                 <input
                                   aria-describedby={disputeInvalidField === "normalAmount" ? "settlement-dispute-error" : undefined}
@@ -3987,10 +3987,10 @@ function SettlementView({
                                       value: ev.target.value,
                                     })
                                   }
-                                  className="h-9 w-32 rounded-md border border-border bg-surface-card px-2 text-body-13 text-text-primary"
+                                  className="h-9 w-32 rounded-md border border-border bg-[var(--color-gray-12)] px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]"
                                 />
                               </label>
-                              <label className="flex flex-col gap-0.5 text-label-12 text-text-secondary">
+                              <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                                 {copy.ledger.dispute.disputedAmount}
                                 <input
                                   aria-describedby={disputeInvalidField === "amount" ? "settlement-dispute-error" : undefined}
@@ -4010,10 +4010,10 @@ function SettlementView({
                                       value: ev.target.value,
                                     })
                                   }
-                                  className="h-9 w-32 rounded-md border border-border bg-surface-card px-2 text-body-13 text-text-primary"
+                                  className="h-9 w-32 rounded-md border border-border bg-[var(--color-gray-12)] px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]"
                                 />
                               </label>
-                              <label className="flex min-w-60 flex-1 flex-col gap-0.5 text-label-12 text-text-secondary">
+                              <label className="flex min-w-60 flex-1 flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                                 {copy.ledger.dispute.reason}
                                 <input
                                   aria-describedby={disputeInvalidField === "reason" ? "settlement-dispute-error" : undefined}
@@ -4032,10 +4032,10 @@ function SettlementView({
                                       value: ev.target.value,
                                     })
                                   }
-                                  className="h-9 rounded-md border border-border bg-surface-card px-2 text-body-13 text-text-primary"
+                                  className="h-9 rounded-md border border-border bg-[var(--color-gray-12)] px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]"
                                 />
                               </label>
-                              <label className="flex min-w-60 flex-1 flex-col gap-0.5 text-label-12 text-text-secondary">
+                              <label className="flex min-w-60 flex-1 flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                                 {copy.ledger.dispute.evidenceLabel}
                                 <input
                                   type="text"
@@ -4047,7 +4047,7 @@ function SettlementView({
                                       value: ev.target.value,
                                     })
                                   }
-                                  className="h-9 rounded-md border border-border bg-surface-card px-2 text-body-13 text-text-primary"
+                                  className="h-9 rounded-md border border-border bg-[var(--color-gray-12)] px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]"
                                 />
                               </label>
                               <Button variant="secondary" size="xs"
@@ -4070,7 +4070,7 @@ function SettlementView({
                             ) : null}
                             {disputeError ? (
                               <p
-                                className="mt-1 break-keep text-label-12 text-status-danger"
+                                className="mt-1 break-keep text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]"
                                 id="settlement-dispute-error"
                                 role="alert"
                               >
@@ -4084,7 +4084,7 @@ function SettlementView({
                     {recordFor === e.id ? (
                       <HostTableRow
                         aria-label={loadableCopy.sections.settlementPaymentHistory}
-                        className="border-b border-border-subtle bg-surface"
+                        className="border-b border-[var(--color-gray-11)] bg-[var(--color-gray-12)]"
                         data-ui="settlement-record-form"
                       >
                         <HostTableCell colSpan={11} className="px-3 py-2 whitespace-normal">
@@ -4190,7 +4190,7 @@ function SettlementView({
                     {exceptionFor === e.id ? (
                       <HostTableRow
                         aria-label={copy.exceptions.title}
-                        className="border-b border-border-subtle bg-surface"
+                        className="border-b border-[var(--color-gray-11)] bg-[var(--color-gray-12)]"
                         data-ui="settlement-exceptions-panel"
                         id={`settlement-exceptions-panel-${e.id}`}
                       >
@@ -4229,7 +4229,7 @@ function SettlementView({
             >
               {copy.ledger.previousPage}
             </Button>
-            <span aria-live="polite" className="text-label-12 text-text-muted">
+            <span aria-live="polite" className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
               {copy.ledger.pageOf
                 .replace("{page}", String(ledgerCurrentPage))
                 .replace("{total}", String(ledgerPageCount))}
@@ -4287,39 +4287,39 @@ function SettlementView({
             <DialogTitle>{copy.ledger.title}</DialogTitle>
           </DialogHeader>
         <div className="flex flex-col gap-3">
-          <label className="flex flex-col gap-1 text-label-12 text-text-secondary">
+          <label className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
             {copy.ledger.counterparty}
             <input
               aria-label={copy.ledger.counterparty}
-              className="h-9 rounded-md border border-border px-2 text-body-13 text-text-primary"
+              className="h-9 rounded-md border border-border px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]"
               disabled={manualScheduleBusy}
               onChange={(event) => setManualScheduleCounterparty(event.target.value)}
               value={manualScheduleCounterparty}
             />
           </label>
-          <label className="flex flex-col gap-1 text-label-12 text-text-secondary">
+          <label className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
             {copy.ledger.amount}
             <input
               aria-label={copy.ledger.amount}
-              className="h-9 rounded-md border border-border px-2 text-body-13 text-text-primary"
+              className="h-9 rounded-md border border-border px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]"
               disabled={manualScheduleBusy}
               inputMode="decimal"
               onChange={(event) => setManualScheduleAmount(event.target.value)}
               value={manualScheduleAmount}
             />
           </label>
-          <label className="flex flex-col gap-1 text-label-12 text-text-secondary">
+          <label className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
             {copy.controls.currencyLabel}
             <input
               aria-label={copy.controls.currencyLabel}
-              className="h-9 rounded-md border border-border px-2 text-body-13 text-text-primary"
+              className="h-9 rounded-md border border-border px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]"
               disabled={manualScheduleBusy}
               maxLength={3}
               onChange={(event) => setManualScheduleCurrency(event.target.value)}
               value={manualScheduleCurrency}
             />
           </label>
-          <label className="flex flex-col gap-1 text-label-12 text-text-secondary">
+          <label className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
             {copy.ledger.due}
             <DatePicker
               ariaLabel={copy.ledger.due}
@@ -4329,7 +4329,7 @@ function SettlementView({
               value={manualScheduleDueDate}
             />
           </label>
-          <div className="flex flex-col gap-1 text-label-12 text-text-secondary">
+          <div className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
             <span>{copy.ledger.type}</span>
             <Select value={manualScheduleType} onValueChange={(value) => {
                 if (value === "receivable" || value === "payable") setManualScheduleType(value);
@@ -4346,7 +4346,7 @@ function SettlementView({
             </Select>
           </div>
           {manualScheduleError ? (
-            <p className="m-0 text-body-13 text-status-danger" role="alert">
+            <p className="m-0 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]" role="alert">
               {manualScheduleError}
             </p>
           ) : null}
@@ -4382,7 +4382,7 @@ function SettlementView({
           </DialogHeader>
         {writeoffTarget ? (
           <div className="flex flex-col gap-4">
-            <p className="m-0 text-body-14 text-text-primary">
+            <p className="m-0 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-2)]">
               {copy.ledger.writeoff.summary
                 .replace(
                   "{scheduled}",
@@ -4415,7 +4415,7 @@ function SettlementView({
             {writeoffDialogState.status === "loading" ? (
               <p
                 aria-live="polite"
-                className="m-0 text-body-14 text-text-muted"
+                className="m-0 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-5)]"
                 role="status"
               >
                 {copy.ledger.writeoff.loading}
@@ -4438,23 +4438,23 @@ function SettlementView({
             ) : (
               <>
                 {writeoffHasProposal ? (
-                  <section className="rounded-lg border border-status-warning bg-status-warning-bg p-3">
-                    <h3 className="m-0 text-body-14 font-semibold text-text-primary">
+                  <section className="rounded-lg border border-[var(--color-yellow-1)] bg-[var(--color-yellow-6)] p-3">
+                    <h3 className="m-0 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-semibold text-[var(--color-gray-2)]">
                       {copy.ledger.writeoff.pendingTitle}
                     </h3>
                     {writeoffSchedule?.writeoff_proposal_reason ? (
-                      <p className="mt-2 mb-0 whitespace-pre-wrap text-body-13 text-text-primary">
+                      <p className="mt-2 mb-0 whitespace-pre-wrap text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]">
                         {writeoffSchedule.writeoff_proposal_reason}
                       </p>
                     ) : null}
                     {writeoffSchedule?.writeoff_proposal_document_id ? (
-                      <p className="mt-1 mb-0 break-all text-label-12 text-text-muted">
+                      <p className="mt-1 mb-0 break-all text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                         {copy.ledger.writeoff.documentIdLabel}:{" "}
                         {writeoffSchedule.writeoff_proposal_document_id}
                       </p>
                     ) : null}
                     {writeoffSchedule?.writeoff_proposal_evidence ? (
-                      <p className="mt-1 mb-0 whitespace-pre-wrap text-label-12 text-text-muted">
+                      <p className="mt-1 mb-0 whitespace-pre-wrap text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                         {copy.ledger.writeoff.externalEvidenceLabel}:{" "}
                         {writeoffSchedule.writeoff_proposal_evidence}
                       </p>
@@ -4463,23 +4463,23 @@ function SettlementView({
                 ) : null}
                 {canProposeWriteoff || canFinalizeWriteoff ? (
                   <section className="grid gap-3">
-                    <label className="grid gap-1 text-label-12 text-text-secondary">
+                    <label className="grid gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                       {copy.ledger.writeoff.reasonLabel}
                       <textarea
                         aria-invalid={Boolean(writeoffError)}
-                        className="min-h-24 rounded-md border border-border bg-surface-card px-3 py-2 text-body-14 text-text-primary"
+                        className="min-h-24 rounded-md border border-border bg-[var(--color-gray-12)] px-3 py-2 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-2)]"
                         onChange={(event) => setWriteoffReason(event.target.value)}
                         placeholder={copy.ledger.writeoff.reasonPlaceholder}
                         required
                         value={writeoffReason}
                       />
                     </label>
-                    <label className="grid gap-1 text-label-12 text-text-secondary">
+                    <label className="grid gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                       {copy.ledger.writeoff.documentIdLabel}
                       <input
                         aria-describedby="writeoff-evidence-hint"
                         aria-invalid={Boolean(writeoffError)}
-                        className="h-10 rounded-md border border-border bg-surface-card px-3 text-body-14 text-text-primary"
+                        className="h-10 rounded-md border border-border bg-[var(--color-gray-12)] px-3 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-2)]"
                         onChange={(event) =>
                           setWriteoffDocumentId(event.target.value)
                         }
@@ -4490,12 +4490,12 @@ function SettlementView({
                         value={writeoffDocumentId}
                       />
                     </label>
-                    <label className="grid gap-1 text-label-12 text-text-secondary">
+                    <label className="grid gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                       {copy.ledger.writeoff.externalEvidenceLabel}
                       <textarea
                         aria-describedby="writeoff-evidence-hint"
                         aria-invalid={Boolean(writeoffError)}
-                        className="min-h-20 rounded-md border border-border bg-surface-card px-3 py-2 text-body-14 text-text-primary"
+                        className="min-h-20 rounded-md border border-border bg-[var(--color-gray-12)] px-3 py-2 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-2)]"
                         onChange={(event) =>
                           setWriteoffExternalEvidence(event.target.value)
                         }
@@ -4506,7 +4506,7 @@ function SettlementView({
                       />
                     </label>
                     <p
-                      className="m-0 text-label-12 text-text-muted"
+                      className="m-0 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]"
                       id="writeoff-evidence-hint"
                     >
                       {copy.ledger.writeoff.evidenceHint}
@@ -4515,13 +4515,13 @@ function SettlementView({
                 ) : null}
                 <section aria-labelledby="writeoff-history-title">
                   <h3
-                    className="m-0 text-body-14 font-semibold text-text-primary"
+                    className="m-0 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-semibold text-[var(--color-gray-2)]"
                     id="writeoff-history-title"
                   >
                     {copy.ledger.writeoff.historyTitle}
                   </h3>
                   {writeoffEvents.length === 0 ? (
-                    <p className="mt-2 mb-0 text-body-13 text-text-muted">
+                    <p className="mt-2 mb-0 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                       {copy.ledger.writeoff.historyEmpty}
                     </p>
                   ) : (
@@ -4531,18 +4531,18 @@ function SettlementView({
                     >
                       {writeoffEvents.map((event) => (
                         <li
-                          className="rounded-md border border-border-muted p-3"
+                          className="rounded-md border border-[var(--color-gray-10)] p-3"
                           key={event.id}
                         >
                           <div className="flex flex-wrap items-start justify-between gap-2">
-                            <strong className="text-body-13 text-text-primary">
+                            <strong className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]">
                               {writeoffEventLabel(
                                 event.event_type,
                                 copy.ledger.writeoff,
                               )}
                             </strong>
                             <time
-                              className="text-label-12 text-text-muted"
+                              className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]"
                               dateTime={event.occurred_at}
                             >
                               {copy.ledger.writeoff.historyActor
@@ -4560,7 +4560,7 @@ function SettlementView({
                                 )}
                             </time>
                           </div>
-                          <p className="mt-1 mb-0 text-label-12 text-text-muted">
+                          <p className="mt-1 mb-0 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                             {copy.ledger.writeoff.historyAmounts
                               .replace(
                                 "{scheduled}",
@@ -4587,18 +4587,18 @@ function SettlementView({
                               )}
                           </p>
                           {event.reason ? (
-                            <p className="mt-1 mb-0 whitespace-pre-wrap text-body-13 text-text-primary">
+                            <p className="mt-1 mb-0 whitespace-pre-wrap text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]">
                               {event.reason}
                             </p>
                           ) : null}
                           {event.evidence_document_id ? (
-                            <p className="mt-1 mb-0 break-all text-label-12 text-text-muted">
+                            <p className="mt-1 mb-0 break-all text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                               {copy.ledger.writeoff.documentIdLabel}:{" "}
                               {event.evidence_document_id}
                             </p>
                           ) : null}
                           {event.external_evidence ? (
-                            <p className="mt-1 mb-0 whitespace-pre-wrap text-label-12 text-text-muted">
+                            <p className="mt-1 mb-0 whitespace-pre-wrap text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                               {copy.ledger.writeoff.externalEvidenceLabel}:{" "}
                               {event.external_evidence}
                             </p>
@@ -4612,7 +4612,7 @@ function SettlementView({
             )}
             {writeoffError ? (
               <p
-                className="m-0 text-body-13 text-status-danger"
+                className="m-0 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]"
                 role="alert"
               >
                 {writeoffError}
@@ -4689,12 +4689,12 @@ function SettlementView({
           </DialogHeader>
         {closeTarget ? (
           <div className="flex flex-col gap-3">
-            <p className="m-0 break-keep [overflow-wrap:anywhere] text-body-14 font-regular text-text-primary">
+            <p className="m-0 break-keep [overflow-wrap:anywhere] text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-normal text-[var(--color-gray-2)]">
               {copy.ledger.closeConfirmBody
                 .replace("{counterparty}", closeTarget.entry.counterparty_name ?? "—")
                 .replace("{amount}", exactMoney(closeTarget.entry.amount, closeTarget.entry.currency))}
             </p>
-            <div className="flex flex-col gap-1 text-label-12 text-text-secondary">
+            <div className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
               <span>{copy.ledger.closeType}</span>
               <Select value={closeDraft.closureType} onValueChange={(value) => {
                   if (!isCloseType(value)) return;
@@ -4714,7 +4714,7 @@ function SettlementView({
                 </SelectContent>
               </Select>
             </div>
-            <label className="flex flex-col gap-1 text-label-12 text-text-secondary">
+            <label className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
               {copy.ledger.closeNote}
               <Textarea
                 aria-label={copy.ledger.closeNote}
@@ -4730,7 +4730,7 @@ function SettlementView({
               />
             </label>
             {closeDraft.error ? (
-              <p className="m-0 text-body-13 text-status-danger" role="alert">
+              <p className="m-0 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]" role="alert">
                 {closeDraft.error}
               </p>
             ) : null}
@@ -4767,11 +4767,11 @@ function SettlementView({
           </DialogHeader>
         {reopenTarget ? (
           <div className="flex flex-col gap-3">
-            <p className="m-0 break-keep [overflow-wrap:anywhere] text-body-14 font-regular text-text-primary">
+            <p className="m-0 break-keep [overflow-wrap:anywhere] text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-normal text-[var(--color-gray-2)]">
               {reopenBody}
             </p>
             {reopenError ? (
-              <p className="m-0 text-body-13 text-status-danger" role="alert">
+              <p className="m-0 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]" role="alert">
                 {reopenError}
               </p>
             ) : null}
@@ -4804,7 +4804,7 @@ function SettlementView({
             <DialogTitle>{copy.ledger.uncompleteConfirmTitle}</DialogTitle>
           </DialogHeader>
         {uncompleteTarget ? (
-          <p className="m-0 text-body-14 font-regular text-text-primary">
+          <p className="m-0 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-normal text-[var(--color-gray-2)]">
             {copy.ledger.uncompleteConfirmBody
               .replace("{counterparty}", uncompleteTarget.entry.counterparty_name ?? "—")
               .replace("{amount}", exactMoney(uncompleteTarget.entry.amount, uncompleteTarget.entry.currency))}

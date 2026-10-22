@@ -336,12 +336,12 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
       <>
       {renderHeader?.(null)}
       <section
-        className="flex flex-col gap-3 rounded-lg border border-border-muted bg-surface-card px-4 py-6"
+        className="flex flex-col gap-3 rounded-lg border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] px-4 py-6"
         data-component="ShipmentsConnected"
         data-state="error"
         role="alert"
       >
-        <p className="text-body-14 text-status-danger">{copy.loadError}</p>
+        <p className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-red-1)]">{copy.loadError}</p>
         <Button variant="outline" onClick={loadShipments} type="button">
           {copy.retry}
         </Button>
@@ -399,7 +399,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
           ))}
         </TabsList>
       </Tabs>
-      <span className="text-label-12 text-text-muted">
+      <span className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
         {`거래 ${groups.length}건 · 선적 ${groups.reduce((sum, group) => sum + group.rows.length, 0)}건`}
       </span>
     </BusinessListToolbar>
@@ -409,7 +409,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
 
   return (
     <div className="flex flex-col gap-4" data-component="ShipmentsConnected" data-state="ready">
-      {dealId ? <h3 className="text-header-17 font-bold">선적 정보</h3> : renderHeader ? renderHeader(controls) : controls}
+      {dealId ? <h3 className="text-[length:var(--text-body-6)] leading-[var(--leading-body-6)] font-bold">선적 정보</h3> : renderHeader ? renderHeader(controls) : controls}
       {/* The list page wraps the tabs and every deal group in one card. */}
       <div className={dealId ? "contents" : "reference-shipment-list-card"}>
       {!dealId && listControls}
@@ -422,10 +422,10 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
         className="reference-shipment-results"
       >
       {!canRefresh ? (
-        <p className="text-label-12 text-text-secondary">{refreshUnavailableMessage}</p>
+        <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">{refreshUnavailableMessage}</p>
       ) : null}
       {refreshState.status === "notice" ? (
-        <p className="text-body-13 text-text-secondary" role="status">
+        <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]" role="status">
           {refreshState.message}
         </p>
       ) : null}
@@ -434,11 +434,11 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
           possibly outdated) — show them with a banner, not an error state. */}
       {state.syncStatus === "stale" && state.shipments.length > 0 ? (
         <div
-          className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-ecoya-system-yellow-5 bg-status-warning-bg px-4 py-3"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--color-yellow-5)] bg-[var(--color-yellow-6)] px-4 py-3"
           data-ui="shipments-stale-banner"
           role="status"
         >
-          <p className="text-body-13 text-status-warning">{copy.staleBanner}</p>
+          <p className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-yellow-1)]">{copy.staleBanner}</p>
           <Button variant="outline" size="xs" onClick={loadShipments} type="button">
             {copy.retry}
           </Button>
@@ -448,26 +448,26 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
         // erp-v2-adapt: begin — distinguish filtered-empty results from an empty shipment book.
         state.shipments.length > 0 ? (
           <section data-state="empty">
-            <p className="text-body-14 text-text-secondary">{copy.emptyFiltered}</p>
+            <p className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-4)]">{copy.emptyFiltered}</p>
           </section>
         ) : state.syncStatus === "stale" ? (
           // A stale + empty page 0 means the refresh failed before we could
           // learn whether the book is really empty — do not assert "no
           // shipments" (that claims a fact BE#1212 could not confirm).
           <section
-            className="flex flex-col gap-3 rounded-lg border border-border-muted bg-surface-card px-4 py-6"
+            className="flex flex-col gap-3 rounded-lg border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] px-4 py-6"
             data-component="ShipmentsConnected"
             data-state="stale-empty"
             role="alert"
           >
-            <p className="text-body-14 text-status-danger">{copy.staleEmpty}</p>
+            <p className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-red-1)]">{copy.staleEmpty}</p>
             <Button variant="outline" onClick={loadShipments} type="button">
               {copy.retry}
             </Button>
           </section>
         ) : (
         // erp-v2-adapt: end
-        <p className="text-body-14 text-text-secondary">{copy.empty}</p>
+        <p className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-4)]">{copy.empty}</p>
         // erp-v2-adapt: begin — close the filtered-empty conditional removed by the parity oracle.
         )
         // erp-v2-adapt: end
@@ -476,8 +476,8 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
           <section key={group.key} className="reference-shipment-group" data-deal-id={group.key}>
             <div className="reference-shipment-group-heading">
               <div className="min-w-0">
-                <h2 className="text-header-17 font-bold text-text-primary">{group.label}</h2>
-                <p className="mt-1 text-body-13 text-text-muted">
+                <h2 className="text-[length:var(--text-body-6)] leading-[var(--leading-body-6)] font-bold text-[var(--color-gray-2)]">{group.label}</h2>
+                <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                   {[group.rows[0].deal_counterparty, copy.shipmentCount.replace("{count}", String(group.rows.length))].filter(Boolean).join(" · ")}
                 </p>
               </div>
@@ -515,18 +515,18 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                   <HostTableRow key={ship.id} data-shipment-id={ship.id} aria-busy={refreshing} data-refresh-state={refreshError ? "error" : refreshing ? "pending" : "ready"}>
                     <HostTableCell>
                       {ship.bl_number ? <div className="font-medium" data-ui="shipment-bl-number">{ship.bl_number}</div> : null}
-                      {ship.container_number ? <div className={ship.bl_number ? "mt-1 text-body-13 text-text-muted" : "font-medium"} data-ui="shipment-container-number">{ship.container_number}</div> : null}
+                      {ship.container_number ? <div className={ship.bl_number ? "mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" : "font-medium"} data-ui="shipment-container-number">{ship.container_number}</div> : null}
                       {!ship.bl_number && !ship.container_number ? <span data-ui="shipment-identifier-fallback">{copy.rowFallback}</span> : null}
                     </HostTableCell>
                     <HostTableCell>
                       <div>{ship.pol || "—"} → {ship.pod || "—"}</div>
-                      <div className="mt-1 text-body-13 text-text-muted">{[ship.carrier, ship.vessel].filter(Boolean).join(" · ") || "—"}</div>
+                      <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{[ship.carrier, ship.vessel].filter(Boolean).join(" · ") || "—"}</div>
                     </HostTableCell>
                     <HostTableCell>
                       <div className="tabular-nums">{effectiveEtd ? formatDate(effectiveEtd, dateTag) : "—"} / {effectiveEta ? formatDate(effectiveEta, dateTag) : "—"}</div>
-                      <div className="mt-1 text-body-13 text-text-muted">{ship.confirmed_eta || ship.confirmed_etd ? "확정 일정 기준" : copy.source[ship.source]}{dday !== null ? ` · ${ddayLabel(dday)}` : ""}</div>
+                      <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{ship.confirmed_eta || ship.confirmed_etd ? "확정 일정 기준" : copy.source[ship.source]}{dday !== null ? ` · ${ddayLabel(dday)}` : ""}</div>
                       {ship.confirmed_eta || ship.provider_eta || ship.confirmed_etd || ship.provider_etd || ship.confirmed_status_at || ship.confirmed_status_by ? (
-                        <details className="reference-shipment-date-details text-body-13 text-text-muted" data-ui="shipment-eta-basis">
+                        <details className="reference-shipment-date-details text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" data-ui="shipment-eta-basis">
                           <summary>일정 근거</summary>
                           {ship.confirmed_etd ? <p>확정 ETD {formatDate(ship.confirmed_etd, dateTag)}</p> : null}
                           {ship.confirmed_eta ? <p>확정 ETA {formatDate(ship.confirmed_eta, dateTag)}</p> : null}
@@ -539,18 +539,18 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                       ) : null}
                     </HostTableCell>
                     <HostTableCell>
-                      <div className="text-body-13 text-text-muted">{ship.bl_number ? "B/L 번호 등록" : "B/L 번호 없음"}</div>
+                      <div className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{ship.bl_number ? "B/L 번호 등록" : "B/L 번호 없음"}</div>
                       {shipEvidence ? <HostButton variant="outline" size="sm" asChild className="mt-1">
                         <Link href="/erp/snap-evidence" title={shipEvidence.allocationLabel ? copy.evidenceAllocatedTo.replace("{label}", shipEvidence.allocationLabel) : undefined}>
                           SNAP {ship.snap_evidence_count === undefined ? "" : `${ship.snap_evidence_count}건 · `}{shipEvidence.mediaCount}장
                         </Link>
-                      </HostButton> : <div className="mt-1 text-body-13 text-text-muted">증거 미확인</div>}
+                      </HostButton> : <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">증거 미확인</div>}
                     </HostTableCell>
                     <HostTableCell>
                       <StatusBadge meaning="state" tone={delayed ? "danger" : arriving ? "warning" : STATUS_TONE[ship.status]}>
                         {delayed ? copy.filters.delayed : arriving ? copy.filters.arriving : copy.status[ship.status] ?? ship.status}
                       </StatusBadge>
-                      {delayed || arriving ? <div className="mt-1 text-body-13 text-text-muted">{copy.status[ship.status] ?? ship.status}</div> : null}
+                      {delayed || arriving ? <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.status[ship.status] ?? ship.status}</div> : null}
                     </HostTableCell>
                     <HostTableCell>
                       {/* The tracking action (갱신 or 선사 사이트) takes one fixed-width
@@ -570,11 +570,11 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                         ) : null}
                       </div>
                       {ship.tracking_health === "stale" || ship.tracking_health === "fetch_failed" ? (
-                        <p className={`mt-1 text-body-13 ${ship.tracking_health === "stale" ? "text-status-warning" : "text-status-danger"}`}>{ship.tracking_health === "stale" ? "조회 정보 오래됨" : "선사 조회 실패"}</p>
+                        <p className={`mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] ${ship.tracking_health === "stale" ? "text-[var(--color-yellow-1)]" : "text-[var(--color-red-1)]"}`}>{ship.tracking_health === "stale" ? "조회 정보 오래됨" : "선사 조회 실패"}</p>
                       ) : null}
-                      {fetchedAt ? <p className="mt-1 text-body-13 text-text-muted">{copy.source.carrierAt.replace("{at}", formatDateTime(fetchedAt, dateTag))}</p> : null}
-                      {!fetchedAt && (ship.tracking_health === "stale" || ship.tracking_health === "fetch_failed") ? <p className="mt-1 text-body-13 text-text-muted">마지막 조회 기록 없음</p> : null}
-                      {refreshError ? <p className="mt-1 text-body-13 text-status-danger" role="alert">{refreshError}</p> : null}
+                      {fetchedAt ? <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.source.carrierAt.replace("{at}", formatDateTime(fetchedAt, dateTag))}</p> : null}
+                      {!fetchedAt && (ship.tracking_health === "stale" || ship.tracking_health === "fetch_failed") ? <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">마지막 조회 기록 없음</p> : null}
+                      {refreshError ? <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]" role="alert">{refreshError}</p> : null}
                     </HostTableCell>
                   </HostTableRow>
                 );

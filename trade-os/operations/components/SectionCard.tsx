@@ -17,10 +17,10 @@ type SectionCardProps = Omit<ComponentProps<"section">, "title"> & {
 };
 
 const TONE_CLASS: Record<SectionCardTone, string> = {
-  // 정본 --surface-border(#EEEFF1). DS 1.0 의 `border-border-subtle` 은
+  // 정본 --surface-border(#EEEFF1). DS 1.0 의 `border-[var(--color-gray-11)]` 은
   // gray-11(#F6F7F9)로 한 단계 옅어 카드 윤곽이 사라진다.
-  default: "border-[var(--surface-border,#eeeff1)] bg-surface-card",
-  hero: "border-ecoya-blue-8 bg-accent-soft",
+  default: "border-[var(--surface-border,#eeeff1)] bg-[var(--color-gray-12)]",
+  hero: "border-[var(--color-primary-8)] bg-[var(--color-primary-10)]",
 };
 
 /**
@@ -84,7 +84,7 @@ function SectionCard({
   return (
     <section
       className={cn(
-        "overflow-hidden rounded-[12px] text-text-primary",
+        "overflow-hidden rounded-[12px] text-[var(--color-gray-2)]",
         variant === "module" ? "shadow-[0_4px_12px_rgba(0,0,0,0.1)]" : "border shadow-[0_2px_8px_rgba(0,0,0,0.08)]",
         TONE_CLASS[tone],
         className,
@@ -102,12 +102,12 @@ function SectionCard({
         >
           <div className="flex min-w-0 flex-col gap-1">
             {title ? (
-              <h2 className={cn("m-0 font-bold text-text-primary", variant === "module" ? "text-header-22 leading-normal" : "text-[length:var(--text-header-6,17px)] leading-[var(--leading-header-6,24px)]")}>
+              <h2 className={cn("m-0 font-bold text-[var(--color-gray-2)]", variant === "module" ? "text-[length:var(--text-body-3)] leading-[var(--leading-body-3)] leading-normal" : "text-[length:var(--text-header-6,17px)] leading-[var(--leading-header-6,24px)]")}>
                 {title}
               </h2>
             ) : null}
             {description ? (
-              <div className="text-[length:var(--text-body-9,14px)] leading-[var(--leading-body-9,18px)] font-regular text-[var(--surface-muted-foreground,#5c5e66)]">
+              <div className="text-[length:var(--text-body-9,14px)] leading-[var(--leading-body-9,18px)] font-normal text-[var(--surface-muted-foreground,#5c5e66)]">
                 {description}
               </div>
             ) : null}

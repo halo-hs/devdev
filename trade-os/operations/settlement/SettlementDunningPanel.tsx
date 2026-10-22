@@ -120,10 +120,10 @@ export function SettlementDunningPanel({
     >
       <div className="flex min-w-0 items-center gap-2">
         <span className="truncate font-medium" title={row.counterparty}>{row.counterparty}</span>
-        {row.overdue && <span className="shrink-0 rounded bg-status-danger-bg px-1.5 py-0.5 text-[11px] text-status-danger">{copy.overdue}</span>}
+        {row.overdue && <span className="shrink-0 rounded bg-[var(--color-red-8)] px-1.5 py-0.5 text-[11px] text-[var(--color-red-1)]">{copy.overdue}</span>}
       </div>
-      <span className="whitespace-nowrap text-right font-medium"><span className="dunning-field-label mr-2 text-xs font-normal text-text-secondary">미결제금액</span>{row.amount}</span>
-      <span className="whitespace-nowrap text-text-secondary"><span className="dunning-field-label mr-2 text-xs">지급기한</span>{row.dueDate}</span>
+      <span className="whitespace-nowrap text-right font-medium"><span className="dunning-field-label mr-2 text-xs font-normal text-[var(--color-gray-4)]">미결제금액</span>{row.amount}</span>
+      <span className="whitespace-nowrap text-[var(--color-gray-4)]"><span className="dunning-field-label mr-2 text-xs">지급기한</span>{row.dueDate}</span>
       <div className="dunning-action-group" role="group" aria-label={`${row.counterparty} 초안 작업`}>
         <Popover open={previewId === row.entry.id} onOpenChange={(open) => setPreviewId(open ? row.entry.id : null)}>
           <PopoverTrigger asChild>
@@ -172,7 +172,7 @@ export function SettlementDunningPanel({
       <div id={listId} hidden={!ready || !expanded} data-ui="settlement-dunning-list" className="divide-y border-t">
         {ready && expanded && (
           <>
-            <div className="settlement-dunning-columns items-center gap-x-4 py-2 text-xs text-text-secondary" aria-hidden="true">
+            <div className="settlement-dunning-columns items-center gap-x-4 py-2 text-xs text-[var(--color-gray-4)]" aria-hidden="true">
               <span>거래처</span><span className="text-right">미결제금액</span><span>지급기한</span><span className="text-right">작업</span>
             </div>
             {rows.map(renderRow)}
@@ -180,13 +180,13 @@ export function SettlementDunningPanel({
         )}
       </div>
       {status === "idle" || status === "loading" ? (
-        <p className="pb-4 text-[13px] text-text-muted">{copy.loading}</p>
+        <p className="pb-4 text-[13px] text-[var(--color-gray-5)]">{copy.loading}</p>
       ) : status === "error" ? (
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4" role="alert">
-          <p className="text-[13px] text-status-danger">{copy.error}</p>
+          <p className="text-[13px] text-[var(--color-red-1)]">{copy.error}</p>
           <Button variant="outline" size="xs" onClick={onRetry} type="button">{copy.retry}</Button>
         </div>
-      ) : rows.length === 0 ? <p className="pb-4 text-[13px] text-text-muted">{copy.empty}</p> : null}
+      ) : rows.length === 0 ? <p className="pb-4 text-[13px] text-[var(--color-gray-5)]">{copy.empty}</p> : null}
     </SectionPanel>
   );
 }

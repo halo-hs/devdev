@@ -107,7 +107,7 @@ export function OverdueRateChart({
         <XLabels labels={points.map((p) => p.xLabel)} width={width} height={height} mode="point" />
       </svg>
       {n === 0 && emptyMessage ? (
-        <p className="m-0 text-body-13 text-text-muted" role="status" data-chart-empty>
+        <p className="m-0 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" role="status" data-chart-empty>
           {emptyMessage}
         </p>
       ) : null}

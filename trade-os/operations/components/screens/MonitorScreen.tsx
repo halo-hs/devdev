@@ -334,9 +334,9 @@ const opsMetrics: MonitorMetric[] = [
 
 function MetricBar({ value }: { value: number }) {
   return (
-    <span className="block h-2 w-full overflow-hidden rounded-full bg-ecoya-gray-10">
+    <span className="block h-2 w-full overflow-hidden rounded-full bg-[var(--color-gray-10)]">
       <span
-        className="block h-full rounded-full bg-ecoya-blue-4"
+        className="block h-full rounded-full bg-[var(--color-primary-4)]"
         style={{ width: `${value}%` }}
       />
     </span>
@@ -575,11 +575,11 @@ function MonitorRightPanel({
   return (
     <div className="grid h-full gap-3" data-component="MyPanel">
       <SectionPanel title={copy.ownerPrinciple} density="compact">
-        <div className="grid gap-3 text-body-14 font-regular text-ecoya-gray-5">
-          <div><strong className="text-ecoya-gray-2">{copy.roleLabel}</strong><div>{copy.roleValue}</div></div>
-          <div><strong className="text-ecoya-gray-2">{copy.limitLabel}</strong><div>{copy.limitValue}</div></div>
+        <div className="grid gap-3 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-normal text-[var(--color-gray-5)]">
+          <div><strong className="text-[var(--color-gray-2)]">{copy.roleLabel}</strong><div>{copy.roleValue}</div></div>
+          <div><strong className="text-[var(--color-gray-2)]">{copy.limitLabel}</strong><div>{copy.limitValue}</div></div>
           {/* empty: 데이터 범위(scope)는 동적 값이므로 "—" (라벨은 정적 UI 로 유지) */}
-          <div><strong className="text-ecoya-gray-2">{copy.scopeLabel}</strong><div>{empty ? "—" : copy.scopeValue}</div></div>
+          <div><strong className="text-[var(--color-gray-2)]">{copy.scopeLabel}</strong><div>{empty ? "—" : copy.scopeValue}</div></div>
         </div>
       </SectionPanel>
       {/* ops 정본 MyPanel은 Owner 원칙 카드만 포함 (monitor-ops.html:216-225) */}
@@ -645,7 +645,7 @@ function ThroughputPanel({
       description={throughputDescription}
     >
       {showLiveEmpty ? (
-        <div className="text-body-14 text-ecoya-gray-5" data-ui="throughput-empty">
+        <div className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-5)]" data-ui="throughput-empty">
           {copy.throughputEmpty}
         </div>
       ) : (
@@ -655,8 +655,8 @@ function ThroughputPanel({
               const active = empty ? false : item.active;
               return (
                 <div
-                  className={`grid min-h-[72px] place-items-center rounded-md border text-center text-label-12 font-medium ${
-                    active ? "border-ecoya-blue-8 bg-ecoya-blue-10 text-ecoya-blue-4" : "border-ecoya-gray-10 bg-ecoya-gray-12 text-ecoya-gray-5"
+                  className={`grid min-h-[72px] place-items-center rounded-md border text-center text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-medium ${
+                    active ? "border-[var(--color-primary-8)] bg-[var(--color-primary-10)] text-[var(--color-primary-4)]" : "border-[var(--color-gray-10)] bg-[var(--color-gray-12)] text-[var(--color-gray-5)]"
                   }`}
                   key={item.day}
                 >

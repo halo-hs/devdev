@@ -77,28 +77,28 @@ export function ReferenceDealDetail({ dealId }: { dealId: string }) {
         <PageHeader title={deal.title || deal.display_id || "거래 상세"} description={deal.counterparty_name || undefined} meta={dealStatuses[deal.status] || deal.status} />
         <SectionCard title="거래 정보">
           <dl className="reference-deal-fields">
-            {[["거래 번호", deal.display_id || deal.deal_id], ["거래처", deal.counterparty_name], ["거래 방향", deal.direction === "buy" ? "매입" : deal.direction === "sell" ? "매출" : null], ["담당자", deal.assignee_name], ["계약 번호", deal.po_number], ["인코텀즈", deal.incoterms], ["거래 금액", deal.amount_total ? `${deal.currency} ${deal.amount_total}` : null]].map(([label, content]) => <div key={label}><dt className="text-body-13 text-text-muted">{label}</dt><dd className="mt-1 text-body-15">{value(content)}</dd></div>)}
+            {[["거래 번호", deal.display_id || deal.deal_id], ["거래처", deal.counterparty_name], ["거래 방향", deal.direction === "buy" ? "매입" : deal.direction === "sell" ? "매출" : null], ["담당자", deal.assignee_name], ["계약 번호", deal.po_number], ["인코텀즈", deal.incoterms], ["거래 금액", deal.amount_total ? `${deal.currency} ${deal.amount_total}` : null]].map(([label, content]) => <div key={label}><dt className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{label}</dt><dd className="mt-1 text-[length:var(--text-body-8)] leading-[var(--leading-body-8)]">{value(content)}</dd></div>)}
           </dl>
         </SectionCard>
         <SectionCard title={`선적 정보 · ${shipments.length}건`} id="shipments">
           {stale && <p role="alert">{copy.staleBanner}</p>}
-          {notice && <p role="status" className="mb-3 text-body-14">{notice}</p>}
+          {notice && <p role="status" className="mb-3 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)]">{notice}</p>}
           {shipments.length === 0 ? <p>{copy.empty}</p> : <div className="reference-deal-shipments">
             {shipments.map(row => <article key={row.id} data-shipment-id={row.id}>
               <div className="reference-deal-shipment-heading">
-                <h3 className="text-header-17 font-bold">{value(row.bl_number || row.container_number)}</h3>
-                <span className="text-body-14">{copy.status[row.status] || row.status}</span>
+                <h3 className="text-[length:var(--text-body-6)] leading-[var(--leading-body-6)] font-bold">{value(row.bl_number || row.container_number)}</h3>
+                <span className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)]">{copy.status[row.status] || row.status}</span>
                 {canOperationalWrite(entitlements) && <Button variant="outline" disabled={pending !== null} onClick={() => void refresh(row.id)}>{pending === row.id ? copy.refreshingTracking : copy.refreshTracking}</Button>}
               </div>
               <dl className="reference-deal-fields">
-                {[["컨테이너", row.container_number], ["선사 · 선박", [row.carrier, row.vessel].filter(Boolean).join(" · ")], ["구간", `${value(row.pol)} → ${value(row.pod)}`], ["출항(ETD)", effectiveShipmentEtd(row)], ["도착(ETA)", effectiveShipmentEta(row)], ["선사 조회 시각", row.provider_fetched_at || row.last_carrier_sync_at]].map(([label, content]) => <div key={label}><dt className="text-body-13 text-text-muted">{label}</dt><dd className="mt-1 text-body-15">{value(content)}</dd></div>)}
+                {[["컨테이너", row.container_number], ["선사 · 선박", [row.carrier, row.vessel].filter(Boolean).join(" · ")], ["구간", `${value(row.pol)} → ${value(row.pod)}`], ["출항(ETD)", effectiveShipmentEtd(row)], ["도착(ETA)", effectiveShipmentEta(row)], ["선사 조회 시각", row.provider_fetched_at || row.last_carrier_sync_at]].map(([label, content]) => <div key={label}><dt className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{label}</dt><dd className="mt-1 text-[length:var(--text-body-8)] leading-[var(--leading-body-8)]">{value(content)}</dd></div>)}
               </dl>
-              <p className="mt-3 text-body-13 text-text-muted">{row.confirmed_eta || row.confirmed_etd ? "사람이 확인한 일정 기준" : copy.source[row.source]}{row.provider_eta && row.confirmed_eta && row.provider_eta !== row.confirmed_eta ? ` · 선사 도착 예정 ${row.provider_eta}` : ""}</p>
+              <p className="mt-3 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{row.confirmed_eta || row.confirmed_etd ? "사람이 확인한 일정 기준" : copy.source[row.source]}{row.provider_eta && row.confirmed_eta && row.provider_eta !== row.confirmed_eta ? ` · 선사 도착 예정 ${row.provider_eta}` : ""}</p>
             </article>)}
           </div>}
         </SectionCard>
         <SectionCard title="거래 서류">
-          <ul className="space-y-3">{deal.documents.map(doc => <li key={doc.doc_code} className="flex items-center justify-between gap-4 text-body-14"><span>{doc.label}</span><span>{doc.present ? doc.state === "complete" ? "완료" : "확인 필요" : "미등록"}</span></li>)}</ul>
+          <ul className="space-y-3">{deal.documents.map(doc => <li key={doc.doc_code} className="flex items-center justify-between gap-4 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)]"><span>{doc.label}</span><span>{doc.present ? doc.state === "complete" ? "완료" : "확인 필요" : "미등록"}</span></li>)}</ul>
         </SectionCard>
       </>}
     </div>

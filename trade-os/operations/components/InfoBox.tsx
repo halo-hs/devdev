@@ -28,9 +28,9 @@ function InfoBox({ tone = "neutral", title, description, action, hideIcon = fals
       {hideIcon ? null : <Info aria-hidden="true" />}
       <span className="flex w-full min-w-0 flex-wrap items-start gap-2">
         <span className="inline-flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="break-keep text-balance text-body-14 font-medium">{title}</span>
+          <span className="break-keep text-balance text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-medium">{title}</span>
           {description && (
-            <span className="text-body-14 font-regular">{description}</span>
+            <span className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-normal">{description}</span>
           )}
         </span>
         {action}

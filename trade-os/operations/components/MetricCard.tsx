@@ -15,12 +15,12 @@ type MetricCardProps = Omit<ComponentProps<"article">, "title"> & {
 };
 
 const toneTextClass: Record<MetricTone, string> = {
-  neutral: "text-ecoya-gray-4",
-  info: "text-ecoya-blue-4",
-  success: "text-ecoya-system-green-1",
-  warning: "text-ecoya-system-yellow-1",
-  danger: "text-ecoya-system-red-2",
-  indigo: "text-ecoya-indigo",
+  neutral: "text-[var(--color-gray-4)]",
+  info: "text-[var(--color-primary-4)]",
+  success: "text-[var(--color-green-1)]",
+  warning: "text-[var(--color-yellow-1)]",
+  danger: "text-[var(--color-red-2)]",
+  indigo: "text-[var(--color-indigo)]",
 };
 
 // Renders the shared Figma KPI card so every operations hero summary matches

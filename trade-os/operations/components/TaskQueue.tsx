@@ -42,7 +42,7 @@ function TaskQueue({
         // Empty: min-h-120 / flex center / typo.b9r(14/400); gray4 not gray5 — gray5 on
         // white is 4.04:1, fails WCAG AA 4.5:1 for this real copy.
         <div
-          className="flex min-h-30 items-center justify-center text-body-14 font-regular text-ecoya-gray-4"
+          className="flex min-h-30 items-center justify-center text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-normal text-[var(--color-gray-4)]"
           data-ui="task-queue-empty"
         >
           {empty}
@@ -58,7 +58,7 @@ function TaskQueue({
                 {/* Main: min-w-0 flex-col gap-4 */}
                 <div className="flex min-w-0 flex-col gap-1">
                   {/* TitleRow: min-w-0 flex items-center gap-6 + typo.b9m(14/500) gray2 */}
-                  <div className="flex min-w-0 items-center gap-1.5 text-body-14 font-medium text-ecoya-gray-2">
+                  <div className="flex min-w-0 items-center gap-1.5 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] font-medium text-[var(--color-gray-2)]">
                     {item.serviceLabel && (
                       <StatusBadge tone={item.serviceTone ?? "neutral"}>{item.serviceLabel}</StatusBadge>
                     )}
@@ -67,7 +67,7 @@ function TaskQueue({
                     )}
                     {/* TitleText: min-w-0 truncate */}
                     {item.href ? (
-                      <Link href={item.href} className="min-w-0 truncate hover:text-ecoya-blue-5">
+                      <Link href={item.href} className="min-w-0 truncate hover:text-[var(--color-primary-5)]">
                         {item.title}
                       </Link>
                     ) : (
@@ -76,7 +76,7 @@ function TaskQueue({
                   </div>
                   {/* Meta: typo.b10r(13/400); gray4 not gray5 (contrast) */}
                   {item.meta && (
-                    <div className="text-body-13 font-regular text-ecoya-gray-4">{item.meta}</div>
+                    <div className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-normal text-[var(--color-gray-4)]">{item.meta}</div>
                   )}
                 </div>
                 {/* Right: flex items-center gap-8 */}

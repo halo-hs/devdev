@@ -30,7 +30,7 @@ function SkeletonList({
   return (
     <StatusRoot
       className={cn(
-        "rounded-lg border border-border-subtle bg-surface-card p-4 shadow-section",
+        "rounded-lg border border-[var(--color-gray-11)] bg-[var(--color-gray-12)] p-4 shadow-section",
         className,
       )}
       data-ui="skeleton-list"
@@ -59,14 +59,14 @@ function SkeletonTable({
   return (
     <StatusRoot
       className={cn(
-        "rounded-lg border border-border-subtle bg-surface-card p-2 shadow-section",
+        "rounded-lg border border-[var(--color-gray-11)] bg-[var(--color-gray-12)] p-2 shadow-section",
         className,
       )}
       data-ui="skeleton-table"
       label={label}
       {...props}
     >
-      <div className="flex h-10 items-center gap-6 rounded-[8px] bg-surface-muted px-3">
+      <div className="flex h-10 items-center gap-6 rounded-[8px] bg-[var(--color-gray-11)] px-3">
         <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] w-1/6" />
         <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] w-1/4" />
         <Skeleton aria-hidden="true" className="h-[14px] rounded-[8px] w-1/6" />
@@ -103,7 +103,7 @@ function SkeletonCards({
     >
       {Array.from({ length: cards }, (_, index) => (
         <div
-          className="flex h-[92px] flex-col justify-center gap-2.5 rounded-lg border border-border-subtle bg-surface-card px-4 shadow-section"
+          className="flex h-[92px] flex-col justify-center gap-2.5 rounded-lg border border-[var(--color-gray-11)] bg-[var(--color-gray-12)] px-4 shadow-section"
           key={index}
         >
           <Skeleton aria-hidden="true" className="h-[12px] rounded-[8px] w-20" />

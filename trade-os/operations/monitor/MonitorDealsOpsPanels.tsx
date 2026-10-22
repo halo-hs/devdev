@@ -64,9 +64,9 @@ function OpsTable({
 }) {
   if (rows.length === 0) return null;
   return (
-    <div className="overflow-hidden rounded-lg border border-border-muted">
+    <div className="overflow-hidden rounded-lg border border-[var(--color-gray-10)]">
       <HostTable className="w-full min-w-[640px] text-left">
-        <HostTableHeader className="bg-surface-muted text-label-12 font-semibold uppercase tracking-wide text-text-muted">
+        <HostTableHeader className="bg-[var(--color-gray-11)] text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold uppercase tracking-wide text-[var(--color-gray-5)]">
           <HostTableRow>
             {columns.map((header) => (
               <HostTableHead key={header} className="px-4 py-2.5">{header}</HostTableHead>
@@ -111,7 +111,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
 
   if (state.status === "loading") {
     return (
-      <p className="mb-4 text-body-14 text-text-muted" data-component="MonitorDealsOpsPanels">
+      <p className="mb-4 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-5)]" data-component="MonitorDealsOpsPanels">
         {loadingLabel}
       </p>
     );
@@ -119,7 +119,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
 
   if (state.status === "error") {
     return (
-      <p className="mb-4 text-body-14 text-ecoya-system-red-2" data-component="MonitorDealsOpsPanels">
+      <p className="mb-4 text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-red-2)]" data-component="MonitorDealsOpsPanels">
         {copy.loadError ?? "Couldn't load operational exceptions."}
       </p>
     );
@@ -130,43 +130,43 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
   const qtyMismatch = state.deals.filter((deal) => hasQtyMismatchRisk(deal));
 
   const docGapRows = docGaps.slice(0, 6).map((deal) => (
-    <HostTableRow key={deal.deal_id} className="border-t border-border-muted hover:bg-surface-muted/60">
-      <HostTableCell className="px-4 py-3 font-medium text-text-primary">
-        <Link className="text-ecoya-accent hover:underline" href={`/erp/deals/${deal.deal_id}`}>
+    <HostTableRow key={deal.deal_id} className="border-t border-[var(--color-gray-10)] hover:bg-surface-muted/60">
+      <HostTableCell className="px-4 py-3 font-medium text-[var(--color-gray-2)]">
+        <Link className="text-[var(--color-primary-4)] hover:underline" href={`/erp/deals/${deal.deal_id}`}>
           {counterpartyLabel(deal)}
         </Link>
       </HostTableCell>
-      <HostTableCell className="px-4 py-3 font-mono text-ecoya-gray-3">{deal.next_eta ?? "—"}</HostTableCell>
-      <HostTableCell className="px-4 py-3 text-text-secondary">{deal.next_document?.label ?? "—"}</HostTableCell>
-      <HostTableCell className="px-4 py-3 font-mono text-text-secondary">
+      <HostTableCell className="px-4 py-3 font-mono text-[var(--color-gray-3)]">{deal.next_eta ?? "—"}</HostTableCell>
+      <HostTableCell className="px-4 py-3 text-[var(--color-gray-4)]">{deal.next_document?.label ?? "—"}</HostTableCell>
+      <HostTableCell className="px-4 py-3 font-mono text-[var(--color-gray-4)]">
         {deal.order_remaining_qty ?? "—"}
       </HostTableCell>
     </HostTableRow>
   ));
 
   const remainingRows = openRemaining.slice(0, 6).map((deal) => (
-    <HostTableRow key={deal.deal_id} className="border-t border-border-muted hover:bg-surface-muted/60">
-      <HostTableCell className="px-4 py-3 font-medium text-text-primary">
-        <Link className="text-ecoya-accent hover:underline" href={`/erp/deals/${deal.deal_id}`}>
+    <HostTableRow key={deal.deal_id} className="border-t border-[var(--color-gray-10)] hover:bg-surface-muted/60">
+      <HostTableCell className="px-4 py-3 font-medium text-[var(--color-gray-2)]">
+        <Link className="text-[var(--color-primary-4)] hover:underline" href={`/erp/deals/${deal.deal_id}`}>
           {counterpartyLabel(deal)}
         </Link>
       </HostTableCell>
-      <HostTableCell className="px-4 py-3 font-mono text-text-secondary">{deal.order_contracted_qty ?? "—"}</HostTableCell>
-      <HostTableCell className="px-4 py-3 font-mono text-text-secondary">{deal.order_shipped_qty ?? "—"}</HostTableCell>
-      <HostTableCell className="px-4 py-3 font-mono text-ecoya-gray-3">{deal.order_remaining_qty ?? "—"}</HostTableCell>
+      <HostTableCell className="px-4 py-3 font-mono text-[var(--color-gray-4)]">{deal.order_contracted_qty ?? "—"}</HostTableCell>
+      <HostTableCell className="px-4 py-3 font-mono text-[var(--color-gray-4)]">{deal.order_shipped_qty ?? "—"}</HostTableCell>
+      <HostTableCell className="px-4 py-3 font-mono text-[var(--color-gray-3)]">{deal.order_remaining_qty ?? "—"}</HostTableCell>
     </HostTableRow>
   ));
 
   const qtyRows = qtyMismatch.slice(0, 6).map((deal) => (
-    <HostTableRow key={deal.deal_id} className="border-t border-border-muted hover:bg-surface-muted/60">
-      <HostTableCell className="px-4 py-3 font-medium text-text-primary">
-        <Link className="text-ecoya-accent hover:underline" href={`/erp/deals/${deal.deal_id}`}>
+    <HostTableRow key={deal.deal_id} className="border-t border-[var(--color-gray-10)] hover:bg-surface-muted/60">
+      <HostTableCell className="px-4 py-3 font-medium text-[var(--color-gray-2)]">
+        <Link className="text-[var(--color-primary-4)] hover:underline" href={`/erp/deals/${deal.deal_id}`}>
           {counterpartyLabel(deal)}
         </Link>
       </HostTableCell>
-      <HostTableCell className="px-4 py-3 text-ecoya-system-red-2">{qtyRiskLabel(deal)}</HostTableCell>
-      <HostTableCell className="px-4 py-3 font-mono text-ecoya-gray-3">{deal.next_eta ?? "—"}</HostTableCell>
-      <HostTableCell className="px-4 py-3 font-mono text-text-secondary">{deal.order_remaining_qty ?? "—"}</HostTableCell>
+      <HostTableCell className="px-4 py-3 text-[var(--color-red-2)]">{qtyRiskLabel(deal)}</HostTableCell>
+      <HostTableCell className="px-4 py-3 font-mono text-[var(--color-gray-3)]">{deal.next_eta ?? "—"}</HostTableCell>
+      <HostTableCell className="px-4 py-3 font-mono text-[var(--color-gray-4)]">{deal.order_remaining_qty ?? "—"}</HostTableCell>
     </HostTableRow>
   ));
 
@@ -185,7 +185,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
         }
       >
         {docGaps.length === 0 ? (
-          <p className="text-body-14 text-text-muted">{copy.docGap.empty}</p>
+          <p className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-5)]">{copy.docGap.empty}</p>
         ) : (
           <OpsTable
             columns={[
@@ -216,7 +216,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
         }
       >
         {openRemaining.length === 0 ? (
-          <p className="text-body-14 text-text-muted">{copy.openRemaining.empty}</p>
+          <p className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-5)]">{copy.openRemaining.empty}</p>
         ) : (
           <OpsTable
             columns={[
@@ -248,7 +248,7 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
         }
       >
         {qtyMismatch.length === 0 ? (
-          <p className="text-body-14 text-text-muted">{copy.qtyMismatch.empty}</p>
+          <p className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-5)]">{copy.qtyMismatch.empty}</p>
         ) : (
           <OpsTable
             columns={[

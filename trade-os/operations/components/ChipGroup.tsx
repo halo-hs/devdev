@@ -91,8 +91,8 @@ function ChipBadge({
     <span
       className={
         shape === "square"
-          ? "inline-flex items-center justify-center whitespace-nowrap rounded px-2.5 py-0.5 text-badge-12 font-bold"
-          : "inline-flex items-center justify-center whitespace-nowrap rounded-[24px] px-2.5 py-0.5 text-badge-12 font-medium"
+          ? "inline-flex items-center justify-center whitespace-nowrap rounded px-2.5 py-0.5 text-[12px] leading-[16px] font-bold"
+          : "inline-flex items-center justify-center whitespace-nowrap rounded-[24px] px-2.5 py-0.5 text-[12px] leading-[16px] font-medium"
       }
       data-ui="chip-badge"
       style={style}

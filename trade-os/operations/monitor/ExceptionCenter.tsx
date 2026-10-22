@@ -18,8 +18,8 @@ import { messages } from "@trade-os/operations/i18n/messages";
 
 // severity → tone (critical worse than warning), mirroring the deal risk badge.
 const SEV_TONE: Record<string, string> = {
-  critical: "text-status-danger",
-  warning: "text-status-warning",
+  critical: "text-[var(--color-red-1)]",
+  warning: "text-[var(--color-yellow-1)]",
 };
 
 /**
@@ -98,7 +98,7 @@ export function ExceptionCenter() {
     unlistedLabel: copy.unlistedRisk,
   });
   const sevLabel = (s: string) => riskSeverityLabel(s, copy.severity, copy.severityFallback);
-  const sevTone = (s: string) => Object.hasOwn(SEV_TONE, s) ? SEV_TONE[s] : "text-text-primary";
+  const sevTone = (s: string) => Object.hasOwn(SEV_TONE, s) ? SEV_TONE[s] : "text-[var(--color-gray-2)]";
   const detailText = (detail: string | undefined) => riskDetailLine(detail, {
     formatDays: (key, days) => riskCopy[key].replace("{days}", String(days)),
     locale: localeTag,
@@ -106,20 +106,20 @@ export function ExceptionCenter() {
   }) ?? "—";
 
   return (
-    <section className="mt-6 rounded-lg border border-border-muted bg-surface-card p-4" data-component="ExceptionCenter">
+    <section className="mt-6 rounded-lg border border-[var(--color-gray-10)] bg-[var(--color-gray-12)] p-4" data-component="ExceptionCenter">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-body-15 font-semibold text-text-primary">{copy.title}</h2>
-        <span className="text-label-12 text-text-muted">
+        <h2 className="text-[length:var(--text-body-8)] leading-[var(--leading-body-8)] font-semibold text-[var(--color-gray-2)]">{copy.title}</h2>
+        <span className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
           {data.items.length > 0 ? copy.dealCount.replace("{count}", String(data.deal_count)) : copy.subtitle}
         </span>
       </div>
       {data.items.length === 0 ? (
-        <p className="mt-3 text-body-13 text-text-muted">{copy.empty}</p>
+        <p className="mt-3 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.empty}</p>
       ) : (
         <div className="mt-3 overflow-x-auto">
-          <HostTable className="w-full border-collapse text-label-12">
+          <HostTable className="w-full border-collapse text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]">
             <HostTableHeader>
-              <HostTableRow className="border-b border-border-muted text-text-disabled">
+              <HostTableRow className="border-b border-[var(--color-gray-10)] text-[var(--color-gray-6)]">
                 <HostTableHead className="px-2 py-1.5 text-left font-medium">{copy.cols.deal}</HostTableHead>
                 <HostTableHead className="px-2 py-1.5 text-left font-medium">{copy.cols.risk}</HostTableHead>
                 <HostTableHead className="px-2 py-1.5 text-left font-medium">{copy.cols.detail}</HostTableHead>
@@ -127,22 +127,22 @@ export function ExceptionCenter() {
             </HostTableHeader>
             <HostTableBody>
               {data.items.map((e, i) => (
-                <HostTableRow key={`${e.deal_id}-${e.risk_type}-${i}`} className="border-b border-border-subtle">
+                <HostTableRow key={`${e.deal_id}-${e.risk_type}-${i}`} className="border-b border-[var(--color-gray-11)]">
                   <HostTableCell className="px-2 py-1.5">
                     <Link
                       // W8-V2b ?from discipline: triage jumps carry their origin so
                       // the deal's back affordance returns to the Monitor, not the list.
                       href={`/erp/deals/${encodeURIComponent(e.deal_id)}?from=${encodeURIComponent("/erp/monitor")}`}
-                      className="text-ecoya-blue-6 hover:underline"
+                      className="text-[var(--color-primary-6)] hover:underline"
                     >
                       {e.deal_ref}
                     </Link>
                   </HostTableCell>
                   <HostTableCell className={`px-2 py-1.5 font-medium ${sevTone(e.severity)}`}>
                     {riskLabel(e.risk_type)}
-                    <span className="ml-1 font-normal text-text-muted">· {sevLabel(e.severity)}</span>
+                    <span className="ml-1 font-normal text-[var(--color-gray-5)]">· {sevLabel(e.severity)}</span>
                   </HostTableCell>
-                  <HostTableCell className="px-2 py-1.5 text-text-muted">{detailText(e.detail)}</HostTableCell>
+                  <HostTableCell className="px-2 py-1.5 text-[var(--color-gray-5)]">{detailText(e.detail)}</HostTableCell>
                 </HostTableRow>
               ))}
             </HostTableBody>
