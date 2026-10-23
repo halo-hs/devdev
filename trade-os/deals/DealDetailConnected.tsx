@@ -2154,14 +2154,11 @@ function DealDocumentPanels({
     const main = workspaceRef.current?.closest<HTMLElement>(
       "[data-deal-scroll-viewport]"
     )
-    const header = document.querySelector("[data-deal-sticky-header]")
     if (!main) return
+    // The comparison covers the whole deal area, sticky deal header included.
     const measure = () => {
       const rect = main.getBoundingClientRect()
-      const top = Math.max(
-        rect.top,
-        header?.getBoundingClientRect().bottom ?? rect.top
-      )
+      const top = rect.top
       setWorkspaceBounds({
         left: rect.left,
         top,
@@ -2175,7 +2172,6 @@ function DealDocumentPanels({
     const returnFocus = editButtonRef.current
     const observer = new ResizeObserver(measure)
     observer.observe(main)
-    if (header) observer.observe(header)
     window.addEventListener("resize", measure)
     window.addEventListener("scroll", measure, true)
     closeRef.current?.focus({ preventScroll: true })
