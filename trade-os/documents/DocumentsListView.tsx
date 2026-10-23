@@ -35,20 +35,6 @@ const generatedDraftListStage = (draft: GeneratedDraft) =>
       : "none",
   })
 
-const generatedDraftReuseFacts: Record<string, string[]> = {
-  "SC-2026-0708": [
-    "거래처 ACME GmbH",
-    "조건 CIF Hamburg",
-    "금액 2,400,000.00 USD",
-  ],
-  "CI-2026-0708": ["은행 거절 전 점검", "거래 연결됨", "통화 USD"],
-  "CI-2026-0712": ["은행 거절 전 점검", "거래처명 불일치", "확정 차단"],
-  "CI-2026-0703": ["품목 Aluminium Scrap", "수량 20 MT", "통화 USD"],
-  "CI-2026-0704": ["공유 링크 활성", "이메일 전달 전", "거래 연결됨"],
-  "QT-2026-0630": ["운임 Hamburg", "선사 HMM", "ETA 08.03"],
-  "SOA-2026-0629": ["정산 6월", "미수금 없음", "고객 전달 요청"],
-}
-
 export function RecentDocumentsTable({
   docs,
   onResult,
@@ -104,7 +90,7 @@ export function RecentDocumentsTable({
         <TableHeader>
           <TableRow>
             <TableHead className="w-[27%] text-left">문서</TableHead>
-            <TableHead className="w-[15%] text-left">Deal</TableHead>
+            <TableHead className="w-[15%] text-left">거래</TableHead>
             <TableHead className="w-[16%]">상태</TableHead>
             <TableHead className="w-[13%] text-left">생성자</TableHead>
             <TableHead className="w-[12%] text-left">수정</TableHead>
@@ -113,7 +99,6 @@ export function RecentDocumentsTable({
         </TableHeader>
         <TableBody>
           {visibleDocs.map((draft) => {
-            const reuseFacts = generatedDraftReuseFacts[draft.number] ?? []
             const rowDestination: GeneratedDocumentDestination =
               draft.tab === "confirmed"
                 ? "confirmed"
@@ -184,16 +169,8 @@ export function RecentDocumentsTable({
                       {draft.title}
                     </span>
                   </div>
-                  <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-sm leading-[18px] text-muted-foreground">
-                    <span>{draft.number}</span>
-                    {reuseFacts.slice(0, 2).map((fact) => (
-                      <span
-                        key={fact}
-                        className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary"
-                      >
-                        {fact}
-                      </span>
-                    ))}
+                  <div className="mt-1 truncate text-sm leading-[18px] text-muted-foreground">
+                    {draft.number}
                   </div>
                 </TableCell>
                 <TableCell className="text-left text-muted-foreground">
@@ -208,7 +185,7 @@ export function RecentDocumentsTable({
                           </span>
                         </TooltipTrigger>
                         <TooltipContent>
-                          이 발행 문서는 볼 수 있지만 연결된 Deal은 별도 권한이
+                          이 발행 문서는 볼 수 있지만 연결된 거래는 별도 권한이
                           필요합니다.
                         </TooltipContent>
                       </Tooltip>
