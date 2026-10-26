@@ -119,22 +119,22 @@ export function AuthSurface({
           aria-label={title}
           className={cn(
             "flex min-w-0 flex-1 items-center justify-center px-5 py-10 sm:px-10 lg:px-16 lg:py-16",
-            variant !== "recovery" &&
-              "items-start py-8 sm:py-[60px] lg:py-[60px]"
+            variant !== "recovery" && "items-start py-10 sm:py-[60px]",
+            variant === "login" && "lg:pt-[139px]",
+            variant === "signup" && "lg:pt-[71px]"
           )}
         >
           <div
             className={cn(
               "w-full max-w-md",
-              variant !== "recovery" && "max-w-[520px]",
-              variant === "signup" && "flex min-h-[720px] flex-col"
+              variant !== "recovery" && "max-w-[440px]"
             )}
           >
             <h1
               className={cn(
                 "text-2xl font-semibold tracking-tight sm:text-3xl",
                 variant !== "recovery" &&
-                  "text-center text-[26px] leading-[39px] font-bold sm:text-[26px]"
+                  "text-center text-[26px] leading-9 font-bold sm:text-[26px]"
               )}
             >
               {title}
@@ -144,7 +144,7 @@ export function AuthSurface({
                 className={cn(
                   "mt-3 text-base leading-7 text-muted-foreground",
                   variant === "signup" &&
-                    "mt-2 min-h-6 text-center text-sm leading-6",
+                    "mt-2 text-center text-[15px] leading-6 text-[var(--color-gray-4)]",
                   variant === "login" &&
                     "mt-8 text-center text-[17px] leading-6"
                 )}
@@ -155,8 +155,8 @@ export function AuthSurface({
             <div
               className={cn(
                 "mt-8",
-                variant === "signup" && "mt-8 flex flex-1 flex-col",
-                variant === "login" && "mt-10"
+                variant === "signup" && "mt-[22px] flex flex-col",
+                variant === "login" && "mt-8"
               )}
             >
               {children}
@@ -165,7 +165,7 @@ export function AuthSurface({
               <div
                 className={cn(
                   "mt-7 flex flex-col gap-3 border-t pt-6",
-                  variant === "login" && "mt-12 border-0 pt-0"
+                  variant === "login" && "mt-8 border-0 pt-0"
                 )}
               >
                 {footer}
@@ -176,6 +176,16 @@ export function AuthSurface({
         <CommonPublicFooter compact />
       </div>
     </main>
+  )
+}
+
+export function AuthDivider() {
+  return (
+    <div className="flex items-center gap-3.5 text-[11px] leading-4 text-[var(--color-gray-6)]">
+      <span className="h-px flex-1 bg-[var(--color-gray-10)]" aria-hidden="true" />
+      또는
+      <span className="h-px flex-1 bg-[var(--color-gray-10)]" aria-hidden="true" />
+    </div>
   )
 }
 

@@ -2360,3 +2360,98 @@
   }
 }
 
+
+/* Figma GNB (로그인 화면 3차): 15px menu, 40px buttons with 10px corners. */
+.trade-landing .trade-nav-wrap {
+  border-bottom-color: #e5e7eb;
+}
+.trade-landing .trade-nav-actions {
+  font-weight: 400;
+}
+.trade-landing .trade-nav-actions > :is(.ecoya-nav-login, .ecoya-nav-contact, .ecoya-nav-start) {
+  border-radius: 10px;
+  font-weight: 400;
+  box-shadow: 0 1px 2px rgb(5 29 57 / 10%);
+}
+.trade-landing .trade-nav-actions > :is(.ecoya-nav-login, .ecoya-nav-contact),
+.trade-landing .trade-nav-actions > .ecoya-nav-login:is(:hover, :active) {
+  border: 1px solid var(--color-gray-9) !important;
+  background: var(--color-gray-12) !important;
+  color: var(--color-gray-2) !important;
+}
+.trade-landing .trade-nav-actions > :is(.ecoya-nav-login, .ecoya-nav-contact):hover {
+  background: var(--color-gray-11) !important;
+  color: var(--color-gray-2) !important;
+}
+/* Without a start button the contact action is the header's primary button. */
+.trade-landing .trade-nav-actions > .ecoya-nav-contact:last-child,
+.trade-landing .trade-nav-actions > .ecoya-nav-contact:last-child:hover {
+  border-color: var(--color-indigo) !important;
+  background: var(--color-indigo) !important;
+  color: var(--color-gray-12) !important;
+}
+@media (min-width: 801px) {
+  .trade-landing .trade-nav {
+    height: 72px;
+    min-height: 72px;
+    padding: 0 40px;
+  }
+  .trade-landing .trade-nav .trade-brand-logo {
+    width: 88px;
+    height: 20px;
+  }
+  .trade-landing .trade-nav .trade-brand-logo img {
+    width: 163.5px;
+    height: 20px;
+  }
+  .trade-landing .trade-nav > nav {
+    gap: 4px;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 22px;
+  }
+  .trade-landing .trade-nav > nav > a {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    color: var(--color-indigo);
+  }
+  .trade-landing .trade-nav-actions {
+    gap: 8px;
+    font-size: 15px;
+  }
+  .trade-landing .trade-nav-actions > :is(.ecoya-nav-login, .ecoya-nav-contact, .ecoya-nav-start) {
+    width: auto;
+    min-width: 0;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 16px;
+    font-size: 15px;
+    line-height: 22px;
+  }
+  .trade-landing .ecoya-locale-select {
+    width: auto;
+    min-width: 100px;
+    height: 40px;
+    gap: 4px;
+    padding: 0 16px 0 14px;
+    border: 1px solid var(--color-gray-9);
+    border-radius: 10px;
+    background: var(--color-gray-12);
+    color: var(--color-gray-2);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 22px;
+    box-shadow: 0 1px 2px rgb(5 29 57 / 10%);
+  }
+  .trade-landing .ecoya-locale-select > svg:first-child {
+    width: 20px;
+    height: 20px;
+    color: var(--color-gray-2);
+  }
+  .trade-landing .ecoya-locale-select > svg:last-child {
+    display: none;
+  }
+}
