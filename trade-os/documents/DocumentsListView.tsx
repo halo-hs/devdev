@@ -2,7 +2,7 @@ import { getGeneratedDocumentListStage, generatedDocumentListStages } from "@tra
 import { useState, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/Table"
-import { FileX2, FileClock, FileCheck2, ShieldCheck, MoreVertical, Copy, Trash2, AlertTriangle, LoaderCircle } from "lucide-react"
+import { FileX2, FileClock, FileCheck2, ShieldCheck, MoreHorizontal, Copy, Trash2, AlertTriangle, LoaderCircle } from "lucide-react"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip"
 import { Button } from "@/components/ui/Button"
@@ -20,7 +20,8 @@ import { TemplateStrip, RelatedDealNotice } from "@trade-os/documents/DocumentCr
 import { ResultScreen } from "@trade-os/documents/DocumentCreateConnected"
 import { StructuredDocumentCreateEditor } from "@trade-os/documents/DocumentCreateStepViews"
 import { Card, CardContent } from "@/components/ui/Card"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs"
+import { Tabs, TabsList, TabsTrigger, TabsCount, TabsContent } from "@/components/ui/Tabs"
+import { StatusBadge } from "@/components/platform/StatusBadge"
 import { BusinessListToolbar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar"
 import { type GeneratedDraft, type CreateStartMode, type GeneratedDocumentOpenOptions, type ErpPreviewRole, type GeneratedDocumentDestination, type DocumentCreateWorkspaceStep, type DealDocumentContext, type DocumentDirection } from "@/App"
 import { generatedDrafts } from "@trade-os/documents/documentTemplateModel"
@@ -89,12 +90,12 @@ export function RecentDocumentsTable({
       <Table className="min-w-[1040px] table-fixed">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[27%] text-left">문서</TableHead>
-            <TableHead className="w-[15%] text-left">거래</TableHead>
-            <TableHead className="w-[16%]">상태</TableHead>
-            <TableHead className="w-[13%] text-left">생성자</TableHead>
-            <TableHead className="w-[12%] text-left">수정</TableHead>
-            <TableHead className="w-[17%] text-right">작업</TableHead>
+            <TableHead className="w-[29.7%] pl-5 text-left">문서</TableHead>
+            <TableHead className="w-[13.3%] text-center">거래</TableHead>
+            <TableHead className="w-[18%] text-center">상태</TableHead>
+            <TableHead className="w-[10.9%] text-center">생성자</TableHead>
+            <TableHead className="w-[10.9%] text-center">수정</TableHead>
+            <TableHead className="w-[17.2%] text-center">작업</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -162,18 +163,18 @@ export function RecentDocumentsTable({
                   }
                 }}
               >
-                <TableCell className="h-auto min-w-0 py-3 text-left whitespace-normal">
+                <TableCell className="h-[60px] min-w-0 py-2 pl-5 text-left whitespace-normal">
                   <div className="flex min-w-0 items-center gap-2">
-                    <ToneBadge tone="blue">{draft.type}</ToneBadge>
+                    <StatusBadge tone="ocean" className="h-4 px-2.5">{draft.type}</StatusBadge>
                     <span className="truncate">
                       {draft.title}
                     </span>
                   </div>
-                  <div className="mt-1 truncate text-sm leading-[18px] text-muted-foreground">
+                  <div className="mt-0.5 truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                     {draft.number}
                   </div>
                 </TableCell>
-                <TableCell className="text-left text-muted-foreground">
+                <TableCell className="text-center">
                   {draft.dealId ? (
                     canOpenDeal ? (
                       <span className="truncate">{draft.dealId}</span>
@@ -191,21 +192,21 @@ export function RecentDocumentsTable({
                       </Tooltip>
                     )
                   ) : (
-                    <span className="text-xs">미연결</span>
+                    <span>미연결</span>
                   )}
                 </TableCell>
-                <TableCell className="whitespace-normal">
+                <TableCell className="py-2 text-center whitespace-normal">
                   <ToneBadge tone={listStage.tone}>{listStage.label}</ToneBadge>
                   {draft.readiness && (
                     <div
-                      className="mt-1 truncate text-sm leading-[18px] text-muted-foreground"
+                      className="mt-0.5 truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]"
                       title={draft.readiness}
                     >
                       {draft.readiness}
                     </div>
                   )}
                 </TableCell>
-                <TableCell className="truncate text-left">
+                <TableCell className="truncate text-center">
                   <span
                     title={
                       draft.creatorAccountId
@@ -216,13 +217,13 @@ export function RecentDocumentsTable({
                     {draft.creatorName}
                   </span>
                 </TableCell>
-                <TableCell className="text-left whitespace-nowrap text-muted-foreground">
+                <TableCell className="text-center whitespace-nowrap">
                   {draft.updated}
                 </TableCell>
                 <TableCell className="relative">
-                  <div className="flex items-center justify-end gap-1.5">
+                  <div className="flex items-center justify-center gap-1.5">
                     <Button
-                      size="xs"
+                      size="default"
                       onClick={(event) => {
                         event.stopPropagation()
                         openDraft(
@@ -240,7 +241,7 @@ export function RecentDocumentsTable({
                         <span className="inline-flex">
                           <Button
                             variant="ghost"
-                            size="icon-xs"
+                            size="icon"
                             className={cn(
                               "text-muted-foreground",
                               draft.pdfState === "draft" && "text-primary",
@@ -263,7 +264,7 @@ export function RecentDocumentsTable({
                               }
                             }}
                           >
-                            <PdfStateIcon className="size-4" />
+                            <PdfStateIcon className="size-[18px]" />
                           </Button>
                         </span>
                       </TooltipTrigger>
@@ -279,12 +280,12 @@ export function RecentDocumentsTable({
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          size="icon-xs"
+                          size="icon"
                           className="text-muted-foreground"
                           aria-label={`${draft.title} 메뉴`}
                           onClick={(event) => event.stopPropagation()}
                         >
-                          <MoreVertical className="size-4" />
+                          <MoreHorizontal className="size-[18px]" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
@@ -653,19 +654,21 @@ export function CreateScreen({
                 <Tabs
                   value={documentListTab}
                   onValueChange={setDocumentListTab}
+                  className="gap-0"
                 >
                   <BusinessListToolbar
-                    className="px-4 pt-4"
+                    className="px-5 pt-5 pb-3.5"
                     aria-label="만든 문서 검색 필터"
                   >
                     <TabsList aria-label="만든 문서 상태">
                       {documentTabs.map((tab) => (
                         <TabsTrigger key={tab.value} value={tab.value}>
-                          {tab.label} {tab.docs.length}
+                          {tab.label}
+                          <TabsCount>{tab.docs.length}</TabsCount>
                         </TabsTrigger>
                       ))}
                     </TabsList>
-                    <div className="ml-auto flex min-w-[240px] flex-1 justify-end">
+                    <div className="ml-auto flex w-[420px] max-w-full min-w-[240px] shrink justify-end">
                       <BusinessFilterSearch
                         label="만든 문서 검색"
                         placeholder="문서번호, 거래처, 상태 검색"
@@ -680,7 +683,7 @@ export function CreateScreen({
                       value={value as string}
                       className="m-0"
                     >
-                      <CardContent data-layout="flush-table" className="p-0">
+                      <CardContent data-layout="flush-table" className="data-[layout=flush-table]:mt-0 group-data-[size=sm]/card:px-5 group-data-[size=sm]/card:pt-0">
                         <RecentDocumentsTable
                           docs={docs as GeneratedDraft[]}
                           onResult={onResult}

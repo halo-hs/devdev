@@ -809,6 +809,9 @@
 :root:not(.dark) {
   --table-header-foreground: var(--color-gray-4);
   --tabs-trigger-foreground: var(--color-gray-4);
+  /* Figma Badge palette ocean (document type tags). */
+  --badge-ocean-background: #dbf1fa;
+  --badge-ocean-foreground: #136686;
   --tabs-trigger-foreground-selected: var(--color-primary-4);
   --tabs-indicator: var(--color-primary-4);
 }
