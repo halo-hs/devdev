@@ -1,6 +1,5 @@
 import { appLocation } from "@/app/appLocation"
 import { useEffect, useState, type FormEvent } from "react"
-import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Textarea } from "@/components/ui/Textarea"
@@ -277,8 +276,8 @@ export function ContactLanding() {
                 {errors.consent}
               </FormFieldMessage>
             )}
-            <Button type="submit" size="lg">
-              {t("이메일로 문의하기")} <ArrowRight size={16} />
+            <Button type="submit" className="ecoya-contact-submit">
+              {t("이메일로 문의하기")}
             </Button>
             <p
               className="ecoya-contact-email-note"
