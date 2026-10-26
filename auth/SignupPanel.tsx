@@ -1,12 +1,12 @@
 import { useState } from "react"
-import { authFieldError } from "@auth/lib/authValidation"
+import { authActionButtonClass, authFieldError, authSocialButtonClass } from "@auth/lib/authValidation"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select"
 import { Button } from "@/components/ui/Button"
-import { RefreshCw, Mail, CheckCircle2, ArrowRight } from "lucide-react"
+import { RefreshCw, Mail, CheckCircle2, ArrowRight, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { AuthInputField } from "@auth/AuthInputField"
 import googleIcon from "@/components/ds2/assets/icons/icon-google.svg"
-import { type CommonPrototypeScreenProps, type Feedback, AuthSurface, InlineFeedback } from "@auth/AuthSurface"
+import { type CommonPrototypeScreenProps, type Feedback, AuthDivider, AuthSurface, InlineFeedback } from "@auth/AuthSurface"
 import { showPreviewControls } from "@auth/authNavigation"
 
 type SignupStep = "identity" | "verification" | "organization" | "complete"
@@ -81,7 +81,7 @@ export function CommonSignupPrototype({
       title={titles[step]}
       description={descriptions[step]}
     >
-      <div className="flex flex-1 flex-col gap-6">
+      <div className="flex flex-col gap-[22px]">
         {showPreviewControls() && (
           <details className="text-xs text-muted-foreground">
             <summary className="cursor-pointer">가입 결과 미리보기</summary>
@@ -132,35 +132,54 @@ export function CommonSignupPrototype({
           <>
             <ol
               aria-label="회원가입 단계"
-              className="flex min-h-8 w-full flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm"
+              className="flex w-full flex-wrap items-center justify-center gap-3"
             >
-              {["계정 만들기", "조직 설정"].map((label, index) => (
-                <li
-                  key={label}
-                  aria-current={
-                    (step === "identity" || step === "verification" ? 0 : 1) ===
-                    index
-                      ? "step"
-                      : undefined
-                  }
-                  className={cn(
-                    "flex items-center gap-2 text-muted-foreground",
-                    (step === "identity" || step === "verification" ? 0 : 1) ===
-                      index && "font-semibold text-primary"
-                  )}
-                >
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full border text-xs">
-                    {index + 1}
-                  </span>
-                  {label}
-                </li>
-              ))}
+              {["계정 만들기", "조직 설정"].map((label, index) => {
+                const current =
+                  (step === "identity" || step === "verification" ? 0 : 1) ===
+                  index
+                return (
+                  <li
+                    key={label}
+                    aria-current={current ? "step" : undefined}
+                    className="flex items-center gap-3"
+                  >
+                    {index > 0 && (
+                      <ChevronRight
+                        className="size-4 text-[var(--color-gray-6)]"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <span className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          "flex size-[22px] shrink-0 items-center justify-center rounded-full text-[13px] leading-[18px] font-semibold",
+                          current
+                            ? "bg-[var(--color-primary-4)] text-white"
+                            : "bg-[var(--color-gray-10)] text-[var(--color-gray-6)]"
+                        )}
+                      >
+                        {index + 1}
+                      </span>
+                      <span
+                        className={
+                          current
+                            ? "text-[14px] leading-5 font-semibold text-[var(--color-gray-2)]"
+                            : "text-[13px] leading-[18px] text-[var(--color-gray-6)]"
+                        }
+                      >
+                        {label}
+                      </span>
+                    </span>
+                  </li>
+                )
+              })}
             </ol>
             {step === "identity" && (
               <>
                 <form
                   noValidate
-                  className="flex min-h-[350px] flex-col gap-4"
+                  className="flex flex-col gap-[18px]"
                   onSubmit={(event) => {
                     event.preventDefault()
                     setSubmitted(true)
@@ -212,23 +231,16 @@ export function CommonSignupPrototype({
                     error={errors.confirm}
                     submitted={submitted}
                   />
-                  <Button type="submit" className="mt-auto h-10 w-full">
+                  <Button type="submit" className={authActionButtonClass}>
                     계정 만들기
                   </Button>
                 </form>
-                <div className="flex flex-col gap-4">
-                  <div
-                    role="separator"
-                    className="flex items-center gap-3 text-xs text-muted-foreground"
-                  >
-                    <span className="h-px flex-1 bg-border" />
-                    또는
-                    <span className="h-px flex-1 bg-border" />
-                  </div>
+                <AuthDivider />
+                <div className="flex flex-col gap-3">
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-10 w-full"
+                    className={authSocialButtonClass}
                     onClick={() => setProviderError(true)}
                   >
                     <SocialGoogleIcon /> Google로 계속
@@ -243,13 +255,13 @@ export function CommonSignupPrototype({
                       }}
                     />
                   )}
-                  <p className="text-center text-sm leading-6 text-muted-foreground">
+                  <p className="text-center text-[14px] leading-5 text-[var(--color-gray-4)]">
                     계정 만들기 또는 Google로 계속하면{" "}
                     <a
                       href="/legal/terms"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-primary hover:underline"
+                      className="font-medium text-[var(--color-indigo)] underline"
                     >
                       이용약관
                     </a>
@@ -258,17 +270,17 @@ export function CommonSignupPrototype({
                       href="/legal/privacy"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-primary hover:underline"
+                      className="font-medium text-[var(--color-indigo)] underline"
                     >
                       개인정보처리방침
                     </a>
                     을 확인한 것으로 봅니다.
                   </p>
                 </div>
-                <p className="text-center text-[13px] text-muted-foreground">
-                  이미 계정이 있으신가요?{" "}
+                <p className="flex items-center justify-center gap-2 text-[15px] leading-[22px] text-[var(--color-gray-5)]">
+                  이미 계정이 있으신가요?
                   <Button
-                    className="h-auto p-0"
+                    className="h-10 p-0 text-[15px] leading-[22px]"
                     variant="link"
                     onClick={() => onNavigate?.("login")}
                   >
@@ -396,5 +408,5 @@ export function CommonSignupPrototype({
 
 function SocialGoogleIcon() {
   const Icon = googleIcon
-  return <Icon aria-hidden="true" className="size-4" />
+  return <Icon aria-hidden="true" />
 }
