@@ -870,7 +870,7 @@ export const templateDirections = {
 
 export const generatedDrafts: GeneratedDraft[] = [
   {
-    dealId: "DL-260707-04", title: "판매계약서 승인 요청", type: "계약서",
+    dealId: "DL-260707-04", title: "판매계약서", type: "계약서",
     number: "SC-2026-0918", party: "ACME GmbH", status: "작성 중", tone: "neutral",
     readiness: "승인자 검토 중", tab: "draft", creatorName: "조민영", creatorAccountId: "account-owner",
     updated: "오늘 10:00", memberCanAccessDeal: true, memberCanDeliver: true, pdfState: "draft",
@@ -878,7 +878,7 @@ export const generatedDrafts: GeneratedDraft[] = [
     approvalPreviewState: "requester-pending",
   },
   {
-    dealId: "DL-260707-04", title: "상업송장 승인 완료", type: "인보이스",
+    dealId: "DL-260707-04", title: "상업송장", type: "인보이스",
     number: "CI-2026-0918", party: "ACME GmbH", status: "작성 중", tone: "neutral",
     readiness: "승인 완료 · 최종 검토", tab: "draft", creatorName: "조민영", creatorAccountId: "account-owner",
     updated: "오늘 10:00", memberCanAccessDeal: true, memberCanDeliver: true, pdfState: "reviewed",
@@ -886,7 +886,7 @@ export const generatedDrafts: GeneratedDraft[] = [
     approvalPreviewState: "requester-approved",
   },
   {
-    dealId: "DL-260707-04", title: "발주서 결제조건 수정", type: "발주서",
+    dealId: "DL-260707-04", title: "발주서", type: "발주서",
     number: "PO-2026-0918", party: "ACME GmbH", status: "작성 중", tone: "neutral",
     readiness: "결제조건 보완 후 재요청", tab: "draft", creatorName: "조민영", creatorAccountId: "account-owner",
     updated: "오늘 10:00", memberCanAccessDeal: true, memberCanDeliver: true, pdfState: "draft",
@@ -895,7 +895,7 @@ export const generatedDrafts: GeneratedDraft[] = [
   },
   {
     dealId: "",
-    title: "표준 매매계약서 초안",
+    title: "표준 매매계약서",
     type: "계약서",
     number: "SC-2026-0708",
     party: "거래 미연결",
@@ -913,7 +913,7 @@ export const generatedDrafts: GeneratedDraft[] = [
   },
   {
     dealId: "DL-260708-08",
-    title: "은행 제출용 상업송장 초안",
+    title: "은행 제출용 상업송장",
     type: "인보이스",
     number: "CI-2026-0708",
     party: "ACME GmbH",
@@ -931,7 +931,7 @@ export const generatedDrafts: GeneratedDraft[] = [
   },
   {
     dealId: "DL-260708-01",
-    title: "은행 제출용 상업송장 점검 필요",
+    title: "은행 제출용 상업송장",
     type: "인보이스",
     number: "CI-2026-0712",
     party: "KATAMAN ASIA-PACIFIC PTE LTD",
@@ -985,7 +985,7 @@ export const generatedDrafts: GeneratedDraft[] = [
   },
   {
     dealId: "DL-260708-01",
-    title: "상업송장 고객 전달",
+    title: "상업송장",
     type: "인보이스",
     number: "CI-2026-0704",
     party: "ACME GmbH",

@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils"
 import { Mail, Check, Copy, X, ChevronDown, AlertTriangle, FileText, ChevronUp, Plus, Upload, LoaderCircle, MoreHorizontal, Trash2, Info, RefreshCw, ChevronRight, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
+import { DocumentTypeBadge } from "@trade-os/components/DocumentTypeBadge"
 import { AppSelect } from "@trade-os/components/AppSelect"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/Table"
 import { Checkbox } from "@/components/ui/Checkbox"
@@ -669,23 +670,13 @@ function UploadDocumentTypeMark({
   documentType: UploadDocumentType
   className?: string
 }) {
-  const unresolved = documentType === "UNK"
   return (
-    <span
-      className={cn(
-        // 문서 올리기 V2: small outlined chip — Document icon + type code.
-        "inline-flex h-5 shrink-0 flex-row items-center justify-center gap-0.5 rounded-[4px] border border-[var(--color-gray-7)] bg-[var(--color-gray-12)] px-1 text-[var(--color-gray-2)]",
-        unresolved && "border-dashed text-[var(--color-gray-5)]",
-        className
-      )}
+    <DocumentTypeBadge
+      code={uploadDocumentTypeCode(documentType)}
+      className={className}
       title={uploadDocumentTypeLabel(documentType)}
       aria-label={`문서 유형 ${uploadDocumentTypeLabel(documentType)}`}
-    >
-      <FileText className="size-3" aria-hidden="true" />
-      <span className="text-[10px] leading-none font-semibold">
-        {uploadDocumentTypeCode(documentType)}
-      </span>
-    </span>
+    />
   )
 }
 
