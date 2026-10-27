@@ -21,7 +21,7 @@ import { ResultScreen } from "@trade-os/documents/DocumentCreateConnected"
 import { StructuredDocumentCreateEditor } from "@trade-os/documents/DocumentCreateStepViews"
 import { Card, CardContent } from "@/components/ui/Card"
 import { Tabs, TabsList, TabsTrigger, TabsCount, TabsContent } from "@/components/ui/Tabs"
-import { StatusBadge } from "@/components/platform/StatusBadge"
+import { DocumentTypeBadge } from "@trade-os/components/DocumentTypeBadge"
 import { BusinessListToolbar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar"
 import { type GeneratedDraft, type CreateStartMode, type GeneratedDocumentOpenOptions, type ErpPreviewRole, type GeneratedDocumentDestination, type DocumentCreateWorkspaceStep, type DealDocumentContext, type DocumentDirection } from "@/App"
 import { generatedDrafts } from "@trade-os/documents/documentTemplateModel"
@@ -165,7 +165,7 @@ export function RecentDocumentsTable({
               >
                 <TableCell className="h-[60px] min-w-0 py-2 pl-5 text-left whitespace-normal">
                   <div className="flex min-w-0 items-center gap-2">
-                    <StatusBadge tone="ocean" className="h-4 px-2.5">{draft.type}</StatusBadge>
+                    <DocumentTypeBadge code={draft.number.split("-")[0]} title={draft.type} />
                     <span className="truncate">
                       {draft.title}
                     </span>
@@ -530,7 +530,7 @@ export function CreateScreen({
     const duplicatedDraft: GeneratedDraft = {
       ...draft,
       number: nextNumber,
-      title: `${draft.title.replace(/\s+(초안|복제본)$/, "")} 복제본`,
+      title: draft.title,
       status: "작성 중",
       tone: "neutral",
       readiness: `원본 ${draft.number}에서 복제`,
@@ -707,7 +707,7 @@ export function CreateScreen({
                   className="group min-h-34 rounded-lg border bg-background p-4 text-left transition hover:border-primary/60 hover:shadow-sm"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <ToneBadge tone="blue">{kind}</ToneBadge>
+                    <DocumentTypeBadge code={kind} />
                   </div>
                   <div className="mt-4 text-base font-semibold tracking-normal">
                     {title}

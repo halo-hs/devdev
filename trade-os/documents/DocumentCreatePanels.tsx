@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react"
 import { templateSchemas, templates, sampleValueForSlot, type PrototypeSlotKind, type Tone, isNumericInputKind, type DocumentStyle } from "@trade-os/documents/documentTemplateModel"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
-import { StatusBadge } from "@/components/platform/StatusBadge"
+import { DocumentTypeBadge } from "@trade-os/components/DocumentTypeBadge"
 import { Button } from "@/components/ui/Button"
 import { ChevronLeft, ChevronRight, FilePlus2, Check, FileText, ChevronDown, Plus, Trash2, Copy, Send, Clock3 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -103,7 +103,7 @@ export function TemplateStrip({ onResult, initialSelectedCode }: {
               onClick={() => setSelectedCode(kind)}
               className={cn("flex w-[206px] shrink-0 snap-start flex-col items-start gap-2 rounded-xl border border-[var(--color-gray-9)] bg-[var(--color-gray-12)] p-3.5 text-left transition hover:border-[var(--color-primary-4)] focus-visible:outline-2 focus-visible:outline-primary", selected && "border-[1.5px] border-[var(--color-primary-4)] bg-[#f0f5ff] p-[13.5px]")}
             >
-              <span className="flex w-full items-center justify-between gap-1.5"><StatusBadge tone="ocean" className="h-4 px-2.5">{kind}</StatusBadge>{selected && <Check className="size-4 text-[var(--color-primary-4)]" />}</span>
+              <span className="flex w-full items-center justify-between gap-1.5"><DocumentTypeBadge code={kind} />{selected && <Check className="size-4 text-[var(--color-primary-4)]" />}</span>
               <strong className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold">{title} <span className="text-[length:var(--text-body-11)] leading-[var(--leading-body-11)] font-normal text-[var(--color-gray-6)]">· {direction === "purchase" ? "구매" : "판매"}</span></strong>
               <span className="line-clamp-2 text-[length:var(--text-body-11)] leading-[var(--leading-body-11)] text-[var(--color-gray-6)]">{description}</span>
             </button>
