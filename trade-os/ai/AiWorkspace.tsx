@@ -1,7 +1,7 @@
 import { useState, useRef } from "react"
 import { aiHandoffCopy } from "@trade-os/lib/aiHandoffCopy"
 import { toast } from "sonner"
-import { FileText, X, Paperclip, Send, Loader2, RefreshCw, Database, Building2, ExternalLink, Copy, RotateCcw, ThumbsUp, ThumbsDown, Search, Check, Plus, Bookmark, SquarePen, PanelRight, Sparkles } from "lucide-react"
+import { FileText, Info, X, Paperclip, Send, Loader2, RefreshCw, Database, Building2, ExternalLink, Copy, RotateCcw, ThumbsUp, ThumbsDown, Search, Check,  SquarePen, PanelRight, Sparkles } from "lucide-react"
 import { Textarea } from "@/components/ui/Textarea"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/Button"
@@ -23,7 +23,11 @@ type AskFile = {
   type: string
   reference: string
   updatedAt: string
+  size?: string
 }
+
+// Figma 7차 PromptInput (6688:42202): up to 10 attachments per question.
+const MAX_ATTACHMENTS = 10
 
 type AskTurn = {
   id: string
@@ -39,6 +43,7 @@ const askFiles: AskFile[] = [
     type: "상업송장",
     reference: "DL-260708-01 · ACME GmbH",
     updatedAt: "오늘 09:18",
+    size: "1.8 MB",
   },
   {
     id: "sc-2026-0708",
@@ -46,6 +51,7 @@ const askFiles: AskFile[] = [
     type: "판매계약서",
     reference: "DL-260708-08 · ACME GmbH",
     updatedAt: "오늘 08:42",
+    size: "920 KB",
   },
   {
     id: "packing-list-0707",
@@ -53,6 +59,7 @@ const askFiles: AskFile[] = [
     type: "포장명세서",
     reference: "DL-260708-01 · KATAMAN",
     updatedAt: "어제 16:04",
+    size: "640 KB",
   },
   {
     id: "bl-2607-014",
@@ -60,6 +67,7 @@ const askFiles: AskFile[] = [
     type: "선하증권",
     reference: "DL-260704-02 · Nordic Raw Materials AB",
     updatedAt: "08.27 14:24",
+    size: "1.2 MB",
   },
   {
     id: "po-260704-18",
@@ -67,6 +75,7 @@ const askFiles: AskFile[] = [
     type: "발주서",
     reference: "DL-260704-02 · Hanbit Trading Co.",
     updatedAt: "08.27 13:41",
+    size: "480 KB",
   },
 ]
 
@@ -374,12 +383,14 @@ export function AskPrototype({
     const nextFiles = askFiles.filter((file) =>
       selectedFileIds.includes(file.id)
     )
-    setAttachedFiles((current) => [
-      ...current,
-      ...nextFiles.filter(
-        (file) => !current.some((attached) => attached.id === file.id)
-      ),
-    ])
+    setAttachedFiles((current) =>
+      [
+        ...current,
+        ...nextFiles.filter(
+          (file) => !current.some((attached) => attached.id === file.id)
+        ),
+      ].slice(0, MAX_ATTACHMENTS)
+    )
     setFileFinderOpen(false)
     setSelectedFileIds([])
   }
@@ -447,83 +458,108 @@ export function AskPrototype({
     toast.success("의견을 반영했습니다.")
   }
 
-  // Figma 7차 (5729:60849): the question box is 760px wide, centered.
+  // Figma 7차 PromptInput (6688:42202): 760px box. Header = 「첨부 파일 n/10」
+  // with 모두 지우기 and 40px rows (3 visible, then scroll); body = 17/24
+  // question (4 lines, then scroll); footer = attach + 질문하기 pinned below.
   const renderComposer = () => (
-    <div
-      className="mx-auto w-full max-w-[760px] rounded-[18px] border border-[var(--color-gray-6)] bg-[var(--color-gray-12)] px-4 pt-3 pb-2.5 shadow-[0_2px_4px_rgb(0_0_0/0.05)] transition-shadow focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-ring/30"
-    >
-      {attachedFiles.length ? (
-        // Figma 7차 (5729:61024): attached files as a list above a divider.
-        <div className="mb-2 max-h-[120px] overflow-y-auto border-b border-[var(--color-gray-10)] pb-2">
-          {attachedFiles.map((file) => (
-            <span
-              key={file.id}
-              className="flex h-10 items-center gap-1.5 rounded-[var(--r-xs)] pr-2 pl-2.5 text-[15px] leading-[22px] text-[var(--color-gray-1)] hover:bg-[var(--color-gray-11)]"
-            >
-              <FileText className="size-4 shrink-0 text-[var(--color-gray-4)]" />
-              <span className="min-w-0 flex-1 truncate">{file.name}</span>
+    <div className="mx-auto w-full max-w-[760px]">
+      <div className="rounded-[18px] border border-[var(--color-gray-6)] bg-[var(--color-gray-12)] px-4 pt-3 pb-2.5 shadow-[0_2px_4px_rgb(0_0_0/0.05)] transition-shadow focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-ring/30">
+        {attachedFiles.length ? (
+          <div className="mb-3 border-b border-[var(--color-gray-9)] pb-2">
+            <div className="flex h-10 items-center justify-between px-2.5">
+              <span className="text-sm leading-5 font-semibold text-[var(--color-gray-1)]">
+                첨부 파일 {attachedFiles.length}/{MAX_ATTACHMENTS}
+              </span>
               <button
                 type="button"
-                className="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-sm)] text-[var(--color-gray-4)] outline-none hover:bg-[var(--color-gray-10)] hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/30"
-                aria-label={`${file.name} 첨부 해제`}
-                onClick={() =>
-                  setAttachedFiles((current) =>
-                    current.filter((attached) => attached.id !== file.id)
-                  )
-                }
+                className="rounded-[var(--r-sm)] px-1 text-[13px] leading-[18px] text-[var(--color-primary-4)] outline-none hover:underline focus-visible:ring-2 focus-visible:ring-primary/30"
+                onClick={() => setAttachedFiles([])}
               >
-                <X className="size-4" />
+                모두 지우기
               </button>
-            </span>
-          ))}
-        </div>
-      ) : null}
-      <Textarea
-        rows={4}
-        aria-label="AI 질문"
-        value={question}
-        onChange={(event) => setQuestion(event.target.value)}
-        onKeyDown={(event) => {
-          if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-            event.preventDefault()
-            submit()
+            </div>
+            <div className="field-scrollbar max-h-[120px] overflow-y-auto">
+              {attachedFiles.map((file) => (
+                <span
+                  key={file.id}
+                  className="flex h-10 items-center gap-1.5 rounded-[var(--r-xs)] pr-2 pl-2.5 text-[15px] leading-[22px] text-[var(--color-gray-1)] hover:bg-[var(--color-gray-11)]"
+                >
+                  <FileText className="size-4 shrink-0 text-[var(--color-gray-4)]" />
+                  <span className="min-w-0 flex-1 truncate">{file.name}</span>
+                  {file.size ? (
+                    <span className="shrink-0 text-[13px] leading-[18px] text-[var(--color-gray-4)] tabular-nums">
+                      {file.size}
+                    </span>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="ml-2 flex size-6 shrink-0 items-center justify-center rounded-[var(--r-sm)] text-[var(--color-gray-4)] outline-none hover:bg-[var(--color-gray-10)] hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/30"
+                    aria-label={`${file.name} 첨부 해제`}
+                    onClick={() =>
+                      setAttachedFiles((current) =>
+                        current.filter((attached) => attached.id !== file.id)
+                      )
+                    }
+                  >
+                    <X className="size-4" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        <Textarea
+          rows={2}
+          aria-label="AI 질문"
+          value={question}
+          onChange={(event) => setQuestion(event.target.value)}
+          onKeyDown={(event) => {
+            if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+              event.preventDefault()
+              submit()
+            }
+          }}
+          className="field-scrollbar max-h-24 min-h-12 w-full resize-none overflow-y-auto border-0! bg-transparent! px-2.5 py-0 text-[17px] leading-6 shadow-none! [field-sizing:content] focus-visible:ring-0"
+          placeholder={
+            attachedFiles.length
+              ? "첨부한 문서에 대해 질문하세요"
+              : "거래, 문서, 정산에 대해 질문하세요"
           }
-        }}
-        className={cn(
-          "max-h-48 min-h-24 w-full resize-none border-0! bg-transparent! px-2.5 pt-1 pb-2 text-[length:var(--text-body-md,15px)] leading-[22px] shadow-none! focus-visible:ring-0",
-          attachedFiles.length && "min-h-20"
-        )}
-        placeholder={
-          attachedFiles.length
-            ? "첨부한 문서에 대해 질문하세요"
-            : "거래, 문서, 정산에 대해 질문하세요"
-        }
-      />
-      <div className="flex items-center gap-1.5">
-        <Button
-          variant="ghost"
-          size="icon-lg"
-          className="-ml-2 text-[var(--color-gray-4)]"
-          aria-label="파일 찾기"
-          title="파일 찾기"
-          onClick={openFileFinder}
-        >
-          <Paperclip />
-        </Button>
-        <div className="ml-auto flex items-center gap-2">
-          <span className="hidden text-xs text-muted-foreground sm:inline">
-            ⌘ + Enter
-          </span>
+        />
+        <div className="mt-2 flex items-center gap-1.5">
+          <Button
+            variant="ghost"
+            size="icon-lg"
+            className="-ml-2 text-[var(--color-gray-4)]"
+            aria-label="파일 찾기"
+            title={
+              attachedFiles.length >= MAX_ATTACHMENTS
+                ? "첨부 파일이 가득 찼습니다"
+                : "파일 찾기"
+            }
+            disabled={attachedFiles.length >= MAX_ATTACHMENTS}
+            onClick={openFileFinder}
+          >
+            <Paperclip />
+          </Button>
           <Button
             size="lg"
-            className="h-11 min-w-[118px] rounded-[var(--r-lg)] bg-[var(--primary)] pr-5 pl-[18px] text-[17px] shadow-[0_1px_2px_rgb(5_29_57/0.1)]"
+            className="ml-auto h-11 min-w-[118px] rounded-[var(--r-lg)] bg-[var(--primary)] pr-5 pl-[18px] text-[17px] shadow-[0_1px_2px_rgb(5_29_57/0.1)]"
             disabled={!question.trim()}
             onClick={submit}
+            title="질문하기 (⌘ + Enter)"
           >
             <Send data-icon="inline-start" /> 질문하기
           </Button>
         </div>
       </div>
+      <p className="mt-3 flex items-center gap-1 text-[13px] leading-[18px] text-[var(--color-gray-4)]">
+        <Info className="size-4 shrink-0" />
+        파일은 최대 {MAX_ATTACHMENTS}개까지 첨부할 수 있어요
+        {attachedFiles.length >= MAX_ATTACHMENTS
+          ? ". 더 올리려면 첨부한 파일을 지워주세요"
+          : ""}
+      </p>
     </div>
   )
 
@@ -849,19 +885,13 @@ export function AskPrototype({
           className="top-14! bottom-0! h-auto! w-[300px] gap-0 p-0 lg:hidden"
         >
           <div className="sr-only">
-            <SheetTitle>대화 목록</SheetTitle>
+            <SheetTitle>대화 기록</SheetTitle>
             <SheetDescription>
               이전 업무 질문을 검색하고 다시 엽니다.
             </SheetDescription>
           </div>
-          <div className="flex h-14 items-center gap-2 border-b border-[var(--surface-border)] px-3">
-            <Button
-              variant="outline"
-              className="flex-1 justify-start bg-background"
-              onClick={startNewChat}
-            >
-              <Plus /> 새 대화
-            </Button>
+          <div className="flex h-14 items-center justify-between gap-2 border-b border-[var(--surface-border)] px-3">
+            <span className="text-[18px] leading-[26px] font-bold text-[var(--color-gray-1)]">대화 기록</span>
             <SheetClose asChild>
               <Button
                 variant="ghost"
@@ -872,18 +902,7 @@ export function AskPrototype({
               </Button>
             </SheetClose>
           </div>
-          <div className="space-y-2 p-3">
-            <Button
-              variant={toolsOpen ? "secondary" : "outline"}
-              className="w-full justify-start"
-              aria-pressed={toolsOpen}
-              onClick={() => {
-                setToolsOpen(true)
-                setMobileHistoryOpen(false)
-              }}
-            >
-              <Bookmark /> 저장한 답변과 상세 조회
-            </Button>
+          <div className="p-3">
             <div className="relative">
               <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -942,7 +961,7 @@ export function AskPrototype({
             <span className="grid min-w-0 gap-1">
               <span className="block truncate text-[18px] leading-[26px] font-bold text-[var(--color-gray-1)]">ECOYA 업무 AI</span>
               <span className="block truncate text-[15px] leading-[22px] text-[var(--color-gray-5)]">
-                거래·문서·정산 근거로 답변
+                거래·문서·정산 데이터를 근거로 답변합니다
               </span>
             </span>
           </div>
@@ -999,7 +1018,7 @@ export function AskPrototype({
                 alt=""
                 width={96}
                 height={96}
-                className="mx-auto mb-8 size-24 shrink-0"
+                className="mx-auto mb-4 size-24 shrink-0"
               />
               <h1 className="text-center text-[22px] leading-[30px] font-bold text-[var(--color-gray-1)]">
                 {aiHandoffCopy.workspace.question}
@@ -1087,7 +1106,11 @@ export function AskPrototype({
         aria-label="대화 목록"
       >
         <div className="flex shrink-0 items-start justify-between gap-1">
-          <span className="text-[18px] leading-[26px] font-bold text-[var(--color-gray-1)]">대화 목록</span>
+          {/* Figma 7차 대화 기록 패널 (6647:42238): title + 최근 30일 대화. */}
+          <span className="grid gap-1">
+            <span className="text-[18px] leading-[26px] font-bold text-[var(--color-gray-1)]">대화 기록</span>
+            <span className="text-[15px] leading-[22px] text-[var(--color-gray-5)]">최근 30일 대화</span>
+          </span>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -1098,23 +1121,8 @@ export function AskPrototype({
             <X />
           </Button>
         </div>
-        <div className="space-y-3">
-          <Button
-            variant="outline"
-            className="w-full justify-start"
-            onClick={startNewChat}
-          >
-            <Plus /> 새 대화
-          </Button>
-          {/* Saved answers live with the conversations instead of a tab above the chat. */}
-          <Button
-            variant={toolsOpen ? "secondary" : "outline"}
-            className="w-full justify-start"
-            aria-pressed={toolsOpen}
-            onClick={() => setToolsOpen(true)}
-          >
-            <Bookmark /> 저장한 답변과 상세 조회
-          </Button>
+        {/* Figma 7차: no 새 대화/저장한 답변 buttons here; 새 대화 stays in the chat header. */}
+        <div>
           <div className="relative">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
