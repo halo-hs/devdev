@@ -49,7 +49,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/AlertDialog"
 import { Button } from "@/components/ui/Button"
-import { BusinessPageHero, heroOutlineButtonClass } from "@/components/platform/HeroBanner"
+import { HeroBanner, heroOutlineButtonClass } from "@/components/platform/HeroBanner"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -657,7 +657,7 @@ export function DealsScreen({
   return (
     <div data-deal-list className="field-scrollbar h-full overflow-y-auto bg-transparent">
       <div className="flex w-full flex-col gap-5 p-4 sm:p-6">
-        <BusinessPageHero
+        <HeroBanner
           title="거래"
           description="확인된 문서를 거래 단위로 모아 다음 작업과 위험을 관리합니다."
           className="[&_header]:flex-wrap"

@@ -155,5 +155,5 @@ Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run bui
 - [ ] 정산 "회계용 CSV 내려받기": 원본 백엔드 주소를 직접 불러 배포 사이트에서 CSV 대신 HTML이 받아짐(이전부터 있던 문제)
 - [ ] 낡은 Playwright 검사 36개를 지금 화면·예시 데이터 기준으로 고치거나 지우기
 - [ ] operations에서 온 조합 부품 일부(`SectionPanel`, `ChipGroup`, `HostTable`)를 공통 부품(Card 등)과 합칠지 결정
-- [ ] `platform/` 파일 9개는 파일 이름과 안에 든 부품 이름이 다름(예: `StatTile.tsx` → `KpiCard`, `HeroBanner.tsx` → `BusinessPageHero`)
+- [ ] `platform/` 파일 7개는 파일 이름과 안에 든 부품 이름이 다름(예: `RouteLoading.tsx` → `PageLoadingBoundary`, `PageNavigator.tsx` → `PdfViewerToolbar`). `HeroBanner`·`StatTile`은 develop 이름으로 맞춤
 - [ ] ESLint 오류 98개 정리

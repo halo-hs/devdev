@@ -7,7 +7,7 @@ import { ReportsConnected } from "./reports/ReportsConnected"
 import { SalesPerformanceConnected } from "./salesperf/SalesPerformanceConnected"
 import { SettlementConnected } from "./settlement/SettlementConnected"
 import { ShipmentsConnected, type ShipmentSummary } from "./shipments/ShipmentsConnected"
-import { BusinessPageHero } from "@/components/platform/HeroBanner"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { messages } from "./lib/i18n/messages"
 import "./OperationsScreens.css"
 
@@ -52,15 +52,15 @@ function Body({ screen }: { screen: OperationsScreenName }) {
   return <div className="ops-page-scroll">
     <div className="ops-content-width w-full space-y-4 px-5 pt-1.5 pb-10">
       {screen === "reports" ? <ReportsConnected copy={messages.erpReports.reports} role={identity.role}
-          renderHeader={(controls, summary) => <BusinessPageHero title={<span className="inline-flex items-baseline gap-2.5">{copy.title}<span className="rounded-full bg-[var(--color-primary-9)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-bold text-[var(--color-indigo)]">{messages.erpReports.reports.proBadge}</span></span>} description={description}
+          renderHeader={(controls, summary) => <HeroBanner title={<span className="inline-flex items-baseline gap-2.5">{copy.title}<span className="rounded-full bg-[var(--color-primary-9)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-bold text-[var(--color-indigo)]">{messages.erpReports.reports.proBadge}</span></span>} description={description}
             controls={controls} summary={summary} />} />
         : screen === "sales" ? <SalesPerformanceConnected copy={messages.erpSalesPerformance.cockpit} role={identity.role}
-          renderHeader={(controls, summary) => <BusinessPageHero title={<span className="inline-flex items-baseline gap-2.5">{copy.title}<span className="rounded-full bg-[var(--color-primary-9)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-bold text-[var(--color-indigo)]">{messages.erpReports.reports.proBadge}</span></span>} description={description}
+          renderHeader={(controls, summary) => <HeroBanner title={<span className="inline-flex items-baseline gap-2.5">{copy.title}<span className="rounded-full bg-[var(--color-primary-9)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-bold text-[var(--color-indigo)]">{messages.erpReports.reports.proBadge}</span></span>} description={description}
             controls={controls} summary={summary} />} />
         : screen === "settlement" ? <SettlementConnected copy={messages.erpSettlement.settlement}
-          renderHeader={(controls, summary) => <BusinessPageHero title={copy.title} description={description} controls={controls} summary={summary} />} />
+          renderHeader={(controls, summary) => <HeroBanner title={copy.title} description={description} controls={controls} summary={summary} />} />
         : <ShipmentsConnected copy={messages.erpShipments.shipments}
-          renderHeader={controls => <BusinessPageHero title={copy.title} description={description} controls={controls} />} />}
+          renderHeader={controls => <HeroBanner title={copy.title} description={description} controls={controls} />} />}
     </div>
   </div>
 }

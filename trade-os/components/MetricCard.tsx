@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 
-import { KpiCard } from "@/components/platform/StatTile";
+import { StatTile } from "@/components/platform/StatTile";
 import { cn } from "@/lib/utils";
 
 type MetricTone = "neutral" | "info" | "success" | "warning" | "danger" | "indigo";
@@ -36,7 +36,7 @@ function MetricCard({
   ...props
 }: MetricCardProps) {
   return (
-    <KpiCard
+    <StatTile
       className={cn("min-w-0 bg-[var(--color-gray-12)]", className)}
       data-ui="metric-card"
       label={
@@ -53,10 +53,10 @@ function MetricCard({
       }
       value={value}
       valueClassName={valueToned ? toneTextClass[tone] : undefined}
-      {...(props as Omit<ComponentProps<typeof KpiCard>, "label" | "value">)}
+      {...(props as Omit<ComponentProps<typeof StatTile>, "label" | "value">)}
     >
       {meta ? <span className={toneTextClass[tone]}>{meta}</span> : null}
-    </KpiCard>
+    </StatTile>
   );
 }
 

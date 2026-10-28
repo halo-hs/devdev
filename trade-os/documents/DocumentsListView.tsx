@@ -15,7 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/Alert"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import { toast } from "sonner"
 import { templateSchemas, templateMeta, templates } from "@trade-os/documents/documentTemplateModel"
-import { BusinessPageHero } from "@/components/platform/HeroBanner"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { TemplateStrip, RelatedDealNotice } from "@trade-os/documents/DocumentCreatePanels"
 import { ResultScreen } from "@trade-os/documents/DocumentCreateConnected"
 import { StructuredDocumentCreateEditor } from "@trade-os/documents/DocumentCreateStepViews"
@@ -568,7 +568,7 @@ export function CreateScreen({
   // The type selector is the page's main action, so it sits in the hero and
   // overlaps its lower edge like the 문서 올리기 upload card.
   const pageHeading = (
-    <BusinessPageHero
+    <HeroBanner
       title="문서 만들기"
       description="발행 문서를 검색·필터하고, 이어서 작성·PDF·복제·삭제·고객 전달을 한곳에서 처리합니다."
       className="mb-6"

@@ -7,7 +7,7 @@ import { BusinessFilterSegments } from "@/components/platform/SearchFilterBar";
 import { ChipGroup } from "@trade-os/components/ChipGroup";
 import { InfoBox } from "@trade-os/components/InfoBox";
 import { MetricCard, type MetricTone } from "@trade-os/components/MetricCard";
-import { BusinessPageHero, heroOutlineButtonClass } from "@/components/platform/HeroBanner";
+import { HeroBanner, heroOutlineButtonClass } from "@/components/platform/HeroBanner";
 import { DashboardLayout } from "@trade-os/components/ScreenLayouts";
 import {
   BlockedCard,
@@ -816,7 +816,7 @@ function MonitorBody({
   const titleBar = useMemo(
     () => (
       <div className="ops-content-width w-full px-5 pt-1.5">
-      <BusinessPageHero
+      <HeroBanner
         actions={<MonitorActions actions={actions} variant={variant} copy={copy} live={Boolean(live)} />}
         title={ops ? copy.titleOps : copy.titleDefault}
         description={ops ? copy.descriptionOps : copy.description}

@@ -1,4 +1,4 @@
-import { BusinessPageHero } from "@/components/platform/HeroBanner"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { useEffect } from "react"
 import { useStartGuide } from "./StartGuideProvider"
 import { isDone, type GuideItem } from "./state"
@@ -107,7 +107,7 @@ export function OnboardingPrototype({
       className="min-h-full bg-transparent px-5 py-6 sm:px-8 sm:py-8"
     >
       <div className="mx-auto max-w-6xl space-y-8">
-        <BusinessPageHero
+        <HeroBanner
           eyebrow="Trade OS 시작 가이드"
           title="처음 시작하기"
           description="Trade OS의 첫 거래를 만들어 보세요. 다른 업무를 먼저 시작하고 언제든 돌아와도 괜찮습니다."

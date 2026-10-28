@@ -34,7 +34,7 @@ import { PdfPanelWorkspaceCard } from "@/components/platform/PdfPanelResizeHandl
 import { DocumentReviewWorkspace } from "@trade-os/confirm/ConfirmFlowConnected"
 import { TablePagination } from "@/components/ui/TablePagination"
 import { type FileDropZoneRef, FileDropZone } from "@/components/ds2/extensions/FileDropZone"
-import { BusinessPageHero } from "@/components/platform/HeroBanner"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { type RecentDocument, type UploadDocumentType, type UploadDetailStep, type UploadDocumentDealLinks, type UploadDocumentDealLink, type DocumentStageKey } from "@/App"
 import { uploadDocumentTypeLabel, manualUploadDocumentTypeOptions, reviewFieldsForDocument, resolvedReviewFields, isUploadDocumentTypeUnresolved } from "@trade-os/inbox/uploadDocumentModel"
 
@@ -2386,7 +2386,7 @@ function BeforeUploadState({
       <div className="w-full px-4 py-5 sm:px-5 sm:py-6">
         {/* 문서 올리기 V2 (6325:101775): left-aligned hero with the upload card
             overlapping its lower edge; the step list sits in the card's top row. */}
-        <BusinessPageHero
+        <HeroBanner
           eyebrow="AI 파일 올리기"
           title="문서 올리기"
           description="PDF를 올려 내용을 검토한 뒤, 거래를 선택하고 반영할 내용을 확인하세요."
