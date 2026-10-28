@@ -22,11 +22,14 @@ export function CommonPublicLayout({
   authVariant,
   sharedHeader = true,
   homeHref = "/snap",
+  landingActions = false,
 }: {
   children: ReactNode
   authVariant?: AuthLayoutVariant
   sharedHeader?: boolean
   homeHref?: "/" | "/snap"
+  /** Legal pages: the landing header as-is, with 로그인 · 시작하기. */
+  landingActions?: boolean
 }) {
   const [language, setLanguage] = useState("ko")
   const [menuOpen, setMenuOpen] = useState(false)
@@ -44,9 +47,9 @@ export function CommonPublicLayout({
             product={homeHref === "/snap" ? "snap" : "erp"}
             homeHref="/"
             showLocaleToggle
-            showLoginAction={false}
-            showStartAction={false}
-            plainLinks
+            showLoginAction={landingActions}
+            showStartAction={landingActions}
+            plainLinks={!landingActions}
           />
         </div>
       ) : (

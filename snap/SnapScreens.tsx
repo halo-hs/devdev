@@ -1153,7 +1153,7 @@ function PublicPrototype({ screen, navigate, routeParams }: PrototypeScreenProps
       { key: "SC-45", label: "위치기반 서비스", href: "/legal/location" },
     ]
     return (
-      <CommonPublicLayout>
+      <CommonPublicLayout homeHref="/" landingActions>
         <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-8 sm:px-8 sm:py-12">
           <div className="max-w-3xl">
             <div className="text-xs font-semibold text-primary">LEGAL</div>
