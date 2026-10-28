@@ -98,12 +98,15 @@ const feedbackIcons: Record<Feedback["tone"], typeof CheckCircle2> = {
 export function AuthSurface({
   variant,
   title,
+  titleAside,
   description,
   children,
   footer,
 }: {
   variant: AuthLayoutVariant
   title: string
+  /** Sits at the right of the title without moving the centered heading. */
+  titleAside?: ReactNode
   description?: string
   children: ReactNode
   footer?: ReactNode
@@ -133,15 +136,22 @@ export function AuthSurface({
               variant !== "recovery" && "max-w-[440px]"
             )}
           >
-            <h1
-              className={cn(
-                "text-2xl font-semibold tracking-tight sm:text-3xl",
-                variant !== "recovery" &&
-                  "text-center text-[26px] leading-9 font-bold sm:text-[26px]"
+            <div className="relative">
+              <h1
+                className={cn(
+                  "text-2xl font-semibold tracking-tight sm:text-3xl",
+                  variant !== "recovery" &&
+                    "text-center text-[26px] leading-9 font-bold sm:text-[26px]"
+                )}
+              >
+                {title}
+              </h1>
+              {titleAside && (
+                <div className="absolute top-1/2 right-0 -translate-y-1/2">
+                  {titleAside}
+                </div>
               )}
-            >
-              {title}
-            </h1>
+            </div>
             {description && (
               <p
                 className={cn(
