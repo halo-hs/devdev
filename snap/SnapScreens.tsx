@@ -1147,10 +1147,10 @@ function PublicPrototype({ screen, navigate, routeParams }: PrototypeScreenProps
   if (screen === "SC-03" || screen === "SC-04" || screen === "SC-45") {
     const legalScreen = screen as LegalScreen
     const document = SNAP_LEGAL_DOCUMENTS[legalScreen]
-    const legalTabs: Array<{ key: LegalScreen; label: string }> = [
-      { key: "SC-03", label: "이용약관" },
-      { key: "SC-04", label: "개인정보처리방침" },
-      { key: "SC-45", label: "위치기반 서비스" },
+    const legalTabs: Array<{ key: LegalScreen; label: string; href: string }> = [
+      { key: "SC-03", label: "이용약관", href: "/legal/terms" },
+      { key: "SC-04", label: "개인정보처리방침", href: "/legal/privacy" },
+      { key: "SC-45", label: "위치기반 서비스", href: "/legal/location" },
     ]
     return (
       <CommonPublicLayout>
@@ -1171,20 +1171,25 @@ function PublicPrototype({ screen, navigate, routeParams }: PrototypeScreenProps
           <div className="mt-8 overflow-hidden rounded-[var(--r-lg)] border border-[var(--surface-border)] bg-background">
             <div className="field-scrollbar flex overflow-x-auto border-b border-[var(--surface-border)] px-3 sm:px-5">
               {legalTabs.map((tab) => (
-                <button
+                <a
                   key={tab.key}
-                  type="button"
+                  href={tab.href}
+                  aria-current={legalScreen === tab.key ? "page" : undefined}
                   className={cn(
                     "relative shrink-0 px-3 py-4 text-sm font-medium text-muted-foreground",
                     legalScreen === tab.key && "text-primary"
                   )}
-                  onClick={() => navigate(tab.key)}
+                  onClick={(event) => {
+                    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return
+                    event.preventDefault()
+                    navigate(tab.key)
+                  }}
                 >
                   {tab.label}
                   {legalScreen === tab.key ? (
                     <span className="absolute inset-x-3 bottom-0 h-0.5 bg-primary" />
                   ) : null}
-                </button>
+                </a>
               ))}
             </div>
             <div className="grid lg:grid-cols-[240px_minmax(0,1fr)]">
