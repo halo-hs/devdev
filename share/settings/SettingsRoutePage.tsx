@@ -9,7 +9,7 @@ import { AliasesPage } from "./CounterpartyAliasSettingsView"
 import { appLocation } from "@/app/appLocation"
 import { useEffect, useMemo, useState } from "react"
 import {
-  ArrowLeft,
+  ChevronLeft,
   Bell,
   Building2,
   Check,
@@ -394,14 +394,16 @@ function SettingsHubContent({
         collapsible="icon"
         className="settings-navigation top-0 h-svh! bg-background md:z-50"
       >
-        <SidebarGroup className="border-b p-3">
+        {/* Figma SettingsNav (6911:91747): 12px inset, 4px rhythm, search then a
+            Gray 9 rule; menu rows are 36px with 20px icons and 15/22 labels. */}
+        <SidebarGroup className="gap-1 px-3 pt-4 pb-1">
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              className="h-10 min-w-0 flex-1 justify-start gap-3 px-2 text-muted-foreground group-data-[collapsible=icon]:hidden"
+              className="h-[38px] min-w-0 flex-1 justify-start gap-3 rounded-lg px-1.5 text-[15px] leading-[22px] text-[var(--color-gray-3)] group-data-[collapsible=icon]:hidden [&_svg]:size-5"
               onClick={() => onNavigate("home")}
             >
-              <ArrowLeft />
+              <ChevronLeft strokeWidth={1.75} />
               <span>앱으로 돌아가기</span>
             </Button>
             {/* Same toggle as the main Trade OS sidebar (gray slide icon). */}
@@ -418,32 +420,35 @@ function SettingsHubContent({
               <NavigationIcon name="slide" className="scale-75 group-data-[collapsible=icon]:scale-100" />
             </Button>
           </div>
-          <div className="mt-3">
+          <div>
             <WorkspaceSwitcher
               workspaceId={workspaceId}
               onWorkspaceChange={onWorkspaceChange}
               navigation
             />
           </div>
-          <div className="relative mt-3 group-data-[collapsible=icon]:hidden">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative group-data-[collapsible=icon]:hidden">
+            <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-[var(--color-gray-4)]" />
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              className="pl-9"
+              className="h-10 rounded-lg border-[var(--color-gray-5)] pl-[38px] shadow-[0_2px_4px_rgba(0,0,0,0.05)]"
               placeholder="설정 검색..."
               aria-label="설정 검색"
             />
           </div>
+          <div className="mt-1 h-px bg-[var(--color-gray-9)] group-data-[collapsible=icon]:hidden" />
         </SidebarGroup>
         <SidebarContent>
           <nav aria-label="설정 메뉴">
             {visibleGroups.map((group) => (
               // Same inset as the main Trade OS sidebar (menu starts 20px in).
-              <SidebarGroup key={group.label} className="px-5 py-1">
-                <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+              <SidebarGroup key={group.label} className="px-3 py-0">
+                <SidebarGroupLabel className="h-8 px-2 text-[11px] leading-4 font-normal text-[var(--color-gray-1)]">
+                  {group.label}
+                </SidebarGroupLabel>
                 <SidebarGroupContent>
-                  <SidebarMenu>
+                  <SidebarMenu className="gap-1">
                     {group.items.map((item) => {
                       const Icon = item.icon
                       return (
@@ -464,17 +469,23 @@ function SettingsHubContent({
                             aria-current={
                               effectiveSection === item.id ? "page" : undefined
                             }
-                            className="text-sidebar-foreground/75 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 data-active:text-primary"
+                            className="h-9 gap-3 rounded-lg border border-transparent px-1.5 text-[15px] leading-[22px] text-[var(--color-gray-3)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 [&>svg]:size-5"
                           >
                             {item.navIcon ? (
                               <NavigationIcon name={item.navIcon} className="size-5 shrink-0" />
                             ) : (
                               <Icon strokeWidth={1.75} />
                             )}
-                            <span className="group-data-[collapsible=icon]:hidden">
+                            <span className="min-w-0 flex-1 truncate group-data-[collapsible=icon]:hidden">
                               {item.label}
-                              {item.id === "billing" ? " ↗" : ""}
                             </span>
+                            {item.id === "billing" ? (
+                              <ExternalLink
+                                aria-hidden="true"
+                                className="mr-1.5 size-4! shrink-0 group-data-[collapsible=icon]:hidden"
+                                strokeWidth={1.75}
+                              />
+                            ) : null}
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       )

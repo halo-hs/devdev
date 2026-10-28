@@ -103,10 +103,18 @@
   border-inline-end: 0;
 }
 
-.snap-navigation [data-slot="sidebar-menu-button"][data-active="true"],
-.settings-navigation [data-slot="sidebar-menu-button"][data-active="true"] {
+.snap-navigation [data-slot="sidebar-menu-button"][data-active="true"] {
   background: var(--sidebar-accent);
   color: var(--sidebar-accent-foreground);
+  box-shadow: none;
+}
+
+/* Figma SettingsNav (6911:91755): the current item is Blue 10 with a Blue 4
+   border and label. */
+.settings-navigation [data-slot="sidebar-menu-button"][data-active="true"] {
+  border-color: var(--color-primary-4);
+  background: var(--color-primary-10);
+  color: var(--color-primary-4);
   box-shadow: none;
 }
 
