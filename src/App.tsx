@@ -60,6 +60,7 @@ import {
 import { cn } from "@/lib/utils"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import { toast } from "sonner"
+import { ViewSeatProvider } from "@trade-os/components/ViewSeatGate"
 import { type Tone, templateSchemas } from "@trade-os/documents/documentTemplateModel"
 import { type PrototypeSlotKind, templates } from "@trade-os/documents/documentTemplateModel"
 import { AppNav } from "@/shell/ErpNav"
@@ -687,6 +688,9 @@ export function App() {
     // The demo login's subscription state follows the session like `role`.
     const plan = new URLSearchParams(appLocation.search).get("plan")
     if (plan === "trial" || plan === "expired") nextUrl.searchParams.set("plan", plan)
+    if (erpHomeRole === "member" && new URLSearchParams(appLocation.search).get("seat") === "view") {
+      nextUrl.searchParams.set("seat", "view")
+    }
     if (nextScreen === "inbox" && originDealId) nextUrl.searchParams.set("fromDeal", originDealId)
     if (nextScreen === "create" && params.dealId) nextUrl.searchParams.set("deal_id", params.dealId)
     const nextLocation = `${nextUrl.pathname}${nextUrl.search}`
@@ -956,6 +960,9 @@ export function App() {
   return (
     <SettingsDemoProvider key={workspaceId}>
     <StartGuideProvider key={workspaceId} scope={`preview-account:${workspaceId}`} role={erpHomeRole}>
+    <ViewSeatProvider
+      viewOnly={erpHomeRole === "member" && new URLSearchParams(appLocation.search).get("seat") === "view"}
+    >
     <SidebarProvider
       open={sidebarOpen}
       onOpenChange={setSidebarOpen}
@@ -1289,6 +1296,7 @@ export function App() {
         )}
       </div>
     </SidebarProvider>
+    </ViewSeatProvider>
     </StartGuideProvider>
     </SettingsDemoProvider>
   )

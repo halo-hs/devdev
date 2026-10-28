@@ -1,4 +1,5 @@
 import { useState, useRef } from "react"
+import { ViewSeatAction, useViewOnly, useViewSeatGuard } from "@trade-os/components/ViewSeatGate"
 import { aiHandoffCopy } from "@trade-os/lib/aiHandoffCopy"
 import { toast } from "sonner"
 import { FileText, Info, X, Paperclip, Send, Loader2, RefreshCw, Database, Building2, ExternalLink, Copy, RotateCcw, ThumbsUp, ThumbsDown, Search, Check,  SquarePen, PanelRight, Sparkles } from "lucide-react"
@@ -90,9 +91,11 @@ export function AskPrototype({
   initialQuestion?: string
   submitOnOpen?: boolean
 }) {
+  const viewOnly = useViewOnly()
+  const viewSeatGuard = useViewSeatGuard()
   const [question, setQuestion] = useState(initialQuestion)
   const [turns, setTurns] = useState<AskTurn[]>(() =>
-    submitOnOpen && initialQuestion.trim()
+    submitOnOpen && !viewOnly && initialQuestion.trim()
       ? [
           {
             id: "initial",
@@ -262,6 +265,7 @@ export function AskPrototype({
   const submit = () => {
     const nextQuestion = question.trim()
     if (!nextQuestion) return
+    if (viewSeatGuard()) return
     setTurns((current) => [
       ...current,
       {
@@ -542,15 +546,17 @@ export function AskPrototype({
           >
             <Paperclip />
           </Button>
-          <Button
-            size="lg"
-            className="ml-auto h-11 min-w-[118px] rounded-[var(--r-lg)] bg-[var(--primary)] pr-5 pl-[18px] text-[17px] shadow-[0_1px_2px_rgb(5_29_57/0.1)]"
-            disabled={!question.trim()}
-            onClick={submit}
-            title="질문하기 (⌘ + Enter)"
-          >
-            <Send data-icon="inline-start" /> 질문하기
-          </Button>
+          <ViewSeatAction>
+            <Button
+              size="lg"
+              className="ml-auto h-11 min-w-[118px] rounded-[var(--r-lg)] bg-[var(--primary)] pr-5 pl-[18px] text-[17px] shadow-[0_1px_2px_rgb(5_29_57/0.1)]"
+              disabled={!question.trim()}
+              onClick={submit}
+              title="질문하기 (⌘ + Enter)"
+            >
+              <Send data-icon="inline-start" /> 질문하기
+            </Button>
+          </ViewSeatAction>
         </div>
       </div>
       <p className="mt-3 flex items-center gap-1 text-[13px] leading-[18px] text-[var(--color-gray-4)]">

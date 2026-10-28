@@ -48,11 +48,12 @@ import { showPreviewControls } from "@auth/authNavigation"
 // failure. Never production credentials; the picker that fills them is a
 // temporary review aid, not part of the designed login screen.
 const DEMO_PASSWORD = "ecoya"
-type DemoAccount = { email: string; role: CommonPreviewRole; plan: CommonPreviewPlan; label: string }
+type DemoAccount = { email: string; role: CommonPreviewRole; plan: CommonPreviewPlan; seat?: "view"; label: string }
 const DEMO_ACCOUNTS: DemoAccount[] = [
   { email: "ecoya@ecoya.kr", role: "owner", plan: "paid", label: "Owner" },
   { email: "admin@ecoya.kr", role: "admin", plan: "paid", label: "Admin" },
-  { email: "member@ecoya.kr", role: "member", plan: "paid", label: "Member" },
+  { email: "member@ecoya.kr", role: "member", plan: "paid", label: "Member · 사용 권한" },
+  { email: "view@ecoya.kr", role: "member", plan: "paid", seat: "view", label: "Member · View 권한만" },
 ]
 const DEMO_PLAN_ACCOUNTS: DemoAccount[] = [
   { email: "paid@ecoya.kr", role: "owner", plan: "paid", label: "유료 구독 중" },
@@ -169,7 +170,7 @@ export function CommonLoginPrototype({
     setState("submitting")
     window.setTimeout(() => {
       if (initialProduct && onProductLanding) {
-        onProductLanding(initialProduct, account.role, account.plan)
+        onProductLanding(initialProduct, account.role, { plan: account.plan, seat: account.seat })
         return
       }
       setPassword("")
@@ -304,7 +305,7 @@ export function CommonLoginPrototype({
               <Button
                 className="w-full"
                 type="button"
-                onClick={() => onProductLanding?.("erp", signedInAccount.role, signedInAccount.plan)}
+                onClick={() => onProductLanding?.("erp", signedInAccount.role, { plan: signedInAccount.plan, seat: signedInAccount.seat })}
               >
                 <Building2 /> Trade OS 열기
               </Button>
@@ -320,7 +321,7 @@ export function CommonLoginPrototype({
                 className="w-full"
                 type="button"
                 variant="outline"
-                onClick={() => onProductLanding?.("snap", signedInAccount.role, signedInAccount.plan)}
+                onClick={() => onProductLanding?.("snap", signedInAccount.role, { plan: signedInAccount.plan, seat: signedInAccount.seat })}
               >
                 <MapPin /> SNAP 열기
               </Button>

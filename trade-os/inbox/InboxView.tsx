@@ -1,4 +1,5 @@
 import { useState, useRef, type DragEvent as ReactDragEvent, useEffect } from "react"
+import { ViewSeatAction, useViewSeatGuard } from "@trade-os/components/ViewSeatGate"
 import { cn } from "@/lib/utils"
 import { Mail, Check, Copy, X, ChevronDown, AlertTriangle, FileText, ChevronUp, Plus, Upload, LoaderCircle, MoreHorizontal, Trash2, Info, RefreshCw, ChevronRight, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/Button"
@@ -2380,6 +2381,7 @@ function BeforeUploadState({
   const fileDropZoneRef = useRef<FileDropZoneRef | null>(null)
   const folderInputRef = useRef<HTMLInputElement | null>(null)
   const [mailOpen, setMailOpen] = useState(false)
+  const viewSeatGuard = useViewSeatGuard()
 
   return (
     <div className="h-full min-h-0 overflow-y-auto bg-transparent">
@@ -2450,7 +2452,12 @@ function BeforeUploadState({
                 label="파일을 끌어다 놓으세요"
                 instructions={`PDF 최대 ${TRADE_DOCUMENT_MAX_UPLOAD_FILES}개, 파일당 ${TRADE_DOCUMENT_MAX_UPLOAD_MB}MB`}
                 clickToSelect
-                onFiles={onFilesSelected}
+                onClick={(event) => {
+                  if (viewSeatGuard()) event.preventDefault()
+                }}
+                onFiles={(files) => {
+                  if (!viewSeatGuard()) onFilesSelected(files)
+                }}
                 // 문서 올리기 V2 (6273:100113): Blue 10 drop area, stacked and centered.
                 className="min-h-[112px] flex-col gap-2 border-[var(--color-primary-6)] bg-[var(--color-primary-10)] px-4 text-center text-[var(--color-primary-4)]"
               >
@@ -2496,30 +2503,36 @@ function BeforeUploadState({
                 </Alert>
               ) : null}
               <div className="mt-3 flex flex-wrap justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setMailOpen(true)}
-                >
-                  <Mail data-icon="inline-start" /> 이메일에서 찾기
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => folderInputRef.current?.click()}
-                >
-                  <FileText data-icon="inline-start" /> 폴더 선택
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileDropZoneRef.current?.open()}
-                >
-                  <Upload data-icon="inline-start" /> 파일 선택
-                </Button>
+                <ViewSeatAction>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setMailOpen(true)}
+                  >
+                    <Mail data-icon="inline-start" /> 이메일에서 찾기
+                  </Button>
+                </ViewSeatAction>
+                <ViewSeatAction>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => folderInputRef.current?.click()}
+                  >
+                    <FileText data-icon="inline-start" /> 폴더 선택
+                  </Button>
+                </ViewSeatAction>
+                <ViewSeatAction>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileDropZoneRef.current?.open()}
+                  >
+                    <Upload data-icon="inline-start" /> 파일 선택
+                  </Button>
+                </ViewSeatAction>
               </div>
             </CardContent>
           </Card>

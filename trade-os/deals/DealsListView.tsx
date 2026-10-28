@@ -1,4 +1,5 @@
 import { BusinessFilterBar, BusinessListToolbar, BusinessFilterSearch, BusinessFilterSelect } from "@/components/platform/SearchFilterBar"
+import { ViewSeatAction } from "@trade-os/components/ViewSeatGate"
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/Empty"
 import {
   getDealWorkPlan,
@@ -700,18 +701,22 @@ export function DealsScreen({
           className="[&_header]:flex-wrap"
           actions={
             <>
-              <Button
-                variant="outline"
-                className={heroOutlineButtonClass}
-                onClick={exportCsv}
-              >
-                <Download data-icon="inline-start" />
-                엑셀 다운로드
-              </Button>
-              <Button onClick={() => setShowCreate(true)}>
-                <Plus data-icon="inline-start" />
-                거래 만들기
-              </Button>
+              <ViewSeatAction>
+                <Button
+                  variant="outline"
+                  className={heroOutlineButtonClass}
+                  onClick={exportCsv}
+                >
+                  <Download data-icon="inline-start" />
+                  엑셀 다운로드
+                </Button>
+              </ViewSeatAction>
+              <ViewSeatAction>
+                <Button onClick={() => setShowCreate(true)}>
+                  <Plus data-icon="inline-start" />
+                  거래 만들기
+                </Button>
+              </ViewSeatAction>
             </>
           }
           controls={

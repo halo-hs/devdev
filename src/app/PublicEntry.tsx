@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card"
-import { type CommonPreviewPlan, type CommonPreviewRole, type CommonProduct, type CommonScreenKey } from "@auth/AuthSurface"
+import { type CommonPreviewAccount, type CommonPreviewRole, type CommonProduct, type CommonScreenKey } from "@auth/AuthSurface"
 import { CommonTermsPrototype, CommonPrivacyPrototype } from "@auth/LegalDocumentView"
 import { CommonPasswordRecoveryPrototype } from "@auth/PasswordResetPanel"
 import { CommonSignupPrototype } from "@auth/SignupPanel"
@@ -169,11 +169,12 @@ export function CommonEntry({ children }: { children: ReactNode }) {
   const land = (
     product: CommonProduct,
     role: CommonPreviewRole = "owner",
-    plan: CommonPreviewPlan = "paid"
+    preview: CommonPreviewAccount = {}
   ) => {
     const erpHome = new URLSearchParams()
     if (role !== "owner") erpHome.set("role", role)
-    if (plan !== "paid") erpHome.set("plan", plan)
+    if (preview.plan && preview.plan !== "paid") erpHome.set("plan", preview.plan)
+    if (preview.seat) erpHome.set("seat", preview.seat)
     // This is the existing local preview session, never a production credential.
     if (product === "snap") {
       try {
