@@ -2,7 +2,7 @@ import { getGeneratedDocumentListStage, generatedDocumentListStages } from "@tra
 import { useState, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/Table"
-import { FileX2, FileClock, FileCheck2, ShieldCheck, MoreHorizontal, Copy, Trash2, AlertTriangle, LoaderCircle } from "lucide-react"
+import { FilePlus2, FileX2, FileClock, FileCheck2, ShieldCheck, MoreHorizontal, Copy, Trash2, AlertTriangle, LoaderCircle } from "lucide-react"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip"
 import { Button } from "@/components/ui/Button"
@@ -14,12 +14,13 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { Alert, AlertDescription } from "@/components/ui/Alert"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import { toast } from "sonner"
-import { templateSchemas, templateMeta, templates } from "@trade-os/documents/documentTemplateModel"
+import { templateSchemas, templateMeta } from "@trade-os/documents/documentTemplateModel"
 import { HeroBanner } from "@/components/platform/HeroBanner"
 import { TemplateStrip, RelatedDealNotice } from "@trade-os/documents/DocumentCreatePanels"
 import { ResultScreen } from "@trade-os/documents/DocumentCreateConnected"
 import { StructuredDocumentCreateEditor } from "@trade-os/documents/DocumentCreateStepViews"
 import { Card, CardContent } from "@/components/ui/Card"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/Empty"
 import { Tabs, TabsList, TabsTrigger, TabsCount, TabsContent } from "@/components/ui/Tabs"
 import { DocumentTypeBadge } from "@trade-os/components/DocumentTypeBadge"
 import { BusinessListToolbar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar"
@@ -470,8 +471,12 @@ export function CreateScreen({
   const [workbenchDirection, setWorkbenchDirection] = useState<DocumentDirection | null>(null)
   const [workbenchDocumentNumber, setWorkbenchDocumentNumber] = useState<string | null>(null)
   const [structuredEditorOpen, setStructuredEditorOpen] = useState(false)
+  // ?state=empty previews the 만든 문서 0건 state without archiving every draft.
   const [createdDocuments, setCreatedDocuments] = useState<GeneratedDraft[]>(
-    () => [...generatedDrafts]
+    () =>
+      new URLSearchParams(window.location.search).get("state") === "empty"
+        ? []
+        : [...generatedDrafts]
   )
   const [documentSearch, setDocumentSearch] = useState("")
   const [documentListTab, setDocumentListTab] = useState("all")
@@ -700,38 +705,23 @@ export function CreateScreen({
               </Card>
             </>
           ) : (
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3 xl:grid-cols-3">
-              {templates.map(([kind, title, desc, usage]) => (
-                <div
-                  key={title}
-                  className="group min-h-34 rounded-lg border bg-background p-4 text-left transition hover:border-primary/60 hover:shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <DocumentTypeBadge code={kind} />
-                  </div>
-                  <div className="mt-4 text-base font-semibold tracking-normal">
-                    {title}
-                  </div>
-                  <div className="mt-2 text-sm leading-5 text-muted-foreground">
-                    {desc}
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    <ToneBadge tone="neutral">{usage}</ToneBadge>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between gap-3">
-                    <span className="h-1 w-10 rounded-full bg-primary/50 transition group-hover:w-16" />
-                    <span className="opacity-0 transition group-hover:opacity-100">
-                      <Button
-                        size="sm"
-                        onClick={() => openUnifiedWorkbench("template", kind)}
-                      >
-                        시작
-                      </Button>
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Card>
+              <Empty className="min-h-64">
+                <EmptyHeader className="items-center">
+                  <EmptyMedia>
+                    <FilePlus2 />
+                  </EmptyMedia>
+                  <EmptyTitle>
+                    {relatedDeal
+                      ? "이 거래에서 만든 문서가 없습니다."
+                      : "만든 문서가 없습니다."}
+                  </EmptyTitle>
+                  <EmptyDescription>
+                    위에서 문서 종류를 선택하면 첫 문서를 만들 수 있습니다.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            </Card>
           )}
         </section>
       </section>
