@@ -11,6 +11,7 @@ import {
   MapPin,
   AlertCircle,
   RefreshCw,
+  UserRound,
 } from "lucide-react"
 import {
   Card,
@@ -20,6 +21,7 @@ import {
   CardFooter,
 } from "@/components/ui/Card"
 import { AuthInputField } from "@auth/AuthInputField"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover"
 import googleIcon from "@/components/ds2/assets/icons/icon-google.svg"
 import appleIcon from "@/components/ds2/assets/icons/icon-apple.svg"
 import {
@@ -41,11 +43,22 @@ import {
 } from "@auth/AuthSurface"
 import { showPreviewControls } from "@auth/authNavigation"
 
-// Local preview logins, one per organization role. Never production credentials.
+// Prototype-only logins for checking each organization role and each login
+// failure. Never production credentials; the picker that fills them is a
+// temporary review aid, not part of the designed login screen.
+const DEMO_PASSWORD = "ecoya"
 const DEMO_ACCOUNTS: Array<{ email: string; role: CommonPreviewRole; label: string }> = [
   { email: "ecoya@ecoya.kr", role: "owner", label: "Owner" },
   { email: "admin@ecoya.kr", role: "admin", label: "Admin" },
   { email: "member@ecoya.kr", role: "member", label: "Member" },
+]
+const DEMO_ERROR_ACCOUNTS: Array<{ email: string; password?: string; state: CommonAuthState; label: string }> = [
+  { email: "ecoya@ecoya.kr", password: "wrong-password", state: "rejected", label: "비밀번호 오류" },
+  { email: "noorg@ecoya.kr", state: "no-organization", label: "조직 없음" },
+  { email: "pending@ecoya.kr", state: "pending-approval", label: "조직 승인 대기" },
+  { email: "locked@ecoya.kr", state: "rate-limited", label: "로그인 시도 제한" },
+  { email: "offline@ecoya.kr", state: "network-error", label: "네트워크 오류" },
+  { email: "error@ecoya.kr", state: "page-error", label: "계정·조직 조회 오류" },
 ]
 
 export function CommonLoginPrototype({
@@ -58,6 +71,7 @@ export function CommonLoginPrototype({
   const [password, setPassword] = useState("")
   const [state, setState] = useState<CommonAuthState>("idle")
   const [signedInRole, setSignedInRole] = useState<CommonPreviewRole>("owner")
+  const [demoOpen, setDemoOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const fieldErrors = {
     email: authFieldError(email, "이메일", { email: true }),
@@ -123,9 +137,19 @@ export function CommonLoginPrototype({
       return
     }
     setSubmitted(false)
+    const signInEmail = email.trim().toLowerCase()
+    const demoError =
+      password === DEMO_PASSWORD
+        ? DEMO_ERROR_ACCOUNTS.find((account) => !account.password && account.email === signInEmail)
+        : undefined
+    if (demoError) {
+      setPassword("")
+      setState(demoError.state)
+      return
+    }
     const role =
-      password === "ecoya"
-        ? DEMO_ACCOUNTS.find((account) => account.email === email.trim().toLowerCase())?.role
+      password === DEMO_PASSWORD
+        ? DEMO_ACCOUNTS.find((account) => account.email === signInEmail)?.role
         : undefined
     if (!role) {
       setState("rejected")
@@ -225,6 +249,66 @@ export function CommonLoginPrototype({
         </div>
       ) : (
         <form noValidate className="flex flex-col gap-8" onSubmit={submit}>
+          <Popover open={demoOpen} onOpenChange={setDemoOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="fixed right-4 bottom-4 z-[var(--z-dropdown)] rounded-full border-dashed bg-background shadow-md"
+              >
+                <UserRound /> 임시 · 데모 계정
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent side="top" align="end" className="w-80 gap-3 p-3">
+              <div className="rounded-md border border-dashed border-[var(--surface-border)] bg-[var(--surface-muted-background)] px-3 py-2 text-xs leading-5 text-muted-foreground">
+                <strong className="font-semibold text-foreground">확인용 임시 팝업</strong>
+                <br />
+                프로토타입 확인을 위해서만 있는 창이며 실제 로그인 화면 디자인에는 포함되지 않습니다. 계정을 고르면 아이디·비밀번호가 채워지고, 로그인을 누르면 해당 역할 또는 오류 상태로 이어집니다.
+              </div>
+              {[
+                {
+                  title: "역할별 로그인",
+                  items: DEMO_ACCOUNTS.map((account) => ({
+                    key: account.email,
+                    label: account.label,
+                    email: account.email,
+                    password: DEMO_PASSWORD,
+                  })),
+                },
+                {
+                  title: "오류 확인",
+                  items: DEMO_ERROR_ACCOUNTS.map((account) => ({
+                    key: account.state,
+                    label: account.label,
+                    email: account.email,
+                    password: account.password ?? DEMO_PASSWORD,
+                  })),
+                },
+              ].map((group) => (
+                <div key={group.title}>
+                  <div className="px-1 pb-1 text-[11px] font-semibold text-muted-foreground">{group.title}</div>
+                  {group.items.map((item) => (
+                    <button
+                      key={item.key}
+                      type="button"
+                      className="flex w-full items-center justify-between gap-3 rounded-md px-2 py-1.5 text-left text-sm hover:bg-[var(--surface-muted-background)]"
+                      onClick={() => {
+                        setEmail(item.email)
+                        setPassword(item.password)
+                        setSubmitted(false)
+                        setState("idle")
+                        setDemoOpen(false)
+                      }}
+                    >
+                      <span className="font-medium">{item.label}</span>
+                      <span className="truncate text-xs text-muted-foreground">{item.email}</span>
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </PopoverContent>
+          </Popover>
           <div className="flex flex-col gap-[18px]">
             {loginNotice && (
               <div
@@ -237,11 +321,6 @@ export function CommonLoginPrototype({
                 />
                 <p>{loginNotice}</p>
               </div>
-            )}
-            {showPreviewControls() && (
-              <p className="text-xs text-muted-foreground">
-                데모 계정(비밀번호 ecoya): {DEMO_ACCOUNTS.map((account) => `${account.email} ${account.label}`).join(" · ")}
-              </p>
             )}
             {stateFeedback[state] ? (
               <InlineFeedback feedback={stateFeedback[state]!} />
