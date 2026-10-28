@@ -15,7 +15,7 @@ import {
 } from "@trade-os/lib/dealFinanceWorkspace"
 import { exactFinanceMoney, presentFinanceFact } from "@trade-os/lib/erpFinance"
 import { decimalMagnitude, FINANCE_DECIMAL_SCALE } from "@trade-os/lib/financeDecimal"
-import { useMemo, useState } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import {
   Archive,
@@ -320,6 +320,7 @@ const sortOptions: FilterOptions = [
 // active one is shown as a removable filter chip.
 type KpiFilter =
   | "all"
+  | "pending"
   | "eta"
   | "overdue"
   | "risk"
@@ -328,6 +329,7 @@ type KpiFilter =
   | "quantity"
 
 const kpiFilterLabels: Record<Exclude<KpiFilter, "all">, string> = {
+  pending: "처리 대기",
   eta: "도착 임박",
   overdue: "연체",
   risk: "리스크",
@@ -350,12 +352,47 @@ const kpiFilterMatchers: Record<
   Exclude<KpiFilter, "all">,
   (deal: Deal) => boolean
 > = {
+  pending: (deal) => deal.pending > 0,
   eta: isDueSoon,
   overdue: (deal) => Boolean(deal.overdueAr),
   risk: (deal) => deal.risks.length > 0,
   remaining: (deal) => Boolean(deal.remaining),
   doc_gap: (deal) => deal.pending > 0,
   quantity: (deal) => deal.risks.includes("quantity"),
+}
+
+// Ghost button for a metric count: bold number, Gray 1; Blue 4 on a Blue 10
+// fill while its filter is applied.
+function MetricCountButton({
+  active,
+  label,
+  className,
+  onClick,
+  children,
+}: {
+  active: boolean
+  label: string
+  className?: string
+  onClick: () => void
+  children: ReactNode
+}) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      aria-pressed={active}
+      aria-label={label}
+      className={cn(
+        "-mx-2 h-auto px-2 py-0 font-bold tabular-nums text-[var(--color-gray-1)] hover:bg-[color-mix(in_srgb,var(--color-gray-1)_6%,transparent)] hover:text-[var(--color-gray-1)]",
+        active &&
+          "bg-[var(--color-primary-10)] text-[var(--color-primary-4)] hover:bg-[var(--color-primary-10)] hover:text-[var(--color-primary-4)]",
+        className
+      )}
+      onClick={onClick}
+    >
+      {children}
+    </Button>
+  )
 }
 
 function optionLabel(options: FilterOptions, value: string) {
@@ -913,67 +950,63 @@ export function DealsScreen({
             </Button>
           </div>
         )}
+        {/* Metrics are plain cards; only the count is a ghost button that
+            narrows the list below (press again to clear). */}
         <section aria-label="주요 거래 지표" className="-mt-2 flex flex-col gap-3 pt-1">
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {[
+            {([
               {
                 label: "오픈 오더",
                 count: baseDeals.filter((deal) => deal.orderLifecycle === "open").length,
                 detail: "주문 결정이 열려 있는 거래",
-                onSelect: () => setLifecycle("open"),
+                active: lifecycle === "open",
+                toggle: () => setLifecycle(lifecycle === "open" ? "all" : "open"),
               },
               {
                 label: "처리 대기",
                 count: baseDeals.reduce((sum, deal) => sum + deal.pending, 0),
                 detail: "확인이 필요한 문서",
+                active: kpiFilter === "pending",
+                toggle: () => setKpiFilter(kpiFilter === "pending" ? "all" : "pending"),
               },
               {
                 label: "도착 임박",
                 count: baseDeals.filter(isDueSoon).length,
                 detail: "7일 안에 도착 예정",
-                onSelect: () => setKpiFilter("eta"),
+                active: kpiFilter === "eta",
+                toggle: () => setKpiFilter(kpiFilter === "eta" ? "all" : "eta"),
               },
               {
                 label: "연체",
                 count: baseDeals.filter((deal) => deal.overdueAr).length,
                 detail: "받을 돈이 늦어진 거래",
-                onSelect: () => setKpiFilter("overdue"),
+                active: kpiFilter === "overdue",
+                toggle: () => setKpiFilter(kpiFilter === "overdue" ? "all" : "overdue"),
               },
-            ].map((metric) => {
-              const body = (
-                <>
-                  <span className="text-sm leading-5 font-semibold text-[var(--color-gray-1)]">
-                    {metric.label}
-                  </span>
-                  <strong className="text-[22px] leading-[30px] font-bold tabular-nums text-[var(--color-gray-1)]">
-                    {metric.count}건
-                  </strong>
-                  <span className="text-[13px] leading-[18px] text-[var(--color-gray-4)]">
-                    {metric.detail}
-                  </span>
-                </>
-              )
-              const cardClass =
-                "flex min-w-0 flex-col items-start gap-1.5 rounded-xl bg-white px-5 py-[18px] text-left shadow-[0_4px_12px_rgba(0,0,0,0.1)]"
-              return metric.onSelect ? (
-                <button
-                  key={metric.label}
-                  type="button"
-                  aria-label={`${metric.label} ${metric.count}건 보기`}
-                  className={cn(cardClass, "outline-none hover:bg-[var(--color-gray-11)] focus-visible:ring-2 focus-visible:ring-ring")}
+            ]).map((metric) => (
+              <Card
+                key={metric.label}
+                className="min-w-0 items-start gap-1.5 px-5 py-[18px]"
+              >
+                <span className="text-sm leading-5 font-semibold text-[var(--color-gray-1)]">
+                  {metric.label}
+                </span>
+                <MetricCountButton
+                  active={metric.active}
+                  label={`${metric.label} ${metric.count}건으로 목록 거르기`}
+                  className="text-[22px] leading-[30px]"
                   onClick={() => {
-                    metric.onSelect()
+                    metric.toggle()
                     setPage(1)
                   }}
                 >
-                  {body}
-                </button>
-              ) : (
-                <div key={metric.label} className={cardClass}>
-                  {body}
-                </div>
-              )
-            })}
+                  {metric.count}건
+                </MetricCountButton>
+                <span className="text-[13px] leading-[18px] text-[var(--color-gray-4)]">
+                  {metric.detail}
+                </span>
+              </Card>
+            ))}
           </div>
           <div
             aria-label="운영 리스크"
@@ -982,29 +1015,28 @@ export function DealsScreen({
             {riskStripFilters.map((key) => {
               const active = kpiFilter === key
               const Icon = riskStripIcons[key]
+              const count = baseDeals.filter(kpiFilterMatchers[key]).length
               return (
-                <button
+                <Card
                   key={key}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => {
-                    setKpiFilter(active ? "all" : key)
-                    setPage(1)
-                  }}
-                  className={cn(
-                    "flex h-12 min-w-[100px] items-center gap-2 rounded-[10px] border border-[var(--color-gray-8)] bg-white px-4 text-left shadow-[0_1px_2px_rgba(5,29,57,0.1)] outline-none hover:bg-[var(--color-gray-11)] focus-visible:ring-2 focus-visible:ring-ring",
-                    active &&
-                      "border-[var(--color-primary-4)] bg-[var(--color-primary-10)] hover:bg-[var(--color-primary-10)]"
-                  )}
+                  className="h-12 min-w-[100px] flex-row items-center gap-2 px-4 py-0"
                 >
                   <Icon className="size-5 shrink-0 text-[var(--color-gray-4)]" strokeWidth={1.5} />
                   <span className="truncate text-[13px] text-[var(--color-gray-4)]">
                     {kpiFilterLabels[key]}
                   </span>
-                  <strong className="ml-1 text-base leading-[22px] font-bold tabular-nums text-[var(--color-gray-1)]">
-                    {baseDeals.filter(kpiFilterMatchers[key]).length}건
-                  </strong>
-                </button>
+                  <MetricCountButton
+                    active={active}
+                    label={`${kpiFilterLabels[key]} ${count}건으로 목록 거르기`}
+                    className="ml-1 text-base leading-[22px]"
+                    onClick={() => {
+                      setKpiFilter(active ? "all" : key)
+                      setPage(1)
+                    }}
+                  >
+                    {count}건
+                  </MetricCountButton>
+                </Card>
               )
             })}
           </div>
