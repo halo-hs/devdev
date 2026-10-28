@@ -3429,33 +3429,32 @@ function SettlementView({
         id="settlement-ledger"
         title={copy.ledger.title}
         action={
-          <div className="flex flex-wrap items-center gap-3">
-            <Button variant="outline"
-              aria-label={copy.ledger.title}
-              data-ui="settlement-manual-schedule"
-              disabled={!canRecord}
-              onClick={openManualSchedule}
-              type="button"
-            >
-              {copy.ledger.formSave}
-            </Button>
-            <span aria-hidden="true" className="h-5 w-px bg-[var(--color-gray-9)]" />
-            <Tabs
-              value={tab}
-              onValueChange={(id) => {
-                if (!SETTLEMENT_LEDGER_TABS.includes(id as SettlementLedgerTab)) return;
-                setTab(id as SettlementLedgerTab);
-              }}
-            >
-              <TabsList variant="segment" aria-label={copy.ledger.tabsAria}>
-                {SETTLEMENT_LEDGER_TABS.map((ledgerTab) => (
-                  <TabsTrigger key={ledgerTab} value={ledgerTab}>{copy.ledger.tabs[ledgerTab]}</TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          </div>
+          <Button variant="outline"
+            aria-label={copy.ledger.title}
+            data-ui="settlement-manual-schedule"
+            disabled={!canRecord}
+            onClick={openManualSchedule}
+            type="button"
+          >
+            {copy.ledger.formSave}
+          </Button>
         }
       >
+        {/* Direction tabs sit under the title, matching the 자금 일정 card. */}
+        <Tabs
+          className="mb-3"
+          value={tab}
+          onValueChange={(id) => {
+            if (!SETTLEMENT_LEDGER_TABS.includes(id as SettlementLedgerTab)) return;
+            setTab(id as SettlementLedgerTab);
+          }}
+        >
+          <TabsList variant="segment" aria-label={copy.ledger.tabsAria}>
+            {SETTLEMENT_LEDGER_TABS.map((ledgerTab) => (
+              <TabsTrigger key={ledgerTab} value={ledgerTab}>{copy.ledger.tabs[ledgerTab]}</TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
         {ledgerCellFilterActive ? (
           <p
             className="mb-3 flex flex-wrap items-center gap-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]"
