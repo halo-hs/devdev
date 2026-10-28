@@ -47,8 +47,12 @@ function readUploadQueue(): RecentDocument[] {
   try {
     const saved = JSON.parse(localStorage.getItem(UPLOAD_QUEUE_STORAGE_KEY) ?? "null")
     if (Array.isArray(saved) && saved.every((item) => item && typeof item.name === "string" && typeof item.documentType === "string" && typeof item.stage === "string")) {
-      const documents: RecentDocument[] = saved.map((document: RecentDocument) => document.contentHash && ["queued", "ocr"].includes(document.stage)
-        ? { ...document, stage: "failed", status: "처리 중단 · 다시 추출", tone: "danger" } : document)
+      // A rejected duplicate upload is an attempt, not a saved document. Remove
+      // the old prototype seed from queues persisted by earlier previews.
+      const documents: RecentDocument[] = saved
+        .filter((document: RecentDocument) => document.stage !== "duplicate")
+        .map((document: RecentDocument) => document.contentHash && ["queued", "ocr"].includes(document.stage)
+          ? { ...document, stage: "failed", status: "처리 중단 · 다시 추출", tone: "danger" } : document)
       if (!localStorage.getItem(UPLOAD_STATUS_SEEDS_KEY)) {
         for (const seed of recentDocuments.filter((document) => document.name.endsWith("_0918.pdf"))) {
           if (!documents.some((document) => document.name === seed.name)) documents.push(seed)
@@ -137,10 +141,6 @@ const recentDocuments: RecentDocument[] = [
     tone: "danger",
     stage: "failed",
     documentType: "AN",
-  },
-  {
-    name: "인보이스_중복확인_0918.pdf", uploadedAt: "2026.09.18 09:15", pages: 2,
-    dealLabel: "한빛무역 · INV-2026-0703", status: "중복 확인 필요", tone: "warning", stage: "duplicate", documentType: "CI",
   },
   {
     name: "회사소개서_처리제외_0918.pdf", uploadedAt: "2026.09.18 09:10", pages: 4,
@@ -647,7 +647,7 @@ function matchesDocumentQueueStatus(
   if (filter === "confirmed") return document.stage === "confirmed"
   if (filter === "processing") return ["ocr", "queued"].includes(document.stage)
   if (filter === "review")
-    return ["field", "duplicate"].includes(document.stage)
+    return document.stage === "field"
   return ["failed", "excluded"].includes(document.stage)
 }
 
@@ -727,9 +727,7 @@ function HorizontalDocumentTray({
   const processingCount = documents.filter((document) =>
     ["ocr", "queued"].includes(document.stage)
   ).length
-  const reviewCount = documents.filter((document) =>
-    ["field", "duplicate"].includes(document.stage)
-  ).length
+  const reviewCount = documents.filter((document) => document.stage === "field").length
   const failedCount = documents.filter((document) =>
     ["failed", "excluded"].includes(document.stage)
   ).length
@@ -1338,6 +1336,11 @@ export function InboxScreen({
         reviewMatches
       )
     : -1
+  useEffect(() => {
+    if (initialDocumentName && initialDocumentIndex < 0 && !dealReviewRequested) {
+      onDocumentOpen?.(null)
+    }
+  }, [initialDocumentName, initialDocumentIndex, dealReviewRequested, onDocumentOpen])
   const initialSelectedDocument =
     initialUploadDocuments[initialDocumentIndex] ?? initialUploadDocuments[0]
   const [hasFile, setHasFile] = useState(initialDocumentIndex >= 0)
@@ -1467,9 +1470,7 @@ export function InboxScreen({
   ]
   const uploadChecks: DocumentBlockingIssue[] = isTypeUnresolved
     ? [{ key: "type", label: "문서 유형 선택", onSelect: () => openUploadRequirement() }]
-    : selectedDocument.stage === "duplicate"
-      ? [{ key: "duplicate", label: "중복 문서 확인", onSelect: () => openUploadRequirement() }]
-      : []
+    : []
 
   const handlePdfReviewComplete = () => {
     if (isDealBlocked) return
@@ -1978,10 +1979,6 @@ export function InboxScreen({
         ) : selectedDocument.stage === "excluded" ? (
           <Button size="sm" variant="outline" disabled>
             처리 제외
-          </Button>
-        ) : selectedDocument.stage === "duplicate" ? (
-          <Button size="sm" variant="outline" disabled>
-            중복 확인 필요
           </Button>
         ) : step === "compare" ? (
           <Button
