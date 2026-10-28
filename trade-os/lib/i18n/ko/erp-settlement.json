@@ -497,6 +497,7 @@
       "csv": "회계용 CSV 내려받기",
       "taxCsv": "세무사용 월간 명세서",
       "monthLabel": "대상 월",
+      "monthValue": "{year}년 {month}월",
       "failed": "CSV 내보내기에 실패했습니다. 잠시 후 다시 시도해주세요."
     },
     "decisions": {

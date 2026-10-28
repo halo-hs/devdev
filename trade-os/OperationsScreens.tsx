@@ -57,8 +57,9 @@ function Body({ screen }: { screen: OperationsScreenName }) {
         // Figma 영업 성과 시안 A (6934:147523): same as 결산 리포트, KPIs under the hero.
         : screen === "sales" ? <SalesPerformanceConnected copy={messages.erpSalesPerformance.cockpit} role={identity.role}
           renderHeader={(controls, summary) => <><HeroBanner title={copy.title} description={description} controls={controls} />{summary}</>} />
+        // Figma 정산 (6224:188704): KPI cards sit 16px under the hero, no overlap.
         : screen === "settlement" ? <SettlementConnected copy={messages.erpSettlement.settlement}
-          renderHeader={(controls, summary) => <HeroBanner title={copy.title} description={description} controls={controls} summary={summary} />} />
+          renderHeader={(controls, summary) => <div className="flex flex-col gap-4"><HeroBanner title={copy.title} description={description} controls={controls} />{summary}</div>} />
         : <ShipmentsConnected copy={messages.erpShipments.shipments}
           renderHeader={controls => <HeroBanner title={copy.title} description={description} controls={controls} />} />}
     </div>
