@@ -6,13 +6,13 @@ import { templateMeta } from "@trade-os/documents/documentTemplateModel"
 import { getSnapRouteByScreen } from "@snap/lib/snapRoutes"
 import { settingsSectionLabel } from "@share/settings/SettingsRoutePage"
 import { cn } from "@/lib/utils"
-import { ChevronRight, ChevronDown, MoreVertical, Users, ClipboardList, Clock3, RefreshCw } from "lucide-react"
+import { ChevronRight, ChevronDown, MoreVertical, ClipboardList, Clock3, RefreshCw } from "lucide-react"
 import { NotificationButton } from "@/shell/ErpNav"
 import { Button } from "@/components/ui/Button"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/Popover"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select"
 import { Separator } from "@/components/ui/Separator"
-import { type Screen, type ProductKey, type ErpPreviewRole, type DocumentApprovalPreviewState } from "@/App"
+import { type Screen, type ProductKey, type DocumentApprovalPreviewState } from "@/App"
 import { snapNavGroups } from "@/shell/erpRouteMeta"
 
 const snapScreenLabels = Object.fromEntries(
@@ -31,9 +31,6 @@ export function WorkspaceHeader({
   product,
   snapScreen,
   onSnapScreenChange,
-  erpHomeRole,
-  onErpHomeRoleChange,
-  showErpHomeRoleSwitch,
   documentApprovalPreviewState,
   onDocumentApprovalPreviewStateChange,
   showDocumentApprovalPreviewSwitch,
@@ -49,9 +46,6 @@ export function WorkspaceHeader({
   product: ProductKey
   snapScreen: SnapScreenKey
   onSnapScreenChange: (screen: SnapScreenKey) => void
-  erpHomeRole: ErpPreviewRole
-  onErpHomeRoleChange: (role: ErpPreviewRole) => void
-  showErpHomeRoleSwitch: boolean
   documentApprovalPreviewState: DocumentApprovalPreviewState
   onDocumentApprovalPreviewStateChange: (
     state: DocumentApprovalPreviewState
@@ -266,9 +260,6 @@ export function WorkspaceHeader({
             ) : null}
             <TopBarUtilities
               product={product}
-              erpHomeRole={erpHomeRole}
-              onErpHomeRoleChange={onErpHomeRoleChange}
-              showErpHomeRoleSwitch={showErpHomeRoleSwitch}
               documentApprovalPreviewState={documentApprovalPreviewState}
               onDocumentApprovalPreviewStateChange={
                 onDocumentApprovalPreviewStateChange
@@ -303,18 +294,12 @@ function formatWorldTime(timeZone: string, now: Date) {
 
 export function TopBarUtilities({
   product,
-  erpHomeRole,
-  onErpHomeRoleChange,
-  showErpHomeRoleSwitch,
   documentApprovalPreviewState,
   onDocumentApprovalPreviewStateChange,
   showDocumentApprovalPreviewSwitch,
   dealActionsRef,
 }: {
   product: ProductKey
-  erpHomeRole: ErpPreviewRole
-  onErpHomeRoleChange: (role: ErpPreviewRole) => void
-  showErpHomeRoleSwitch: boolean
   documentApprovalPreviewState: DocumentApprovalPreviewState
   onDocumentApprovalPreviewStateChange: (
     state: DocumentApprovalPreviewState
@@ -390,42 +375,6 @@ export function TopBarUtilities({
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-52 gap-0 p-1">
-          {product === "erp" && showErpHomeRoleSwitch ? (
-            <>
-              <div className="px-2 py-2">
-                <label className="mb-1.5 flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                  <Users className="size-3.5" />
-                  화면 권한
-                </label>
-                <Select
-                  value={erpHomeRole}
-                  onValueChange={(value) => {
-                    if (
-                      value === "owner" ||
-                      value === "admin" ||
-                      value === "member"
-                    ) {
-                      onErpHomeRoleChange(value)
-                      setOpen(null)
-                    }
-                  }}
-                >
-                  <SelectTrigger
-                    className="h-8 w-full bg-[var(--control-background)]"
-                    aria-label="화면 권한 전환"
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent align="end">
-                    <SelectItem value="owner">Owner</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="member">Member</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Separator className="my-1" />
-            </>
-          ) : null}
           {product === "erp" && showDocumentApprovalPreviewSwitch ? (
             <>
               <div className="px-2 py-2">

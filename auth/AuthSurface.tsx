@@ -67,10 +67,16 @@ export interface CommonOrganization {
 
 // Organization role of the local demo account; Trade OS reads it from `?role=`.
 export type CommonPreviewRole = "owner" | "admin" | "member"
+// Trade OS subscription state of the demo account; read from `?plan=`.
+export type CommonPreviewPlan = "paid" | "trial" | "expired"
 
 export interface CommonPrototypeScreenProps {
   onNavigate?: (route: CommonScreenKey) => void
-  onProductLanding?: (product: CommonProduct, role?: CommonPreviewRole) => void
+  onProductLanding?: (
+    product: CommonProduct,
+    role?: CommonPreviewRole,
+    plan?: CommonPreviewPlan
+  ) => void
   initialProduct?: CommonProduct
   loginNotice?: string
 }

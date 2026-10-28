@@ -75,6 +75,15 @@ import { dealDocumentContexts } from "@trade-os/documents/documentTemplateModel"
 export type Screen = ErpMenuTarget | "result" | "snap-platform"
 export type ProductKey = "erp" | "snap"
 export type ErpPreviewRole = "owner" | "admin" | "member"
+
+// `?plan=trial|expired` comes from the demo login (무료 체험 중 / 체험 종료
+// accounts); without it Trade OS is a paid subscription.
+function erpPreviewSubscriptionStates() {
+  const plan = new URLSearchParams(appLocation.search).get("plan")
+  return {
+    erp: plan === "trial" ? "trial_active" : plan === "expired" ? "trial_expired" : "paid_active",
+  } as const
+}
 export type DocumentStageKey =
   "field" | "ocr" | "confirmed" | "queued" | "excluded" | "failed" | "duplicate"
 export type UploadDocumentType =
@@ -675,6 +684,9 @@ export function App() {
     if (erpHomeRole === "admin" || erpHomeRole === "member") {
       nextUrl.searchParams.set("role", erpHomeRole)
     }
+    // The demo login's subscription state follows the session like `role`.
+    const plan = new URLSearchParams(appLocation.search).get("plan")
+    if (plan === "trial" || plan === "expired") nextUrl.searchParams.set("plan", plan)
     if (nextScreen === "inbox" && originDealId) nextUrl.searchParams.set("fromDeal", originDealId)
     if (nextScreen === "create" && params.dealId) nextUrl.searchParams.set("deal_id", params.dealId)
     const nextLocation = `${nextUrl.pathname}${nextUrl.search}`
@@ -744,22 +756,6 @@ export function App() {
     }
     setScreenLoading(true)
     setScreen(nextScreen)
-  }
-
-  const switchErpHomeRole = (nextRole: ErpPreviewRole) => {
-    const nextUrl = new URL(appLocation.href)
-    if (nextRole === "admin" || nextRole === "member") {
-      nextUrl.searchParams.set("role", nextRole)
-    } else {
-      nextUrl.searchParams.delete("role")
-    }
-    window.history.replaceState(
-      { ...(window.history.state ?? {}), product: "erp" },
-      "",
-      `${nextUrl.pathname}${nextUrl.search}`
-    )
-    setErpHomeRole(nextRole)
-    setProduct("erp")
   }
 
   const switchProduct = (nextProduct: ProductKey) => {
@@ -982,11 +978,6 @@ export function App() {
         product={product}
         snapScreen={snapScreen}
         onSnapScreenChange={navigateSnap}
-        erpHomeRole={erpHomeRole}
-        onErpHomeRoleChange={switchErpHomeRole}
-        showErpHomeRoleSwitch={
-          screen === "home" || screen === "create" || screen === "result"
-        }
         documentApprovalPreviewState={documentApprovalPreviewState}
         onDocumentApprovalPreviewStateChange={setDocumentApprovalPreviewState}
         showDocumentApprovalPreviewSwitch={screen === "result"}
@@ -1005,6 +996,7 @@ export function App() {
           <SettingsPrototype
             availableProducts={availableProducts}
             role={erpHomeRole}
+            subscriptionStates={erpPreviewSubscriptionStates()}
             onLogout={handleLogout}
             workspaceId={workspaceId}
             onWorkspaceChange={switchWorkspace}
@@ -1181,6 +1173,7 @@ export function App() {
                     <DealDetailScreen
                       key={selectedDealId}
                       dealId={selectedDealId}
+                      role={erpHomeRole}
                       focusTarget={dealNotificationTarget}
                       onBack={() => navigateTo("deals")}
                       onAskAi={() => navigateTo("ask", { question: `거래 ${selectedDealId}: `, submit: false })}

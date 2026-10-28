@@ -842,6 +842,7 @@ export function SettingsPrototype({
   onWorkspaceChange,
   availableProducts,
   role,
+  subscriptionStates,
 }: {
   onNavigate: Navigate
   onLogout: () => void
@@ -849,6 +850,7 @@ export function SettingsPrototype({
   onWorkspaceChange: (workspaceId: WorkspaceKey) => void
   availableProducts?: readonly ProductEntitlement[]
   role?: SettingsRole
+  subscriptionStates?: Parameters<typeof SettingsHubV2>[0]["subscriptionStates"]
 }) {
   return (
     <SettingsHubV2
@@ -858,6 +860,7 @@ export function SettingsPrototype({
       onWorkspaceChange={onWorkspaceChange}
       availableProducts={availableProducts}
       role={role}
+      subscriptionStates={subscriptionStates}
     />
   )
 }

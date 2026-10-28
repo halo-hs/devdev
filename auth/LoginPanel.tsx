@@ -33,6 +33,7 @@ import {
   SelectItem,
 } from "@/components/ui/Select"
 import {
+  type CommonPreviewPlan,
   type CommonPreviewRole,
   type CommonPrototypeScreenProps,
   type CommonAuthState,
@@ -47,10 +48,16 @@ import { showPreviewControls } from "@auth/authNavigation"
 // failure. Never production credentials; the picker that fills them is a
 // temporary review aid, not part of the designed login screen.
 const DEMO_PASSWORD = "ecoya"
-const DEMO_ACCOUNTS: Array<{ email: string; role: CommonPreviewRole; label: string }> = [
-  { email: "ecoya@ecoya.kr", role: "owner", label: "Owner" },
-  { email: "admin@ecoya.kr", role: "admin", label: "Admin" },
-  { email: "member@ecoya.kr", role: "member", label: "Member" },
+type DemoAccount = { email: string; role: CommonPreviewRole; plan: CommonPreviewPlan; label: string }
+const DEMO_ACCOUNTS: DemoAccount[] = [
+  { email: "ecoya@ecoya.kr", role: "owner", plan: "paid", label: "Owner" },
+  { email: "admin@ecoya.kr", role: "admin", plan: "paid", label: "Admin" },
+  { email: "member@ecoya.kr", role: "member", plan: "paid", label: "Member" },
+]
+const DEMO_PLAN_ACCOUNTS: DemoAccount[] = [
+  { email: "paid@ecoya.kr", role: "owner", plan: "paid", label: "유료 구독 중" },
+  { email: "trial@ecoya.kr", role: "owner", plan: "trial", label: "무료 체험 중" },
+  { email: "expired@ecoya.kr", role: "owner", plan: "expired", label: "무료 체험 종료" },
 ]
 const DEMO_ERROR_ACCOUNTS: Array<{ email: string; password?: string; state: CommonAuthState; label: string }> = [
   { email: "ecoya@ecoya.kr", password: "wrong-password", state: "rejected", label: "비밀번호 오류" },
@@ -70,7 +77,7 @@ export function CommonLoginPrototype({
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [state, setState] = useState<CommonAuthState>("idle")
-  const [signedInRole, setSignedInRole] = useState<CommonPreviewRole>("owner")
+  const [signedInAccount, setSignedInAccount] = useState<DemoAccount>(DEMO_ACCOUNTS[0])
   const [demoOpen, setDemoOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const fieldErrors = {
@@ -147,11 +154,11 @@ export function CommonLoginPrototype({
       setState(demoError.state)
       return
     }
-    const role =
+    const account =
       password === DEMO_PASSWORD
-        ? DEMO_ACCOUNTS.find((account) => account.email === signInEmail)?.role
+        ? [...DEMO_ACCOUNTS, ...DEMO_PLAN_ACCOUNTS].find((item) => item.email === signInEmail)
         : undefined
-    if (!role) {
+    if (!account) {
       setState("rejected")
       return
     }
@@ -162,11 +169,11 @@ export function CommonLoginPrototype({
     setState("submitting")
     window.setTimeout(() => {
       if (initialProduct && onProductLanding) {
-        onProductLanding(initialProduct, role)
+        onProductLanding(initialProduct, account.role, account.plan)
         return
       }
       setPassword("")
-      setSignedInRole(role)
+      setSignedInAccount(account)
       setState("authenticated")
     }, 350)
   }
@@ -194,12 +201,21 @@ export function CommonLoginPrototype({
           <div className="rounded-md border border-dashed border-[var(--surface-border)] bg-[var(--surface-muted-background)] px-3 py-2 text-xs leading-5 text-muted-foreground">
             <strong className="font-semibold text-foreground">확인용 임시 팝업</strong>
             <br />
-            프로토타입 확인을 위해서만 있는 창이며 실제 로그인 화면 디자인에는 포함되지 않습니다. 계정을 고르면 아이디·비밀번호가 채워지고, 로그인을 누르면 해당 역할 또는 오류 상태로 이어집니다.
+            프로토타입 확인을 위해서만 있는 창이며 실제 로그인 화면 디자인에는 포함되지 않습니다. 계정을 고르면 아이디·비밀번호가 채워지고, 로그인을 누르면 해당 역할·구독 상태 또는 오류로 이어집니다. 화면 권한은 이 계정으로만 바꿀 수 있습니다.
           </div>
           {[
             {
               title: "역할별 로그인",
               items: DEMO_ACCOUNTS.map((account) => ({
+                key: account.email,
+                label: account.label,
+                email: account.email,
+                password: DEMO_PASSWORD,
+              })),
+            },
+            {
+              title: "구독 상태 (Owner)",
+              items: DEMO_PLAN_ACCOUNTS.map((account) => ({
                 key: account.email,
                 label: account.label,
                 email: account.email,
@@ -288,7 +304,7 @@ export function CommonLoginPrototype({
               <Button
                 className="w-full"
                 type="button"
-                onClick={() => onProductLanding?.("erp", signedInRole)}
+                onClick={() => onProductLanding?.("erp", signedInAccount.role, signedInAccount.plan)}
               >
                 <Building2 /> Trade OS 열기
               </Button>
@@ -304,7 +320,7 @@ export function CommonLoginPrototype({
                 className="w-full"
                 type="button"
                 variant="outline"
-                onClick={() => onProductLanding?.("snap", signedInRole)}
+                onClick={() => onProductLanding?.("snap", signedInAccount.role, signedInAccount.plan)}
               >
                 <MapPin /> SNAP 열기
               </Button>
