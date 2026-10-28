@@ -1,7 +1,7 @@
 import { useState, useRef } from "react"
 import { aiHandoffCopy } from "@trade-os/lib/aiHandoffCopy"
 import { toast } from "sonner"
-import { FileText, Info, X, Paperclip, Send, Loader2, RefreshCw, Database, Building2, ExternalLink, Copy, RotateCcw, ThumbsUp, ThumbsDown, Search, Check, Plus, Bookmark, SquarePen, PanelRight, Sparkles } from "lucide-react"
+import { FileText, Info, X, Paperclip, Send, Loader2, RefreshCw, Database, Building2, ExternalLink, Copy, RotateCcw, ThumbsUp, ThumbsDown, Search, Check,  SquarePen, PanelRight, Sparkles } from "lucide-react"
 import { Textarea } from "@/components/ui/Textarea"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/Button"
@@ -890,14 +890,8 @@ export function AskPrototype({
               이전 업무 질문을 검색하고 다시 엽니다.
             </SheetDescription>
           </div>
-          <div className="flex h-14 items-center gap-2 border-b border-[var(--surface-border)] px-3">
-            <Button
-              variant="outline"
-              className="flex-1 justify-start bg-background"
-              onClick={startNewChat}
-            >
-              <Plus /> 새 대화
-            </Button>
+          <div className="flex h-14 items-center justify-between gap-2 border-b border-[var(--surface-border)] px-3">
+            <span className="text-[18px] leading-[26px] font-bold text-[var(--color-gray-1)]">대화 기록</span>
             <SheetClose asChild>
               <Button
                 variant="ghost"
@@ -908,18 +902,7 @@ export function AskPrototype({
               </Button>
             </SheetClose>
           </div>
-          <div className="space-y-2 p-3">
-            <Button
-              variant={toolsOpen ? "secondary" : "outline"}
-              className="w-full justify-start"
-              aria-pressed={toolsOpen}
-              onClick={() => {
-                setToolsOpen(true)
-                setMobileHistoryOpen(false)
-              }}
-            >
-              <Bookmark /> 저장한 답변과 상세 조회
-            </Button>
+          <div className="p-3">
             <div className="relative">
               <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -1138,23 +1121,8 @@ export function AskPrototype({
             <X />
           </Button>
         </div>
-        <div className="space-y-3">
-          <Button
-            variant="outline"
-            className="w-full justify-start"
-            onClick={startNewChat}
-          >
-            <Plus /> 새 대화
-          </Button>
-          {/* Saved answers live with the conversations instead of a tab above the chat. */}
-          <Button
-            variant={toolsOpen ? "secondary" : "outline"}
-            className="w-full justify-start"
-            aria-pressed={toolsOpen}
-            onClick={() => setToolsOpen(true)}
-          >
-            <Bookmark /> 저장한 답변과 상세 조회
-          </Button>
+        {/* Figma 7차: no 새 대화/저장한 답변 buttons here; 새 대화 stays in the chat header. */}
+        <div>
           <div className="relative">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
