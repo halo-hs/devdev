@@ -12,6 +12,8 @@ import {
   AlertCircle,
   RefreshCw,
   UserRound,
+  Mail,
+  CircleUserRound,
 } from "lucide-react"
 import {
   Card,
@@ -60,9 +62,11 @@ const DEMO_PLAN_ACCOUNTS: DemoAccount[] = [
   { email: "trial@ecoya.kr", role: "owner", plan: "trial", label: "무료 체험 중" },
   { email: "expired@ecoya.kr", role: "owner", plan: "expired", label: "무료 체험 종료" },
 ]
+// An existing Account whose last Organization removed it: login lands on the
+// CS-01 「조직에서 제외된 사용자의 로그인 후 안내」 (organization_required).
+const DEMO_REMOVED_ACCOUNT = { email: "removed@ecoya.kr", label: "조직에서 제외됨 (소속 없음)" }
 const DEMO_ERROR_ACCOUNTS: Array<{ email: string; password?: string; state: CommonAuthState; label: string }> = [
   { email: "ecoya@ecoya.kr", password: "wrong-password", state: "rejected", label: "비밀번호 오류" },
-  { email: "noorg@ecoya.kr", state: "no-organization", label: "조직 없음" },
   { email: "pending@ecoya.kr", state: "pending-approval", label: "조직 승인 대기" },
   { email: "locked@ecoya.kr", state: "rate-limited", label: "로그인 시도 제한" },
   { email: "offline@ecoya.kr", state: "network-error", label: "네트워크 오류" },
@@ -80,6 +84,8 @@ export function CommonLoginPrototype({
   const [state, setState] = useState<CommonAuthState>("idle")
   const [signedInAccount, setSignedInAccount] = useState<DemoAccount>(DEMO_ACCOUNTS[0])
   const [demoOpen, setDemoOpen] = useState(false)
+  // Set only by the removed demo account; the plain 조직 없음 notice is gone.
+  const [organizationAction, setOrganizationAction] = useState<"idle" | "create">("idle")
   const [submitted, setSubmitted] = useState(false)
   const fieldErrors = {
     email: authFieldError(email, "이메일", { email: true }),
@@ -155,6 +161,15 @@ export function CommonLoginPrototype({
       setState(demoError.state)
       return
     }
+    if (password === DEMO_PASSWORD && signInEmail === DEMO_REMOVED_ACCOUNT.email) {
+      setState("submitting")
+      window.setTimeout(() => {
+        setPassword("")
+        setOrganizationAction("idle")
+        setState("no-organization")
+      }, 350)
+      return
+    }
     const account =
       password === DEMO_PASSWORD
         ? [...DEMO_ACCOUNTS, ...DEMO_PLAN_ACCOUNTS].find((item) => item.email === signInEmail)
@@ -183,10 +198,14 @@ export function CommonLoginPrototype({
     <AuthSurface
       variant="login"
       title={
-        state === "authenticated" ? "사용할 제품을 선택해 주세요" : "로그인"
+        state === "authenticated"
+          ? "사용할 제품을 선택해 주세요"
+          : state === "no-organization"
+            ? "소속 조직 확인"
+            : "로그인"
       }
       titleAside={
-        state === "authenticated" ? undefined : (
+        state === "authenticated" || state === "no-organization" ? undefined : (
       <Popover open={demoOpen} onOpenChange={setDemoOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -222,6 +241,17 @@ export function CommonLoginPrototype({
                 email: account.email,
                 password: DEMO_PASSWORD,
               })),
+            },
+            {
+              title: "계정 상태",
+              items: [
+                {
+                  key: DEMO_REMOVED_ACCOUNT.email,
+                  label: DEMO_REMOVED_ACCOUNT.label,
+                  email: DEMO_REMOVED_ACCOUNT.email,
+                  password: DEMO_PASSWORD,
+                },
+              ],
             },
             {
               title: "오류 확인",
@@ -265,7 +295,6 @@ export function CommonLoginPrototype({
         state === "network-error" ||
         state === "page-error" ||
         state === "rate-limited" ||
-        state === "no-organization" ||
         state === "pending-approval" ||
         state === "session-expired" ? (
           <p className="flex items-center justify-center gap-2 text-[15px] leading-[22px] text-[var(--color-gray-5)]">
@@ -290,6 +319,57 @@ export function CommonLoginPrototype({
           <Loader2 className="size-7 animate-spin text-primary" aria-hidden />
           <p className="font-semibold">로그인 처리 중</p>
           <p className="text-sm text-muted-foreground">잠시만 기다려 주세요.</p>
+        </div>
+      ) : state === "no-organization" ? (
+        // CS-01 조직에서 제외된 사용자의 로그인 후 안내: the Account stays, no
+        // re-signup and no 탈퇴 계속 here; 내 계정 opens account management.
+        <div className="grid gap-3" data-organization-required>
+          <div className="rounded-lg border bg-muted/30 p-5">
+            <div className="flex items-start gap-3">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Building2 aria-hidden className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="font-semibold">소속된 조직이 없습니다.</h2>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  새 조직을 만들거나 조직 관리자에게 초대를 요청하세요. 초대 메일을 받았다면 메일의 링크에서 수락할 수 있습니다.
+                </p>
+                <p className="mt-3 text-xs text-muted-foreground">{DEMO_REMOVED_ACCOUNT.email}</p>
+              </div>
+            </div>
+          </div>
+          <Button type="button" onClick={() => setOrganizationAction("create")}>
+            <Building2 /> 새 조직 만들기
+          </Button>
+          {organizationAction === "create" ? (
+            <p role="status" className="text-sm leading-6 text-muted-foreground">
+              기존 조직 생성 화면으로 이동합니다. 실제 생성은 조직 생성 절차에서 완료됩니다.
+            </p>
+          ) : null}
+          <p className="flex items-start gap-2 rounded-lg border px-4 py-3 text-sm leading-6 text-muted-foreground">
+            <Mail className="mt-1 size-4 shrink-0" aria-hidden />
+            초대 메일을 받았다면 메일의 링크를 열어 초대를 확인하고 수락하세요.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              window.location.assign("/erp/settings?section=account&withdrawalPreview=password")
+            }
+          >
+            <CircleUserRound /> 내 계정
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setOrganizationAction("idle")
+              setEmail("")
+              setState("idle")
+            }}
+          >
+            다른 계정으로 로그인
+          </Button>
         </div>
       ) : state === "authenticated" ? (
         <div className="grid gap-3">
