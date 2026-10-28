@@ -821,8 +821,11 @@ function MonitorBody({
         title={ops ? copy.titleOps : copy.titleDefault}
         description={ops ? copy.descriptionOps : copy.description}
         controls={<MonitorFilters actions={actions} copy={copy} />}
-        summary={<MonitorMetricGrid items={metrics} empty={isEmpty} />}
       />
+      {/* KPIs sit 16px under the hero instead of overlapping it, like 결산 리포트. */}
+      <div className="mt-4">
+        <MonitorMetricGrid items={metrics} empty={isEmpty} />
+      </div>
       </div>
     ),
     [actions, ops, variant, copy, live, metrics, isEmpty],

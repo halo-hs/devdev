@@ -2309,7 +2309,14 @@ export function KpiTile({
       data-ui="reports-kpi"
       label={label}
       value={value}
-      delta={delta ? { text: <KpiDeltaText text={delta.text} />, tone: "neutral" } : null}
+      delta={
+        delta
+          ? KPI_DELTA_PATTERN.test(delta.text)
+            ? { text: <KpiDeltaText text={delta.text} />, tone: "neutral" }
+            : // Unsigned notes (e.g. 연체 금액) keep their meaning color.
+              { text: delta.text, tone: delta.tone === "bad" ? "negative" : delta.tone === "up" ? "positive" : "neutral" }
+          : null
+      }
     >
       {basis || caution || errorMessage ? (
         <>
