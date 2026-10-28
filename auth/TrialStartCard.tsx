@@ -115,7 +115,7 @@ export function TrialStartCard({ product, role, state = "ready", trialDays, tria
         ) : terminal ? (
           <div className="space-y-4">
             <Alert variant="neutral" role="status"><Info aria-hidden="true" /><AlertDescription>{message}</AlertDescription></Alert>
-            <p className="text-sm leading-relaxed text-muted-foreground">계속 업무를 진행하려면 구독을 시작해 주세요.</p>
+            <p className="text-sm leading-relaxed text-muted-foreground">{role === "owner" ? "계속 업무를 진행하려면 구독을 시작해 주세요." : "조직 대표가 구독을 시작하면 다시 작업할 수 있습니다."}</p>
           </div>
         ) : (
           <>

@@ -1,6 +1,7 @@
 import { invitationExamples } from "./invitationData"
 import { useEffect, useState, type ReactNode } from "react"
 import { Button } from "@/components/ui/Button"
+import { MEMBER_SEAT_KEY } from "@share/settings/useSettingsDemo"
 import type { ProductEntitlement, SettingsRole } from "./SettingsRoutePage"
 import { SettingsDemoContext, useSettingsDemo, names } from "@share/settings/useSettingsDemo"
 
@@ -61,7 +62,6 @@ const initialRequests: Request[] = [
 // Member's request survives logging in again as the OWNER who approves it.
 // The demo login leaves `MEMBER_SEAT_KEY` to set the Member's Trade OS seat.
 const DEMO_STATE_KEY = "ecoya.preview.settings-demo"
-export const MEMBER_SEAT_KEY = "ecoya.preview.member-trade-seat"
 
 function readDemoState() {
   try {

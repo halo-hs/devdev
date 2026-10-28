@@ -1,5 +1,5 @@
 import { appLocation } from "@/app/appLocation"
-import { MEMBER_SEAT_KEY } from "@share/settings/SubscriptionSettings"
+import { MEMBER_SEAT_KEY } from "@share/settings/useSettingsDemo"
 import { useEffect, useState, type ReactNode } from "react"
 import { ArrowRight, Building2, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/Button"
