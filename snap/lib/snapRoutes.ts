@@ -527,6 +527,8 @@ export function normalizeSnapLocation(
 
   if (pathname === "/signin") {
     canonicalPath = "/login"
+  } else if (pathname === "/terms" || pathname === "/privacy") {
+    canonicalPath = `/legal${pathname}`
   } else if (pathname === "/legal") {
     const legalTab = query.get("tab")
     canonicalPath =

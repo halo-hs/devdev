@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from "@/components/ui/Card"
 import { type CommonProduct, type CommonScreenKey } from "@auth/AuthSurface"
-import { CommonTermsPrototype, CommonPrivacyPrototype } from "@auth/LegalDocumentView"
 import { CommonPasswordRecoveryPrototype } from "@auth/PasswordResetPanel"
 import { CommonSignupPrototype } from "@auth/SignupPanel"
 import { CommonLoginPrototype } from "@auth/LoginPanel"
@@ -30,8 +29,6 @@ const publicPaths: Partial<Record<CommonScreenKey, string>> = {
   signup: "/signup",
   "free-trial": "/free-trial",
   "password-recovery": "/password-recovery",
-  terms: "/legal/terms",
-  privacy: "/legal/privacy",
 }
 
 function publicScreen(pathname: string) {
@@ -41,8 +38,6 @@ function publicScreen(pathname: string) {
     "/erp/signup": "signup",
     "/forgot-password": "password-recovery",
     "/trial": "free-trial",
-    "/terms": "terms",
-    "/privacy": "privacy",
   }
   return (
     aliases[path] ??
@@ -232,8 +227,6 @@ export function CommonEntry({ children }: { children: ReactNode }) {
         {screen === "password-recovery" && (
           <CommonPasswordRecoveryPrototype {...props} />
         )}
-        {screen === "terms" && <CommonTermsPrototype {...props} />}
-        {screen === "privacy" && <CommonPrivacyPrototype {...props} />}
       </CommonPublicLayout>
     </div>
   )
