@@ -1,7 +1,8 @@
 "use client";
 
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/components/HostTable";
-import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/SearchFilterBar";
+import { BusinessListToolbar } from "@/components/platform/SearchFilterBar";
+import { cn } from "@/lib/utils";
 
 import Link from "@trade-os/lib/AppLink";
 import { useSearchParams } from "@/hooks/useSearchParams";
@@ -2925,39 +2926,52 @@ function SettlementView({
     setRefreshingManually(false);
   }, [reloadVersion]);
 
+  // Figma 정산 hero (6224:188704): label-in-value pill selects on the left,
+  // white refresh/export buttons on the right.
+  const heroSelectClass = "!h-10 !rounded-full !border-transparent pl-5 pr-4 font-medium";
+  const heroButtonClass = "h-10 rounded-[var(--r-md)] border border-[var(--color-gray-9)] bg-white px-4 font-normal text-[var(--color-gray-2)] shadow-[0_1px_2px_rgba(5,29,57,0.1)] hover:bg-[var(--color-gray-11)] hover:text-[var(--color-gray-2)]";
+  const taxMonthOptions = useMemo(() => {
+    const [year, month] = asOfISO.slice(0, 7).split("-").map(Number);
+    if (!year || !month) return [];
+    return Array.from({ length: 12 }, (_, offset) => {
+      const date = new Date(year, month - 1 - offset, 1);
+      const y = String(date.getFullYear());
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      return { value: `${y}-${m}`, label: copy.export.monthValue.replace("{year}", y).replace("{month}", m) };
+    });
+  }, [asOfISO, copy.export.monthValue]);
+  const taxMonthLabel = taxMonthOptions.find((option) => option.value === effectiveTaxMonth)?.label ?? effectiveTaxMonth;
+  const currencyValueLabel = ledgerCurrency ?? copy.controls.currencyAll;
+
   const controls = (
     <BusinessListToolbar
       data-ui="settlement-controls"
       aria-label="정산 필터"
       actions={
         <>
-          {/* HeroBanner controls rule: 새로고침 is an icon button. */}
-          <Button variant="outline" size="icon-lg"
+          {/* HeroBanner controls rule: 새로고침 is an icon button. ghost: the
+              hero restyles outline buttons as translucent; Figma wants white. */}
+          <Button variant="ghost" size="icon-lg"
             aria-label={copy.controls.refresh}
+            className={cn(heroButtonClass, "size-10 px-0")}
             data-ui="settlement-refresh"
             disabled={refreshingManually}
             onClick={onManualRefresh}
             title={copy.controls.refresh}
             type="button"
           >
-            <RefreshCw className="size-5" aria-hidden="true" />
+            <RefreshCw className={cn("size-5", refreshingManually && "animate-spin")} aria-hidden="true" />
           </Button>
-          <BusinessFilterField label={copy.export.monthLabel}>
-            <DatePicker
-              mode="month"
-              ariaLabel={copy.export.monthLabel}
-              value={effectiveTaxMonth}
-              onValueChange={setTaxMonth}
-            />
-          </BusinessFilterField>
-          <Button variant="secondary"
+          <Button variant="ghost"
+            className={heroButtonClass}
             type="button"
             onClick={onExportTaxCsv}
             disabled={exporting || !effectiveTaxMonth}
           >
             {copy.export.taxCsv}
           </Button>
-          <Button variant="secondary"
+          <Button variant="ghost"
+            className={heroButtonClass}
             type="button"
             onClick={onExportCsv}
             disabled={exporting}
@@ -2968,30 +2982,40 @@ function SettlementView({
       }
       result={
         <p
-          className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]"
+          className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-white/80"
           data-ui="settlement-balance-as-of"
         >
           {copy.asOf.replace("{date}", asOf)}
         </p>
       }
     >
-      <BusinessFilterField label={copy.controls.currencyLabel}>
-        <Select value={ledgerCurrency ?? "all"} onValueChange={(value) => onLedgerCurrencyChange(value === "all" ? undefined : value)}>
-          <SelectTrigger aria-label={copy.controls.currencyLabel} data-ui="settlement-currency-filter" className="min-w-24"><SelectValue /></SelectTrigger>
-          <SelectContent align="start">
-            {([
-            { label: copy.controls.currencyAll, value: "all" },
-            ...availableLedgerCurrencies.map((currency) => ({
-              label: currency,
-              value: currency,
-            })),
-          ]).map((option) => (
-              <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </BusinessFilterField>
-      <label className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)] flex items-center gap-1.5">
+      <Select value={ledgerCurrency ?? "all"} onValueChange={(value) => onLedgerCurrencyChange(value === "all" ? undefined : value)}>
+        <SelectTrigger aria-label={copy.controls.currencyLabel} data-ui="settlement-currency-filter" className={heroSelectClass}>
+          <SelectValue>{`${copy.controls.currencyLabel} · ${currencyValueLabel}`}</SelectValue>
+        </SelectTrigger>
+        <SelectContent align="start">
+          {([
+          { label: copy.controls.currencyAll, value: "all" },
+          ...availableLedgerCurrencies.map((currency) => ({
+            label: currency,
+            value: currency,
+          })),
+        ]).map((option) => (
+            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select value={effectiveTaxMonth} onValueChange={setTaxMonth}>
+        <SelectTrigger aria-label={copy.export.monthLabel} data-ui="settlement-tax-month" className={heroSelectClass}>
+          <SelectValue>{`${copy.export.monthLabel} · ${taxMonthLabel}`}</SelectValue>
+        </SelectTrigger>
+        <SelectContent align="start">
+          {taxMonthOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <label className="text-[length:var(--text-body-8)] leading-[var(--leading-body-8)] font-semibold text-white flex items-center gap-2">
         <Checkbox
           checked={includeCancelled}
           className="border-white bg-white"

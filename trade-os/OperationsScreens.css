@@ -93,19 +93,20 @@
   justify-content: flex-start;
   min-width: 0;
 }
+/* Figma 정산 hero (6224:188704): checkbox label white 15 SemiBold, as-of note 12 at 80%. */
 .ops-screen .business-hero-controls [data-ui="settlement-controls"] label,
 .ops-screen .business-hero-controls [data-ui="settlement-balance-as-of"] {
-  color: rgb(255 255 255 / 78%);
   white-space: nowrap;
 }
-.ops-screen [data-slot="business-page-hero"] [data-component="SettlementDecisionCards"] {
+/* KPI 4 · 결산형: four bare cards in one row, 16px under the hero. */
+.ops-screen [data-component="SettlementDecisionCards"] {
   background: transparent;
   border: 0;
   border-radius: 0;
   box-shadow: none;
   overflow: visible;
 }
-.ops-screen [data-slot="business-page-hero"] [data-component="SettlementDecisionCards"] > header {
+.ops-screen [data-component="SettlementDecisionCards"] > header {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -114,18 +115,18 @@
   overflow: hidden;
   clip-path: inset(50%);
 }
-.ops-screen [data-slot="business-page-hero"] [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] { padding: 0; }
-.ops-screen [data-slot="business-page-hero"] [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
+.ops-screen [data-component="SettlementConnected"] [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] { padding: 0; }
+.ops-screen [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
 @media (max-width: 1023px) {
-  .ops-screen [data-slot="business-page-hero"] [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
+  .ops-screen [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 639px) {
-  .ops-screen [data-slot="business-page-hero"] [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
+  .ops-screen [data-component="SettlementDecisionCards"] > [data-ui="section-panel-content"] > .grid {
     grid-template-columns: minmax(0, 1fr);
   }
   .ops-screen .business-hero-controls [data-ui="settlement-controls"] > .business-filter-row { justify-content: flex-start; }
@@ -135,7 +136,8 @@
 
 
 .ops-screen .business-hero-controls [data-ui="settlement-balance-as-of"] {
-  font-size: var(--filter-font-size);
+  font-size: 12px;
+  line-height: normal;
 }
 @media (max-width: 639px) {
   .ops-screen .business-hero-controls [data-ui="settlement-balance-as-of"] { margin-left: 0; }
