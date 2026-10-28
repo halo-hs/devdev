@@ -1,7 +1,7 @@
 "use client";
 import { Badge } from "@/components/ui/Badge";
 import { Button as ShadcnButton } from "@/components/ui/Button";
-import { StatTile } from "@/components/platform/StatTile";
+import { KpiCard } from "@/components/platform/KpiCard";
 import { RankingRow } from "@/components/platform/RankingRow";
 import { PeriodCloseRow } from "@/components/platform/PeriodCloseRow";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -2304,7 +2304,7 @@ export function KpiTile({
   className?: string;
 }) {
   return (
-    <StatTile
+    <KpiCard
       className={cn("bg-[var(--color-gray-12)]", className)}
       data-ui="reports-kpi"
       label={label}
@@ -2333,7 +2333,7 @@ export function KpiTile({
           ) : null}
         </>
       ) : null}
-    </StatTile>
+    </KpiCard>
   );
 }
 

@@ -4,25 +4,25 @@ import { Card } from "@/components/ui/Card"
 import { Separator } from "@/components/ui/Separator"
 import { cn } from "@/lib/utils"
 
-type StatTileTone = "positive" | "negative" | "neutral"
+type KpiCardTone = "positive" | "negative" | "neutral"
 
-const toneClasses: Record<StatTileTone, string> = {
+const toneClasses: Record<KpiCardTone, string> = {
   negative: "text-[var(--color-red-2)]",
   positive: "text-[var(--color-primary-4)]",
   neutral: "text-[var(--color-gray-5)]",
 }
 
-type StatTileProps = Omit<ComponentProps<typeof Card>, "children"> & {
+type KpiCardProps = Omit<ComponentProps<typeof Card>, "children"> & {
   label: ReactNode
   value: ReactNode
-  delta?: { text: ReactNode; tone: StatTileTone } | null
+  delta?: { text: ReactNode; tone: KpiCardTone } | null
   valueClassName?: string
   children?: ReactNode
 }
 
 // Figma KPI card (결산리포트 v6 · 5974:36276): Card without header, 14/20 label,
 // Gray 9 separator, 26/36 value and 12/16 detail lines.
-function StatTile({ label, value, delta, valueClassName, className, children, ...props }: StatTileProps) {
+function KpiCard({ label, value, delta, valueClassName, className, children, ...props }: KpiCardProps) {
   return (
     <Card
       {...props}
@@ -40,5 +40,5 @@ function StatTile({ label, value, delta, valueClassName, className, children, ..
   )
 }
 
-export { StatTile }
-export type { StatTileTone }
+export { KpiCard }
+export type { KpiCardTone }
