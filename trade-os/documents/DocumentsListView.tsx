@@ -468,9 +468,17 @@ export function CreateScreen({
   const [entryState, setEntryState] = useState<"history" | "first">(
     initialEntryState
   )
-  const [unifiedWorkbenchOpen, setUnifiedWorkbenchOpen] = useState(false)
+  // 거래 상세 「이 거래로 문서 만들기」 already picked the type, so open the
+  // editor with the deal attached instead of the list.
+  const dealTemplateCode =
+    relatedDeal && initialTemplateCode && templateSchemas[initialTemplateCode]
+      ? initialTemplateCode
+      : null
+  const [unifiedWorkbenchOpen, setUnifiedWorkbenchOpen] = useState(
+    Boolean(dealTemplateCode)
+  )
   const [workbenchTemplateCode, setWorkbenchTemplateCode] = useState(
-    relatedDeal ? "QT" : "SC"
+    dealTemplateCode ?? (relatedDeal ? "QT" : "SC")
   )
   const [workbenchDirection, setWorkbenchDirection] = useState<DocumentDirection | null>(null)
   const [workbenchDocumentNumber, setWorkbenchDocumentNumber] = useState<string | null>(null)
