@@ -1,5 +1,5 @@
 import { useId, useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
+import { CircleAlert, Eye, EyeOff, Info } from "lucide-react"
 import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
 
@@ -34,7 +34,10 @@ export function AuthInputField({
   const shownError = touched || submitted ? error : undefined
   return (
     <div className="flex min-w-0 flex-col gap-2">
-      <label htmlFor={id} className="text-base font-medium">
+      <label
+        htmlFor={id}
+        className="text-[15px] leading-[22px] font-normal text-[var(--color-gray-2)]"
+      >
         {label}
       </label>
       <div className="relative">
@@ -46,7 +49,7 @@ export function AuthInputField({
           type={password ? (visible ? "text" : "password") : type}
           autoComplete={autoComplete}
           placeholder={placeholder}
-          className={`h-12 text-base md:text-base ${password ? "pr-12" : ""}`}
+          className={`h-10 border-[var(--color-gray-6)] text-[17px] leading-6 placeholder:text-[var(--color-gray-7)] md:text-[17px] ${password ? "pr-11" : ""}`}
           aria-invalid={Boolean(shownError)}
           aria-describedby={shownError || hint ? `${id}-message` : undefined}
           onChange={(event) => onChange(event.target.value)}
@@ -57,7 +60,7 @@ export function AuthInputField({
             type="button"
             variant="ghost"
             size="icon"
-            className="absolute top-1 right-1 size-10"
+            className="absolute top-1 right-2 size-8 text-[var(--color-gray-4)] [&_svg]:size-4"
             aria-label={`${label} ${visible ? "숨기기" : "보기"}`}
             onClick={() => setVisible(!visible)}
           >
@@ -68,16 +71,18 @@ export function AuthInputField({
       {shownError ? (
         <p
           id={`${id}-message`}
-          className="text-sm leading-6 text-destructive"
+          className="flex items-start gap-1 text-[13px] leading-[18px] text-destructive"
           role="alert"
         >
+          <CircleAlert className="mt-px size-4 shrink-0" aria-hidden="true" />
           {shownError}
         </p>
       ) : hint ? (
         <p
           id={`${id}-message`}
-          className="text-sm leading-6 text-muted-foreground"
+          className="flex items-start gap-1 text-[13px] leading-[18px] text-[var(--color-gray-5)]"
         >
+          <Info className="mt-px size-4 shrink-0" aria-hidden="true" />
           {hint}
         </p>
       ) : null}

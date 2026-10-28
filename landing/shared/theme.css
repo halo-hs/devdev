@@ -370,18 +370,6 @@
 .ecoya-auth-header .trade-nav .ecoya-logo-dark {
   display: none;
 }
-@media (min-width: 1024px) {
-  .ecoya-auth-header:is([data-auth-variant="signup"], [data-auth-variant="login"]) .trade-nav-wrap {
-    background: linear-gradient(to right, transparent 25%, #ffffff 25%);
-    border-bottom: 0;
-  }
-  .ecoya-auth-header:is([data-auth-variant="signup"], [data-auth-variant="login"]) .trade-nav .ecoya-logo-light {
-    display: none;
-  }
-  .ecoya-auth-header:is([data-auth-variant="signup"], [data-auth-variant="login"]) .trade-nav .ecoya-logo-dark {
-    display: block;
-  }
-}
 .trade-landing select.trade-language {
   background: transparent;
   border: 0;
@@ -419,43 +407,4 @@
 }
 .trade-feature-visual .trade-owner-preview dd {
   white-space: nowrap;
-}
-
-/* The account introduction uses the same palette as the featured pricing card. */
-.ecoya-account-guide {
-  background:
-    radial-gradient(ellipse at 100% 0%, rgb(116 169 224 / 35%), transparent 62%),
-    radial-gradient(ellipse at 0% 100%, rgb(41 101 165 / 40%), transparent 65%),
-    linear-gradient(145deg, #1c3d61 15%, #132840 72%, #0f1e36);
-}
-.ecoya-account-photo { opacity: .16; mix-blend-mode: luminosity; }
-.ecoya-account-photo-shade {
-  background: linear-gradient(180deg, rgb(28 61 97 / 60%), transparent 55%, rgb(15 30 54 / 25%));
-}
-
-/* A single uninterrupted backdrop continues behind the desktop auth logo. */
-@media (min-width: 1024px) {
-  .ecoya-auth-header:is([data-auth-variant="signup"], [data-auth-variant="login"]) {
-    background: transparent;
-  }
-  .ecoya-account-guide {
-    --account-header-height: 88px;
-    overflow: visible;
-    background: none;
-  }
-  .ecoya-account-guide::before {
-    content: "";
-    position: absolute;
-    inset: calc(-1 * var(--account-header-height)) 0 0;
-    z-index: -1;
-    pointer-events: none;
-    background:
-      radial-gradient(ellipse at 100% 0%, rgb(116 169 224 / 35%), transparent 62%),
-      radial-gradient(ellipse at 0% 100%, rgb(41 101 165 / 40%), transparent 65%),
-      linear-gradient(145deg, #1c3d61 15%, #132840 72%, #0f1e36);
-  }
-  .ecoya-account-guide :is(.ecoya-account-photo, .ecoya-account-photo-shade) {
-    top: calc(-1 * var(--account-header-height));
-    height: calc(100% + var(--account-header-height));
-  }
 }

@@ -15,20 +15,38 @@ const pages = [
   { page: "snap", href: "/snap", label: "ECOYA SNAP" },
 ] as const
 
+// develop LandingAppLink: login/signup links return to the product after auth.
+export function withNext(href: string) {
+  const [pathname, query] = href.split("?")
+  const params = new URLSearchParams(query)
+  const product = params.get("product")
+  if (
+    (pathname === "/login" || pathname === "/signup") &&
+    !params.has("next") &&
+    (product === "erp" || product === "snap")
+  ) {
+    params.set("next", `/${product}`)
+    return `${pathname}?${params.toString()}`
+  }
+  return href
+}
+
 export function StartButton({
   label = "시작하기",
   product = "erp",
   className,
+  inquiryOnly = false,
 }: {
   label?: string
   product?: "erp" | "snap"
   className?: string
+  inquiryOnly?: boolean
 }) {
   const t = useT()
   return (
     <Button size="lg" asChild className={className}>
-      <a href={`/signup?product=${product}`}>
-        {t(label)}
+      <a href={inquiryOnly ? "/contact" : withNext(`/signup?product=${product}`)}>
+        {t(inquiryOnly ? "도입 문의" : label)}
         <ArrowRight />
       </a>
     </Button>
@@ -43,6 +61,7 @@ export function LandingHeader({
   showLocaleToggle = false,
   showLoginAction = true,
   showStartAction = true,
+  plainLinks = false,
 }: {
   page?: LandingPage
   product?: "erp" | "snap"
@@ -51,6 +70,8 @@ export function LandingHeader({
   showLocaleToggle?: boolean
   showLoginAction?: boolean
   showStartAction?: boolean
+  /** develop auth header: 가격 · 도입 문의 without a product query. */
+  plainLinks?: boolean
 }) {
   const t = useT()
   const suffix = page === "trade" ? "Trade OS" : page === "snap" ? "SNAP" : null
@@ -78,7 +99,7 @@ export function LandingHeader({
             SNAP
           </a>
           <a
-            href={`/pricing?product=${product}`}
+            href={plainLinks ? "/pricing" : `/pricing?product=${product}`}
             aria-current={page === "pricing" ? "page" : undefined}
           >
             {t("가격")}
@@ -93,18 +114,26 @@ export function LandingHeader({
               asChild
               className="ecoya-nav-login"
             >
-              <a href={`/login?product=${product}`}>{t("로그인")}</a>
+              <a href={withNext(`/login?product=${product}`)}>{t("로그인")}</a>
             </Button>
           )}
           <a
             className="ecoya-nav-contact"
-            href={page === "story" ? "/contact" : `/contact?product=${product}`}
+            href={
+              plainLinks || page === "story" || page === "pricing"
+                ? "/contact"
+                : `/contact?product=${product}`
+            }
             aria-current={page === "contact" ? "page" : undefined}
           >
             {t("도입 문의")}
           </a>
           {showStartAction && (
-            <StartButton product={product} className="ecoya-nav-start" />
+            <StartButton
+              product={product}
+              inquiryOnly={page === "pricing"}
+              className="ecoya-nav-start"
+            />
           )}
         </div>
       </header>
@@ -154,6 +183,7 @@ export function LandingShell({
           <a href={`/contact?product=${product}`}>{t("도입 문의")}</a>
           <a href="/legal/terms">{t("이용약관")}</a>
           <a href="/legal/privacy">{t("개인정보처리방침")}</a>
+          <a href="/legal/location">{t("위치기반 서비스 이용약관")}</a>
         </nav>
       </footer>
     </div>

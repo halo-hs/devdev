@@ -21,7 +21,7 @@ import {
 
 import { Badge } from "@/components/ui/Badge"
 import { SummaryMetricStrip } from "@/components/platform/SummaryMetricStrip"
-import { BusinessPageHero } from "@/components/platform/HeroBanner"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/Button"
 import {
   Card,
@@ -144,7 +144,7 @@ function Page({
       className="h-full overflow-y-auto bg-transparent"
     >
       <div className="w-full px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
-        <BusinessPageHero
+        <HeroBanner
           className="[&_header]:flex-wrap"
           variant={aiEntryHeader ? "ai" : "default"}
           title={title}

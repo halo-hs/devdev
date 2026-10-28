@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 export const heroOutlineButtonClass =
   "border-white/25 bg-white/10 text-white shadow-none hover:border-white/50 hover:bg-white/15 hover:text-white active:border-white/50 active:bg-white/20 active:text-white"
 
-type BusinessPageHeroProps = {
+type HeroBannerProps = {
   title: ReactNode
   description?: ReactNode
   eyebrow?: ReactNode
@@ -23,7 +23,7 @@ type BusinessPageHeroProps = {
   compact?: boolean
 }
 
-export function BusinessPageHero({
+export function HeroBanner({
   title,
   description,
   eyebrow,
@@ -37,7 +37,7 @@ export function BusinessPageHero({
   className,
   variant = "default",
   compact = false,
-}: BusinessPageHeroProps) {
+}: HeroBannerProps) {
   const generatedTitleId = useId()
 
   return (

@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 
-import { KpiCard } from "@/components/platform/StatTile";
+import { KpiCard } from "@/components/platform/KpiCard";
 import { cn } from "@/lib/utils";
 
 type MetricTone = "neutral" | "info" | "success" | "warning" | "danger" | "indigo";

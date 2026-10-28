@@ -553,7 +553,7 @@
 }
 
 /* ---- 2) 히어로 필터 토큰 ---- */
-/* Shared with the transaction list's BusinessPageHero. */
+/* Shared with the transaction list's HeroBanner. */
 .business-hero-controls {
   --control-background: rgba(255, 255, 255, 0.12);
   --control-background-hover: rgba(255, 255, 255, 0.16);
@@ -809,6 +809,9 @@
 :root:not(.dark) {
   --table-header-foreground: var(--color-gray-4);
   --tabs-trigger-foreground: var(--color-gray-4);
+  /* Figma Badge palette ocean (document type tags). */
+  --badge-ocean-background: #dbf1fa;
+  --badge-ocean-foreground: #136686;
   --tabs-trigger-foreground-selected: var(--color-primary-4);
   --tabs-indicator: var(--color-primary-4);
 }

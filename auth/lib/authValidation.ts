@@ -18,7 +18,12 @@ export function authFieldError(
 
 export type AuthLayoutVariant = "login" | "signup" | "recovery"
 export const authGridColumns = {
-  login: "lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]",
-  signup: "lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]",
+  login: "lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]",
+  signup: "lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]",
   recovery: "lg:grid-cols-[minmax(0,3fr)_minmax(0,7fr)]",
 } as const
+
+// Figma 로그인 화면 3차: 48px primary and social actions with 17px labels.
+export const authActionButtonClass =
+  "h-12 w-full rounded-xl px-6 text-[17px] leading-6"
+export const authSocialButtonClass = `${authActionButtonClass} gap-1.5 border-[var(--color-gray-9)] pr-6 pl-[22px] text-[var(--color-gray-2)] shadow-[0_1px_2px_rgb(5_29_57/10%)] [&_svg]:size-5`

@@ -1,13 +1,43 @@
 import { useState, type FormEvent } from "react"
-import { authFieldError } from "@auth/lib/authValidation"
+import {
+  authActionButtonClass,
+  authFieldError,
+  authSocialButtonClass,
+} from "@auth/lib/authValidation"
 import { Button } from "@/components/ui/Button"
-import { Loader2, Building2, MapPin, AlertCircle, RefreshCw, ArrowRight } from "lucide-react"
-import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/Card"
+import {
+  Loader2,
+  Building2,
+  MapPin,
+  AlertCircle,
+  RefreshCw,
+} from "lucide-react"
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/Card"
 import { AuthInputField } from "@auth/AuthInputField"
 import googleIcon from "@/components/ds2/assets/icons/icon-google.svg"
 import appleIcon from "@/components/ds2/assets/icons/icon-apple.svg"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "@/components/ui/Select"
-import { type CommonPrototypeScreenProps, type CommonAuthState, type Feedback, AuthSurface, InlineFeedback } from "@auth/AuthSurface"
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+} from "@/components/ui/Select"
+import {
+  type CommonPrototypeScreenProps,
+  type CommonAuthState,
+  type Feedback,
+  AuthDivider,
+  AuthSurface,
+  InlineFeedback,
+} from "@auth/AuthSurface"
 import { showPreviewControls } from "@auth/authNavigation"
 
 export function CommonLoginPrototype({
@@ -121,10 +151,10 @@ export function CommonLoginPrototype({
         state === "no-organization" ||
         state === "pending-approval" ||
         state === "session-expired" ? (
-          <p className="text-center text-sm text-muted-foreground">
-            계정이 없나요?{" "}
+          <p className="flex items-center justify-center gap-2 text-[15px] leading-[22px] text-[var(--color-gray-5)]">
+            계정이 없나요?
             <Button
-              className="h-auto p-0"
+              className="h-10 p-0 text-[15px] leading-[22px]"
               variant="link"
               onClick={() => onNavigate?.("signup")}
             >
@@ -182,75 +212,77 @@ export function CommonLoginPrototype({
           </Card>
         </div>
       ) : (
-        <form noValidate className="flex flex-col gap-4" onSubmit={submit}>
-          {loginNotice && (
-            <div
-              role="status"
-              className="flex items-start gap-2.5 rounded-lg border border-primary/15 bg-primary/5 px-4 py-3 text-sm leading-6 text-foreground"
-            >
-              <AlertCircle
-                className="mt-0.5 size-5 shrink-0 text-primary"
-                aria-hidden
+        <form noValidate className="flex flex-col gap-8" onSubmit={submit}>
+          <div className="flex flex-col gap-[18px]">
+            {loginNotice && (
+              <div
+                role="status"
+                className="flex items-start gap-2.5 rounded-lg border border-primary/15 bg-primary/5 px-4 py-3 text-sm leading-6 text-foreground"
+              >
+                <AlertCircle
+                  className="mt-0.5 size-5 shrink-0 text-primary"
+                  aria-hidden
+                />
+                <p>{loginNotice}</p>
+              </div>
+            )}
+            {showPreviewControls() && (
+              <p className="text-xs text-muted-foreground">
+                데모 계정: ecoya@ecoya.kr / ecoya
+              </p>
+            )}
+            {stateFeedback[state] ? (
+              <InlineFeedback feedback={stateFeedback[state]!} />
+            ) : null}
+            {state === "page-error" && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setState("idle")}
+              >
+                <RefreshCw /> 로그인 화면으로 돌아가기
+              </Button>
+            )}
+            <AuthInputField
+              name="email"
+              label="이메일"
+              type="email"
+              autoComplete="email"
+              placeholder="name@example.com"
+              value={email}
+              onChange={setEmail}
+              error={fieldErrors.email}
+              submitted={submitted}
+            />
+            <div className="flex flex-col gap-2">
+              <AuthInputField
+                name="password"
+                label="비밀번호"
+                password
+                autoComplete="current-password"
+                placeholder="비밀번호를 입력하세요"
+                value={password}
+                onChange={setPassword}
+                error={fieldErrors.password}
+                submitted={submitted}
               />
-              <p>{loginNotice}</p>
+              <div className="flex justify-end">
+                <Button
+                  className="h-6 p-0 text-[11px] leading-4"
+                  type="button"
+                  variant="link"
+                  onClick={() => onNavigate?.("password-recovery")}
+                >
+                  비밀번호 찾기
+                </Button>
+              </div>
             </div>
-          )}
-          {showPreviewControls() && (
-            <p className="text-xs text-muted-foreground">
-              데모 계정: ecoya@ecoya.kr / ecoya
-            </p>
-          )}
-          {stateFeedback[state] ? (
-            <InlineFeedback feedback={stateFeedback[state]!} />
-          ) : null}
-          {state === "page-error" && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setState("idle")}
-            >
-              <RefreshCw /> 로그인 화면으로 돌아가기
-            </Button>
-          )}
-          <AuthInputField
-            name="email"
-            label="이메일"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={setEmail}
-            error={fieldErrors.email}
-            submitted={submitted}
-          />
-          <AuthInputField
-            name="password"
-            label="비밀번호"
-            password
-            autoComplete="current-password"
-            value={password}
-            onChange={setPassword}
-            error={fieldErrors.password}
-            submitted={submitted}
-          />
-          <div className="flex justify-end">
-            <Button
-              className="h-auto p-0"
-              type="button"
-              variant="link"
-              onClick={() => onNavigate?.("password-recovery")}
-            >
-              비밀번호 찾기
+            <Button type="submit" className={authActionButtonClass}>
+              로그인
             </Button>
           </div>
-          <Button type="submit">
-            <ArrowRight /> 로그인
-          </Button>
-          <div className="my-2 flex items-center gap-4 text-xs text-muted-foreground">
-            <span className="h-px flex-1 bg-border" aria-hidden="true" />
-            또는
-            <span className="h-px flex-1 bg-border" aria-hidden="true" />
-          </div>
-          <div className="grid gap-2">
+          <AuthDivider />
+          <div className="grid gap-2.5">
             {[
               { name: "Google", icon: googleIcon },
               { name: "Apple", icon: appleIcon },
@@ -259,13 +291,13 @@ export function CommonLoginPrototype({
                 key={provider.name}
                 type="button"
                 variant="outline"
-                className="h-10 w-full"
+                className={authSocialButtonClass}
                 onClick={() => {
                   setPassword("")
                   setState("provider-error")
                 }}
               >
-                <provider.icon aria-hidden="true" className="size-4" />
+                <provider.icon aria-hidden="true" />
                 {provider.name}로 계속하기
               </Button>
             ))}

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react"
 import { templateSchemas, templates, sampleValueForSlot, type PrototypeSlotKind, type Tone, isNumericInputKind, type DocumentStyle } from "@trade-os/documents/documentTemplateModel"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
+import { DocumentTypeBadge } from "@trade-os/components/DocumentTypeBadge"
 import { Button } from "@/components/ui/Button"
 import { ChevronLeft, ChevronRight, FilePlus2, Check, FileText, ChevronDown, Plus, Trash2, Copy, Send, Clock3 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -60,10 +61,11 @@ export function TemplateStrip({ onResult, initialSelectedCode }: {
   return (
     <section
       aria-label="문서 폼 선택"
-      className="min-w-0 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 pt-5 pb-2 text-[var(--color-gray-2)] shadow-[var(--shadow-modal)] ring-1 ring-[var(--color-gray-10)]"
+      // Figma HeroBanner/SectionCard (6847:44445): 60px in from the hero edges, radius 22, 30/20 inset.
+      className="min-w-0 rounded-[22px] border border-[var(--color-gray-9)] bg-[var(--color-gray-12)] px-5 py-5 text-[var(--color-gray-2)] shadow-[0_2px_4px_rgb(0_0_0/8%)] sm:mx-[44px] sm:px-[30px]"
     >
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+      <div className="flex min-h-8 flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
           <Tabs
             value={direction}
             onValueChange={(value) => {
@@ -77,13 +79,13 @@ export function TemplateStrip({ onResult, initialSelectedCode }: {
               setSelectedCode(nextTemplates[0]?.[0] ?? "")
             }}
           >
-            <TabsList aria-label="거래 방향">
+            <TabsList size="sm" aria-label="거래 방향">
               <TabsTrigger value="purchase">구매</TabsTrigger>
               <TabsTrigger value="sales">판매</TabsTrigger>
             </TabsList>
           </Tabs>
-          <h2 className="text-base font-semibold">문서 유형 선택</h2>
-          <ToneBadge tone="neutral">{visibleTemplates.length}개</ToneBadge>
+          <h2 className="text-[length:var(--text-body-8)] leading-[var(--leading-body-8)] font-semibold">문서 유형 선택</h2>
+          <span className="inline-flex h-5 items-center rounded-[var(--r-pill)] bg-[var(--color-gray-10)] px-2.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">{visibleTemplates.length}개</span>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon-sm" aria-label="이전 문서 유형" disabled={!scrollState.previous} onClick={() => scroll(-1)}><ChevronLeft /></Button>
@@ -93,17 +95,17 @@ export function TemplateStrip({ onResult, initialSelectedCode }: {
           </Button>
         </div>
       </div>
-      <div ref={viewportRef} aria-label="문서 유형 목록" className="-mx-1 flex min-w-0 snap-x snap-proximity scroll-px-1 gap-3 overflow-x-auto overscroll-x-contain px-1 pt-1 pb-3">
+      <div ref={viewportRef} aria-label="문서 유형 목록" className="-mx-1 flex [scrollbar-color:var(--color-gray-7)_transparent] [scrollbar-width:thin] min-w-0 snap-x snap-proximity scroll-px-1 items-start gap-3 overflow-x-auto overscroll-x-contain px-1 pt-2.5 pb-2">
         {visibleTemplates.map(([kind, title, description]) => {
           const selected = selectedCode === kind
           return (
             <button key={kind} type="button" aria-pressed={selected}
               onClick={() => setSelectedCode(kind)}
-              className={cn("flex w-60 shrink-0 snap-start flex-col items-start rounded-lg border border-[var(--color-gray-9)] bg-[var(--color-gray-12)] p-4 text-left transition hover:border-[var(--color-primary-4)] focus-visible:outline-2 focus-visible:outline-primary", selected && "border-[var(--color-primary-4)] bg-[var(--color-primary-10)] ring-1 ring-[var(--color-primary-4)] ring-inset")}
+              className={cn("flex w-[206px] shrink-0 snap-start flex-col items-start gap-2 rounded-xl border border-[var(--color-gray-9)] bg-[var(--color-gray-12)] p-3.5 text-left transition hover:border-[var(--color-primary-4)] focus-visible:outline-2 focus-visible:outline-primary", selected && "border-[1.5px] border-[var(--color-primary-4)] bg-[#f0f5ff] p-[13.5px]")}
             >
-              <span className="flex w-full items-center justify-between gap-2"><ToneBadge tone="blue">{kind}</ToneBadge>{selected && <Check className="size-4 text-[var(--color-primary-4)]" />}</span>
-              <strong className="mt-2 text-sm">{title} <span className="text-xs font-normal text-muted-foreground">· {direction === "purchase" ? "구매" : "판매"}</span></strong>
-              <span className="mt-1.5 text-xs leading-5 text-muted-foreground">{description}</span>
+              <span className="flex w-full items-center justify-between gap-1.5"><DocumentTypeBadge code={kind} />{selected && <Check className="size-4 text-[var(--color-primary-4)]" />}</span>
+              <strong className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold">{title} <span className="text-[length:var(--text-body-11)] leading-[var(--leading-body-11)] font-normal text-[var(--color-gray-6)]">· {direction === "purchase" ? "구매" : "판매"}</span></strong>
+              <span className="line-clamp-2 text-[length:var(--text-body-11)] leading-[var(--leading-body-11)] text-[var(--color-gray-6)]">{description}</span>
             </button>
           )
         })}

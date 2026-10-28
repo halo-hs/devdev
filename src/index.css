@@ -103,10 +103,18 @@
   border-inline-end: 0;
 }
 
-.snap-navigation [data-slot="sidebar-menu-button"][data-active="true"],
-.settings-navigation [data-slot="sidebar-menu-button"][data-active="true"] {
+.snap-navigation [data-slot="sidebar-menu-button"][data-active="true"] {
   background: var(--sidebar-accent);
   color: var(--sidebar-accent-foreground);
+  box-shadow: none;
+}
+
+/* Figma SettingsNav (6911:91755): the current item is Blue 10 with a Blue 4
+   border and label. */
+.settings-navigation [data-slot="sidebar-menu-button"][data-active="true"] {
+  border-color: var(--color-primary-4);
+  background: var(--color-primary-10);
+  color: var(--color-primary-4);
   box-shadow: none;
 }
 
@@ -282,9 +290,10 @@
 .auth-surface:is([data-auth-layout="login"], [data-auth-layout="signup"]) {
   & .text-xs { font-size: 13px; line-height: 18.2px; }
   & .text-sm { font-size: 14px; line-height: 20.44px; }
-  & label { font-size: 15px; line-height: 21.9px; }
+  & label { font-size: 15px; line-height: 22px; }
   & [data-slot="button"] { min-height: 40px; font-size: 15px; line-height: 21.9px; }
   & [data-slot="button"].h-auto { min-height: 0; font-size: 14px; }
-  & [data-slot="input"] { height: 40px; min-height: 40px; font-size: 16px; line-height: 24px; }
-  & [data-slot="input"] + button { top: 0; right: 0; }
+  /* Figma 로그인 화면 3차 sizes (48px actions, 24px text link, 32px eye toggle) come from their classes. */
+  & [data-slot="button"]:is(.h-12, .h-6, .size-8) { min-height: revert-layer; font-size: revert-layer; line-height: revert-layer; }
+  & [data-slot="input"] { height: 40px; min-height: 40px; font-size: 17px; line-height: 24px; }
 }

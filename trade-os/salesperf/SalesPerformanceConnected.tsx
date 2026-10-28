@@ -1099,12 +1099,15 @@ function SalesPerformanceIdentityScope({
       </BusinessFilterField>
       {currencies.length > 0 ? (
         <BusinessFilterField label={copy.controls.currencyAria}>
-          <BusinessFilterSegments
-            ariaLabel={copy.controls.currencyAria}
-            options={currencies.map((ccy) => ({ id: ccy, label: ccy }))}
-            value={currency ?? ""}
-            onChange={setCurrencyChoice}
-          />
+          {/* Figma 영업 성과 시안 A (6934:147543): currency is a 90px Select, as on 결산 리포트. */}
+          <Select value={currency ?? ""} onValueChange={setCurrencyChoice}>
+            <SelectTrigger aria-label={copy.controls.currencyAria} className="h-8 w-[90px]"><SelectValue /></SelectTrigger>
+            <SelectContent align="start">
+              {currencies.map((ccy) => (
+                <SelectItem key={ccy} value={ccy}>{ccy}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </BusinessFilterField>
       ) : null}
       {isManager ? (
@@ -1225,8 +1228,9 @@ function SalesPerformanceIdentityScope({
           {/* ── GP: 내 월별 추세 + (org 전체 뷰) 담당자별 랭킹 ── */}
           {showManagerGp ? <div
             className={cn(
-              "grid items-start gap-4 max-lg:grid-cols-1",
-              showByAssignee ? "grid-cols-[minmax(0,1.9fr)_minmax(0,1.1fr)]" : "grid-cols-1",
+              // Figma 6934:147596: trend fills the row, 담당자별 GP is 370 wide and as tall.
+              "grid items-stretch gap-4 max-lg:grid-cols-1",
+              showByAssignee ? "grid-cols-[minmax(0,1fr)_370px]" : "grid-cols-1",
             )}
           >
             <ReportCard
@@ -1236,8 +1240,8 @@ function SalesPerformanceIdentityScope({
                   {replaceTokens(copy.gpTrend.sub, { currency: currencyLabel })}
                   <span className="mt-1 block text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.gpTrend.basis}</span>
                   {gpExclusion.text ? (
-                    <>
-                      {" — "}
+                    <span className={cn("mt-1 block text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]", gpExclusion.unknown ? "text-[var(--color-gray-5)]" : "text-[var(--color-red-1)]")}>
+                      {"— "}
                       <span
                         className={gpExclusion.unknown ? "text-[var(--color-gray-5)]" : "text-[var(--color-red-1)]"}
                         data-ui={
@@ -1257,7 +1261,7 @@ function SalesPerformanceIdentityScope({
                           ) : null}
                         </>
                       )}
-                    </>
+                    </span>
                   ) : null}
                 </>
               }

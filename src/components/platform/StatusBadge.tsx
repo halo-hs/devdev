@@ -17,6 +17,7 @@ type StatusTone =
   | "fieldDone"
   | "done"
   | "cancelled"
+  | "ocean"
 
 // Figma Badge (891:1212) status colors: Gray 9/Gray 3, Blue 10/Blue 4,
 // Green 6/Green 1, Orange 6/Orange 1, Red 6/Red 2, plus the Trade OS
@@ -35,6 +36,7 @@ const tones: Record<StatusTone, { fg: string; bg: string }> = {
   fieldDone: { fg: "var(--color-orange-2)", bg: "var(--color-orange-6)" },
   done: { fg: "var(--color-gray-4)", bg: "var(--color-gray-10)" },
   cancelled: { fg: "var(--color-gray-7)", bg: "var(--color-gray-10)" },
+  ocean: { fg: "var(--badge-ocean-foreground)", bg: "var(--badge-ocean-background)" },
 }
 
 // xs is the list badge (20px, 11/16); sm and md are the larger badges the

@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils"
 import { Mail, Check, Copy, X, ChevronDown, AlertTriangle, FileText, ChevronUp, Plus, Upload, LoaderCircle, MoreHorizontal, Trash2, Info, RefreshCw, ChevronRight, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
+import { DocumentTypeBadge } from "@trade-os/components/DocumentTypeBadge"
 import { AppSelect } from "@trade-os/components/AppSelect"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/Table"
 import { Checkbox } from "@/components/ui/Checkbox"
@@ -33,7 +34,7 @@ import { PdfPanelWorkspaceCard } from "@/components/platform/PdfPanelResizeHandl
 import { DocumentReviewWorkspace } from "@trade-os/confirm/ConfirmFlowConnected"
 import { TablePagination } from "@/components/ui/TablePagination"
 import { type FileDropZoneRef, FileDropZone } from "@/components/ds2/extensions/FileDropZone"
-import { BusinessPageHero } from "@/components/platform/HeroBanner"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { type RecentDocument, type UploadDocumentType, type UploadDetailStep, type UploadDocumentDealLinks, type UploadDocumentDealLink, type DocumentStageKey } from "@/App"
 import { uploadDocumentTypeLabel, manualUploadDocumentTypeOptions, reviewFieldsForDocument, resolvedReviewFields, isUploadDocumentTypeUnresolved } from "@trade-os/inbox/uploadDocumentModel"
 
@@ -669,23 +670,13 @@ function UploadDocumentTypeMark({
   documentType: UploadDocumentType
   className?: string
 }) {
-  const unresolved = documentType === "UNK"
   return (
-    <span
-      className={cn(
-        // 문서 올리기 V2: small outlined chip — Document icon + type code.
-        "inline-flex h-5 shrink-0 flex-row items-center justify-center gap-0.5 rounded-[4px] border border-[var(--color-gray-7)] bg-[var(--color-gray-12)] px-1 text-[var(--color-gray-2)]",
-        unresolved && "border-dashed text-[var(--color-gray-5)]",
-        className
-      )}
+    <DocumentTypeBadge
+      code={uploadDocumentTypeCode(documentType)}
+      className={className}
       title={uploadDocumentTypeLabel(documentType)}
       aria-label={`문서 유형 ${uploadDocumentTypeLabel(documentType)}`}
-    >
-      <FileText className="size-3" aria-hidden="true" />
-      <span className="text-[10px] leading-none font-semibold">
-        {uploadDocumentTypeCode(documentType)}
-      </span>
-    </span>
+    />
   )
 }
 
@@ -2395,7 +2386,7 @@ function BeforeUploadState({
       <div className="w-full px-4 py-5 sm:px-5 sm:py-6">
         {/* 문서 올리기 V2 (6325:101775): left-aligned hero with the upload card
             overlapping its lower edge; the step list sits in the card's top row. */}
-        <BusinessPageHero
+        <HeroBanner
           eyebrow="AI 파일 올리기"
           title="문서 올리기"
           description="PDF를 올려 내용을 검토한 뒤, 거래를 선택하고 반영할 내용을 확인하세요."

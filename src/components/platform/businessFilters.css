@@ -325,8 +325,9 @@
   max-width: 100%;
   flex-wrap: wrap;
 }
+/* Tabs default (40px): 32px triggers inside the 4px track inset. */
 .business-filter-bar [data-slot="tabs-trigger"] {
-  min-height: calc(var(--filter-height) - 4px);
+  min-height: calc(var(--filter-height) - 8px);
   font-size: var(--filter-font-size);
 }
 .business-filter-bar .business-filter-search {

@@ -5,9 +5,10 @@ export const aiHandoffCopy = {
   subtitle: "저장된 거래·문서·선적과 현재 잔액을 근거와 함께 확인합니다.",
   placeholder: "거래 내역을 질문하거나 아래 조회 조건을 선택하세요.",
   workspace: {
-    question: "어떤 업무를 확인할까요?",
+    // Figma 7차 빈 화면 인사 (5729:60828); the name is sample data until the session provides one.
+    question: "홍길동님, 무엇이든 물어보세요",
     guide:
-      "문서, 거래, 선적 일정이나 현재 금액을 질문하세요. 근거를 확인한 뒤 실제 업무로 이어갈 수 있습니다.",
+      "질문하면 거래·문서·정산 데이터를 근거로 답하고, 바로 업무로 이어갑니다",
     tools: "저장한 답변과 상세 조회",
     toolsHint:
       "정확한 기간, 특정 거래나 보존된 본문이 필요할 때 도구를 펼치세요.",
