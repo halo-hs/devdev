@@ -1,4 +1,7 @@
 import { appLocation } from "@/app/appLocation"
+import termsOfServiceSource from "./legal/terms-of-service.md?raw"
+import privacyPolicySource from "./legal/privacy-policy.md?raw"
+import locationTermsSource from "./legal/location-based-service-terms.md?raw"
 import { CommonPublicLayout } from "@auth/AuthCommonShell"
 import {
   useEffect,
@@ -711,128 +714,115 @@ function SnapAuthVisual({
 
 type LegalScreen = "SC-03" | "SC-04" | "SC-45"
 
+type LegalBlock =
+  | { kind: "paragraph"; text: string }
+  | { kind: "list"; items: string[] }
+  | { kind: "table"; header: string[]; rows: string[][] }
+
+type LegalSection = { title: string; part?: string; blocks: LegalBlock[] }
+
+// Trade OS 게시용 약관 원문(hrm-corp/ecoya-products `ecoya 2.0/legal`)을 그대로 읽어
+// 조문(##) 단위 섹션으로 나눕니다. `#` 제목은 국가별 부가조항 같은 묶음 제목입니다.
+function parseLegalMarkdown(source: string) {
+  const strip = (line: string) => line.replace(/^#+\s*/, "").replace(/\*\*/g, "").trim()
+  const cells = (line: string) => line.trim().replace(/^\||\|$/g, "").split("|").map((cell) => cell.trim())
+  const intro: LegalBlock[] = []
+  const sections: LegalSection[] = []
+  let title = ""
+  let part: string | undefined
+  let current: LegalBlock[] = intro
+  for (const line of source.split("\n")) {
+    if (!line.trim() || line.trim() === "---") continue
+    if (line.startsWith("## ")) {
+      const section: LegalSection = { title: strip(line), part, blocks: [] }
+      sections.push(section)
+      current = section.blocks
+    } else if (line.startsWith("# ")) {
+      if (!title) title = strip(line)
+      else {
+        const section: LegalSection = { title: strip(line), blocks: [] }
+        sections.push(section)
+        part = section.title
+        current = section.blocks
+      }
+    } else if (line.startsWith("|")) {
+      const last = current.at(-1)
+      if (/^\|[\s:|-]+\|$/.test(line.trim())) continue
+      if (last?.kind === "table") last.rows.push(cells(line))
+      else current.push({ kind: "table", header: cells(line), rows: [] })
+    } else if (/^\d+\.\s/.test(line)) {
+      const last = current.at(-1)
+      const item = line.replace(/^\d+\.\s/, "")
+      if (last?.kind === "list") last.items.push(item)
+      else current.push({ kind: "list", items: [item] })
+    } else {
+      current.push({ kind: "paragraph", text: line.trim() })
+    }
+  }
+  return { title, intro, sections }
+}
+
 const SNAP_LEGAL_DOCUMENTS: Record<
   LegalScreen,
-  {
-    title: string
-    summary: string
-    sections: Array<{ title: string; paragraphs: string[] }>
-  }
+  { summary: string } & ReturnType<typeof parseLegalMarkdown>
 > = {
   "SC-03": {
-    title: "이용약관",
-    summary:
-      "ECOYA SNAP 계정, 조직 워크스페이스, 현장 증빙 및 보고서 기능의 이용 기준입니다.",
-    sections: [
-      {
-        title: "제1조 목적과 적용 범위",
-        paragraphs: [
-          "본 약관은 ECOYA가 제공하는 ECOYA SNAP 서비스의 이용 조건과 회사 및 이용자의 권리·의무를 정합니다.",
-          "조직 관리자가 구성원을 초대하거나 외부 작업 링크를 발급한 경우에도 본 약관과 조직의 내부 정책이 함께 적용됩니다.",
-        ],
-      },
-      {
-        title: "제2조 계정과 조직",
-        paragraphs: [
-          "이용자는 정확한 정보를 사용해 계정을 생성하고 로그인 정보를 안전하게 관리해야 합니다. 조직 관리자는 구성원의 권한과 접근 범위를 관리합니다.",
-        ],
-      },
-      {
-        title: "제3조 현장 증빙과 보고서",
-        paragraphs: [
-          "서비스는 사진, 영상, 위치, 촬영 시각, 메모 및 검토 이력을 작업 단위로 관리합니다. 이용자는 업로드한 자료를 사용할 정당한 권한을 보유해야 합니다.",
-          "AI가 제안한 분류나 요약은 사람의 확인을 보조하며, 최종 보고서의 정확성은 확정 전에 이용자가 검토해야 합니다.",
-        ],
-      },
-      {
-        title: "제4조 요금과 서비스 변경",
-        paragraphs: [
-          "유료 기능의 요금, 제공량 및 결제 주기는 요금제 화면과 결제 단계에 표시합니다. 중요한 변경은 적용 전에 안내합니다.",
-        ],
-      },
-      {
-        title: "제5조 이용 제한과 책임",
-        paragraphs: [
-          "타인의 권리를 침해하거나 불법적인 자료를 저장·공유하는 행위, 서비스의 안정성을 해치는 행위는 제한될 수 있습니다.",
-        ],
-      },
-    ],
+    summary: "ECOYA Platform과 Trade OS·SNAP의 계정, 조직, 유료서비스와 고객 데이터 이용 기준입니다.",
+    ...parseLegalMarkdown(termsOfServiceSource),
   },
   "SC-04": {
-    title: "개인정보처리방침",
-    summary:
-      "ECOYA SNAP을 이용할 때 처리되는 개인정보와 이용자의 권리를 안내합니다.",
-    sections: [
-      {
-        title: "1. 처리하는 개인정보",
-        paragraphs: [
-          "계정 생성 시 이름, 업무 이메일, 조직 정보와 인증 기록을 처리합니다. 서비스 이용 과정에서 작업 정보, 접속 기록, 기기 정보, 고객지원 내역이 생성될 수 있습니다.",
-          "위치 기능을 사용하는 작업에서는 이용자의 선택과 권한 설정에 따라 위치정보가 현장 증빙에 포함될 수 있습니다.",
-        ],
-      },
-      {
-        title: "2. 처리 목적",
-        paragraphs: [
-          "계정과 조직 관리, 현장 작업 기록, 보고서 생성과 전달, 보안 및 장애 대응, 고객지원과 서비스 개선을 위해 필요한 범위에서 정보를 처리합니다.",
-        ],
-      },
-      {
-        title: "3. 보유 및 삭제",
-        paragraphs: [
-          "개인정보는 이용 목적이 달성되거나 보유 기간이 끝나면 지체 없이 삭제합니다. 관계 법령이나 조직의 증빙 보존 정책에 따라 별도 보관이 필요한 경우에는 분리하여 관리합니다.",
-        ],
-      },
-      {
-        title: "4. 제공 및 처리 위탁",
-        paragraphs: [
-          "서비스 제공에 필요한 인프라, 메시지 발송, 결제 등의 업무를 전문 사업자에게 위탁할 수 있으며 수탁자와 처리 목적은 공개된 정책에서 안내합니다.",
-        ],
-      },
-      {
-        title: "5. 이용자의 권리",
-        paragraphs: [
-          "이용자는 자신의 개인정보를 조회·정정·삭제하거나 처리 정지를 요청할 수 있습니다. 조직이 관리하는 업무 자료는 조직 정책과 법적 보존 의무가 함께 적용될 수 있습니다.",
-        ],
-      },
-    ],
+    summary: "ECOYA Platform을 이용할 때 처리되는 개인정보와 정보주체의 권리를 안내합니다.",
+    ...parseLegalMarkdown(privacyPolicySource),
   },
   "SC-45": {
-    title: "위치기반 서비스 이용약관",
-    summary:
-      "현장 증빙에 위치정보를 포함하는 경우의 이용 조건과 보호 기준입니다.",
-    sections: [
-      {
-        title: "제1조 목적",
-        paragraphs: [
-          "본 약관은 ECOYA SNAP의 위치기반 기능을 이용할 때 회사와 개인위치정보주체의 권리·의무를 정합니다.",
-        ],
-      },
-      {
-        title: "제2조 제공하는 기능",
-        paragraphs: [
-          "이용자가 허용한 경우 현장 사진과 작업 기록에 촬영 위치를 연결하고, 지정 작업 장소와 실제 기록 위치를 확인하는 기능을 제공합니다.",
-        ],
-      },
-      {
-        title: "제3조 위치정보의 이용과 보유",
-        paragraphs: [
-          "위치정보는 현장 증빙의 진위와 작업 수행 여부를 확인하기 위한 범위에서 이용합니다. 관련 기록은 법령 및 조직의 보존 정책에 따른 기간 동안 보호 조치와 함께 보관합니다.",
-        ],
-      },
-      {
-        title: "제4조 이용자의 통제",
-        paragraphs: [
-          "이용자는 기기 설정에서 위치 권한을 변경할 수 있습니다. 다만 위치가 필수인 작업에서는 일부 증빙 기능의 사용이 제한될 수 있습니다.",
-        ],
-      },
-      {
-        title: "제5조 문의와 권리 행사",
-        paragraphs: [
-          "위치정보 이용 내역의 확인, 동의 철회 또는 보호 조치에 관한 문의는 고객지원 채널을 통해 요청할 수 있습니다.",
-        ],
-      },
-    ],
+    summary: "ECOYA SNAP에서 현장 증빙에 위치정보를 포함하는 경우의 이용 조건과 보호 기준입니다.",
+    ...parseLegalMarkdown(locationTermsSource),
   },
+}
+
+// 원문의 **강조**, `코드`, 게시 전 입력 자리 {{항목}}을 화면용으로 바꿉니다.
+function LegalInline({ text }: { text: string }) {
+  return text.split(/(\*\*[^*]+\*\*|`[^`]+`|\{\{[^}]+\}\})/).map((part, index) => {
+    if (part.startsWith("**")) return <strong key={index} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>
+    if (part.startsWith("`")) return <span key={index}>{part.slice(1, -1)}</span>
+    if (part.startsWith("{{")) {
+      return (
+        <span key={index} className="rounded bg-[var(--surface-muted-background)] px-1 text-[0.85em] text-muted-foreground">
+          {part.slice(2, -2).replace(/_/g, " ")} 입력 예정
+        </span>
+      )
+    }
+    return part
+  })
+}
+
+function LegalBlocks({ blocks }: { blocks: LegalBlock[] }) {
+  return blocks.map((block, index) => {
+    if (block.kind === "paragraph") return <p key={index}><LegalInline text={block.text} /></p>
+    if (block.kind === "list") {
+      return (
+        <ol key={index} className="list-decimal space-y-1.5 pl-5">
+          {block.items.map((item) => <li key={item}><LegalInline text={item} /></li>)}
+        </ol>
+      )
+    }
+    return (
+      <div key={index} className="field-scrollbar overflow-x-auto rounded-[var(--r-md)] border border-[var(--surface-border)]">
+        <table className="w-full min-w-[520px] text-left text-sm leading-6">
+          <thead className="bg-[var(--surface-muted-background)] text-foreground">
+            <tr>{block.header.map((cell) => <th key={cell} className="px-3 py-2 font-semibold"><LegalInline text={cell} /></th>)}</tr>
+          </thead>
+          <tbody>
+            {block.rows.map((row, rowIndex) => (
+              <tr key={rowIndex} className="border-t border-[var(--surface-border)] align-top">
+                {row.map((cell, cellIndex) => <td key={cellIndex} className="px-3 py-2"><LegalInline text={cell} /></td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  })
 }
 
 function PublicPrototype({ screen, navigate, routeParams }: PrototypeScreenProps) {
@@ -1157,10 +1147,10 @@ function PublicPrototype({ screen, navigate, routeParams }: PrototypeScreenProps
   if (screen === "SC-03" || screen === "SC-04" || screen === "SC-45") {
     const legalScreen = screen as LegalScreen
     const document = SNAP_LEGAL_DOCUMENTS[legalScreen]
-    const legalTabs: Array<{ key: LegalScreen; label: string }> = [
-      { key: "SC-03", label: "이용약관" },
-      { key: "SC-04", label: "개인정보처리방침" },
-      { key: "SC-45", label: "위치기반 서비스" },
+    const legalTabs: Array<{ key: LegalScreen; label: string; href: string }> = [
+      { key: "SC-03", label: "이용약관", href: "/legal/terms" },
+      { key: "SC-04", label: "개인정보처리방침", href: "/legal/privacy" },
+      { key: "SC-45", label: "위치기반 서비스", href: "/legal/location" },
     ]
     return (
       <CommonPublicLayout>
@@ -1174,27 +1164,32 @@ function PublicPrototype({ screen, navigate, routeParams }: PrototypeScreenProps
               {document.summary}
             </p>
             <p className="mt-4 text-xs text-muted-foreground">
-              최종 업데이트 2026.09.07
+              문서 정리일 2026.10.28 · 법무 승인 전 확인용
             </p>
           </div>
 
           <div className="mt-8 overflow-hidden rounded-[var(--r-lg)] border border-[var(--surface-border)] bg-background">
             <div className="field-scrollbar flex overflow-x-auto border-b border-[var(--surface-border)] px-3 sm:px-5">
               {legalTabs.map((tab) => (
-                <button
+                <a
                   key={tab.key}
-                  type="button"
+                  href={tab.href}
+                  aria-current={legalScreen === tab.key ? "page" : undefined}
                   className={cn(
                     "relative shrink-0 px-3 py-4 text-sm font-medium text-muted-foreground",
                     legalScreen === tab.key && "text-primary"
                   )}
-                  onClick={() => navigate(tab.key)}
+                  onClick={(event) => {
+                    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return
+                    event.preventDefault()
+                    navigate(tab.key)
+                  }}
                 >
                   {tab.label}
                   {legalScreen === tab.key ? (
                     <span className="absolute inset-x-3 bottom-0 h-0.5 bg-primary" />
                   ) : null}
-                </button>
+                </a>
               ))}
             </div>
             <div className="grid lg:grid-cols-[240px_minmax(0,1fr)]">
@@ -1202,25 +1197,30 @@ function PublicPrototype({ screen, navigate, routeParams }: PrototypeScreenProps
                 <div className="text-xs font-semibold text-muted-foreground">목차</div>
                 <ol className="mt-4 space-y-3 text-sm">
                   {document.sections.map((section, index) => (
-                    <li key={section.title} className="flex gap-2 text-muted-foreground">
-                      <span className="w-5 shrink-0 text-xs tabular-nums">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <span>{section.title}</span>
+                    <li key={`${section.part}-${section.title}`}>
+                      <a href={`#legal-${index}`} className="flex gap-2 text-muted-foreground hover:text-foreground">
+                        <span className="w-5 shrink-0 text-xs tabular-nums">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <span>{section.title}</span>
+                      </a>
                     </li>
                   ))}
                 </ol>
               </aside>
               <article className="max-w-4xl space-y-10 px-5 py-8 sm:px-10 sm:py-10">
-                {document.sections.map((section) => (
-                  <section key={section.title}>
-                    <h2 className="text-lg font-semibold tracking-[-0.01em]">
+                {document.intro.length ? (
+                  <div className="space-y-3 text-[15px] leading-7 text-muted-foreground sm:text-base sm:leading-8">
+                    <LegalBlocks blocks={document.intro} />
+                  </div>
+                ) : null}
+                {document.sections.map((section, index) => (
+                  <section key={`${section.part}-${section.title}`} id={`legal-${index}`} className="scroll-mt-24">
+                    <h2 className="text-lg font-semibold sm:text-xl tracking-[-0.01em]">
                       {section.title}
                     </h2>
-                    <div className="mt-3 space-y-3 text-sm leading-7 text-muted-foreground">
-                      {section.paragraphs.map((paragraph) => (
-                        <p key={paragraph}>{paragraph}</p>
-                      ))}
+                    <div className="mt-3 space-y-3 text-[15px] leading-7 text-muted-foreground sm:text-base sm:leading-8">
+                      <LegalBlocks blocks={section.blocks} />
                     </div>
                   </section>
                 ))}

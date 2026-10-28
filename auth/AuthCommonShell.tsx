@@ -8,7 +8,8 @@ import {
 import { LandingHeader } from "@landing/shared/layout"
 import { type AuthLayoutVariant } from "@auth/lib/authValidation"
 import { cn } from "@/lib/utils"
-import loginWarehouse from "@/assets/auth/login-warehouse.jpg"
+// Same photo as the develop login (public/images/auth/cargo-operations-banner.jpg).
+import loginCargo from "@/assets/auth/cargo-operations-banner.jpg"
 import signupVessel from "@/assets/auth/signup-vessel.jpg"
 import ecoyaWhiteLogo from "@/components/ds2/assets/logos/logo-ecoya-white.png"
 import ecoyaColorLogo from "@/components/ds2/assets/logos/logo-ecoya-snap-color.png"
@@ -293,12 +294,12 @@ function BrandedAccountGuide({ variant }: { variant: "login" | "signup" }) {
       )}
     >
       <img
-        src={signup ? signupVessel : loginWarehouse}
+        src={signup ? signupVessel : loginCargo}
         alt=""
         aria-hidden="true"
         className={cn(
           "pointer-events-none absolute inset-x-0 -z-10 w-full max-w-none object-cover",
-          signup ? "top-[-16.26%] h-[106.51%]" : "inset-y-0 h-full"
+          signup ? "top-[-16.26%] h-[106.51%]" : "inset-y-0 h-full object-[60%_center]"
         )}
       />
       <div
