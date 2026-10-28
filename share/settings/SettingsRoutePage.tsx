@@ -550,7 +550,7 @@ export function SettingsHubV2(props: Parameters<typeof SettingsHubContent>[0]) {
   if (sharedDemo) return <SettingsHubContent {...props} />
   return (
     <SettingsDemoProvider
-      key={`${props.workspaceId}:${props.role ?? "owner"}:${(props.availableProducts ?? ["erp", "snap"]).join(",")}:${props.subscriptionKind ?? "separate"}`}
+      key={`${props.workspaceId}:${props.role ?? "owner"}:${(props.availableProducts ?? ["erp", "snap"]).join(",")}:${props.subscriptionKind ?? "separate"}:${props.subscriptionStates?.erp ?? "paid_active"}`}
       subscriptionKind={props.subscriptionKind}
     >
       <SettingsHubContent {...props} />

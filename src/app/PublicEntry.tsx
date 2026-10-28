@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card"
-import { type CommonProduct, type CommonScreenKey } from "@auth/AuthSurface"
+import { type CommonPreviewPlan, type CommonPreviewRole, type CommonProduct, type CommonScreenKey } from "@auth/AuthSurface"
 import { CommonPasswordRecoveryPrototype } from "@auth/PasswordResetPanel"
 import { CommonSignupPrototype } from "@auth/SignupPanel"
 import { CommonLoginPrototype } from "@auth/LoginPanel"
@@ -161,7 +161,14 @@ export function CommonEntry({ children }: { children: ReactNode }) {
     setLocation(nextUrl)
     window.scrollTo(0, 0)
   }
-  const land = (product: CommonProduct) => {
+  const land = (
+    product: CommonProduct,
+    role: CommonPreviewRole = "owner",
+    plan: CommonPreviewPlan = "paid"
+  ) => {
+    const erpHome = new URLSearchParams()
+    if (role !== "owner") erpHome.set("role", role)
+    if (plan !== "paid") erpHome.set("plan", plan)
     // This is the existing local preview session, never a production credential.
     if (product === "snap") {
       try {
@@ -184,7 +191,7 @@ export function CommonEntry({ children }: { children: ReactNode }) {
       usageRequested
         ? `/erp/settings?section=${product === "erp" ? "organization" : "snap-usage"}`
         : product === "erp"
-          ? "/erp/home"
+          ? `/erp/home${erpHome.size ? `?${erpHome}` : ""}`
           : "/dashboard"
     )
   }

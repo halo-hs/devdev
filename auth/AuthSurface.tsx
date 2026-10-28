@@ -65,9 +65,18 @@ export interface CommonOrganization {
   isCurrent?: boolean
 }
 
+// Organization role of the local demo account; Trade OS reads it from `?role=`.
+export type CommonPreviewRole = "owner" | "admin" | "member"
+// Trade OS subscription state of the demo account; read from `?plan=`.
+export type CommonPreviewPlan = "paid" | "trial" | "expired"
+
 export interface CommonPrototypeScreenProps {
   onNavigate?: (route: CommonScreenKey) => void
-  onProductLanding?: (product: CommonProduct) => void
+  onProductLanding?: (
+    product: CommonProduct,
+    role?: CommonPreviewRole,
+    plan?: CommonPreviewPlan
+  ) => void
   initialProduct?: CommonProduct
   loginNotice?: string
 }
@@ -95,12 +104,15 @@ const feedbackIcons: Record<Feedback["tone"], typeof CheckCircle2> = {
 export function AuthSurface({
   variant,
   title,
+  titleAside,
   description,
   children,
   footer,
 }: {
   variant: AuthLayoutVariant
   title: string
+  /** Sits at the right of the title without moving the centered heading. */
+  titleAside?: ReactNode
   description?: string
   children: ReactNode
   footer?: ReactNode
@@ -130,15 +142,22 @@ export function AuthSurface({
               variant !== "recovery" && "max-w-[440px]"
             )}
           >
-            <h1
-              className={cn(
-                "text-2xl font-semibold tracking-tight sm:text-3xl",
-                variant !== "recovery" &&
-                  "text-center text-[26px] leading-9 font-bold sm:text-[26px]"
+            <div className="relative">
+              <h1
+                className={cn(
+                  "text-2xl font-semibold tracking-tight sm:text-3xl",
+                  variant !== "recovery" &&
+                    "text-center text-[26px] leading-9 font-bold sm:text-[26px]"
+                )}
+              >
+                {title}
+              </h1>
+              {titleAside && (
+                <div className="absolute top-1/2 right-0 -translate-y-1/2">
+                  {titleAside}
+                </div>
               )}
-            >
-              {title}
-            </h1>
+            </div>
             {description && (
               <p
                 className={cn(

@@ -85,8 +85,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/DropdownMenu"
 import { Input } from "@/components/ui/Input"
@@ -237,11 +235,6 @@ type OrderState = "open" | "closed" | "short_closed" | "cancelled"
 type OrderAction =
   "close" | "short_close" | "cancel" | "reopen" | null
 
-const roleLabels: Record<Role, string> = {
-  owner: "Owner 화면",
-  admin: "관리자 화면",
-  member: "멤버 화면",
-}
 const canMutate = (role: Role) => role === "owner" || role === "admin"
 const dealProfiles: Record<string, DealProfile> = {
   "DL-260708-01": {
@@ -5727,6 +5720,7 @@ function PeopleTab({
 
 export function DealDetailScreen({
   dealId,
+  role,
   focusTarget,
   onBack,
   onAskAi,
@@ -5740,6 +5734,8 @@ export function DealDetailScreen({
   workspaceActionsTarget,
 }: {
   dealId: string
+  /** Organization role of the signed-in (demo) account. */
+  role: Role
   focusTarget?: NotificationDealTarget | null
   onBack: () => void
   onAskAi: () => void
@@ -5773,7 +5769,6 @@ export function DealDetailScreen({
   })
   const [shipmentSummary, setShipmentSummary] =
     useState<DealShipmentSummary | null>(null)
-  const [role, setRole] = useState<Role>("owner")
   const [activeSection, setActiveSection] = useState<Tab>(
     focusTarget?.tab ?? stageEntryTab(dealId)
   )
@@ -5976,11 +5971,6 @@ export function DealDetailScreen({
     if (data.assigneeId !== undefined) setAssignee(data.assigneeId ?? "미배정")
     setRiskDismissed(data.riskDismissed)
   }, [refresh.data])
-  useEffect(() => {
-    setSavingDealId(false)
-    setSavingAssignee(false)
-    setEditingDealId(false)
-  }, [role])
   const [verificationOpen, setVerificationOpen] = useState(false)
   const [reviewFocusId, setReviewFocusId] =
     useState<DealReviewNotice["id"]>("account_change")
@@ -6704,28 +6694,6 @@ export function DealDetailScreen({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-60">
-                  <DropdownMenuLabel className="flex items-center justify-between gap-3">
-                    <span>화면 권한 미리보기</span>
-                    <span className="font-normal text-muted-foreground">
-                      {roleLabels[role]}
-                    </span>
-                  </DropdownMenuLabel>
-                  {(Object.entries(roleLabels) as Array<[Role, string]>).map(
-                    ([value, label]) => (
-                      <DropdownMenuItem
-                        key={value}
-                        onClick={() => setRole(value)}
-                      >
-                        <span className="flex size-4 items-center justify-center">
-                          {role === value ? (
-                            <Check className="size-3.5" />
-                          ) : null}
-                        </span>
-                        {label}
-                      </DropdownMenuItem>
-                    )
-                  )}
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setDialog("issue")}>
                     <AlertTriangle />
                     이슈 플래그 등록
