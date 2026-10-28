@@ -787,7 +787,7 @@ function LegalInline({ text }: { text: string }) {
     if (part.startsWith("`")) return <span key={index}>{part.slice(1, -1)}</span>
     if (part.startsWith("{{")) {
       return (
-        <span key={index} className="rounded bg-[var(--surface-muted-background)] px-1 text-xs text-muted-foreground">
+        <span key={index} className="rounded bg-[var(--surface-muted-background)] px-1 text-[0.85em] text-muted-foreground">
           {part.slice(2, -2).replace(/_/g, " ")} 입력 예정
         </span>
       )
@@ -808,7 +808,7 @@ function LegalBlocks({ blocks }: { blocks: LegalBlock[] }) {
     }
     return (
       <div key={index} className="field-scrollbar overflow-x-auto rounded-[var(--r-md)] border border-[var(--surface-border)]">
-        <table className="w-full min-w-[520px] text-left text-xs leading-5">
+        <table className="w-full min-w-[520px] text-left text-sm leading-6">
           <thead className="bg-[var(--surface-muted-background)] text-foreground">
             <tr>{block.header.map((cell) => <th key={cell} className="px-3 py-2 font-semibold"><LegalInline text={cell} /></th>)}</tr>
           </thead>
@@ -1205,16 +1205,16 @@ function PublicPrototype({ screen, navigate, routeParams }: PrototypeScreenProps
               </aside>
               <article className="max-w-4xl space-y-10 px-5 py-8 sm:px-10 sm:py-10">
                 {document.intro.length ? (
-                  <div className="space-y-3 text-sm leading-7 text-muted-foreground">
+                  <div className="space-y-3 text-[15px] leading-7 text-muted-foreground sm:text-base sm:leading-8">
                     <LegalBlocks blocks={document.intro} />
                   </div>
                 ) : null}
                 {document.sections.map((section, index) => (
                   <section key={`${section.part}-${section.title}`} id={`legal-${index}`} className="scroll-mt-24">
-                    <h2 className="text-lg font-semibold tracking-[-0.01em]">
+                    <h2 className="text-lg font-semibold sm:text-xl tracking-[-0.01em]">
                       {section.title}
                     </h2>
-                    <div className="mt-3 space-y-3 text-sm leading-7 text-muted-foreground">
+                    <div className="mt-3 space-y-3 text-[15px] leading-7 text-muted-foreground sm:text-base sm:leading-8">
                       <LegalBlocks blocks={section.blocks} />
                     </div>
                   </section>
