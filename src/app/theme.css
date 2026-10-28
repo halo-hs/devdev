@@ -553,7 +553,7 @@
 }
 
 /* ---- 2) 히어로 필터 토큰 ---- */
-/* Shared with the transaction list's BusinessPageHero. */
+/* Shared with the transaction list's HeroBanner. */
 .business-hero-controls {
   --control-background: rgba(255, 255, 255, 0.12);
   --control-background-hover: rgba(255, 255, 255, 0.16);

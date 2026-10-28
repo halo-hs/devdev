@@ -13,7 +13,7 @@ import { FileText, ChevronLeft, ChevronRight, Building2, Check, Search } from "l
 import { DocumentStage } from "@trade-os/components/DocumentStage"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
 import { DocumentReviewSharePanel } from "@trade-os/documents/DocumentSharePanel"
-import { BusinessPageHero } from "@/components/platform/HeroBanner"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/Button"
 import { DocumentSaveSummary } from "@trade-os/components/DocumentSaveSummary"
 import { PdfPanelWorkspaceCard, PdfPanelResizeHandle } from "@/components/platform/PdfPanelResizeHandle"
@@ -1014,7 +1014,7 @@ export function ResultScreen({
     return (
       <div className="h-full overflow-auto bg-transparent px-4 py-6 sm:px-5">
         <div className="w-full">
-          <BusinessPageHero
+          <HeroBanner
             title="문서 만들기"
             summary={
               <TemplateStrip onResult={(_mode, code, direction) => {

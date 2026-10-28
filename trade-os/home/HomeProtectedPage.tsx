@@ -13,7 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 
-import { BusinessPageHero } from "@/components/platform/HeroBanner"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/Button"
 import { Card } from "@/components/ui/Card"
 import { Input } from "@/components/ui/Input"
@@ -95,7 +95,7 @@ function HomeStartSection({
       aria-label={ariaLabel}
       className={cn("min-w-0 xl:col-start-1 xl:row-start-1", className)}
     >
-      <BusinessPageHero
+      <HeroBanner
         variant="ai"
         compact
         eyebrow="ECOYA 업무 도우미"
