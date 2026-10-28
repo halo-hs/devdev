@@ -65,9 +65,12 @@ export interface CommonOrganization {
   isCurrent?: boolean
 }
 
+// Organization role of the local demo account; Trade OS reads it from `?role=`.
+export type CommonPreviewRole = "owner" | "admin" | "member"
+
 export interface CommonPrototypeScreenProps {
   onNavigate?: (route: CommonScreenKey) => void
-  onProductLanding?: (product: CommonProduct) => void
+  onProductLanding?: (product: CommonProduct, role?: CommonPreviewRole) => void
   initialProduct?: CommonProduct
   loginNotice?: string
 }

@@ -31,6 +31,7 @@ import {
   SelectItem,
 } from "@/components/ui/Select"
 import {
+  type CommonPreviewRole,
   type CommonPrototypeScreenProps,
   type CommonAuthState,
   type Feedback,
@@ -39,6 +40,13 @@ import {
   InlineFeedback,
 } from "@auth/AuthSurface"
 import { showPreviewControls } from "@auth/authNavigation"
+
+// Local preview logins, one per organization role. Never production credentials.
+const DEMO_ACCOUNTS: Array<{ email: string; role: CommonPreviewRole; label: string }> = [
+  { email: "ecoya@ecoya.kr", role: "owner", label: "Owner" },
+  { email: "admin@ecoya.kr", role: "admin", label: "Admin" },
+  { email: "member@ecoya.kr", role: "member", label: "Member" },
+]
 
 export function CommonLoginPrototype({
   onNavigate,
@@ -49,6 +57,7 @@ export function CommonLoginPrototype({
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [state, setState] = useState<CommonAuthState>("idle")
+  const [signedInRole, setSignedInRole] = useState<CommonPreviewRole>("owner")
   const [submitted, setSubmitted] = useState(false)
   const fieldErrors = {
     email: authFieldError(email, "이메일", { email: true }),
@@ -114,9 +123,11 @@ export function CommonLoginPrototype({
       return
     }
     setSubmitted(false)
-    const valid =
-      email.trim().toLowerCase() === "ecoya@ecoya.kr" && password === "ecoya"
-    if (!valid) {
+    const role =
+      password === "ecoya"
+        ? DEMO_ACCOUNTS.find((account) => account.email === email.trim().toLowerCase())?.role
+        : undefined
+    if (!role) {
       setState("rejected")
       return
     }
@@ -127,10 +138,11 @@ export function CommonLoginPrototype({
     setState("submitting")
     window.setTimeout(() => {
       if (initialProduct && onProductLanding) {
-        onProductLanding(initialProduct)
+        onProductLanding(initialProduct, role)
         return
       }
       setPassword("")
+      setSignedInRole(role)
       setState("authenticated")
     }, 350)
   }
@@ -188,7 +200,7 @@ export function CommonLoginPrototype({
               <Button
                 className="w-full"
                 type="button"
-                onClick={() => onProductLanding?.("erp")}
+                onClick={() => onProductLanding?.("erp", signedInRole)}
               >
                 <Building2 /> Trade OS 열기
               </Button>
@@ -204,7 +216,7 @@ export function CommonLoginPrototype({
                 className="w-full"
                 type="button"
                 variant="outline"
-                onClick={() => onProductLanding?.("snap")}
+                onClick={() => onProductLanding?.("snap", signedInRole)}
               >
                 <MapPin /> SNAP 열기
               </Button>
@@ -228,7 +240,7 @@ export function CommonLoginPrototype({
             )}
             {showPreviewControls() && (
               <p className="text-xs text-muted-foreground">
-                데모 계정: ecoya@ecoya.kr / ecoya
+                데모 계정(비밀번호 ecoya): {DEMO_ACCOUNTS.map((account) => `${account.email} ${account.label}`).join(" · ")}
               </p>
             )}
             {stateFeedback[state] ? (
