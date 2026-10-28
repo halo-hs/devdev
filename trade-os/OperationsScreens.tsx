@@ -51,9 +51,9 @@ function Body({ screen }: { screen: OperationsScreenName }) {
     : "subtitle" in copy ? copy.subtitle : undefined
   return <div className="ops-page-scroll">
     <div className="ops-content-width w-full space-y-4 px-5 pt-1.5 pb-10">
+      {/* Figma 결산리포트 v6 (5789:51755): no PRO badge, KPI rows sit 16px under the hero. */}
       {screen === "reports" ? <ReportsConnected copy={messages.erpReports.reports} role={identity.role}
-          renderHeader={(controls, summary) => <HeroBanner title={<span className="inline-flex items-baseline gap-2.5">{copy.title}<span className="rounded-full bg-[var(--color-primary-9)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-bold text-[var(--color-indigo)]">{messages.erpReports.reports.proBadge}</span></span>} description={description}
-            controls={controls} summary={summary} />} />
+          renderHeader={(controls, summary) => <><HeroBanner title={copy.title} description={description} controls={controls} />{summary}</>} />
         : screen === "sales" ? <SalesPerformanceConnected copy={messages.erpSalesPerformance.cockpit} role={identity.role}
           renderHeader={(controls, summary) => <HeroBanner title={<span className="inline-flex items-baseline gap-2.5">{copy.title}<span className="rounded-full bg-[var(--color-primary-9)] px-2 py-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-bold text-[var(--color-indigo)]">{messages.erpReports.reports.proBadge}</span></span>} description={description}
             controls={controls} summary={summary} />} />

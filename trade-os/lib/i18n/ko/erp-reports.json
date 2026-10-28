@@ -34,6 +34,7 @@
       "rangeMonths": "{count}개월",
       "currencyAria": "통화",
       "assigneeAria": "담당자 필터",
+      "assigneeLabel": "담당자",
       "assigneeAll": "전체 담당자",
       "filtersLabel": "결산 리포트 필터"
     },

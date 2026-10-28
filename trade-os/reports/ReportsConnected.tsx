@@ -11,6 +11,7 @@ import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/
 import { BusinessFilterSegments } from "@/components/platform/SearchFilterBar";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { RefreshCw } from "lucide-react";
 
 import { InfoBox } from "@trade-os/components/InfoBox";
 import { AnalyticsSkeleton } from "@trade-os/components/AnalyticsSkeleton";
@@ -1185,13 +1186,10 @@ function ReportsConnectedSession({
   const settlementEmpty = settlementSnapshot != null && settlementCurrencies.length === 0;
 
   const summary = settlementState.status !== "loading" && !settlementEmpty && (settlementState.status !== "error" || settlementSnapshot != null) ? (
-<div
-            className={cn(
-              // Figma 결산리포트 v6 KPI 7 · 2줄: 4 cards, then GP (2 columns) + 2.
-              "grid grid-cols-4 gap-x-4 gap-y-3 max-lg:grid-cols-2 max-sm:grid-cols-1",
-            )}
-            data-ui="reports-kpis"
-          >
+<div className="grid gap-3" data-ui="reports-kpis">
+          {/* Figma 결산리포트 v6 KPI 7 · 2줄: 4 cards, then GP (2 columns) + 2.
+              Under 1280 (5891:35766) the first row wraps 2·2 and the second is 3 equal. */}
+          <div className="grid grid-cols-4 gap-x-4 gap-y-3 max-xl:grid-cols-2 max-sm:grid-cols-1">
             <KpiTile
               label={replaceTokens(copy.kpi.receivableDue, { period: latestLabel, currency: currencyLabel })}
               value={latest ? fmtAmount(latest.planned) : "—"}
@@ -1258,9 +1256,11 @@ function ReportsConnectedSession({
                   : null
               }
             />
+          </div>
+          <div className={cn("grid gap-x-4 gap-y-3 max-sm:grid-cols-1", showGp ? "grid-cols-4 max-xl:grid-cols-3" : "grid-cols-2")}>
             {showGp ? (
               <KpiTile
-                className="col-span-2 px-6 max-sm:col-span-1"
+                className="col-span-2 px-6 max-xl:col-span-1"
                 label={replaceTokens(copy.kpi.gp, { period: gpLatestLabel || latestLabel, currency: currencyLabel })}
                 value={gpState.status === "error" || !gpKpi.latest ? "—" : fmtAmount(gpKpi.latest.gp)}
                 delta={
@@ -1349,6 +1349,7 @@ function ReportsConnectedSession({
               }
             />
           </div>
+          </div>
   ) : undefined;
 
   const controls = (
@@ -1364,12 +1365,14 @@ function ReportsConnectedSession({
               data-ui="reports-refresh"
               disabled={reportsRefreshDisabled}
               onClick={() => void refreshReports()}
-              size="lg"
+              size="icon-lg"
+              title={copy.refresh}
               type="button"
-              variant="outline"
-              className="rounded-[var(--r-md)] px-4"
+              // ghost: the hero restyles outline buttons as translucent; Figma wants white.
+              variant="ghost"
+              className="size-10 rounded-[var(--r-md)] bg-white text-[var(--color-gray-1)] shadow-[0_1px_2px_rgba(5,29,57,0.1)] hover:bg-[var(--color-gray-11)] hover:text-[var(--color-gray-1)]"
             >
-              {reportsRefreshDisabled ? copy.loading : copy.refresh}
+              <RefreshCw className={cn("size-5", reportsRefreshDisabled && "animate-spin")} />
             </ShadcnButton>
           ) : null}
 
@@ -1444,12 +1447,12 @@ function ReportsConnectedSession({
       ) : null}
       {isManager ? (
         <BusinessFilterField
-          label={copy.controls.assigneeAria}
+          label={copy.controls.assigneeLabel}
           data-ui="reports-assignee-filter"
         >
           <Select value={assigneeFilter ?? ASSIGNEE_ALL} onValueChange={(value) => changeAssignee(value)}>
-            <SelectTrigger aria-label={copy.controls.assigneeAria} className="h-8"><SelectValue placeholder={copy.controls.assigneeAll} /></SelectTrigger>
-            <SelectContent align="start">
+            <SelectTrigger aria-label={copy.controls.assigneeAria} className="h-8 w-[140px] [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:truncate"><SelectValue placeholder={copy.controls.assigneeAll} /></SelectTrigger>
+            <SelectContent align="start" className="max-w-[320px]">
               {(assigneeOptions).map((option) => (
                 <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
               ))}
@@ -1520,7 +1523,7 @@ function ReportsConnectedSession({
       )}
 
           {/* ── 본문 그리드: 좌 차트 컬럼 / 우 Top·월마감 ── */}
-          <div className="grid items-start gap-4 grid-cols-[minmax(0,1fr)_360px] max-lg:grid-cols-1">
+          <div className="grid items-start gap-4 grid-cols-[minmax(0,1fr)_360px] max-xl:grid-cols-1">
             <div className="grid min-w-0 gap-4">
               {/* 수취 계획 vs AR 적용액 */}
               {settlementSnapshot != null && !settlementEmpty ? (
@@ -2259,6 +2262,30 @@ function monthCloseFunctionalCurrencyLine(
 
 // ── 소형 프레젠테이션 조각 (영업 성과 콕핏 OS-C2 가 재사용 — export) ──
 
+// Figma 결산리포트 v6 KPI: a signed change reads "▲ +7.9% vs 8월" in red when it
+// rises and "▼ -12.6% vs 8월" in blue when it falls; the rest of the line stays gray.
+const KPI_DELTA_PATTERN = /([+\-−][\d.,]+%p?(?: vs [^·]+)?)/;
+
+function KpiDeltaText({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(KPI_DELTA_PATTERN).map((part, index) => {
+        if (index % 2 === 0) return part;
+        const falling = part.startsWith("-") || part.startsWith("−");
+        return (
+          <span
+            key={index}
+            className={falling ? "text-[var(--color-primary-4)]" : "text-[var(--color-red-2)]"}
+          >
+            {falling ? "▼ " : "▲ "}
+            {part.trimEnd()}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 export function KpiTile({
   label,
   value,
@@ -2282,11 +2309,7 @@ export function KpiTile({
       data-ui="reports-kpi"
       label={label}
       value={value}
-      delta={
-        delta
-          ? { text: delta.text, tone: delta.tone === "bad" ? "negative" : delta.tone === "up" ? "positive" : "neutral" }
-          : null
-      }
+      delta={delta ? { text: <KpiDeltaText text={delta.text} />, tone: "neutral" } : null}
     >
       {basis || caution || errorMessage ? (
         <>
