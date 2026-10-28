@@ -2199,7 +2199,7 @@ function DealDocumentPanels({
         {/* Same no-header Card surface as 거래 경제: white, radius 12, section shadow. */}
         <Card className="gap-0 px-5 py-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold">딜 요약 브리프</h2>
+            <h2 className="text-sm font-semibold">거래 요약 브리프</h2>
             {aiQuestion}
           </div>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -3453,9 +3453,9 @@ function DealHealthReference({
           ? "text-destructive"
           : "text-muted-foreground"
   return (
-    <section aria-label="딜 건강도와 서류 대조" className="px-4 py-4">
+    <section aria-label="거래 건강도와 서류 대조" className="px-4 py-4">
       <div className="flex items-end justify-between gap-3">
-        <h4 className="text-sm font-semibold">딜 건강도</h4>
+        <h4 className="text-sm font-semibold">거래 건강도</h4>
         <strong className="text-2xl font-semibold text-warning-foreground">
           72
         </strong>

@@ -1,3 +1,4 @@
+import { salesPerformancePreview, salesPerformanceRanking } from "./salesPerformancePreview"
 import { demoExceptionResponse } from "./settlementExceptions"
 import captured from './responses.json'
 import reportFixtures from './reports.json'
@@ -217,6 +218,11 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
     const bundle = bundles[`${period}/${member}`] || bundles[`${period}/all`]
     const key = ({ 'settlement-series':'series','gp-series':'gp','gp-by-assignee':'ranking','counterparty-status':'status','counterparty-gp':'counterpartyGp','counterparty-top':query.get('metric') === 'overdue' ? 'overdueTop':'top' } as Record<string,string>)[path.split('/').pop()!]
     value = bundle[key]?.body
+    if (typeof window !== "undefined" && window.location.pathname.endsWith("/erp/sales-performance")) {
+      value = key === "ranking"
+        ? salesPerformanceRanking(salesPerformancePreview("gp", bundle.gp.body) as import("../api/reports").GPSeriesResponse, value)
+        : salesPerformancePreview(key, value)
+    }
   } else {
     const candidates = Object.entries(responses).filter(([key]) => key.split('?')[0] === path)
     candidates.sort(([a], [b]) => {
