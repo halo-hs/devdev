@@ -60,6 +60,7 @@ import {
 import { cn } from "@/lib/utils"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import { toast } from "sonner"
+import { ViewSeatProvider } from "@trade-os/components/ViewSeatGate"
 import { type Tone, templateSchemas } from "@trade-os/documents/documentTemplateModel"
 import { type PrototypeSlotKind, templates } from "@trade-os/documents/documentTemplateModel"
 import { AppNav } from "@/shell/ErpNav"
@@ -76,12 +77,14 @@ export type Screen = ErpMenuTarget | "result" | "snap-platform"
 export type ProductKey = "erp" | "snap"
 export type ErpPreviewRole = "owner" | "admin" | "member"
 
-// `?plan=trial|expired` comes from the demo login (무료 체험 중 / 체험 종료
-// accounts); without it Trade OS is a paid subscription.
+// `?plan=trial|expired` and `?snap=none` come from the demo login (구독 상태
+// accounts); without them Trade OS and SNAP are paid subscriptions.
 function erpPreviewSubscriptionStates() {
-  const plan = new URLSearchParams(appLocation.search).get("plan")
+  const search = new URLSearchParams(appLocation.search)
+  const plan = search.get("plan")
   return {
     erp: plan === "trial" ? "trial_active" : plan === "expired" ? "trial_expired" : "paid_active",
+    snap: search.get("snap") === "none" ? "trial_not_started" : "paid_active",
   } as const
 }
 export type DocumentStageKey =
@@ -687,6 +690,8 @@ export function App() {
     // The demo login's subscription state follows the session like `role`.
     const plan = new URLSearchParams(appLocation.search).get("plan")
     if (plan === "trial" || plan === "expired") nextUrl.searchParams.set("plan", plan)
+    const snap = new URLSearchParams(appLocation.search).get("snap")
+    if (snap === "none") nextUrl.searchParams.set("snap", snap)
     if (nextScreen === "inbox" && originDealId) nextUrl.searchParams.set("fromDeal", originDealId)
     if (nextScreen === "create" && params.dealId) nextUrl.searchParams.set("deal_id", params.dealId)
     const nextLocation = `${nextUrl.pathname}${nextUrl.search}`
@@ -954,8 +959,9 @@ export function App() {
     isThreePaneScreen || screen === "deal" || screen === "ask"
 
   return (
-    <SettingsDemoProvider key={workspaceId}>
+    <SettingsDemoProvider key={workspaceId} persist>
     <StartGuideProvider key={workspaceId} scope={`preview-account:${workspaceId}`} role={erpHomeRole}>
+    <ViewSeatProvider role={erpHomeRole}>
     <SidebarProvider
       open={sidebarOpen}
       onOpenChange={setSidebarOpen}
@@ -1289,6 +1295,7 @@ export function App() {
         )}
       </div>
     </SidebarProvider>
+    </ViewSeatProvider>
     </StartGuideProvider>
     </SettingsDemoProvider>
   )

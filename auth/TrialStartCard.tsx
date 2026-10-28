@@ -55,14 +55,16 @@ export function TrialStartCard({ product, role, state = "ready", trialDays, tria
         <h3 id={`${id}-product`} className="text-sm font-semibold">{name}</h3>
         {terminal ? (
           <div className="space-y-2 text-xs leading-relaxed text-muted-foreground">
-            <div className="flex flex-wrap gap-x-4 gap-y-1"><span>체험 종료</span><span>체험 시작 {trialPeriod?.startedAt ?? "{시작일}"}</span><span>체험 종료 {trialPeriod?.endedAt ?? "{종료일}"}</span></div>
-            <p>무료 체험 기간을 모두 사용했습니다. 현재 읽기 전용으로 이용할 수 있습니다.</p>
-            <p>{role === "owner" ? "계속 업무를 진행하려면 구독을 시작해 주세요." : "계속 업무를 진행하려면 조직 Owner에게 구독을 요청해 주세요."}</p>
+            {/* CS-09 만료 read-only: show the dates only when both are known. */}
+            <div className="flex flex-wrap gap-x-4 gap-y-1"><span>체험 종료 · 읽기 전용</span>{trialPeriod?.startedAt && trialPeriod.endedAt && <span>체험 시작 {trialPeriod.startedAt} · 체험 종료 {trialPeriod.endedAt}</span>}</div>
+            <p className="font-medium text-foreground">무료 체험 기간이 끝났습니다</p>
+            <p>입력한 데이터는 보존되며 구독 후 이어서 사용할 수 있습니다. 지금은 조회·검색·원본·기존 PDF 다운로드만 할 수 있습니다.</p>
+            {role !== "owner" && <p>조직 대표가 구독을 시작하면 다시 작업할 수 있습니다.</p>}
           </div>
         ) : locked ? (
           <div className="space-y-1 text-xs leading-relaxed text-muted-foreground" role="note">
             <p className="flex items-start gap-1.5"><LockKeyhole className="mt-0.5 size-3.5 shrink-0" aria-label="제품 잠금" /><span>아직 시작되지 않은 제품입니다</span></p>
-            <p>Organization OWNER가 무료 체험 또는 구독을 시작하면 사용할 수 있습니다.</p>
+            <p>조직 대표가 무료 체험이나 구독을 시작하면 사용할 수 있습니다.</p>
           </div>
         ) : (
           <>
@@ -71,6 +73,7 @@ export function TrialStartCard({ product, role, state = "ready", trialDays, tria
             </div>
             <div id={`${id}-terms`} className="flex flex-wrap gap-x-3 gap-y-1 text-xs leading-relaxed text-muted-foreground">
               <span>카드 등록 없이 시작하며 자동 결제되지 않습니다.</span>
+              <span>체험 중 유료 업무 사용자: 최대 3명</span>
               <span>체험 기간이 끝나면 읽기 전용으로 전환됩니다.</span>
             </div>
           </>
@@ -106,13 +109,13 @@ export function TrialStartCard({ product, role, state = "ready", trialDays, tria
             <LockKeyhole aria-label="제품 잠금" />
             <div className="min-w-0 space-y-2">
               <p className="font-semibold">아직 시작되지 않은 제품입니다</p>
-              <AlertDescription>Organization OWNER가 무료 체험 또는 구독을 시작하면 사용할 수 있습니다.</AlertDescription>
+              <AlertDescription>조직 대표가 무료 체험이나 구독을 시작하면 사용할 수 있습니다.</AlertDescription>
             </div>
           </Alert>
         ) : terminal ? (
           <div className="space-y-4">
             <Alert variant="neutral" role="status"><Info aria-hidden="true" /><AlertDescription>{message}</AlertDescription></Alert>
-            <p className="text-sm leading-relaxed text-muted-foreground">계속 업무를 진행하려면 구독을 시작해 주세요.</p>
+            <p className="text-sm leading-relaxed text-muted-foreground">{role === "owner" ? "계속 업무를 진행하려면 구독을 시작해 주세요." : "조직 대표가 구독을 시작하면 다시 작업할 수 있습니다."}</p>
           </div>
         ) : (
           <>

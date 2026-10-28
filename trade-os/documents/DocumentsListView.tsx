@@ -1,4 +1,5 @@
 import { getGeneratedDocumentListStage, generatedDocumentListStages } from "@trade-os/lib/generatedDocumentListStage"
+import { useViewSeatGuard } from "@trade-os/components/ViewSeatGate"
 import { useState, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/Table"
@@ -58,6 +59,7 @@ export function RecentDocumentsTable({
   currentAccountId: string
   flush?: boolean
 }) {
+  const viewSeatGuard = useViewSeatGuard()
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<GeneratedDraft | null>(null)
   const [deletePending, setDeletePending] = useState(false)
@@ -227,6 +229,7 @@ export function RecentDocumentsTable({
                       size="default"
                       onClick={(event) => {
                         event.stopPropagation()
+                        if ((isDraft || canDeliver) && viewSeatGuard()) return
                         openDraft(
                           isDraft || !canDeliver
                             ? rowDestination
@@ -294,7 +297,7 @@ export function RecentDocumentsTable({
                         className="min-w-36"
                         onClick={(event) => event.stopPropagation()}
                       >
-                        <DropdownMenuItem onSelect={() => void onDuplicate(draft)}>
+                        <DropdownMenuItem onSelect={() => { if (!viewSeatGuard()) void onDuplicate(draft) }}>
                           <Copy /> 복제하여 수정
                         </DropdownMenuItem>
                         {canDelete ? (
@@ -461,6 +464,7 @@ export function CreateScreen({
   relatedDeal?: DealDocumentContext | null
   role: ErpPreviewRole
 }) {
+  const viewSeatGuard = useViewSeatGuard()
   const [entryState, setEntryState] = useState<"history" | "first">(
     initialEntryState
   )
@@ -563,6 +567,7 @@ export function CreateScreen({
     templateCode?: string,
     direction?: DocumentDirection
   ) => {
+    if (viewSeatGuard()) return
     setWorkbenchTemplateCode(
       templateCode && templateSchemas[templateCode] ? templateCode : "SC"
     )

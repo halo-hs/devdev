@@ -1,4 +1,5 @@
 import { appLocation } from "@/app/appLocation"
+import { MEMBER_SEAT_KEY } from "@share/settings/useSettingsDemo"
 import { useEffect, useState, type ReactNode } from "react"
 import { ArrowRight, Building2, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/Button"
@@ -10,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card"
-import { type CommonPreviewPlan, type CommonPreviewRole, type CommonProduct, type CommonScreenKey } from "@auth/AuthSurface"
+import { type CommonPreviewAccount, type CommonPreviewRole, type CommonProduct, type CommonScreenKey } from "@auth/AuthSurface"
 import { CommonPasswordRecoveryPrototype } from "@auth/PasswordResetPanel"
 import { CommonSignupPrototype } from "@auth/SignupPanel"
 import { CommonLoginPrototype } from "@auth/LoginPanel"
@@ -164,11 +165,20 @@ export function CommonEntry({ children }: { children: ReactNode }) {
   const land = (
     product: CommonProduct,
     role: CommonPreviewRole = "owner",
-    plan: CommonPreviewPlan = "paid"
+    preview: CommonPreviewAccount = {}
   ) => {
     const erpHome = new URLSearchParams()
     if (role !== "owner") erpHome.set("role", role)
-    if (plan !== "paid") erpHome.set("plan", plan)
+    if (preview.plan && preview.plan !== "paid") erpHome.set("plan", preview.plan)
+    if (preview.snap) erpHome.set("snap", preview.snap)
+    // The Member's Trade OS seat lives in the settings preview (사용자 관리).
+    if (role === "member") {
+      try {
+        window.localStorage.setItem(MEMBER_SEAT_KEY, preview.seat === "view" ? "view" : "assigned")
+      } catch {
+        // Without storage the Member keeps the previous seat state.
+      }
+    }
     // This is the existing local preview session, never a production credential.
     if (product === "snap") {
       try {

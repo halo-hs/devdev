@@ -4,6 +4,9 @@ import type { useDemoState } from "@share/settings/SubscriptionSettings"
 
 export const names = { erp: "Trade OS", snap: "SNAP" }
 
+// Left by the demo login; the settings preview applies it to the Member's Trade OS seat.
+export const MEMBER_SEAT_KEY = "ecoya.preview.member-trade-seat"
+
 export const SettingsDemoContext = createContext<ReturnType<
   typeof useDemoState
 > | null>(null)

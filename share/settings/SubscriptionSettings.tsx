@@ -1,6 +1,7 @@
 import { invitationExamples } from "./invitationData"
-import { useState, type ReactNode } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { Button } from "@/components/ui/Button"
+import { MEMBER_SEAT_KEY } from "@share/settings/useSettingsDemo"
 import type { ProductEntitlement, SettingsRole } from "./SettingsRoutePage"
 import { SettingsDemoContext, useSettingsDemo, names } from "@share/settings/useSettingsDemo"
 
@@ -46,25 +47,70 @@ const initialMembers: Member[] = [
     snap: false,
   },
 ]
-export function useDemoState(subscriptionKind: "separate" | "bundle") {
-  const [members, setMembers] = useState(initialMembers)
+const initialRequests: Request[] = [
+  {
+    id: "request-member-snap",
+    memberId: "member",
+    product: "snap",
+    kind: "access",
+    status: "pending",
+    requester: "member",
+  },
+]
+
+// The app preview keeps members and requests in this browser so a View
+// Member's request survives logging in again as the OWNER who approves it.
+// The demo login leaves `MEMBER_SEAT_KEY` to set the Member's Trade OS seat.
+const DEMO_STATE_KEY = "ecoya.preview.settings-demo"
+
+function readDemoState() {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(DEMO_STATE_KEY) ?? "null") as
+      | { members: Member[]; requests: Request[] }
+      | null
+    const members = stored?.members ?? initialMembers
+    const requests = stored?.requests ?? initialRequests
+    const seat = window.localStorage.getItem(MEMBER_SEAT_KEY)
+    window.localStorage.removeItem(MEMBER_SEAT_KEY)
+    if (!seat) return { members, requests }
+    // Once the View Member has asked for Trade OS, 사용자 관리 owns the seat
+    // (approve, reject or unassign there); logging in again keeps that result.
+    const requested = requests.some(
+      (request) => request.memberId === "member" && request.product === "erp"
+    )
+    if (seat === "view" && requested) return { members, requests }
+    return {
+      members: members.map((member) =>
+        member.id === "member" ? { ...member, erp: seat === "assigned" } : member
+      ),
+      requests,
+    }
+  } catch {
+    return { members: initialMembers, requests: initialRequests }
+  }
+}
+
+export function useDemoState(subscriptionKind: "separate" | "bundle", persist = false) {
+  const [initial] = useState(() =>
+    persist ? readDemoState() : { members: initialMembers, requests: initialRequests }
+  )
+  const [members, setMembers] = useState(initial.members)
   const [invitations, setInvitations] = useState(invitationExamples)
-  const [requests, setRequests] = useState<Request[]>([
-    {
-      id: "request-member-snap",
-      memberId: "member",
-      product: "snap",
-      kind: "access",
-      status: "pending",
-      requester: "member",
-    },
-  ])
+  const [requests, setRequests] = useState<Request[]>(initial.requests)
+  useEffect(() => {
+    if (!persist) return
+    try {
+      window.localStorage.setItem(DEMO_STATE_KEY, JSON.stringify({ members, requests }))
+    } catch {
+      // The preview still works without storage.
+    }
+  }, [persist, members, requests])
   // Purchased capacity is a fixture. UI assignment must never change purchased capacity.
   const capacity = subscriptionKind === "bundle" ? { erp: 8, snap: 8 } : { erp: 8, snap: 5 }
   return { members, setMembers, requests, setRequests, capacity, invitations, setInvitations }
 }
-export function SettingsDemoProvider({ children, subscriptionKind = "separate" }: { children: ReactNode; subscriptionKind?: "separate" | "bundle" }) {
-  const value = useDemoState(subscriptionKind)
+export function SettingsDemoProvider({ children, subscriptionKind = "separate", persist = false }: { children: ReactNode; subscriptionKind?: "separate" | "bundle"; persist?: boolean }) {
+  const value = useDemoState(subscriptionKind, persist)
   return (
     <SettingsDemoContext.Provider value={value}>
       {children}
