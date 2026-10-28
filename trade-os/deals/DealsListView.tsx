@@ -21,6 +21,8 @@ import {
   Archive,
   ChevronDown,
   ChevronRight,
+  CircleAlert,
+  FileText,
   GitBranch,
   Info,
   Download,
@@ -28,8 +30,10 @@ import {
   MoreVertical,
   Plus,
   RefreshCw,
+  Ship,
   SlidersHorizontal,
   X,
+  type LucideIcon,
 } from "lucide-react"
 
 import { TablePagination } from "@/components/ui/TablePagination"
@@ -46,7 +50,6 @@ import {
 } from "@/components/ui/AlertDialog"
 import { Button } from "@/components/ui/Button"
 import { BusinessPageHero, heroOutlineButtonClass } from "@/components/platform/HeroBanner"
-import { SummaryMetricStrip } from "@/components/platform/SummaryMetricStrip"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -245,6 +248,15 @@ function ddayOrder(value: string) {
     : Number.POSITIVE_INFINITY
 }
 
+// Figma D-day badge: overdue red, three days or fewer orange, done green.
+function ddayTone(value: string) {
+  if (value === "완료") return "success" as const
+  const match = /^D([+-])(\d+)$/.exec(value)
+  if (!match) return "neutral" as const
+  if (match[1] === "+") return "danger" as const
+  return Number(match[2]) <= 3 ? ("warning" as const) : ("neutral" as const)
+}
+
 function isDueSoon(deal: Deal) {
   if (deal.stage !== "shipment") return false
   const eta = new Date(`${deal.eta.replaceAll(".", "-")}T00:00:00`)
@@ -325,6 +337,14 @@ const kpiFilterLabels: Record<Exclude<KpiFilter, "all">, string> = {
 }
 
 const riskStripFilters = ["risk", "remaining", "doc_gap", "quantity"] as const
+
+// Figma 6928:141474 leading icons: Error Circle, Ship, Document, Arrow Sync.
+const riskStripIcons: Record<(typeof riskStripFilters)[number], LucideIcon> = {
+  risk: CircleAlert,
+  remaining: Ship,
+  doc_gap: FileText,
+  quantity: RefreshCw,
+}
 
 const kpiFilterMatchers: Record<
   Exclude<KpiFilter, "all">,
@@ -670,39 +690,33 @@ export function DealsScreen({
                       setPage(1)
                     }}
                   />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="shrink-0 border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                  {/* Figma 6928:141431: white 40px button, 6px gap, count in a
+                      dark circle, chevron up while the filters are open. */}
+                  <button
+                    type="button"
+                    className="flex h-10 shrink-0 items-center gap-1.5 rounded-[10px] bg-white pr-4 pl-3.5 text-[15px] leading-[22px] text-[var(--color-gray-1)] shadow-[0_1px_2px_rgba(5,29,57,0.1)] outline-none hover:bg-[var(--color-gray-11)] focus-visible:ring-2 focus-visible:ring-white"
                     aria-expanded={advancedFiltersOpen}
                     aria-controls="deal-advanced-filters"
                     onClick={() => setAdvancedFiltersOpen((value) => !value)}
                   >
-                    <SlidersHorizontal />
+                    <SlidersHorizontal className="size-[18px]" />
                     상세 필터
                     {activeFilters.length > 0 && (
-                      <span
-                        className={cn(
-                          "grid min-w-5 place-items-center rounded-full px-1.5 text-xs font-semibold tabular-nums",
-                          advancedFiltersOpen
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-white text-primary"
-                        )}
-                      >
+                      <span className="grid size-[18px] place-items-center rounded-full bg-[var(--color-primary-1)] text-[11px] leading-4 font-semibold text-white tabular-nums">
                         {activeFilters.length}
                       </span>
                     )}
                     <ChevronDown
                       className={cn(
-                        "transition-transform",
+                        "size-[18px] transition-transform",
                         advancedFiltersOpen && "rotate-180"
                       )}
                     />
-                  </Button>
+                  </button>
                 </div>
               }
             >
-              {advancedFiltersOpen || activeFilters.length > 0 || query ? (
+              {advancedFiltersOpen ? (
                 <div className="flex w-full max-w-full min-w-0 flex-col gap-3">
                   {advancedFiltersOpen && (
                     <div
@@ -846,174 +860,155 @@ export function DealsScreen({
                       )}
                     </div>
                   )}
-                  {(activeFilters.length > 0 || query) && (
-                    <div
-                      aria-label="적용된 필터"
-                      className="flex flex-wrap items-center gap-2"
-                    >
-                      {activeFilters.map((filter) => (
-                        <Button
-                          key={filter.key}
-                          variant="outline"
-                          size="sm"
-                          className="rounded-full border-white/25 bg-white/15 text-white hover:bg-white/25 hover:text-white"
-                          aria-label={`${filter.label} 필터 해제`}
-                          onClick={() => {
-                            filter.clear()
-                            setPage(1)
-                          }}
-                        >
-                          {filter.label}
-                          <X className="size-3" />
-                        </Button>
-                      ))}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-white/80 hover:bg-white/10 hover:text-white active:bg-white/15"
-                        onClick={() => {
-                          setQuery("")
-                          setLifecycle("all")
-                          setCounterparty("all")
-                          setDateStart("")
-                          setDateEnd("")
-                          setStage("active")
-                          setAssignee("all")
-                          setAssigneeName("")
-                          setKpiFilter("all")
-                          setFinanceFilters(defaultFinanceFilters)
-                          setPage(1)
-                        }}
-                      >
-                        전체 해제
-                      </Button>
-                    </div>
-                  )}
                 </div>
               ) : null}
             </BusinessListToolbar>
           }
-          summary={
-            <section aria-label="주요 거래 지표">
-              <SummaryMetricStrip
-                className="grid-cols-2"
-                items={[
-                  {
-                    label: "오픈 오더",
-                    value: (
-                      <button
-                        aria-label={`오픈 오더 ${baseDeals.filter((deal) => deal.orderLifecycle === "open").length}건 보기`}
-                        onClick={() => {
-                          setLifecycle("open")
-                          setPage(1)
-                        }}
-                      >
-                        {
-                          baseDeals.filter(
-                            (deal) => deal.orderLifecycle === "open"
-                          ).length
-                        }
-                        건
-                      </button>
-                    ),
-                    tone: "blue",
-                    detail: "주문 결정이 열려 있는 거래",
-                  },
-                  {
-                    label: "처리 대기",
-                    value: (
-                      <>
-                        {baseDeals.reduce((sum, deal) => sum + deal.pending, 0)}
-                        건
-                      </>
-                    ),
-                    tone: "warning",
-                    detail: "확인이 필요한 문서",
-                  },
-                  {
-                    label: "도착 임박",
-                    value: (
-                      <button
-                        aria-label="도착 임박 거래 보기"
-                        onClick={() => {
-                          setKpiFilter("eta")
-                          setPage(1)
-                        }}
-                      >
-                        {baseDeals.filter(isDueSoon).length}건
-                      </button>
-                    ),
-                    tone: "warning",
-                    detail: "7일 안에 도착 예정",
-                  },
-                  {
-                    label: "연체",
-                    value: (
-                      <button
-                        aria-label="연체 거래 보기"
-                        onClick={() => {
-                          setKpiFilter("overdue")
-                          setPage(1)
-                        }}
-                      >
-                        {baseDeals.filter((deal) => deal.overdueAr).length}건
-                      </button>
-                    ),
-                    tone: "danger",
-                    detail: "받을 돈이 늦어진 거래",
-                  },
-                ]}
-              />
-              {/* Same 4-column grid and gap as the KPI cards so cells and
-                  dividers line up under them. */}
-              <div
-                aria-label="운영 리스크"
-                className="mt-3 grid grid-cols-2 gap-x-3 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-1.5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] lg:grid-cols-4"
-              >
-                {riskStripFilters.map((key, index) => {
-                  const active = kpiFilter === key
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() => {
-                        setKpiFilter(active ? "all" : key)
-                        setPage(1)
-                      }}
-                      className={cn(
-                        "relative flex min-w-0 items-baseline gap-2 rounded-[var(--r-md)] border border-transparent px-2.5 py-2.5 text-left transition-colors outline-none hover:bg-[var(--color-gray-11)] focus-visible:ring-2 focus-visible:ring-ring",
-                        index % 2 === 1 &&
-                          "before:absolute before:top-2 before:bottom-2 before:-left-[7px] before:w-px before:bg-[var(--color-gray-9)]",
-                        index === 2 &&
-                          "lg:before:absolute lg:before:top-2 lg:before:bottom-2 lg:before:-left-[7px] lg:before:w-px lg:before:bg-[var(--color-gray-9)]",
-                        active &&
-                          "border-[var(--color-primary-4)] bg-[var(--color-primary-10)] hover:bg-[var(--color-primary-10)]"
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "text-sm text-[var(--color-gray-3)]",
-                          active && "text-[var(--color-primary-4)]"
-                        )}
-                      >
-                        {kpiFilterLabels[key]}
-                      </span>
-                      <strong
-                        className={cn(
-                          "text-lg leading-6 font-bold tabular-nums text-[var(--color-gray-1)]",
-                          active && "text-[var(--color-primary-4)]"
-                        )}
-                      >
-                        {baseDeals.filter(kpiFilterMatchers[key]).length}건
-                      </strong>
-                    </button>
-                  )
-                })}
-              </div>
-            </section>
-          }
         />
+        {/* Figma 6928:141427: applied filters, KPI cards and the risk buttons
+            sit under the hero (12px apart), not on it. */}
+        {(activeFilters.length > 0 || query) && (
+          <div
+            aria-label="적용된 필터"
+            className="-mt-2 flex flex-wrap items-center gap-1.5"
+          >
+            {activeFilters.map((filter) => (
+              <span
+                key={filter.key}
+                className="flex h-8 items-center gap-0.5 rounded-full bg-[var(--color-gray-8)] pr-2 pl-3 text-[13px] leading-[22px] text-[var(--color-gray-1)]"
+              >
+                {filter.label}
+                <button
+                  type="button"
+                  className="grid size-6 place-items-center rounded-[var(--r-sm)] text-[var(--color-gray-3)] outline-none hover:bg-[color-mix(in_srgb,var(--color-gray-1)_6%,transparent)] focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label={`${filter.label} 필터 해제`}
+                  onClick={() => {
+                    filter.clear()
+                    setPage(1)
+                  }}
+                >
+                  <X className="size-4" />
+                </button>
+              </span>
+            ))}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="px-3 text-[13px] leading-[18px] text-[var(--color-primary-4)] hover:text-[var(--color-primary-4)]"
+              onClick={() => {
+                setQuery("")
+                setLifecycle("all")
+                setCounterparty("all")
+                setDateStart("")
+                setDateEnd("")
+                setStage("active")
+                setAssignee("all")
+                setAssigneeName("")
+                setKpiFilter("all")
+                setFinanceFilters(defaultFinanceFilters)
+                setPage(1)
+              }}
+            >
+              전체 해제
+            </Button>
+          </div>
+        )}
+        <section aria-label="주요 거래 지표" className="-mt-2 flex flex-col gap-3 pt-1">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[
+              {
+                label: "오픈 오더",
+                count: baseDeals.filter((deal) => deal.orderLifecycle === "open").length,
+                detail: "주문 결정이 열려 있는 거래",
+                onSelect: () => setLifecycle("open"),
+              },
+              {
+                label: "처리 대기",
+                count: baseDeals.reduce((sum, deal) => sum + deal.pending, 0),
+                detail: "확인이 필요한 문서",
+              },
+              {
+                label: "도착 임박",
+                count: baseDeals.filter(isDueSoon).length,
+                detail: "7일 안에 도착 예정",
+                onSelect: () => setKpiFilter("eta"),
+              },
+              {
+                label: "연체",
+                count: baseDeals.filter((deal) => deal.overdueAr).length,
+                detail: "받을 돈이 늦어진 거래",
+                onSelect: () => setKpiFilter("overdue"),
+              },
+            ].map((metric) => {
+              const body = (
+                <>
+                  <span className="text-sm leading-5 font-semibold text-[var(--color-gray-1)]">
+                    {metric.label}
+                  </span>
+                  <strong className="text-[22px] leading-[30px] font-bold tabular-nums text-[var(--color-gray-1)]">
+                    {metric.count}건
+                  </strong>
+                  <span className="text-[13px] leading-[18px] text-[var(--color-gray-4)]">
+                    {metric.detail}
+                  </span>
+                </>
+              )
+              const cardClass =
+                "flex min-w-0 flex-col items-start gap-1.5 rounded-xl bg-white px-5 py-[18px] text-left shadow-[0_4px_12px_rgba(0,0,0,0.1)]"
+              return metric.onSelect ? (
+                <button
+                  key={metric.label}
+                  type="button"
+                  aria-label={`${metric.label} ${metric.count}건 보기`}
+                  className={cn(cardClass, "outline-none hover:bg-[var(--color-gray-11)] focus-visible:ring-2 focus-visible:ring-ring")}
+                  onClick={() => {
+                    metric.onSelect()
+                    setPage(1)
+                  }}
+                >
+                  {body}
+                </button>
+              ) : (
+                <div key={metric.label} className={cardClass}>
+                  {body}
+                </div>
+              )
+            })}
+          </div>
+          <div
+            aria-label="운영 리스크"
+            className="grid grid-cols-2 gap-3 lg:grid-cols-4"
+          >
+            {riskStripFilters.map((key) => {
+              const active = kpiFilter === key
+              const Icon = riskStripIcons[key]
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => {
+                    setKpiFilter(active ? "all" : key)
+                    setPage(1)
+                  }}
+                  className={cn(
+                    "flex h-12 min-w-[100px] items-center gap-2 rounded-[10px] border border-[var(--color-gray-8)] bg-white px-4 text-left shadow-[0_1px_2px_rgba(5,29,57,0.1)] outline-none hover:bg-[var(--color-gray-11)] focus-visible:ring-2 focus-visible:ring-ring",
+                    active &&
+                      "border-[var(--color-primary-4)] bg-[var(--color-primary-10)] hover:bg-[var(--color-primary-10)]"
+                  )}
+                >
+                  <Icon className="size-5 shrink-0 text-[var(--color-gray-4)]" strokeWidth={1.5} />
+                  <span className="truncate text-[13px] text-[var(--color-gray-4)]">
+                    {kpiFilterLabels[key]}
+                  </span>
+                  <strong className="ml-1 text-base leading-[22px] font-bold tabular-nums text-[var(--color-gray-1)]">
+                    {baseDeals.filter(kpiFilterMatchers[key]).length}건
+                  </strong>
+                </button>
+              )
+            })}
+          </div>
+        </section>
         {/* Same list card as 문서 올리기: toolbar, 16px-inset table and pagination. */}
         <Card size="sm">
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-4">
@@ -1049,7 +1044,7 @@ export function DealsScreen({
             </BusinessFilterBar>
             {/* SSOT SC-14 / #443 P3: only moves to 연락처·파이프라인 (/erp/sales);
                 the deals list has no stage board. */}
-            <Button variant="outline" size="lg" onClick={onOpenContacts}>
+            <Button variant="outline" onClick={onOpenContacts}>
               <GitBranch />
               연락처·파이프라인
             </Button>
@@ -1074,18 +1069,19 @@ export function DealsScreen({
             >
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[21%]">
+                  {/* Figma 6928:141491 column widths on the 1320 frame. */}
+                  <TableHead className="w-[250px] pl-5">
                     거래번호 / 거래처
                   </TableHead>
-                  <TableHead className="w-[13%]">품목 / 주문 이행</TableHead>
-                  <TableHead className="w-[13%] text-right!">참고 금액</TableHead>
-                  <TableHead className="w-[17%] text-right!">현재 금융</TableHead>
-                  <TableHead className="w-[10%]">D-day / ETA</TableHead>
-                  <TableHead className="w-[6%]">담당자</TableHead>
-                  <TableHead className="w-[18%]">
+                  <TableHead className="w-[170px]">품목 / 주문 이행</TableHead>
+                  <TableHead className="w-[150px] text-right!">참고 금액</TableHead>
+                  <TableHead className="w-[180px] text-right!">현재 금융</TableHead>
+                  <TableHead className="w-[140px] text-center!">D-day / ETA</TableHead>
+                  <TableHead className="w-[90px] text-center!">담당자</TableHead>
+                  <TableHead className="w-[292px]">
                     진행 상태 / 상세 정보
                   </TableHead>
-                  <TableHead className="w-10">
+                  <TableHead className="w-12">
                     <span className="sr-only">거래 메뉴</span>
                   </TableHead>
                 </TableRow>
@@ -1123,7 +1119,9 @@ export function DealsScreen({
                           }
                         }}
                       >
-                        <TableCell className="py-4 whitespace-normal">
+                        {/* Figma 6928:141500 row: cells 16px from the top,
+                            14/20 id, 13/18 title, 11/16 captions. */}
+                        <TableCell className="py-4 pl-5 align-top whitespace-normal">
                           <button
                             className="block w-full text-left"
                             onClick={(event) => {
@@ -1132,153 +1130,183 @@ export function DealsScreen({
                             }}
                           >
                             <span className="flex items-center gap-2">
-                              <strong className="text-base font-semibold tracking-[-0.01em]">
+                              <strong className="text-sm leading-5 font-bold text-[var(--color-gray-1)]">
                                 {displayDealId}
                               </strong>
                               {deal.shared && (
                                 <StatusBadge tone="blue">공유</StatusBadge>
                               )}
                             </span>
-                            <span className="mt-1 block text-sm">
+                            <span className="mt-0.5 block text-[13px] leading-[18px] text-[var(--color-gray-1)]">
                               {displayDealTitle}
                             </span>
                           </button>
-                          <span className="mt-1 block text-xs text-muted-foreground">
+                          <span className="mt-0.5 block text-[11px] leading-4 text-[var(--color-gray-4)]">
                             {deal.counterparty}
                           </span>
                         </TableCell>
-                        <TableCell className="whitespace-normal">
-                          <span className="text-xs font-medium">
-                            {dealItemSummary(deal)}
-                          </span>
+                        <TableCell className="py-4 align-top whitespace-normal">
                           {(() => {
                             const order = orderProgress(deal.id)
                             return order ? (
                               <>
-                                <span className="mt-1 block text-xs">
+                                <span className="block text-[15px] leading-[22px] text-[var(--color-gray-1)]">
                                   계약 {order.contracted} {order.unit} · 선적{" "}
                                   {order.shipped} {order.unit}
                                 </span>
-                                <span className="mt-1 block text-xs text-warning-foreground">
+                                <span className="mt-0.5 block text-[11px] leading-4 text-[var(--color-gray-4)]">
+                                  {dealItemSummary(deal)}
+                                </span>
+                                <span className="mt-0.5 block text-[11px] leading-4 text-[var(--color-orange-1)]">
                                   잔량 {order.remaining} {order.unit} ·{" "}
                                   {order.state}
                                 </span>
                               </>
                             ) : (
-                              <small className="mt-1 block text-muted-foreground">
-                                {deal.remaining
-                                  ? `잔량 ${deal.remaining}`
-                                  : "수량 근거 확인 필요"}
-                              </small>
+                              <>
+                                <span className="block text-[15px] leading-[22px] text-[var(--color-gray-1)]">
+                                  {deal.remaining
+                                    ? `잔량 ${deal.remaining}`
+                                    : "수량 근거 확인 필요"}
+                                </span>
+                                <span className="mt-0.5 block text-[11px] leading-4 text-[var(--color-gray-4)]">
+                                  {dealItemSummary(deal)}
+                                </span>
+                              </>
                             )
                           })()}
                         </TableCell>
-                        <TableCell className="text-right! whitespace-normal tabular-nums">
+                        <TableCell className="py-4 text-right! align-top whitespace-normal tabular-nums">
                           {(() => {
                             const ref = referenceAmount(deal.id)
                             return ref ? (
                               <>
-                                <strong className="text-xs">
+                                <span className="block text-xs leading-4 text-[var(--color-gray-1)]">
                                   {exactFinanceMoney(ref.amount, ref.currency)}
-                                </strong>
-                                <small className="mt-1 block break-all text-muted-foreground">
+                                </span>
+                                <span className="mt-0.5 block text-[11px] leading-4 break-all text-[var(--color-gray-4)]">
                                   {ref.document} · {ref.state}
-                                </small>
+                                </span>
                               </>
                             ) : (
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-[11px] leading-4 text-[var(--color-gray-4)]">
                                 — · 출처 확인 필요
                               </span>
                             )
                           })()}
                         </TableCell>
-                        <TableCell className="text-right! whitespace-normal tabular-nums">
-                          {filteredFinanceFacts(
-                            deal.id,
-                            deal.currency,
-                            defaultFinanceFilters
-                          ).map((fact) => {
-                            const finance = presentFinanceFact(fact)
-                            return (
-                              <div
-                                key={fact.currency}
-                                className="mb-1 text-xs leading-relaxed"
-                              >
-                                <span className="block">
-                                  받을 돈{" "}
-                                  {finance.receivable === "—"
-                                    ? `${fact.currency} —`
-                                    : finance.receivable}
-                                </span>
-                                <span className="block">
-                                  줄 돈{" "}
-                                  {finance.payable === "—"
-                                    ? `${fact.currency} —`
-                                    : finance.payable}
-                                </span>
-                                {finance.adjustedResult === "—" && (
-                                  <span className="block text-warning-foreground">
-                                    손익 근거 확인 필요
-                                  </span>
-                                )}
-                              </div>
-                            )
-                          })}
-                          <button
-                            className="text-xs text-primary hover:underline"
-                            onClick={(event) => {
-                              event.stopPropagation()
-                              onOpenDeal(deal.id, "finance")
-                            }}
-                          >
-                            금융 상세 열기
-                          </button>
+                        <TableCell className="py-4 align-top whitespace-normal tabular-nums">
+                          <div className="flex flex-col items-end gap-0.5">
+                            {filteredFinanceFacts(
+                              deal.id,
+                              deal.currency,
+                              defaultFinanceFilters
+                            ).map((fact) => {
+                              const finance = presentFinanceFact(fact)
+                              return (
+                                <div key={fact.currency} className="contents">
+                                  {[
+                                    ["받을 돈", finance.receivable],
+                                    ["줄 돈", finance.payable],
+                                  ].map(([label, amount]) => (
+                                    <span
+                                      key={label}
+                                      className="flex w-full items-baseline justify-between gap-2 text-[11px] leading-4"
+                                    >
+                                      <span className="text-[var(--color-gray-4)]">{label}</span>
+                                      <span className="text-[var(--color-gray-1)]">
+                                        {amount === "—" ? `${fact.currency} —` : amount}
+                                      </span>
+                                    </span>
+                                  ))}
+                                  {finance.adjustedResult === "—" && (
+                                    <span className="text-[11px] leading-4 text-[var(--color-orange-1)]">
+                                      손익 근거 확인 필요
+                                    </span>
+                                  )}
+                                </div>
+                              )
+                            })}
+                            <button
+                              className="h-6 rounded-[var(--r-sm)] px-2 text-[11px] leading-4 text-[var(--color-primary-4)] hover:bg-[color-mix(in_srgb,var(--color-gray-1)_6%,transparent)]"
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                onOpenDeal(deal.id, "finance")
+                              }}
+                            >
+                              금융 상세 열기
+                            </button>
+                          </div>
                         </TableCell>
-                        <TableCell className="tabular-nums">
-                          <strong
-                            className={cn(
-                              "font-medium",
-                              deal.dday.includes("+") && "text-destructive"
-                            )}
-                          >
-                            {deal.dday}
-                          </strong>
-                          {dDayBasisLabel(deal.dDayBasis) ? <span className="ml-1.5 text-xs text-muted-foreground">{dDayBasisLabel(deal.dDayBasis)}</span> : null}
-                          <small className="mt-1 block text-muted-foreground">
-                            ETA {deal.eta.replaceAll(".", "-")}
-                          </small>
+                        <TableCell className="py-4 align-top tabular-nums">
+                          <div className="flex flex-col items-center gap-0.5">
+                            <span className="flex items-center gap-1.5">
+                              <StatusBadge tone={ddayTone(deal.dday)}>
+                                {deal.dday}
+                              </StatusBadge>
+                              {dDayBasisLabel(deal.dDayBasis) ? (
+                                <span className="text-[11px] leading-4 text-[var(--color-gray-4)]">
+                                  {dDayBasisLabel(deal.dDayBasis)}
+                                </span>
+                              ) : null}
+                            </span>
+                            <span className="text-[15px] leading-[22px] text-[var(--color-gray-3)]">
+                              ETA {deal.eta.replaceAll(".", "-")}
+                            </span>
+                          </div>
                         </TableCell>
                         <TableCell
                           className={cn(
-                            "text-xs",
+                            "py-4 text-center align-top text-[13px] leading-[18px] text-[var(--color-gray-1)]",
                             deal.assignee === "미배정" &&
-                              "text-warning-foreground"
+                              "text-[var(--color-orange-1)]"
                           )}
                         >
                           {deal.assignee}
                         </TableCell>
-                        <TableCell className="whitespace-normal">
-                          <div aria-label={`${displayDealId} 상태별 상세`}>
-                            <StatusBadge
-                              tone={
-                                deal.stage === "settled" ? "success" : "neutral"
-                              }
-                            >
-                              {stageLabels[deal.stage]}
-                              {deal.stage === "settled" ||
-                              deal.stage === "settlement"
-                                ? ""
-                                : " 진행"}
-                            </StatusBadge>
-                            <div className="mt-1.5 space-y-1 text-xs text-muted-foreground">
-                              <p>{deal.direction === "sales" ? "매출" : deal.direction === "purchase" ? "매입" : "방향 확인 필요"}</p>
-                              {Boolean(deal.requiredDocsMissing) && <p className="text-warning-foreground">서류 미비 {deal.requiredDocsMissing}건</p>}
-                              {dealStateDetails(deal).map((detail) => (
-                                <p key={detail}>{detail}</p>
-                              ))}
-                            </div>
+                        <TableCell className="py-4 align-top whitespace-normal">
+                          <div
+                            aria-label={`${displayDealId} 상태별 상세`}
+                            className="flex flex-col items-start gap-1"
+                          >
+                            <span className="flex items-center gap-1">
+                              <StatusBadge
+                                tone={
+                                  deal.stage === "settled" ? "success" : "neutral"
+                                }
+                              >
+                                {stageLabels[deal.stage]}
+                                {deal.stage === "settled" ||
+                                deal.stage === "settlement"
+                                  ? ""
+                                  : " 진행"}
+                              </StatusBadge>
+                              <StatusBadge variant="outline">
+                                {deal.direction === "sales" ? "매출" : deal.direction === "purchase" ? "매입" : "방향 확인 필요"}
+                              </StatusBadge>
+                            </span>
+                            {Boolean(deal.requiredDocsMissing) && (
+                              <span className="text-[11px] leading-4 text-[var(--color-orange-1)]">
+                                · 서류 미비 {deal.requiredDocsMissing}건
+                              </span>
+                            )}
+                            {dealStateDetails(deal).map((detail) => (
+                              <span
+                                key={detail}
+                                className="text-[11px] leading-4 text-[var(--color-gray-4)]"
+                              >
+                                · {detail}
+                              </span>
+                            ))}
+                            {deal.risks.length > 0 && (
+                              <span className="rounded-full bg-[var(--color-orange-6)] px-2.5 py-0.5 text-[13px] leading-[18px] text-[var(--color-orange-1)]">
+                                리스크 {deal.risks.length}건 · {deal.risks
+                                  .map((risk) => riskLabels[risk])
+                                  .join(" · ")}
+                              </span>
+                            )}
                             <button
-                              className="mt-2 text-left text-xs font-medium text-primary hover:underline"
+                              className="h-6 rounded-[var(--r-sm)] px-2 text-left text-[11px] leading-4 text-[var(--color-primary-4)] hover:bg-[color-mix(in_srgb,var(--color-gray-1)_6%,transparent)]"
                               onClick={(event) => {
                                 event.stopPropagation()
                                 onOpenDeal(
@@ -1291,16 +1319,9 @@ export function DealsScreen({
                                 ? `${workLabels[getDealWorkPlan(deal.id).current!]} 확인 · ${deal.nextAction}`
                                 : "정산 상세 보기"}
                             </button>
-                            {deal.risks.length > 0 && (
-                              <small className="mt-1 block text-warning-foreground">
-                                리스크 {deal.risks.length}건 · {deal.risks
-                                  .map((risk) => riskLabels[risk])
-                                  .join(" · ")}
-                              </small>
-                            )}
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="py-4 align-top">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
@@ -1383,22 +1404,30 @@ export function DealsScreen({
         </Card>
 
         {role === "owner" ? (
-          <section className="border-t pt-4">
-            <Button
-              variant="ghost"
-              className="h-auto w-full justify-between rounded-none px-0 py-2"
+          <section className="border-t border-[var(--color-gray-9)]">
+            {/* Figma 6928:141842: blue link, count, Owner badge, chevron at the end. */}
+            <button
+              type="button"
+              aria-expanded={archiveOpen}
+              className="flex w-full items-center gap-3 px-1 py-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
               onClick={() => setArchiveOpen((value) => !value)}
             >
-              <span className="flex items-center gap-2">
+              <span className="flex h-8 items-center gap-1 text-[13px] leading-[18px] text-[var(--color-primary-4)]">
                 <Archive className="size-4" />
                 보관된 거래 보기
-                <StatusBadge>{archivedDeals.length}</StatusBadge>
-                <StatusBadge>Owner</StatusBadge>
               </span>
-              <ChevronRight
-                className={cn("size-4 transition", archiveOpen && "rotate-90")}
-              />
-            </Button>
+              <span className="text-[13px] leading-[18px] text-[var(--color-gray-1)] tabular-nums">
+                {archivedDeals.length}
+              </span>
+              <span className="flex h-4 items-center rounded-full bg-[var(--color-gray-9)] px-2.5 text-[11px] leading-4 text-[var(--color-gray-3)]">
+                Owner
+              </span>
+              <span className="ml-auto grid size-8 place-items-center text-[var(--color-gray-2)]">
+                <ChevronRight
+                  className={cn("size-[18px] transition", archiveOpen && "rotate-90")}
+                />
+              </span>
+            </button>
             {archiveOpen ? (
               <div className="mt-2 divide-y border-y bg-muted/35 px-4">
                 {archivedDeals.length ? (
