@@ -38,13 +38,14 @@ export function CommonPublicLayout({
           className="trade-landing ecoya-auth-header"
           data-auth-variant={authVariant}
         >
+          {/* develop AuthCommonShell: same nav as the landing, actions are 언어 · 도입 문의 only. */}
           <LandingHeader
             product={homeHref === "/snap" ? "snap" : "erp"}
-            homeHref={homeHref}
-            homeLabel="ECOYA 서비스 홈"
+            homeHref="/"
             showLocaleToggle
             showLoginAction={false}
             showStartAction={false}
+            plainLinks
           />
         </div>
       ) : (
