@@ -1018,7 +1018,7 @@ export function AskPrototype({
                 alt=""
                 width={96}
                 height={96}
-                className="mx-auto mb-8 size-24 shrink-0"
+                className="mx-auto mb-4 size-24 shrink-0"
               />
               <h1 className="text-center text-[22px] leading-[30px] font-bold text-[var(--color-gray-1)]">
                 {aiHandoffCopy.workspace.question}
