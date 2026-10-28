@@ -82,6 +82,8 @@ export function ProductsSubscriptions({
       onClose={closeChange}
     />
   ) : null
+  // Screen examples (PRICING-POLICY 4장: 30×24h trial); the server supplies real dates.
+  const trialExample = { startedAt: "2026.10.14", endedAt: "2026.11.13", daysLeft: 16 }
   const subscriptionExamples = {
     erp: { startedAt: "2026.09.01", renewsAt: "2026.11.01" },
     snap: { startedAt: "2026.09.15", renewsAt: "2026.10.15" },
@@ -124,7 +126,8 @@ export function ProductsSubscriptions({
                 {subscription.items.map((product) => <TrialStartDemo
                   key={`${product}:${role}:${status}:${trialStates[product] ?? "ready"}`}
                   product={product} role={role} layout="row"
-                  initialState={status === "trial_expired" ? "used" : trialStates[product]} trialDays={trialDays[product]} trialPeriod={trialPeriods[product]}
+                  initialState={status === "trial_expired" ? "used" : trialStates[product]} trialDays={trialDays[product] ?? 30}
+                  trialPeriod={trialPeriods[product] ?? (status === "trial_expired" ? { startedAt: "2026.09.01", endedAt: "2026.10.01" } : undefined)}
                   onSubscribe={(selectedProduct) => setChangeIntent({ kind: "plan", initialPlan: selectedProduct })}
                 />)}
               </div>
@@ -147,8 +150,27 @@ export function ProductsSubscriptions({
                   {(status === "paid_active" || status === "cancel_scheduled") && <span>구독 시작 {subscriptionExamples[subscription.id].startedAt}</span>}
                   {status === "paid_active" && <span>다음 갱신 {subscriptionExamples[subscription.id].renewsAt}</span>}
                   {status === "cancel_scheduled" && <span>해지 예정 {subscriptionExamples[subscription.id].renewsAt}</span>}
-                  {status === "trial_active" && <span>체험 기간 {"{서버 값}일"} · {"{시작일} – {종료일}"}</span>}
+                  {status === "trial_active" && <span>체험 기간 30일 · {trialExample.startedAt} – {trialExample.endedAt} · {trialExample.daysLeft}일 남음</span>}
                 </div>
+                {status === "trial_active" && (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {role === "owner"
+                      ? "체험이 끝나면 이 제품은 읽기 전용으로 바뀌어요. 계속 사용하려면 기간 안에 구독을 시작하세요. 카드 등록이나 자동 결제는 없어요."
+                      : "체험이 끝나면 이 제품은 읽기 전용으로 바뀌어요. 구독은 조직 대표가 시작할 수 있어요."}
+                  </p>
+                )}
+                {status === "payment_pending" && (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {role === "owner"
+                      ? "결제가 완료되지 않았어요. 갱신 예정일부터 7일 안에 결제하면 지금처럼 이용할 수 있어요."
+                      : "결제 확인이 필요해요. 조직 대표가 결제를 마치면 지금처럼 이용할 수 있어요."}
+                  </p>
+                )}
+                {status === "cancel_scheduled" && (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    해지 예정일까지는 지금처럼 이용할 수 있고, 이후에는 읽기 전용으로 바뀌어요.
+                  </p>
+                )}
                 <div className="mt-2 grid gap-2">
                   {subscription.items.map((product) => {
                     const assigned = members.filter((member) => member[product]).length
@@ -188,7 +210,7 @@ export function ProductsSubscriptions({
           {offers.filter((offer) => offer.id === "bundle" || !products.includes(offer.id)).map((offer) => (
             offer.id !== "bundle" && (subscriptionStates[offer.id] ?? "trial_not_started") === "trial_not_started" ? (
               <div key={`${offer.id}:${role}:${trialStates[offer.id] ?? "ready"}`} className="rounded-xl border bg-background p-5 lg:col-span-3">
-                <TrialStartDemo product={offer.id} role={role} layout="row" initialState={trialStates[offer.id]} trialDays={trialDays[offer.id]} trialPeriod={trialPeriods[offer.id]} onSubscribe={(product) => setChangeIntent({ kind: "plan", initialPlan: product })} />
+                <TrialStartDemo product={offer.id} role={role} layout="row" initialState={trialStates[offer.id]} trialDays={trialDays[offer.id] ?? 30} trialPeriod={trialPeriods[offer.id]} onSubscribe={(product) => setChangeIntent({ kind: "plan", initialPlan: product })} />
               </div>
             ) : (
             <article key={offer.id} className="flex flex-col rounded-xl border bg-background p-5">
