@@ -183,6 +183,7 @@ export function LandingShell({
           <a href={`/contact?product=${product}`}>{t("도입 문의")}</a>
           <a href="/legal/terms">{t("이용약관")}</a>
           <a href="/legal/privacy">{t("개인정보처리방침")}</a>
+          <a href="/legal/location">{t("위치기반 서비스 이용약관")}</a>
         </nav>
       </footer>
     </div>
