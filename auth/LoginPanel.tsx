@@ -50,7 +50,7 @@ import { showPreviewControls } from "@auth/authNavigation"
 // failure. Never production credentials; the picker that fills them is a
 // temporary review aid, not part of the designed login screen.
 const DEMO_PASSWORD = "ecoya"
-type DemoAccount = { email: string; role: CommonPreviewRole; plan: CommonPreviewPlan; seat?: "view"; label: string }
+type DemoAccount = { email: string; role: CommonPreviewRole; plan: CommonPreviewPlan; seat?: "view"; snap?: "none"; label: string }
 const DEMO_ACCOUNTS: DemoAccount[] = [
   { email: "ecoya@ecoya.kr", role: "owner", plan: "paid", label: "Owner" },
   { email: "admin@ecoya.kr", role: "admin", plan: "paid", label: "Admin" },
@@ -58,9 +58,10 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
   { email: "view@ecoya.kr", role: "member", plan: "paid", seat: "view", label: "Member · View 권한만" },
 ]
 const DEMO_PLAN_ACCOUNTS: DemoAccount[] = [
-  { email: "paid@ecoya.kr", role: "owner", plan: "paid", label: "유료 구독 중" },
-  { email: "trial@ecoya.kr", role: "owner", plan: "trial", label: "무료 체험 중" },
-  { email: "expired@ecoya.kr", role: "owner", plan: "expired", label: "무료 체험 종료" },
+  // SNAP is not started for these, so its settings stay hidden (Common IA 최종 설정 IA).
+  { email: "paid@ecoya.kr", role: "owner", plan: "paid", snap: "none", label: "유료 구독 중" },
+  { email: "trial@ecoya.kr", role: "owner", plan: "trial", snap: "none", label: "무료 체험 중" },
+  { email: "expired@ecoya.kr", role: "owner", plan: "expired", snap: "none", label: "무료 체험 종료" },
 ]
 // An existing Account whose last Organization removed it: login lands on the
 // CS-01 「조직에서 제외된 사용자의 로그인 후 안내」 (organization_required).
@@ -185,7 +186,7 @@ export function CommonLoginPrototype({
     setState("submitting")
     window.setTimeout(() => {
       if (initialProduct && onProductLanding) {
-        onProductLanding(initialProduct, account.role, { plan: account.plan, seat: account.seat })
+        onProductLanding(initialProduct, account.role, { plan: account.plan, seat: account.seat, snap: account.snap })
         return
       }
       setPassword("")
@@ -385,7 +386,7 @@ export function CommonLoginPrototype({
               <Button
                 className="w-full"
                 type="button"
-                onClick={() => onProductLanding?.("erp", signedInAccount.role, { plan: signedInAccount.plan, seat: signedInAccount.seat })}
+                onClick={() => onProductLanding?.("erp", signedInAccount.role, { plan: signedInAccount.plan, seat: signedInAccount.seat, snap: signedInAccount.snap })}
               >
                 <Building2 /> Trade OS 열기
               </Button>
@@ -401,7 +402,7 @@ export function CommonLoginPrototype({
                 className="w-full"
                 type="button"
                 variant="outline"
-                onClick={() => onProductLanding?.("snap", signedInAccount.role, { plan: signedInAccount.plan, seat: signedInAccount.seat })}
+                onClick={() => onProductLanding?.("snap", signedInAccount.role, { plan: signedInAccount.plan, seat: signedInAccount.seat, snap: signedInAccount.snap })}
               >
                 <MapPin /> SNAP 열기
               </Button>

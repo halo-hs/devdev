@@ -97,6 +97,12 @@ type NavItem = {
   keywords?: readonly string[]
 }
 
+// Common IA 최종 설정 IA: product settings open only for a paid subscription or
+// an active trial; not started, read-only and unknown states live in 제품 및 구독.
+function productSettingsOpen(state: SubscriptionDisplayStatus | undefined) {
+  return state !== "trial_not_started" && state !== "trial_expired" && state !== "read_only"
+}
+
 // Common SSOT 02-COMMON-IA: headings are non-interactive, menus one level deep.
 const navigation: Array<{ label: string; items: NavItem[] }> = [
   {
@@ -317,13 +323,15 @@ function SettingsHubContent({
           ...group,
           items: group.items.filter(
             (item) =>
-              (!item.product || availableProducts.includes(item.product)) &&
+              (!item.product ||
+                (availableProducts.includes(item.product) &&
+                  productSettingsOpen(subscriptionStates[item.product]))) &&
               (!item.roles || item.roles.includes(role)) &&
               (!item.permission || importPermissions[item.permission])
           ),
         }))
         .filter((group) => group.items.length > 0),
-    [availableProducts, role, importPermissions]
+    [availableProducts, subscriptionStates, role, importPermissions]
   )
   const availableIds = useMemo(
     () => groups.flatMap((group) => group.items.map((item) => item.id)),
@@ -550,7 +558,7 @@ export function SettingsHubV2(props: Parameters<typeof SettingsHubContent>[0]) {
   if (sharedDemo) return <SettingsHubContent {...props} />
   return (
     <SettingsDemoProvider
-      key={`${props.workspaceId}:${props.role ?? "owner"}:${(props.availableProducts ?? ["erp", "snap"]).join(",")}:${props.subscriptionKind ?? "separate"}:${props.subscriptionStates?.erp ?? "paid_active"}`}
+      key={`${props.workspaceId}:${props.role ?? "owner"}:${(props.availableProducts ?? ["erp", "snap"]).join(",")}:${props.subscriptionKind ?? "separate"}:${props.subscriptionStates?.erp ?? "paid_active"}:${props.subscriptionStates?.snap ?? "paid_active"}`}
       subscriptionKind={props.subscriptionKind}
     >
       <SettingsHubContent {...props} />
