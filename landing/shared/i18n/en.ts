@@ -19,6 +19,7 @@ export const en: Record<string, string> = {
   "ECOYA SNAP 시작하기": "Get started with ECOYA SNAP",
   "이용약관": "Terms of Service",
   "개인정보처리방침": "Privacy Policy",
+  "위치기반 서비스 이용약관": "Location Services Terms",
 
   // ── SNAP · document title ───────────────────────────────
   "ECOYA SNAP — 현장 작업을 믿을 수 있는 증거로":
