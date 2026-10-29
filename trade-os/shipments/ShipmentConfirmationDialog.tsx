@@ -113,7 +113,7 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
       <DialogContent className="max-h-[90dvh] overflow-y-auto" onCloseAutoFocus={(event) => { event.preventDefault(); returnFocus(); }}>
         <DialogHeader>
           <DialogTitle>{c.title}</DialogTitle>
-          <DialogDescription>{[baseline.bl_number, baseline.container_number].filter(Boolean).join(" · ") || copy.rowFallback} — {c.description}</DialogDescription>
+          <DialogDescription>{c.description}</DialogDescription>
         </DialogHeader>
         <form className="flex flex-col gap-4" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
           <FieldDescription className="text-[var(--color-gray-4)]">{c.manualHint}</FieldDescription>
@@ -136,7 +136,6 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
                 {field === "confirmed_status" ? <FieldDescription className="text-[var(--color-gray-4)]" id="shipment-status-hint">{c.statusHint}</FieldDescription> : null}
                 {released ? <FieldDescription className="text-[var(--color-gray-4)]" role="status">{field === "confirmed_status" ? c.releaseStatusHint : c.releaseHint}</FieldDescription> : null}
                 <div className="flex flex-wrap gap-2">
-                  {!changed && draft[field] ? <Button aria-label={`${label}: ${c.confirmValue}`} disabled={pending || !writable} onClick={() => setEdits((old) => ({ ...old, [field]: draft[field] }))} size="sm" type="button" variant="link">{c.confirmValue}</Button> : null}
                   {baseline[field] != null && !released ? <Button aria-label={`${label}: ${field === "confirmed_status" ? c.useProviderStatus : c.useSource}`} disabled={pending || !writable} onClick={() => setEdits((old) => ({ ...old, [field]: null }))} size="sm" type="button" variant="link">{field === "confirmed_status" ? c.useProviderStatus : c.useSource}</Button> : null}
                   {changed ? <Button aria-label={`${label}: ${c.undo}`} disabled={pending} onClick={() => { setDraft((old) => ({ ...old, [field]: initial[field] })); setEdits((old) => { const next = { ...old }; delete next[field]; return next; }); }} size="sm" type="button" variant="link">{c.undo}</Button> : null}
                 </div>

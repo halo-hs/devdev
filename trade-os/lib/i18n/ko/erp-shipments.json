@@ -65,7 +65,7 @@
     "dealLink": "거래 보기 →",
     "confirmation": {
       "title": "일정 확인·수정",
-      "description": "선사나 포워더에 확인한 일정과 운송 상태를 기록합니다.",
+      "description": "선적 일정과 운송 상태를 수정합니다.",
       "etd": "출항 예정일",
       "eta": "도착 예정일",
       "status": "운송 상태",
