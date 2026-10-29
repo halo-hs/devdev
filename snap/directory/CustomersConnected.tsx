@@ -5,7 +5,6 @@ import {
   Building2,
   Plus,
   RefreshCw,
-  Search,
   UserRound,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -21,7 +20,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/AlertDialog"
 import { Badge } from "@/components/ui/Badge"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/Button"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/Empty"
+import { BusinessFilterBar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar"
+import { Tabs, TabsCount, TabsList, TabsTrigger } from "@/components/ui/Tabs"
+import { Card } from "@/components/ui/Card"
 import {
   Dialog,
   DialogContent,
@@ -326,9 +330,9 @@ function HistoryList({
           ))}
         </div>
       ) : (
-        <div className="rounded-md border border-dashed p-5 text-center text-sm text-muted-foreground">
-          {empty}
-        </div>
+        <Empty className="min-h-24">
+          <EmptyHeader><EmptyDescription>{empty}</EmptyDescription></EmptyHeader>
+        </Empty>
       )}
     </section>
   )
@@ -555,17 +559,16 @@ export function SnapCustomersPage() {
   return (
     <div className="mx-auto w-full max-w-ecoya-wide-xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="w-full">
-        <div className="flex flex-wrap items-start justify-between gap-4 pb-5">
-          <div>
-            <h1 className="text-2xl font-semibold">고객</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              수신자와 전달 이력을 작업자·조직 멤버와 분리해 관리합니다.
-            </p>
-          </div>
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus /> 고객 추가
-          </Button>
-        </div>
+        <HeroBanner
+          title="고객"
+          description="수신자와 전달 이력을 작업자·조직 멤버와 분리해 관리합니다."
+          className="mb-5 [&_header]:flex-wrap"
+          actions={
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus /> 고객 추가
+            </Button>
+          }
+        />
 
         <div className="ui-summary-strip grid grid-cols-2 sm:grid-cols-4">
           <button
@@ -578,8 +581,8 @@ export function SnapCustomersPage() {
               closeCustomer()
             }}
           >
-            <div className="text-xs text-muted-foreground">등록 고객</div>
-            <div className="mt-1 text-xl font-semibold">{activeCount}명</div>
+            <div className="text-[length:var(--text-body-9)] leading-5 font-semibold text-[var(--color-gray-2)]">등록 고객</div>
+            <div className="mt-1 text-[26px] leading-9 font-bold tabular-nums">{activeCount}명</div>
           </button>
           <button
             type="button"
@@ -591,12 +594,12 @@ export function SnapCustomersPage() {
               closeCustomer()
             }}
           >
-            <div className="text-xs text-muted-foreground">이메일 등록</div>
-            <div className="mt-1 text-xl font-semibold">{withEmail}명</div>
+            <div className="text-[length:var(--text-body-9)] leading-5 font-semibold text-[var(--color-gray-2)]">이메일 등록</div>
+            <div className="mt-1 text-[26px] leading-9 font-bold tabular-nums">{withEmail}명</div>
           </button>
           <div className="p-4">
-            <div className="text-xs text-muted-foreground">고객 전달 링크</div>
-            <div className="mt-1 text-xl font-semibold">{links.length || DEMO_LINKS.length}건</div>
+            <div className="text-[length:var(--text-body-9)] leading-5 font-semibold text-[var(--color-gray-2)]">고객 전달 링크</div>
+            <div className="mt-1 text-[26px] leading-9 font-bold tabular-nums">{links.length || DEMO_LINKS.length}건</div>
           </div>
           <button
             type="button"
@@ -608,55 +611,45 @@ export function SnapCustomersPage() {
               closeCustomer()
             }}
           >
-            <div className="text-xs text-muted-foreground">보관됨</div>
-            <div className="mt-1 text-xl font-semibold">{archivedCount}명</div>
+            <div className="text-[length:var(--text-body-9)] leading-5 font-semibold text-[var(--color-gray-2)]">보관됨</div>
+            <div className="mt-1 text-[26px] leading-9 font-bold tabular-nums">{archivedCount}명</div>
           </button>
         </div>
 
-        <div className="mt-5 grid min-h-[560px] gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
+        <Card className="mt-5 grid min-h-[560px] gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_420px]">
           <section className={cn("min-w-0", selected && "hidden lg:block")}>
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
+              <BusinessFilterBar className="min-w-0 flex-1">
+                <BusinessFilterSearch
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  className="pl-9"
+                  onValueChange={setSearch}
                   placeholder="고객명, 담당자, 이메일 검색"
-                  aria-label="고객 검색"
+                  label="고객 검색"
                 />
-              </div>
-              <div
-                className="grid shrink-0 grid-cols-2 rounded-md bg-muted p-1"
-                role="group"
-                aria-label="고객 상태"
+              </BusinessFilterBar>
+              <Tabs
+                value={statusFilter}
+                onValueChange={(value) => {
+                  setStatusFilter(value as typeof statusFilter)
+                  setEmailOnly(false)
+                  closeCustomer()
+                }}
+                className="shrink-0"
               >
-                {(
-                  [
-                    ["active", "활성 고객"],
-                    ["archived", `보관됨 ${archivedCount}`],
-                  ] as const
-                ).map(([value, label]) => (
-                  <Button
-                    key={value}
-                    type="button"
-                    size="sm"
-                    variant={statusFilter === value ? "secondary" : "ghost"}
-                    className={cn(
-                      "h-7 px-2 text-xs",
-                      statusFilter === value && "bg-background shadow-sm hover:bg-background"
-                    )}
-                    aria-pressed={statusFilter === value}
-                    onClick={() => {
-                      setStatusFilter(value)
-                      setEmailOnly(false)
-                      closeCustomer()
-                    }}
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </div>
+                <TabsList aria-label="고객 상태">
+                  {(
+                    [
+                      ["active", "활성 고객", null],
+                      ["archived", "보관됨", archivedCount],
+                    ] as const
+                  ).map(([value, label, count]) => (
+                    <TabsTrigger key={value} value={value} className="gap-2">
+                      <span>{label}</span>
+                      {count === null ? null : <TabsCount>{count}</TabsCount>}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
               <Button variant="outline" size="icon" onClick={() => void loadCustomers()} aria-label="고객 새로고침">
                 <RefreshCw />
               </Button>
@@ -713,17 +706,19 @@ export function SnapCustomersPage() {
                 ))}
               </div>
             ) : (
-              <div className="rounded-md border border-dashed py-16 text-center">
-                <Building2 className="mx-auto size-7 text-muted-foreground" />
-                <p className="mt-3 text-sm font-medium">
+              <Empty className="min-h-64">
+                <EmptyHeader>
+                <EmptyMedia variant="icon"><Building2 /></EmptyMedia>
+                <EmptyTitle>
                   {customers.length ? "검색 결과가 없습니다." : "등록된 고객이 없습니다."}
-                </p>
+                </EmptyTitle>
+                </EmptyHeader>
                 {!customers.length ? (
-                  <Button className="mt-4" onClick={() => setCreateOpen(true)}>
+                  <Button onClick={() => setCreateOpen(true)}>
                     <Plus /> 첫 고객 추가
                   </Button>
                 ) : null}
-              </div>
+              </Empty>
             )}
           </section>
 
@@ -796,7 +791,7 @@ export function SnapCustomersPage() {
               </div>
             )}
           </aside>
-        </div>
+        </Card>
       </div>
 
       <Dialog open={createOpen} onOpenChange={(open) => !busy && setCreateOpen(open)}>

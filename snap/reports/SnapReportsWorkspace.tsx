@@ -36,10 +36,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/AlertDialog"
-import { Badge } from "@/components/ui/Badge"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/Button"
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/Empty"
+import { Alert, AlertDescription, alertVariants } from "@/components/ui/Alert"
+import { StatusBadge as PlatformStatusBadge } from "@/components/platform/StatusBadge"
+import { BusinessFilterBar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar"
+import { Card, CardContent, CardHeader } from "@/components/ui/Card"
 import { Input } from "@/components/ui/Input"
-import { SubmittedSearchInput } from "@/components/ui/SubmittedSearchInput"
 import {
   Sheet,
   SheetContent,
@@ -56,7 +60,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs"
+import { Tabs, TabsCount, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import { Textarea } from "@/components/ui/Textarea"
 import type { SnapNavigationOptions } from "@snap/operations/SnapOperationsPages"
 import type { SnapScreenKey } from "@snap/SnapScreens"
@@ -298,17 +302,17 @@ function StatusBadge({ value }: { value: string }) {
     normalized.includes("reject") ||
     normalized.includes("revoke") ||
     normalized.includes("expire")
-      ? "ui-status-danger"
+      ? "danger"
       : normalized.includes("review") ||
           normalized.includes("pending") ||
           normalized.includes("draft")
-        ? "ui-status-warning"
+        ? "warning"
         : normalized.includes("active") ||
             normalized.includes("approve") ||
             normalized.includes("sent") ||
             normalized.includes("complete")
-          ? "ui-status-success"
-          : "ui-status-neutral"
+          ? "success"
+          : "neutral"
   const labels: Record<string, string> = {
     review: "검토 필요",
     pending: "대기",
@@ -324,9 +328,9 @@ function StatusBadge({ value }: { value: string }) {
     expired: "만료",
   }
   return (
-    <Badge variant="outline" className={cn("font-normal", tone)}>
+    <PlatformStatusBadge tone={tone}>
       {labels[normalized] || value || "상태 없음"}
-    </Badge>
+    </PlatformStatusBadge>
   )
 }
 
@@ -351,14 +355,14 @@ function SummaryStrip({
     },
   ]
   return (
-    <div className="ui-summary-strip grid sm:grid-cols-4">
+    <div className="ui-summary-strip grid grid-cols-2 sm:grid-cols-4">
       {items.map((item) => {
         const className = "flex min-h-20 items-center gap-3 border-b px-4 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0"
         const content = <>
           <item.icon className="size-6 text-primary" />
           <div>
-            <div className="text-xs text-muted-foreground">{item.label}</div>
-            <div className="mt-1 text-xl font-semibold">{item.value}건</div>
+            <div className="text-[length:var(--text-body-9)] leading-5 font-semibold text-[var(--color-gray-2)]">{item.label}</div>
+            <div className="mt-1 text-[26px] leading-9 font-bold tabular-nums">{item.value}건</div>
           </div>
         </>
         return item.key ? (
@@ -391,23 +395,26 @@ function PageState({
   action?: ReactNode
 }) {
   return (
-    <div className="flex min-h-52 flex-col items-center justify-center rounded-md border border-dashed px-6 text-center">
-      <span className="text-muted-foreground">{icon}</span>
-      <div className="mt-3 font-medium">{title}</div>
-      <p className="mt-1 max-w-lg text-sm leading-6 text-muted-foreground">{description}</p>
-      {action ? <div className="mt-4">{action}</div> : null}
-    </div>
+    <Empty className="min-h-52">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">{icon}</EmptyMedia>
+        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyDescription>{description}</EmptyDescription>
+      </EmptyHeader>
+      {action ? <EmptyContent>{action}</EmptyContent> : null}
+    </Empty>
   )
 }
 
 function SearchBar({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   return (
-    <SubmittedSearchInput
-      value={value}
-      onSearch={onChange}
-      formClassName="w-full max-w-xl"
-      placeholder="리포트, 고객, 작업 ID 검색"
-    />
+    <BusinessFilterBar className="w-full max-w-xl">
+      <BusinessFilterSearch
+        value={value}
+        onValueChange={onChange}
+        label="리포트, 고객, 작업 ID 검색"
+      />
+    </BusinessFilterBar>
   )
 }
 
@@ -446,7 +453,7 @@ function FieldReports({ rows, navigate }: { rows: SnapJsonRecord[]; navigate: Sn
                     <TableCell className="text-right tabular-nums">{numberValue(row, "media_count", "evidence_count")}개</TableCell>
                     <TableCell>{compactDate(row.submitted_at ?? row.updated_at ?? row.due_at)}</TableCell>
                     <TableCell className="text-right">
-                      <Button size="xs" variant="outline" onClick={() => navigate("SC-20", { params: { id } })}>
+                      <Button size="lg" variant="outline" onClick={() => navigate("SC-20", { params: { id } })}>
                         검토 열기
                       </Button>
                     </TableCell>
@@ -498,7 +505,7 @@ function ReviewReports({ rows, navigate, onChanged }: { rows: SnapJsonRecord[]; 
                     <TableCell>{textValue(row, "review_reason", "reason") || "고객 공개 내용 확인"}</TableCell>
                     <TableCell><StatusBadge value={textValue(row, "status") || "review"} /></TableCell>
                     <TableCell className="text-right">
-                      <Button size="xs" onClick={() => setSelected(row)}>검토</Button>
+                      <Button size="lg" onClick={() => setSelected(row)}>검토</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -616,7 +623,7 @@ function ReviewSheet({ selected, onOpenChange, navigate, onChanged }: { selected
               </Button>
             </div>
             {preflight ? (
-              <div className={cn("mt-3 rounded-md border p-3 text-sm", preflight.ready_to_send ? "ui-status-success" : "ui-status-warning") }>
+              <div className={cn(alertVariants({ variant: preflight.ready_to_send ? "positive" : "caution" }), "mt-3 block p-3 text-sm")}>
                 <div className="font-medium">{preflight.ready_to_send ? "전달 준비 완료" : "확인 후 승인 가능"}</div>
                 {preflight.blocking?.length ? <ul className="mt-2 list-disc space-y-1 pl-5 text-xs">{preflight.blocking.map((item) => <li key={item}>{item}</li>)}</ul> : <p className="mt-1 text-xs">차단 항목이 없습니다.</p>}
               </div>
@@ -644,7 +651,7 @@ function ReviewSheet({ selected, onOpenChange, navigate, onChanged }: { selected
             <Textarea className="mt-3" value={rejectReason} onChange={(event) => setRejectReason(event.target.value)} rows={3} placeholder="수정해야 할 사실과 표현을 남겨 주세요." />
           </section>
 
-          {error ? <p className="ui-status-danger mt-4 rounded-md border p-3 text-sm" role="alert">{error}</p> : null}
+          {error ? <Alert variant="destructive" className="mt-4"><AlertDescription>{error}</AlertDescription></Alert> : null}
 
           <div className="mt-6 grid grid-cols-2 gap-2 border-t pt-5">
             <Button variant="outline" onClick={() => navigate("SC-21", { params: { id: task || "TASK-DEMO-001" } })}>
@@ -710,7 +717,7 @@ function SentReports({ rows, onChanged }: { rows: SnapJsonRecord[]; onChanged: (
   return (
     <div className="space-y-4">
       <SearchBar value={query} onChange={setQuery} />
-      {error ? <p className="ui-status-danger rounded-md border p-3 text-sm">{error}</p> : null}
+      {error ? <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert> : null}
       {filtered.length ? (
         <div className="overflow-x-auto">
           <Table>
@@ -727,16 +734,16 @@ function SentReports({ rows, onChanged }: { rows: SnapJsonRecord[]; onChanged: (
                     <TableCell>{compactDate(row.created_at)}</TableCell>
                     <TableCell>{compactDate(row.last_opened_at)}<div className="text-xs text-muted-foreground">{numberValue(row, "open_count", "view_count")}회</div></TableCell>
                     <TableCell>{textValue(row, "locale") || "-"}</TableCell>
-                    <TableCell>{boolValue(row, "acknowledged") ? <Badge className="ui-status-success">확인됨</Badge> : "미확인"}</TableCell>
+                    <TableCell>{boolValue(row, "acknowledged") ? <PlatformStatusBadge tone="success">확인됨</PlatformStatusBadge> : "미확인"}</TableCell>
                     <TableCell><StatusBadge value={textValue(row, "status") || "active"} /></TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         {path ? (
-                          <Button size="icon-xs" variant="ghost" title="외부 화면 열기" onClick={() => window.open(path, "_blank", "noopener,noreferrer")}><ExternalLink /></Button>
+                          <Button size="icon-lg" variant="ghost" title="외부 화면 열기" onClick={() => window.open(path, "_blank", "noopener,noreferrer")}><ExternalLink /></Button>
                         ) : null}
                         {active ? (
                           <Button
-                            size="icon-xs"
+                            size="icon-lg"
                             variant="ghost"
                             title="링크 회수"
                             disabled={busy === `revoke-${linkId}`}
@@ -823,14 +830,14 @@ function DeliveryReports({ failures, email, onChanged }: { failures: SnapJsonRec
   ]
   return (
     <div className="space-y-4">
-      {error ? <p className="ui-status-danger rounded-md border p-3 text-sm">{error}</p> : null}
+      {error ? <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert> : null}
       {rows.length ? (
         <div className="overflow-hidden">
           <Table>
             <TableHeader><TableRow><TableHead>리포트</TableHead><TableHead>채널</TableHead><TableHead>수신자</TableHead><TableHead>실패 이유</TableHead><TableHead>요청 시각</TableHead><TableHead className="text-right">재시도</TableHead></TableRow></TableHeader>
             <TableBody>{rows.map(({ kind, row }) => {
               const id = textValue(row, "delivery_log_id", "delivery_id", "id")
-              return <TableRow key={`${kind}-${id}`}><TableCell className="font-medium">{reportTitle(row)}</TableCell><TableCell>{kind === "email" ? <><Mail className="mr-1 inline size-4" /> 이메일</> : <><Link2 className="mr-1 inline size-4" /> 링크</>}</TableCell><TableCell>{textValue(row, "recipient", "recipient_value") || "-"}</TableCell><TableCell className="max-w-sm whitespace-normal text-destructive">{textValue(row, "error_message", "error", "reason") || "전달 실패"}</TableCell><TableCell>{compactDate(row.created_at)}</TableCell><TableCell className="text-right"><Button size="xs" variant="outline" disabled={busy === `${kind}-${id}`} onClick={() => void retry(kind, row)}>{busy === `${kind}-${id}` ? <LoaderCircle className="animate-spin" /> : <RefreshCw />} 다시 전달</Button></TableCell></TableRow>
+              return <TableRow key={`${kind}-${id}`}><TableCell className="font-medium">{reportTitle(row)}</TableCell><TableCell>{kind === "email" ? <><Mail className="mr-1 inline size-4" /> 이메일</> : <><Link2 className="mr-1 inline size-4" /> 링크</>}</TableCell><TableCell>{textValue(row, "recipient", "recipient_value") || "-"}</TableCell><TableCell className="max-w-sm whitespace-normal text-destructive">{textValue(row, "error_message", "error", "reason") || "전달 실패"}</TableCell><TableCell>{compactDate(row.created_at)}</TableCell><TableCell className="text-right"><Button size="lg" variant="outline" disabled={busy === `${kind}-${id}`} onClick={() => void retry(kind, row)}>{busy === `${kind}-${id}` ? <LoaderCircle className="animate-spin" /> : <RefreshCw />} 다시 전달</Button></TableCell></TableRow>
             })}</TableBody>
           </Table>
         </div>
@@ -861,13 +868,12 @@ export function SnapReportsPage({ navigate, routeSearch }: { navigate: SnapNavig
   return (
     <div className="field-scrollbar h-full overflow-y-auto bg-transparent">
       <div className="mx-auto w-full max-w-ecoya-wide-xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-start justify-between gap-4 border-b-0 pb-5">
-          <div>
-            <h1 className="text-2xl font-semibold">보고서</h1>
-            <p className="mt-1 text-sm text-muted-foreground">현장 결과를 검토하고 승인한 뒤, 고객 전달과 링크 수명주기를 관리합니다.</p>
-          </div>
-          <Button variant="outline" onClick={resource.reload}><RefreshCw /> 새로고침</Button>
-        </div>
+        <HeroBanner
+          title="보고서"
+          description="현장 결과를 검토하고 승인한 뒤, 고객 전달과 링크 수명주기를 관리합니다."
+          className="mb-5 [&_header]:flex-wrap"
+          actions={<Button variant="outline" onClick={resource.reload}><RefreshCw /> 새로고침</Button>}
+        />
 
         <div className="mt-5">
           <SummaryStrip
@@ -877,15 +883,19 @@ export function SnapReportsPage({ navigate, routeSearch }: { navigate: SnapNavig
           />
         </div>
 
-        <Tabs value={tab} onValueChange={changeTab} className="mt-5">
+        <Card size="sm" className="mt-5">
+        <CardHeader>
+        <Tabs value={tab} onValueChange={changeTab}>
           <TabsList className="h-auto max-w-full justify-start overflow-x-auto">
-            {tabs.map((item) => <TabsTrigger key={item.id} value={item.id} className="gap-2"><span>{item.label}</span><Badge variant="secondary" className="min-w-6 justify-center px-1.5">{item.count}</Badge></TabsTrigger>)}
+            {tabs.map((item) => <TabsTrigger key={item.id} value={item.id} className="gap-2"><span>{item.label}</span><TabsCount>{item.count}</TabsCount></TabsTrigger>)}
           </TabsList>
         </Tabs>
+        </CardHeader>
 
-        <div className="mt-5">
+        <CardContent className="pb-4">
           {resource.loading ? <div className="space-y-3"><Skeleton className="h-10 w-full max-w-xl" /><Skeleton className="h-56 w-full rounded-[var(--r-md)]" /></div> : resource.error ? <PageState icon={<AlertCircle />} title="리포트를 불러오지 못했습니다" description={resource.error} action={<Button variant="outline" onClick={resource.reload}><RefreshCw /> 다시 시도</Button>} /> : tab === "field" ? <FieldReports rows={resource.data.field} navigate={navigate} /> : tab === "review" ? <ReviewReports rows={resource.data.review} navigate={navigate} onChanged={resource.reload} /> : tab === "sent" ? <SentReports rows={resource.data.sent} onChanged={resource.reload} /> : <DeliveryReports failures={resource.data.failures} email={resource.data.email} onChanged={resource.reload} />}
-        </div>
+        </CardContent>
+        </Card>
       </div>
     </div>
   )

@@ -4,7 +4,6 @@ import {
   Clock3,
   Mail,
   RefreshCw,
-  Search,
   ShieldCheck,
   UserPlus,
   Users,
@@ -22,7 +21,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/AlertDialog"
 import { Badge } from "@/components/ui/Badge"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/Button"
+import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/Empty"
+import { Alert, AlertDescription } from "@/components/ui/Alert"
+import { StatusBadge as PlatformStatusBadge } from "@/components/platform/StatusBadge"
+import { BusinessFilterBar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar"
+import { Card } from "@/components/ui/Card"
 import {
   Dialog,
   DialogContent,
@@ -53,7 +58,6 @@ import {
   snapApiErrorMessage,
   type SnapJsonRecord,
 } from "@snap/lib/snapReportApi"
-import { cn } from "@/lib/utils"
 
 type MemberRole = "owner" | "admin" | "manager" | "worker" | "viewer"
 type WorkRole = "manager" | "worker"
@@ -261,11 +265,11 @@ function Metric({
       aria-pressed={active}
       onClick={onClick}
     >
-      <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+      <div className="flex items-center justify-between gap-3 text-[length:var(--text-body-9)] leading-5 font-semibold text-[var(--color-gray-2)]">
         <span>{label}</span>
         <Icon className="size-4" />
       </div>
-      <div className="mt-2 text-xl font-semibold tabular-nums">{value}</div>
+      <div className="mt-1 text-[26px] leading-9 font-bold tabular-nums">{value}</div>
     </button>
   )
 }
@@ -514,45 +518,38 @@ export function SnapWorkersPage() {
   return (
     <div className="h-full overflow-y-auto bg-transparent">
       <div className="mx-auto w-full max-w-ecoya-wide-xl px-4 py-6 sm:px-6 lg:px-8">
-        <header className="flex flex-wrap items-start justify-between gap-4 pb-5">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-semibold">작업자 · 작업 매니저</h1>
-              {plan ? (
-                <Badge variant="secondary">
-                  {plan.tier.toUpperCase()} · {plan.unlimited ? "좌석 무제한" : `${plan.seatsUsed}/${plan.seats}석`}
-                </Badge>
-              ) : null}
-            </div>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              현장 작업자와 작업 매니저를 관리하고 배정·검토 권한을 설정합니다. 고객 수신자와는 별도입니다.
-            </p>
-          </div>
-          {isAdmin ? (
-            <Button onClick={() => setInviteOpen(true)} disabled={seatsFull} title={seatsFull ? "좌석이 모두 사용 중입니다." : undefined}>
-              <UserPlus /> 작업 인력 초대
-            </Button>
-          ) : null}
-        </header>
+        <HeroBanner
+          eyebrow={plan ? `${plan.tier.toUpperCase()} · ${plan.unlimited ? "좌석 무제한" : `${plan.seatsUsed}/${plan.seats}석`}` : undefined}
+          title="작업자 · 작업 매니저"
+          description="현장 작업자와 작업 매니저를 관리하고 배정·검토 권한을 설정합니다. 고객 수신자와는 별도입니다."
+          className="mb-5 [&_header]:flex-wrap"
+          actions={
+            isAdmin ? (
+              <Button onClick={() => setInviteOpen(true)} disabled={seatsFull} title={seatsFull ? "좌석이 모두 사용 중입니다." : undefined}>
+                <UserPlus /> 작업 인력 초대
+              </Button>
+            ) : undefined
+          }
+        />
 
         {seatsFull ? (
-          <div className="ui-status-warning mt-5 px-4 py-3 text-sm">
-            사용 가능한 좌석이 없습니다. 비활성 작업 인력을 정리하거나 요금제 상향을 요청하세요.
-          </div>
+          <Alert variant="caution" className="mt-5">
+            <AlertDescription>사용 가능한 좌석이 없습니다. 비활성 작업 인력을 정리하거나 요금제 상향을 요청하세요.</AlertDescription>
+          </Alert>
         ) : null}
 
-        <section className="ui-summary-strip mt-5 grid sm:grid-cols-2 lg:grid-cols-4">
+        <section className="ui-summary-strip mt-5 grid grid-cols-2 sm:grid-cols-4">
           <Metric label="전체 작업 인력" value={`${counts.all}명`} icon={Users} active={summaryFilter === "all"} onClick={() => setSummaryFilter("all")} />
           <Metric label="작업자" value={`${counts.workers}명`} icon={CheckCircle2} active={summaryFilter === "worker"} onClick={() => setSummaryFilter("worker")} />
           <Metric label="작업 매니저" value={`${counts.managers}명`} icon={ShieldCheck} active={summaryFilter === "manager"} onClick={() => setSummaryFilter("manager")} />
           <Metric label="가입·초대 대기" value={`${counts.joinRequests + counts.invites}건`} icon={Clock3} active={summaryFilter === "pending"} onClick={() => setSummaryFilter("pending")} />
         </section>
 
-        {showPending ? <section className="mt-6">
+        {showPending ? <Card className="mt-6 p-4 sm:p-5">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-semibold">가입 요청</h2>
+                <h2 className="text-[18px] leading-[26px] font-bold">가입 요청</h2>
                 <Badge variant="secondary">{joinRequests.length}건</Badge>
               </div>
               <p className="mt-2 text-xs leading-5 text-muted-foreground">
@@ -590,7 +587,7 @@ export function SnapWorkersPage() {
                       <TableCell className="text-muted-foreground">{formatDate(member.createdAt)}</TableCell>
                       <TableCell className="text-right">
                         {isAdmin ? (
-                          <Button size="xs" onClick={() => setConfirmAction({ kind: "approve", member })}>
+                          <Button size="lg" onClick={() => setConfirmAction({ kind: "approve", member })}>
                             <ShieldCheck /> 가입 승인
                           </Button>
                         ) : (
@@ -603,23 +600,22 @@ export function SnapWorkersPage() {
               </Table>
             </div>
           ) : (
-            <div className="mt-4 flex min-h-24 items-center justify-center rounded-md border border-dashed bg-muted/15 text-sm text-muted-foreground">
-              승인할 가입 요청이 없습니다.
-            </div>
+            <Empty className="mt-4 min-h-24">
+              <EmptyHeader><EmptyTitle>승인할 가입 요청이 없습니다.</EmptyTitle></EmptyHeader>
+            </Empty>
           )}
-        </section> : null}
+        </Card> : null}
 
-        {showJoinedMembers ? <section className="mt-6">
+        {showJoinedMembers ? <Card className="mt-6 p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3 pb-3">
             <div>
-              <h2 className="text-base font-semibold">작업자 및 작업 매니저</h2>
+              <h2 className="text-[18px] leading-[26px] font-bold">작업자 및 작업 매니저</h2>
               <p className="mt-2 text-xs leading-5 text-muted-foreground">현장 실행 역할과 가입 상태를 관리합니다. 조직 권한은 별도 정보로 표시합니다.</p>
             </div>
             <div className="flex w-full items-center gap-2 sm:w-auto">
-              <div className="relative min-w-0 flex-1 sm:w-72">
-                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input value={search} onChange={(event) => setSearch(event.target.value)} className="pl-9" placeholder="이름, 이메일, 역할 검색" />
-              </div>
+              <BusinessFilterBar className="min-w-0 flex-1 sm:w-72">
+                <BusinessFilterSearch value={search} onValueChange={setSearch} label="이름, 이메일, 역할 검색" />
+              </BusinessFilterBar>
               <Button variant="outline" size="icon" onClick={() => void load()} aria-label="새로고침">
                 <RefreshCw />
               </Button>
@@ -635,7 +631,7 @@ export function SnapWorkersPage() {
               <Button variant="outline" className="mt-4" onClick={() => void load()}><RefreshCw /> 다시 시도</Button>
             </div>
           ) : visibleMembers.length === 0 ? (
-            <div className="mt-4 flex min-h-40 items-center justify-center rounded-md border border-dashed bg-muted/15 text-sm text-muted-foreground">조건에 맞는 작업 인력이 없습니다.</div>
+            <Empty className="mt-4 min-h-40"><EmptyHeader><EmptyTitle>조건에 맞는 작업 인력이 없습니다.</EmptyTitle></EmptyHeader></Empty>
           ) : (
             <div className="mt-4 overflow-x-auto">
               <Table>
@@ -664,16 +660,16 @@ export function SnapWorkersPage() {
                         <TableCell>
                           {editable ? (
                             <Select value={ROLE_OPTIONS.includes(member.role as WorkRole) ? member.role : "worker"} onValueChange={(role) => void changeRole(member, role as WorkRole)} disabled={busy || member.status !== "active"}>
-                              <SelectTrigger size="sm" className="w-28">{roleLabel(member.role)}</SelectTrigger>
+                              <SelectTrigger className="w-28">{roleLabel(member.role)}</SelectTrigger>
                               <SelectContent>{ROLE_OPTIONS.map((role) => <SelectItem key={role} value={role}>{roleLabel(role)}</SelectItem>)}</SelectContent>
                             </Select>
                           ) : <Badge variant="secondary">{roleLabel(member.role)}</Badge>}
                         </TableCell>
-                        <TableCell><Badge variant={member.status === "pending_approval" ? "outline" : "secondary"} className={cn(member.status === "active" && "text-success", member.status === "pending_approval" && "ui-status-warning")}>{statusLabel(member.status)}</Badge></TableCell>
+                        <TableCell><PlatformStatusBadge tone={member.status === "active" ? "success" : member.status === "pending_approval" ? "warning" : "neutral"}>{statusLabel(member.status)}</PlatformStatusBadge></TableCell>
                         <TableCell className="text-muted-foreground">{formatDate(member.createdAt)}</TableCell>
                         <TableCell className="text-right">
-                          {editable && member.status === "active" ? <Button size="xs" variant="ghost" className="text-destructive" onClick={() => setConfirmAction({ kind: "deactivate", member })}>비활성화</Button> : null}
-                          {editable && member.status === "inactive" ? <Button size="xs" variant="outline" onClick={() => setConfirmAction({ kind: "reactivate", member })}>복구</Button> : null}
+                          {editable && member.status === "active" ? <Button size="lg" variant="ghost" className="text-destructive" onClick={() => setConfirmAction({ kind: "deactivate", member })}>비활성화</Button> : null}
+                          {editable && member.status === "inactive" ? <Button size="lg" variant="outline" onClick={() => setConfirmAction({ kind: "reactivate", member })}>복구</Button> : null}
                           {!editable ? <span className="text-xs text-muted-foreground">-</span> : null}
                         </TableCell>
                       </TableRow>
@@ -683,10 +679,10 @@ export function SnapWorkersPage() {
               </Table>
             </div>
           )}
-        </section> : null}
+        </Card> : null}
 
-        {showPending ? <section className="mt-8 pt-5">
-          <div className="flex items-center justify-between"><div><h2 className="text-base font-semibold">보낸 초대</h2><p className="mt-2 text-xs leading-5 text-muted-foreground">아직 사용자가 수락하지 않은 초대입니다. 수락 후에는 위 가입 요청으로 이동합니다.</p></div><Badge variant="secondary">{invites.length}건</Badge></div>
+        {showPending ? <Card className="mt-6 p-4 sm:p-5">
+          <div className="flex items-center justify-between"><div><h2 className="text-[18px] leading-[26px] font-bold">보낸 초대</h2><p className="mt-2 text-xs leading-5 text-muted-foreground">아직 사용자가 수락하지 않은 초대입니다. 수락 후에는 위 가입 요청으로 이동합니다.</p></div><Badge variant="secondary">{invites.length}건</Badge></div>
           <div className="mt-4 divide-y border-y">
             {invites.length ? invites.map((invite) => (
               <div key={invite.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
@@ -695,7 +691,7 @@ export function SnapWorkersPage() {
               </div>
             )) : <div className="py-10 text-center text-sm text-muted-foreground">대기 중인 초대가 없습니다.</div>}
           </div>
-        </section> : null}
+        </Card> : null}
       </div>
 
       <Dialog open={inviteOpen} onOpenChange={(open) => !busy && setInviteOpen(open)}>

@@ -18,7 +18,11 @@ import {
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/Badge"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/Button"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/Empty"
+import { BusinessFilterBar, BusinessFilterSearch, BusinessFilterSelect } from "@/components/platform/SearchFilterBar"
+import { Card, CardContent, CardHeader } from "@/components/ui/Card"
 import {
   Dialog,
   DialogContent,
@@ -28,7 +32,6 @@ import {
   DialogTitle,
 } from "@/components/ui/Dialog"
 import { Input } from "@/components/ui/Input"
-import { SubmittedSearchInput } from "@/components/ui/SubmittedSearchInput"
 import {
   Select,
   SelectContent,
@@ -37,7 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/Select"
 import { Skeleton } from "@/components/ui/Skeleton"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
+import { Tabs, TabsContent, TabsCount, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import { snapApi } from "@snap/lib/snapApi"
 import {
   SnapApiError,
@@ -380,7 +383,7 @@ function FolderSummary({
     { key: "archived" as const, label: "보관됨", value: `${archived}개` },
   ]
   return (
-    <div className="ui-summary-strip grid sm:grid-cols-2 lg:grid-cols-4">
+    <div className="ui-summary-strip grid grid-cols-2 sm:grid-cols-4">
       {metrics.map((metric, index) => {
         const className = cn(
           "px-4 py-4",
@@ -388,8 +391,8 @@ function FolderSummary({
         )
         const content = (
           <>
-            <div className="text-xs text-muted-foreground">{metric.label}</div>
-            <div className="mt-1 text-xl font-semibold tabular-nums">{metric.value}</div>
+            <div className="text-[length:var(--text-body-9)] leading-5 font-semibold text-[var(--color-gray-2)]">{metric.label}</div>
+            <div className="mt-1 text-[26px] leading-9 font-bold tabular-nums">{metric.value}</div>
           </>
         )
         return metric.key ? (
@@ -765,17 +768,16 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
   return (
     <div className="h-full overflow-y-auto bg-transparent">
       <div className="mx-auto w-full max-w-ecoya-wide-xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-start justify-between gap-4 border-b-0 pb-5">
-          <div>
-            <h1 className="text-2xl font-semibold">증빙 보관함</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              업무와 원본 미디어를 폴더로 연결해 보존하며, 폴더에서 제거해도 원본은 삭제되지 않습니다.
-            </p>
-          </div>
-          <Button onClick={() => setCreateOpen(true)}>
-            <FolderPlus aria-hidden="true" /> 폴더 만들기
-          </Button>
-        </div>
+        <HeroBanner
+          title="증빙 보관함"
+          description="업무와 원본 미디어를 폴더로 연결해 보존하며, 폴더에서 제거해도 원본은 삭제되지 않습니다."
+          className="mb-5 [&_header]:flex-wrap"
+          actions={
+            <Button onClick={() => setCreateOpen(true)}>
+              <FolderPlus aria-hidden="true" /> 폴더 만들기
+            </Button>
+          }
+        />
 
         <div className="mt-5">
           <FolderSummary
@@ -788,71 +790,59 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
           />
         </div>
 
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-          <SubmittedSearchInput
-            value={search}
-            onSearch={setSearch}
-            placeholder="폴더명 또는 유형 검색"
-            searchLabel="폴더 검색"
-            formClassName="min-w-0 flex-1"
-          />
-          <div
-            className="grid shrink-0 grid-cols-3 rounded-md bg-muted p-1"
-            role="group"
-            aria-label="폴더 상태"
-          >
-            {(
-              [
-                ["active", "활성 폴더"],
-                ["archived", "보관됨"],
-                ["all", "전체"],
-              ] as const
-            ).map(([value, label]) => (
-              <Button
-                key={value}
-                type="button"
-                size="sm"
-                variant={statusFilter === value ? "secondary" : "ghost"}
-                className={cn(
-                  "h-7 px-2 text-xs",
-                  statusFilter === value && "bg-background shadow-sm hover:bg-background"
-                )}
-                aria-pressed={statusFilter === value}
-                onClick={() => {
-                  setStatusFilter(value)
-                  setSelectedFolderId("")
-                }}
-              >
-                {label}
-              </Button>
-            ))}
+        <Card size="sm" className="mt-5">
+          <CardHeader>
+        <BusinessFilterBar className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="min-w-0 flex-1">
+            <BusinessFilterSearch
+              value={search}
+              onValueChange={setSearch}
+              placeholder="폴더명 또는 유형 검색"
+              label="폴더 검색"
+            />
           </div>
-          <Select
+          <Tabs
+            value={statusFilter}
+            onValueChange={(value) => {
+              setStatusFilter(value as typeof statusFilter)
+              setSelectedFolderId("")
+            }}
+            className="shrink-0"
+          >
+            <TabsList aria-label="폴더 상태">
+              {(
+                [
+                  ["active", "활성 폴더"],
+                  ["archived", "보관됨"],
+                  ["all", "전체"],
+                ] as const
+              ).map(([value, label]) => (
+                <TabsTrigger key={value} value={value}>
+                  {label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+          <BusinessFilterSelect
+            label="유형"
             value={folderTypeFilter}
             onValueChange={(value) =>
               setFolderTypeFilter(value as typeof folderTypeFilter)
             }
-          >
-            <SelectTrigger className="w-full sm:w-44" aria-label="폴더 유형">
-              <SelectValue>
-                {folderTypeFilter === "all"
-                  ? "모든 유형"
-                  : FOLDER_TYPE_LABELS[folderTypeFilter]}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">모든 유형</SelectItem>
-              {FOLDER_TYPES.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {FOLDER_TYPE_LABELS[type]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+            options={[
+              { value: "all", label: "모든 유형" },
+              ...FOLDER_TYPES.map((type) => ({
+                value: type,
+                label: FOLDER_TYPE_LABELS[type],
+              })),
+            ]}
+          />
+        </BusinessFilterBar>
+          </CardHeader>
+          <CardContent className="p-0">
 
         {error ? (
-          <div className="mt-5 rounded-md border border-destructive/30 bg-destructive/5 p-5">
+          <div className="m-4 rounded-md border border-destructive/30 bg-destructive/5 p-5">
             <div className="font-medium">
               {forbidden ? "이 기능을 볼 권한이 없습니다." : "폴더를 불러오지 못했습니다."}
             </div>
@@ -862,7 +852,7 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
             </Button>
           </div>
         ) : (
-          <div className="mt-5 min-h-[520px] border-y lg:grid lg:grid-cols-[340px_minmax(0,1fr)]">
+          <div className="min-h-[520px] border-t lg:grid lg:grid-cols-[340px_minmax(0,1fr)]">
             <section
               className={cn(
                 "min-w-0 lg:border-r",
@@ -1011,7 +1001,7 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
 
                   <Tabs defaultValue="items" className="px-4 py-5 sm:px-5">
                     <TabsList>
-                      <TabsTrigger value="items">연결 항목 {selectedItems.length}</TabsTrigger>
+                      <TabsTrigger value="items" className="gap-2"><span>연결 항목</span><TabsCount>{selectedItems.length}</TabsCount></TabsTrigger>
                       <TabsTrigger value="tasks" disabled={selectedFolder.status === "archived"}>
                         업무 추가
                       </TabsTrigger>
@@ -1024,13 +1014,15 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
                       {folderItemsLoading ? (
                         <FolderListSkeleton />
                       ) : selectedItems.length === 0 ? (
-                        <div className="rounded-md border border-dashed px-5 py-14 text-center">
-                          <Link2 className="mx-auto size-6 text-muted-foreground" />
-                          <p className="mt-3 text-sm font-medium">연결된 항목이 없습니다.</p>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            업무 또는 미디어를 추가하면 이 폴더에서 함께 확인할 수 있습니다.
-                          </p>
-                        </div>
+                        <Empty className="min-h-52">
+                          <EmptyHeader>
+                            <EmptyMedia variant="icon"><Link2 /></EmptyMedia>
+                            <EmptyTitle>연결된 항목이 없습니다.</EmptyTitle>
+                            <EmptyDescription>
+                              업무 또는 미디어를 추가하면 이 폴더에서 함께 확인할 수 있습니다.
+                            </EmptyDescription>
+                          </EmptyHeader>
+                        </Empty>
                       ) : (
                         <div className="divide-y border-y">
                           {selectedItems.map((item) => (
@@ -1193,6 +1185,8 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
             </section>
           </div>
         )}
+          </CardContent>
+        </Card>
       </div>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>

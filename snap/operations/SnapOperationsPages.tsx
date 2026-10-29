@@ -20,7 +20,6 @@ import {
   ExternalLink,
   FileText,
   FileJson,
-  Filter,
   Globe,
   LoaderCircle,
   PackageCheck,
@@ -34,18 +33,26 @@ import {
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/Badge"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/Button"
-import { Card } from "@/components/ui/Card"
-import { Input } from "@/components/ui/Input"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/Select"
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/Empty"
+import { StatusBadge as PlatformStatusBadge } from "@/components/platform/StatusBadge"
+import {
+  BusinessFilterSearch,
+  BusinessFilterSelect,
+  BusinessListToolbar,
+} from "@/components/platform/SearchFilterBar"
+import { Card, CardContent, CardHeader } from "@/components/ui/Card"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs"
+import { Input } from "@/components/ui/Input"
 import { Skeleton } from "@/components/ui/Skeleton"
-import { SubmittedSearchInput } from "@/components/ui/SubmittedSearchInput"
 import {
   Sheet,
   SheetContent,
@@ -545,18 +552,19 @@ function workflowKeywords(record: SnapJsonRecord) {
   return arrayValue(record, "intent_keywords", "keywords", "routing_keywords")
 }
 
-function statusVariant(
-  status: string
-): "secondary" | "outline" | "destructive" {
+function statusTone(status: string) {
   if (["rejected", "failed", "overdue", "cancelled"].includes(status))
-    return "destructive"
+    return "danger" as const
   if (
-    ["approved", "sent", "completed", "done", "verified", "confirmed"].includes(
+    ["approved", "sent", "delivered", "completed", "done", "verified"].includes(
       status
     )
   )
-    return "secondary"
-  return "outline"
+    return "success" as const
+  if (["submitted", "review"].includes(status)) return "warning" as const
+  if (["assigned", "active", "in_progress", "confirmed"].includes(status))
+    return "info" as const
+  return "neutral" as const
 }
 
 function statusLabel(status: string) {
@@ -584,20 +592,13 @@ function PageHeader({
   actions?: ReactNode
 }) {
   return (
-    <header className="flex flex-col gap-4 pb-5 sm:flex-row sm:items-start sm:justify-between">
-      <div className="min-w-0">
-        {eyebrow ? (
-          <div className="mb-1 text-xs font-medium text-primary">{eyebrow}</div>
-        ) : null}
-        <h1 className="text-2xl font-semibold">{title}</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-          {description}
-        </p>
-      </div>
-      {actions ? (
-        <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>
-      ) : null}
-    </header>
+    <HeroBanner
+      eyebrow={eyebrow}
+      title={title}
+      description={description}
+      actions={actions}
+      className="[&_header]:flex-wrap"
+    />
   )
 }
 
@@ -619,24 +620,28 @@ function SummaryStrip({
   return (
     <div
       className={cn(
-        "ui-summary-strip grid sm:grid-cols-2",
-        items.length === 3 ? "xl:grid-cols-3" : "xl:grid-cols-4"
+        "ui-summary-strip grid",
+        items.length === 3
+          ? "grid-cols-1 sm:grid-cols-3"
+          : "grid-cols-2 sm:grid-cols-4"
       )}
     >
       {items.map((item, index) => {
         const content = (
           <>
-            <div className="text-xs text-muted-foreground">{item.label}</div>
+            <div className="text-[length:var(--text-body-9)] leading-5 font-semibold text-[var(--color-gray-2)]">
+              {item.label}
+            </div>
             <div
               className={cn(
-                "mt-1 truncate text-xl font-semibold tabular-nums",
+                "mt-1 truncate text-[26px] leading-9 font-bold tabular-nums",
                 item.alert && "text-destructive"
               )}
             >
               {item.value}
             </div>
             {item.hint ? (
-              <div className="mt-1 truncate text-xs text-muted-foreground">
+              <div className="mt-1 truncate text-[12px] leading-4 text-muted-foreground">
                 {item.hint}
               </div>
             ) : null}
@@ -675,7 +680,7 @@ function LoadingState({
   if (variant === "dashboard") {
     return (
       <div className="space-y-6 py-4" aria-label="불러오는 중">
-        <div className="ui-summary-strip grid sm:grid-cols-2 xl:grid-cols-4">
+        <div className="ui-summary-strip grid grid-cols-2 sm:grid-cols-4">
           {Array.from({ length: 4 }, (_, index) => (
             <div key={index} className="space-y-2 border-r p-4 last:border-r-0">
               <Skeleton className="h-3 w-20" />
@@ -762,7 +767,7 @@ function LoadingState({
   if (variant === "table") {
     return (
       <div className="space-y-5 py-4" aria-label="불러오는 중">
-        <div className="ui-summary-strip grid sm:grid-cols-4">
+        <div className="ui-summary-strip grid grid-cols-2 sm:grid-cols-4">
           {Array.from({ length: 4 }, (_, index) => (
             <div key={index} className="space-y-2 border-r p-4">
               <Skeleton className="h-3 w-20" />
@@ -835,16 +840,14 @@ function EmptyState({
   action?: ReactNode
 }) {
   return (
-    <div className="flex min-h-52 flex-col items-center justify-center gap-3 rounded-md border border-dashed bg-muted/15 px-4 text-center">
-      <div className="text-muted-foreground">{icon}</div>
-      <div>
-        <div className="font-medium">{title}</div>
-        <div className="mt-1 max-w-lg text-sm text-muted-foreground">
-          {description}
-        </div>
-      </div>
-      {action}
-    </div>
+    <Empty className="min-h-52">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">{icon}</EmptyMedia>
+        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyDescription>{description}</EmptyDescription>
+      </EmptyHeader>
+      {action ? <EmptyContent>{action}</EmptyContent> : null}
+    </Empty>
   )
 }
 
@@ -858,11 +861,10 @@ function SearchField({
   placeholder: string
 }) {
   return (
-    <SubmittedSearchInput
+    <BusinessFilterSearch
+      label={placeholder}
       value={value}
-      onSearch={onChange}
-      placeholder={placeholder}
-      formClassName="min-w-0 flex-1"
+      onValueChange={onChange}
     />
   )
 }
@@ -1015,7 +1017,7 @@ function DashboardPage({ navigate }: { navigate: SnapNavigate }) {
                 <div className="mb-4 flex items-end justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-[length:var(--text-header-7)] leading-[var(--leading-header-7)] font-bold">
+                      <h2 className="text-[18px] leading-[26px] font-bold">
                         오늘 할 일
                       </h2>
                       <Badge variant="default">{priorities.length}건</Badge>
@@ -1067,12 +1069,12 @@ function DashboardPage({ navigate }: { navigate: SnapNavigate }) {
                           <span className="text-xs text-[var(--surface-muted-foreground)] tabular-nums sm:text-sm">
                             {formatDate(taskDate(task))}
                           </span>
-                          <Badge
-                            variant={statusVariant(taskStatus(task))}
+                          <PlatformStatusBadge
+                            tone={statusTone(taskStatus(task))}
                             className="justify-self-start"
                           >
                             {statusLabel(taskStatus(task))}
-                          </Badge>
+                          </PlatformStatusBadge>
                         </span>
                         <ChevronRight className="mt-2 size-4 text-[var(--control-accessory-foreground)] transition-transform group-hover:translate-x-0.5 sm:mt-0" />
                       </button>
@@ -1203,115 +1205,131 @@ function TasksPage({ navigate }: { navigate: SnapNavigate }) {
               setPage(1)
             }}
           />
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <SearchField
-              value={query}
-              onChange={(value) => {
-                setQuery(value)
-                setPage(1)
-              }}
-              placeholder="업무명, 고객, 위치, 업무 유형 검색"
-            />
-            <Select
-              value={filter}
-              onValueChange={(value) => {
-                setFilter(String(value))
-                setPage(1)
-              }}
-            >
-              <SelectTrigger className="w-full sm:w-40">
-                <Filter className="size-4 text-muted-foreground" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">전체 상태</SelectItem>
-                <SelectItem value="active">진행 중</SelectItem>
-                <SelectItem value="review">검토 대기</SelectItem>
-                <SelectItem value="done">완료</SelectItem>
-                <SelectItem value="draft">초안</SelectItem>
-                <SelectItem value="rejected">반려</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {visible.length === 0 ? (
-            <EmptyState
-              icon={<ClipboardList className="size-7" />}
-              title="조건에 맞는 업무가 없습니다"
-              description="검색어나 상태 필터를 바꾸거나 새 업무를 만드세요."
-              action={
-                <Button onClick={() => navigate("SC-19")}>업무 만들기</Button>
-              }
-            />
-          ) : (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>업무</TableHead>
-                    <TableHead>고객·위치</TableHead>
-                    <TableHead>담당자</TableHead>
-                    <TableHead>예정일</TableHead>
-                    <TableHead>상태</TableHead>
-                    <TableHead className="w-12">
-                      <span className="sr-only">열기</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {visible.map((task, index) => {
-                    const id = recordId(task, index)
-                    const status = taskStatus(task)
-                    return (
-                      <TableRow
-                        key={id}
-                        className="cursor-pointer"
-                        onClick={() => navigate("SC-20", { params: { id } })}
-                      >
-                        <TableCell className="max-w-80 whitespace-normal">
-                          <div className="font-medium">{taskTitle(task)}</div>
-                          <div className="mt-0.5 text-xs text-muted-foreground">
-                            {id}
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-64 whitespace-normal">
-                          <div>{taskCustomer(task)}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {taskLocation(task)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {stringValue(task, "assignee_name", "worker_name") ||
-                            "미배정"}
-                        </TableCell>
-                        <TableCell>{formatDate(taskDate(task))}</TableCell>
-                        <TableCell>
-                          <Badge variant={statusVariant(status)}>
-                            {statusLabel(status)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <ArrowRight className="size-4 text-muted-foreground" />
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-              <TablePagination
-                className="px-0"
-                page={currentPage}
-                pageSize={pageSize}
-                total={filtered.length}
-                pageSizeOptions={[10, 20, 50]}
-                aria-label="작업 목록 페이지 이동"
-                onPageChange={setPage}
-                onPageSizeChange={(nextPageSize) => {
-                  setPageSize(nextPageSize)
-                  setPage(1)
-                }}
+          <Card size="sm">
+            <CardHeader>
+              <BusinessListToolbar
+                aria-label="업무 필터"
+                search={
+                  <SearchField
+                    value={query}
+                    onChange={(value) => {
+                      setQuery(value)
+                      setPage(1)
+                    }}
+                    placeholder="업무명, 고객, 위치, 업무 유형 검색"
+                  />
+                }
+                actions={
+                  <BusinessFilterSelect
+                    label="상태"
+                    value={filter}
+                    onValueChange={(value) => {
+                      setFilter(value)
+                      setPage(1)
+                    }}
+                    options={[
+                      { value: "all", label: "전체 상태" },
+                      { value: "active", label: "진행 중" },
+                      { value: "review", label: "검토 대기" },
+                      { value: "done", label: "완료" },
+                      { value: "draft", label: "초안" },
+                      { value: "rejected", label: "반려" },
+                    ]}
+                  />
+                }
               />
-            </>
-          )}
+            </CardHeader>
+            <CardContent data-layout="flush-table" className="p-0">
+              {visible.length === 0 ? (
+                <EmptyState
+                  icon={<ClipboardList className="size-7" />}
+                  title="조건에 맞는 업무가 없습니다"
+                  description="검색어나 상태 필터를 바꾸거나 새 업무를 만드세요."
+                  action={
+                    <Button onClick={() => navigate("SC-19")}>
+                      업무 만들기
+                    </Button>
+                  }
+                />
+              ) : (
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>업무</TableHead>
+                        <TableHead>고객·위치</TableHead>
+                        <TableHead>담당자</TableHead>
+                        <TableHead>예정일</TableHead>
+                        <TableHead>상태</TableHead>
+                        <TableHead className="w-12">
+                          <span className="sr-only">열기</span>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {visible.map((task, index) => {
+                        const id = recordId(task, index)
+                        const status = taskStatus(task)
+                        return (
+                          <TableRow
+                            key={id}
+                            className="cursor-pointer"
+                            onClick={() =>
+                              navigate("SC-20", { params: { id } })
+                            }
+                          >
+                            <TableCell className="max-w-80 whitespace-normal">
+                              <div className="font-medium">
+                                {taskTitle(task)}
+                              </div>
+                              <div className="mt-0.5 text-xs text-muted-foreground">
+                                {id}
+                              </div>
+                            </TableCell>
+                            <TableCell className="max-w-64 whitespace-normal">
+                              <div>{taskCustomer(task)}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {taskLocation(task)}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {stringValue(
+                                task,
+                                "assignee_name",
+                                "worker_name"
+                              ) || "미배정"}
+                            </TableCell>
+                            <TableCell>{formatDate(taskDate(task))}</TableCell>
+                            <TableCell>
+                              <PlatformStatusBadge tone={statusTone(status)}>
+                                {statusLabel(status)}
+                              </PlatformStatusBadge>
+                            </TableCell>
+                            <TableCell>
+                              <ArrowRight className="size-4 text-muted-foreground" />
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                  <TablePagination
+                    className="px-4"
+                    page={currentPage}
+                    pageSize={pageSize}
+                    total={filtered.length}
+                    pageSizeOptions={[10, 20, 50]}
+                    aria-label="작업 목록 페이지 이동"
+                    onPageChange={setPage}
+                    onPageSizeChange={(nextPageSize) => {
+                      setPageSize(nextPageSize)
+                      setPage(1)
+                    }}
+                  />
+                </>
+              )}
+            </CardContent>
+          </Card>
         </>
       )}
     </OperationsLayout>
@@ -1375,201 +1393,179 @@ function CalendarPage({ navigate }: { navigate: SnapNavigate }) {
       ) : resource.error ? (
         <ErrorState message={resource.error} onRetry={resource.reload} />
       ) : (
-        <>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon-sm"
-                aria-label="이전 달"
-                onClick={() =>
-                  setCursor(
-                    (date) =>
-                      new Date(date.getFullYear(), date.getMonth() - 1, 1)
-                  )
-                }
-              >
-                <ChevronLeft />
-              </Button>
-              <h2 className="min-w-32 text-center font-semibold">
-                {monthLabel}
-              </h2>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                aria-label="다음 달"
-                onClick={() =>
-                  setCursor(
-                    (date) =>
-                      new Date(date.getFullYear(), date.getMonth() + 1, 1)
-                  )
-                }
-              >
-                <ChevronRight />
-              </Button>
-              <Button variant="ghost" onClick={() => setCursor(new Date())}>
-                오늘
-              </Button>
+        <Card size="sm">
+          <CardHeader>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label="이전 달"
+                  onClick={() =>
+                    setCursor(
+                      (date) =>
+                        new Date(date.getFullYear(), date.getMonth() - 1, 1)
+                    )
+                  }
+                >
+                  <ChevronLeft />
+                </Button>
+                <h2 className="min-w-32 text-center font-semibold">
+                  {monthLabel}
+                </h2>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label="다음 달"
+                  onClick={() =>
+                    setCursor(
+                      (date) =>
+                        new Date(date.getFullYear(), date.getMonth() + 1, 1)
+                    )
+                  }
+                >
+                  <ChevronRight />
+                </Button>
+                <Button variant="ghost" onClick={() => setCursor(new Date())}>
+                  오늘
+                </Button>
+              </div>
             </div>
-            <Select
-              value={filter}
-              onValueChange={(value) => setFilter(String(value))}
-            >
-              <SelectTrigger className="w-40">
-                <span className="flex min-w-0 items-center gap-2">
-                  <span
-                    className={cn(
-                      "size-2 shrink-0 rounded-full",
-                      filter === "all"
-                        ? "bg-muted-foreground"
-                        : taskStatusStyle(filter).dot
-                    )}
-                  />
-                  <span>
-                    {filter === "all" ? "전체 상태" : statusLabel(filter)}
-                  </span>
-                </span>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">
-                  <span className="flex items-center gap-2">
-                    <span className="size-2 rounded-full bg-muted-foreground" />
-                    전체 상태
-                  </span>
-                </SelectItem>
-                {TASK_STATUS_ORDER.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    <span className="flex items-center gap-2">
-                      <span
-                        className={cn(
-                          "size-2 rounded-full",
-                          taskStatusStyle(status).dot
-                        )}
-                      />
-                      {statusLabel(status)}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-y py-2.5 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">진행 단계</span>
-            {TASK_STATUS_ORDER.map((status) => (
+          </CardHeader>
+          <CardContent className="space-y-3 pb-4">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b pb-2.5 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">진행 단계</span>
               <button
-                key={status}
                 type="button"
+                aria-pressed={filter === "all"}
                 className={cn(
                   "flex items-center gap-1.5 rounded px-1 py-0.5 hover:bg-muted",
-                  filter === status && "bg-muted font-medium text-foreground"
+                  filter === "all" && "bg-muted font-medium text-foreground"
                 )}
-                onClick={() =>
-                  setFilter((current) => (current === status ? "all" : status))
-                }
+                onClick={() => setFilter("all")}
               >
-                <span
-                  className={cn(
-                    "size-2 rounded-full",
-                    taskStatusStyle(status).dot
-                  )}
-                />
-                {statusLabel(status)}
+                전체
               </button>
-            ))}
-          </div>
-          <div className="overflow-hidden rounded-md border">
-            <div className="grid grid-cols-7 bg-sidebar text-center text-xs text-muted-foreground">
-              {["일", "월", "화", "수", "목", "금", "토"].map((day) => (
-                <div key={day} className="border-r px-2 py-2 last:border-r-0">
-                  {day}
-                </div>
+              {TASK_STATUS_ORDER.map((status) => (
+                <button
+                  key={status}
+                  type="button"
+                  className={cn(
+                    "flex items-center gap-1.5 rounded px-1 py-0.5 hover:bg-muted",
+                    filter === status && "bg-muted font-medium text-foreground"
+                  )}
+                  aria-pressed={filter === status}
+                  onClick={() =>
+                    setFilter((current) =>
+                      current === status ? "all" : status
+                    )
+                  }
+                >
+                  <span
+                    className={cn(
+                      "size-2 rounded-full",
+                      taskStatusStyle(status).dot
+                    )}
+                  />
+                  {statusLabel(status)}
+                </button>
               ))}
             </div>
-            <div className="grid grid-cols-7">
-              {cells.map((date) => {
-                const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
-                const items = tasksByDate.get(key) ?? []
-                const otherMonth = date.getMonth() !== cursor.getMonth()
-                const today = new Date().toDateString() === date.toDateString()
-                return (
-                  <div
-                    key={key}
-                    className={cn(
-                      "min-h-28 border-t border-r p-1.5 last:border-r-0 sm:min-h-36 sm:p-2",
-                      otherMonth && "bg-muted/30 text-muted-foreground"
-                    )}
-                  >
+            <div className="overflow-hidden rounded-md border">
+              <div className="grid grid-cols-7 bg-sidebar text-center text-xs text-muted-foreground">
+                {["일", "월", "화", "수", "목", "금", "토"].map((day) => (
+                  <div key={day} className="border-r px-2 py-2 last:border-r-0">
+                    {day}
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7">
+                {cells.map((date) => {
+                  const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
+                  const items = tasksByDate.get(key) ?? []
+                  const otherMonth = date.getMonth() !== cursor.getMonth()
+                  const today =
+                    new Date().toDateString() === date.toDateString()
+                  return (
                     <div
+                      key={key}
                       className={cn(
-                        "flex size-6 items-center justify-center rounded-full text-xs",
-                        today && "bg-primary text-primary-foreground"
+                        "min-h-28 border-t border-r p-1.5 last:border-r-0 sm:min-h-36 sm:p-2",
+                        otherMonth && "bg-muted/30 text-muted-foreground"
                       )}
                     >
-                      {date.getDate()}
-                    </div>
-                    <div className="mt-1 space-y-1">
-                      {items.slice(0, 3).map((task, index) => {
-                        const status = normalizedTaskStatus(taskStatus(task))
-                        const style = taskStatusStyle(status)
-                        const title = taskTitle(task)
-                        return (
-                          <Tooltip key={recordId(task, index)}>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                className={cn(
-                                  "block w-full truncate rounded border-l-2 px-1.5 py-1 text-left text-[11px] transition-colors",
-                                  style.event
-                                )}
-                                onClick={() =>
-                                  navigate("SC-20", {
-                                    params: { id: recordId(task, index) },
-                                  })
-                                }
+                      <div
+                        className={cn(
+                          "flex size-6 items-center justify-center rounded-full text-xs",
+                          today && "bg-primary text-primary-foreground"
+                        )}
+                      >
+                        {date.getDate()}
+                      </div>
+                      <div className="mt-1 space-y-1">
+                        {items.slice(0, 3).map((task, index) => {
+                          const status = normalizedTaskStatus(taskStatus(task))
+                          const style = taskStatusStyle(status)
+                          const title = taskTitle(task)
+                          return (
+                            <Tooltip key={recordId(task, index)}>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  className={cn(
+                                    "block w-full truncate rounded border-l-2 px-1.5 py-1 text-left text-[11px] transition-colors",
+                                    style.event
+                                  )}
+                                  onClick={() =>
+                                    navigate("SC-20", {
+                                      params: { id: recordId(task, index) },
+                                    })
+                                  }
+                                >
+                                  <span
+                                    className={cn(
+                                      "mr-1 inline-block size-1.5 rounded-full",
+                                      style.dot
+                                    )}
+                                  />
+                                  {title}
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent
+                                side="top"
+                                align="start"
+                                className="flex max-w-72 flex-col items-start gap-1 px-3 py-2"
                               >
-                                <span
-                                  className={cn(
-                                    "mr-1 inline-block size-1.5 rounded-full",
-                                    style.dot
-                                  )}
-                                />
-                                {title}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="top"
-                              align="start"
-                              className="flex max-w-72 flex-col items-start gap-1 px-3 py-2"
-                            >
-                              <strong className="text-xs">{title}</strong>
-                              <span className="flex items-center gap-1.5 text-[11px] text-background/80">
-                                <span
-                                  className={cn(
-                                    "size-2 rounded-full",
-                                    style.dot
-                                  )}
-                                />
-                                진행 상태 · {statusLabel(status)}
-                              </span>
-                              <span className="text-[11px] text-background/70">
-                                {taskLocation(task)}
-                              </span>
-                            </TooltipContent>
-                          </Tooltip>
-                        )
-                      })}
-                      {items.length > 3 ? (
-                        <div className="px-1 text-[10px] text-muted-foreground">
-                          +{items.length - 3}건
-                        </div>
-                      ) : null}
+                                <strong className="text-xs">{title}</strong>
+                                <span className="flex items-center gap-1.5 text-[11px] text-background/80">
+                                  <span
+                                    className={cn(
+                                      "size-2 rounded-full",
+                                      style.dot
+                                    )}
+                                  />
+                                  진행 상태 · {statusLabel(status)}
+                                </span>
+                                <span className="text-[11px] text-background/70">
+                                  {taskLocation(task)}
+                                </span>
+                              </TooltipContent>
+                            </Tooltip>
+                          )
+                        })}
+                        {items.length > 3 ? (
+                          <div className="px-1 text-[10px] text-muted-foreground">
+                            +{items.length - 3}건
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
-          </div>
-        </>
+          </CardContent>
+        </Card>
       )}
     </OperationsLayout>
   )
@@ -1965,128 +1961,140 @@ function ErpHandoffPage({ navigate }: { navigate: SnapNavigate }) {
             selectedKey={status}
             onSelect={setStatus}
           />
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <SearchField
-              value={query}
-              onChange={setQuery}
-              placeholder="업무명, 위치, 인계 유형 검색"
-            />
-            <Select
-              value={status}
-              onValueChange={(value) => setStatus(String(value))}
-            >
-              <SelectTrigger className="w-full sm:w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">전체 상태</SelectItem>
-                <SelectItem value="draft">초안</SelectItem>
-                <SelectItem value="confirmed">확정</SelectItem>
-                <SelectItem value="sent">전달됨</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {filtered.length === 0 ? (
-            <EmptyState
-              icon={<PackageCheck className="size-7" />}
-              title="조건에 맞는 인계가 없습니다"
-              description="업무 상세에서 ERP 연결 범위를 만들면 이 목록에서 확정할 수 있습니다."
-            />
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>업무</TableHead>
-                  <TableHead>인계 유형·범위</TableHead>
-                  <TableHead>생성일</TableHead>
-                  <TableHead>상태</TableHead>
-                  <TableHead className="text-right">작업</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((handoff, index) => {
-                  const id = recordId(handoff, index)
-                  const rowStatus = stringValue(handoff, "status") || "draft"
-                  return (
-                    <TableRow key={id}>
-                      <TableCell className="max-w-80 whitespace-normal">
-                        <Button
-                          variant="outline"
-                          size="xs"
-                          className="max-w-full justify-start"
-                          onClick={() =>
-                            navigate("SC-20", {
-                              params: {
-                                id:
-                                  stringValue(handoff, "task_id") ||
-                                  "TASK-DEMO-001",
-                              },
-                            })
-                          }
-                        >
-                          <span className="truncate">
-                            {stringValue(handoff, "task_title", "title") ||
-                              "업무"}
-                          </span>
-                        </Button>
-                        <div className="mt-0.5 text-xs text-muted-foreground">
-                          {stringValue(handoff, "location_name") || id}
-                        </div>
-                      </TableCell>
-                      <TableCell className="max-w-72 whitespace-normal">
-                        <div>
-                          {stringValue(handoff, "handoff_type") || "generic"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {stringValue(handoff, "scope", "scope_summary") ||
-                            "범위 확인 필요"}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {formatDate(stringValue(handoff, "created_at"), {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={statusVariant(rowStatus)}>
-                          {statusLabel(rowStatus)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-end gap-2">
-                          {rowStatus === "draft" ? (
-                            <Button
-                              size="xs"
-                              variant="outline"
-                              disabled={busyId === id}
-                              onClick={() => void confirm(handoff, index)}
-                            >
-                              {busyId === id ? (
-                                <LoaderCircle className="animate-spin" />
-                              ) : (
-                                <Check />
-                              )}{" "}
-                              확정
-                            </Button>
-                          ) : null}
-                          <Button
-                            size="xs"
-                            variant="outline"
-                            disabled={busyId === id}
-                            onClick={() => void exportPackage(handoff, index)}
-                          >
-                            <FileJson /> 내보내기
-                          </Button>
-                        </div>
-                      </TableCell>
+          <Card size="sm">
+            <CardHeader>
+              <BusinessListToolbar
+                aria-label="인계 필터"
+                search={
+                  <SearchField
+                    value={query}
+                    onChange={setQuery}
+                    placeholder="업무명, 위치, 인계 유형 검색"
+                  />
+                }
+                actions={
+                  <BusinessFilterSelect
+                    label="상태"
+                    value={status}
+                    onValueChange={setStatus}
+                    options={[
+                      { value: "all", label: "전체 상태" },
+                      { value: "draft", label: "초안" },
+                      { value: "confirmed", label: "확정" },
+                      { value: "sent", label: "전달됨" },
+                    ]}
+                  />
+                }
+              />
+            </CardHeader>
+            <CardContent data-layout="flush-table" className="p-0">
+              {filtered.length === 0 ? (
+                <EmptyState
+                  icon={<PackageCheck className="size-7" />}
+                  title="조건에 맞는 인계가 없습니다"
+                  description="업무 상세에서 ERP 연결 범위를 만들면 이 목록에서 확정할 수 있습니다."
+                />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>업무</TableHead>
+                      <TableHead>인계 유형·범위</TableHead>
+                      <TableHead>생성일</TableHead>
+                      <TableHead>상태</TableHead>
+                      <TableHead className="text-right">작업</TableHead>
                     </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          )}
+                  </TableHeader>
+                  <TableBody>
+                    {filtered.map((handoff, index) => {
+                      const id = recordId(handoff, index)
+                      const rowStatus =
+                        stringValue(handoff, "status") || "draft"
+                      return (
+                        <TableRow key={id}>
+                          <TableCell className="max-w-80 whitespace-normal">
+                            <Button
+                              variant="outline"
+                              size="lg"
+                              className="max-w-full justify-start"
+                              onClick={() =>
+                                navigate("SC-20", {
+                                  params: {
+                                    id:
+                                      stringValue(handoff, "task_id") ||
+                                      "TASK-DEMO-001",
+                                  },
+                                })
+                              }
+                            >
+                              <span className="truncate">
+                                {stringValue(handoff, "task_title", "title") ||
+                                  "업무"}
+                              </span>
+                            </Button>
+                            <div className="mt-0.5 text-xs text-muted-foreground">
+                              {stringValue(handoff, "location_name") || id}
+                            </div>
+                          </TableCell>
+                          <TableCell className="max-w-72 whitespace-normal">
+                            <div>
+                              {stringValue(handoff, "handoff_type") ||
+                                "generic"}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {stringValue(handoff, "scope", "scope_summary") ||
+                                "범위 확인 필요"}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {formatDate(stringValue(handoff, "created_at"), {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            <PlatformStatusBadge tone={statusTone(rowStatus)}>
+                              {statusLabel(rowStatus)}
+                            </PlatformStatusBadge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex justify-end gap-2">
+                              {rowStatus === "draft" ? (
+                                <Button
+                                  size="lg"
+                                  variant="outline"
+                                  disabled={busyId === id}
+                                  onClick={() => void confirm(handoff, index)}
+                                >
+                                  {busyId === id ? (
+                                    <LoaderCircle className="animate-spin" />
+                                  ) : (
+                                    <Check />
+                                  )}{" "}
+                                  확정
+                                </Button>
+                              ) : null}
+                              <Button
+                                size="lg"
+                                variant="outline"
+                                disabled={busyId === id}
+                                onClick={() =>
+                                  void exportPackage(handoff, index)
+                                }
+                              >
+                                <FileJson /> 내보내기
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
         </>
       )}
     </OperationsLayout>
@@ -2184,167 +2192,184 @@ function CorrectiveActionsPage({ navigate }: { navigate: SnapNavigate }) {
         title="시정조치"
         description="검토에서 발견된 위험을 작업자 재촬영과 증거 검증까지 닫힌 흐름으로 관리합니다."
       />
-      <div className="flex flex-wrap gap-2">
-        {["all", "open", "in_progress", "overdue", "verified"].map((value) => (
-          <Button
-            key={value}
-            size="sm"
-            variant={filter === value ? "secondary" : "ghost"}
-            onClick={() => setFilter(value)}
+      <Card size="sm">
+        <CardHeader>
+          <Tabs
+            value={filter}
+            onValueChange={(value) => setFilter(String(value))}
           >
-            {
-              {
-                all: "전체",
-                open: "대기",
-                in_progress: "진행 중",
-                overdue: "기한 초과",
-                verified: "검증 완료",
-              }[value]
-            }
-          </Button>
-        ))}
-      </div>
-      {resource.loading ? (
-        <LoadingState variant="table" />
-      ) : resource.error ? (
-        <ErrorState message={resource.error} onRetry={resource.reload} />
-      ) : visible.length === 0 ? (
-        <EmptyState
-          icon={<CheckCircle2 className="size-7" />}
-          title="이 상태의 시정조치가 없습니다"
-          description="검토에서 새 조치가 등록되면 위험도와 기한 기준으로 표시됩니다."
-        />
-      ) : (
-        <div className="divide-y border-y">
-          {visible.map((item, index) => {
-            const id = recordId(item, index)
-            const status = stringValue(item, "status") || "open"
-            const risk = stringValue(item, "risk_band", "priority") || "unrated"
-            const selected = selectedId === id
-            return (
-              <article key={id} className="px-3 py-4">
-                <div className="flex flex-wrap items-start gap-2">
-                  <Badge
-                    variant={
-                      risk === "critical" || risk === "high"
-                        ? "destructive"
-                        : "outline"
-                    }
-                  >
-                    {risk}
-                  </Badge>
-                  <Badge variant={statusVariant(status)}>
-                    {statusLabel(status)}
-                  </Badge>
-                  <button
-                    className="ml-auto text-xs text-primary hover:underline"
-                    onClick={() =>
-                      navigate("SC-20", {
-                        params: {
-                          id: stringValue(item, "task_id") || "TASK-DEMO-001",
-                        },
-                      })
-                    }
-                  >
-                    업무 보기 <ExternalLink className="ml-1 inline size-3" />
-                  </button>
-                </div>
-                <h2 className="mt-2 font-medium">
-                  {stringValue(item, "hazard", "title") || "시정조치"}
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {stringValue(item, "action_required", "description") ||
-                    "조치 내용을 확인하세요."}
-                </p>
-                <div className="mt-2 text-xs text-muted-foreground">
-                  기한 {stringValue(item, "due_date") || "미정"}
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {status === "open" ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={busyId === id}
-                      onClick={() =>
-                        void updateStatus(item, index, "in_progress")
-                      }
-                    >
-                      조치 시작
-                    </Button>
-                  ) : null}
-                  {status !== "verified" ? (
-                    <>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={busyId === id}
-                        onClick={() => void createRecapture(item, index)}
-                      >
-                        재촬영 요청
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => setSelectedId(selected ? "" : id)}
-                      >
-                        검증
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={busyId === id}
-                      onClick={() =>
-                        void updateStatus(item, index, "in_progress")
-                      }
-                    >
-                      다시 열기
-                    </Button>
-                  )}
-                </div>
-                {selected ? (
-                  <div className="mt-4 grid gap-3 border-t pt-4">
-                    <label className="grid gap-1.5 text-sm font-medium">
-                      증거 URL
-                      <Input
-                        value={evidenceUrl}
-                        onChange={(event) => setEvidenceUrl(event.target.value)}
-                        placeholder="https://... 또는 첨부 미디어 URL"
-                      />
-                    </label>
-                    <label className="grid gap-1.5 text-sm font-medium">
-                      검증 메모
-                      <Textarea
-                        value={notes}
-                        onChange={(event) => setNotes(event.target.value)}
-                        placeholder="확인한 사실과 조치 결과"
-                      />
-                    </label>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" onClick={() => setSelectedId("")}>
-                        취소
-                      </Button>
-                      <Button
-                        disabled={busyId === id}
-                        onClick={() =>
-                          void updateStatus(item, index, "verified")
+            <TabsList aria-label="시정조치 상태">
+              {(
+                [
+                  ["all", "전체"],
+                  ["open", "대기"],
+                  ["in_progress", "진행 중"],
+                  ["overdue", "기한 초과"],
+                  ["verified", "검증 완료"],
+                ] as const
+              ).map(([value, label]) => (
+                <TabsTrigger key={value} value={value}>
+                  {label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </CardHeader>
+        <CardContent className="pb-2">
+          {resource.loading ? (
+            <LoadingState variant="table" />
+          ) : resource.error ? (
+            <ErrorState message={resource.error} onRetry={resource.reload} />
+          ) : visible.length === 0 ? (
+            <EmptyState
+              icon={<CheckCircle2 className="size-7" />}
+              title="이 상태의 시정조치가 없습니다"
+              description="검토에서 새 조치가 등록되면 위험도와 기한 기준으로 표시됩니다."
+            />
+          ) : (
+            <div className="divide-y">
+              {visible.map((item, index) => {
+                const id = recordId(item, index)
+                const status = stringValue(item, "status") || "open"
+                const risk =
+                  stringValue(item, "risk_band", "priority") || "unrated"
+                const selected = selectedId === id
+                return (
+                  <article key={id} className="px-3 py-4">
+                    <div className="flex flex-wrap items-start gap-2">
+                      <PlatformStatusBadge
+                        meaning="risk"
+                        tone={
+                          risk === "critical" || risk === "high"
+                            ? "danger"
+                            : risk === "medium"
+                              ? "warning"
+                              : "neutral"
                         }
                       >
-                        {busyId === id ? (
-                          <LoaderCircle className="animate-spin" />
-                        ) : (
-                          <ClipboardCheck />
-                        )}{" "}
-                        검증 완료
-                      </Button>
+                        {risk}
+                      </PlatformStatusBadge>
+                      <PlatformStatusBadge tone={statusTone(status)}>
+                        {statusLabel(status)}
+                      </PlatformStatusBadge>
+                      <button
+                        className="ml-auto text-xs text-primary hover:underline"
+                        onClick={() =>
+                          navigate("SC-20", {
+                            params: {
+                              id:
+                                stringValue(item, "task_id") || "TASK-DEMO-001",
+                            },
+                          })
+                        }
+                      >
+                        업무 보기{" "}
+                        <ExternalLink className="ml-1 inline size-3" />
+                      </button>
                     </div>
-                  </div>
-                ) : null}
-              </article>
-            )
-          })}
-        </div>
-      )}
+                    <h2 className="mt-2 font-medium">
+                      {stringValue(item, "hazard", "title") || "시정조치"}
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {stringValue(item, "action_required", "description") ||
+                        "조치 내용을 확인하세요."}
+                    </p>
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      기한 {stringValue(item, "due_date") || "미정"}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {status === "open" ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={busyId === id}
+                          onClick={() =>
+                            void updateStatus(item, index, "in_progress")
+                          }
+                        >
+                          조치 시작
+                        </Button>
+                      ) : null}
+                      {status !== "verified" ? (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={busyId === id}
+                            onClick={() => void createRecapture(item, index)}
+                          >
+                            재촬영 요청
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => setSelectedId(selected ? "" : id)}
+                          >
+                            검증
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={busyId === id}
+                          onClick={() =>
+                            void updateStatus(item, index, "in_progress")
+                          }
+                        >
+                          다시 열기
+                        </Button>
+                      )}
+                    </div>
+                    {selected ? (
+                      <div className="mt-4 grid gap-3 border-t pt-4">
+                        <label className="grid gap-1.5 text-sm font-medium">
+                          증거 URL
+                          <Input
+                            value={evidenceUrl}
+                            onChange={(event) =>
+                              setEvidenceUrl(event.target.value)
+                            }
+                            placeholder="https://... 또는 첨부 미디어 URL"
+                          />
+                        </label>
+                        <label className="grid gap-1.5 text-sm font-medium">
+                          검증 메모
+                          <Textarea
+                            value={notes}
+                            onChange={(event) => setNotes(event.target.value)}
+                            placeholder="확인한 사실과 조치 결과"
+                          />
+                        </label>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            onClick={() => setSelectedId("")}
+                          >
+                            취소
+                          </Button>
+                          <Button
+                            disabled={busyId === id}
+                            onClick={() =>
+                              void updateStatus(item, index, "verified")
+                            }
+                          >
+                            {busyId === id ? (
+                              <LoaderCircle className="animate-spin" />
+                            ) : (
+                              <ClipboardCheck />
+                            )}{" "}
+                            검증 완료
+                          </Button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </article>
+                )
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </OperationsLayout>
   )
 }

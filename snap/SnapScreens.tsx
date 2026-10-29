@@ -58,8 +58,10 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/ui/Badge"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/Button"
+import { alertVariants } from "@/components/ui/Alert"
+import { StatusBadge as PlatformStatusBadge } from "@/components/platform/StatusBadge"
 import {
   Card,
   CardContent,
@@ -399,13 +401,13 @@ const GROUP_LABELS: Record<SnapGroup, string> = {
   mobile: "모바일 App",
 }
 
-const toneClasses: Record<Tone, string> = {
-  neutral: "ui-status-neutral",
-  blue: "ui-status-info",
-  green: "ui-status-success",
-  amber: "ui-status-warning",
-  red: "ui-status-danger",
-}
+const statusBadgeTones = {
+  neutral: "neutral",
+  blue: "info",
+  green: "success",
+  amber: "warning",
+  red: "danger",
+} as const
 
 function StatusBadge({
   children,
@@ -415,7 +417,7 @@ function StatusBadge({
   tone?: Tone
 }) {
   return (
-    <Badge className={cn("font-medium", toneClasses[tone])}>{children}</Badge>
+    <PlatformStatusBadge tone={statusBadgeTones[tone]}>{children}</PlatformStatusBadge>
   )
 }
 
@@ -459,8 +461,8 @@ function MetricStrip({
     items.length === 2
       ? "sm:grid-cols-2 lg:grid-cols-2"
       : items.length === 3
-        ? "sm:grid-cols-2 lg:grid-cols-3"
-        : "sm:grid-cols-2 lg:grid-cols-4"
+        ? "sm:grid-cols-3"
+        : "grid-cols-2 sm:grid-cols-4"
 
   return (
     <div
@@ -471,9 +473,9 @@ function MetricStrip({
           key={item.label}
           className="min-w-0 border-b p-4 last:border-b-0 sm:border-r lg:border-b-0"
         >
-          <div className="text-xs text-muted-foreground">{item.label}</div>
-          <div className="mt-2 flex items-end justify-between gap-2">
-            <strong className="truncate text-xl font-semibold">
+          <div className="text-[length:var(--text-body-9)] leading-5 font-semibold text-[var(--color-gray-2)]">{item.label}</div>
+          <div className="mt-1 flex items-end justify-between gap-2">
+            <strong className="truncate text-[26px] leading-9 font-bold tabular-nums">
               {item.value}
             </strong>
             {item.note ? (
@@ -498,10 +500,10 @@ function StateBanner({
   action?: ReactNode
 }) {
   const styles = {
-    info: "ui-status-info",
-    success: "ui-status-success",
-    warning: "ui-status-warning",
-    danger: "ui-status-danger",
+    info: alertVariants({ variant: "positive" }),
+    success: alertVariants({ variant: "positive" }),
+    warning: alertVariants({ variant: "caution" }),
+    danger: alertVariants({ variant: "destructive" }),
   }
   const Icon =
     tone === "success"
@@ -512,8 +514,8 @@ function StateBanner({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center",
-        styles[tone]
+        styles[tone],
+        "flex flex-col gap-3 p-4 sm:flex-row sm:items-center"
       )}
     >
       <Icon className="size-5 shrink-0" />
@@ -1054,7 +1056,7 @@ function PublicPrototype({ screen, navigate, routeParams }: PrototypeScreenProps
                 <Card key={String(title)} className="rounded-md shadow-none">
                   <CardHeader>
                     <Icon className="size-6 text-primary" />
-                    <CardTitle className="text-base">{String(title)}</CardTitle>
+                    <CardTitle>{String(title)}</CardTitle>
                     <CardDescription>{String(description)}</CardDescription>
                   </CardHeader>
                 </Card>
@@ -2905,7 +2907,7 @@ function LinkPrototype({ screen, navigate, routeParams }: PrototypeScreenProps) 
           </div>
           <Card className="h-fit rounded-md shadow-none">
             <CardHeader>
-              <CardTitle className="text-base">제출할 파일</CardTitle>
+              <CardTitle>제출할 파일</CardTitle>
               <CardDescription>
                 현재 {actionTotalUploaded}개
                 {uploadLimit != null ? ` · 최대 ${uploadLimit}개` : ""}
@@ -3194,7 +3196,7 @@ function LinkPrototype({ screen, navigate, routeParams }: PrototypeScreenProps) 
             <div className="grid md:grid-cols-[1fr_300px]">
               <main className="p-5 sm:p-8">
                 {publicData?.cross_border && !consentAccepted ? (
-                  <div className="ui-status-warning mb-6 rounded-md border p-4">
+                  <div className={cn(alertVariants({ variant: "caution" }), "mb-6 block p-4")}>
                     <div className="font-semibold">국외 이전 동의가 필요합니다</div>
                     <p className="mt-1 text-sm leading-6">
                       리포트와 증거가 다른 국가의 수신자에게 제공됩니다. 공개 범위를 확인하고 동의해 주세요.
@@ -3546,7 +3548,7 @@ function LinkPrototype({ screen, navigate, routeParams }: PrototypeScreenProps) 
       <div className="mt-6 grid gap-5 lg:grid-cols-[280px_1fr]">
         <Card className="rounded-md shadow-none">
           <CardHeader>
-            <CardTitle className="text-base">Fixture</CardTitle>
+            <CardTitle>Fixture</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Select defaultValue="v3">
@@ -3686,18 +3688,18 @@ function ReportPhotoThumb({
           <div className="absolute inset-x-1.5 top-1.5 h-1/3 rounded-sm bg-white/35" />
           <div className="relative flex h-full flex-col items-center justify-center gap-1 p-1 text-center">
             <Camera className="size-3.5" />
-            <span className="max-w-full truncate text-[9px] font-medium">
+            <span className="max-w-full truncate text-[11px] font-medium">
               {label}
             </span>
           </div>
         </>
       )}
       {src ? (
-        <span className="absolute inset-x-0 bottom-0 truncate bg-black/55 px-1 py-0.5 text-center text-[9px] font-medium text-white">
+        <span className="absolute inset-x-0 bottom-0 truncate bg-black/55 px-1 py-0.5 text-center text-[11px] font-medium text-white">
           {label}
         </span>
       ) : null}
-      <span className="absolute right-1 bottom-1 rounded bg-black/55 px-1 text-[9px] text-white">
+      <span className="absolute right-1 bottom-1 rounded bg-black/55 px-1 text-[11px] text-white">
         {index}
       </span>
       {selected ? (
@@ -4146,7 +4148,7 @@ function LegacyManagerContent({
         <div className="mt-6 grid gap-5 lg:grid-cols-[1.3fr_0.7fr]">
           <Card className="rounded-md shadow-none">
             <CardHeader>
-              <CardTitle className="text-base">우선 처리</CardTitle>
+              <CardTitle>우선 처리</CardTitle>
               <CardDescription>
                 사람의 결정이 필요한 작업만 표시합니다.
               </CardDescription>
@@ -4178,7 +4180,7 @@ function LegacyManagerContent({
           </Card>
           <Card className="rounded-md shadow-none">
             <CardHeader>
-              <CardTitle className="text-base">작업 흐름</CardTitle>
+              <CardTitle>작업 흐름</CardTitle>
               <CardDescription>최근 7일</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -4441,7 +4443,7 @@ function LegacyManagerContent({
             {createPhase === "clarify" ? (
               <Card className="rounded-md shadow-none">
                 <CardHeader>
-                  <CardTitle className="text-base">범위 확인 질문</CardTitle>
+                  <CardTitle>범위 확인 질문</CardTitle>
                   <CardDescription>
                     작업 결과가 달라지는 질문만 답합니다. 나머지는 AI 제안을
                     사용합니다.
@@ -4487,7 +4489,7 @@ function LegacyManagerContent({
             {createPhase === "scope" ? (
               <Card className="rounded-md shadow-none">
                 <CardHeader>
-                  <CardTitle className="text-base">작업 범위 확인</CardTitle>
+                  <CardTitle>작업 범위 확인</CardTitle>
                   <CardDescription>
                     작업자가 현장에서 수행할 항목과 필수 증거를 확정합니다.
                   </CardDescription>
@@ -4561,7 +4563,7 @@ function LegacyManagerContent({
           {createPhase !== "request" ? (
             <Card className="h-fit rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-base">AI 작업 초안</CardTitle>
+                <CardTitle>AI 작업 초안</CardTitle>
                 <CardDescription>
                   확정 전에는 작업자에게 보이지 않습니다.
                 </CardDescription>
@@ -4658,7 +4660,7 @@ function LegacyManagerContent({
           <CardHeader className="pb-3">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <CardTitle className="text-base">현장 전달</CardTitle>
+                <CardTitle>현장 전달</CardTitle>
                 <CardDescription>
                   앱을 쓰는 팀원에게 배정하거나 외부 작업자용 링크를 만듭니다.
                 </CardDescription>
@@ -4782,7 +4784,7 @@ function LegacyManagerContent({
         <div className="grid gap-5 xl:grid-cols-[260px_minmax(0,1fr)_360px]">
           <Card className="rounded-md shadow-none">
             <CardHeader>
-              <CardTitle className="text-base">작업 범위</CardTitle>
+              <CardTitle>작업 범위</CardTitle>
               <CardDescription>확정본 · 변경 시 재확인</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
@@ -4891,7 +4893,7 @@ function LegacyManagerContent({
           </div>
           <Card className="h-fit rounded-md shadow-none">
             <CardHeader>
-              <CardTitle className="text-base">선택 증거</CardTitle>
+              <CardTitle>선택 증거</CardTitle>
               <CardDescription>{selectedEvidenceRow.id}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -5259,7 +5261,7 @@ function LegacyManagerContent({
             <div className="space-y-4">
             <Card className="rounded-md shadow-none">
               <CardHeader>
-                <CardTitle className="text-base">리포트 제목</CardTitle>
+                <CardTitle>리포트 제목</CardTitle>
                 <CardDescription>
                   고객 화면과 링크 전달에 함께 표시됩니다.
                 </CardDescription>
@@ -5280,7 +5282,7 @@ function LegacyManagerContent({
             </Card>
             <Card className="rounded-md shadow-none">
               <CardHeader>
-                <CardTitle className="text-base">포함할 증거</CardTitle>
+                <CardTitle>포함할 증거</CardTitle>
                 <CardDescription>승인 snapshot에 고정됩니다.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -5294,7 +5296,7 @@ function LegacyManagerContent({
             </Card>
             <Card className="rounded-md shadow-none">
               <CardHeader>
-                <CardTitle className="text-base">표지 사진</CardTitle>
+                <CardTitle>표지 사진</CardTitle>
                 <CardDescription>
                   사진 유형별 원본을 작은 크롭 썸네일로 확인하고, 리포트에 넣을 사진만 선택합니다. 원본은 보존됩니다.
                 </CardDescription>
@@ -5639,7 +5641,7 @@ function LegacyManagerContent({
           </div>
           <Card className="h-fit rounded-md shadow-none">
             <CardHeader>
-              <CardTitle className="text-base">{workflowStep}</CardTitle>
+              <CardTitle>{workflowStep}</CardTitle>
               <CardDescription>전환 조건과 복구 행동</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -5746,7 +5748,7 @@ function LegacyManagerContent({
                   </TableCell>
                   <TableCell>{row[4]}</TableCell>
                   <TableCell>
-                    <Button size="xs" variant="outline">
+                    <Button size="lg" variant="outline">
                       {row[5]}
                     </Button>
                   </TableCell>
@@ -5793,7 +5795,7 @@ function LegacyManagerContent({
                     {item[0]}
                   </span>
                 </div>
-                <CardTitle className="text-base">{item[1]}</CardTitle>
+                <CardTitle>{item[1]}</CardTitle>
                 <CardDescription>기한 {item[2]} · 담당 김민지</CardDescription>
               </CardHeader>
               <CardContent>
@@ -5890,10 +5892,11 @@ function ManagerPage({
   return (
     <div className="h-full overflow-y-auto bg-white">
       <div className="mx-auto w-full max-w-ecoya-wide-xl px-4 py-6 sm:px-6 sm:py-7 lg:px-8">
-        <ScreenHeading
+        <HeroBanner
           title={title}
           description={description}
-          action={action}
+          actions={action}
+          className="[&_header]:flex-wrap"
         />
         <div className="mt-6">{children}</div>
       </div>
@@ -6250,7 +6253,7 @@ function ReportTable({ navigate }: { navigate: (key: SnapScreenKey) => void }) {
                   <TableCell>고객 공개 문구 1건 확인</TableCell>
                   <TableCell><StatusBadge tone="amber">검토 필요</StatusBadge></TableCell>
                   <TableCell className="text-right">
-                    <Button size="xs" onClick={() => navigate("SC-21")}>검토 열기</Button>
+                    <Button size="lg" onClick={() => navigate("SC-21")}>검토 열기</Button>
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -6329,7 +6332,7 @@ function ReportTable({ navigate }: { navigate: (key: SnapScreenKey) => void }) {
                       <div className="inline-flex gap-1">
                         {link.status !== "active" ? (
                           <Button
-                            size="xs"
+                            size="lg"
                             variant="outline"
                             onClick={() => updateLocalLink(link.token, {
                               status: "active",
@@ -6341,7 +6344,7 @@ function ReportTable({ navigate }: { navigate: (key: SnapScreenKey) => void }) {
                           </Button>
                         ) : (
                           <Button
-                            size="xs"
+                            size="lg"
                             variant="outline"
                             onClick={() => updateLocalLink(link.token, {
                               last_resend_at: new Date().toISOString(),
@@ -6351,7 +6354,7 @@ function ReportTable({ navigate }: { navigate: (key: SnapScreenKey) => void }) {
                           </Button>
                         )}
                         <Button
-                          size="xs"
+                          size="lg"
                           variant="ghost"
                           disabled={link.status === "revoked"}
                           onClick={() => updateLocalLink(link.token, {
