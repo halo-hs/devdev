@@ -1,8 +1,11 @@
+import { formatDate, formatDateTime } from "@trade-os/lib/orgDate"
+import { useLocaleTag } from "@trade-os/lib/i18n/useLocaleTag"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip"
 import { DealRefreshContext, useDealRefresh, useDealRefreshController } from "@trade-os/deals/useDealRefresh"
 import { PostWriteRefreshNotice } from "@trade-os/components/PostWriteRefreshNotice"
 import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, type DealDocumentRecord } from "@trade-os/lib/dealDocumentActions"
 import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
+import { InfoBox } from "@trade-os/components/InfoBox"
 import { OperationsScreen } from "@trade-os/OperationsScreens"
 import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@/components/platform/FormItem"
 import {
@@ -32,7 +35,6 @@ import {
   Check,
   ChevronDown,
   ChevronLeft,
-  ChevronUp,
   CircleAlert,
   FilePlus2,
   FileSearch,
@@ -41,6 +43,7 @@ import {
   Unlink,
   LoaderCircle,
   MoreVertical,
+  NotebookPen,
   Pencil,
   Plus,
   RefreshCw,
@@ -68,6 +71,7 @@ import {
   DocumentTemplateOptions,
   type DocumentTemplateOption,
 } from "@trade-os/components/DocumentTemplateOptions"
+import { NavigationIcon } from "@/components/platform/NavigationIcon"
 import { Badge } from "@/components/ui/Badge"
 import { Button } from "@/components/ui/Button"
 import { Card } from "@/components/ui/Card"
@@ -526,7 +530,7 @@ function DealProgressNavigation({
             </a>
           </div>
           {metrics}
-          <ol className="mt-2 space-y-1">
+          <ol className="mt-2 space-y-2">
             {stages.map((stage, index) => {
               const key = stage.tab as DealWorkKey
               const complete = plan.states[key] === "complete"
@@ -537,7 +541,7 @@ function DealProgressNavigation({
                   key={stage.value}
                   aria-current={active ? "step" : undefined}
                   className={cn(
-                    "rounded-md px-2 py-0.5",
+                    "relative rounded-md px-2 py-0.5 before:pointer-events-none before:absolute before:left-5 before:top-7 before:-bottom-3 before:border-l before:border-[var(--surface-border)] before:content-[''] last:before:hidden",
                     active && "bg-primary/[0.06] ring-1 ring-primary/15"
                   )}
                 >
@@ -586,7 +590,7 @@ function DealProgressNavigation({
                             : "예정"}
                     </span>
                   </a>
-                  <div className="ml-3 border-l pl-4">
+                  <div className="ml-3 pl-4">
                     {stage.value === "shipment" && (
                       <p className="py-1 text-xs text-muted-foreground">
                         {index <= current
@@ -1232,7 +1236,7 @@ function SectionHeading({
   description,
   action,
 }: {
-  title: string
+  title: ReactNode
   description?: string
   action?: ReactNode
 }) {
@@ -1280,6 +1284,7 @@ function SimpleSelect({
   className,
   icon,
   ariaLabel,
+  label,
   size,
 }: {
   value: string
@@ -1289,6 +1294,7 @@ function SimpleSelect({
   className?: string
   icon?: ReactNode
   ariaLabel?: string
+  label?: string
   size?: "sm" | "default"
 }) {
   return (
@@ -1303,6 +1309,7 @@ function SimpleSelect({
         aria-label={ariaLabel}
       >
         {icon}
+        {label && <span className="text-muted-foreground">{label}</span>}
         <SelectValue />
       </SelectTrigger>
       <SelectContent className="z-[var(--z-popup)]">
@@ -1579,7 +1586,21 @@ function PanelFailure({
   )
 }
 
+function DealDisclosureButton({ expanded, onClick, label, collapsedLabel = "보기", controls }: {
+  expanded: boolean
+  onClick: () => void
+  label: string
+  collapsedLabel?: string
+  controls?: string
+}) {
+  return <Button type="button" variant="ghost" size="sm" className="shrink-0 gap-1 text-muted-foreground" aria-label={`${label} ${expanded ? "접기" : "펼치기"}`} aria-expanded={expanded} aria-controls={controls} onClick={onClick}>
+    {expanded ? "접기" : collapsedLabel}
+    <ChevronDown data-icon="inline-end" className={cn("size-4 transition-transform", expanded && "rotate-180")} />
+  </Button>
+}
+
 function AuditTrail({ items }: { items: AuditItem[] }) {
+  const dateTag = useLocaleTag()
   return (
     <div className="mt-3 border-l-2 pl-4">
       {items.slice(0, 6).map((item) => (
@@ -1587,7 +1608,7 @@ function AuditTrail({ items }: { items: AuditItem[] }) {
           <strong className="text-sm">{item.action}</strong>
           <p className="mt-0.5 text-xs text-muted-foreground">{item.detail}</p>
           <small className="mt-1 block text-[11px] text-muted-foreground">
-            {item.actor} · {item.time}
+            {item.actor} · {formatDateTime(item.time, dateTag)}
           </small>
         </div>
       ))}
@@ -1602,14 +1623,15 @@ type DealMissingField = {
   issue: "누락" | "불일치"
 }
 
+const needsReview = (match: DealFieldMatch) =>
+  match === "누락" || match === "확인 필요"
+
 function requiredDealReviews(
   fields: DealFieldDetail[],
   groups: DealFieldGroup[],
   items: DealLineItem[],
   direction: DealProfile["direction"]
 ): DealMissingField[] {
-  const needsReview = (match: DealFieldMatch) =>
-    match === "누락" || match === "확인 필요"
   return [
     ...fields
       .filter(
@@ -1655,19 +1677,13 @@ function DealMissingInformation({
   return (
     <section
       aria-label="상세 항목 검토"
-      className="rounded-md border border-destructive/30 bg-destructive/5"
       data-deal-missing-information
     >
-      <div className="flex min-h-14 items-center gap-2 px-3 sm:gap-3 sm:px-4">
-        <AlertTriangle
-          aria-hidden
-          className="size-4 shrink-0 text-destructive"
-        />
-        <div role="alert" className="min-w-0 flex-1 text-xs sm:text-sm">
-          <strong className="text-destructive">
-            검토 필요 {fields.length}건 · 누락·불일치
-          </strong>
-          <div className="mt-0.5 flex flex-wrap gap-x-2 text-muted-foreground">
+      <InfoBox
+        tone="risk"
+        title={`검토 필요 ${fields.length}건 · 누락·불일치`}
+        description={
+          <span className="mt-0.5 flex flex-wrap gap-x-2">
             {fields.map((field) => (
               <button
                 key={field.key}
@@ -1679,21 +1695,12 @@ function DealMissingInformation({
               </button>
             ))}
             <span>항목을 확인해 주세요.</span>
-          </div>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="shrink-0"
-          aria-label={expanded ? "검토 항목 접기" : "검토 항목 펼치기"}
-          aria-expanded={expanded}
-          aria-controls="deal-missing-fields"
-          onClick={() => setExpanded((value) => !value)}
-        >
-          {expanded ? "접기" : "항목 보기"}
-          <ChevronDown className={cn("size-4", expanded && "rotate-180")} />
-        </Button>
-      </div>
+          </span>
+        }
+        action={
+        <DealDisclosureButton expanded={expanded} onClick={() => setExpanded((value) => !value)} label="검토 항목" collapsedLabel="항목 보기" controls="deal-missing-fields" />
+        }
+      />
       <ul
         id="deal-missing-fields"
         hidden={!expanded}
@@ -1788,14 +1795,11 @@ function DealAssistBar({
         <section
           data-deal-review-summary
           aria-label="확인 알림"
-          className="rounded-md border border-warning/30 bg-warning/5"
         >
-          <div className="flex min-h-14 items-center gap-2 px-3 sm:gap-3 sm:px-4">
-            <CircleAlert className="size-4 shrink-0 text-warning-foreground" />
-            <div className="min-w-0 flex-1 text-xs sm:text-sm">
-              <strong className="text-warning-foreground">
-                확인 필요 {notices.length}건
-              </strong>
+          <InfoBox
+            tone="caution"
+            title={`확인 필요 ${notices.length}건`}
+            description={
               <button
                 type="button"
                 className="mt-0.5 block text-left text-muted-foreground underline decoration-warning/40 underline-offset-2 hover:text-warning-foreground"
@@ -1803,20 +1807,11 @@ function DealAssistBar({
               >
                 {notices[0].title}
               </button>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="shrink-0"
-              aria-label={expanded ? "확인 항목 접기" : "확인 항목 펼치기"}
-              aria-expanded={expanded}
-              aria-controls="deal-confirmation-list"
-              onClick={() => setExpanded((value) => !value)}
-            >
-              {expanded ? "접기" : "항목 보기"}
-              <ChevronDown className={cn("size-4", expanded && "rotate-180")} />
-            </Button>
-          </div>
+            }
+            action={
+            <DealDisclosureButton expanded={expanded} onClick={() => setExpanded((value) => !value)} label="확인 항목" collapsedLabel="항목 보기" controls="deal-confirmation-list" />
+            }
+          />
           <ul
             id="deal-confirmation-list"
             hidden={!expanded}
@@ -2056,24 +2051,10 @@ function DealWorkBlock({
       className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-lg border bg-muted/20 p-4 outline-none"
     >
       <div className="flex items-center justify-between gap-3">
-        <button
-          className="flex min-h-9 flex-1 items-center gap-2 text-left text-sm font-semibold"
-          aria-expanded={previewOpen}
-          aria-controls={`planned-${work}`}
-          onClick={() => onPreview(work)}
-        >
-          <ChevronDown
-            className={cn(
-              "size-4 transition-transform",
-              previewOpen && "rotate-180"
-            )}
-          />
-          {workLabels[work]}
-          <StatusBadge>예정</StatusBadge>
-          <span className="ml-auto text-xs font-normal text-primary">
-            {previewOpen ? "접기" : "미리 보기"}
-          </span>
-        </button>
+        <div className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold">
+          {workLabels[work]}<StatusBadge>예정</StatusBadge>
+        </div>
+        <DealDisclosureButton expanded={previewOpen} onClick={() => onPreview(work)} label={workLabels[work]} collapsedLabel="미리 보기" controls={`planned-${work}`} />
         {canWrite && (
           <Button size="sm" variant="outline" onClick={() => onStart(work)}>
             직접 입력
@@ -2340,11 +2321,16 @@ function DealMemoComposer({ onCreateNote }: { onCreateNote: (body: string) => Pr
   }
   return (
     <Popover open={open} onOpenChange={(next) => { if (!saving) setOpen(next) }}>
-      <PopoverTrigger asChild>
-        <Button type="button" variant="outline" size="sm">
-          <Plus data-icon="inline-start" />메모 추가
-        </Button>
-      </PopoverTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <PopoverTrigger asChild>
+            <Button type="button" variant="outline" size="icon-sm" aria-label="메모 추가">
+              <NotebookPen className="size-[18px]" />
+            </Button>
+          </PopoverTrigger>
+        </TooltipTrigger>
+        <TooltipContent>메모 추가</TooltipContent>
+      </Tooltip>
       <PopoverContent side="bottom" align="end" sideOffset={8}
         className="w-[min(360px,calc(100vw-2rem))] p-4">
         <form aria-label="메모 추가" className="space-y-3" onSubmit={async (event) => {
@@ -2387,6 +2373,7 @@ function DealRecordSections({
   onUpdateNote: (noteId: number, body: string) => Promise<void>
   onDeleteNote: (noteId: number) => Promise<void>
 }) {
+  const dateTag = useLocaleTag()
   const [editingNoteId, setEditingNoteId] = useState<number | null>(null)
   const [editingNoteBody, setEditingNoteBody] = useState("")
   const [deletingNote, setDeletingNote] = useState<DealNoteItem | null>(null)
@@ -2447,7 +2434,7 @@ function DealRecordSections({
                       <Button
                         type="button"
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon-xs"
                         aria-label="노트 수정"
                         onClick={() => {
                           setEditingNoteId(item.id)
@@ -2459,7 +2446,7 @@ function DealRecordSections({
                       <Button
                         type="button"
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon-xs"
                         aria-label="노트 삭제"
                         onClick={() => setDeletingNote(item)}
                       >
@@ -2468,7 +2455,7 @@ function DealRecordSections({
                     </span>
                   </div>
                   <small className="mt-1 block text-muted-foreground">
-                    {item.actor} · {item.time}
+                    {item.actor} · {item.time.length === 10 ? formatDate(item.time, dateTag) : formatDateTime(item.time, dateTag)}
                   </small>
                 </>
               )}
@@ -2477,28 +2464,14 @@ function DealRecordSections({
         </div>
       </div>
       <div className="border-t border-[var(--surface-border)] py-3">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between gap-4 rounded-[var(--r-sm)] px-1 py-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
-          aria-expanded={activityHistoryOpen}
-          onClick={() => setActivityHistoryOpen((open) => !open)}
-        >
-          <span>
-            <strong className="block text-sm font-semibold">활동 이력</strong>
-            <small className="mt-0.5 block text-xs font-normal text-muted-foreground">
-              거래에서 수정된 모든 내역
-            </small>
-          </span>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            {activityHistoryOpen ? "접기" : "보기"}
-            {activityHistoryOpen ? (
-              <ChevronUp className="size-4" />
-            ) : (
-              <ChevronDown className="size-4" />
-            )}
-          </span>
-        </button>
-        {activityHistoryOpen ? <AuditTrail items={audit} /> : null}
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-semibold">활동 이력</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">거래에서 수정된 모든 내역</p>
+          </div>
+          <DealDisclosureButton expanded={activityHistoryOpen} onClick={() => setActivityHistoryOpen((open) => !open)} label="활동 이력" controls="deal-activity-history" />
+        </div>
+        {activityHistoryOpen ? <div id="deal-activity-history"><AuditTrail items={audit} /></div> : null}
       </div>
       {deletingNote ? (
         <ActionDialog
@@ -2895,10 +2868,11 @@ function DealFieldsPanel({
                       "h-10 px-3 py-0",
                       !["goods", "hsCode"].includes(key) &&
                         "text-right tabular-nums",
-                      key === "quantity" &&
+                      ["goods", "quantity"].includes(key) &&
                         item.match === "확인 필요" &&
                         "border-destructive/55 text-destructive"
                     )}
+                    aria-describedby={key === "goods" && needsReview(item.match) ? `deal-item-${item.id}-goods-message` : undefined}
                     value={item[key]}
                     inputMode={
                       ["goods", "hsCode"].includes(key)
@@ -2909,7 +2883,7 @@ function DealFieldsPanel({
                     }
                     disabled={!editable}
                     aria-invalid={
-                      key === "quantity" && item.match === "확인 필요"
+                      ["goods", "quantity"].includes(key) && item.match === "확인 필요"
                     }
                     onChange={(event) =>
                       onItemChange(item.id, key, event.target.value)
@@ -2963,9 +2937,9 @@ function DealFieldsPanel({
                   <tbody key={item.id} className="mb-3 block rounded-xl border bg-card p-3 last:mb-0 @min-[480px]/items:p-4">
                     <tr className="relative grid grid-cols-2 gap-x-3 gap-y-4 @min-[480px]/items:grid-cols-3 @min-[760px]/items:grid-cols-[minmax(0,2fr)_minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,1.15fr)_32px] [&>td]:min-w-0">
                       <td className="col-span-2 pr-9 @min-[480px]/items:col-span-3 @min-[760px]/items:col-span-1 @min-[760px]/items:pr-0">
-                        <FormFieldHeader className="mb-2" label={`품목 ${number} · 품목명`} htmlFor={`deal-item-${item.id}-goods`} badge={<StatusBadge tone={matchTone(item.match)}>{item.match === "확인 필요" ? "불일치" : item.match}</StatusBadge>} />
+                        <FormFieldHeader className="mb-2" label={`품목 ${number} · 품목명`} htmlFor={`deal-item-${item.id}-goods`} badge={needsReview(item.match) ? <StatusBadge tone={matchTone(item.match)}>{item.match === "확인 필요" ? "불일치" : item.match}</StatusBadge> : undefined} />
                         {input("goods", "품목명")}
-                        <FormFieldMessage className="mt-2">{item.evidence.join(" · ")}</FormFieldMessage>
+                        {needsReview(item.match) && <FormFieldMessage id={`deal-item-${item.id}-goods-message`} tone="danger" className="mt-2">{item.evidence.join(" · ")}</FormFieldMessage>}
                       </td>
                       <td>
                         <div id={`deal-field-label-item-${item.id}-quantity`} className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)]" data-quantity-heading>
@@ -2997,7 +2971,7 @@ function DealFieldsPanel({
                             </div>
                           ) : undefined}
                           />
-                          <div className="grid grid-cols-[minmax(0,1fr)_88px] gap-1">
+                          <div className="grid grid-cols-[minmax(0,1fr)_72px] gap-1">
                             {input("quantity", "수량")}
                             {unit("quantityUnit", "수량 단위", ["MT", "KG", "EA"])}
                           </div>
@@ -3009,13 +2983,20 @@ function DealFieldsPanel({
                         </div>
                         {input("unitPrice", "단가")}
                       </td>
-                      <td>
-                        <FormFieldHeader className="mb-2" label={profile.direction === "direction_pending" ? "거래 금액" : `${directionLabels[profile.direction]} 금액`} />
-                        <output aria-label={`품목 ${number} 금액`} className="flex min-h-8 items-center justify-end text-right font-semibold break-words tabular-nums">
-                          {itemAmount(item)} {item.currency}
-                        </output>
+                      <td className="col-span-2 @min-[760px]/items:col-span-1">
+                        <FormFieldHeader className="mb-2" label={profile.direction === "direction_pending" ? "거래 금액" : `${directionLabels[profile.direction]} 금액`} htmlFor={`deal-item-${item.id}-amount`} />
+                        <div className="flex min-w-0 items-center gap-2">
+                        <Input
+                          id={`deal-item-${item.id}-amount`}
+                          aria-label={`품목 ${number} 금액`}
+                          className="h-10 px-3 py-0 text-right tabular-nums"
+                          value={itemAmount(item)}
+                          readOnly
+                        />
+                          <span className="shrink-0 text-sm text-muted-foreground">{item.currency}</span>
+                        </div>
                       </td>
-                      <td className="absolute top-0 right-0 text-right @min-[760px]/items:static @min-[760px]/items:pt-9">
+                      <td className="absolute top-0 right-0 text-right @min-[760px]/items:static @min-[760px]/items:flex @min-[760px]/items:h-10 @min-[760px]/items:items-center @min-[760px]/items:mt-[calc(var(--text-base--line-height)+8px)]">
                         {editable && items.length > 1 && (
                           <Button size="icon-sm" variant="ghost" aria-label={`품목 ${number} 삭제`} onClick={() => onRemoveItem(item.id)}>
                             <Trash2 />
@@ -3093,8 +3074,8 @@ function DealFieldsPanel({
               htmlFor={`deal-field-${field.key}`}
               id={`deal-field-label-${field.key}`}
               style={{ scrollMarginTop: "calc(var(--deal-header-height,128px) + 16px)" }}
-              badge={<StatusBadge tone={matchTone(field.match)}>{field.match === "확인 필요" ? "불일치" : field.match}</StatusBadge>}
-              message={field.evidence.join(" · ") || undefined}
+              badge={needsReview(field.match) ? <StatusBadge tone={matchTone(field.match)}>{field.match === "확인 필요" ? "불일치" : field.match}</StatusBadge> : undefined}
+              message={needsReview(field.match) ? field.evidence.join(" · ") || undefined : undefined}
               messageId={`deal-field-${field.key}-message`}
               tone={field.match === "누락" || field.match === "확인 필요" ? "danger" : "neutral"}
               candidates={editable &&
@@ -3136,7 +3117,7 @@ function DealFieldsPanel({
                   field.match === "확인 필요" &&
                     "border-destructive/55 text-destructive focus-visible:ring-destructive/25"
                 )}
-                aria-describedby={field.evidence.length ? `deal-field-${field.key}-message` : undefined}
+                aria-describedby={needsReview(field.match) && field.evidence.length ? `deal-field-${field.key}-message` : undefined}
                 id={`deal-field-${field.key}`}
                 style={{
                   scrollMarginTop:
@@ -4452,25 +4433,12 @@ function DocumentsTab({
           <aside className="field-scrollbar min-w-0 border-t px-4 py-4 xl:h-full xl:overflow-y-auto xl:border-t-0 xl:px-5 xl:pb-8">
             <div className="border-b border-[var(--surface-border)] pb-2">
               <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  className="flex shrink-0 items-center gap-1.5 rounded-[var(--r-sm)] px-1 py-1 text-left focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none"
-                  aria-expanded={documentsExpanded}
-                  onClick={() => {
-                    setDocumentsExpanded((value) => !value)
-                    setSupplementaryDocumentsExpanded(false)
-                  }}
-                >
-                  <h3 className="text-base font-semibold">거래 서류</h3>
-                  <StatusBadge tone="neutral">
-                    전체 {totalDocumentCount}건
-                  </StatusBadge>
-                  {documentsExpanded ? (
-                    <ChevronUp className="size-3.5 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="size-3.5 text-muted-foreground" />
-                  )}
-                </button>
+                <h3 className="text-base font-semibold">거래 서류</h3>
+                <StatusBadge tone="neutral">전체 {totalDocumentCount}건</StatusBadge>
+                <DealDisclosureButton expanded={documentsExpanded} onClick={() => {
+                  setDocumentsExpanded((value) => !value)
+                  setSupplementaryDocumentsExpanded(false)
+                }} label="거래 서류" />
                 <div
                   className="flex w-full min-w-0 items-center gap-1 overflow-x-auto"
                   aria-label="중요 서류 요약"
@@ -4755,7 +4723,7 @@ function FulfillmentTab({
       action: "가격 수정",
       detail: "USD 120,000/MT",
       actor: "조민영",
-      time: "07.09 14:20",
+      time: "2026-07-09T14:20:00+09:00",
     },
   ])
   const [refreshing, setRefreshing] = useState(false)
@@ -4879,7 +4847,7 @@ function FulfillmentTab({
           action: actionLabels[action],
           detail: reason.trim(),
           actor: "조민영",
-          time: "방금",
+          time: new Date().toISOString(),
         },
         ...items,
       ])
@@ -4894,16 +4862,9 @@ function FulfillmentTab({
           <div className="flex flex-col gap-7">
             <section>
               <SectionHeading
-                title="주문 이행"
+                title={<span className="flex flex-wrap items-center gap-2">주문 이행<StatusBadge tone={lifecycle === "closed" || lifecycle === "short_closed" ? "success" : lifecycle === "cancelled" ? "neutral" : "warning"}>{labels[lifecycle]}</StatusBadge></span>}
                 description="계약 20MT · 누적 선적 16MT"
-                action={
-                  <div className="flex flex-wrap items-center gap-2">
-                    <DealContractTool />
-                    <StatusBadge tone={lifecycle === "closed" || lifecycle === "short_closed" ? "success" : lifecycle === "cancelled" ? "neutral" : "warning"}>
-                      {labels[lifecycle]}
-                    </StatusBadge>
-                  </div>
-                }
+                action={<div className="ml-auto"><DealContractTool /></div>}
               />
               <div className="mt-5 grid items-center gap-5 md:grid-cols-[1fr_auto]">
                 <div>
@@ -4975,23 +4936,10 @@ function FulfillmentTab({
                   <SectionHeading
                     title="주문 이력"
                     action={
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        aria-expanded={orderHistoryOpen}
-                        onClick={() => setOrderHistoryOpen((open) => !open)}
-                      >
-                        {orderHistoryOpen ? "접기" : "보기"}
-                        {orderHistoryOpen ? (
-                          <ChevronUp data-icon="inline-end" />
-                        ) : (
-                          <ChevronDown data-icon="inline-end" />
-                        )}
-                      </Button>
+                      <DealDisclosureButton expanded={orderHistoryOpen} onClick={() => setOrderHistoryOpen((open) => !open)} label="주문 이력" controls="deal-order-history" />
                     }
                   />
-                  {orderHistoryOpen ? <AuditTrail items={orderEvents} /> : null}
+                  {orderHistoryOpen ? <div id="deal-order-history"><AuditTrail items={orderEvents} /></div> : null}
                 </section>
               </>
             ) : null}
@@ -5456,8 +5404,8 @@ function PeopleTab({
                           </span>
                         </div>
                       ) : (
-                        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                          <div className="min-w-0 flex-1 basis-40">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0 flex-1">
                             <div className="mb-1 flex items-center gap-2 text-xs">
                               <span className="font-medium">{party.role}</span>
                               <span className="text-muted-foreground">
@@ -5474,7 +5422,7 @@ function PeopleTab({
                               <span className="flex text-muted-foreground">
                                 <Button
                                   variant="ghost"
-                                  size="icon-sm"
+                                  size="icon-xs"
                                   onClick={() => {
                                     setPartyEdit(party)
                                     setPartyForm({
@@ -5488,7 +5436,7 @@ function PeopleTab({
                                 </Button>
                                 <Button
                                   variant="ghost"
-                                  size="icon-sm"
+                                  size="icon-xs"
                                   onClick={() => setPartyDelete(party)}
                                   aria-label="당사자 삭제"
                                 >
@@ -5953,13 +5901,13 @@ export function DealDetailScreen({
       id: 1,
       body: "7월 15일까지 B/L 원본 요청",
       actor: "조민영",
-      time: "2026.07.13",
+      time: "2026-07-13",
     },
     {
       id: 2,
       body: "잔금 지급 전 계좌 변경 여부 재확인",
       actor: "조민영",
-      time: "2026.07.13",
+      time: "2026-07-13",
     },
   ])
   const [riskDismissed, setRiskDismissed] = useState(false)
@@ -5980,14 +5928,14 @@ export function DealDetailScreen({
       action: "거래 생성",
       detail: "SC-2026-0708 Confirm에서 자동 생성",
       actor: "시스템",
-      time: "07.08 09:12",
+      time: "2026-07-08T09:12:00+09:00",
     },
     {
       id: 2,
       action: "담당자 지정",
       detail: "조민영",
       actor: "박서윤",
-      time: "07.08 09:20",
+      time: "2026-07-08T09:20:00+09:00",
     },
   ])
   const openMissingField = (key: string) => {
@@ -6083,7 +6031,7 @@ export function DealDetailScreen({
         detail,
         actor:
           role === "member" ? "김도현" : role === "admin" ? "박서윤" : "조민영",
-        time: "방금 전",
+        time: new Date().toISOString(),
       },
       ...items,
     ])
@@ -6140,7 +6088,7 @@ export function DealDetailScreen({
         id: Date.now(),
         body: nextBody,
         actor: "조민영",
-        time: "방금",
+        time: new Date().toISOString(),
       },
     ])
     addAudit("메모 추가", nextBody)
@@ -6389,18 +6337,18 @@ export function DealDetailScreen({
                       ) : null}
                     </div>
                   )}
-                  <StatusBadge tone="blue">
-                    {{ contract: "계약", shipment: "선적", customs: "통관", settlement: "정산 중", settled: "정산 완료" }[fixture?.stage ?? "contract"]}
-                  </StatusBadge>
-                  {fixture && fixture.orderLifecycle !== "open" && <StatusBadge tone={fixture.orderLifecycle === "closed" ? "success" : "neutral"}>
-                    {fixture.orderLifecycle === "closed" ? "종결" : fixture.orderLifecycle === "cancelled" ? "취소" : "주문 미확인"}
-                  </StatusBadge>}
                   <StatusBadge
                     tone={profile.direction === "sales" ? "success" : profile.direction === "purchase" ? "blue" : "neutral"}
                     variant="outline"
                   >
                     {directionLabels[profile.direction]}
                   </StatusBadge>
+                  <StatusBadge tone="blue">
+                    {{ contract: "계약", shipment: "선적", customs: "통관", settlement: "정산 중", settled: "정산 완료" }[fixture?.stage ?? "contract"]}
+                  </StatusBadge>
+                  {fixture && fixture.orderLifecycle !== "open" && <StatusBadge tone={fixture.orderLifecycle === "closed" ? "success" : "neutral"}>
+                    {fixture.orderLifecycle === "closed" ? "종결" : fixture.orderLifecycle === "cancelled" ? "취소" : "주문 미확인"}
+                  </StatusBadge>}
                   {createdProfile && profile.direction === "direction_pending" && canMutate(role) ? (
                     <Select disabled={savingDirection} onValueChange={value => {
                       if (value !== "sales" && value !== "purchase") return
@@ -6416,15 +6364,6 @@ export function DealDetailScreen({
                       <SelectContent><SelectItem value="sales">매출</SelectItem><SelectItem value="purchase">매입</SelectItem></SelectContent>
                     </Select>
                   ) : null}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto rounded-full p-0"
-                    onClick={() => navigateSection("verification")}
-                    aria-label="리스크 개요 보기"
-                  >
-                    <StatusBadge tone="danger">리스크 2</StatusBadge>
-                  </Button>
                 </div>
                 <div className="mt-0.5 flex min-w-0 items-center gap-2">
                   {editingDealId ? (
@@ -6493,7 +6432,7 @@ export function DealDetailScreen({
                 disabled={!canMutate(role)}
                 onClick={onUpload}
               >
-                <FilePlus2 data-icon="inline-start" />이 거래로 문서 올리기
+                <NavigationIcon name="upload" className="!size-[18px]" />문서 올리기
               </Button>
               <Popover
                 open={documentTemplatePickerOpen}
@@ -6508,7 +6447,7 @@ export function DealDetailScreen({
                     size="sm"
                     title={`${currentDealId} 거래 정보로 문서 만들기`}
                   >
-                    <FilePlus2 data-icon="inline-start" />이 거래로 문서 만들기
+                    <NavigationIcon name="document" className="!size-[18px]" />문서 만들기
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
@@ -6568,8 +6507,8 @@ export function DealDetailScreen({
                         : "이 거래에서 만든 문서 보기"
                     }
                   >
-                    문서 고객 전달
-                    <span className="ml-0.5 inline-flex min-w-5 items-center justify-center rounded-full bg-white/15 px-1.5 text-[11px] text-white">
+                    <span>문서 고객 전달</span>
+                    <span className="inline-flex min-w-4 items-center justify-center rounded-full bg-current/10 px-1 text-[11px] tabular-nums">
                       {generatedDocuments.length}
                     </span>
                   </Button>
@@ -6866,14 +6805,18 @@ export function DealDetailScreen({
                     aria-label="주요 거래 정보"
                     className="space-y-2 px-4 py-3"
                   >
-                    <a
-                      href={`/erp/counterparties/${encodeURIComponent(mainInformation.counterparty)}`}
-                      className="inline-block text-sm font-medium text-primary break-words hover:underline"
-                    >
-                      {mainInformation.counterparty}
-                    </a>
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <StatusBadge tone={profile.direction === "direction_pending" ? "neutral" : "blue"}>
+                    <div className="flex min-w-0 items-center gap-2">
+                      <a
+                        href={`/erp/counterparties/${encodeURIComponent(mainInformation.counterparty)}`}
+                        className="min-w-0 text-sm font-medium text-primary break-words hover:underline"
+                      >
+                        {mainInformation.counterparty}
+                      </a>
+                      <StatusBadge
+                        tone={profile.direction === "sales" ? "success" : profile.direction === "purchase" ? "blue" : "neutral"}
+                        variant="outline"
+                        className="shrink-0"
+                      >
                         {directionLabels[profile.direction]}
                       </StatusBadge>
                     </div>
@@ -6985,6 +6928,7 @@ export function DealDetailScreen({
                 value={assignee}
                 disabled={!canMutate(role) || savingAssignee}
                 ariaLabel="거래 담당자"
+                label="담당자"
                 onValueChange={async (next) => {
                   if (!canMutate(role) || savingAssignee) return
                   const receipt = refresh.beginWrite()

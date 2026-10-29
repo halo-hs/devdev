@@ -251,7 +251,7 @@ export function WorkspaceHeader({
             </nav>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
-            {isMobile || sidebarCollapsed ? (
+            {screen !== "deal" && (isMobile || sidebarCollapsed) ? (
               <NotificationButton
                 unreadCount={unreadNotificationCount}
                 active={screen === "notifications"}
