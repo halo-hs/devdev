@@ -180,22 +180,21 @@ export function CommonEntry({ children }: { children: ReactNode }) {
       }
     }
     // This is the existing local preview session, never a production credential.
-    if (product === "snap") {
-      try {
-        window.localStorage.setItem(
-          "snap_web_session",
-          JSON.stringify({
-            authenticated: true,
-            role: "manager",
-            email: "ecoya@ecoya.kr",
-            organization: "ECOYA Demo Co.",
-          })
-        )
-      } catch {
-        /* The product access guard will offer a retry. */
-      }
-      resetSnapSessionAccessCache()
+    // One ECOYA login covers both products, so switching to SNAP stays signed in.
+    try {
+      window.localStorage.setItem(
+        "snap_web_session",
+        JSON.stringify({
+          authenticated: true,
+          role: "manager",
+          email: "ecoya@ecoya.kr",
+          organization: "ECOYA Demo Co.",
+        })
+      )
+    } catch {
+      /* The product access guard will offer a retry. */
     }
+    resetSnapSessionAccessCache()
     const usageRequested = url.searchParams.get("returnTo") === "usage"
     appLocation.assign(
       usageRequested

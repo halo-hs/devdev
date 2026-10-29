@@ -41,6 +41,7 @@ import {
 } from "@snap/SnapScreens"
 import { SnapRouteAccessScreen } from "@snap/access/SnapRouteAccessScreen"
 import {
+  ensureSnapWorkspaceSession,
   resetSnapSessionAccessCache,
   useSnapRouteAccess,
 } from "@snap/lib/snapRouteAccess"
@@ -767,6 +768,7 @@ export function App() {
     if (nextProduct === product) return
     if (!activeWorkspace.products[nextProduct]) return
     if (nextProduct === "snap") {
+      ensureSnapWorkspaceSession()
       navigateSnap("SC-17")
       return
     }
@@ -798,6 +800,7 @@ export function App() {
       ? "erp"
       : "snap"
     if (fallbackProduct === "snap") {
+      ensureSnapWorkspaceSession()
       navigateSnap("SC-17")
       return
     }
@@ -1263,7 +1266,7 @@ export function App() {
                       routeParams={snapRoute?.params}
                       routeSearch={snapRoute?.search}
                       showNavigator={false}
-                      className="min-h-full"
+                      className="min-h-full bg-transparent"
                     />
                   ) : (
                     <ResultScreen
