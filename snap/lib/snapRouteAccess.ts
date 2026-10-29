@@ -128,6 +128,29 @@ export function resetSnapSessionAccessCache() {
   pendingSession = null
 }
 
+/**
+ * Switching products inside the signed-in workspace keeps the same ECOYA
+ * account. Seed the local preview session only when SNAP has none yet.
+ */
+export function ensureSnapWorkspaceSession() {
+  try {
+    if (!window.localStorage.getItem("snap_web_session")) {
+      window.localStorage.setItem(
+        "snap_web_session",
+        JSON.stringify({
+          authenticated: true,
+          role: "manager",
+          email: "ecoya@ecoya.kr",
+          organization: "ECOYA Demo Co.",
+        })
+      )
+    }
+  } catch {
+    // The product access guard will offer a retry.
+  }
+  resetSnapSessionAccessCache()
+}
+
 function evaluateAccess(
   definition: SnapRouteDefinition | null,
   session: ResolvedSnapSession | null,

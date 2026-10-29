@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react"
 import { Check } from "lucide-react"
 import { Button } from "@/components/ui/Button"
+import { Card } from "@/components/ui/Card"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { Badge } from "@/components/ui/Badge"
 import { useStartGuide } from "@trade-os/onboarding/StartGuideProvider"
 import type { SnapRole } from "@snap/lib/snapRoutes"
@@ -101,13 +103,10 @@ export function SnapStartGuidePage({
   const loadError = guide.error || Boolean(privileged && common?.error)
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-8 sm:px-8">
-      <header>
-        <h1 className="text-2xl font-semibold">처음 시작하기</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          실제 업무 화면에서 한 단계씩 진행합니다. 언제든 다른 메뉴로 이동할 수
-          있습니다.
-        </p>
-      </header>
+      <HeroBanner
+        title="처음 시작하기"
+        description="실제 업무 화면에서 한 단계씩 진행합니다. 언제든 다른 메뉴로 이동할 수 있습니다."
+      />
       {loadError ? (
         <div role="alert" className="space-y-3 rounded-md border p-4">
           <p className="text-sm">
@@ -160,9 +159,10 @@ export function SnapStartGuidePage({
             </div>
           )}
           {privileged && (
-            <section aria-label="조직 안내">
-              <h2 className="mb-3 text-base font-semibold">조직 안내</h2>
-              <div className="divide-y border-y">
+            <Card size="sm" className="p-4 sm:p-5">
+          <section aria-label="조직 안내">
+              <h2 className="mb-3 text-[18px] leading-[26px] font-bold">조직 안내</h2>
+              <div className="divide-y">
                 {(
                   [
                     ["C1", "조직 정보 확인하기"],
@@ -194,10 +194,12 @@ export function SnapStartGuidePage({
                 ))}
               </div>
             </section>
+          </Card>
           )}
+          <Card size="sm" className="p-4 sm:p-5">
           <section aria-label="제품 시작">
-            <h2 className="mb-3 text-base font-semibold">제품 시작</h2>
-            <ol className="divide-y border-y">
+            <h2 className="mb-3 text-[18px] leading-[26px] font-bold">제품 시작</h2>
+            <ol className="divide-y">
               {steps.map((step, index) => {
                 const complete = Boolean(guide.state?.completed[step.id])
                 const previousDone =
@@ -248,6 +250,7 @@ export function SnapStartGuidePage({
               })}
             </ol>
           </section>
+          </Card>
         </>
       )}
     </div>

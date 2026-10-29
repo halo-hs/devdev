@@ -78,7 +78,7 @@
 
 /* Product-specific layout hooks may remain while semantic values stay common. */
 .snap-product {
-  background: var(--ui-surface-page);
+  background: transparent;
 }
 
 .snap-product [data-slot="card"] {

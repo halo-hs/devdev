@@ -23,7 +23,9 @@ import {
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/Badge"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/Button"
+import { alertVariants } from "@/components/ui/Alert"
 import {
   Card,
   CardContent,
@@ -273,13 +275,12 @@ function TaskPageHeader({
   action?: ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-3 pb-5 sm:flex-row sm:items-start sm:justify-between">
-      <div className="min-w-0">
-        <h1 className="text-2xl font-semibold">{title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
-    </div>
+    <HeroBanner
+      title={title}
+      description={description}
+      actions={action}
+      className="mb-5 [&_header]:flex-wrap"
+    />
   )
 }
 
@@ -297,10 +298,17 @@ function InlineState({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-md border px-4 py-3 sm:flex-row sm:items-center",
-        tone === "success" && "ui-status-success",
-        tone === "warning" && "ui-status-warning",
-        tone === "error" && "ui-status-danger"
+        alertVariants({
+          variant:
+            tone === "success"
+              ? "positive"
+              : tone === "warning"
+                ? "caution"
+                : tone === "error"
+                  ? "destructive"
+                  : "neutral",
+        }),
+        "flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center"
       )}
     >
       <div className="min-w-0 flex-1">
@@ -687,7 +695,7 @@ function SnapTaskCreatePage({ navigate }: SnapTaskWorkspaceProps) {
             {phase === "clarify" ? (
               <Card className="rounded-md shadow-none">
                 <CardHeader>
-                  <CardTitle className="text-base">범위 확인 질문</CardTitle>
+                  <CardTitle>범위 확인 질문</CardTitle>
                   <CardDescription>
                     작업 결과를 바꾸는 질문만 확인합니다.
                   </CardDescription>
@@ -724,7 +732,7 @@ function SnapTaskCreatePage({ navigate }: SnapTaskWorkspaceProps) {
             {phase === "scope" ? (
               <Card className="rounded-md shadow-none">
                 <CardHeader>
-                  <CardTitle className="text-base">작업 범위 확인</CardTitle>
+                  <CardTitle>작업 범위 확인</CardTitle>
                   <CardDescription>
                     작업자가 수집할 필수 증거를 확인합니다.
                   </CardDescription>
@@ -760,7 +768,7 @@ function SnapTaskCreatePage({ navigate }: SnapTaskWorkspaceProps) {
             {phase === "review" ? (
               <Card className="rounded-md shadow-none">
                 <CardHeader>
-                  <CardTitle className="text-base">최종 확정</CardTitle>
+                  <CardTitle>최종 확정</CardTitle>
                   <CardDescription>
                     확정하면 작업자 배정과 실행 링크 생성이 가능합니다.
                   </CardDescription>
@@ -819,7 +827,7 @@ function SnapTaskCreatePage({ navigate }: SnapTaskWorkspaceProps) {
           {phase !== "request" ? (
             <Card className="h-fit rounded-md shadow-none lg:sticky lg:top-4">
               <CardHeader>
-                <CardTitle className="text-base">AI 작업 초안</CardTitle>
+                <CardTitle>AI 작업 초안</CardTitle>
                 <CardDescription>확정 전에는 작업자에게 보이지 않습니다.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
@@ -1352,7 +1360,7 @@ function SnapTaskDetailPage({ navigate, routeParams }: SnapTaskWorkspaceProps) {
         </Card>
 
         {!suggestionDismissed && data.suggestion ? (
-          <div className="mt-5 flex flex-col gap-3 rounded-md border border-primary/30 bg-primary/5 p-4 sm:flex-row sm:items-center">
+          <div className={cn(alertVariants({ variant: "positive" }), "mt-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center")}>
             <FolderInput className="size-5 shrink-0 text-primary" />
             <div className="min-w-0 flex-1">
               <div className="text-sm font-medium">추천 증빙 폴더</div>
@@ -1373,7 +1381,7 @@ function SnapTaskDetailPage({ navigate, routeParams }: SnapTaskWorkspaceProps) {
         ) : null}
 
         {filedFolderName ? (
-          <div className="ui-status-success mt-5 flex flex-col gap-3 rounded-md p-4 sm:flex-row sm:items-center">
+          <div className={cn(alertVariants({ variant: "positive" }), "mt-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center")}>
             <CheckCircle2 className="size-5 shrink-0 text-success" />
             <div className="min-w-0 flex-1">
               <div className="text-sm font-medium text-success">증빙 폴더에 추가됨</div>
@@ -1392,7 +1400,7 @@ function SnapTaskDetailPage({ navigate, routeParams }: SnapTaskWorkspaceProps) {
           <div className="space-y-5">
             <Card className="rounded-md shadow-none">
               <CardHeader>
-                <CardTitle className="text-base">담당 작업자 배정</CardTitle>
+                <CardTitle>담당 작업자 배정</CardTitle>
                 <CardDescription>
                   SNAP에 가입한 작업자에게 앱 내 업무를 배정하고 알림을 보냅니다.
                 </CardDescription>
@@ -1448,7 +1456,7 @@ function SnapTaskDetailPage({ navigate, routeParams }: SnapTaskWorkspaceProps) {
 
             <Card className="rounded-md shadow-none">
               <CardHeader>
-                <CardTitle className="text-base">작업 수행 링크</CardTitle>
+                <CardTitle>작업 수행 링크</CardTitle>
                 <CardDescription>
                   앱이 없는 외부 작업자가 체크리스트를 확인하고 직접 촬영·제출합니다.
                 </CardDescription>
@@ -1496,7 +1504,7 @@ function SnapTaskDetailPage({ navigate, routeParams }: SnapTaskWorkspaceProps) {
 
             <Card className="rounded-md shadow-none">
               <CardHeader>
-                <CardTitle className="text-base">증빙 업로드 요청</CardTitle>
+                <CardTitle>증빙 업로드 요청</CardTitle>
                 <CardDescription>
                   협력사 등 외부 사용자가 업무를 수행하지 않고 사진·파일만 제출합니다.
                 </CardDescription>
@@ -1544,7 +1552,7 @@ function SnapTaskDetailPage({ navigate, routeParams }: SnapTaskWorkspaceProps) {
 
             <Card className="rounded-md shadow-none">
               <CardHeader>
-                <CardTitle className="text-base">업무 정보</CardTitle>
+                <CardTitle>업무 정보</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-4 text-sm sm:grid-cols-2 xl:grid-cols-1">
                 {[
@@ -1569,7 +1577,7 @@ function SnapTaskDetailPage({ navigate, routeParams }: SnapTaskWorkspaceProps) {
 
             <Card className="rounded-md shadow-none">
               <CardHeader>
-                <CardTitle className="text-base">활동 이력</CardTitle>
+                <CardTitle>활동 이력</CardTitle>
               </CardHeader>
               <CardContent>
                 {data.activity.length ? (
@@ -1598,7 +1606,7 @@ function SnapTaskDetailPage({ navigate, routeParams }: SnapTaskWorkspaceProps) {
               <CardHeader>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <CardTitle className="text-base">체크리스트</CardTitle>
+                    <CardTitle>체크리스트</CardTitle>
                     <CardDescription>{satisfied}/{required}개 필수 항목 충족</CardDescription>
                   </div>
                   <span className="text-sm font-semibold text-primary">{completion}%</span>
@@ -1632,7 +1640,7 @@ function SnapTaskDetailPage({ navigate, routeParams }: SnapTaskWorkspaceProps) {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <CardTitle className="text-base">제출 증거</CardTitle>
+                      <CardTitle>제출 증거</CardTitle>
                       <Badge variant="secondary">{data.media.length}건</Badge>
                     </div>
                     <CardDescription>

@@ -176,6 +176,7 @@ export function CommonLoginPrototype({
         ? [...DEMO_ACCOUNTS, ...DEMO_PLAN_ACCOUNTS].find((item) => item.email === signInEmail)
         : undefined
     if (!account) {
+      setPassword("")
       setState("rejected")
       return
     }

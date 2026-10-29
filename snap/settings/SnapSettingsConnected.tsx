@@ -21,7 +21,9 @@ import {
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/Badge"
+import { HeroBanner } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/Button"
+import { alertVariants } from "@/components/ui/Alert"
 import {
   Card,
   CardContent,
@@ -203,16 +205,13 @@ function PlatformPageHeader({
   actions?: ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-3 pb-5 sm:flex-row sm:items-start sm:justify-between">
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-semibold">{title}</h1>
-          <Badge variant="outline">Platform Operator</Badge>
-        </div>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      </div>
-      {actions}
-    </div>
+    <HeroBanner
+      eyebrow="Platform Operator"
+      title={title}
+      description={description}
+      actions={actions}
+      className="[&_header]:flex-wrap"
+    />
   )
 }
 
@@ -270,9 +269,15 @@ function StatePanel({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-md border p-5 sm:flex-row sm:items-center",
-        tone === "warning" && "ui-status-warning",
-        tone === "danger" && "ui-status-danger"
+        alertVariants({
+          variant:
+            tone === "warning"
+              ? "caution"
+              : tone === "danger"
+                ? "destructive"
+                : "neutral",
+        }),
+        "flex flex-col gap-3 p-5 sm:flex-row sm:items-center"
       )}
     >
       <AlertCircle
@@ -383,7 +388,7 @@ function PlatformOverviewPage() {
         <div className="grid gap-4 lg:grid-cols-2">
           <Card className="rounded-md shadow-none">
             <CardHeader>
-              <CardTitle className="text-base">확인 필요한 운영 항목</CardTitle>
+              <CardTitle>확인 필요한 운영 항목</CardTitle>
               <CardDescription>실제 응답에서 조치가 필요한 상태만 표시합니다.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -399,7 +404,7 @@ function PlatformOverviewPage() {
           </Card>
           <Card className="rounded-md shadow-none">
             <CardHeader>
-              <CardTitle className="text-base">최근 AI 실행</CardTitle>
+              <CardTitle>최근 AI 실행</CardTitle>
               <CardDescription>비용과 실패 상태를 함께 확인합니다.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -479,7 +484,7 @@ function PlatformSignupsPage() {
         </div>
         <Card className="rounded-md shadow-none">
           <CardHeader>
-            <CardTitle className="text-base">승인 대기 {filtered.length}건</CardTitle>
+            <CardTitle>승인 대기 {filtered.length}건</CardTitle>
           </CardHeader>
           <CardContent>
             {filtered.length === 0 ? (
@@ -571,7 +576,7 @@ function PlatformTenantsPage({ navigate }: { navigate: PlatformNavigate }) {
                   <TableCell><Badge variant={lifecycleStatus === "active" ? "secondary" : lifecycleStatus === "suspended" ? "destructive" : "outline"}>{lifecycleStatus}</Badge></TableCell>
                   <TableCell><Badge variant="outline">{textValue(row.bundle_code, "미지정")}</Badge><p className="mt-1 text-xs text-muted-foreground">{textValue(row.subscription_status, "구독 정보 없음")}</p></TableCell>
                   <TableCell className="text-right tabular-nums">{numberValue(row.member_count)}</TableCell><TableCell className="text-right tabular-nums">{numberValue(row.snap_task_count, numberValue(row.task_count))}</TableCell><TableCell className="text-right tabular-nums">{numberValue(row.snap_report_count, numberValue(row.report_count))}</TableCell><TableCell className="text-right tabular-nums">{numberValue(row.credit_balance).toLocaleString()}</TableCell><TableCell>{formatDateTime(row.last_snap_task_at ?? row.last_task_at)}</TableCell>
-                  <TableCell><Button variant="outline" size="xs" onClick={() => navigate("SC-34", { params: { orgId: id } })}>지원 뷰</Button></TableCell>
+                  <TableCell><Button variant="outline" size="lg" onClick={() => navigate("SC-34", { params: { orgId: id } })}>지원 뷰</Button></TableCell>
                 </TableRow>
               })}
             </TableBody>
@@ -600,7 +605,7 @@ function PlatformSupportPage({ orgId, navigate }: { orgId: string; navigate: Pla
       <ResourceBoundary state={state}>
         <div className="flex flex-wrap items-center gap-3 rounded-md border p-4"><span className="flex size-11 items-center justify-center rounded-md bg-muted"><Building2 /></span><div className="min-w-0 flex-1"><p className="font-semibold">{textValue(org.name)}</p><p className="text-sm text-muted-foreground">{textValue(org.slug, textValue(org.org_id))} · {textValue(org.lifecycle_status)}</p></div>{data?.read_only ? <Badge variant="secondary">읽기 전용</Badge> : null}{data?.audited ? <Badge variant="outline">감사 기록</Badge> : null}<ShieldCheck className="size-5 text-success" /></div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6"><MetricCard label="멤버" value={numberValue(summary.member_count)} /><MetricCard label="업무" value={numberValue(summary.task_count)} /><MetricCard label="보고서" value={numberValue(summary.report_count)} /><MetricCard label="전달 실패" value={numberValue(summary.failed_deliveries)} /><MetricCard label="활성 링크" value={numberValue(summary.active_share_links)} /><MetricCard label="크레딧" value={numberValue(summary.credit_balance).toLocaleString()} /></div>
-        {sections.map((section) => <Card key={section.title} className="rounded-md shadow-none"><CardHeader><CardTitle className="text-base">{section.title}</CardTitle></CardHeader><CardContent><CompactTable empty={`${section.title} 내역이 없습니다.`} rows={section.rows} columns={section.columns} /></CardContent></Card>)}
+        {sections.map((section) => <Card key={section.title} className="rounded-md shadow-none"><CardHeader><CardTitle>{section.title}</CardTitle></CardHeader><CardContent><CompactTable empty={`${section.title} 내역이 없습니다.`} rows={section.rows} columns={section.columns} /></CardContent></Card>)}
       </ResourceBoundary>
     </PlatformPage>
   )
@@ -622,7 +627,7 @@ function PlatformIntegrationsPage() {
   return <PlatformPage title="연동 상태" description="외부 SaaS와 인프라 환경변수의 실제 설정 여부를 확인합니다.">
     <ResourceBoundary state={state}>
       <div className="flex flex-wrap items-center gap-3 rounded-md border p-4"><Badge variant={payload.launch_ready ? "secondary" : "destructive"}>{payload.launch_ready ? "출시 준비 완료" : "출시 준비 미완료"}</Badge><span className="text-sm">설정 {numberValue(payload.configured, items.filter((row) => row.configured).length)}/{numberValue(payload.total, items.length)}</span><span className="text-sm text-muted-foreground">필수 {numberValue(payload.required_ready)}/{numberValue(payload.required_total)}</span></div>
-      {items.length === 0 ? <StatePanel title="등록된 연동이 없습니다" description="백엔드 연동 레지스트리에 항목이 추가되면 이곳에서 상태를 확인할 수 있습니다." /> : Array.from(groups.entries()).map(([category, rows]) => <Card key={category} className="rounded-md shadow-none"><CardHeader><CardTitle className="text-base">{category}</CardTitle></CardHeader><CardContent className="space-y-2">{rows.map((row) => <div key={row.key} className={cn("rounded-md border p-3", row.configured && "ui-status-success")}><div className="flex flex-wrap items-center gap-2">{row.configured ? <CheckCircle2 className="size-4 text-success" /> : <Circle className="size-4 text-muted-foreground" />}<span className="font-medium">{row.vendor}</span><Badge variant={row.required ? "secondary" : "outline"}>{row.required ? "필수" : "선택"}</Badge><Badge variant="outline">{row.launch_phase}</Badge><span className="ml-auto text-xs text-muted-foreground">{row.configured ? "설정됨" : "미설정"}</span></div><p className="mt-1 pl-6 text-xs text-muted-foreground">{row.scope}</p><div className="mt-2 flex flex-wrap gap-1 pl-6">{row.env.map((env) => <code key={env.key} className={cn("rounded border px-1.5 py-0.5 text-[11px]", env.set ? "border-success/30 text-success" : "text-muted-foreground")}>{env.set ? "✓" : "○"} {env.key}</code>)}</div></div>)}</CardContent></Card>)}
+      {items.length === 0 ? <StatePanel title="등록된 연동이 없습니다" description="백엔드 연동 레지스트리에 항목이 추가되면 이곳에서 상태를 확인할 수 있습니다." /> : Array.from(groups.entries()).map(([category, rows]) => <Card key={category} className="rounded-md shadow-none"><CardHeader><CardTitle>{category}</CardTitle></CardHeader><CardContent className="space-y-2">{rows.map((row) => <div key={row.key} className={cn("rounded-md border p-3", row.configured && "ui-status-success")}><div className="flex flex-wrap items-center gap-2">{row.configured ? <CheckCircle2 className="size-4 text-success" /> : <Circle className="size-4 text-muted-foreground" />}<span className="font-medium">{row.vendor}</span><Badge variant={row.required ? "secondary" : "outline"}>{row.required ? "필수" : "선택"}</Badge><Badge variant="outline">{row.launch_phase}</Badge><span className="ml-auto text-xs text-muted-foreground">{row.configured ? "설정됨" : "미설정"}</span></div><p className="mt-1 pl-6 text-xs text-muted-foreground">{row.scope}</p><div className="mt-2 flex flex-wrap gap-1 pl-6">{row.env.map((env) => <code key={env.key} className={cn("rounded border px-1.5 py-0.5 text-[11px]", env.set ? "border-success/30 text-success" : "text-muted-foreground")}>{env.set ? "✓" : "○"} {env.key}</code>)}</div></div>)}</CardContent></Card>)}
     </ResourceBoundary>
   </PlatformPage>
 }
@@ -646,9 +651,9 @@ function PlatformAiPage() {
   return <PlatformPage title="AI 사용량" description="모델 라우팅, 실제 호출 비용, 월 예산과 보고서 단위 경제성을 확인합니다.">
     <ResourceBoundary state={state}>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><MetricCard label="운영 모드" value={textValue(routing.mode)} note={`Capture ${textValue(routing.capture_intel_mode)}`} /><MetricCard label="AI 호출" value={numberValue(usage.estate_call_count, rowsValue(usage.items).length)} /><MetricCard label="누적 추정 비용" value={formatUsd(usage.estate_total_estimated_cost ?? usage.total_estimated_cost)} /><MetricCard label="월 예산" value={`${percent.toFixed(1)}%`} note={`${formatUsd(used, 2)} / ${formatUsd(limit, 2)}`} /></div>
-      <Card className="rounded-md shadow-none"><CardHeader><CardTitle className="text-base">예산 소진</CardTitle></CardHeader><CardContent><Progress value={percent} /><p className="mt-2 text-xs text-muted-foreground">{budget.over_limit ? "월 예산을 초과했습니다." : budget.alert ? "예산 알림 기준에 도달했습니다." : "예산 범위 안에서 운영 중입니다."}</p></CardContent></Card>
-      <div className="grid gap-4 lg:grid-cols-2"><Card className="rounded-md shadow-none"><CardHeader><CardTitle className="text-base">단위 경제성</CardTitle><CardDescription>전달 완료 보고서를 기준으로 계산합니다.</CardDescription></CardHeader><CardContent className="grid gap-3 sm:grid-cols-2"><MetricCard label="전달 보고서" value={numberValue(economics.delivered_reports)} /><MetricCard label="보고서당 AI 비용" value={formatUsd(economics.avg_ai_cost_per_report_usd)} /><MetricCard label="크레딧당 총이익" value={formatUsd(economics.gross_margin_per_credit_usd, 2)} /><MetricCard label="총이익률" value={`${numberValue(economics.gross_margin_pct).toFixed(1)}%`} /></CardContent></Card><Card className="rounded-md shadow-none"><CardHeader><CardTitle className="text-base">모델 라우팅</CardTitle></CardHeader><CardContent><CompactTable empty="라우팅 규칙이 없습니다." rows={rowsValue(routing.routes)} columns={[{ label: "레이어", render: (row) => textValue(row.layer) }, { label: "모델", render: (row) => textValue(row.effective_model ?? row.model) }, { label: "Provider", render: (row) => textValue(row.provider) }, { label: "Tier", render: (row) => textValue(row.tier) }]} /></CardContent></Card></div>
-      <Card className="rounded-md shadow-none"><CardHeader><CardTitle className="text-base">최근 사용 기록</CardTitle></CardHeader><CardContent><CompactTable empty="AI 사용 기록이 없습니다." rows={rowsValue(usage.items).slice(0, 25)} columns={[{ label: "레이어", render: (row) => textValue(row.layer) }, { label: "모델", render: (row) => textValue(row.model) }, { label: "상태", render: (row) => textValue(row.status) }, { label: "비용", render: (row) => formatUsd(row.estimated_cost, 5) }, { label: "시각", render: (row) => formatDateTime(row.created_at) }]} /></CardContent></Card>
+      <Card className="rounded-md shadow-none"><CardHeader><CardTitle>예산 소진</CardTitle></CardHeader><CardContent><Progress value={percent} /><p className="mt-2 text-xs text-muted-foreground">{budget.over_limit ? "월 예산을 초과했습니다." : budget.alert ? "예산 알림 기준에 도달했습니다." : "예산 범위 안에서 운영 중입니다."}</p></CardContent></Card>
+      <div className="grid gap-4 lg:grid-cols-2"><Card className="rounded-md shadow-none"><CardHeader><CardTitle>단위 경제성</CardTitle><CardDescription>전달 완료 보고서를 기준으로 계산합니다.</CardDescription></CardHeader><CardContent className="grid gap-3 sm:grid-cols-2"><MetricCard label="전달 보고서" value={numberValue(economics.delivered_reports)} /><MetricCard label="보고서당 AI 비용" value={formatUsd(economics.avg_ai_cost_per_report_usd)} /><MetricCard label="크레딧당 총이익" value={formatUsd(economics.gross_margin_per_credit_usd, 2)} /><MetricCard label="총이익률" value={`${numberValue(economics.gross_margin_pct).toFixed(1)}%`} /></CardContent></Card><Card className="rounded-md shadow-none"><CardHeader><CardTitle>모델 라우팅</CardTitle></CardHeader><CardContent><CompactTable empty="라우팅 규칙이 없습니다." rows={rowsValue(routing.routes)} columns={[{ label: "레이어", render: (row) => textValue(row.layer) }, { label: "모델", render: (row) => textValue(row.effective_model ?? row.model) }, { label: "Provider", render: (row) => textValue(row.provider) }, { label: "Tier", render: (row) => textValue(row.tier) }]} /></CardContent></Card></div>
+      <Card className="rounded-md shadow-none"><CardHeader><CardTitle>최근 사용 기록</CardTitle></CardHeader><CardContent><CompactTable empty="AI 사용 기록이 없습니다." rows={rowsValue(usage.items).slice(0, 25)} columns={[{ label: "레이어", render: (row) => textValue(row.layer) }, { label: "모델", render: (row) => textValue(row.model) }, { label: "상태", render: (row) => textValue(row.status) }, { label: "비용", render: (row) => formatUsd(row.estimated_cost, 5) }, { label: "시각", render: (row) => formatDateTime(row.created_at) }]} /></CardContent></Card>
       {state.data?.failures.length ? <StatePanel tone="warning" title="일부 AI 지표를 불러오지 못했습니다" description={state.data.failures.join(" · ")} action={<Button variant="outline" size="sm" onClick={state.reload}><RefreshCw /> 다시 시도</Button>} /> : null}
     </ResourceBoundary>
   </PlatformPage>
