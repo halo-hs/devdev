@@ -1223,7 +1223,7 @@
         "retry": "다시 시도"
       },
       "brief": {
-        "title": "딜 요약 브리프",
+        "title": "거래 요약 브리프",
         "sourceLabel": "자동 요약",
         "sourceLabelAi": "AI 요약",
         "asOf": "업무 사실 기준 {at}",
@@ -1309,7 +1309,7 @@
             "reconcile_weight": "포장명세서와 B/L 중량 대조"
           }
         },
-        "loadError": "딜 요약을 불러오지 못했습니다.",
+        "loadError": "거래 요약을 불러오지 못했습니다.",
         "emptyTitle": "아직 요약할 정보가 없습니다",
         "emptyDescription": "아직 요약할 거래 정보가 충분하지 않습니다. 문서가 확인되면 자동으로 표시됩니다.",
         "retry": "다시 시도"
@@ -1363,7 +1363,7 @@
         "manualEntry": "수동 입력"
       },
       "dealHealth": {
-        "title": "딜 건강도",
+        "title": "거래 건강도",
         "subtitle": "서류·대조·결제·선적·마진을 하나의 설명가능한 점수로.",
         "scoreSuffix": "/ 100",
         "bands": {
@@ -1385,7 +1385,7 @@
           "margin_risk": "마진",
           "compliance_release": "컴플라이언스"
         },
-        "loadError": "딜 건강도를 불러오지 못했습니다.",
+        "loadError": "거래 건강도를 불러오지 못했습니다.",
         "retry": "다시 시도"
       },
       "bankChange": {

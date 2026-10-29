@@ -1,10 +1,12 @@
 "use client";
 
 import { counterpartyDisplayState } from "./counterpartyDisplayState";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/platform/StatusBadge";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/SearchFilterBar";
 import { Search } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip";
 
 import {
   useCallback,
@@ -300,13 +302,14 @@ function SalesPerformanceIdentityScope({
   const tag = localeTag("ko");
 
   // member 는 BE 가 본인으로 강제(서비스 레이어) — FE 는 그 전제로 오너/관리자에게만
-  // 담당자 필터·담당자별 GP 섹션을 노출한다(D10: 전체 범위 + 담당자 필터).
+  // 담당자·담당자별 GP 섹션을 노출한다(D10: 전체 범위 + 담당자).
   const isManager = role === "owner" || role === "admin";
 
   // erp-v2-adapt: begin — QA-1352 removes the projection-derived preflight gate.
   // erp-v2-adapt: end
   const [assigneeFilter, setAssigneeFilter] = useState<string | null>(null);
   const [currencyChoice, setCurrencyChoice] = useState<string | null>(null);
+  const [tableSort, setTableSort] = useState("overdue");
   // erp-v2-adapt: begin — QA-1352 waits for the backend gate reason before choosing a notice.
   const [state, setState] = useState<LoadState>({ status: "loading" });
   // erp-v2-adapt: end
@@ -709,7 +712,7 @@ function SalesPerformanceIdentityScope({
   }, []);
 
   const fmtCompact = useCallback(
-    (v: number) => formatNumber(v, tag, { notation: "compact", maximumFractionDigits: 1 }),
+    (v: number) => formatNumber(v, tag, { maximumFractionDigits: 2 }),
     [tag],
   );
   const fmtTenthsPct = useCallback(
@@ -724,11 +727,7 @@ function SalesPerformanceIdentityScope({
     (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString(tag, { month: "short", timeZone: "UTC" }),
     [tag],
   );
-  const monthDay = useCallback(
-    (iso: string) =>
-      new Date(`${iso}T00:00:00Z`).toLocaleDateString(tag, { month: "short", day: "numeric", timeZone: "UTC" }),
-    [tag],
-  );
+  const tableDate = (iso: string) => iso.slice(0, 10).replaceAll("-", ".");
   const yearMonth = useCallback(
     (iso: string) =>
       new Date(`${iso}T00:00:00Z`).toLocaleDateString(tag, { year: "numeric", month: "short", timeZone: "UTC" }),
@@ -740,23 +739,37 @@ function SalesPerformanceIdentityScope({
   // ── ready 파생 데이터 ──
   const data = state.status === "ready" ? state.data : null;
   const statusItems = useMemo(() => data?.status?.items ?? [], [data]);
-  const statusItemChunks = useMemo(
-    () =>
-      Array.from(
-        { length: Math.ceil(statusItems.length / STATUS_TABLE_CHUNK_SIZE) },
-        (_, chunkIndex) => {
-          const start = chunkIndex * STATUS_TABLE_CHUNK_SIZE;
-          return statusItems.slice(start, start + STATUS_TABLE_CHUNK_SIZE);
-        },
-      ),
-    [statusItems],
-  );
   const currencies = useMemo(
     () => deriveCockpitCurrencies(data?.series ?? null, data?.gp ?? null, statusItems),
     [data, statusItems],
   );
   const currency =
     currencyChoice && currencies.includes(currencyChoice) ? currencyChoice : currencies[0] ?? null;
+  const visibleStatusItems = useMemo(() => {
+    const items = statusItems.filter(item => item.currency === currency);
+    return items.sort((a, b) => {
+      if (tableSort === "nextDue") {
+        return (a.next_due_date ?? "9999").localeCompare(b.next_due_date ?? "9999");
+      }
+      const left = amountCell(tableSort === "outstanding" ? a.outstanding : a.overdue);
+      const right = amountCell(tableSort === "outstanding" ? b.outstanding : b.overdue);
+      if (!left.valid || !right.valid) return Number(right.valid) - Number(left.valid);
+      return left.scaled === right.scaled
+        ? (a.next_due_date ?? "9999").localeCompare(b.next_due_date ?? "9999")
+        : left.scaled > right.scaled ? -1 : 1;
+    });
+  }, [statusItems, currency, tableSort]);
+  const statusItemChunks = useMemo(
+    () =>
+      Array.from(
+        { length: Math.ceil(visibleStatusItems.length / STATUS_TABLE_CHUNK_SIZE) },
+        (_, chunkIndex) => {
+          const start = chunkIndex * STATUS_TABLE_CHUNK_SIZE;
+          return visibleStatusItems.slice(start, start + STATUS_TABLE_CHUNK_SIZE);
+        },
+      ),
+    [visibleStatusItems],
+  );
   const fmtAmount = useCallback(
     (value: AmountCell | bigint | string | null | undefined, amountCurrency: string | null = currency) => {
       if (value == null) return "—";
@@ -861,7 +874,7 @@ function SalesPerformanceIdentityScope({
     memberDirectory.status === "ready" ? memberDirectory.members : [];
   const currencyLabel = currency ?? "";
 
-  // Member는 settlement-series의 담당자 필터를 사용하며, assignee 부재를 회사 전체 권한으로 해석하지 않는다.
+  // Member는 settlement-series의 담당자를 사용하며, assignee 부재를 회사 전체 권한으로 해석하지 않는다.
   const effectiveAssignee = isManager
     ? data?.status?.assignee ?? null
     : data?.series?.assignee ?? null;
@@ -1238,64 +1251,52 @@ function SalesPerformanceIdentityScope({
               sub={
                 <>
                   {replaceTokens(copy.gpTrend.sub, { currency: currencyLabel })}
-                  <span className="mt-1 block text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.gpTrend.basis}</span>
                   {gpExclusion.text ? (
-                    <span className={cn("mt-1 block text-[length:var(--text-body-10)] leading-[var(--leading-body-10)]", gpExclusion.unknown ? "text-[var(--color-gray-5)]" : "text-[var(--color-red-1)]")}>
-                      {"— "}
-                      <span
-                        className={gpExclusion.unknown ? "text-[var(--color-gray-5)]" : "text-[var(--color-red-1)]"}
-                        data-ui={
-                          gpExclusion.unknown ? "salesperf-gp-excluded-unknown" : "salesperf-gp-excluded"
-                        }
-                      >
-                        {gpExclusion.text}
-                      </span>{" "}
-                      {gpExclusion.unknown ? null : (
-                        <>
-                          {copy.gpTrend.excludedWindowNote}
-                          {gpExclusion.mixedPresent ? (
-                            <>
-                              {" "}
-                              {copy.gpTrend.excludedSuffix}
-                            </>
-                          ) : null}
-                        </>
-                      )}
-                    </span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button type="button" className="ml-2 text-[var(--color-red-1)] underline decoration-dotted underline-offset-4" data-ui={gpExclusion.unknown ? "salesperf-gp-excluded-unknown" : "salesperf-gp-excluded"}>
+                          {gpExclusion.unknown ? "집계 범위 확인 필요" : "집계 제외 항목 있음"}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">{gpExclusion.text}</TooltipContent>
+                    </Tooltip>
                   ) : null}
                 </>
               }
             >
-              <GpBarChart
-                ariaLabel={copy.gpTrend.aria}
-                formatAxisValue={fmtCompact}
-                formatBarLabel={fmtCompact}
-                points={gpPoints.map((p) => ({
-                  key: p.periodStart,
-                  xLabel: axisLabel(p.periodStart),
-                  gp: p.gp.approx,
-                  hasData: p.hasData,
-                  tooltip: p.hasData ? (
-                    <>
-                      <span className="font-bold">{yearMonth(p.periodStart)}</span>
-                      <br />
-                      {copy.gpTrend.gpLabel} {fmtAmount(p.gp)} {currencyLabel}
-                      {p.marginPermyriad != null ? (
-                        <>
-                          <br />
-                          {copy.gpTrend.marginLabel} {fmtRatioPct(p.marginPermyriad)}
-                        </>
-                      ) : null}
-                    </>
-                  ) : (
-                    <>
-                      <span className="font-bold">{yearMonth(p.periodStart)}</span>
-                      <br />
-                      {copy.gpTrend.noData}
-                    </>
-                  ),
-                }))}
-              />
+              <div className="[&_[data-gp-bar=negative]>path]:fill-[var(--color-red-1)] [&_[data-gp-bar=negative]>text]:fill-[var(--color-red-1)]">
+                <GpBarChart
+                  ariaLabel={copy.gpTrend.aria}
+                  formatAxisValue={fmtCompact}
+                  formatBarLabel={fmtCompact}
+                  showValueLabels={false}
+                  points={gpPoints.map((p) => ({
+                    key: p.periodStart,
+                    xLabel: axisLabel(p.periodStart),
+                    gp: p.gp.approx,
+                    hasData: p.hasData,
+                    tooltip: p.hasData ? (
+                      <>
+                        <span className="font-bold">{yearMonth(p.periodStart)}</span>
+                        <br />
+                        {copy.gpTrend.gpLabel} {fmtAmount(p.gp)} {currencyLabel}
+                        {p.marginPermyriad != null ? (
+                          <>
+                            <br />
+                            {copy.gpTrend.marginLabel} {fmtRatioPct(p.marginPermyriad)}
+                          </>
+                        ) : null}
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-bold">{yearMonth(p.periodStart)}</span>
+                        <br />
+                        {copy.gpTrend.noData}
+                      </>
+                    ),
+                  }))}
+                />
+              </div>
             </ReportCard>
 
             {showByAssignee ? (
@@ -1374,24 +1375,41 @@ function SalesPerformanceIdentityScope({
             ) : null}
           </div> : null}
 
-          {/* ── 하단 거래처 상태 테이블 (D10) — 서버 순서 = 주의 필요 순, 재정렬 금지 ── */}
+          {/* Table controls apply only to the fetched rows in the selected currency. */}
           {isManager ? (
-            <ReportCard
-              title={copy.table.title}
-              sub={
-                <>
-                  {copy.table.subOrg}
-                  {data?.status ? <> · {replaceTokens(copy.table.asOf, { date: monthDay(data.status.as_of) })}</> : null}
-                  {/* BE 클램프 상한에 닿으면 절단 가능성 고지 — 숫자가 전체처럼 읽히지 않게. */}
-                  {statusLimitReached ? <> · {statusLimitText}</> : null}
-                </>
-              }
-            >
-            {statusItems.length === 0 ? (
+            <Card className="min-w-0 bg-[var(--color-gray-12)]">
+              <CardHeader>
+                <div className="flex flex-col items-stretch gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="lg:shrink-0">
+                    <CardTitle>{copy.table.title}</CardTitle>
+                    <CardDescription className="mt-1">
+                      {data?.status ? replaceTokens(copy.table.asOf, { date: tableDate(data.status.as_of) }) : null}
+                      {statusLimitReached ? <> · {statusLimitText}</> : null}
+                    </CardDescription>
+                  </div>
+                  <BusinessListToolbar
+                    aria-label="거래처 정렬"
+                    className="min-w-0 lg:flex-1 lg:[&_.business-filter-row]:justify-end"
+                  >
+                    <BusinessFilterField label="정렬">
+                      <Select value={tableSort} onValueChange={setTableSort}>
+                        <SelectTrigger className="w-44" aria-label="거래처 정렬"><SelectValue /></SelectTrigger>
+                        <SelectContent align="end">
+                          <SelectItem value="overdue">연체 금액 높은 순</SelectItem>
+                          <SelectItem value="outstanding">미수 금액 높은 순</SelectItem>
+                          <SelectItem value="nextDue">다음 결제일 빠른 순</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </BusinessFilterField>
+                  </BusinessListToolbar>
+                </div>
+              </CardHeader>
+              <CardContent>
+            {visibleStatusItems.length === 0 ? (
               <p className="mt-3 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.table.empty}</p>
             ) : (
-              <div className="mt-3 overflow-x-auto" data-ui="salesperf-status-scroll">
-                <div className="min-w-[1400px]" data-ui="salesperf-status-table">
+              <div className="overflow-x-auto" data-ui="salesperf-status-scroll">
+                <div className="min-w-[1320px]" data-ui="salesperf-status-table">
                   {statusItemChunks.map((chunk, chunkIndex) => {
                     const chunkStart = chunkIndex * STATUS_TABLE_CHUNK_SIZE;
                     const chunkEnd = chunkStart + chunk.length;
@@ -1411,34 +1429,36 @@ function SalesPerformanceIdentityScope({
                       >
                         <HostTable
                           aria-label={`${copy.table.title} ${chunkStart + 1}-${chunkEnd}`}
-                          className="w-full table-fixed border-collapse text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums"
+                          className="w-full table-fixed border-collapse text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] tabular-nums [&_th]:px-3 [&_td]:px-3 [&_th:nth-child(7)]:pl-6 [&_td:nth-child(7)]:pl-6"
                         >
                           <colgroup>
-                            <col className="w-[18%]" />
-                            <col className="w-[12%]" />
-                            <col className="w-[7%]" />
-                            <col className="w-[9%]" />
-                            <col className="w-[9%]" />
-                            <col className="w-[9%]" />
-                            <col className="w-[10%]" />
-                            <col className="w-[7%]" />
-                            <col className="w-[7%]" />
-                            <col className="w-[7%]" />
-                            <col className="w-[5%]" />
+                            <col style={{ width: 192 }} />
+                            <col style={{ width: 88 }} />
+                            <col style={{ width: 60 }} />
+                            <col style={{ width: 116 }} />
+                            <col style={{ width: 116 }} />
+                            <col style={{ width: 116 }} />
+                            <col style={{ width: 124 }} />
+                            <col style={{ width: 124 }} />
+                            <col style={{ width: 84 }} />
+                            <col style={{ width: 84 }} />
+                            <col style={{ width: 92 }} />
+                            <col style={{ width: 116 }} />
                           </colgroup>
                           <HostTableHeader className={chunkIndex === 0 ? undefined : "sr-only"}>
                             <HostTableRow className="border-b border-[var(--color-gray-10)] text-left text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
                               <HostTableHead className="py-1.5 pr-3 font-medium">{copy.table.columns.counterparty}</HostTableHead>
                               <HostTableHead className="py-1.5 pr-3 font-medium">상태</HostTableHead>
                               <HostTableHead className="py-1.5 pr-3 font-medium">{copy.table.columns.currency}</HostTableHead>
-                              <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.table.columns.totalDue}</HostTableHead>
-                              <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.table.columns.outstanding}</HostTableHead>
                               <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.table.columns.overdue}</HostTableHead>
-                              <HostTableHead className="py-1.5 pr-3 font-medium">{copy.table.columns.nextDue}</HostTableHead>
+                              <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.table.columns.outstanding}</HostTableHead>
+                              <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.table.columns.totalDue}</HostTableHead>
+                              <HostTableHead className="py-1.5 pr-3 pl-5 font-medium">{copy.table.columns.nextDue}</HostTableHead>
+                              <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.table.columns.nextDueAmount}</HostTableHead>
                               <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.table.columns.shipments}</HostTableHead>
                               <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.table.columns.docs}</HostTableHead>
-                              <HostTableHead className="py-1.5 pr-3 font-medium">{copy.table.columns.lastActivity}</HostTableHead>
-                              <HostTableHead className="py-1.5 text-right font-medium">{copy.table.columns.activeDeals}</HostTableHead>
+                              <HostTableHead className="py-1.5 pr-3 text-right font-medium">{copy.table.columns.activeDeals}</HostTableHead>
+                              <HostTableHead className="py-1.5 font-medium">{copy.table.columns.lastActivity}</HostTableHead>
                             </HostTableRow>
                           </HostTableHeader>
                           <HostTableBody>
@@ -1450,7 +1470,7 @@ function SalesPerformanceIdentityScope({
                                 <HostTableRow
                                   key={`${item.counterparty}-${item.currency}`}
                                   className={
-                                    rowIndex === statusItems.length - 1
+                                    rowIndex === visibleStatusItems.length - 1
                                       ? undefined
                                       : "border-b border-[var(--color-gray-10)]"
                                   }
@@ -1471,15 +1491,13 @@ function SalesPerformanceIdentityScope({
                                   </HostTableCell>
                                   <HostTableCell className="py-1.5 pr-3" data-ui="counterparty-status-evidence">
                                     <StatusBadge size="sm" tone={displayState.tone}>{displayState.label}</StatusBadge>
-                                    <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{!displayState.writtenOff.valid || displayState.writtenOff.scaled < 0n ? "상각 확인 필요" : displayState.writtenOff.scaled > 0n ? `상각 처리됨 · ${fmtAmount(displayState.writtenOff.raw, item.currency)} ${item.currency}` : null}</p>
+                                    {displayState.writtenOff.valid && displayState.writtenOff.scaled > 0n && (
+                                      <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
+                                        {`상각 처리됨 · ${fmtAmount(displayState.writtenOff.raw, item.currency)} ${item.currency}`}
+                                      </p>
+                                    )}
                                   </HostTableCell>
                                   <HostTableCell className="py-1.5 pr-3 text-[var(--color-gray-4)]">{item.currency}</HostTableCell>
-                                  <HostTableCell className="py-1.5 pr-3 text-right">
-                                    {fmtAmount(item.total_due, item.currency)}
-                                  </HostTableCell>
-                                  <HostTableCell className="py-1.5 pr-3 text-right">
-                                    {fmtAmount(item.outstanding, item.currency)}
-                                  </HostTableCell>
                                   <HostTableCell
                                     className={cn(
                                       "py-1.5 pr-3 text-right",
@@ -1488,17 +1506,24 @@ function SalesPerformanceIdentityScope({
                                   >
                                     {fmtAmount(overdue, item.currency)}
                                   </HostTableCell>
-                                  <HostTableCell className="py-1.5 pr-3 whitespace-nowrap">
-                                    {item.next_due_date
-                                      ? `${monthDay(item.next_due_date)} · ${fmtAmount(item.next_due_amount, item.currency)}`
-                                      : copy.table.none}
+                                  <HostTableCell className="py-1.5 pr-3 text-right">
+                                    {fmtAmount(item.outstanding, item.currency)}
+                                  </HostTableCell>
+                                  <HostTableCell className="py-1.5 pr-3 text-right">
+                                    {fmtAmount(item.total_due, item.currency)}
+                                  </HostTableCell>
+                                  <HostTableCell className="py-1.5 pr-3 pl-5 whitespace-nowrap">
+                                    {item.next_due_date ? tableDate(item.next_due_date) : copy.table.none}
+                                  </HostTableCell>
+                                  <HostTableCell className="py-1.5 pr-3 text-right whitespace-nowrap">
+                                    {item.next_due_date ? fmtAmount(item.next_due_amount, item.currency) : copy.table.none}
                                   </HostTableCell>
                                   <HostTableCell className="py-1.5 pr-3 text-right">{item.upcoming_shipments}</HostTableCell>
                                   <HostTableCell className="py-1.5 pr-3 text-right">{item.recent_docs}</HostTableCell>
-                                  <HostTableCell className="py-1.5 pr-3 whitespace-nowrap">
-                                    {item.last_activity ? monthDay(item.last_activity) : copy.table.none}
+                                  <HostTableCell className="py-1.5 pr-3 text-right">{item.active_deals}</HostTableCell>
+                                  <HostTableCell className="py-1.5 whitespace-nowrap">
+                                    {item.last_activity ? tableDate(item.last_activity) : copy.table.none}
                                   </HostTableCell>
-                                  <HostTableCell className="py-1.5 text-right">{item.active_deals}</HostTableCell>
                                 </HostTableRow>
                               );
                             })}
@@ -1510,7 +1535,8 @@ function SalesPerformanceIdentityScope({
                 </div>
               </div>
             )}
-            </ReportCard>
+              </CardContent>
+            </Card>
           ) : (
             <InfoBox
               data-ui="salesperf-status-forbidden"

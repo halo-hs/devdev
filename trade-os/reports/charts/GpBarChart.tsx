@@ -140,8 +140,10 @@ export function GpBarChart({
   ariaLabel,
   formatAxisValue,
   formatBarLabel,
+  showValueLabels = true,
 }: {
   points: GpPoint[];
+  showValueLabels?: boolean;
   height?: number;
   ariaLabel: string;
   formatAxisValue: ((v: bigint) => string) | ((v: number) => string);
@@ -175,7 +177,7 @@ export function GpBarChart({
   // padding grows with the longest label (≈7px per glyph) instead of clipping it.
   const axisLabels = (ticks.length ? ticks : [BigInt(0)]).map((tick) => format(displayValue(tick)));
   const lastValue = n > 0 ? chartValue(points[n - 1].gp) : BigInt(0);
-  const lastLabel = n > 0 && points[n - 1].hasData !== false ? formatBar(displayValue(lastValue)) : "";
+  const lastLabel = showValueLabels && n > 0 && points[n - 1].hasData !== false ? formatBar(displayValue(lastValue)) : "";
   const pad: ChartPad = {
     ...CHART_PAD,
     l: Math.max(CHART_PAD.l, Math.max(...axisLabels.map((label) => label.length)) * 7 + 10),
@@ -183,7 +185,9 @@ export function GpBarChart({
   };
   const { iw, ih } = innerSize(width, height, pad);
   const slot = n > 0 ? iw / n : iw;
-  const bw = Math.max(2, Math.min(16, slot - 10));
+  const bw = showValueLabels
+    ? Math.max(2, Math.min(16, slot - 10))
+    : Math.max(8, Math.min(32, slot * 0.42));
   const y0 = pad.t + ih - chartRatio(-minV, span) * ih;
 
   return (
@@ -230,7 +234,7 @@ export function GpBarChart({
                 d={negative ? barPathBottom(x, y, bw, h, 4) : barPathTop(x, y, bw, h, 4)}
                 fill={negative ? CHART_COLORS.gpNegative : CHART_COLORS.gpPositive}
               />
-              {negative ? (
+              {showValueLabels && negative ? (
                 <text
                   x={x + bw / 2}
                   y={y + h + 12}
@@ -242,7 +246,7 @@ export function GpBarChart({
                   {formatBar(displayValue(value))}
                 </text>
               ) : null}
-              {isLast && !negative ? (
+              {showValueLabels && isLast && !negative ? (
                 <text
                   x={x + bw / 2}
                   y={Math.max(pad.t, y - 6)}
