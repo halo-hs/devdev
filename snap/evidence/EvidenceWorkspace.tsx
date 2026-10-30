@@ -863,7 +863,7 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
               <div className="flex items-center justify-between border-b px-3 py-3">
                 <div>
                   <h2 className="text-sm font-semibold">폴더</h2>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {filteredFolders.length}개 표시
                   </p>
                 </div>
@@ -885,7 +885,7 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
                       ? "보관된 폴더가 없습니다."
                       : "조건에 맞는 폴더가 없습니다."}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {statusFilter === "archived"
                       ? "폴더를 보관하면 연결된 증빙과 함께 이 목록에 유지됩니다."
                       : "필터를 바꾸거나 새 폴더를 만드세요."}
@@ -919,7 +919,7 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-medium">{folder.name}</span>
-                        <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <span className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                           <span>{FOLDER_TYPE_LABELS[folder.type]}</span>
                           <span>{folder.itemCount}개 항목</span>
                           {folder.visibility === "private" && (
@@ -973,7 +973,7 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
                             <Badge variant="secondary">보관됨</Badge>
                           )}
                         </div>
-                        <p className="mt-1 text-xs text-muted-foreground">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           {FOLDER_TYPE_LABELS[selectedFolder.type]} · 최근 변경 {formatDate(selectedFolder.updatedAt)}
                         </p>
                         {selectedFolder.visibility === "private" && (
@@ -1040,7 +1040,7 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
                                   </span>
                                   <Badge variant="secondary">{itemTypeLabel(item.itemType)}</Badge>
                                 </div>
-                                <p className="mt-1 truncate text-xs text-muted-foreground">
+                                <p className="mt-1 truncate text-sm text-muted-foreground">
                                   {item.description || sourceLabel(item.source)} · {formatDate(item.addedAt)}
                                 </p>
                               </div>
@@ -1094,7 +1094,7 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
                               </span>
                               <div className="min-w-0 flex-1">
                                 <div className="truncate text-sm font-medium">{candidate.title}</div>
-                                <div className="mt-1 truncate text-xs text-muted-foreground">
+                                <div className="mt-1 truncate text-sm text-muted-foreground">
                                   {candidate.description}
                                 </div>
                               </div>
@@ -1162,7 +1162,7 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
                               <Thumbnail item={candidate} />
                               <div className="min-w-0 flex-1">
                                 <div className="truncate text-sm font-medium">{candidate.title}</div>
-                                <div className="mt-1 truncate text-xs text-muted-foreground">
+                                <div className="mt-1 truncate text-sm text-muted-foreground">
                                   {candidate.description}
                                 </div>
                               </div>
