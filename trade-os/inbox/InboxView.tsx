@@ -1,3 +1,4 @@
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/Popover"
 import { useState, useRef, type DragEvent as ReactDragEvent, useEffect } from "react"
 import { ViewSeatAction, useViewSeatGuard } from "@trade-os/components/ViewSeatGate"
 import { cn } from "@/lib/utils"
@@ -588,20 +589,21 @@ function EmailForwardQueue({
 
 function AiDocumentProcessingNotice() {
   return (
-    // 문서 올리기 V2 note-group: Gray 5 13px note + Blue 4 11px "자세히" button.
-    <details className="group text-[13px] text-[var(--color-gray-6)]">
-      <summary className="flex cursor-pointer list-none flex-wrap items-center justify-end gap-x-1 gap-y-1 rounded-sm py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-        <span>AI 추출값은 원본과 확인한 뒤 확정하세요.</span>
-        <span className="inline-flex h-6 items-center gap-1 rounded-[var(--r-sm)] pr-1.5 pl-2 text-[11px] leading-4 text-[var(--color-primary-4)] hover:bg-[var(--color-primary-10)]">
-          자세히 <ChevronDown className="size-3.5 transition-transform group-open:rotate-180" />
-        </span>
-      </summary>
-      <p className="mt-1 text-xs leading-5 text-[var(--color-gray-4)]">
-        ECOYA는 PDF에서 필드를 읽고 추출하는 데 AI를 사용합니다. 추출값은
-        부정확하거나 불완전할 수 있습니다. 확인한 값만 공식 기록이 됩니다.
-        법률·세무·관세·재무 자문이 아닙니다.
-      </p>
-    </details>
+    <div className="flex items-center justify-end gap-1 text-[13px] text-[var(--color-gray-6)]">
+      <span>AI 추출값은 원본과 확인한 뒤 확정하세요.</span>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button type="button" variant="ghost" size="icon-xs" aria-label="AI 문서 처리 안내">
+            <Info className="size-3.5" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent align="end" className="max-w-[calc(100vw-32px)] text-xs leading-5">
+          ECOYA는 PDF에서 필드를 읽고 추출하는 데 AI를 사용합니다. 추출값은
+          부정확하거나 불완전할 수 있습니다. 확인한 값만 공식 기록이 됩니다.
+          법률·세무·관세·재무 자문이 아닙니다.
+        </PopoverContent>
+      </Popover>
+    </div>
   )
 }
 
@@ -2210,13 +2212,14 @@ function PendingUploadDocumentsTable({
             <Table className="min-w-[760px] table-fixed [&_td]:text-sm">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[28%] text-left!">
+                  <TableHead className="w-[25%] text-left!">
                     문서 유형
                   </TableHead>
-                  <TableHead className="w-[26%] text-left!">파일</TableHead>
-                  <TableHead className="w-[22%] text-left!">등록일자</TableHead>
-                  <TableHead className="w-[14%] text-left!">상태</TableHead>
-                  <TableHead className="w-[10%] text-right!">작업</TableHead>
+                  <TableHead className="w-[25%] text-left!">파일</TableHead>
+                  <TableHead className="w-[21%] text-left!">등록일자</TableHead>
+                  <TableHead className="w-[15%] text-left!">상태</TableHead>
+                  <TableHead className="w-[10%] text-center!">작업</TableHead>
+                  <TableHead className="w-12" aria-label="더보기" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -2255,8 +2258,7 @@ function PendingUploadDocumentsTable({
                         {document.status}
                       </ToneBadge>
                     </TableCell>
-                    <TableCell className="text-right!">
-                      <div className="flex items-center justify-end gap-1">
+                    <TableCell className="text-center!">
                         <Button
                           size="xs"
                           variant="outline"
@@ -2267,6 +2269,8 @@ function PendingUploadDocumentsTable({
                         >
                           {actionLabel(document.stage)}
                         </Button>
+                    </TableCell>
+                    <TableCell className="text-center!">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -2297,14 +2301,13 @@ function PendingUploadDocumentsTable({
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
                 {filteredDocuments.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={5}
+                      colSpan={6}
                       className="py-10 text-center! text-xs text-[var(--surface-muted-foreground)]"
                     >
                       검색 조건에 맞는 문서가 없습니다.

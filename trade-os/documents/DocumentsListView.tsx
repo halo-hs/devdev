@@ -99,6 +99,7 @@ export function RecentDocumentsTable({
             <TableHead className="w-[10.9%] text-center">생성자</TableHead>
             <TableHead className="w-[10.9%] text-center">수정</TableHead>
             <TableHead className="w-[17.2%] text-center">작업</TableHead>
+            <TableHead className="w-12" aria-label="더보기" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -274,6 +275,9 @@ export function RecentDocumentsTable({
                       </TooltipTrigger>
                       <TooltipContent>{pdfStateLabel}</TooltipContent>
                     </Tooltip>
+                  </div>
+                </TableCell>
+                <TableCell className="text-center">
                     {/* Portal menu so the scrolling table never clips it. */}
                     <DropdownMenu
                       open={openMenu === draft.number}
@@ -313,7 +317,6 @@ export function RecentDocumentsTable({
                         ) : null}
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </div>
                 </TableCell>
               </TableRow>
             )
