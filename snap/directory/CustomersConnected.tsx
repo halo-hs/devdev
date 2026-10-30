@@ -619,14 +619,6 @@ export function SnapCustomersPage() {
         <Card className="mt-5 grid min-h-[560px] gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_420px]">
           <section className={cn("min-w-0", selected && "hidden lg:block")}>
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-              <BusinessFilterBar className="min-w-0 flex-1">
-                <BusinessFilterSearch
-                  value={search}
-                  onValueChange={setSearch}
-                  placeholder="고객명, 담당자, 이메일 검색"
-                  label="고객 검색"
-                />
-              </BusinessFilterBar>
               <Tabs
                 value={statusFilter}
                 onValueChange={(value) => {
@@ -650,6 +642,15 @@ export function SnapCustomersPage() {
                   ))}
                 </TabsList>
               </Tabs>
+              <BusinessFilterBar className="min-w-0 flex-1">
+                <BusinessFilterSearch
+                  value={search}
+                  onValueChange={setSearch}
+                  placeholder="고객명, 담당자, 이메일 검색"
+                  label="고객 검색"
+                />
+              </BusinessFilterBar>
+
               <Button variant="outline" size="icon" onClick={() => void loadCustomers()} aria-label="고객 새로고침">
                 <RefreshCw />
               </Button>

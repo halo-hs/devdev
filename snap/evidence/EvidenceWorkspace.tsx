@@ -793,14 +793,6 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
         <Card size="sm" className="mt-5">
           <CardHeader>
         <BusinessFilterBar className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <div className="min-w-0 flex-1">
-            <BusinessFilterSearch
-              value={search}
-              onValueChange={setSearch}
-              placeholder="폴더명 또는 유형 검색"
-              label="폴더 검색"
-            />
-          </div>
           <Tabs
             value={statusFilter}
             onValueChange={(value) => {
@@ -823,6 +815,14 @@ export function SnapEvidenceLibrary({ onOpenTask }: SnapEvidenceLibraryProps) {
               ))}
             </TabsList>
           </Tabs>
+          <div className="min-w-0 flex-1">
+            <BusinessFilterSearch
+              value={search}
+              onValueChange={setSearch}
+              placeholder="폴더명 또는 유형 검색"
+              label="폴더 검색"
+            />
+          </div>
           <BusinessFilterSelect
             label="유형"
             value={folderTypeFilter}
