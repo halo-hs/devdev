@@ -2229,22 +2229,26 @@
 .ecoya-contact-heading { margin-bottom: 32px; }
 .ecoya-contact-heading h1 { margin: 16px 0; font-size: clamp(28px, 3vw, 40px); color: var(--ecoya-ink); }
 .ecoya-contact-heading > p:last-child { color: var(--ecoya-ink-soft); font-size: 17px; }
-.ecoya-contact-form { display: flex; flex-direction: column; gap: 24px; padding: clamp(20px, 4vw, 40px); border: 1px solid var(--ecoya-rule); border-radius: 20px; background: var(--ecoya-card); }
-.ecoya-contact-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
-.ecoya-contact-form [data-slot="form-field-header"] label { font-size: 15px; }
-.ecoya-contact-form :is(input:not([type="checkbox"]), select, textarea) { width: 100%; min-height: 44px; font-size: 16px; }
-.trade-landing .ecoya-contact-form textarea { min-height: 144px; resize: vertical; }
-.ecoya-contact-form select { padding: 10px 12px; background: var(--ecoya-card); color: var(--ecoya-ink); border: 1px solid var(--ecoya-rule); border-radius: 8px; }
-.ecoya-contact-privacy { padding: 20px; background: var(--ecoya-paper); border-radius: 12px; font-size: 14px; line-height: 1.7; color: var(--ecoya-ink-soft); }
-.ecoya-contact-privacy h2 { margin: 0 0 14px; font-size: 16px; color: var(--ecoya-ink); }
+/* Figma FieldPreset tokens, shared with the login and signup forms. */
+.ecoya-contact-form { display: flex; flex-direction: column; gap: 18px; padding: clamp(20px, 4vw, 40px); border: 1px solid var(--color-gray-9); border-radius: 22px; background: var(--ecoya-card); box-shadow: 0 2px 4px rgb(0 0 0 / 8%); }
+.ecoya-contact-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; }
+.ecoya-contact-form [data-slot="form-field-header"] label { font-size: 15px; line-height: 22px; font-weight: 400; color: var(--color-gray-2); }
+.ecoya-contact-form :is(input:not([type="checkbox"]), select, textarea) { width: 100%; height: 40px; min-height: 40px; padding: 8px 16px; border: 1px solid var(--color-gray-6); border-radius: 8px; background-color: var(--color-gray-12); color: var(--color-gray-2); font-size: 17px; line-height: 24px; font-weight: 400; box-shadow: 0 2px 4px rgb(0 0 0 / 5%); }
+.ecoya-contact-form :is(input, textarea)::placeholder { color: var(--color-gray-7); }
+.ecoya-contact-form :is(input:not([type="checkbox"]), select, textarea)[aria-invalid="true"] { border-color: var(--control-invalid-border); }
+.trade-landing .ecoya-contact-form textarea { height: auto; min-height: 144px; resize: vertical; }
+.ecoya-contact-form select { appearance: none; padding-right: 44px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%235c5e66' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; cursor: pointer; }
+.ecoya-contact-privacy { margin-top: 6px; padding: 20px; background: var(--color-gray-11); border-radius: 12px; font-size: 14px; line-height: 20px; color: var(--color-gray-4); }
+.ecoya-contact-privacy h2 { margin: 0 0 12px; font-size: 15px; line-height: 22px; font-weight: 600; color: var(--color-gray-2); }
 .ecoya-contact-privacy dl { margin: 0; }
-.ecoya-contact-privacy dl > div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 12px; padding-block: 10px; border-top: 1px solid var(--ecoya-rule); }
-.ecoya-contact-privacy dt { font-weight: 600; color: var(--ecoya-ink); }
+.ecoya-contact-privacy dl > div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 12px; padding-block: 10px; border-top: 1px solid var(--color-gray-10); }
+.ecoya-contact-privacy dt { font-weight: 600; color: var(--color-gray-2); }
 .ecoya-contact-privacy dd { margin: 0; }
-.ecoya-contact-consent { display: flex; align-items: flex-start; gap: 10px; font-size: 15px; cursor: pointer; }
-.ecoya-contact-consent input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--ecoya-button); flex-shrink: 0; }
-.ecoya-contact-email-note { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ecoya-ink-soft); }
-.ecoya-contact-email-note a { color: var(--ecoya-label-ink); text-decoration: underline; }
+.ecoya-contact-consent { display: flex; align-items: center; gap: 8px; font-size: 15px; line-height: 22px; color: var(--color-gray-2); cursor: pointer; }
+.ecoya-contact-consent input { width: 16px; height: 16px; margin: 0; accent-color: var(--color-indigo); flex-shrink: 0; }
+.trade-landing .ecoya-contact-form .ecoya-contact-submit { border-color: var(--color-indigo); background: var(--color-indigo); color: var(--color-gray-12); height: 48px; min-height: 48px; margin-top: 14px; border-radius: 12px; padding-inline: 24px; font-size: 17px; line-height: 24px; font-weight: 400; }
+.ecoya-contact-email-note { margin: 0; font-size: 14px; line-height: 20px; color: var(--color-gray-5); }
+.ecoya-contact-email-note a { color: var(--color-primary-4); text-decoration: underline; }
 @media (max-width: 540px) {
   .ecoya-contact-fields { grid-template-columns: 1fr; }
   .ecoya-contact-privacy dl > div { grid-template-columns: 1fr; gap: 4px; }
