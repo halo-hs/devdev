@@ -321,7 +321,7 @@ function HistoryList({
             >
               <span className="min-w-0">
                 <span className="block truncate text-sm font-medium">{item.title}</span>
-                <span className="block truncate text-xs text-muted-foreground">{item.meta}</span>
+                <span className="block truncate text-sm text-muted-foreground">{item.meta}</span>
               </span>
               <Badge variant="secondary" className="shrink-0 font-normal">
                 {item.status}
@@ -619,14 +619,6 @@ export function SnapCustomersPage() {
         <Card className="mt-5 grid min-h-[560px] gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_420px]">
           <section className={cn("min-w-0", selected && "hidden lg:block")}>
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-              <BusinessFilterBar className="min-w-0 flex-1">
-                <BusinessFilterSearch
-                  value={search}
-                  onValueChange={setSearch}
-                  placeholder="고객명, 담당자, 이메일 검색"
-                  label="고객 검색"
-                />
-              </BusinessFilterBar>
               <Tabs
                 value={statusFilter}
                 onValueChange={(value) => {
@@ -650,6 +642,15 @@ export function SnapCustomersPage() {
                   ))}
                 </TabsList>
               </Tabs>
+              <BusinessFilterBar className="min-w-0 flex-1">
+                <BusinessFilterSearch
+                  value={search}
+                  onValueChange={setSearch}
+                  placeholder="고객명, 담당자, 이메일 검색"
+                  label="고객 검색"
+                />
+              </BusinessFilterBar>
+
               <Button variant="outline" size="icon" onClick={() => void loadCustomers()} aria-label="고객 새로고침">
                 <RefreshCw />
               </Button>
@@ -686,14 +687,14 @@ export function SnapCustomersPage() {
                       </span>
                       <span className="min-w-0">
                         <span className="block truncate font-medium">{customer.name}</span>
-                        <span className="block truncate text-xs text-muted-foreground">
+                        <span className="block truncate text-sm text-muted-foreground">
                           {customer.contactName || "담당자 미등록"}
                         </span>
                       </span>
                     </span>
                     <span className="min-w-0 text-sm text-muted-foreground">
                       <span className="block truncate">{customer.contactEmail || "이메일 미등록"}</span>
-                      <span className="block truncate text-xs">{customer.contactPhone || "전화번호 미등록"}</span>
+                      <span className="block truncate text-sm">{customer.contactPhone || "전화번호 미등록"}</span>
                     </span>
                     <Badge variant="secondary" className="w-fit font-normal">
                       {customer.status === "archived"
@@ -785,7 +786,7 @@ export function SnapCustomersPage() {
               <div className="flex min-h-80 flex-col items-center justify-center text-center text-muted-foreground">
                 <UserRound className="size-8" />
                 <p className="mt-3 text-sm font-medium text-foreground">고객을 선택하세요</p>
-                <p className="mt-1 max-w-xs text-xs">
+                <p className="mt-1 max-w-xs text-sm">
                   연락처, 메모와 고객별 업무·보고서·공유 링크 이력을 확인합니다.
                 </p>
               </div>
