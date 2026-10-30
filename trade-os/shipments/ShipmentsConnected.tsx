@@ -488,7 +488,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
               ) : null}
             </div>
             <HostTable className={dealId ? "ops-shipment-table !min-w-[880px]" : "ops-shipment-table"} aria-label={`${group.label} 선적 정보`}>
-              {dealId ? <colgroup><col style={{ width: "17%" }} /><col style={{ width: "19%" }} /><col style={{ width: "22%" }} /><col style={{ width: "13%" }} /><col style={{ width: "8%" }} /><col style={{ width: "14%" }} /><col style={{ width: 48 }} /></colgroup> : <colgroup><col style={{ width: "19%" }} /><col style={{ width: "21%" }} /><col style={{ width: "24%" }} /><col style={{ width: "12%" }} /><col style={{ width: "9%" }} /><col style={{ width: "15%" }} /></colgroup>}
+              <colgroup><col style={{ width: "17%" }} /><col style={{ width: "19%" }} /><col style={{ width: "22%" }} /><col style={{ width: "13%" }} /><col style={{ width: "8%" }} /><col style={{ width: "14%" }} /><col style={{ width: 48 }} /></colgroup>
               <HostTableHeader><HostTableRow>
                 <HostTableHead>B/L · 컨테이너</HostTableHead>
                 <HostTableHead>항로 · 선박</HostTableHead>
@@ -496,7 +496,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                 <HostTableHead>서류·근거</HostTableHead>
                 <HostTableHead>{copy.cols.status}</HostTableHead>
                 <HostTableHead>작업</HostTableHead>
-                {dealId && <HostTableHead aria-label="수정" />}
+                <HostTableHead aria-label="수정" />
               </HostTableRow></HostTableHeader>
               <HostTableBody>
               {group.rows.map((ship) => {
@@ -554,9 +554,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                       {delayed || arriving ? <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.status[ship.status] ?? ship.status}</div> : null}
                     </HostTableCell>
                     <HostTableCell>
-                      {/* The tracking action (갱신 or 선사 사이트) takes one fixed-width
-                          slot so 수정 lines up in every row. */}
-                      <div className={dealId ? "flex items-center" : "grid grid-cols-[112px_auto] items-center justify-start gap-2"}>
+                      <div className="flex items-center">
                         {trackingAction.kind === "refresh" && canRefresh ? (
                           <HostButton className="w-full" title="추적 정보 갱신" aria-label={refreshing ? copy.refreshingTracking : copy.refreshTracking} disabled={refreshState.status === "pending"} onClick={() => void refreshTracking(ship.id)} size="sm" type="button" variant="outline">
                             <RefreshCw aria-hidden="true" className={refreshing ? "size-4 animate-spin" : "size-4"} />{refreshing ? "갱신 중" : "갱신"}
@@ -566,9 +564,6 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                           <HostButton className="w-full" variant="outline" size="sm" asChild><a href={trackingAction.href} target="_blank" rel="noopener noreferrer">선사 사이트 ↗</a></HostButton>
                         ) : null}
                         {trackingAction.kind !== "site" && !(trackingAction.kind === "refresh" && canRefresh) ? <span aria-hidden="true" /> : null}
-                        {canRefresh && !dealId ? (
-                          <HostButton title="일정 및 운송 상태 수정" aria-label="일정 및 운송 상태 수정" disabled={refreshState.status === "pending"} onClick={event => { editTrigger.current = event.currentTarget; setEditing(ship); }} size="sm" type="button" variant="outline"><Pencil aria-hidden="true" className="size-4" />수정</HostButton>
-                        ) : null}
                       </div>
                       {ship.tracking_health === "stale" || ship.tracking_health === "fetch_failed" ? (
                         <p className={`mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] ${ship.tracking_health === "stale" ? "text-[var(--color-yellow-1)]" : "text-[var(--color-red-1)]"}`}>{ship.tracking_health === "stale" ? "조회 정보 오래됨" : "선사 조회 실패"}</p>
@@ -577,9 +572,9 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                       {!fetchedAt && (ship.tracking_health === "stale" || ship.tracking_health === "fetch_failed") ? <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">마지막 조회 기록 없음</p> : null}
                       {refreshError ? <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]" role="alert">{refreshError}</p> : null}
                     </HostTableCell>
-                    {dealId && <HostTableCell className="text-right">
+                    <HostTableCell className="text-right">
                       {canRefresh && <HostButton title="일정 및 운송 상태 수정" aria-label="일정 및 운송 상태 수정" disabled={refreshState.status === "pending"} onClick={event => { editTrigger.current = event.currentTarget; setEditing(ship); }} size="icon-sm" className="size-8" type="button" variant="ghost"><Pencil aria-hidden="true" className="size-4" /></HostButton>}
-                    </HostTableCell>}
+                    </HostTableCell>
                   </HostTableRow>
                 );
               })}
