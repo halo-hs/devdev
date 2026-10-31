@@ -1,4 +1,4 @@
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/Popover"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { useState, useRef, type DragEvent as ReactDragEvent, useEffect } from "react"
 import { ViewSeatAction } from "@trade-os/components/ViewSeatGate"
 import { useViewSeatGuard } from "@trade-os/components/useViewSeat"

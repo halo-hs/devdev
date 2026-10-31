@@ -1,4 +1,4 @@
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/Table"
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import { formatDate, formatDateTime } from "@trade-os/lib/orgDate"
 import { useLocaleTag } from "@trade-os/lib/i18n/useLocaleTag"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
