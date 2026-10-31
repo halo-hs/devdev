@@ -8,13 +8,13 @@ import { carrierTrackingAction } from "./carrierSites";
 import Link from "@trade-os/lib/AppLink";
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { Button as HostButton } from "@/components/ui/Button";
+import { Button as HostButton } from "@/components/ui/button";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/components/HostTable";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SkeletonTable } from "@trade-os/components/Skeletons";
 import { StatusBadge, type StatusTone } from "@/components/platform/StatusBadge";
-import { Button } from "@/components/ui/Button";
-import { usePlatformSession } from "@trade-os/lib/session/PlatformSessionContext";
+import { Button } from "@/components/ui/button";
+import { usePlatformSession } from "@trade-os/lib/session/platformSession";
 import { ApiError } from "@trade-os/lib/api/client";
 import {
   confirmShipment,
@@ -155,6 +155,9 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
   }, [getIdToken, dealId]);
 
   useEffect(() => {
+    // Start the external request and expose its pending state together. Cleanup below
+    // invalidates late responses; retaining this lifecycle preserves drafts during refresh.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadShipments();
     return () => {
       fetchEventId.current += 1;

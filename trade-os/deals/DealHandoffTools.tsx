@@ -4,9 +4,9 @@ import {
   EmptyHeader,
   EmptyTitle,
   EmptyDescription,
-} from "@/components/ui/Empty"
+} from "@/components/ui/empty"
 import { createContext, useContext, useState, type ReactNode } from "react"
-import { Button } from "@/components/ui/Button"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -14,16 +14,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/Dialog"
-import { Input } from "@/components/ui/Input"
-import { Textarea } from "@/components/ui/Textarea"
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select"
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -31,7 +31,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/Table"
+} from "@/components/ui/table"
 import { settlementLedgerRows } from "@trade-os/lib/erpMenuSamples"
 
 type Document = { code: string; type: string; file: string }

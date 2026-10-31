@@ -2,11 +2,11 @@ import { useDealRefresh } from "@trade-os/deals/useDealRefresh"
 import { useEffect, useRef, useState } from "react"
 import { FileSearch, RefreshCw, ArrowRightLeft, Tags } from "lucide-react"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Textarea } from "@/components/ui/Textarea"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/Dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import { dealDocumentReviewUrl, type DealDocumentRecord, type DocumentMovePreview } from "@trade-os/lib/dealDocumentActions"
 
@@ -35,16 +35,21 @@ export function DealDocumentActions({ document, canWrite, onChanged }: {
   const fileInput = useRef<HTMLInputElement>(null)
   const processing = document.state === "processing"
 
-  useEffect(() => {
+  const [previousCanWrite, setPreviousCanWrite] = useState(canWrite)
+  if (previousCanWrite !== canWrite) {
+    setPreviousCanWrite(canWrite)
     if (!canWrite) { setDialog(null); setBusy(false) }
-  }, [canWrite])
+  }
+  const requestKey = JSON.stringify([dialog, targetId, attempt, document, canWrite])
+  const [previousRequest, setPreviousRequest] = useState(requestKey)
+  if (previousRequest !== requestKey) {
+    setPreviousRequest(requestKey)
+    setLoading(Boolean(canWrite && dialog && dialog !== "replace")); setLoadError(""); setPreview(null)
+  }
 
   useEffect(() => {
     let cancelled = false
     if (!canWrite || !dialog || dialog === "replace") return
-    setLoading(true)
-    setLoadError("")
-    setPreview(null)
     const load = async () => {
       try {
         if (dialog === "type") {

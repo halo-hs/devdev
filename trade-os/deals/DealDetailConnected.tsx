@@ -1,7 +1,7 @@
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/Table"
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import { formatDate, formatDateTime } from "@trade-os/lib/orgDate"
 import { useLocaleTag } from "@trade-os/lib/i18n/useLocaleTag"
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { DealRefreshContext, useDealRefresh, useDealRefreshController } from "@trade-os/deals/useDealRefresh"
 import { PostWriteRefreshNotice } from "@trade-os/components/PostWriteRefreshNotice"
 import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, type DealDocumentRecord } from "@trade-os/lib/dealDocumentActions"
@@ -22,6 +22,7 @@ import { deals as dealFixtures } from "@trade-os/lib/prototypeDeals"
 import { DealFinanceWorkspace } from "@trade-os/deals/DealFinanceWorkspace"
 import {
   useEffect,
+  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -73,9 +74,9 @@ import {
   type DocumentTemplateOption,
 } from "@trade-os/components/DocumentTemplateOptions"
 import { NavigationIcon } from "@/components/platform/NavigationIcon"
-import { Badge } from "@/components/ui/Badge"
-import { Button } from "@/components/ui/Button"
-import { Card } from "@/components/ui/Card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -85,42 +86,42 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/AlertDialog"
+} from "@/components/ui/alert-dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/DropdownMenu"
-import { Input } from "@/components/ui/Input"
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/Popover"
+} from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select"
-import { Separator } from "@/components/ui/Separator"
+} from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/Dialog"
+} from "@/components/ui/dialog"
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from "@/components/ui/Sheet"
-import { Textarea } from "@/components/ui/Textarea"
+} from "@/components/ui/sheet"
+import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { StatusBadge } from "@/components/platform/StatusBadge"
 import { DatePicker } from "@/components/ui/DatePicker"
@@ -3776,7 +3777,10 @@ function DocumentsTab({
               : field.value,
     }))
   )
-  useEffect(() => {
+  const profileKey = `${profile.direction}:${profile.counterparty}`
+  const [previousProfile, setPreviousProfile] = useState(profileKey)
+  if (previousProfile !== profileKey) {
+    setPreviousProfile(profileKey)
     setDealFields(current => current.map(field => {
       if (field.key === "direction") return { ...field, value: directionLabels[profile.direction] }
       const partyKey = profile.direction === "sales" ? "buyer" : profile.direction === "purchase" ? "seller" : null
@@ -3784,7 +3788,7 @@ function DocumentsTab({
         ? { ...field, value: profile.counterparty }
         : field
     }))
-  }, [profile.direction, profile.counterparty])
+  }
   const mainInformation = useMemo(
     () => ({
       counterparty:
@@ -3950,9 +3954,7 @@ function DocumentsTab({
       )
     )
   }
-  useEffect(() => {
-    const data = refresh.data
-    if (!data) return
+  const applyRefreshedDocuments = useEffectEvent((data: NonNullable<typeof refresh.data>) => {
     setDocumentRecords(data.documents)
     setSelected(current => {
       if (unlinked.includes(current.code) || (current.documentId && unlinked.includes(current.documentId)) || linkedDocuments[current.code]) return current
@@ -3966,6 +3968,12 @@ function DocumentsTab({
       fieldVersionsRef.current.set(field.target, field.version)
       applyTargetValue(field.target, field.value)
     }
+  })
+  useEffect(() => {
+    // A new read is the event; pending edits and current links are read at delivery time.
+    // Reconcile the accepted external snapshot with editable local fields exactly once.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (refresh.data) applyRefreshedDocuments(refresh.data)
   }, [refresh.data])
   const recordCommittedEdit = (target: string, finalValue: string) => {
     const session = editSessionsRef.current.get(target)
@@ -5890,14 +5898,15 @@ export function DealDetailScreen({
     },
   ])
   const [riskDismissed, setRiskDismissed] = useState(false)
-  useEffect(() => {
-    const data = refresh.data?.deal
-    if (!data) return
+  const [previousDealRead, setPreviousDealRead] = useState(refresh.data)
+  if (refresh.data && refresh.data !== previousDealRead) {
+    setPreviousDealRead(refresh.data)
+    const data = refresh.data.deal
     setCurrentDealId(data.displayId)
     if (data.title !== undefined) setDealTitle(data.title)
     if (data.assigneeId !== undefined) setAssignee(data.assigneeId ?? "미배정")
     setRiskDismissed(data.riskDismissed)
-  }, [refresh.data])
+  }
   const [verificationOpen, setVerificationOpen] = useState(false)
   const [reviewFocusId, setReviewFocusId] =
     useState<DealReviewNotice["id"]>("account_change")

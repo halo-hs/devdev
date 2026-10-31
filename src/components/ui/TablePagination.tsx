@@ -1,7 +1,7 @@
 import {
   PaginationController,
   type PaginationControllerProps,
-} from "@/components/ds2/extensions/PaginationController"
+} from "@/components/platform/PaginationController"
 
 import { cn } from "@/lib/utils"
 

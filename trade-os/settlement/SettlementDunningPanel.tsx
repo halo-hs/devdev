@@ -5,9 +5,9 @@ import "./SettlementDunningPanel.css";
 import { useId, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Check, ChevronDown, ChevronUp, Copy, ExternalLink } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { SectionPanel } from "@trade-os/components/SectionPanel";
 import { formatDate } from "@trade-os/lib/orgDate";
 import type { LedgerEntry } from "@trade-os/lib/api/settlement";

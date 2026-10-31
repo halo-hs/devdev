@@ -1,4 +1,4 @@
-import { DatePicker as DSDatePicker } from "@/components/ds2/extensions/DatePicker"
+import { DatePicker as DatePickerControl } from "@/components/platform/DatePicker"
 import { cn } from "@/lib/utils"
 
 function parse(value: string | undefined, mode: "date" | "month") {
@@ -8,7 +8,7 @@ function parse(value: string | undefined, mode: "date" | "month") {
   return new Date(year, month - 1, mode === "month" ? 1 : day || 1)
 }
 
-// String-valued wrapper over the DS DatePicker (Figma DatePicker 153:992) so
+// String-valued wrapper over the shared DatePicker (Figma DatePicker 153:992) so
 // screens that kept "YYYY-MM-DD" / "YYYY-MM" strings for native date inputs can
 // switch to the shared calendar without changing their state shape.
 function DatePicker({
@@ -37,7 +37,7 @@ function DatePicker({
   className?: string
 }) {
   return (
-    <DSDatePicker
+    <DatePickerControl
       id={id}
       aria-invalid={invalid || undefined}
       mode={mode}

@@ -1,6 +1,6 @@
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react"
 
-import { Badge } from "@/components/ui/Badge"
+import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 type StatusTone =

@@ -1,54 +1,12 @@
-import { useCallback, useEffect, useState } from "react"
+import { useSnapStartGuide, type Item } from "./useSnapStartGuide"
 import { Check } from "lucide-react"
-import { Button } from "@/components/ui/Button"
-import { Card } from "@/components/ui/Card"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { HeroBanner } from "@/components/platform/HeroBanner"
-import { Badge } from "@/components/ui/Badge"
-import { useStartGuide } from "@trade-os/onboarding/StartGuideProvider"
+import { Badge } from "@/components/ui/badge"
+import { useStartGuide } from "@trade-os/onboarding/startGuideContext"
 import type { SnapRole } from "@snap/lib/snapRoutes"
 
-type Item = "S1" | "S2" | "S3" | "S4"
-type Projection = {
-  access: "active" | "read-only" | "revoked"
-  completed: Partial<Record<Item, string>>
-  taskId?: string
-}
-// The preview consumes recorded completion receipts. Visiting a route or clicking
-// a CTA never writes a completion. Live projection/receipt integration is separate.
-export function useSnapStartGuide(scope: string) {
-  const key = `ecoya.preview.snap-start-guide.v1:${scope}`
-  const [result, setResult] = useState<{
-    key: string
-    state: Projection | null
-    error: boolean
-  }>({ key, state: null, error: false })
-  const reload = useCallback(() => {
-    try {
-      const raw = localStorage.getItem(key)
-      const state = raw
-        ? (JSON.parse(raw) as Projection)
-        : ({ access: "active", completed: {} } as Projection)
-      if (
-        !state.completed ||
-        !["active", "read-only", "revoked"].includes(state.access)
-      )
-        throw new Error("Invalid guide projection")
-      setResult({ key, state, error: false })
-    } catch {
-      setResult({ key, state: null, error: true })
-    }
-  }, [key])
-  useEffect(() => {
-    reload()
-    window.addEventListener("storage", reload)
-    return () => window.removeEventListener("storage", reload)
-  }, [reload])
-  return {
-    state: result.key === key ? result.state : null,
-    error: result.key === key && result.error,
-    reload,
-  }
-}
 const steps: {
   id: Item
   title: string

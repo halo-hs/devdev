@@ -1,13 +1,14 @@
-import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/components/HostTable";
 "use client";
+
+import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/components/HostTable";
 
 import Link from "@trade-os/lib/AppLink";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { SectionPanel } from "@trade-os/components/SectionPanel";
 import { StatusBadge } from "@/components/platform/StatusBadge";
-import { Button } from "@/components/ui/Button";
-import { usePlatformAuth } from "@trade-os/lib/session/PlatformSessionContext";
+import { Button } from "@/components/ui/button";
+import { usePlatformAuth } from "@trade-os/lib/session/platformSession";
 import { type DealSummaryResponse } from "@trade-os/lib/api/deals";
 import { listAllDeals } from "@trade-os/lib/api/listAllDeals";
 import {
@@ -101,6 +102,9 @@ export function MonitorDealsOpsPanels({ copy }: { copy: MonitorOpsCopy }) {
   }, [getIdToken]);
 
   useEffect(() => {
+    // Start the external request and expose its pending state together. Cleanup below
+    // invalidates late responses; retaining this lifecycle preserves drafts during refresh.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
     return () => {
       fetchEventId.current += 1;

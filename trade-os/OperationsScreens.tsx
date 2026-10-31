@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { PlatformSessionProvider, useIdentity } from "./lib/session/PlatformSessionContext"
+import { PlatformSessionProvider } from "./lib/session/PlatformSessionContext"
+import { useIdentity } from "./lib/session/platformSession"
 import { getPlatformIdentity, type PlatformIdentityResponse } from "./lib/api/me"
 import { getEntitlements, type EntitlementsResponse } from "./lib/api/entitlements"
 import { MonitorConnected } from "./monitor/MonitorConnected"
@@ -72,7 +73,6 @@ export function OperationsScreen({ screen, dealId, onShipmentSummary }: { screen
   const [attempt, setAttempt] = useState(0)
   useEffect(() => {
     let active = true
-    setError("")
     Promise.all([getPlatformIdentity(getIdToken), getEntitlements(getIdToken)])
       .then(([identity, entitlements]) => {
         if (!active) return
@@ -85,7 +85,7 @@ export function OperationsScreen({ screen, dealId, onShipmentSummary }: { screen
   return <div className="ops-host" style={{ minHeight: 0, minWidth: 0 }}><div className="ops-screen" data-ops-screen={screen} style={{ minHeight: 0, minWidth: 0 }}>
     {error ? <div role="alert" className="m-6 rounded-lg border p-6">
       <p>화면 데이터를 불러오지 못했습니다.</p><p>{error}</p>
-      <button className="mt-3 underline" onClick={() => setAttempt(n => n + 1)}>다시 시도</button>
+      <button className="mt-3 underline" onClick={() => { setError(""); setAttempt(n => n + 1) }}>다시 시도</button>
     </div> : session ? <PlatformSessionProvider {...session} getIdToken={getIdToken}>
       {screen === "deal-shipments" && dealId ? <ShipmentsConnected key={dealId} copy={messages.erpShipments.shipments} dealId={dealId} onSummaryChange={onShipmentSummary} /> : screen !== "deal-shipments" ? <Body screen={screen} /> : null}
     </PlatformSessionProvider> : <div className="p-6" role="status">화면 데이터를 불러오는 중입니다…</div>}

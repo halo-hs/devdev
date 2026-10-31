@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
+import { useEffect, useState } from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/Button"
-import { Badge } from "@/components/ui/Badge"
-import { Input } from "@/components/ui/Input"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/Dialog"
+} from "@/components/ui/dialog"
 import type { SettingsRole } from "./SettingsRoutePage"
 
 type Master = {
@@ -56,7 +56,7 @@ const initial: Data = {
   ],
 }
 // Local preview data only. Production merge must use the v2 preview/execute contract.
-export const aliasPreview = {
+const aliasPreview = {
   async read(key: string): Promise<Data> {
     const stored = localStorage.getItem(key)
     if (!stored) return structuredClone(initial)
@@ -95,18 +95,22 @@ export function AliasesPage({ role }: { role: SettingsRole }) {
     null
   )
   const [repairResult, setRepairResult] = useState("")
-  const load = useCallback(async () => {
+  const [attempt, setAttempt] = useState(0)
+  const requestKey = `${key}:${attempt}`
+  const [previousRequest, setPreviousRequest] = useState(requestKey)
+  if (previousRequest !== requestKey) {
+    setPreviousRequest(requestKey)
     setState("loading")
-    try {
-      setData(await aliasPreview.read(key))
-      setState("ready")
-    } catch {
-      setState("error")
-    }
-  }, [key])
+    setData(null)
+  }
+  const load = () => setAttempt(value => value + 1)
   useEffect(() => {
-    void load()
-  }, [load])
+    let active = true
+    aliasPreview.read(key).then(value => {
+      if (active) { setData(value); setState("ready") }
+    }).catch(() => { if (active) setState("error") })
+    return () => { active = false }
+  }, [key, attempt])
   const write = async (next: Data, done: () => void) => {
     if (!canEdit || busy) return
     setBusy(true)

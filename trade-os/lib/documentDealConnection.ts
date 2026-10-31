@@ -83,7 +83,8 @@ export function changeDocumentConnection(previewId: string, reason: string, evid
   const current = getDocumentConnection(preview.documentId, preview.from)
   if (current.revision !== preview.revision || current.link?.dealId !== preview.from.dealId) throw new Error("연결 정보가 변경되었습니다. 현재 연결과 변경 영향을 다시 확인해 주세요.")
   if (preview.blockedReason || hasCashDependency(preview.documentId)) throw new Error("정산 내역이 연결되어 있어 변경하지 못했습니다. 정산에서 먼저 확인해 주세요.")
-  const { link: _link, ...stored } = current
+  const { link, ...stored } = current
+  void link // The persisted review omits the computed connection projection.
   const next: DocumentReviewState = {
     ...stored, connectionKnown: true, dealId: preview.to?.dealId, dealLabel: preview.to?.dealLabel,
     status: preview.to ? "committed" : "review", revision: current.revision + 1, idempotencyKey: undefined,

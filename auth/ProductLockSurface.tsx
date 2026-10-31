@@ -1,5 +1,5 @@
 import { Building2 } from "lucide-react"
-import { Typography } from "@/components/ds2/extensions/Typography"
+import { Typography } from "@/components/platform/Typography"
 import { cn } from "@/lib/utils"
 import { TrialStartCard, type TrialProduct, type TrialRole, type TrialStartState } from "./TrialStartCard"
 

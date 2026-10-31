@@ -1,6 +1,6 @@
 import { HeroBanner } from "@/components/platform/HeroBanner"
 import { useEffect } from "react"
-import { useStartGuide } from "./StartGuideProvider"
+import { useStartGuide } from "./startGuideContext"
 import { isDone, type GuideItem } from "./state"
 import {
   Check,
@@ -11,7 +11,7 @@ import {
   Link2,
   MessageSquare,
 } from "lucide-react"
-import { Button } from "@/components/ui/Button"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { ErpMenuTarget } from "@trade-os/ErpScreens"
 

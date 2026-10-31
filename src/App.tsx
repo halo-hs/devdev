@@ -20,7 +20,7 @@ import { workspaceOptions, type WorkspaceKey } from "@/lib/workspaces"
 import {
   SidebarInset,
   SidebarProvider,
-} from "@/components/ui/Sidebar"
+} from "@/components/ui/sidebar"
 import {
   DealDetailScreen,
   DealsScreen,

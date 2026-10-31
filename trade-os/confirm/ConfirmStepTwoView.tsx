@@ -6,19 +6,19 @@ import { normalizeDecimalInput } from "@trade-os/lib/money"
 import { toast } from "sonner"
 import { focusDocumentRequirement } from "@trade-os/lib/documentRequirementNavigation"
 import { type DocumentBlockingIssue, DocumentBlockingAlerts } from "@trade-os/components/DocumentBlockingAlerts"
-import { Button } from "@/components/ui/Button"
+import { Button } from "@/components/ui/button"
 import { LoaderCircle, AlertTriangle, Sparkles, Building2, RefreshCw, Plus, Search } from "lucide-react"
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { createPortal } from "react-dom"
-import { ScrollArea } from "@/components/ui/ScrollArea"
-import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/Alert"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/alert"
 import { DocumentConnectionSummary, DocumentConnectionChangeDialog } from "@trade-os/components/DocumentConnectionSummary"
-import { Badge } from "@/components/ui/Badge"
+import { Badge } from "@/components/ui/badge"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
-import { Skeleton } from "@/components/ui/Skeleton"
-import { Field, FieldLabel } from "@/components/ui/Field"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select"
-import { Input } from "@/components/ui/Input"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { DatePicker } from "@/components/ui/DatePicker"
 import { type RecentDocument, type ReviewField, type DocumentSourceDeal } from "@/App"
@@ -90,37 +90,42 @@ export function DealConfirmPanel({
   const [connectionAttempt, setConnectionAttempt] = useState(0)
   const [changingConnection, setChangingConnection] = useState(false)
   const [changeDialog, setChangeDialog] = useState<{ target: DocumentDealLink | null; evidence: string[] } | null>(null)
-  useEffect(() => {
-    if (!connection?.link || new URLSearchParams(window.location.search).get("undo") !== "1") return
-    const url = new URL(window.location.href)
-    url.searchParams.delete("undo")
-    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}`)
-    setChangeDialog({ target: null, evidence: [] })
-  }, [connection?.link])
   const [loadedCandidates, setLoadedCandidates] = useState<(DocumentSourceDeal & CandidateEvidence)[]>([])
   const [candidateAttempt, setCandidateAttempt] = useState(0)
   const recommendedDealId = loadedCandidates.find(candidate => candidate.recommended)?.id ?? null
   const activeLink = connection?.link ?? null
   const connectionReady = Boolean(connection) && !connectionError
+  const connectionRequest = JSON.stringify([document.name, connectionAttempt, linkedDealLabel])
+  const [previousConnectionRequest, setPreviousConnectionRequest] = useState(connectionRequest)
+  if (previousConnectionRequest !== connectionRequest) {
+    setPreviousConnectionRequest(connectionRequest)
+    setConnectionError(""); setConnection(null)
+  }
   useEffect(() => {
     let active = true
-    setConnectionError(""); setConnection(null)
     const legacy = readUploadDocumentDealLinks()[document.name]
     prototypeBackend.tradeDocuments.getConnection(document.name, legacy)
       .then(value => {
         if (!active) return
         if (linkedDealLabel && !value.link && !value.connectionKnown) throw new Error("현재 연결의 거래 정보를 확인하지 못했습니다.")
         setConnection(value)
+        if (value.link && new URLSearchParams(window.location.search).get("undo") === "1") {
+          const url = new URL(window.location.href)
+          url.searchParams.delete("undo")
+          window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}`)
+          setChangeDialog({ target: null, evidence: [] })
+        }
       })
       .catch(error => { if (active) setConnectionError(error instanceof Error ? error.message : "현재 연결 정보를 불러오지 못했습니다.") })
     return () => { active = false }
-  }, [document.name, connectionAttempt])
+  }, [document.name, connectionAttempt, linkedDealLabel])
   const [pendingCreatedDeal] = useState(() => {
     const review = readDocumentReview(document.name)
     return review.status !== "committed" && !review.connectionHistory?.length
       ? prototypeBackend.deals.listCreated().find(deal => deal.sourceDocumentId === document.name) ?? null : null
   })
-  const [selectedDealId, setSelectedDealId] = useState<string | null>(null)
+  const [selectedDeal, setSelectedDealId] = useState<string | null>(null)
+  const selectedDealId = selectedDeal ?? (!activeLink && loadedCandidates.some(candidate => candidate.id === originDealId) ? originDealId : null)
   const [searchQuery, setSearchQuery] = useState("")
   const [newDealFormOpen, setNewDealFormOpen] = useState(Boolean(pendingCreatedDeal))
   const [newDealName, setNewDealName] = useState(pendingCreatedDeal?.counterparty ?? aiCounterpartyName)
@@ -136,21 +141,20 @@ export function DealConfirmPanel({
   const [candidateLoadState, setCandidateLoadState] = useState<
     "loading" | "ready" | "error"
   >("loading")
+  const candidateRequest = JSON.stringify([document.name, readCounterparty, readAmountField?.value, readCurrency, candidateAttempt])
+  const [previousCandidateRequest, setPreviousCandidateRequest] = useState(candidateRequest)
+  if (previousCandidateRequest !== candidateRequest) {
+    setPreviousCandidateRequest(candidateRequest)
+    setCandidateLoadState("loading"); setLoadedCandidates([])
+  }
   useEffect(() => {
     let active = true
-    setCandidateLoadState("loading")
     const created: DocumentSourceDeal[] = prototypeBackend.deals.listCreated().map(deal => ({ id: deal.id, title: deal.title, party: deal.counterparty, amount: deal.amount, currency: deal.currency, item: "품목 미등록", stage: "신규 거래", tone: "neutral" }))
     prototypeBackend.tradeDocuments.listCandidates([...documentSourceDeals, ...created], { counterparty: readCounterparty, amount: readAmountField?.value ?? "", currency: readCurrency })
       .then(rows => { if (active) { setLoadedCandidates(rows); setCandidateLoadState("ready") } })
       .catch(() => { if (active) setCandidateLoadState("error") })
     return () => { active = false }
   }, [document.name, readCounterparty, readAmountField?.value, readCurrency, candidateAttempt])
-  useEffect(() => {
-    if (!originDealId || activeLink || candidateLoadState !== "ready") return
-    if (loadedCandidates.some(candidate => candidate.id === originDealId)) {
-      setSelectedDealId(current => current ?? originDealId)
-    }
-  }, [originDealId, activeLink, candidateLoadState, loadedCandidates])
   const [creatingDeal, setCreatingDeal] = useState(false)
   const creatingRef = useRef(false)
   const [createdDeal, setCreatedDeal] = useState<DocumentDealLink | null>(() => pendingCreatedDeal ? { dealId: pendingCreatedDeal.id, dealLabel: `${pendingCreatedDeal.id} · ${pendingCreatedDeal.counterparty}` } : null)

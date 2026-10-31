@@ -1,4 +1,4 @@
-import { Command, CommandInput } from "@/components/ui/Command"
+import { Command, CommandInput } from "@/components/ui/command"
 import { useMemo, useState } from "react"
 import {
   AlertTriangle,
@@ -11,9 +11,9 @@ import {
   FileText,
 } from "lucide-react"
 
-import { Badge } from "@/components/ui/Badge"
-import { Button } from "@/components/ui/Button"
-import { Checkbox } from "@/components/ui/Checkbox"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   notifications,
   type NotificationCategory,

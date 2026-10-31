@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
 type Scope = { key: string; request: number; writes: Set<object>; accepted: boolean }
 export type WriteReceipt = { scope: Scope; id: object }
@@ -6,18 +6,22 @@ export type RefreshFailure = "stale" | "read" | 403 | 404 | null
 
 /** Mirrors reloadAfterWrite: a failed read never rejects or replays a write. */
 export function usePostWriteRefresh<T>(scopeKey: string, read: () => Promise<T>) {
-  const current = useRef<Scope>({ key: scopeKey, request: 0, writes: new Set(), accepted: false })
-  if (current.current.key !== scopeKey) {
-    current.current = { key: scopeKey, request: 0, writes: new Set(), accepted: false }
+  const [scope, setScope] = useState<Scope>(() => ({ key: scopeKey, request: 0, writes: new Set(), accepted: false }))
+  if (scope.key !== scopeKey) {
+    setScope({ key: scopeKey, request: 0, writes: new Set(), accepted: false })
   }
+  const current = useRef(scope)
   const reader = useRef(read)
-  reader.current = read
+  useLayoutEffect(() => {
+    current.current = scope
+    reader.current = read
+  }, [scope, read])
   const mounted = useRef(true)
   useEffect(() => {
     mounted.current = true
     return () => { mounted.current = false; current.current.request++ }
   }, [])
-  const [state, setState] = useState<{ scope: Scope; busy: boolean; failure: RefreshFailure; data?: T }>({ scope: current.current, busy: false, failure: null })
+  const [state, setState] = useState<{ scope: Scope; busy: boolean; failure: RefreshFailure; data?: T }>({ scope, busy: false, failure: null })
   const isCurrent = (receipt: WriteReceipt) => mounted.current && receipt.scope === current.current
   const refresh = async () => {
     const scope = current.current
@@ -52,7 +56,7 @@ export function usePostWriteRefresh<T>(scopeKey: string, read: () => Promise<T>)
     receipt.scope.accepted ||= accepted
     if (receipt.scope.accepted && !receipt.scope.writes.size) void refresh()
   }
-  const visible = state.scope === current.current ? state : { busy: false, failure: null, data: undefined }
+  const visible = state.scope === scope ? state : { busy: false, failure: null, data: undefined }
   return { ...visible, refresh, beginWrite, finishWrite, isCurrent }
 }
 

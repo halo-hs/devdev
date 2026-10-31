@@ -12,7 +12,7 @@
 | SNAP 업무 | `snap/` | 현장 업무 화면과 로직 |
 | 공통 업무·공개 링크 | `share/` | 업무 홈 모듈, 설정, 알림, 고객 공유 링크 |
 | 공통 UI | `src/components/ui/`, `src/components/platform/`, `src/lib/`, `src/hooks/` | 여러 영역이 소비하는 컴포넌트·훅·유틸리티 |
-| 디자인 시스템 | `src/components/ds2/`, `src/app/tokensDs2.css`, `src/app/theme.css` | 기본 컴포넌트·공통 토큰·브랜드 자산 |
+| 디자인 자원 | `src/assets/`, `src/types/`, `src/app/tokensDs2.css`, `src/app/theme.css` | 공통 토큰·브랜드 자산·자산 타입. 기본 컴포넌트는 `src/components/ui/`, 공통 조합·확장 부품은 `src/components/platform/`에 정의 |
 | 앱 연결 | `src/` | 진입점, 라우팅, 전역 스타일 |
 
 ## 한 페이지 요청은 해당 페이지에 한정
@@ -35,9 +35,10 @@ Figma(SNAP 2.0 작업)를 코드에 반영할 때 지키는 기준입니다. Fig
 - 예외는 사용자가 디자인을 그대로 따르라고 지정한 화면뿐입니다(현재: 홈 업무판). 그 외 화면은 문구를 유지합니다.
 
 **컴포넌트 적용**
-- shadcn 기본 컴포넌트는 `src/components/ui/`의 래퍼를 최대한 씁니다. 화면에서 같은 모양을 손으로 다시 그리지 않습니다.
-- shadcn에 없는 Figma 조합 컴포넌트(KPI 카드, 순위 행 등)는 `src/components/platform/`에 공용 컴포넌트로 만들되, 안쪽은 shadcn 기본 컴포넌트(Card·Separator·Progress·Badge·Button 등)로 조립합니다.
-- 디자인 시스템 기본 부품은 `src/components/ds2/`(ui·extensions·assets), 기본 토큰은 `src/app/tokensDs2.css`입니다. DS 확장 컴포넌트를 통째로 복사한 래퍼는 만들지 않습니다.
+- shadcn 기본 컴포넌트는 `src/components/ui/`의 단일 구현을 씁니다. 파일명은 shadcn의 kebab-case(`button.tsx`, `alert-dialog.tsx`)를 따르고, 별도의 기본 부품 레이어나 스타일 래퍼를 만들지 않습니다. 화면에서 같은 모양을 손으로 다시 그리지 않습니다.
+- shadcn에 없는 Figma 조합 컴포넌트(KPI 카드, 순위 행 등)와 공통 확장 부품(DatePicker, AsyncButton 등)은 `src/components/platform/`에 함께 둡니다. 안쪽은 shadcn 기본 컴포넌트(Card·Separator·Progress·Badge·Button 등)로 조립하며, `ds2/extensions/` 같은 별도 조합 부품 폴더를 다시 만들지 않습니다.
+- 기본 토큰은 `src/app/tokensDs2.css`, Figma 토큰 덮어쓰기는 `src/app/theme.css`입니다. 공통 자산은 `src/assets/`, 훅은 `src/hooks/`, 유틸리티는 `src/lib/`, SVG 타입은 `src/types/`에 둡니다. `components/ds2/`는 제거했으며 이전 경로의 재내보내기 파일은 만들지 않습니다. 자체 부품 `ui/DatePicker.tsx`·`SubmittedSearchInput.tsx`·`TablePagination.tsx`는 기존 위치·이름·동작을 유지하고, 기존 어댑터는 `platform/`의 구현을 참조합니다.
+- 모바일 기준은 용도에 따라 다릅니다. `useSidebarMobile`은 사이드바의 768px 기준, `useIsMobile`은 업무 화면의 1024px 기준, `useIsCompactWorkspace`는 1280px 기준을 유지합니다.
 - 다른 작업자가 같은 이름의 컴포넌트를 만들고 있는지 먼저 확인하고 겹치지 않게 합니다.
 
 **토큰과 크기**

@@ -1,23 +1,23 @@
 import { type BankCashInput, type ReviewedField } from "@trade-os/lib/erpDocumentWorkflow"
 import { type DocumentConnection } from "@trade-os/lib/documentDealConnection"
 import { useIsMobile } from "@/hooks/useIsMobile"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/Button"
-import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/Alert"
+import { Button } from "@/components/ui/button"
+import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/alert"
 import { OcrFieldReviewList, UploadFieldHistory } from "@trade-os/confirm/ConfirmStepOneView"
 import { AlertTriangle, ChevronLeft, LoaderCircle } from "lucide-react"
 import { DocumentStage } from "@trade-os/components/DocumentStage"
 import { dealDocumentPreviews } from "@trade-os/lib/dealDocumentActions"
 import { DealConfirmPanel } from "@trade-os/confirm/ConfirmStepTwoView"
-import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/Resizable"
+import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable"
 import { PdfPanelResizeHandle } from "@/components/platform/PdfPanelResizeHandle"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
-import { Field, FieldLabel } from "@/components/ui/Field"
-import { Combobox, ComboboxInput, ComboboxContent, ComboboxEmpty, ComboboxList, ComboboxItem } from "@/components/ui/Combobox"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { Combobox, ComboboxInput, ComboboxContent, ComboboxEmpty, ComboboxList, ComboboxItem } from "@/components/ui/combobox"
 import { type Tone } from "@trade-os/documents/documentTemplateModel"
-import { ItemGroup, Item, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/Item"
-import { Skeleton } from "@/components/ui/Skeleton"
+import { ItemGroup, Item, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item"
+import { Skeleton } from "@/components/ui/skeleton"
 import { type RecentDocument, type UploadDetailStep, type UploadDocumentType } from "@/App"
 import { isUploadDocumentTypeUnresolved, uploadDocumentTypeLabel, manualUploadDocumentTypeOptions } from "@trade-os/inbox/uploadDocumentModel"
 
@@ -67,7 +67,12 @@ export function DocumentReviewWorkspace({
   const isCompact = useIsMobile()
   const [requestedPage, setRequestedPage] = useState<{ page: number }>()
   const previewRef = useRef<HTMLElement>(null)
-  useEffect(() => setRequestedPage(undefined), [document.name, document.documentType])
+  const documentKey = `${document.name}:${document.documentType}`
+  const [previousDocument, setPreviousDocument] = useState(documentKey)
+  if (previousDocument !== documentKey) {
+    setPreviousDocument(documentKey)
+    setRequestedPage(undefined)
+  }
 
   const fieldsPanel = (
     <section

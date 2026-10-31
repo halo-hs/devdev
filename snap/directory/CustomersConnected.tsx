@@ -18,14 +18,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/AlertDialog"
-import { Badge } from "@/components/ui/Badge"
+} from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
 import { HeroBanner } from "@/components/platform/HeroBanner"
-import { Button } from "@/components/ui/Button"
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/Empty"
+import { Button } from "@/components/ui/button"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { BusinessFilterBar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar"
-import { Tabs, TabsCount, TabsList, TabsTrigger } from "@/components/ui/Tabs"
-import { Card } from "@/components/ui/Card"
+import { Tabs, TabsCount, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -33,10 +33,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/Dialog"
-import { Input } from "@/components/ui/Input"
-import { Skeleton } from "@/components/ui/Skeleton"
-import { Textarea } from "@/components/ui/Textarea"
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Textarea } from "@/components/ui/textarea"
 import { snapApi } from "@snap/lib/snapApi"
 import {
   snapApiConfigured,

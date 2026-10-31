@@ -1,8 +1,8 @@
 import Link from "@trade-os/lib/AppLink";
 import type { ReactNode } from "react";
 
-import { Button } from "@/components/ui/Button";
-import { Separator } from "@/components/ui/Separator";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 import { DdayBadge, StatusBadge, type DdayTone, type StatusTone } from "@/components/platform/StatusBadge";
 import { SectionPanel, type SectionPanelProps } from "@trade-os/components/SectionPanel";
