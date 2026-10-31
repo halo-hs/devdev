@@ -81,19 +81,30 @@ Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run bui
 
 | 폴더 | 역할 | 화면에서 직접 import |
 | --- | --- | --- |
-| `src/components/ds2/ui/` | shadcn 기반 기본 부품 원본 | 안 함 — `ui/` 래퍼를 씀 |
-| `src/components/ds2/extensions/` | 디자인 시스템 팀이 기본 부품을 조합해 만든 확장 부품 | `DatePicker`는 `ui/DatePicker` 래퍼로, 나머지는 직접 |
-| `src/components/ds2/assets/` | 로고·아이콘·애니메이션 | 함 |
-| `src/components/ui/` | 같은 이름의 ds2 부품에 Figma 색·간격만 입힌 래퍼 | 함 |
-| `src/components/platform/` | 여러 화면이 쓰는 조합 부품(StatusBadge, SearchFilterBar 등) | 함 |
+| `src/components/ui/` | shadcn 기반 기본 부품의 단일 구현. 기존 동작과 Figma 스타일 유지 | 함 |
+| `src/assets/` | 로고·아이콘·애니메이션·화면 이미지 | 함 |
+| `src/components/platform/` | 공통 조합·확장 부품 25개(StatusBadge, SearchFilterBar, AsyncButton, DatePicker 등)와 CSS | 직접 또는 기존 `ui/DatePicker`, `ui/TablePagination` 어댑터를 통해 사용 |
 
-한 기능에서만 쓰는 부품은 그 기능 폴더(예: `trade-os/components/`)에 두고, 여러 화면이 쓰게 되면 `platform/`으로 옮깁니다. 색·간격 기본값은 `src/app/tokensDs2.css`, Figma 덮어쓰기는 `src/app/theme.css`에서 고칩니다.
+`ds2/ui/`와 `ui/`의 이중 정의는 제거했습니다. 기본 부품은 `ui/`에서 한 번만 정의하고, 색·간격 기본값은 `src/app/tokensDs2.css`, Figma 토큰 덮어쓰기는 `src/app/theme.css`에서 고칩니다. 기존 Radix/Base UI 사용 방식과 공개 props를 유지하며, shadcn 최신 코드로 일괄 교체하지 않습니다. `cn`의 구현은 `src/lib/utils.ts` 한 곳에 있습니다.
+
+기존 `ds2/extensions/`의 `AsyncButton`, `DatePicker`, `FileDropZone`, `LabeledProgress`, `PaginationController`, `Typography`는 `platform/`으로 통합했습니다. 구현과 공개 props는 그대로 이동했으며 이전 경로의 재내보내기 파일은 두지 않습니다. 자체 부품인 `ui/DatePicker.tsx`, `ui/SubmittedSearchInput.tsx`, `ui/TablePagination.tsx`는 기존 위치를 유지합니다. 날짜 문자열·페이지 표시를 처리하는 기존 어댑터는 `platform/`의 구현을 참조합니다. 한 기능에서만 쓰는 부품은 그 기능 폴더(예: `trade-os/components/`)에 둡니다.
+
+`components/ds2/` 폴더는 제거했습니다. 사용 중인 자산 18개는 `src/assets/icons/`, `logos/`, `lottie/`로 옮겼고, SVG 선언은 `src/types/svg.d.ts`에 둡니다. 사이드바 전용 768px 판별은 `src/hooks/useSidebarMobile.ts`로 옮겼습니다. 업무 화면의 `useIsMobile`(1024px)·`useIsCompactWorkspace`(1280px)과 용도가 다르므로 기준값을 합치지 않습니다. 사용하지 않던 `ds2/lib/utils.ts` 재내보내기는 삭제하고 `src/lib/utils.ts`의 `cn`을 직접 사용합니다.
+
+Figma의 크기·팔레트도 같은 기본 부품의 props로 선택합니다. 별도의 디자인 전용 구현을 만들지 않습니다.
+
+| 부품 | Figma 대응 |
+| --- | --- |
+| `Button` 크기 | `xs` 24px, `default` 32px, `lg` 40px, `xl` 44px, `2xl` 48px, `3xl` 56px. 기존 `sm`은 32px 별칭. 아이콘 전용은 `icon-xs`, `icon`, `icon-lg`, `icon-xl`, `icon-2xl`, `icon-3xl` |
+| `Button` 스타일 | `neutral` = Figma neutral. 기존 `outline`도 같은 중립 스타일을 유지. `outline-primary` = Figma outline, `ghost-neutral` = Figma ghost-neutral. 나머지는 기존 variant 이름 사용 |
+| `Badge` | `palette`로 Figma 팔레트 선택(`powder`, `indigo`, `forest`, `teal`, `pine`, `sky`, `ocean`, `violet`, `purple`, `plum`, `mauve`, `rose`, `wine`, `flame`, `tangerine`, `brown`, `khaki`, `fuchsia`, `sand` 등), `tone="fill"` 또는 `"outline"`. 기존 팔레트 이름과 `S`·`L` 크기도 유지 |
+| `TabsList` | `size="sm"`은 Figma 실측 높이 34px(트리거 26px), 기본 40px, `lg` 44px. `variant="line"`의 sm은 24px. `Tabs orientation="vertical"`은 세로 배치와 위·아래 방향키 이동을 함께 지원 |
 
 ## 파일 이름 규칙
 
 - 화면·부품(`.tsx`)은 PascalCase(`DealsListView.tsx`), 훅·로직·데이터(`.ts`)와 CSS는 camelCase(`usePreviewPlayback.ts`, `tokensDs2.css`). 제품 프론트엔드의 `-` 이름 규칙은 따르지 않습니다.
-- 예외: `page.tsx`, `layout.tsx`, `main.tsx`, `index.tsx`.
-- `ui/` 래퍼는 감싸는 ds2 부품과 파일 이름이 같습니다(`ui/Tooltip.tsx` → `ds2/ui/Tooltip.tsx`).
+- 예외: `page.tsx`, `layout.tsx`, `main.tsx`, `index.tsx`와 `src/components/ui/`의 shadcn 기본 부품.
+- shadcn 기본 부품은 공식 kebab-case 이름(`ui/button.tsx`, `ui/alert-dialog.tsx`, `ui/scroll-area.tsx`)을 씁니다. 자체 부품 3개는 기존 PascalCase를 유지합니다.
 - import 경로는 대소문자까지 파일 이름과 같아야 합니다. 맥에서는 틀려도 동작하지만 배포 빌드(Linux)는 실패합니다. 대소문자만 바꾸는 이름 변경은 `git mv a.tsx a.tmp` → `git mv a.tmp A.tsx` 두 단계로 합니다.
 
 ## 로컬 전용 폴더
@@ -108,7 +119,7 @@ Node.js 22 이상에서 `npm ci`, `npm run dev`로 실행합니다. `npm run bui
 
 | 전 | 지금 |
 | --- | --- |
-| `packages/design-system-2.0/` | `src/components/ds2/`, 토큰 `src/app/tokensDs2.css` |
+| `packages/design-system-2.0/` | 기본 부품 `src/components/ui/`, 조합 부품 `src/components/platform/`, 자산 `src/assets/`, 토큰 `src/app/tokensDs2.css` |
 | `packages/shared-ui/` 래퍼·조합 부품 | `src/components/ui/`, `src/components/platform/` |
 | `trade-os/operations/index.tsx` | `trade-os/OperationsScreens.tsx` (화면 진입점) |
 | `trade-os/operations/styles/host.css` | `trade-os/OperationsScreens.css` (화면별 레이아웃 규칙) |

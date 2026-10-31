@@ -1,12 +1,12 @@
 "use client";
 
 import { counterpartyDisplayState } from "./counterpartyDisplayState";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/platform/StatusBadge";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/SearchFilterBar";
 import { Search } from "lucide-react";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 import {
   useCallback,
@@ -21,11 +21,11 @@ import {
 
 import { InfoBox } from "@trade-os/components/InfoBox";
 import { AnalyticsSkeleton } from "@trade-os/components/AnalyticsSkeleton";
-import { Button } from "@/components/ui/Button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 // erp-v2-adapt: begin — QA-1352 defers the gate reason to BE #495 instead of the boolean projection.
-import { usePlatformSession } from "@trade-os/lib/session/PlatformSessionContext";
+import { usePlatformSession } from "@trade-os/lib/session/platformSession";
 // erp-v2-adapt: end
 import { GpBarChart } from "@trade-os/reports/charts/GpBarChart";
 import { KpiTile, ReportCard } from "@trade-os/reports/ReportsConnected";

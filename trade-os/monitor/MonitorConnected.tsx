@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { InfoBox } from "@trade-os/components/InfoBox";
 import { AnalyticsSkeleton } from "@trade-os/components/AnalyticsSkeleton";
 import { toast } from "sonner";
 import { MonitorBody, type MonitorBodyCopy } from "@trade-os/monitor/MonitorScreen";
 import { MonitorDealsOpsPanels, type MonitorOpsCopy } from "@trade-os/monitor/MonitorDealsOpsPanels";
-import { usePlatformAuth } from "@trade-os/lib/session/PlatformSessionContext";
+import { usePlatformAuth } from "@trade-os/lib/session/platformSession";
 import { ApiError } from "@trade-os/lib/api/client";
 import { ackFlag, listFlags } from "@trade-os/lib/api/flags";
 import {
@@ -175,7 +175,8 @@ function mergeMonitorSnapshots(
     merged[area] = nextArea as never;
     if (nextMeta) merged.area_meta = { ...merged.area_meta, [area]: nextMeta };
     if (merged.partial_errors?.[area] && !incoming.partial_errors?.[area]) {
-      const { [area]: _ignored, ...remainingErrors } = merged.partial_errors;
+      const remainingErrors = { ...merged.partial_errors };
+      delete remainingErrors[area];
       merged.partial_errors = remainingErrors;
     }
   }
@@ -187,7 +188,8 @@ function mergeMonitorSnapshots(
     for (const area of replacedAreas) {
       if (staleAreas.has(area)) continue;
       if (!merged.partial_errors?.[area]) continue;
-      const { [area]: _ignored, ...remainingErrors } = merged.partial_errors;
+      const remainingErrors = { ...merged.partial_errors };
+      delete remainingErrors[area];
       merged.partial_errors = remainingErrors;
     }
   }
@@ -455,6 +457,9 @@ export function MonitorConnected({
   );
 
   useEffect(() => {
+    // Start the external request and expose its pending state together. Cleanup below
+    // invalidates late responses; retaining this lifecycle preserves drafts during refresh.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadMonitor();
     return () => {
       monitorFetchId.current += 1;
@@ -545,7 +550,7 @@ export function MonitorConnected({
         return { ...prev, live: { ...prev.live, ...flagViewRef.current } };
       });
     },
-    [ackCopy, flagsPending, getIdToken, liveCopy, state.status, toast],
+    [ackCopy, flagsPending, getIdToken, liveCopy, state.status],
   );
 
   const handleFlagCheckedChange = useCallback((checked: boolean) => {

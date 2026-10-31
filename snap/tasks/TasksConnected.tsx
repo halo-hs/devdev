@@ -22,29 +22,29 @@ import {
   X,
 } from "lucide-react"
 
-import { Badge } from "@/components/ui/Badge"
+import { Badge } from "@/components/ui/badge"
 import { HeroBanner } from "@/components/platform/HeroBanner"
-import { Button } from "@/components/ui/Button"
-import { alertVariants } from "@/components/ui/Alert"
+import { Button } from "@/components/ui/button"
+import { alertVariants } from "@/components/ui/alert"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/Card"
-import { Checkbox } from "@/components/ui/Checkbox"
-import { Input } from "@/components/ui/Input"
-import { Progress } from "@/components/ui/Progress"
+} from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+import { Progress } from "@/components/ui/progress"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select"
-import { Skeleton } from "@/components/ui/Skeleton"
-import { Textarea } from "@/components/ui/Textarea"
+} from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Textarea } from "@/components/ui/textarea"
 import { snapApi } from "@snap/lib/snapApi"
 import {
   snapApiConfigured,

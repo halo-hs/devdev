@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { ApiError } from "@trade-os/lib/api/client";
 import {
@@ -564,7 +564,6 @@ export function CanonicalScheduleCashPanel({
                   // the record action, so focusing its first field preserves the
                   // existing keyboard flow without stealing focus on page load.
                   // a11y-exception(justified, SC-2.4.3): focus follows the user's explicit record-cash action into the opened form.
-                  // eslint-disable-next-line jsx-a11y/no-autofocus
                   autoFocus
                   className={`${inputClass} mt-1 w-full`}
                   inputMode="decimal"

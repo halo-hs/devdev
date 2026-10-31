@@ -22,7 +22,7 @@ import {
 import { SectionPanel } from "@trade-os/components/SectionPanel";
 import { StatusBadge } from "@/components/platform/StatusBadge";
 import { TaskQueue, type TaskQueueItem } from "@trade-os/components/TaskQueue";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 import { ErpScreenFrame } from "../components/ErpScreenFrame";
 

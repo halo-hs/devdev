@@ -1,6 +1,6 @@
 import { BusinessFilterBar, BusinessListToolbar, BusinessFilterSearch, BusinessFilterSelect } from "@/components/platform/SearchFilterBar"
 import { ViewSeatAction } from "@trade-os/components/ViewSeatGate"
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/Empty"
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import {
   getDealWorkPlan,
   workLabels,
@@ -48,22 +48,22 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/AlertDialog"
-import { Button } from "@/components/ui/Button"
+} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
 import { HeroBanner, heroOutlineButtonClass } from "@/components/platform/HeroBanner"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/DropdownMenu"
-import { Input } from "@/components/ui/Input"
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/Popover"
-import { Card, CardContent } from "@/components/ui/Card"
+} from "@/components/ui/popover"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -71,8 +71,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/Table"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs"
+} from "@/components/ui/table"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { StatusBadge } from "@/components/platform/StatusBadge"
 import { DatePicker } from "@/components/ui/DatePicker"

@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Check } from "lucide-react"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/Dialog"
+} from "@/components/ui/dialog"
 import type { ProductEntitlement, SettingsRole } from "./SettingsRoutePage"
 
 export type SubscriptionPlan = "erp" | "snap" | "bundle" | "separate"

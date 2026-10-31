@@ -1,7 +1,7 @@
 import { AlertTriangle, LockKeyhole, LogIn, RefreshCw } from "lucide-react"
 
-import { Button } from "@/components/ui/Button"
-import { Skeleton } from "@/components/ui/Skeleton"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import type { SnapRouteAccessResult } from "@snap/lib/snapRouteAccess"
 
 export function SnapRouteAccessScreen({

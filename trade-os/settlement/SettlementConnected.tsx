@@ -10,8 +10,8 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState, Fragment
 
 import { InfoBox } from "@trade-os/components/InfoBox";
 import { RefreshCw } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
-import { Checkbox } from "@/components/ui/Checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { LoadableSection, type LoadableSectionCopy } from "@trade-os/components/LoadableSection";
 import { OperationalTableFrame } from "@trade-os/components/OperationalTableFrame";
@@ -19,12 +19,12 @@ import { SectionPanel } from "@trade-os/components/SectionPanel";
 import { SkeletonCards, SkeletonTable } from "@trade-os/components/Skeletons";
 import { StatusBadge, type StatusTone } from "@/components/platform/StatusBadge";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/Button";
-import { AsyncButton } from "@/components/ds2/extensions/AsyncButton";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-import { Textarea } from "@/components/ui/Textarea";
-import { useEntitlements, useIdentity, usePlatformAuth } from "@trade-os/lib/session/PlatformSessionContext";
+import { Button } from "@/components/ui/button";
+import { AsyncButton } from "@/components/platform/AsyncButton";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useEntitlements, useIdentity, usePlatformAuth } from "@trade-os/lib/session/platformSession";
 import {
   CASH_CALENDAR_BUCKETS,
   FINANCE_DECIMAL_SCALE,
@@ -1300,7 +1300,7 @@ export function SettlementConnected({ copy, renderHeader }: { copy: SettlementCo
     } else {
       toast.success(message);
     }
-  }, [toast]);
+  }, []);
   const fetchEventId = useRef(0);
   const calendarRetryEventId = useRef(0);
   const financeFactsRetryEventId = useRef(0);
@@ -1540,6 +1540,9 @@ export function SettlementConnected({ copy, renderHeader }: { copy: SettlementCo
   // way a manual reload does, instead of silently leaving the previous
   // tab's rows in "ready" state while a new tab's fetch is in flight.
   useEffect(() => {
+    // Start the external request and expose its pending state together. Cleanup below
+    // invalidates late responses; retaining this lifecycle preserves drafts during refresh.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadSettlement();
     return () => {
       fetchEventId.current += 1;

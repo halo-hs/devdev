@@ -9,10 +9,10 @@ import {
   Loader2,
   RefreshCw,
 } from "lucide-react"
-import GoogleIcon from "@/components/ds2/assets/icons/icon-google.svg"
+import GoogleIcon from "@/assets/icons/icon-google.svg"
 import { appLocation } from "@/app/appLocation"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { PageHeading, SettingsSection } from "./views/SettingsSection"
 import type {
   WithdrawalGateway,

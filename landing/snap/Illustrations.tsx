@@ -16,7 +16,7 @@ import {
   Sparkles,
   Wrench,
 } from "lucide-react"
-import { useT } from "../shared/Locale"
+import { useT } from "../shared/useLocale"
 
 const screens = {
   create: {

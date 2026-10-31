@@ -10,4 +10,4 @@ import erpShipments from "./ko/erp-shipments.json"
 export const messages = {erpCommon, erpDeals, erpMonitor, erpReports, erpSalesPerformance, erpSettlement, erpShipments, auth, common} as const
 export type AppMessages = typeof messages
 export type AppLocaleTag = "ko-KR"
-export function localeTag(_locale: string): AppLocaleTag { return "ko-KR" }
+export const localeTag: (locale: string) => AppLocaleTag = () => "ko-KR"

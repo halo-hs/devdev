@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { InfoBox } from "@trade-os/components/InfoBox";
 import { SkeletonCards } from "@trade-os/components/Skeletons";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 import type { Loadable } from "@trade-os/lib/loadable";
 
@@ -22,7 +22,8 @@ type LoadableSectionProps<T> = {
   onRetry?: () => void;
 };
 
-function assertNever(_state: never): never {
+function assertNever(state: never): never {
+  void state // The never parameter enforces exhaustive state handling.
   throw new Error("Unexpected Loadable state");
 }
 

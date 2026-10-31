@@ -1,10 +1,10 @@
 "use client";
-import { Badge } from "@/components/ui/Badge";
-import { Button as ShadcnButton } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button as ShadcnButton } from "@/components/ui/button";
 import { KpiCard } from "@/components/platform/KpiCard";
 import { RankingRow } from "@/components/platform/RankingRow";
 import { PeriodCloseRow } from "@/components/platform/PeriodCloseRow";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/components/HostTable";
 import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/SearchFilterBar";
 
@@ -17,12 +17,12 @@ import { InfoBox } from "@trade-os/components/InfoBox";
 import { AnalyticsSkeleton } from "@trade-os/components/AnalyticsSkeleton";
 import { SkeletonList } from "@trade-os/components/Skeletons";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/Button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 // erp-v2-adapt: begin — QA-1352 defers the gate reason to BE #495 instead of the boolean projection.
-import { usePlatformSession } from "@trade-os/lib/session/PlatformSessionContext";
+import { usePlatformSession } from "@trade-os/lib/session/platformSession";
 import { InsightsGateNotice } from "@trade-os/components/InsightsGateNotice";
 // erp-v2-adapt: end
 // FE#760 — Top-N 원천 데이터 드릴다운. Reuses the existing (previously
@@ -2180,7 +2180,7 @@ function ReportsConnectedSession({
       <Dialog open={snapshotState.status !== "closed"} onOpenChange={(open) => {
           if (!open) closeSnapshot();
         }}>
-        <DialogContent className="gap-5 sm:max-w-[560px]">
+        <DialogContent className="max-h-[calc(100dvh-2rem)] grid-cols-[minmax(0,1fr)] gap-5 overflow-y-auto sm:max-w-[560px]">
           <DialogHeader>
             <DialogTitle>{
           snapshotState.status === "closed"

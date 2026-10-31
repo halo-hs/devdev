@@ -3,23 +3,18 @@
 import { useRef, useState, useEffect } from "react";
 
 
-import type { HTMLAttributes, LabelHTMLAttributes } from "react";
+import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-import { Button } from "@/components/ui/Button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { ApiError } from "../lib/api/client";
 import { effectiveShipmentEta, effectiveShipmentEtd, type Shipment, type ShipmentConfirmation, type ShipmentStatus } from "../lib/api/shipments";
 
 import type { AppMessages } from '../lib/i18n/messages';
 type ShipmentsCopy = AppMessages['erpShipments']['shipments'];
-function Field(props: HTMLAttributes<HTMLDivElement>) { return <div {...props} className={`space-y-2 ${props.className || ''}`} />; }
-function FieldLabel(props: LabelHTMLAttributes<HTMLLabelElement>) { return <label {...props} />; }
-function FieldDescription(props: HTMLAttributes<HTMLParagraphElement>) { return <p {...props} className={`text-sm text-muted-foreground ${props.className || ''}`} />; }
-function Alert({variant, ...props}: HTMLAttributes<HTMLDivElement> & {variant?: string}) { return <div {...props} role={props.role || 'alert'} className={variant === 'destructive' ? 'text-destructive' : ''} />; }
-function AlertDescription(props: HTMLAttributes<HTMLDivElement>) { return <div {...props} />; }
-function AlertTitle(props: HTMLAttributes<HTMLHeadingElement>) { return <h3 {...props} />; }
 
 type ConfirmationField = "confirmed_eta" | "confirmed_etd" | "confirmed_status";
 type Edits = Partial<Pick<ShipmentConfirmation, ConfirmationField>>;
@@ -117,17 +112,18 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
         </DialogHeader>
         <form className="flex flex-col gap-4" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
           <FieldDescription className="text-[var(--color-gray-4)]">{c.manualHint}</FieldDescription>
+          <FieldGroup className="gap-4">
           {fields.map((field) => {
             const label = field === "confirmed_etd" ? c.etd : field === "confirmed_eta" ? c.eta : c.status;
             const released = edits[field] === null;
             const changed = Object.hasOwn(edits, field);
             return (
-              <Field key={field}>
+              <Field key={field} data-disabled={pending || released || !writable} data-invalid={field !== "confirmed_status" && changed && !released && !draft[field]}>
                 <FieldLabel htmlFor={`shipment-${field}`}>{label}</FieldLabel>
                 {field === "confirmed_status" ? (
                   <Select disabled={pending || released || !writable} onValueChange={(value) => setField(field, value)} value={draft[field]}>
                     <SelectTrigger aria-describedby="shipment-status-hint" id={`shipment-${field}`}><SelectValue /></SelectTrigger>
-                    <SelectContent position="popper" style={{ zIndex: "calc(var(--z-dialog) + 2)" }}>{statuses.map((status) => <SelectItem key={status} value={status}>{copy.status[status]}</SelectItem>)}</SelectContent>
+                    <SelectContent position="popper"><SelectGroup>{statuses.map((status) => <SelectItem key={status} value={status}>{copy.status[status]}</SelectItem>)}</SelectGroup></SelectContent>
                   </Select>
                 ) : (
                   <DatePicker ariaLabel={label} className="w-full" disabled={pending || released || !writable} id={`shipment-${field}`} invalid={changed && !released && !draft[field]} onValueChange={(value) => setField(field, value)} value={draft[field] ?? ""} />
@@ -142,6 +138,7 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
               </Field>
             );
           })}
+          </FieldGroup>
           {!canWrite || !baseline.edit_token ? <Alert variant="destructive"><AlertDescription>{!canWrite ? c.forbidden : c.missingToken}</AlertDescription></Alert> : null}
           {invalidDate ? <Alert id="shipment-date-error" variant="destructive"><AlertDescription>{c.invalidDate}</AlertDescription></Alert> : null}
           {pending ? <FieldDescription className="text-[var(--color-gray-4)]" role="status">{c.savingContinues}</FieldDescription> : null}

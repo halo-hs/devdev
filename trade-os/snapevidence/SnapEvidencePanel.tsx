@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { RefreshCw } from "lucide-react"
-import { Button } from "@/components/ui/Button"
-import { Badge } from "@/components/ui/Badge"
-import { Input } from "@/components/ui/Input"
-import { Textarea } from "@/components/ui/Textarea"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/Dialog"
+} from "@/components/ui/dialog"
 import {
   Table,
   TableBody,
@@ -19,7 +19,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/Table"
+} from "@/components/ui/table"
 
 type Container = {
   id: string
@@ -146,7 +146,7 @@ const seed: Data = {
   ],
   releases: [],
 }
-export const snapEvidencePreview = {
+const snapEvidencePreview = {
   async read(key: string): Promise<Data> {
     const raw = localStorage.getItem(key)
     if (!raw) return structuredClone(seed)
@@ -193,18 +193,22 @@ export function SnapEvidenceWorkspace({
   const [reason, setReason] = useState("")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
-  const load = useCallback(async () => {
+  const [attempt, setAttempt] = useState(0)
+  const requestKey = `${key}:${attempt}`
+  const [previousRequest, setPreviousRequest] = useState(requestKey)
+  if (previousRequest !== requestKey) {
+    setPreviousRequest(requestKey)
     setState("loading")
-    try {
-      setData(await snapEvidencePreview.read(key))
-      setState("ready")
-    } catch {
-      setState("error")
-    }
-  }, [key])
+    setData(null)
+  }
+  const load = () => setAttempt(value => value + 1)
   useEffect(() => {
-    void load()
-  }, [load])
+    let active = true
+    snapEvidencePreview.read(key).then(value => {
+      if (active) { setData(value); setState("ready") }
+    }).catch(() => { if (active) setState("error") })
+    return () => { active = false }
+  }, [key, attempt])
   const close = () => {
     if (!busy) {
       setAllocate(null)

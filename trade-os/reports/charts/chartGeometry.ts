@@ -86,3 +86,12 @@ export const CHART_COLORS = {
   labelText: "var(--color-gray-3)",
   surface: "var(--color-gray-12)",
 } as const;
+
+export type ChartPad = { l: number; r: number; t: number; b: number };
+
+export function innerSize(width: number, height: number, pad: ChartPad = CHART_PAD) {
+  return {
+    iw: Math.max(0, width - pad.l - pad.r),
+    ih: Math.max(0, height - pad.t - pad.b),
+  };
+}

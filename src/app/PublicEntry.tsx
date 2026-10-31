@@ -2,7 +2,7 @@ import { appLocation } from "@/app/appLocation"
 import { MEMBER_SEAT_KEY } from "@share/settings/useSettingsDemo"
 import { useEffect, useState, type ReactNode } from "react"
 import { ArrowRight, Building2, MapPin } from "lucide-react"
-import { Button } from "@/components/ui/Button"
+import { Button } from "@/components/ui/button"
 import { CommonPublicLayout } from "@auth/AuthCommonShell"
 import {
   Card,
@@ -10,7 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/Card"
+} from "@/components/ui/card"
 import { type CommonPreviewAccount, type CommonPreviewRole, type CommonProduct, type CommonScreenKey } from "@auth/AuthSurface"
 import { CommonPasswordRecoveryPrototype } from "@auth/PasswordResetPanel"
 import { CommonSignupPrototype } from "@auth/SignupPanel"

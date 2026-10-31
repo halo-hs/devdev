@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { demoAllocate, demoAllocationCandidates, demoAllocations } from '../lib/demo/settlementExceptions';
 
 export function OverpaymentAllocationPanel({id, canRecord, disabled, onSaved}: {id:string;canRecord:boolean;disabled:boolean;onSaved:()=>void}) {

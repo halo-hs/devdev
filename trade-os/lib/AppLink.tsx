@@ -2,7 +2,7 @@ import { deals } from "@trade-os/lib/prototypeDeals"
 import type { AnchorHTMLAttributes } from "react"
 
 // In-app link: client-side navigation for /erp routes; demo deal ids map to prototype deals.
-export function appHref(href?: string) {
+function appHref(href?: string) {
   if (!href?.startsWith("/erp/")) return href
   const match = href.match(/^\/erp\/deals\/de000000-0000-4000-8000-(\d{12})(.*)$/)
   const demo = match && deals[Number(match[1]) - 1]

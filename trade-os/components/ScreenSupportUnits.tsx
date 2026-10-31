@@ -5,7 +5,7 @@ import { MetricCard } from "@trade-os/components/MetricCard";
 import { SectionPanel, type SectionPanelProps } from "@trade-os/components/SectionPanel";
 import { StatusBadge } from "@/components/platform/StatusBadge";
 import { ChevronsUpDown } from "lucide-react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 type UnitPanelProps = Omit<SectionPanelProps, "title"> & {
