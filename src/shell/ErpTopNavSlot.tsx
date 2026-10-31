@@ -6,7 +6,7 @@ import { templateMeta } from "@trade-os/documents/documentTemplateModel"
 import { getSnapRouteByScreen } from "@snap/lib/snapRoutes"
 import { settingsSectionLabel } from "@share/settings/settingsNavigation"
 import { cn } from "@/lib/utils"
-import { ChevronRight, ChevronDown, MoreVertical, ClipboardList, Clock3, RefreshCw } from "lucide-react"
+import { ChevronRight, ChevronDown, MoreHorizontal, ClipboardList, Clock3, RefreshCw } from "lucide-react"
 import { NotificationButton } from "@/shell/ErpNav"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
@@ -371,7 +371,7 @@ export function TopBarUtilities({
             aria-label="더보기"
             className="text-muted-foreground"
           >
-            <MoreVertical className="size-4.5" />
+            <MoreHorizontal className="size-4.5" />
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-52 gap-0 p-1">

@@ -10,7 +10,6 @@ import {
   LayoutGrid,
   Link2,
   MoreHorizontal,
-  MoreVertical,
   Plus,
   RefreshCw,
   Search,
@@ -699,7 +698,7 @@ export function RoleHomeBoard({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="lg" className="ml-auto min-w-[100px] gap-1.5 border-[var(--color-gray-10)] px-4 [&_svg]:size-5">
-              <MoreVertical />
+              <MoreHorizontal />
               모듈 편집
             </Button>
           </DropdownMenuTrigger>

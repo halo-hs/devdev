@@ -1,3 +1,4 @@
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/Table"
 import { formatDate, formatDateTime } from "@trade-os/lib/orgDate"
 import { useLocaleTag } from "@trade-os/lib/i18n/useLocaleTag"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
@@ -43,7 +44,7 @@ import {
   Link2,
   Unlink,
   LoaderCircle,
-  MoreVertical,
+  MoreHorizontal,
   NotebookPen,
   Pencil,
   Plus,
@@ -2936,15 +2937,14 @@ function DealFieldsPanel({
                 )
                 return (
                   <tbody key={item.id} className="mb-3 block rounded-xl border bg-card p-3 last:mb-0 @min-[480px]/items:p-4">
-                    <tr className="relative grid grid-cols-2 gap-x-3 gap-y-4 @min-[480px]/items:grid-cols-3 @min-[760px]/items:grid-cols-[minmax(0,2fr)_minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,1.15fr)_32px] [&>td]:min-w-0">
+                    <tr className="relative grid grid-cols-2 gap-x-3 gap-y-0 @min-[480px]/items:grid-cols-3 @min-[760px]/items:grid-cols-[minmax(0,2fr)_minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,1.15fr)_32px] @min-[760px]/items:grid-rows-[auto_40px_auto] @min-[760px]/items:gap-y-0 [&>td:not(:last-child)]:row-span-3 [&>td:not(:last-child)]:grid [&>td:not(:last-child)]:grid-rows-subgrid [&>td:not(:last-child)]:pb-4 @min-[760px]/items:[&>td:not(:last-child)]:pb-0 [&>td]:min-w-0">
                       <td className="col-span-2 pr-9 @min-[480px]/items:col-span-3 @min-[760px]/items:col-span-1 @min-[760px]/items:pr-0">
                         <FormFieldHeader className="mb-2" label={`품목 ${number} · 품목명`} htmlFor={`deal-item-${item.id}-goods`} badge={needsReview(item.match) ? <StatusBadge tone={matchTone(item.match)}>{item.match === "확인 필요" ? "불일치" : item.match}</StatusBadge> : undefined} />
                         {input("goods", "품목명")}
                         {needsReview(item.match) && <FormFieldMessage id={`deal-item-${item.id}-goods-message`} tone="danger" className="mt-2">{item.evidence.join(" · ")}</FormFieldMessage>}
                       </td>
                       <td>
-                        <div id={`deal-field-label-item-${item.id}-quantity`} className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)]" data-quantity-heading>
-                          <FormFieldHeader className="mb-2" label="수량 / 단위" htmlFor={`deal-field-item-${item.id}-quantity`}
+                          <FormFieldHeader id={`deal-field-label-item-${item.id}-quantity`} data-quantity-heading className="mb-2 scroll-mt-[calc(var(--deal-header-height,128px)+16px)]" label="수량 / 단위" htmlFor={`deal-field-item-${item.id}-quantity`}
                             badge={item.match === "확인 필요" ? <StatusBadge tone="warning">불일치</StatusBadge> : undefined}
                             candidates={editable &&
                           item.match === "확인 필요" &&
@@ -2976,12 +2976,9 @@ function DealFieldsPanel({
                             {input("quantity", "수량")}
                             {unit("quantityUnit", "수량 단위", ["MT", "KG", "EA"])}
                           </div>
-                        </div>
                       </td>
                       <td>
-                        <div data-item-unit-price-heading className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)]">
-                          <FormFieldHeader className="mb-2" label={`단가 · ${item.currency}/${item.quantityUnit}`} htmlFor={`deal-item-${item.id}-unitPrice`} />
-                        </div>
+                          <FormFieldHeader data-item-unit-price-heading className="mb-2 scroll-mt-[calc(var(--deal-header-height,128px)+16px)]" label={`단가 · ${item.currency}/${item.quantityUnit}`} htmlFor={`deal-item-${item.id}-unitPrice`} />
                         {input("unitPrice", "단가")}
                       </td>
                       <td className="col-span-2 @min-[760px]/items:col-span-1">
@@ -2997,7 +2994,7 @@ function DealFieldsPanel({
                           <span className="shrink-0 text-sm text-muted-foreground">{item.currency}</span>
                         </div>
                       </td>
-                      <td className="absolute top-0 right-0 text-right @min-[760px]/items:static @min-[760px]/items:flex @min-[760px]/items:h-10 @min-[760px]/items:items-center @min-[760px]/items:mt-[calc(var(--text-base--line-height)+8px)]">
+                      <td className="absolute top-0 right-0 text-right @min-[760px]/items:static @min-[760px]/items:flex @min-[760px]/items:h-10 @min-[760px]/items:items-center @min-[760px]/items:row-start-2 @min-[760px]/items:col-start-5">
                         {editable && items.length > 1 && (
                           <Button size="icon-sm" variant="ghost" aria-label={`품목 ${number} 삭제`} onClick={() => onRemoveItem(item.id)}>
                             <Trash2 />
@@ -3066,11 +3063,11 @@ function DealFieldsPanel({
               : profile.direction === "purchase" ? "지급 정보" : "결제 정보"
             : group}
         </h4>
-        <div className="mt-3 grid min-w-0 gap-4 @min-[640px]/fields:grid-cols-2">
+        <div className="mt-3 grid min-w-0 gap-x-4 gap-y-2 @min-[640px]/fields:grid-cols-2">
           {groupFields.map((field) => (
             <FormField
               key={field.key}
-              className="py-1"
+              className="py-1 @min-[640px]/fields:row-span-3 @min-[640px]/fields:grid @min-[640px]/fields:grid-rows-subgrid"
               label={field.label}
               htmlFor={`deal-field-${field.key}`}
               id={`deal-field-label-${field.key}`}
@@ -3418,22 +3415,6 @@ function DealHealthReference({
       })),
     }
   })
-  const symbol = (status: string) =>
-    status === "일치"
-      ? "✓"
-      : status === "불일치"
-        ? "!"
-        : status === "문서 누락"
-          ? "×"
-          : "—"
-  const color = (status: string) =>
-    status === "일치"
-      ? "text-success"
-      : status === "불일치"
-        ? "text-warning-foreground"
-        : status === "문서 누락"
-          ? "text-destructive"
-          : "text-muted-foreground"
   return (
     <section aria-label="거래 건강도와 서류 대조" className="px-4 py-4">
       <div className="flex items-end justify-between gap-3">
@@ -3494,38 +3475,36 @@ function DealHealthReference({
               PO·송장·포장명세·B/L의 같은 항목 값이 서로 일치하는지 한눈에 대조합니다.
             </DialogDescription>
           </DialogHeader>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-xs">
-              <thead>
-                <tr className="border-b">
-                  <th className="p-2">항목</th>
-                  {documentSummary.documents.map((document) => (
-                    <th key={documentKey(document)} className="p-2">
-                      {document.type}
-                      <span className="block font-normal text-muted-foreground">
-                        {document.code}
-                      </span>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.label} className="border-b">
-                    <th className="p-2 font-medium">{row.label}</th>
-                    {row.cells.map((cell) => (
-                      <td key={cell.document.code} className="p-2 align-top">
-                        <span className={color(cell.status)}>
-                          {symbol(cell.status)} {cell.status}
-                        </span>
-                        <span className="mt-1 block">{cell.value || "—"}</span>
-                      </td>
-                    ))}
-                  </tr>
+          <Table className="min-w-[720px] table-fixed" aria-label="서류 항목별 대조">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-28">항목</TableHead>
+                {documentSummary.documents.map((document) => (
+                  <TableHead key={documentKey(document)} className="h-auto py-3 whitespace-normal">
+                    <span className="block text-sm">{document.type}</span>
+                    <span className="text-xs text-muted-foreground">{document.code}</span>
+                    {!document.file && <span className="mt-1 block text-xs text-destructive">문서 미연결</span>}
+                    {document.file && document.status === "분석 중" && <span className="mt-1 block text-xs text-muted-foreground">분석 중</span>}
+                  </TableHead>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((row) => (
+                <TableRow key={row.label}>
+                  <TableCell className="py-3 whitespace-normal font-medium">
+                    <span className="block text-sm">{row.label}</span>
+                    {row.cells.some(cell => cell.status === "불일치") && <span className="mt-1 block text-xs text-warning-foreground">불일치</span>}
+                  </TableCell>
+                  {row.cells.map((cell) => (
+                    <TableCell key={cell.document.code} className={cn("py-3 text-sm whitespace-normal break-words", !cell.value && "text-muted-foreground", cell.status === "불일치" && "bg-warning/5")}>
+                      {cell.value || "—"}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </DialogContent>
       </Dialog>
     </section>
@@ -6638,7 +6617,7 @@ export function DealDetailScreen({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon-sm" aria-label="더보기">
-                    <MoreVertical />
+                    <MoreHorizontal />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-60">
@@ -6830,13 +6809,11 @@ export function DealDetailScreen({
                       </StatusBadge>
                     </div>
                     {nextDocument ? (
-                      <div data-next-document className={cn("flex flex-col items-stretch gap-3 rounded-md border px-3 py-2.5 text-sm", nextDocument.tone === "warning" ? "border-warning/25 bg-warning/10" : "border-primary/15 bg-primary/5")}>
-                        <div className="min-w-0 break-keep">
-                          <span className="font-semibold">다음 서류: {nextDocument.label}</span>
-                          <p className="mt-0.5 text-xs text-muted-foreground">{{ upload: "PDF를 업로드하고 검토한 뒤 이 거래에 연결하세요.", create: "양식을 선택해 거래에 필요한 문서를 만드세요.", confirm: "문서 내용과 승인 상태를 검토한 뒤 확정하세요.", deliver: "확정한 문서를 고객에게 전달하세요.", reconcile: "포장명세서와 선하증권의 중량을 확인하세요." }[nextDocument.kind]}</p>
-                        </div>
+                      <div data-next-document className="rounded-md bg-primary/5 p-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="min-w-0 text-xs font-semibold text-primary break-keep">다음 서류: {nextDocument.label}</span>
                         {canMutate(role) && (
-                          <Button size="sm" variant="outline" className="ml-auto bg-background" onClick={() => {
+                          <Button size="xs" variant="link" className="h-auto shrink-0 gap-1 py-0 text-xs" onClick={() => {
                             if (nextDocument.kind === "upload") onUpload()
                             else if (nextDocument.kind === "create") onCreateDocument(nextDocument.templateCode)
                             else if (nextDocument.kind === "confirm" && nextDraft) onReviewDocument(nextDraft.number)
@@ -6844,6 +6821,8 @@ export function DealDetailScreen({
                             else navigateSection(nextDocument.kind === "reconcile" ? "verification" : "documents")
                           }}>진행하기<ArrowUpRight data-icon="inline-end" /></Button>
                         )}
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">{{ upload: "PDF를 업로드하고 검토한 뒤 이 거래에 연결하세요.", create: "양식을 선택해 거래에 필요한 문서를 만드세요.", confirm: "문서 내용과 승인 상태를 검토한 뒤 확정하세요.", deliver: "확정한 문서를 고객에게 전달하세요.", reconcile: "포장명세서와 선하증권의 중량을 확인하세요." }[nextDocument.kind]}</p>
                       </div>
                     ) : (
                       <div className="rounded-md bg-primary/5 p-2">

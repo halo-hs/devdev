@@ -28,7 +28,7 @@ import {
   Info,
   Download,
   Loader2,
-  MoreVertical,
+  MoreHorizontal,
   Plus,
   RefreshCw,
   Ship,
@@ -1368,7 +1368,7 @@ export function DealsScreen({
                                 aria-label={`${displayDealId} 거래 메뉴`}
                                 onClick={(event) => event.stopPropagation()}
                               >
-                                <MoreVertical className="size-4" />
+                                <MoreHorizontal className="size-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
