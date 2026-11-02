@@ -340,7 +340,7 @@ function EmailForwardInPanel({
     <section
       className={cn(
         "rounded-lg border bg-background text-left",
-        compact ? "mt-4 p-3" : "p-5"
+        compact ? "mt-4 p-3" : "rounded-none border-0 p-0"
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -392,7 +392,7 @@ function EmailForwardInPanel({
         </div>
       ) : (
         <div className="mt-3">
-          <div className="grid grid-cols-2 gap-2 rounded-[var(--r-lg)] bg-[var(--surface-background)] px-3 py-3 shadow-[var(--shadow-section)] ring-1 ring-[var(--surface-border)]">
+          <div className="grid grid-cols-2 gap-3">
             <label className="grid gap-1">
               <span className="text-[11px] font-medium text-muted-foreground">
                 수신일자
@@ -556,9 +556,9 @@ function EmailForwardQueue({
   // Portaled to body so the panel stacks above the shell header instead of
   // inside the page's stacking context.
   return createPortal(
-    <div className="fixed inset-y-0 right-0 z-50 w-[min(560px,calc(100vw-24px))] border-l bg-background shadow-2xl">
+    <div className="fixed inset-y-0 right-0 z-50 w-[min(480px,100vw)] border-l bg-background shadow-2xl">
       <div className="flex h-full min-h-0 flex-col">
-        <div className="flex h-14 shrink-0 items-center justify-between border-b px-5">
+        <div className="flex min-h-20 shrink-0 items-start justify-between px-6 pt-6 pb-4">
           <div>
             <div className="text-sm font-semibold">수신 메일에서 첨부 선택</div>
             <div className="mt-0.5 text-xs text-muted-foreground">
@@ -574,7 +574,7 @@ function EmailForwardQueue({
             <X className="size-4" />
           </Button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto p-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-5">
           <EmailForwardInPanel
             onImportFiles={(files) => {
               onImportFiles(files)
@@ -608,6 +608,37 @@ function AiDocumentProcessingNotice() {
   )
 }
 
+function DuplicateInvoiceWarning() {
+  const [groups, setGroups] = useState<{ invoice_number: string; count: number }[]>([])
+  const [failed, setFailed] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [attempt, setAttempt] = useState(0)
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    prototypeBackend.tradeDocuments.listDuplicateInvoices()
+      .then(({ items }) => { if (active) { setGroups(items); setFailed(false) } })
+      .catch(() => { if (active) setFailed(true) })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [attempt])
+  if (!failed && groups.length === 0) return null
+  return (
+    <Alert variant={failed ? "caution" : "riskHigh"} data-component="DuplicateInvoiceWarning">
+      <AlertTriangle className="size-4" />
+      <AlertTitle className="text-xs">
+        {failed ? "중복 인보이스 번호를 확인하지 못했습니다." : `중복 인보이스 번호 ${groups.length}건 발견`}
+      </AlertTitle>
+      <AlertDescription className="text-[11px] leading-5">
+        {failed ? "잠시 후 다시 시도해 주세요. 파일은 계속 올릴 수 있습니다." :
+          groups.map((group) => `${group.invoice_number} · 문서 ${group.count}개`).join(" / ")}
+      </AlertDescription>
+      {failed ? <AlertAction><Button variant="ghost" size="xs" disabled={loading}
+        onClick={() => setAttempt((value) => value + 1)}>다시 시도</Button></AlertAction> : null}
+    </Alert>
+  )
+}
+
 function DuplicateUploadAlert({
   notice,
   onDismiss,
@@ -638,7 +669,7 @@ function DuplicateUploadAlert({
 }
 
 // Kept as a fallback for older prototype routes while the horizontal tray ships.
-type DocumentTrayFilter = "all" | "processing" | "review" | "failed" | "confirmed"
+type DocumentTrayFilter = "all" | "processing" | "review" | "failed"
 
 type DocumentQueueSort = "recent" | "oldest"
 
@@ -647,7 +678,6 @@ function matchesDocumentQueueStatus(
   filter: DocumentTrayFilter
 ) {
   if (filter === "all") return true
-  if (filter === "confirmed") return document.stage === "confirmed"
   if (filter === "processing") return ["ocr", "queued"].includes(document.stage)
   if (filter === "review")
     return document.stage === "field"
@@ -852,12 +882,12 @@ function HorizontalDocumentTray({
               </div>
               <div className="truncate text-[11px] leading-4 text-[var(--color-gray-5)]">
                 {uploadDocumentTypeLabel(selectedDocument.documentType)}
-                {selectedIndex >= 0 ? ` · ${selectedIndex + 1} / ${documents.length}` : " · 연결 완료"}
+                {selectedIndex >= 0 ? ` · ${selectedIndex + 1} / ${documents.length}` : ""}
               </div>
             </div>
-            <ToneBadge tone={selectedDocument.tone}>
+            {selectedDocument.stage !== "confirmed" ? <ToneBadge tone={selectedDocument.tone}>
               {selectedDocument.status}
-            </ToneBadge>
+            </ToneBadge> : null}
           </div>
         ) : null}
 
@@ -959,6 +989,7 @@ function HorizontalDocumentTray({
               />
             </div>
           ) : null}
+          <div className="mb-2 empty:hidden"><DuplicateInvoiceWarning /></div>
           {documents.length === 0 && !uploadProgress ? (
             <div className="rounded-[var(--r-md)] border border-dashed border-[var(--surface-border)] px-4 py-5 text-center text-xs text-[var(--surface-muted-foreground)]">
               파일 추가 버튼에서 문서를 추가해 주세요.
@@ -1912,7 +1943,7 @@ export function InboxScreen({
           await handleFilesSelected([new File([pdf.output("blob")], "PO_시작가이드_예시.pdf", { type: "application/pdf" })])
         }}>예시 PDF 사용</Button></Alert></div>}
         <BeforeUploadState
-          documents={uploadDocuments.map((document, index) => ({ document, index }))}
+          documents={pendingUploadDocuments}
           onOpenDocument={(index) => {
             openUploadDocument(index)
             setHasFile(true)
@@ -2166,7 +2197,6 @@ function PendingUploadDocumentsTable({
                     <SelectItem value="processing">처리 중</SelectItem>
                     <SelectItem value="review">확인 필요</SelectItem>
                     <SelectItem value="failed">실패·제외</SelectItem>
-                    <SelectItem value="confirmed">거래 연결 완료</SelectItem>
                   </SelectContent>
                 </Select>
               </BusinessFilterField>
@@ -2398,10 +2428,10 @@ function BeforeUploadState({
           title="문서 올리기"
           description="PDF를 올려 내용을 검토한 뒤, 거래를 선택하고 반영할 내용을 확인하세요."
           summary={
-        <div className="mx-auto w-full max-w-5xl">
-          <Card className="w-full bg-[var(--color-gray-12)]! shadow-[var(--shadow-modal)]" size="sm">
-            <CardContent className="p-4 sm:p-5">
-              <div className="mb-3 grid gap-2">
+        <div className="mx-auto w-full max-w-[1200px]">
+          <Card className="w-full rounded-[22px] border bg-[var(--color-gray-12)]! shadow-[var(--shadow-section)]" size="sm">
+            <CardContent className="p-5 sm:px-[30px]">
+              <div className="mb-5 grid gap-5">
                 <div className="flex flex-wrap items-start gap-x-6 gap-y-2">
                   <ol
                     aria-label="문서 처리 순서"
@@ -2448,6 +2478,7 @@ function BeforeUploadState({
                     onDismiss={onDismissDuplicateUpload}
                   />
                 ) : null}
+                <DuplicateInvoiceWarning />
               </div>
               <FileDropZone
                 ref={fileDropZoneRef}
@@ -2464,7 +2495,7 @@ function BeforeUploadState({
                   if (!viewSeatGuard()) onFilesSelected(files)
                 }}
                 // 문서 올리기 V2 (6273:100113): Blue 10 drop area, stacked and centered.
-                className="min-h-[112px] flex-col gap-2 border-[var(--color-primary-6)] bg-[var(--color-primary-10)] px-4 text-center text-[var(--color-primary-4)]"
+                className="min-h-[148px] flex-col gap-2 border-[var(--color-primary-6)] bg-[var(--color-primary-10)] px-4 text-center text-[var(--color-primary-4)]"
               >
                 <Upload className="size-5" />
                 <span>

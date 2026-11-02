@@ -308,7 +308,7 @@ export function DealConfirmPanel({
             : "거래처·거래 생성 중"
           : "연결 중"
         : activeLink
-          ? changingConnection ? newDealReady ? createdDeal ? "생성한 거래로 변경 검토" : "새 거래 등록 후 변경 검토" : "연결 변경 확인" : "거래 연결 완료"
+          ? newDealReady ? createdDeal ? "생성한 거래로 변경 검토" : "새 거래 등록 후 변경 검토" : "연결 변경 확인"
           : createdDeal && newDealFormOpen
             ? "생성한 거래에 연결 재시도"
           : newDealReady
@@ -320,7 +320,7 @@ export function DealConfirmPanel({
               : "선택한 거래 연결"}
     </Button>
   )
-  const primaryAction = (
+  const primaryAction = activeLink && !changingConnection ? null : (
     <>
     <DocumentBlockingAlerts errors={connectionErrors} checks={connectionChecks} />
     {tradeSeatAssigned ? primaryButton : (
@@ -363,7 +363,7 @@ export function DealConfirmPanel({
         </div>
 
         <ScrollArea className="min-h-0 flex-1 [&_[data-slot=scroll-area-viewport]>div]:!block">
-          <div data-document-requirement="connection" className="mx-auto w-full max-w-4xl space-y-5 p-6">
+          <div data-document-requirement="connection" className="mx-auto w-full max-w-4xl space-y-5 px-5 py-4">
             {connectionError ? <Alert variant="destructive"><AlertTitle>현재 거래 연결을 불러오지 못했습니다</AlertTitle><AlertDescription>{connectionError}</AlertDescription><Button className="mt-3" size="sm" variant="outline" onClick={() => setConnectionAttempt(value => value + 1)}>현재 연결 다시 확인</Button></Alert>
               : connection ? <DocumentConnectionSummary connection={connection} changing={changingConnection} disabled={!tradeSeatAssigned || linking || candidateLoadState !== "ready" || !onConnectionChanged}
                 onChange={() => {
@@ -419,6 +419,7 @@ export function DealConfirmPanel({
                 </dl>
               </section>
             ) : null}
+
 
 
             {(!activeLink || changingConnection) && connectionReady ? <section>
@@ -639,6 +640,7 @@ export function DealConfirmPanel({
                               type="button"
                               role="radio"
                               aria-checked={selected}
+                              aria-controls={selected ? `candidate-comparison-${candidate.id}` : undefined}
                               className={cn(
                                 // 문서 올리기 V2 거래 후보 (6233:82241): 20px radio, 15 title,
                                 // 13 meta, Blue 10 row when selected.
@@ -663,28 +665,66 @@ export function DealConfirmPanel({
                               </span>
                               <span className="min-w-0 flex-1">
                                 <span className="flex min-w-0 items-center gap-2">
-                                  <strong className="truncate text-[15px] leading-[22px] font-medium text-[var(--color-gray-1)]">
+                                  <strong className="truncate text-[15px] leading-[22px] font-normal text-[var(--color-gray-1)]">
                                     {candidate.title}
                                   </strong>
                                   <ToneBadge tone={candidate.tone}>
                                     {candidate.stage}
                                   </ToneBadge>
                                 </span>
-                                <span className="mt-0.5 block truncate text-[13px] leading-[18px] text-[var(--color-gray-5)]">
+                                <span className="mt-0.5 block truncate text-[11px] leading-4 text-[var(--color-gray-5)]">
                                   {candidate.id} · {candidate.party}
                                 </span>
-                                <span className="mt-0.5 block text-[13px] leading-[18px] text-[var(--primary)]">
+                                <span className="mt-0.5 block text-[11px] leading-4 text-[var(--primary)]">
                                   {candidate.item} · {candidate.amount}{" "}
                                   {candidate.currency}
                                 </span>
                                 {candidate.id === activeLink?.dealId ? <span className="mt-2 block text-[10px] font-medium">현재 연결</span> : null}
                               </span>
-                              {recommended ? (
-                                <span className="flex shrink-0 items-center gap-1 text-[13px] text-[#6b4ee6]">
-                                  <Sparkles className="size-3.5" /> AI 추천
-                                </span>
-                              ) : null}
                             </button>
+                            {recommended ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span tabIndex={0} aria-label={`${candidate.id} AI 추천 근거`}
+                                    className="mr-5 flex shrink-0 cursor-help items-center gap-1 rounded-sm text-[11px] text-[#6b4ee6] outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                    <Sparkles className="size-3.5" aria-hidden="true" /> AI 추천
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-72">
+                                  <p className="font-medium">추천 근거 · 시안 예시</p>
+                                  {candidate.reasons.length ? candidate.reasons.map(reason => (
+                                    <p key={reason}>{reason.replace("거래처 일치", "거래처명 동일")}</p>
+                                  )) : <p>제공된 추천 근거가 없습니다.</p>}
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : null}
+                            {selected ? (
+                              <div id={`candidate-comparison-${candidate.id}`} className="w-full min-w-0 basis-full px-5 pb-4 pt-1">
+                                <section className="rounded-[var(--r-md)] border border-[var(--color-gray-9)] bg-background p-4">
+                                <dl className="grid gap-y-3 sm:grid-cols-3" aria-label={`${candidate.id} 현재 문서값과 선택한 거래값 비교`}>
+                                  {[
+                                    ["거래처", readCounterparty, candidate.party],
+                                    ["금액·통화", readAmountField?.value ? [readAmountField.value, readCurrency].filter(Boolean).join(" ") : "", candidate.amount ? [candidate.amount, candidate.currency].filter(Boolean).join(" ") : ""],
+                                    ["수량", documentReviewFields.filter(field => field.key === "quantity").map(field => [field.value, field.unit].filter(Boolean).join(" ")).join(" / "), candidate.item.split(" · ")[1] ?? ""],
+                                  ].map(([label, documentValue, candidateValue]) => (
+                                    <div key={label} className="min-w-0 border-t border-[var(--color-gray-10)] py-2.5 first:border-t-0 sm:border-t-0 sm:border-l sm:px-3 sm:first:border-l-0 sm:first:pl-0 sm:last:pr-0">
+                                      <dt className="text-[11px] leading-4 text-[var(--color-gray-4)]">{label}</dt>
+                                      <dd className="mt-2 flex flex-col gap-2">
+                                        <div className="min-w-0">
+                                          <span className="text-[11px] leading-4 text-muted-foreground">현재 문서</span>
+                                          <p className="mt-0.5 truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold" title={documentValue || "값 없음"}>{documentValue || "—"}</p>
+                                        </div>
+                                        <div className="min-w-0">
+                                          <span className="text-[11px] leading-4 text-muted-foreground">선택한 거래</span>
+                                          <p className="mt-0.5 truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold" title={candidateValue || "값 없음"}>{candidateValue || "—"}</p>
+                                        </div>
+                                      </dd>
+                                    </div>
+                                  ))}
+                                </dl>
+                                </section>
+                              </div>
+                            ) : null}
                             </div>
                           )
                         })}
