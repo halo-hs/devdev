@@ -33,7 +33,7 @@ export function LinkedDocumentComparison({ dealId, connected = false, candidate 
         "DL-260625-07": ["", "", "운송 완료 후 지급"],
       }
       const [weight, incoterms, payment] = terms[dealId] ?? ["", "", ""]
-      return { documents: documents.map(document => ({ ...document, comparisonValues: deal ? {
+      return { documents: documents.map<ComparisonDocument>(document => ({ ...document, comparisonValues: deal ? {
         seller: deal.party,
         amount: ["PO", "SC", "CI"].includes(document.code) ? `${deal.amount} ${deal.currency}` : "",
         quantity: deal.item.split(" · ")[1] ?? "",
