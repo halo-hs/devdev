@@ -1,13 +1,18 @@
 import { type PrototypeSlotKind } from "@trade-os/documents/documentTemplateModel"
 import { type UploadDocumentDealLinks, type UploadDocumentType, type RecentDocument, type ReviewField } from "@/App"
 
+// Explicit link for the built-in completed preview document; never infer a deal ID from its label.
+const initialUploadDocumentDealLinks: UploadDocumentDealLinks = {
+  "계약서_안심찬.pdf": { dealId: "DL-260708-01", dealLabel: "DL-260708-01 · KATAMAN ASIA-PACIFIC PTE LTD" },
+}
+
 export function readUploadDocumentDealLinks(): UploadDocumentDealLinks {
   if (typeof window === "undefined") return {}
   try {
     const stored = window.localStorage.getItem(
       UPLOAD_DOCUMENT_DEAL_LINKS_STORAGE_KEY
     )
-    return stored ? (JSON.parse(stored) as UploadDocumentDealLinks) : {}
+    return { ...initialUploadDocumentDealLinks, ...(stored ? (JSON.parse(stored) as UploadDocumentDealLinks) : {}) }
   } catch {
     return {}
   }

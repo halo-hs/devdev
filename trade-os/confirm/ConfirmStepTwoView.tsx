@@ -426,6 +426,10 @@ export function DealConfirmPanel({
               </section>
             ) : null}
 
+            {connectionReady && activeLink && !changingConnection ? (
+              <LinkedDocumentComparison key={`${document.name}:${activeLink.dealId}:linked`} dealId={activeLink.dealId} connected />
+            ) : null}
+
             {(!activeLink || changingConnection) && connectionReady ? <section>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>

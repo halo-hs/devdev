@@ -119,7 +119,7 @@ const recentDocuments: RecentDocument[] = [
     name: "계약서_안심찬.pdf",
     uploadedAt: "2026.08.27 13:58",
     pages: 8,
-    dealLabel: "안심찬상사 · SC-2026-0812",
+    dealLabel: "DL-260708-01 · KATAMAN ASIA-PACIFIC PTE LTD",
     status: "거래 연결 완료",
     tone: "success",
     stage: "confirmed",

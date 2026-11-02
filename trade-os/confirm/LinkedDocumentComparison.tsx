@@ -39,7 +39,7 @@ function documentValue(record: DealDocumentRecord | null, field: typeof comparis
   return `${role}${value[1]}`
 }
 
-export function LinkedDocumentComparison({ dealId }: { dealId: string }) {
+export function LinkedDocumentComparison({ dealId, connected = false }: { dealId: string; connected?: boolean }) {
   const load = () => {
     try {
       const records = listDealDocuments(dealId, true)
@@ -59,7 +59,7 @@ export function LinkedDocumentComparison({ dealId }: { dealId: string }) {
     <section aria-label="연결된 서류 대조표" className="mt-4 w-full min-w-0 border-t pt-4 [contain:inline-size]">
       <h3 className="text-sm font-semibold">서류 대조표</h3>
       <p className="mt-1 text-xs text-muted-foreground">
-        {dealId} 거래에 이미 연결된 서류를 비교합니다. 현재 업로드 문서는 연결 전에는 포함되지 않습니다.
+        {dealId} 거래에 이미 연결된 서류를 비교합니다.{!connected ? " 현재 업로드 문서는 연결 전에는 포함되지 않습니다." : ""}
       </p>
       {data.error ? (
         <Alert className="mt-3">
