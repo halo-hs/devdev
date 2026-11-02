@@ -61,7 +61,7 @@ export function LinkedDocumentComparison({ dealId, connected = false }: { dealId
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="mt-3">연결된 서류 대조표 전체 보기</Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[85dvh] overflow-auto sm:max-w-6xl">
+      <DialogContent className="max-h-[90dvh] w-[calc(100vw-2rem)] overflow-auto sm:max-w-[calc(100vw-4rem)]">
         <DialogHeader>
           <DialogTitle>서류 대조표</DialogTitle>
           <DialogDescription>
