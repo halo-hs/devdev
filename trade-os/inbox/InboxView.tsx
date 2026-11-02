@@ -638,7 +638,7 @@ function DuplicateUploadAlert({
 }
 
 // Kept as a fallback for older prototype routes while the horizontal tray ships.
-type DocumentTrayFilter = "all" | "processing" | "review" | "failed" | "confirmed"
+type DocumentTrayFilter = "all" | "processing" | "review" | "failed"
 
 type DocumentQueueSort = "recent" | "oldest"
 
@@ -647,7 +647,6 @@ function matchesDocumentQueueStatus(
   filter: DocumentTrayFilter
 ) {
   if (filter === "all") return true
-  if (filter === "confirmed") return document.stage === "confirmed"
   if (filter === "processing") return ["ocr", "queued"].includes(document.stage)
   if (filter === "review")
     return document.stage === "field"
@@ -852,12 +851,12 @@ function HorizontalDocumentTray({
               </div>
               <div className="truncate text-[11px] leading-4 text-[var(--color-gray-5)]">
                 {uploadDocumentTypeLabel(selectedDocument.documentType)}
-                {selectedIndex >= 0 ? ` · ${selectedIndex + 1} / ${documents.length}` : " · 연결 완료"}
+                {selectedIndex >= 0 ? ` · ${selectedIndex + 1} / ${documents.length}` : ""}
               </div>
             </div>
-            <ToneBadge tone={selectedDocument.tone}>
+            {selectedDocument.stage !== "confirmed" ? <ToneBadge tone={selectedDocument.tone}>
               {selectedDocument.status}
-            </ToneBadge>
+            </ToneBadge> : null}
           </div>
         ) : null}
 
@@ -1912,7 +1911,7 @@ export function InboxScreen({
           await handleFilesSelected([new File([pdf.output("blob")], "PO_시작가이드_예시.pdf", { type: "application/pdf" })])
         }}>예시 PDF 사용</Button></Alert></div>}
         <BeforeUploadState
-          documents={uploadDocuments.map((document, index) => ({ document, index }))}
+          documents={pendingUploadDocuments}
           onOpenDocument={(index) => {
             openUploadDocument(index)
             setHasFile(true)
@@ -2166,7 +2165,6 @@ function PendingUploadDocumentsTable({
                     <SelectItem value="processing">처리 중</SelectItem>
                     <SelectItem value="review">확인 필요</SelectItem>
                     <SelectItem value="failed">실패·제외</SelectItem>
-                    <SelectItem value="confirmed">거래 연결 완료</SelectItem>
                   </SelectContent>
                 </Select>
               </BusinessFilterField>

@@ -309,7 +309,7 @@ export function DealConfirmPanel({
             : "거래처·거래 생성 중"
           : "연결 중"
         : activeLink
-          ? changingConnection ? newDealReady ? createdDeal ? "생성한 거래로 변경 검토" : "새 거래 등록 후 변경 검토" : "연결 변경 확인" : "거래 연결 완료"
+          ? newDealReady ? createdDeal ? "생성한 거래로 변경 검토" : "새 거래 등록 후 변경 검토" : "연결 변경 확인"
           : createdDeal && newDealFormOpen
             ? "생성한 거래에 연결 재시도"
           : newDealReady
@@ -321,7 +321,7 @@ export function DealConfirmPanel({
               : "선택한 거래 연결"}
     </Button>
   )
-  const primaryAction = (
+  const primaryAction = activeLink && !changingConnection ? null : (
     <>
     <DocumentBlockingAlerts errors={connectionErrors} checks={connectionChecks} />
     {tradeSeatAssigned ? primaryButton : (
