@@ -24,6 +24,8 @@ import { type RecentDocument, type DocumentSourceDeal } from "@/App"
 import { documentSourceDeals, quotationMoney } from "@trade-os/documents/documentTemplateModel"
 import { resolvedReviewFields, readUploadDocumentDealLinks } from "@trade-os/inbox/uploadDocumentModel"
 
+import { LinkedDocumentComparison } from "./LinkedDocumentComparison"
+
 export function DealConfirmPanel({
   document,
   originDealId,
@@ -366,7 +368,7 @@ export function DealConfirmPanel({
           </div>
         </div>
 
-        <ScrollArea className="min-h-0 flex-1">
+        <ScrollArea className="min-h-0 flex-1 [&_[data-slot=scroll-area-viewport]>div]:!block">
           <div data-document-requirement="connection" className="mx-auto w-full max-w-4xl space-y-5 p-6">
             {connectionError ? <Alert variant="destructive"><AlertTitle>현재 거래 연결을 불러오지 못했습니다</AlertTitle><AlertDescription>{connectionError}</AlertDescription><Button className="mt-3" size="sm" variant="outline" onClick={() => setConnectionAttempt(value => value + 1)}>현재 연결 다시 확인</Button></Alert>
               : connection ? <DocumentConnectionSummary connection={connection} changing={changingConnection} disabled={!tradeSeatAssigned || linking || candidateLoadState !== "ready" || !onConnectionChanged}
@@ -709,6 +711,10 @@ export function DealConfirmPanel({
                             ))}
                           </dl>
                         </details>
+                      ) : null}
+
+                      {selectedCandidate && !newDealFormOpen ? (
+                        <LinkedDocumentComparison key={`${document.name}:${selectedCandidate.id}`} dealId={selectedCandidate.id} />
                       ) : null}
 
                       {selectedCandidate ? (
