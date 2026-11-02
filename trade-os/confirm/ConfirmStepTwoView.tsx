@@ -24,7 +24,6 @@ import { type RecentDocument, type DocumentSourceDeal } from "@/App"
 import { documentSourceDeals, quotationMoney } from "@trade-os/documents/documentTemplateModel"
 import { resolvedReviewFields, readUploadDocumentDealLinks } from "@trade-os/inbox/uploadDocumentModel"
 
-import { LinkedDocumentComparison } from "./LinkedDocumentComparison"
 
 export function DealConfirmPanel({
   document,
@@ -421,9 +420,6 @@ export function DealConfirmPanel({
               </section>
             ) : null}
 
-            {connectionReady && activeLink && !changingConnection ? (
-              <div><LinkedDocumentComparison key={`${document.name}:${activeLink.dealId}`} dealId={activeLink.dealId} connected /></div>
-            ) : null}
 
             {(!activeLink || changingConnection) && connectionReady ? <section>
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -689,9 +685,6 @@ export function DealConfirmPanel({
                                 </span>
                               ) : null}
                             </button>
-                            <div className="ml-auto px-5 py-3">
-                              <LinkedDocumentComparison dealId={candidate.id} connected={candidate.id === activeLink?.dealId} />
-                            </div>
                             </div>
                           )
                         })}
