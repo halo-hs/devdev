@@ -333,9 +333,6 @@ export function DealConfirmPanel({
     </>
   )
 
-  const comparisonDealId = connectionReady
-    ? activeLink && !changingConnection ? activeLink.dealId : !newDealFormOpen ? selectedCandidate?.id : null
-    : null
   return (
     <>
       {actionPortalTarget
@@ -424,8 +421,8 @@ export function DealConfirmPanel({
               </section>
             ) : null}
 
-            {comparisonDealId ? (
-              <LinkedDocumentComparison key={`${document.name}:${comparisonDealId}:${Boolean(activeLink && !changingConnection)}`} dealId={comparisonDealId} connected={Boolean(activeLink && !changingConnection)} />
+            {connectionReady && activeLink && !changingConnection ? (
+              <div><LinkedDocumentComparison key={`${document.name}:${activeLink.dealId}`} dealId={activeLink.dealId} connected /></div>
             ) : null}
 
             {(!activeLink || changingConnection) && connectionReady ? <section>
@@ -641,15 +638,15 @@ export function DealConfirmPanel({
                           const selected = selectedDealId === candidate.id
                           const recommended = candidate.id === recommendedDealId
                           return (
+                            <div key={candidate.id} className={cn("flex flex-wrap items-center border-b border-[var(--color-gray-10)] last:border-b-0", selected && "bg-[var(--color-primary-10)]")}>
                             <button
-                              key={candidate.id}
                               type="button"
                               role="radio"
                               aria-checked={selected}
                               className={cn(
                                 // 문서 올리기 V2 거래 후보 (6233:82241): 20px radio, 15 title,
                                 // 13 meta, Blue 10 row when selected.
-                                "flex w-full items-center gap-4 border-b border-[var(--color-gray-10)] px-5 py-3.5 text-left last:border-b-0 hover:bg-[var(--color-gray-11)]",
+                                "flex min-w-0 flex-1 basis-64 items-center gap-4 px-5 py-3.5 text-left hover:bg-[var(--color-gray-11)]",
                                 selected && "bg-[var(--color-primary-10)] hover:bg-[var(--color-primary-10)]"
                               )}
                               disabled={creatingDeal || linking || candidate.id === activeLink?.dealId}
@@ -692,6 +689,10 @@ export function DealConfirmPanel({
                                 </span>
                               ) : null}
                             </button>
+                            <div className="ml-auto px-5 py-3">
+                              <LinkedDocumentComparison dealId={candidate.id} connected={candidate.id === activeLink?.dealId} />
+                            </div>
+                            </div>
                           )
                         })}
                         {candidates.length === 0 ? (
