@@ -810,7 +810,7 @@ function HorizontalDocumentTray({
       <div
         role="button"
         tabIndex={0}
-        aria-label="검토·배정 대기 문서 목록"
+        aria-label="업로드 문서 목록"
         aria-expanded={expanded}
         className="flex min-h-14 cursor-pointer flex-wrap items-center gap-2 p-2 xl:flex-nowrap xl:gap-3.5 xl:py-3 xl:pr-3.5 xl:pl-3 outline-none hover:bg-muted/20 focus-visible:[box-shadow:var(--shadow-keyboard-focus)]"
         onClick={() => handleExpandedChange(!expanded)}
@@ -828,7 +828,7 @@ function HorizontalDocumentTray({
             expanded ? "text-[var(--color-primary-4)]" : "text-[var(--color-gray-2)]"
           )}
         >
-          <span className="font-semibold">검토·배정 대기 문서</span>
+          <span className="font-semibold">업로드 문서</span>
           <span className="inline-flex items-center justify-center rounded-[10px] bg-[var(--color-gray-11)] px-[7px] py-px text-[12px] font-semibold text-[var(--color-gray-4)]">
             {documents.length}
           </span>
@@ -1010,7 +1010,7 @@ function HorizontalDocumentTray({
                     "mt-4 border-t border-[var(--surface-border)] pt-3"
                 )}
               >
-                <BusinessListToolbar aria-label="대기 문서 필터">
+                <BusinessListToolbar aria-label="업로드 문서 필터">
                   <BusinessFilterField label="상태">
                     <Select
                       value={filter}
@@ -1020,7 +1020,7 @@ function HorizontalDocumentTray({
                     >
                       <SelectTrigger
                         size="sm"
-                        className="w-32"
+                        className="w-44"
                         aria-label="상태 필터"
                       >
                         <SelectValue />
@@ -1030,6 +1030,7 @@ function HorizontalDocumentTray({
                         <SelectItem value="processing">처리 중</SelectItem>
                         <SelectItem value="review">확인 필요</SelectItem>
                         <SelectItem value="failed">처리 실패</SelectItem>
+                        <SelectItem value="confirmed">거래 연결 완료</SelectItem>
                       </SelectContent>
                     </Select>
                   </BusinessFilterField>
@@ -1446,10 +1447,8 @@ export function InboxScreen({
   })
   const etd = currentReviewFields.find((field) => field.key === "etd")?.value
   const eta = currentReviewFields.find((field) => field.key === "eta")?.value
-  const pendingUploadDocuments = uploadDocuments
-    .map((document, index) => ({ document, index }))
-    .filter(({ document }) => document.stage !== "confirmed")
-  const pendingSelectedIndex = pendingUploadDocuments.findIndex(({ index }) => index === selectedIndex)
+  const uploadDocumentEntries = uploadDocuments.map((document, index) => ({ document, index }))
+  const selectedQueueIndex = uploadDocumentEntries.findIndex(({ index }) => index === selectedIndex)
   const isTypeUnresolved = isUploadDocumentTypeUnresolved(selectedDocument)
   const pdfReviewCompleted =
     selectedDocument.pdfReviewCompleted === true ||
@@ -2027,17 +2026,17 @@ export function InboxScreen({
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden p-3 sm:p-4">
         <HorizontalDocumentTray
-          documents={pendingUploadDocuments.map(({ document }) => document)}
-          selectedIndex={pendingSelectedIndex}
+          documents={uploadDocumentEntries.map(({ document }) => document)}
+          selectedIndex={selectedQueueIndex}
           currentDocument={selectedDocument}
           onSelect={(index) => {
-            const sourceIndex = pendingUploadDocuments[index]?.index
+            const sourceIndex = uploadDocumentEntries[index]?.index
             if (sourceIndex === undefined) return
             openUploadDocument(sourceIndex)
             setFileTrayOpen(false)
           }}
           onDelete={(index) => {
-            const sourceIndex = pendingUploadDocuments[index]?.index
+            const sourceIndex = uploadDocumentEntries[index]?.index
             if (sourceIndex === undefined) return
             handleDeleteDocument(sourceIndex)
           }}
