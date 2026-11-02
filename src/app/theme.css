@@ -835,7 +835,8 @@
 .app-navigation-brand .snap-product-switcher { height: 28px; padding: 0; gap: 6px; }
 .app-navigation-brand .snap-product-switcher > svg { width: 16px; height: 16px; }
 .app-navigation-brand .navigation-toggle > svg { display: none; }
-[data-collapsible="icon"] .app-navigation-content [data-slot="sidebar-menu"] { gap: 4px; }
+/* Hovered and active items keep a visible gap whether the sidebar is open or collapsed. */
+.app-navigation-content [data-slot="sidebar-menu"] { gap: 4px; }
 .app-navigation-footer [data-slot="sidebar-menu"] { gap: 0; }
 .app-navigation-brand .snap-product-switcher > svg { display: none; }
 .app-navigation-brand .snap-product-switcher::after {

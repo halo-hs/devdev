@@ -1052,7 +1052,7 @@ function DashboardPage({ navigate }: { navigate: SnapNavigate }) {
                             <span className="block truncate font-medium text-[var(--surface-foreground)]">
                               {taskTitle(task)}
                             </span>
-                            <span className="mt-0.5 block truncate text-xs text-[var(--surface-muted-foreground)]">
+                            <span className="mt-0.5 block truncate text-sm text-[var(--surface-muted-foreground)]">
                               {taskCustomer(task)} · {taskLocation(task)}
                             </span>
                           </span>
@@ -1282,13 +1282,13 @@ function TasksPage({ navigate }: { navigate: SnapNavigate }) {
                               <div className="font-medium">
                                 {taskTitle(task)}
                               </div>
-                              <div className="mt-0.5 text-xs text-muted-foreground">
+                              <div className="mt-0.5 text-sm text-muted-foreground">
                                 {id}
                               </div>
                             </TableCell>
                             <TableCell className="max-w-64 whitespace-normal">
                               <div>{taskCustomer(task)}</div>
-                              <div className="text-xs text-muted-foreground">
+                              <div className="text-sm text-muted-foreground">
                                 {taskLocation(task)}
                               </div>
                             </TableCell>
@@ -2032,7 +2032,7 @@ function ErpHandoffPage({ navigate }: { navigate: SnapNavigate }) {
                                   "업무"}
                               </span>
                             </Button>
-                            <div className="mt-0.5 text-xs text-muted-foreground">
+                            <div className="mt-0.5 text-sm text-muted-foreground">
                               {stringValue(handoff, "location_name") || id}
                             </div>
                           </TableCell>
@@ -2041,7 +2041,7 @@ function ErpHandoffPage({ navigate }: { navigate: SnapNavigate }) {
                               {stringValue(handoff, "handoff_type") ||
                                 "generic"}
                             </div>
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-sm text-muted-foreground">
                               {stringValue(handoff, "scope", "scope_summary") ||
                                 "범위 확인 필요"}
                             </div>
