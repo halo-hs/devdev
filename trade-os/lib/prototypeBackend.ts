@@ -349,6 +349,10 @@ export const prototypeBackend = {
     completeReview: completeDealDocumentReview,
   },
   tradeDocuments: {
+    // Preview fixture for #1049; production uses GET /trade/documents/duplicate-invoices.
+    listDuplicateInvoices: async () => ({ items: [
+      { invoice_number: "INV-2607-003", count: 2 },
+    ] }),
     listCandidates: async <T extends Parameters<typeof documentCandidates>[0][number]>(deals: T[], facts: Parameters<typeof documentCandidates>[1]) => documentCandidates(deals, facts),
     getConnection: async (...args: Parameters<typeof getDocumentConnection>) => getDocumentConnection(...args),
     previewConnectionChange: async (...args: Parameters<typeof previewConnectionChange>) => previewConnectionChange(...args),

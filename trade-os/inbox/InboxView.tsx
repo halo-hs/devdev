@@ -608,6 +608,37 @@ function AiDocumentProcessingNotice() {
   )
 }
 
+function DuplicateInvoiceWarning() {
+  const [groups, setGroups] = useState<{ invoice_number: string; count: number }[]>([])
+  const [failed, setFailed] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [attempt, setAttempt] = useState(0)
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    prototypeBackend.tradeDocuments.listDuplicateInvoices()
+      .then(({ items }) => { if (active) { setGroups(items); setFailed(false) } })
+      .catch(() => { if (active) setFailed(true) })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [attempt])
+  if (!failed && groups.length === 0) return null
+  return (
+    <Alert variant="destructive" data-component="DuplicateInvoiceWarning">
+      <AlertTriangle className="size-4" />
+      <AlertTitle className="text-xs">
+        {failed ? "중복 인보이스 번호를 확인하지 못했습니다." : `중복 인보이스 번호 ${groups.length}건 발견`}
+      </AlertTitle>
+      <AlertDescription className="text-[11px] leading-5">
+        {failed ? "잠시 후 다시 시도해 주세요. 파일은 계속 올릴 수 있습니다." :
+          groups.map((group) => `${group.invoice_number} · 문서 ${group.count}개`).join(" / ")}
+      </AlertDescription>
+      {failed ? <AlertAction><Button variant="ghost" size="xs" disabled={loading}
+        onClick={() => setAttempt((value) => value + 1)}>다시 시도</Button></AlertAction> : null}
+    </Alert>
+  )
+}
+
 function DuplicateUploadAlert({
   notice,
   onDismiss,
@@ -958,6 +989,7 @@ function HorizontalDocumentTray({
               />
             </div>
           ) : null}
+          <div className="mb-2 empty:hidden"><DuplicateInvoiceWarning /></div>
           {documents.length === 0 && !uploadProgress ? (
             <div className="rounded-[var(--r-md)] border border-dashed border-[var(--surface-border)] px-4 py-5 text-center text-xs text-[var(--surface-muted-foreground)]">
               파일 추가 버튼에서 문서를 추가해 주세요.
@@ -2446,6 +2478,7 @@ function BeforeUploadState({
                     onDismiss={onDismissDuplicateUpload}
                   />
                 ) : null}
+                <DuplicateInvoiceWarning />
               </div>
               <FileDropZone
                 ref={fileDropZoneRef}

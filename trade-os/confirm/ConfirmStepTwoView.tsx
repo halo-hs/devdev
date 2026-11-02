@@ -699,7 +699,8 @@ export function DealConfirmPanel({
                               </Tooltip>
                             ) : null}
                             {selected ? (
-                              <div id={`candidate-comparison-${candidate.id}`} className="w-full min-w-0 basis-full border-t border-[var(--color-gray-9)] bg-background px-5 py-3">
+                              <div id={`candidate-comparison-${candidate.id}`} className="w-full min-w-0 basis-full px-5 pb-4 pt-1">
+                                <section className="rounded-[var(--r-md)] border border-[var(--color-gray-9)] bg-background p-4">
                                 <dl className="grid gap-y-3 sm:grid-cols-3" aria-label={`${candidate.id} 현재 문서값과 선택한 거래값 비교`}>
                                   {[
                                     ["거래처", readCounterparty, candidate.party],
@@ -721,6 +722,7 @@ export function DealConfirmPanel({
                                     </div>
                                   ))}
                                 </dl>
+                                </section>
                               </div>
                             ) : null}
                             </div>
