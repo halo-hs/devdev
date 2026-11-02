@@ -281,4 +281,3 @@ export const initialDocumentFields: Record<string, DocumentFieldSet> = {
     ],
   },
 }
-
