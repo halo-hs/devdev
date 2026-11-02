@@ -1824,7 +1824,7 @@ export function InboxScreen({
   const rereadingDocuments = useRef(new Set<string>())
   const retryDocument = async (index: number) => {
     const document = uploadDocuments[index]
-    if (!document || isUploadDocumentTypeUnresolved(document) || !["failed", "field"].includes(document.stage) || (document.retryCount ?? 0) >= 3 || rereadingDocuments.current.has(document.name)) return
+    if (!document || isUploadDocumentTypeUnresolved(document) || document.stage !== "failed" || (document.retryCount ?? 0) >= 3 || rereadingDocuments.current.has(document.name)) return
     const name = document.name
     rereadingDocuments.current.add(name)
     setUploadDocuments((current) => current.map((item) => item.name === name
@@ -1887,9 +1887,9 @@ export function InboxScreen({
               ...document,
               documentType,
               sourcePages: undefined,
-              stage: "field",
-              status: "검토 대기",
-              tone: "warning",
+              stage: document.stage === "failed" ? "failed" : "field",
+              status: document.stage === "failed" ? "처리 실패" : "검토 대기",
+              tone: document.stage === "failed" ? "danger" : "warning",
               pdfReviewCompleted: false,
             }
           : document
@@ -1965,6 +1965,14 @@ export function InboxScreen({
             onClick={() => void handleAutoSave("retry")}
           >
             다시 저장
+          </Button>
+        ) : null}
+        {selectedDocument.stage === "failed" && (selectedDocument.retryCount ?? 0) < 3 ? (
+          <Button size="sm" variant="outline"
+            disabled={isTypeUnresolved}
+            title={isTypeUnresolved ? "문서 유형을 먼저 선택해 주세요." : undefined}
+            onClick={() => void retryDocument(selectedIndex)}>
+            다시 읽기 ({selectedDocument.retryCount ?? 0}/3)
           </Button>
         ) : null}
         {selectedDocument.stage === "ocr" ||
@@ -2060,7 +2068,6 @@ export function InboxScreen({
             onPdfReviewComplete={handlePdfReviewComplete}
             onReviewedFieldChange={handleReviewedFieldChange}
             onDocumentTypeChange={handleDocumentTypeChange}
-            onReread={() => void retryDocument(selectedIndex)}
             mobilePane={mobilePane}
             onMobilePaneChange={setMobilePane}
           />

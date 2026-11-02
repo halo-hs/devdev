@@ -40,7 +40,6 @@ export function DocumentReviewWorkspace({
   onPdfReviewComplete,
   onReviewedFieldChange,
   onDocumentTypeChange,
-  onReread,
   mobilePane,
   onMobilePaneChange,
 }: {
@@ -61,7 +60,6 @@ export function DocumentReviewWorkspace({
   onPdfReviewComplete: () => void
   onReviewedFieldChange: (key: string, patch: Partial<ReviewedField>) => void
   onDocumentTypeChange: (documentType: UploadDocumentType) => void
-  onReread: () => void
   mobilePane: "fields" | "preview"
   onMobilePaneChange: (pane: "fields" | "preview") => void
 }) {
@@ -120,7 +118,6 @@ export function DocumentReviewWorkspace({
           <DocumentTypeResolution
             document={document}
             onChange={onDocumentTypeChange}
-            onReread={onReread}
           />
           {typeUnresolved ? null : document.stage === "excluded" ? (
             <NonTradeDocumentNotice documentType={document.documentType} />
@@ -260,19 +257,13 @@ export function DocumentReviewWorkspace({
 
 function DocumentTypeResolution({
   document,
-  onReread,
   onChange,
 }: {
   document: RecentDocument
-  onReread: () => void
   onChange: (documentType: UploadDocumentType) => void
 }) {
   const unresolved = isUploadDocumentTypeUnresolved(document)
   const busy = document.stage === "ocr" || document.stage === "queued"
-  const count = document.retryCount ?? 0
-  const typeLabel = uploadDocumentTypeLabel(document.documentType)
-  const finalConsonant = (typeLabel.charCodeAt(typeLabel.length - 1) - 0xac00) % 28
-  const particle = finalConsonant === 0 || finalConsonant === 8 ? "로" : "으로"
   return (
     <Alert className="mt-4 px-4 py-3" variant="default">
       <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[var(--color-orange-2)]" />
@@ -282,7 +273,7 @@ function DocumentTypeResolution({
           {unresolved ? <ToneBadge tone="warning">AI 분류 미확정</ToneBadge> : null}
         </div>
         <p className="mt-1 text-xs leading-5 text-[var(--surface-muted-foreground)]">
-          유형을 선택하면 검토 필드가 바뀝니다. AI로 다시 읽으려면 아래 버튼을 눌러 주세요.
+          유형 선택만으로 AI가 다시 읽지는 않습니다.
         </p>
         <Field className="mt-3 gap-1.5">
           <FieldLabel className="text-xs">문서 유형</FieldLabel>
@@ -313,15 +304,7 @@ function DocumentTypeResolution({
             </ComboboxContent>
           </Combobox>
         </Field>
-        {unresolved ? (
-          <p className="mt-2 text-xs text-muted-foreground">문서 유형을 먼저 선택해 주세요.</p>
-        ) : (
-          <Button className="mt-3" variant="outline" size="sm"
-            disabled={busy || count >= 3 || !["failed", "field"].includes(document.stage)}
-            onClick={onReread}>
-            {busy ? "AI가 다시 읽고 있어요" : count >= 3 ? "다시 읽기 횟수를 모두 사용했어요" : `${typeLabel}${particle} 다시 읽기 (${count}/3)`}
-          </Button>
-        )}
+        {unresolved ? <p className="mt-2 text-xs text-muted-foreground">문서 유형을 먼저 선택해 주세요.</p> : null}
       </div>
     </Alert>
   )
@@ -350,9 +333,9 @@ function DocumentProcessingNotice({ document }: { document: RecentDocument }) {
   const content =
     document.stage === "failed"
       ? {
-          title: "문서를 처리하지 못했어요",
-          body: "원본 파일은 목록에 유지됩니다. 문서 유형을 확인하고 다시 읽기로 재시도할 수 있습니다.",
-          badge: "재시도 가능",
+          title: (document.retryCount ?? 0) >= 3 ? "다시 읽기 횟수를 모두 사용했어요" : "문서를 처리하지 못했어요",
+          body: (document.retryCount ?? 0) >= 3 ? "필요한 정보를 직접 입력하거나 원본 파일을 다시 올려주세요." : "원본 파일은 목록에 유지됩니다. 상단의 다시 읽기로 재시도할 수 있습니다.",
+          badge: (document.retryCount ?? 0) >= 3 ? "한도 소진" : "재시도 가능",
           tone: "danger" as Tone,
         }
       : document.stage === "duplicate"
