@@ -3,7 +3,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { cn } from "@/lib/utils"
 import { initialDocumentFields } from "@trade-os/lib/dealDocumentFields"
 
-export type ComparisonDocument = { code: string; type: string; file: string; status: string; documentId?: string }
+export type ComparisonDocument = { code: string; type: string; file: string; status: string; documentId?: string; comparisonValues?: Record<string, string> }
 const normalizeCandidateValue = (value: string) => value.replaceAll(",", "").replaceAll(" ", "").toLowerCase()
 
 export function DealDocumentComparisonDialog({ open, onOpenChange, documents, description }: {
@@ -42,7 +42,9 @@ export function DealDocumentComparisonTable({ documents }: { documents: Comparis
           : undefined
       return {
         document,
-        value: field?.value ?? "",
+        value: document.file && document.status !== "분석 중"
+          ? document.comparisonValues?.[key] ?? (document.comparisonValues ? "" : field?.value ?? "")
+          : "",
         evidence: field?.evidence ?? "",
       }
     })

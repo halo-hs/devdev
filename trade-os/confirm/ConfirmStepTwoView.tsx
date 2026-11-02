@@ -690,7 +690,7 @@ export function DealConfirmPanel({
                               ) : null}
                             </button>
                             <div className="ml-auto px-5 py-3">
-                              <LinkedDocumentComparison dealId={candidate.id} connected={candidate.id === activeLink?.dealId} />
+                              <LinkedDocumentComparison dealId={candidate.id} candidate={candidate} connected={candidate.id === activeLink?.dealId} />
                             </div>
                             </div>
                           )

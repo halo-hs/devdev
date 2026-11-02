@@ -1,3 +1,5 @@
+import type { DocumentSourceDeal } from "@/App"
+import { documentSourceDeals } from "@trade-os/documents/documentTemplateModel"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -6,7 +8,7 @@ import { importantDealDocuments, listDealDocuments } from "@trade-os/lib/dealDoc
 
 // Same linked document slots and comparison dialog as the transaction detail.
 // Selecting a candidate only reads its documents; it never connects the current upload.
-export function LinkedDocumentComparison({ dealId, connected = false }: { dealId: string; connected?: boolean }) {
+export function LinkedDocumentComparison({ dealId, connected = false, candidate }: { dealId: string; connected?: boolean; candidate?: DocumentSourceDeal }) {
   const load = (): { documents: ComparisonDocument[]; failed: boolean } => {
     try {
       const records = listDealDocuments(dealId, true)
@@ -18,7 +20,25 @@ export function LinkedDocumentComparison({ dealId, connected = false }: { dealId
           status: record.state === "processing" ? "분석 중" : record.state === "needs_type" ? "유형 확인 필요" : record.state === "needs_review" ? "검토" : "보유",
         } : { ...slot, file: "", status: "미비" }
       })
-      return { documents, failed: false }
+      // Preview fixtures: match the candidate's party, currency, amount and quantity.
+      // Missing documents remain missing; these values are not extracted production data.
+      const deal = candidate ?? documentSourceDeals.find(deal => deal.id === dealId)
+      const terms: Record<string, [string, string, string]> = {
+        "DL-260708-08": ["20,400 KG", "CIF Hamburg", "T/T 30일"],
+        "DL-260708-01": ["20,200 KG", "CIF Busan", "L/C at sight"],
+        "DL-260707-04": ["", "", "T/T 선불"],
+        "DL-260704-02": ["12,600 KG", "DAP Busan", "T/T 60일"],
+        "DL-260701-09": ["", "", "월말 정산"],
+        "DL-260629-03": ["18,300 KG", "FOB Singapore", "T/T 30% / 70%"],
+        "DL-260625-07": ["", "", "운송 완료 후 지급"],
+      }
+      const [weight, incoterms, payment] = terms[dealId] ?? ["", "", ""]
+      return { documents: documents.map(document => ({ ...document, comparisonValues: deal ? {
+        seller: deal.party,
+        amount: ["PO", "SC", "CI"].includes(document.code) ? `${deal.amount} ${deal.currency}` : "",
+        quantity: deal.item.split(" · ")[1] ?? "",
+        gross_weight: weight, incoterms, payment: ["PO", "SC", "CI"].includes(document.code) ? payment : "",
+      } : {} })), failed: false }
     } catch {
       return { documents: [], failed: true }
     }
