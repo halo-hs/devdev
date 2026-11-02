@@ -340,7 +340,7 @@ function EmailForwardInPanel({
     <section
       className={cn(
         "rounded-lg border bg-background text-left",
-        compact ? "mt-4 p-3" : "p-5"
+        compact ? "mt-4 p-3" : "rounded-none border-0 p-0"
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -392,7 +392,7 @@ function EmailForwardInPanel({
         </div>
       ) : (
         <div className="mt-3">
-          <div className="grid grid-cols-2 gap-2 rounded-[var(--r-lg)] bg-[var(--surface-background)] px-3 py-3 shadow-[var(--shadow-section)] ring-1 ring-[var(--surface-border)]">
+          <div className="grid grid-cols-2 gap-3">
             <label className="grid gap-1">
               <span className="text-[11px] font-medium text-muted-foreground">
                 수신일자
@@ -556,9 +556,9 @@ function EmailForwardQueue({
   // Portaled to body so the panel stacks above the shell header instead of
   // inside the page's stacking context.
   return createPortal(
-    <div className="fixed inset-y-0 right-0 z-50 w-[min(560px,calc(100vw-24px))] border-l bg-background shadow-2xl">
+    <div className="fixed inset-y-0 right-0 z-50 w-[min(480px,100vw)] border-l bg-background shadow-2xl">
       <div className="flex h-full min-h-0 flex-col">
-        <div className="flex h-14 shrink-0 items-center justify-between border-b px-5">
+        <div className="flex min-h-20 shrink-0 items-start justify-between px-6 pt-6 pb-4">
           <div>
             <div className="text-sm font-semibold">수신 메일에서 첨부 선택</div>
             <div className="mt-0.5 text-xs text-muted-foreground">
@@ -574,7 +574,7 @@ function EmailForwardQueue({
             <X className="size-4" />
           </Button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto p-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-5">
           <EmailForwardInPanel
             onImportFiles={(files) => {
               onImportFiles(files)
@@ -2396,10 +2396,10 @@ function BeforeUploadState({
           title="문서 올리기"
           description="PDF를 올려 내용을 검토한 뒤, 거래를 선택하고 반영할 내용을 확인하세요."
           summary={
-        <div className="mx-auto w-full max-w-5xl">
-          <Card className="w-full bg-[var(--color-gray-12)]! shadow-[var(--shadow-modal)]" size="sm">
-            <CardContent className="p-4 sm:p-5">
-              <div className="mb-3 grid gap-2">
+        <div className="mx-auto w-full max-w-[1200px]">
+          <Card className="w-full rounded-[22px] border bg-[var(--color-gray-12)]! shadow-[var(--shadow-section)]" size="sm">
+            <CardContent className="p-5 sm:px-[30px]">
+              <div className="mb-5 grid gap-5">
                 <div className="flex flex-wrap items-start gap-x-6 gap-y-2">
                   <ol
                     aria-label="문서 처리 순서"
@@ -2462,7 +2462,7 @@ function BeforeUploadState({
                   if (!viewSeatGuard()) onFilesSelected(files)
                 }}
                 // 문서 올리기 V2 (6273:100113): Blue 10 drop area, stacked and centered.
-                className="min-h-[112px] flex-col gap-2 border-[var(--color-primary-6)] bg-[var(--color-primary-10)] px-4 text-center text-[var(--color-primary-4)]"
+                className="min-h-[148px] flex-col gap-2 border-[var(--color-primary-6)] bg-[var(--color-primary-10)] px-4 text-center text-[var(--color-primary-4)]"
               >
                 <Upload className="size-5" />
                 <span>

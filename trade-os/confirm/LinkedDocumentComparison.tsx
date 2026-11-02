@@ -38,7 +38,7 @@ export function LinkedDocumentComparison({ dealId, connected = false, candidate 
         amount: ["PO", "SC", "CI"].includes(document.code) ? `${deal.amount} ${deal.currency}` : "",
         quantity: deal.item.split(" · ")[1] ?? "",
         gross_weight: weight, incoterms, payment: ["PO", "SC", "CI"].includes(document.code) ? payment : "",
-      } : {} })), failed: false }
+      } : {} as Record<string, string> })), failed: false }
     } catch {
       return { documents: [], failed: true }
     }

@@ -16,7 +16,6 @@ import { ToneBadge } from "@trade-os/components/ToneBadge"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Combobox, ComboboxInput, ComboboxContent, ComboboxEmpty, ComboboxList, ComboboxItem } from "@/components/ui/combobox"
 import { type Tone } from "@trade-os/documents/documentTemplateModel"
-import { ItemGroup, Item, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
 import { type RecentDocument, type UploadDetailStep, type UploadDocumentType } from "@/App"
 import { isUploadDocumentTypeUnresolved, uploadDocumentTypeLabel, manualUploadDocumentTypeOptions } from "@trade-os/inbox/uploadDocumentModel"
@@ -265,8 +264,7 @@ function DocumentTypeResolution({
   const unresolved = isUploadDocumentTypeUnresolved(document)
   const busy = document.stage === "ocr" || document.stage === "queued"
   return (
-    <Alert className="mt-4 px-4 py-3" variant="default">
-      <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[var(--color-orange-2)]" />
+    <section className="mt-4 py-3" aria-label="문서 유형 확인">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="text-sm font-semibold">{unresolved ? "문서 유형을 확인해 주세요" : "문서 유형"}</div>
@@ -304,9 +302,9 @@ function DocumentTypeResolution({
             </ComboboxContent>
           </Combobox>
         </Field>
-        {unresolved ? <p className="mt-2 text-xs text-muted-foreground">문서 유형을 먼저 선택해 주세요.</p> : null}
+        {unresolved ? <p className="mt-2 text-xs text-[var(--color-orange-2)]">문서 유형을 먼저 선택해 주세요.</p> : null}
       </div>
-    </Alert>
+    </section>
   )
 }
 
@@ -361,9 +359,11 @@ function DocumentProcessingNotice({ document }: { document: RecentDocument }) {
 
   return (
     <Alert
-      className="p-5"
+      className="px-4 py-3"
       variant={
-        document.stage === "failed"
+        document.stage === "duplicate"
+          ? "caution"
+          : document.stage === "failed"
           ? "riskHigh"
           : document.stage === "ocr"
             ? "blue"
@@ -383,28 +383,13 @@ function DocumentProcessingNotice({ document }: { document: RecentDocument }) {
         <ToneBadge tone={content.tone}>{content.badge}</ToneBadge>
       </AlertAction>
       {document.stage === "duplicate" ? (
-        <ItemGroup className="col-span-full mt-3 gap-2">
-          <Item variant="outline" size="xs">
-            <ItemContent className="flex-row items-center gap-2">
-              <ItemDescription className="text-xs">기존 파일</ItemDescription>
-              <ItemTitle className="text-xs">인보이스_2607_003.pdf</ItemTitle>
-            </ItemContent>
-          </Item>
-          <Item variant="outline" size="xs">
-            <ItemContent className="flex-row items-center gap-2">
-              <ItemDescription className="text-xs">연결 거래</ItemDescription>
-              <ItemTitle className="text-xs">
-                한빛무역 · INV-2026-0703
-              </ItemTitle>
-            </ItemContent>
-          </Item>
-          <Alert variant="default">
-            <AlertTriangle className="text-[var(--color-orange-2)]" />
-            <AlertDescription className="text-xs">
-              동일 인보이스 번호가 2건 감지되어 이중 지급 검토가 필요합니다.
-            </AlertDescription>
-          </Alert>
-        </ItemGroup>
+        <div className="col-span-full mt-3 space-y-2">
+          <dl className="grid grid-cols-2 gap-6 text-xs">
+            <div><dt className="text-[11px] text-muted-foreground">기존 파일</dt><dd className="mt-1 break-words text-foreground">인보이스_2607_003.pdf</dd></div>
+            <div><dt className="text-[11px] text-muted-foreground">연결 거래</dt><dd className="mt-1 break-words text-foreground">한빛무역 · INV-2026-0703</dd></div>
+          </dl>
+          <p className="text-xs">동일 인보이스 번호가 2건 감지되어 이중 지급 검토가 필요합니다.</p>
+        </div>
       ) : document.stage === "ocr" ? (
         <div
           className="col-span-full mt-3 space-y-2"

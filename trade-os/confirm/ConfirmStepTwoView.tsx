@@ -364,7 +364,7 @@ export function DealConfirmPanel({
         </div>
 
         <ScrollArea className="min-h-0 flex-1 [&_[data-slot=scroll-area-viewport]>div]:!block">
-          <div data-document-requirement="connection" className="mx-auto w-full max-w-4xl space-y-5 p-6">
+          <div data-document-requirement="connection" className="mx-auto w-full max-w-4xl space-y-5 px-5 py-4">
             {connectionError ? <Alert variant="destructive"><AlertTitle>현재 거래 연결을 불러오지 못했습니다</AlertTitle><AlertDescription>{connectionError}</AlertDescription><Button className="mt-3" size="sm" variant="outline" onClick={() => setConnectionAttempt(value => value + 1)}>현재 연결 다시 확인</Button></Alert>
               : connection ? <DocumentConnectionSummary connection={connection} changing={changingConnection} disabled={!tradeSeatAssigned || linking || candidateLoadState !== "ready" || !onConnectionChanged}
                 onChange={() => {
@@ -667,24 +667,24 @@ export function DealConfirmPanel({
                               </span>
                               <span className="min-w-0 flex-1">
                                 <span className="flex min-w-0 items-center gap-2">
-                                  <strong className="truncate text-[15px] leading-[22px] font-medium text-[var(--color-gray-1)]">
+                                  <strong className="truncate text-[15px] leading-[22px] font-normal text-[var(--color-gray-1)]">
                                     {candidate.title}
                                   </strong>
                                   <ToneBadge tone={candidate.tone}>
                                     {candidate.stage}
                                   </ToneBadge>
                                 </span>
-                                <span className="mt-0.5 block truncate text-[13px] leading-[18px] text-[var(--color-gray-5)]">
+                                <span className="mt-0.5 block truncate text-[11px] leading-4 text-[var(--color-gray-5)]">
                                   {candidate.id} · {candidate.party}
                                 </span>
-                                <span className="mt-0.5 block text-[13px] leading-[18px] text-[var(--primary)]">
+                                <span className="mt-0.5 block text-[11px] leading-4 text-[var(--primary)]">
                                   {candidate.item} · {candidate.amount}{" "}
                                   {candidate.currency}
                                 </span>
                                 {candidate.id === activeLink?.dealId ? <span className="mt-2 block text-[10px] font-medium">현재 연결</span> : null}
                               </span>
                               {recommended ? (
-                                <span className="flex shrink-0 items-center gap-1 text-[13px] text-[#6b4ee6]">
+                                <span className="flex shrink-0 items-center gap-1 text-[11px] text-[#6b4ee6]">
                                   <Sparkles className="size-3.5" /> AI 추천
                                 </span>
                               ) : null}
