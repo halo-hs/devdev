@@ -100,6 +100,13 @@ export function OnboardingPrototype({
     (id === "T2" && Boolean(state.anchor)) ||
     (id === "T3" && Boolean(state.trade.T2)) ||
     (id === "T4" && Boolean(state.trade.T3))
+  const unavailableReason: Record<"T2" | "T3" | "T4", string> = {
+    T2: "확인할 문서가 없습니다. 문서를 올리면 AI 결과를 확인할 수 있어요.",
+    T3: state.anchor
+      ? "이 문서의 AI 결과를 검토하면 거래 연결을 이어갈 수 있어요."
+      : "연결할 문서가 없습니다. 문서를 올리고 검토해 주세요.",
+    T4: "연결된 거래가 있으면 AI에게 질문할 수 있어요.",
+  }
   const next = steps.find((step) => !isDone(state, step.id))?.id
   // Figma 처음시작하기 4차 (6578:223261): hero + overlapping guide card,
   // four step cards in one row, then the first-PDF tips panel.
@@ -135,7 +142,7 @@ export function OnboardingPrototype({
                   </h2>
                   <span
                     className="text-[13px] leading-[18px] font-semibold text-[var(--color-gray-2)]"
-                    aria-label={`진행 ${guide.count}/${total}`}
+                    aria-label={`전체 ${guide.count}/${total}`}
                   >
                     전체 {guide.count}/{total}
                   </span>
@@ -153,7 +160,7 @@ export function OnboardingPrototype({
                     style={{ width: `${(guide.count / total) * 100}%` }}
                   />
                 </div>
-                <p className="text-[11px] leading-4 text-[var(--color-gray-5)]">
+                <p className="text-[11px] leading-4 text-[var(--color-gray-4)]">
                   실제 작업이 완료되면 진행에 반영됩니다.
                 </p>
               </div>
@@ -293,8 +300,7 @@ export function OnboardingPrototype({
                       </div>
                     ) : (
                       <p className="mt-auto pl-[30px] text-[11px] leading-4 text-[var(--color-gray-5)]">
-                        이전 항목을 완료하면 같은 문서·거래에서 이어갈 수
-                        있어요.
+                        {unavailableReason[step.id as "T2" | "T3" | "T4"]}
                       </p>
                     ))}
                 </li>
