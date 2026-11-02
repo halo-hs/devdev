@@ -3,7 +3,7 @@ import { useState, useRef, type DragEvent as ReactDragEvent, useEffect } from "r
 import { ViewSeatAction } from "@trade-os/components/ViewSeatGate"
 import { useViewSeatGuard } from "@trade-os/components/useViewSeat"
 import { cn } from "@/lib/utils"
-import { Mail, Check, Copy, X, ChevronDown, AlertTriangle, FileText, ChevronUp, Plus, Upload, LoaderCircle, MoreHorizontal, Trash2, Info, RefreshCw, ChevronRight, ChevronLeft } from "lucide-react"
+import { Mail, Check, Copy, X, ChevronDown, AlertTriangle, FileText, ChevronUp, Plus, Upload, LoaderCircle, MoreHorizontal, Trash2, Info, ChevronRight, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
 import { DocumentTypeBadge } from "@trade-os/components/DocumentTypeBadge"
@@ -119,7 +119,7 @@ const recentDocuments: RecentDocument[] = [
     name: "계약서_안심찬.pdf",
     uploadedAt: "2026.08.27 13:58",
     pages: 8,
-    dealLabel: "안심찬상사 · SC-2026-0812",
+    dealLabel: "DL-260708-01 · KATAMAN ASIA-PACIFIC PTE LTD",
     status: "거래 연결 완료",
     tone: "success",
     stage: "confirmed",
@@ -1821,16 +1821,19 @@ export function InboxScreen({
       }
     }, 650)
   }
+  const rereadingDocuments = useRef(new Set<string>())
   const retryDocument = async (index: number) => {
     const document = uploadDocuments[index]
-    if (!document || document.stage !== "failed" || (document.retryCount ?? 0) >= 3) return
+    if (!document || isUploadDocumentTypeUnresolved(document) || (document.stage !== "failed" && !document.rereadAfterTypeSelection) || (document.retryCount ?? 0) >= 3 || rereadingDocuments.current.has(document.name)) return
     const name = document.name
+    rereadingDocuments.current.add(name)
     setUploadDocuments((current) => current.map((item) => item.name === name
       ? { ...item, retryCount: (item.retryCount ?? 0) + 1, stage: "ocr", status: "분석 중...", tone: "blue" } : item))
-    const result = await prototypeBackend.tradeDocuments.retry({ id: name })
+    const result = await prototypeBackend.tradeDocuments.retry({ id: name, documentType: document.documentType }).catch(() => ({ ok: false }))
+    rereadingDocuments.current.delete(name)
     const failed = !result.ok || /encrypted|password|fail/i.test(name)
     setUploadDocuments((current) => current.map((item) => item.name === name
-      ? { ...item, stage: failed ? "failed" : "field", status: failed ? "처리 실패 · 파일 확인 필요" : "검토 대기", tone: failed ? "danger" : "warning" } : item))
+      ? { ...item, rereadAfterTypeSelection: false, stage: failed ? "failed" : "field", status: failed ? "처리 실패 · 파일 확인 필요" : "검토 대기", tone: failed ? "danger" : "warning" } : item))
     if (!failed) guide?.record({ type: "document-created", documentId: name, receipt: crypto.randomUUID() })
     guide?.record({ type: "extraction", documentId: name, stage: failed ? "failed" : "ready" })
     if (failed) toast.error("재추출하지 못했습니다. 잠금 해제 또는 원본 파일 확인 후 다시 올려 주세요.")
@@ -1876,17 +1879,19 @@ export function InboxScreen({
     if (deletedName) toast.success(`${deletedName} 파일을 삭제했습니다.`)
   }
   const handleDocumentTypeChange = (documentType: UploadDocumentType) => {
+    if (rereadingDocuments.current.has(selectedDocument.name) || (documentType === selectedDocument.documentType && !isUploadDocumentTypeUnresolved(selectedDocument))) return
     setUploadDocuments((current) =>
       current.map((document, index) =>
         index === selectedIndex
           ? {
               ...document,
               documentType,
-              reviewedFields: {},
+              documentTypeConfirmed: true,
+              rereadAfterTypeSelection: document.rereadAfterTypeSelection || isUploadDocumentTypeUnresolved(document),
               sourcePages: undefined,
-              stage: "field",
-              status: "검토 대기",
-              tone: "warning",
+              stage: document.stage === "failed" ? "failed" : "field",
+              status: document.stage === "failed" ? "처리 실패" : "검토 대기",
+              tone: document.stage === "failed" ? "danger" : "warning",
               pdfReviewCompleted: false,
             }
           : document
@@ -1964,16 +1969,15 @@ export function InboxScreen({
             다시 저장
           </Button>
         ) : null}
-        {selectedDocument.stage === "failed" ? (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={(selectedDocument.retryCount ?? 0) >= 3}
-            onClick={() => void retryDocument(selectedIndex)}
-          >
-            <RefreshCw data-icon="inline-start" /> {(selectedDocument.retryCount ?? 0) >= 3 ? "재추출 한도 도달" : "다시 추출"}
+        {(selectedDocument.stage === "failed" || selectedDocument.rereadAfterTypeSelection || isTypeUnresolved) && selectedDocument.stage !== "ocr" && selectedDocument.stage !== "queued" && (selectedDocument.retryCount ?? 0) < 3 ? (
+          <Button size="sm" variant="outline"
+            disabled={isTypeUnresolved}
+            title={isTypeUnresolved ? "문서 유형을 먼저 선택해 주세요." : undefined}
+            onClick={() => void retryDocument(selectedIndex)}>
+            다시 읽기 ({selectedDocument.retryCount ?? 0}/3)
           </Button>
-        ) : selectedDocument.stage === "ocr" ||
+        ) : null}
+        {selectedDocument.stage === "ocr" ||
           selectedDocument.stage === "queued" ? (
           <Button size="sm" disabled>
             <LoaderCircle className="animate-spin" data-icon="inline-start" />

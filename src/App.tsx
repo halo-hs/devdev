@@ -139,6 +139,8 @@ export type RecentDocument = {
   contentHash?: string
   dealDocumentId?: string
   fileDataUrl?: string
+  documentTypeConfirmed?: boolean
+  rereadAfterTypeSelection?: boolean
   retryCount?: number
 }
 export type UploadDocumentDealLink = {
