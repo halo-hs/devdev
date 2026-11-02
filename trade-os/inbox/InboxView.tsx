@@ -624,7 +624,7 @@ function DuplicateInvoiceWarning() {
   }, [attempt])
   if (!failed && groups.length === 0) return null
   return (
-    <Alert variant="destructive" data-component="DuplicateInvoiceWarning">
+    <Alert variant={failed ? "caution" : "riskHigh"} data-component="DuplicateInvoiceWarning">
       <AlertTriangle className="size-4" />
       <AlertTitle className="text-xs">
         {failed ? "중복 인보이스 번호를 확인하지 못했습니다." : `중복 인보이스 번호 ${groups.length}건 발견`}
