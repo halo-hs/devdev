@@ -3,7 +3,7 @@ import { ViewSeatAction } from "@trade-os/components/ViewSeatGate"
 import { useViewOnly, useViewSeatGuard } from "@trade-os/components/useViewSeat"
 import { aiHandoffCopy } from "@trade-os/lib/aiHandoffCopy"
 import { toast } from "sonner"
-import { FileText, Info, X, Paperclip, Send, Loader2, RefreshCw, Database, Building2, ExternalLink, Copy, RotateCcw, ThumbsUp, ThumbsDown, Search, Check,  SquarePen, PanelRight, Sparkles } from "lucide-react"
+import { FileText, Info, X, Paperclip, Send, Loader2, RefreshCw, Database, Building2, ExternalLink, Copy, RotateCcw, ThumbsUp, ThumbsDown, Search, Check,  SquarePen, MessageSquareText, Sparkles } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -553,7 +553,7 @@ export function AskPrototype({
               className="ml-auto h-11 min-w-[118px] rounded-[var(--r-lg)] bg-[var(--primary)] pr-5 pl-[18px] text-[17px] shadow-[0_1px_2px_rgb(5_29_57/0.1)]"
               disabled={!question.trim()}
               onClick={submit}
-              title="질문하기 (⌘ + Enter)"
+              title="질문하기 (⌘/Ctrl + Enter)"
             >
               <Send data-icon="inline-start" /> 질문하기
             </Button>
@@ -892,13 +892,13 @@ export function AskPrototype({
           className="top-14! bottom-0! h-auto! w-[300px] gap-0 p-0 lg:hidden"
         >
           <div className="sr-only">
-            <SheetTitle>대화 기록</SheetTitle>
+            <SheetTitle>대화 목록</SheetTitle>
             <SheetDescription>
               이전 업무 질문을 검색하고 다시 엽니다.
             </SheetDescription>
           </div>
           <div className="flex h-14 items-center justify-between gap-2 border-b border-[var(--surface-border)] px-3">
-            <span className="text-[18px] leading-[26px] font-bold text-[var(--color-gray-1)]">대화 기록</span>
+            <span className="text-[18px] leading-[26px] font-bold text-[var(--color-gray-1)]">대화 목록</span>
             <SheetClose asChild>
               <Button
                 variant="ghost"
@@ -986,7 +986,7 @@ export function AskPrototype({
               title="대화 목록 열기"
               onClick={() => setMobileHistoryOpen(true)}
             >
-              <PanelRight />
+              <MessageSquareText />
             </Button>
             {!historyOpen ? (
               <Button
@@ -999,7 +999,7 @@ export function AskPrototype({
                 title="대화 목록 열기"
                 onClick={() => setHistoryOpen(true)}
               >
-                <PanelRight />
+                <MessageSquareText />
               </Button>
             ) : null}
           </div>
@@ -1113,9 +1113,9 @@ export function AskPrototype({
         aria-label="대화 목록"
       >
         <div className="flex shrink-0 items-start justify-between gap-1">
-          {/* Figma 7차 대화 기록 패널 (6647:42238): title + 최근 30일 대화. */}
+          {/* Figma 7차 대화 목록 패널 (6647:42238): title + 최근 30일 대화. */}
           <span className="grid gap-1">
-            <span className="text-[18px] leading-[26px] font-bold text-[var(--color-gray-1)]">대화 기록</span>
+            <span className="text-[18px] leading-[26px] font-bold text-[var(--color-gray-1)]">대화 목록</span>
             <span className="text-[15px] leading-[22px] text-[var(--color-gray-5)]">최근 30일 대화</span>
           </span>
           <Button
