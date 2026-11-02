@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { dealDocumentPreviews, listDealDocuments, type DealDocumentRecord } from "@trade-os/lib/dealDocumentActions"
@@ -56,11 +57,17 @@ export function LinkedDocumentComparison({ dealId, connected = false }: { dealId
   }
   const [data, setData] = useState(load)
   return (
-    <section aria-label="연결된 서류 대조표" className="mt-4 w-full min-w-0 border-t pt-4 [contain:inline-size]">
-      <h3 className="text-sm font-semibold">서류 대조표</h3>
-      <p className="mt-1 text-xs text-muted-foreground">
-        {dealId} 거래에 이미 연결된 서류를 비교합니다.{!connected ? " 현재 업로드 문서는 연결 전에는 포함되지 않습니다." : ""}
-      </p>
+    <Dialog onOpenChange={open => { if (open) setData(load()) }}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="mt-3">연결된 서류 대조표 전체 보기</Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85dvh] overflow-auto sm:max-w-6xl">
+        <DialogHeader>
+          <DialogTitle>서류 대조표</DialogTitle>
+          <DialogDescription>
+            {dealId} 거래에 이미 연결된 서류를 비교합니다.{!connected ? " 현재 업로드 문서는 연결 전에는 포함되지 않습니다." : ""}
+          </DialogDescription>
+        </DialogHeader>
       {data.error ? (
         <Alert className="mt-3">
           <AlertDescription>서류 대조표를 불러오지 못했습니다.</AlertDescription>
@@ -86,6 +93,7 @@ export function LinkedDocumentComparison({ dealId, connected = false }: { dealId
           <p className="mt-2 text-xs text-muted-foreground">값이 없는 항목은 —로 표시합니다. 거래처의 역할, 통화·수량 기준을 확인해 주세요.</p>
         </div>
       )}
-    </section>
+      </DialogContent>
+    </Dialog>
   )
 }
