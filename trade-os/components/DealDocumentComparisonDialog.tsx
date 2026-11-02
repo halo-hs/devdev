@@ -9,6 +9,22 @@ const normalizeCandidateValue = (value: string) => value.replaceAll(",", "").rep
 export function DealDocumentComparisonDialog({ open, onOpenChange, documents, description }: {
   open: boolean; onOpenChange: (open: boolean) => void; documents: ComparisonDocument[]; description?: string
 }) {
+  return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-h-[85dvh] overflow-auto sm:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>서류 대조 (5-Way Match)</DialogTitle>
+            <DialogDescription>
+              {description ?? "PO·송장·포장명세·B/L의 같은 항목 값이 서로 일치하는지 한눈에 대조합니다."}
+            </DialogDescription>
+          </DialogHeader>
+          <DealDocumentComparisonTable documents={documents} />
+        </DialogContent>
+      </Dialog>
+  )
+}
+
+export function DealDocumentComparisonTable({ documents }: { documents: ComparisonDocument[] }) {
   const rows = [
     ["거래처", "seller"],
     ["금액", "amount"],
@@ -50,14 +66,6 @@ export function DealDocumentComparisonDialog({ open, onOpenChange, documents, de
     }
   })
   return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[85dvh] overflow-auto sm:max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>서류 대조 (5-Way Match)</DialogTitle>
-            <DialogDescription>
-              {description ?? "PO·송장·포장명세·B/L의 같은 항목 값이 서로 일치하는지 한눈에 대조합니다."}
-            </DialogDescription>
-          </DialogHeader>
           <Table className="min-w-[720px] table-fixed" aria-label="서류 항목별 대조">
             <TableHeader>
               <TableRow>
@@ -88,7 +96,5 @@ export function DealDocumentComparisonDialog({ open, onOpenChange, documents, de
               ))}
             </TableBody>
           </Table>
-        </DialogContent>
-      </Dialog>
   )
 }

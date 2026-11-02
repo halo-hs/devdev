@@ -333,6 +333,9 @@ export function DealConfirmPanel({
     </>
   )
 
+  const comparisonDealId = connectionReady
+    ? activeLink && !changingConnection ? activeLink.dealId : !newDealFormOpen ? selectedCandidate?.id : null
+    : null
   return (
     <>
       {actionPortalTarget
@@ -421,8 +424,8 @@ export function DealConfirmPanel({
               </section>
             ) : null}
 
-            {connectionReady && activeLink && !changingConnection ? (
-              <LinkedDocumentComparison key={`${document.name}:${activeLink.dealId}:linked`} dealId={activeLink.dealId} connected />
+            {comparisonDealId ? (
+              <LinkedDocumentComparison key={`${document.name}:${comparisonDealId}:${Boolean(activeLink && !changingConnection)}`} dealId={comparisonDealId} connected={Boolean(activeLink && !changingConnection)} />
             ) : null}
 
             {(!activeLink || changingConnection) && connectionReady ? <section>
@@ -697,10 +700,6 @@ export function DealConfirmPanel({
                           </div>
                         ) : null}
                       </div>
-
-                      {selectedCandidate && !newDealFormOpen ? (
-                        <LinkedDocumentComparison key={`${document.name}:${selectedCandidate.id}`} dealId={selectedCandidate.id} />
-                      ) : null}
 
                       {selectedCandidate ? (
                         document.documentType === "BANK_STATEMENT" ? (
