@@ -13,7 +13,6 @@ import { createPortal } from "react-dom"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/alert"
 import { DocumentConnectionSummary, DocumentConnectionChangeDialog } from "@trade-os/components/DocumentConnectionSummary"
-import { Badge } from "@/components/ui/badge"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Field, FieldLabel } from "@/components/ui/field"
@@ -21,7 +20,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { DatePicker } from "@/components/ui/DatePicker"
-import { type RecentDocument, type ReviewField, type DocumentSourceDeal } from "@/App"
+import { type RecentDocument, type DocumentSourceDeal } from "@/App"
 import { documentSourceDeals, quotationMoney } from "@trade-os/documents/documentTemplateModel"
 import { resolvedReviewFields, readUploadDocumentDealLinks } from "@trade-os/inbox/uploadDocumentModel"
 
@@ -53,26 +52,6 @@ export function DealConfirmPanel({
     documentReviewFields
       .find((field) => ["counterparty", "buyer", "seller"].includes(field.key))
       ?.value.trim() ?? ""
-  const dealMatchingFieldKeys = [
-    "counterparty",
-    "seller",
-    "buyer",
-    "total_amount",
-    "currency",
-    "item_name",
-    "quantity",
-    "invoice_number",
-    "sc_number",
-    "po_number",
-  ]
-  const documentDealValues = dealMatchingFieldKeys
-    .map((key) => documentReviewFields.find((field) => field.key === key))
-    .filter((field): field is ReviewField => Boolean(field?.value.trim()))
-    .filter(
-      (field, index, values) =>
-        values.findIndex((value) => value.key === field.key) === index
-    )
-    .slice(0, 3)
   const readCounterparty =
     documentReviewFields.find((field) => field.key === "counterparty")?.value ??
     documentReviewFields.find((field) => field.key === "seller")?.value ??
@@ -85,6 +64,13 @@ export function DealConfirmPanel({
     documentReviewFields.find((field) => field.key === "currency")?.value ??
     readAmountField?.unit?.split("/")[0] ??
     ""
+  const documentDealValues = [
+    { key: "counterparty", label: "거래처", value: readCounterparty, unit: "" },
+    { key: "amount", label: "금액", value: readAmountField?.value ?? "", unit: readCurrency },
+    ...([['po_number', 'PO 번호']] as const).map(([key, label]) => ({
+      key, label, value: documentReviewFields.find(field => field.key === key)?.value ?? "", unit: "",
+    })),
+  ].filter(field => field.value.trim()).slice(0, 3)
   const [connection, setConnection] = useState<DocumentConnection | null>(null)
   const [connectionError, setConnectionError] = useState("")
   const [connectionAttempt, setConnectionAttempt] = useState(0)
@@ -423,13 +409,7 @@ export function DealConfirmPanel({
                         <dt className="truncate text-[11px] leading-4 text-[var(--color-gray-4)]">
                           {field.label}
                         </dt>
-                        <Badge
-                          size="sm"
-                          palette={field.tone === "success" ? "green" : "orange"}
-                          className="ml-auto shrink-0"
-                        >
-                          {field.confidence}
-                        </Badge>
+
                       </div>
                       <dd
                         className="mt-1.5 truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold"
