@@ -381,7 +381,7 @@ export const prototypeBackend = {
       }
     },
     delete: ({ id }: EntityMutationInput) => localMutation(id),
-    retry: ({ id }: EntityMutationInput) => localMutation(id),
+    retry: ({ id }: EntityMutationInput & { documentType?: string }) => localMutation(id),
     commit: ({ id }: EntityMutationInput) => localMutation(id),
     assignToDeal: ({ id }: EntityMutationInput) => localMutation(id),
     unassignFromDeal: ({ id }: EntityMutationInput) => localMutation(id),

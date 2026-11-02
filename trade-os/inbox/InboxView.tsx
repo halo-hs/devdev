@@ -3,7 +3,7 @@ import { useState, useRef, type DragEvent as ReactDragEvent, useEffect } from "r
 import { ViewSeatAction } from "@trade-os/components/ViewSeatGate"
 import { useViewSeatGuard } from "@trade-os/components/useViewSeat"
 import { cn } from "@/lib/utils"
-import { Mail, Check, Copy, X, ChevronDown, AlertTriangle, FileText, ChevronUp, Plus, Upload, LoaderCircle, MoreHorizontal, Trash2, Info, RefreshCw, ChevronRight, ChevronLeft } from "lucide-react"
+import { Mail, Check, Copy, X, ChevronDown, AlertTriangle, FileText, ChevronUp, Plus, Upload, LoaderCircle, MoreHorizontal, Trash2, Info, ChevronRight, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
 import { DocumentTypeBadge } from "@trade-os/components/DocumentTypeBadge"
@@ -1821,13 +1821,16 @@ export function InboxScreen({
       }
     }, 650)
   }
+  const rereadingDocuments = useRef(new Set<string>())
   const retryDocument = async (index: number) => {
     const document = uploadDocuments[index]
-    if (!document || document.stage !== "failed" || (document.retryCount ?? 0) >= 3) return
+    if (!document || isUploadDocumentTypeUnresolved(document) || !["failed", "field"].includes(document.stage) || (document.retryCount ?? 0) >= 3 || rereadingDocuments.current.has(document.name)) return
     const name = document.name
+    rereadingDocuments.current.add(name)
     setUploadDocuments((current) => current.map((item) => item.name === name
       ? { ...item, retryCount: (item.retryCount ?? 0) + 1, stage: "ocr", status: "분석 중...", tone: "blue" } : item))
-    const result = await prototypeBackend.tradeDocuments.retry({ id: name })
+    const result = await prototypeBackend.tradeDocuments.retry({ id: name, documentType: document.documentType }).catch(() => ({ ok: false }))
+    rereadingDocuments.current.delete(name)
     const failed = !result.ok || /encrypted|password|fail/i.test(name)
     setUploadDocuments((current) => current.map((item) => item.name === name
       ? { ...item, stage: failed ? "failed" : "field", status: failed ? "처리 실패 · 파일 확인 필요" : "검토 대기", tone: failed ? "danger" : "warning" } : item))
@@ -1876,13 +1879,13 @@ export function InboxScreen({
     if (deletedName) toast.success(`${deletedName} 파일을 삭제했습니다.`)
   }
   const handleDocumentTypeChange = (documentType: UploadDocumentType) => {
+    if (rereadingDocuments.current.has(selectedDocument.name) || documentType === selectedDocument.documentType) return
     setUploadDocuments((current) =>
       current.map((document, index) =>
         index === selectedIndex
           ? {
               ...document,
               documentType,
-              reviewedFields: {},
               sourcePages: undefined,
               stage: "field",
               status: "검토 대기",
@@ -1964,16 +1967,7 @@ export function InboxScreen({
             다시 저장
           </Button>
         ) : null}
-        {selectedDocument.stage === "failed" ? (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={(selectedDocument.retryCount ?? 0) >= 3}
-            onClick={() => void retryDocument(selectedIndex)}
-          >
-            <RefreshCw data-icon="inline-start" /> {(selectedDocument.retryCount ?? 0) >= 3 ? "재추출 한도 도달" : "다시 추출"}
-          </Button>
-        ) : selectedDocument.stage === "ocr" ||
+        {selectedDocument.stage === "ocr" ||
           selectedDocument.stage === "queued" ? (
           <Button size="sm" disabled>
             <LoaderCircle className="animate-spin" data-icon="inline-start" />
@@ -2066,6 +2060,7 @@ export function InboxScreen({
             onPdfReviewComplete={handlePdfReviewComplete}
             onReviewedFieldChange={handleReviewedFieldChange}
             onDocumentTypeChange={handleDocumentTypeChange}
+            onReread={() => void retryDocument(selectedIndex)}
             mobilePane={mobilePane}
             onMobilePaneChange={setMobilePane}
           />

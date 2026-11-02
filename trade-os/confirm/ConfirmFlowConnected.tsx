@@ -40,6 +40,7 @@ export function DocumentReviewWorkspace({
   onPdfReviewComplete,
   onReviewedFieldChange,
   onDocumentTypeChange,
+  onReread,
   mobilePane,
   onMobilePaneChange,
 }: {
@@ -60,6 +61,7 @@ export function DocumentReviewWorkspace({
   onPdfReviewComplete: () => void
   onReviewedFieldChange: (key: string, patch: Partial<ReviewedField>) => void
   onDocumentTypeChange: (documentType: UploadDocumentType) => void
+  onReread: () => void
   mobilePane: "fields" | "preview"
   onMobilePaneChange: (pane: "fields" | "preview") => void
 }) {
@@ -115,9 +117,12 @@ export function DocumentReviewWorkspace({
             </Alert>
           ) : null}
 
-          {typeUnresolved ? (
-            <DocumentTypeResolution onChange={onDocumentTypeChange} />
-          ) : document.stage === "excluded" ? (
+          <DocumentTypeResolution
+            document={document}
+            onChange={onDocumentTypeChange}
+            onReread={onReread}
+          />
+          {typeUnresolved ? null : document.stage === "excluded" ? (
             <NonTradeDocumentNotice documentType={document.documentType} />
           ) : document.stage === "failed" ||
             document.stage === "duplicate" ||
@@ -254,25 +259,37 @@ export function DocumentReviewWorkspace({
 }
 
 function DocumentTypeResolution({
+  document,
+  onReread,
   onChange,
 }: {
+  document: RecentDocument
+  onReread: () => void
   onChange: (documentType: UploadDocumentType) => void
 }) {
+  const unresolved = isUploadDocumentTypeUnresolved(document)
+  const busy = document.stage === "ocr" || document.stage === "queued"
+  const count = document.retryCount ?? 0
+  const typeLabel = uploadDocumentTypeLabel(document.documentType)
+  const finalConsonant = (typeLabel.charCodeAt(typeLabel.length - 1) - 0xac00) % 28
+  const particle = finalConsonant === 0 || finalConsonant === 8 ? "로" : "으로"
   return (
     <Alert className="mt-4 px-4 py-3" variant="default">
       <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[var(--color-orange-2)]" />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-sm font-semibold">문서 유형을 확인해 주세요</div>
-          <ToneBadge tone="warning">AI 분류 미확정</ToneBadge>
+          <div className="text-sm font-semibold">{unresolved ? "문서 유형을 확인해 주세요" : "문서 유형"}</div>
+          {unresolved ? <ToneBadge tone="warning">AI 분류 미확정</ToneBadge> : null}
         </div>
         <p className="mt-1 text-xs leading-5 text-[var(--surface-muted-foreground)]">
-          AI가 문서 유형을 확정하지 못했습니다. 유형을 선택하면 해당 문서
-          기준으로 검토 필드가 다시 구성됩니다.
+          유형을 선택하면 검토 필드가 바뀝니다. AI로 다시 읽으려면 아래 버튼을 눌러 주세요.
         </p>
         <Field className="mt-3 gap-1.5">
           <FieldLabel className="text-xs">문서 유형</FieldLabel>
           <Combobox
+            value={unresolved ? null : document.documentType}
+            disabled={busy}
+            itemToStringLabel={(value) => uploadDocumentTypeLabel(value as UploadDocumentType)}
             items={manualUploadDocumentTypeOptions.map(
               (option) => option.value
             )}
@@ -296,9 +313,15 @@ function DocumentTypeResolution({
             </ComboboxContent>
           </Combobox>
         </Field>
-        <p className="mt-2 text-xs text-[var(--color-orange-1)]">
-          유형을 선택해야 필드 검토와 거래 연결을 진행할 수 있습니다.
-        </p>
+        {unresolved ? (
+          <p className="mt-2 text-xs text-muted-foreground">문서 유형을 먼저 선택해 주세요.</p>
+        ) : (
+          <Button className="mt-3" variant="outline" size="sm"
+            disabled={busy || count >= 3 || !["failed", "field"].includes(document.stage)}
+            onClick={onReread}>
+            {busy ? "AI가 다시 읽고 있어요" : count >= 3 ? "다시 읽기 횟수를 모두 사용했어요" : `${typeLabel}${particle} 다시 읽기 (${count}/3)`}
+          </Button>
+        )}
       </div>
     </Alert>
   )
@@ -328,7 +351,7 @@ function DocumentProcessingNotice({ document }: { document: RecentDocument }) {
     document.stage === "failed"
       ? {
           title: "문서를 처리하지 못했어요",
-          body: "원본 파일은 목록에 유지됩니다. 상단의 다시 추출로 재시도할 수 있습니다.",
+          body: "원본 파일은 목록에 유지됩니다. 문서 유형을 확인하고 다시 읽기로 재시도할 수 있습니다.",
           badge: "재시도 가능",
           tone: "danger" as Tone,
         }
