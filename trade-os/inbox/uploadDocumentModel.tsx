@@ -43,7 +43,7 @@ export const manualUploadDocumentTypeOptions: ReadonlyArray<{
 export function isUploadDocumentTypeUnresolved(document: RecentDocument) {
   return (
     document.documentType === "UNK" ||
-    (/^QT[-_]/i.test(document.name) && document.documentType === "CI")
+    (!document.documentTypeConfirmed && /^QT[-_]/i.test(document.name) && document.documentType === "CI")
   )
 }
 

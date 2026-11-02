@@ -1824,7 +1824,7 @@ export function InboxScreen({
   const rereadingDocuments = useRef(new Set<string>())
   const retryDocument = async (index: number) => {
     const document = uploadDocuments[index]
-    if (!document || isUploadDocumentTypeUnresolved(document) || document.stage !== "failed" || (document.retryCount ?? 0) >= 3 || rereadingDocuments.current.has(document.name)) return
+    if (!document || isUploadDocumentTypeUnresolved(document) || (document.stage !== "failed" && !document.rereadAfterTypeSelection) || (document.retryCount ?? 0) >= 3 || rereadingDocuments.current.has(document.name)) return
     const name = document.name
     rereadingDocuments.current.add(name)
     setUploadDocuments((current) => current.map((item) => item.name === name
@@ -1833,7 +1833,7 @@ export function InboxScreen({
     rereadingDocuments.current.delete(name)
     const failed = !result.ok || /encrypted|password|fail/i.test(name)
     setUploadDocuments((current) => current.map((item) => item.name === name
-      ? { ...item, stage: failed ? "failed" : "field", status: failed ? "처리 실패 · 파일 확인 필요" : "검토 대기", tone: failed ? "danger" : "warning" } : item))
+      ? { ...item, rereadAfterTypeSelection: false, stage: failed ? "failed" : "field", status: failed ? "처리 실패 · 파일 확인 필요" : "검토 대기", tone: failed ? "danger" : "warning" } : item))
     if (!failed) guide?.record({ type: "document-created", documentId: name, receipt: crypto.randomUUID() })
     guide?.record({ type: "extraction", documentId: name, stage: failed ? "failed" : "ready" })
     if (failed) toast.error("재추출하지 못했습니다. 잠금 해제 또는 원본 파일 확인 후 다시 올려 주세요.")
@@ -1879,13 +1879,15 @@ export function InboxScreen({
     if (deletedName) toast.success(`${deletedName} 파일을 삭제했습니다.`)
   }
   const handleDocumentTypeChange = (documentType: UploadDocumentType) => {
-    if (rereadingDocuments.current.has(selectedDocument.name) || documentType === selectedDocument.documentType) return
+    if (rereadingDocuments.current.has(selectedDocument.name) || (documentType === selectedDocument.documentType && !isUploadDocumentTypeUnresolved(selectedDocument))) return
     setUploadDocuments((current) =>
       current.map((document, index) =>
         index === selectedIndex
           ? {
               ...document,
               documentType,
+              documentTypeConfirmed: true,
+              rereadAfterTypeSelection: document.rereadAfterTypeSelection || isUploadDocumentTypeUnresolved(document),
               sourcePages: undefined,
               stage: document.stage === "failed" ? "failed" : "field",
               status: document.stage === "failed" ? "처리 실패" : "검토 대기",
@@ -1967,7 +1969,7 @@ export function InboxScreen({
             다시 저장
           </Button>
         ) : null}
-        {selectedDocument.stage === "failed" && (selectedDocument.retryCount ?? 0) < 3 ? (
+        {(selectedDocument.stage === "failed" || selectedDocument.rereadAfterTypeSelection || isTypeUnresolved) && selectedDocument.stage !== "ocr" && selectedDocument.stage !== "queued" && (selectedDocument.retryCount ?? 0) < 3 ? (
           <Button size="sm" variant="outline"
             disabled={isTypeUnresolved}
             title={isTypeUnresolved ? "문서 유형을 먼저 선택해 주세요." : undefined}
