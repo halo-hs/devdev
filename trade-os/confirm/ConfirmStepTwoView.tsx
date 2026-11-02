@@ -427,19 +427,7 @@ export function DealConfirmPanel({
             ) : null}
 
             {connectionReady && activeLink && !changingConnection ? (
-              <>
-                <Alert>
-                  <AlertTitle>거래 연결과 문서 검토가 완료되었습니다</AlertTitle>
-                  <AlertDescription>
-                    거래 목록에서 해당 거래를 열어 연결된 문서와 서류 대조표를 확인할 수 있습니다.
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <Button asChild size="sm"><a href={`/erp/deals/${encodeURIComponent(activeLink.dealId)}`}>연결된 거래 보기</a></Button>
-                      <Button asChild variant="outline" size="sm"><a href="/erp/deals">거래 목록</a></Button>
-                    </div>
-                  </AlertDescription>
-                </Alert>
-                <LinkedDocumentComparison key={`${document.name}:${activeLink.dealId}:linked`} dealId={activeLink.dealId} connected />
-              </>
+              <LinkedDocumentComparison key={`${document.name}:${activeLink.dealId}:linked`} dealId={activeLink.dealId} connected />
             ) : null}
 
             {(!activeLink || changingConnection) && connectionReady ? <section>
