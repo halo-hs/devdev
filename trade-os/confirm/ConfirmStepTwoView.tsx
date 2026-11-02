@@ -165,12 +165,6 @@ export function DealConfirmPanel({
     loadedCandidates.find((candidate) => candidate.id === selectedDealId) ??
     null
   const ambiguousCandidates = loadedCandidates.filter((candidate) => candidate.ambiguous).length
-  const readQuantityField = documentReviewFields.find(field => field.key === "quantity")
-  const comparisonRows = selectedCandidate ? [
-    { label: "거래처", documentValue: readCounterparty || "미확인", dealValue: selectedCandidate.party || "미확인", result: "확인 필요" },
-    { label: "금액", documentValue: [readAmountField?.value, readCurrency].filter(Boolean).join(" ") || "미확인", dealValue: `${selectedCandidate.amount} ${selectedCandidate.currency}`, result: readAmountField?.value && readCurrency && normalizeDecimalInput(readAmountField.value) === normalizeDecimalInput(selectedCandidate.amount) && readCurrency.toUpperCase() === selectedCandidate.currency.toUpperCase() ? "금액·통화 일치" : "확인 필요" },
-    { label: "수량", documentValue: [readQuantityField?.value, readQuantityField?.unit].filter(Boolean).join(" ") || "미확인", dealValue: "기준 수량 미확인", result: "기준 수량 확인 필요" },
-  ] : []
   const bankSchedules = eligibleBankSchedules(currentBankSchedules(), selectedDealId ?? "", readCurrency)
   const bankMatchRequired = !activeLink && document.documentType === "BANK_STATEMENT" && Boolean(selectedCandidate) && !newDealFormOpen
   const bankCashError = bankScheduleId && bankScheduleId !== "document-only"
@@ -703,29 +697,6 @@ export function DealConfirmPanel({
                           </div>
                         ) : null}
                       </div>
-
-                      {selectedCandidate && document.documentType !== "BANK_STATEMENT" ? (
-                        <section aria-label="문서와 거래 후보 비교 요약" className="mt-4 border-t pt-4">
-                          <h3 className="text-sm font-semibold">문서·거래 후보 요약</h3>
-                          <p className="mt-1 text-xs text-muted-foreground">현재 문서값과 선택한 거래 후보를 비교합니다.</p>
-                          <div className="mt-3 grid grid-cols-2 gap-3 text-xs text-muted-foreground">
-                            <span>현재 문서</span><span>선택한 거래</span>
-                          </div>
-                          <dl className="divide-y">
-                            {comparisonRows.map(row => (
-                              <div key={row.label} className="py-3">
-                                <dt className="flex flex-wrap items-center justify-between gap-2 text-sm font-medium">
-                                  {row.label}<span className="text-xs font-normal text-muted-foreground">{row.result}</span>
-                                </dt>
-                                <dd className="mt-2 grid grid-cols-2 gap-3 text-sm">
-                                  <span className="min-w-0 break-words">{row.documentValue}</span>
-                                  <span className="min-w-0 break-words">{row.dealValue}</span>
-                                </dd>
-                              </div>
-                            ))}
-                          </dl>
-                        </section>
-                      ) : null}
 
                       {selectedCandidate && !newDealFormOpen ? (
                         <LinkedDocumentComparison key={`${document.name}:${selectedCandidate.id}`} dealId={selectedCandidate.id} />
