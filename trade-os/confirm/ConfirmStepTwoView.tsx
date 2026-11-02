@@ -24,7 +24,6 @@ import { type RecentDocument, type DocumentSourceDeal } from "@/App"
 import { documentSourceDeals, quotationMoney } from "@trade-os/documents/documentTemplateModel"
 import { resolvedReviewFields, readUploadDocumentDealLinks } from "@trade-os/inbox/uploadDocumentModel"
 
-import { LinkedDocumentComparison } from "./LinkedDocumentComparison"
 
 export function DealConfirmPanel({
   document,
@@ -421,9 +420,7 @@ export function DealConfirmPanel({
               </section>
             ) : null}
 
-            {connectionReady && activeLink && !changingConnection ? (
-              <div><LinkedDocumentComparison key={`${document.name}:${activeLink.dealId}`} dealId={activeLink.dealId} connected /></div>
-            ) : null}
+
 
             {(!activeLink || changingConnection) && connectionReady ? <section>
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -643,6 +640,7 @@ export function DealConfirmPanel({
                               type="button"
                               role="radio"
                               aria-checked={selected}
+                              aria-controls={selected ? `candidate-comparison-${candidate.id}` : undefined}
                               className={cn(
                                 // 문서 올리기 V2 거래 후보 (6233:82241): 20px radio, 15 title,
                                 // 13 meta, Blue 10 row when selected.
@@ -683,15 +681,48 @@ export function DealConfirmPanel({
                                 </span>
                                 {candidate.id === activeLink?.dealId ? <span className="mt-2 block text-[10px] font-medium">현재 연결</span> : null}
                               </span>
-                              {recommended ? (
-                                <span className="flex shrink-0 items-center gap-1 text-[11px] text-[#6b4ee6]">
-                                  <Sparkles className="size-3.5" /> AI 추천
-                                </span>
-                              ) : null}
                             </button>
-                            <div className="ml-auto px-5 py-3">
-                              <LinkedDocumentComparison dealId={candidate.id} candidate={candidate} connected={candidate.id === activeLink?.dealId} />
-                            </div>
+                            {recommended ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span tabIndex={0} aria-label={`${candidate.id} AI 추천 근거`}
+                                    className="mr-5 flex shrink-0 cursor-help items-center gap-1 rounded-sm text-[11px] text-[#6b4ee6] outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                    <Sparkles className="size-3.5" aria-hidden="true" /> AI 추천
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-72">
+                                  <p className="font-medium">추천 근거 · 시안 예시</p>
+                                  {candidate.reasons.length ? candidate.reasons.map(reason => (
+                                    <p key={reason}>{reason.replace("거래처 일치", "거래처명 동일")}</p>
+                                  )) : <p>제공된 추천 근거가 없습니다.</p>}
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : null}
+                            {selected ? (
+                              <div id={`candidate-comparison-${candidate.id}`} className="w-full min-w-0 basis-full border-t border-[var(--color-gray-9)] bg-background px-5 py-3">
+                                <dl className="grid gap-y-3 sm:grid-cols-3" aria-label={`${candidate.id} 현재 문서값과 선택한 거래값 비교`}>
+                                  {[
+                                    ["거래처", readCounterparty, candidate.party],
+                                    ["금액·통화", readAmountField?.value ? [readAmountField.value, readCurrency].filter(Boolean).join(" ") : "", candidate.amount ? [candidate.amount, candidate.currency].filter(Boolean).join(" ") : ""],
+                                    ["수량", documentReviewFields.filter(field => field.key === "quantity").map(field => [field.value, field.unit].filter(Boolean).join(" ")).join(" / "), candidate.item.split(" · ")[1] ?? ""],
+                                  ].map(([label, documentValue, candidateValue]) => (
+                                    <div key={label} className="min-w-0 border-t border-[var(--color-gray-10)] py-2.5 first:border-t-0 sm:border-t-0 sm:border-l sm:px-3 sm:first:border-l-0 sm:first:pl-0 sm:last:pr-0">
+                                      <dt className="text-[11px] leading-4 text-[var(--color-gray-4)]">{label}</dt>
+                                      <dd className="mt-2 flex flex-col gap-2">
+                                        <div className="min-w-0">
+                                          <span className="text-[11px] leading-4 text-muted-foreground">현재 문서</span>
+                                          <p className="mt-0.5 truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold" title={documentValue || "값 없음"}>{documentValue || "—"}</p>
+                                        </div>
+                                        <div className="min-w-0">
+                                          <span className="text-[11px] leading-4 text-muted-foreground">선택한 거래</span>
+                                          <p className="mt-0.5 truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold" title={candidateValue || "값 없음"}>{candidateValue || "—"}</p>
+                                        </div>
+                                      </dd>
+                                    </div>
+                                  ))}
+                                </dl>
+                              </div>
+                            ) : null}
                             </div>
                           )
                         })}
