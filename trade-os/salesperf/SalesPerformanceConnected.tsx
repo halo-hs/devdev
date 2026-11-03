@@ -874,18 +874,6 @@ function SalesPerformanceIdentityScope({
     memberDirectory.status === "ready" ? memberDirectory.members : [];
   const currencyLabel = currency ?? "";
 
-  // Member는 settlement-series의 담당자를 사용하며, assignee 부재를 회사 전체 권한으로 해석하지 않는다.
-  const effectiveAssignee = isManager
-    ? data?.status?.assignee ?? null
-    : data?.series?.assignee ?? null;
-  const scopeText = effectiveAssignee == null
-    ? copy.controls.scopeOrg
-    : isManager
-      ? replaceTokens(copy.controls.scopePerson, {
-          name: assigneeLabel(effectiveAssignee, members, copy.byAssignee.unassigned),
-        })
-    : copy.controls.scopeSelf;
-
   const assigneeOptions = [
     { value: ASSIGNEE_ALL, label: copy.controls.assigneeAll },
     ...members
@@ -1088,14 +1076,6 @@ function SalesPerformanceIdentityScope({
     <BusinessListToolbar
       data-ui="salesperf-controls"
       aria-label={copy.controls.filtersLabel}
-      result={
-        <span
-          className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-6)]"
-          data-ui="salesperf-scope"
-        >
-          {scopeText}
-        </span>
-      }
     >
       <BusinessFilterField label={copy.controls.rangeAria}>
         <BusinessFilterSegments
