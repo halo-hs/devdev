@@ -2437,6 +2437,38 @@ function groupItemDecimal(value: string, fixedCents = false) {
     (fixedCents && value ? `.${(fraction ?? "").padEnd(2, "0")}` : fraction === undefined ? "" : `.${fraction}`)
 }
 
+function PaymentHistory({ paymentHistory }: { paymentHistory: AuditItem[] }) {
+  const dateTag = useLocaleTag()
+  const [expanded, setExpanded] = useState(true)
+  return (
+    <section className="mt-5 border-t pt-4" aria-label="지급 정보 변경이력">
+      <div className="flex items-center justify-between gap-3">
+        <FormFieldHeader label="지급 정보 변경이력" />
+        <Button variant="ghost-neutral" size="sm" aria-expanded={expanded} aria-controls="deal-payment-history" onClick={() => setExpanded(open => !open)}>
+          {expanded ? "접기" : "전체 보기"}<ChevronDown data-icon="inline-end" className={cn(expanded && "rotate-180")} />
+        </Button>
+      </div>
+      <div id="deal-payment-history" hidden={!expanded} className="mt-3">
+        {paymentHistory.length ? <ol>
+          {paymentHistory.map((item, index) => (
+            <li key={item.id} className="flex items-start gap-3">
+              <div aria-hidden="true" className="flex w-3 shrink-0 flex-col items-center self-stretch gap-1 pt-1.5">
+                <span className="size-2.5 rounded-full bg-primary" />
+                {index < paymentHistory.length - 1 && <span className="w-0.5 flex-1 bg-border" />}
+              </div>
+              <div className="min-w-0 flex-1 break-words pb-3.5">
+                <p className="text-[13px] leading-[18px]">{item.action}</p>
+                <p className="mt-0.5 text-[13px] leading-[18px]">{item.detail}</p>
+                <p className="mt-1 text-[11px] leading-4 text-muted-foreground">{formatDateTime(item.time, dateTag)} · {item.actor}</p>
+              </div>
+            </li>
+          ))}
+        </ol> : <p className="py-3 text-sm text-muted-foreground">변경 이력이 없습니다.</p>}
+      </div>
+    </section>
+  )
+}
+
 function DealFieldsPanel({
   profile,
   fields,
@@ -2449,6 +2481,7 @@ function DealFieldsPanel({
   onItemCommit,
   onAddItem,
   onRemoveItem,
+  paymentHistory,
 }: {
   profile: DealProfile
   fields: DealFieldDetail[]
@@ -2466,6 +2499,7 @@ function DealFieldsPanel({
   ) => void
   onAddItem: () => void
   onRemoveItem: (id: number) => void
+  paymentHistory: AuditItem[]
 }) {
   const [query, setQuery] = useState("")
   const [editingPrice, setEditingPrice] = useState<number | null>(null)
@@ -2798,6 +2832,7 @@ function DealFieldsPanel({
         tabIndex={-1}
         className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] py-5 outline-none"
       >
+        <div className="flex items-center justify-between gap-3">
         <h4 className="flex items-center gap-2 text-base font-semibold">
           {group === "결제 정보"
             ? profile.direction === "sales"
@@ -2805,6 +2840,7 @@ function DealFieldsPanel({
               : profile.direction === "purchase" ? "지급 정보" : "결제 정보"
             : group}
         </h4>
+        </div>
         <div className="mt-3 grid min-w-0 gap-x-4 gap-y-2 @min-[640px]/fields:grid-cols-2">
           {groupFields.map((field) => (
             <FormField
@@ -2881,6 +2917,7 @@ function DealFieldsPanel({
             </FormField>
           ))}
         </div>
+        {group === "결제 정보" && <PaymentHistory paymentHistory={paymentHistory} />}
       </section>
     )
   }
@@ -2890,7 +2927,7 @@ function DealFieldsPanel({
         <span className="text-xs text-muted-foreground">
           필드·품목 {directionalFields.length + items.length}개
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <StatusBadge tone={reviewCount ? "warning" : "success"}>
             {reviewCount ? `${reviewCount}개 확인` : "대조 완료"}
           </StatusBadge>
@@ -3625,11 +3662,24 @@ function DocumentsTab({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (refresh.data) applyRefreshedDocuments(refresh.data)
   }, [refresh.data])
+  // Prototype examples for the settlement-in-progress deal; latest values match its payment fields.
+  const [paymentHistory, setPaymentHistory] = useState<AuditItem[]>(() => dealId === "DL-260629-03" ? [
+    { id: 3, action: "지급 계좌 수정", detail: "이전 값 8830043970 → 변경 값 8830043968", actor: "조민영", time: "2026-10-30T14:20:00+09:00" },
+    { id: 2, action: "SWIFT 수정", detail: "이전 값 DBSSSGSG → 변경 값 CHASSGSG", actor: "박서윤", time: "2026-10-29T10:30:00+09:00" },
+    { id: 1, action: "지급 은행 수정", detail: "이전 값 DBS Bank Singapore → 변경 값 JPMorgan Chase Singapore", actor: "박서윤", time: "2026-10-29T10:30:00+09:00" },
+  ] : [])
   const recordCommittedEdit = (target: string, finalValue: string) => {
     const session = editSessionsRef.current.get(target)
     if (!session || session.before === finalValue) {
       editSessionsRef.current.delete(target)
       return
+    }
+    if (["field:bank_name", "field:bank_account", "field:bank_swift", "field:payment_due"].includes(target)) {
+      setPaymentHistory(current => [{
+        id: Date.now(), action: `${session.label} 수정`,
+        detail: `이전 값 ${session.before || "—"} → 변경 값 ${finalValue || "—"}`,
+        actor: currentEditorName, time: new Date().toISOString(),
+      }, ...current])
     }
     addAudit(
       `${session.label} 수정`,
@@ -3969,6 +4019,7 @@ function DocumentsTab({
               </div>
             ) : null}
             <DealFieldsPanel
+              paymentHistory={paymentHistory}
               profile={profile}
               fields={dealFields}
               visibleGroups={visibleGroups}
@@ -4532,12 +4583,12 @@ function FulfillmentTab({
             </section>
             <section className="border-t pt-4">
               <SectionHeading title="주문 이력" action={
-                <Button size="sm" variant="outline" className="shrink-0" aria-expanded={orderHistoryOpen} aria-controls="deal-order-history" onClick={() => setOrderHistoryOpen(open => !open)}>
-                  {orderHistoryOpen ? "접기" : "전체 이력"}<ChevronDown data-icon="inline-end" className={cn(orderHistoryOpen && "rotate-180")} />
+                <Button size="sm" variant="ghost-neutral" className="shrink-0" aria-expanded={orderHistoryOpen} aria-controls="deal-order-history" onClick={() => setOrderHistoryOpen(open => !open)}>
+                  {orderHistoryOpen ? "접기" : "전체 보기"}<ChevronDown data-icon="inline-end" className={cn(orderHistoryOpen && "rotate-180")} />
                 </Button>
               } />
-              <ol id="deal-order-history" className="mt-2">
-                {(orderHistoryOpen ? orderEvents : orderEvents.slice(0, 3)).map((event, index, visible) => (
+              <ol id="deal-order-history" className="mt-2" hidden={!orderHistoryOpen}>
+                {orderEvents.map((event, index, visible) => (
                   <li key={event.id} className="flex items-start gap-3">
                     <div aria-hidden="true" className="flex w-3 shrink-0 flex-col items-center self-stretch gap-1 pt-1.5">
                       <span className="size-2.5 rounded-full bg-primary" />

@@ -259,7 +259,7 @@ export function DealFinanceWorkspace({
           >
             <fieldset
               disabled={busy}
-              className="grid items-end gap-3 sm:grid-cols-2 @min-[860px]:grid-cols-[100px_140px_80px_110px_minmax(140px,1fr)_auto]"
+              className="grid items-end gap-3 sm:grid-cols-2 @min-[860px]:grid-cols-[100px_140px_104px_130px_minmax(140px,1fr)_auto]"
             >
               <label className="grid min-w-0 gap-1.5 text-sm">
                 <span>항목</span>
