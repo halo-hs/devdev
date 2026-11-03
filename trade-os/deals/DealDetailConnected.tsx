@@ -479,41 +479,41 @@ function DealProgressNavigation({
     stages.findIndex((item) => item.value === (dealStage(dealId) === "settlement" ? "settled" : dealStage(dealId)))
   )
   return (
-    <div className="px-4 py-3">
+    <div className="p-5">
       <section aria-label="거래 진행 상태">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold">정보·업무 진행</h3>
+          <h3 className="text-base font-bold">정보·업무 진행</h3>
           <Badge variant="secondary" className="text-xs">
             {plan.current
               ? `${workLabels[plan.current]} 확인 필요`
               : "전체 완료"}
           </Badge>
         </div>
-        <nav aria-label="거래 정보 바로가기" className="mt-2">
-          <div className="grid grid-cols-2 gap-1 border-b pb-2">
-            <a
+        <nav aria-label="거래 정보 바로가기" className="mt-4">
+          <div className="grid grid-cols-2 gap-2">
+            <Button asChild variant="outline" size="sm"><a
               href="#deal-overview"
               onClick={(event) => {
                 event.preventDefault()
                 onNavigate("overview")
               }}
-              className="flex min-h-8 items-center justify-center gap-1 rounded text-xs font-medium text-primary hover:bg-primary/5"
+
             >
-              거래 요약
-            </a>
-            <a
+              <FileSearch data-icon="inline-start" />거래 요약
+            </a></Button>
+            <Button asChild variant="outline" size="sm"><a
               href="#deal-documents"
               onClick={(event) => {
                 event.preventDefault()
                 onNavigate("documents")
               }}
-              className="flex min-h-8 items-center justify-center gap-1 rounded text-xs font-medium text-primary hover:bg-primary/5"
+
             >
-              거래 상세
-            </a>
+              <Search data-icon="inline-start" />거래 상세
+            </a></Button>
           </div>
           {metrics}
-          <ol className="mt-2 space-y-2">
+          <ol className="mt-4 flex flex-col gap-2">
             {stages.map((stage, index) => {
               const key = stage.tab as DealWorkKey
               const complete = plan.states[key] === "complete"
@@ -524,8 +524,8 @@ function DealProgressNavigation({
                   key={stage.value}
                   aria-current={active ? "step" : undefined}
                   className={cn(
-                    "relative rounded-md px-2 py-0.5 before:pointer-events-none before:absolute before:left-5 before:top-7 before:-bottom-3 before:border-l before:border-[var(--surface-border)] before:content-[''] last:before:hidden",
-                    active && "bg-primary/[0.06] ring-1 ring-primary/15"
+                    "relative rounded-md px-2 py-0.5 before:pointer-events-none before:absolute before:left-5 before:top-7 before:-bottom-3 before:border-l before:border-[var(--color-primary-4)] before:content-[''] last:before:hidden",
+                    active && "bg-muted/40"
                   )}
                 >
                   <a
@@ -542,9 +542,9 @@ function DealProgressNavigation({
                       className={cn(
                         "flex size-6 shrink-0 items-center justify-center rounded-full text-xs",
                         active
-                          ? "bg-primary text-primary-foreground"
+                          ? "bg-[var(--color-primary-4)] text-white"
                           : complete
-                            ? "bg-primary/10 text-primary"
+                            ? "bg-[var(--color-primary-4)] text-white"
                             : "border text-muted-foreground"
                       )}
                     >
@@ -552,7 +552,7 @@ function DealProgressNavigation({
                     </span>
                     <span
                       className={cn(
-                        "flex-1 text-sm font-semibold group-hover:text-primary",
+                        "flex-1 text-[15px] font-normal leading-[22px] group-hover:text-primary",
                         active && "text-primary"
                       )}
                     >
@@ -560,8 +560,8 @@ function DealProgressNavigation({
                     </span>
                     <span
                       className={cn(
-                        "text-xs",
-                        active ? "text-primary" : "text-muted-foreground"
+                        "rounded-full px-2 text-[11px] leading-4",
+                        complete ? "bg-[var(--color-green-6)] text-[var(--color-green-1)]" : active ? "bg-primary/10 text-primary" : "text-muted-foreground"
                       )}
                     >
                       {complete
@@ -575,7 +575,7 @@ function DealProgressNavigation({
                   </a>
                   <div className="ml-3 pl-4">
                     {stage.value === "shipment" && (
-                      <p className="py-1 text-xs text-muted-foreground">
+                      <p className="py-1 text-[13px] leading-[18px] text-muted-foreground">
                         {index <= current
                           ? (shipment?.state ??
                             (complete ? "선적 완료" : "선적 진행"))
@@ -583,7 +583,7 @@ function DealProgressNavigation({
                       </p>
                     )}
                     {stage.value === "customs" && !complete && (
-                      <p className="py-1 text-xs text-muted-foreground">
+                      <p className="py-1 text-[13px] leading-[18px] text-muted-foreground">
                         {active ? "통관 업무 확인" : "B/L 연결 후 진행"}
                       </p>
                     )}
@@ -614,7 +614,7 @@ function DealProgressNavigation({
                                 event.preventDefault()
                                 onOpenGroup(group)
                               }}
-                              className="flex min-h-8 items-center gap-1.5 rounded px-1 text-xs text-primary hover:bg-primary/5"
+                              className="flex min-h-8 items-center gap-1.5 rounded px-1 text-[13px] text-muted-foreground hover:bg-primary/5"
                             >
                               {group}
                             </a>
@@ -1307,7 +1307,7 @@ function DealDisclosureButton({ expanded, onClick, label, collapsedLabel = "보�
   collapsedLabel?: string
   controls?: string
 }) {
-  return <Button type="button" variant="ghost" size="sm" className="shrink-0 gap-1 text-muted-foreground" aria-label={`${label} ${expanded ? "접기" : "펼치기"}`} aria-expanded={expanded} aria-controls={controls} onClick={onClick}>
+  return <Button type="button" variant="ghost-neutral" size="sm" className="shrink-0 gap-1" aria-label={`${label} ${expanded ? "접기" : "펼치기"}`} aria-expanded={expanded} aria-controls={controls} onClick={onClick}>
     {expanded ? "접기" : collapsedLabel}
     <ChevronDown data-icon="inline-end" className={cn("size-4 transition-transform", expanded && "rotate-180")} />
   </Button>
@@ -1671,12 +1671,12 @@ function DealKeyMetrics({
     { label: "가장 빠른 ETA", value: shipment?.eta ?? "—" },
   ]
   return (
-    <section aria-label="거래 요약 지표" className="border-b py-3">
+    <section aria-label="거래 요약 지표" className="border-b py-4">
       <dl className="grid grid-cols-2 gap-x-3 gap-y-3">
         {metrics.map(({ label, value }) => (
           <div key={label} className="min-w-0">
             <dt className="text-[11px] text-muted-foreground">{label}</dt>
-            <dd className="mt-1 text-sm leading-5 font-semibold break-words tabular-nums">
+            <dd className="mt-0.5 text-base leading-6 font-bold break-words tabular-nums">
               {value}
             </dd>
           </div>
@@ -2437,6 +2437,38 @@ function groupItemDecimal(value: string, fixedCents = false) {
     (fixedCents && value ? `.${(fraction ?? "").padEnd(2, "0")}` : fraction === undefined ? "" : `.${fraction}`)
 }
 
+function PaymentHistory({ paymentHistory }: { paymentHistory: AuditItem[] }) {
+  const dateTag = useLocaleTag()
+  const [expanded, setExpanded] = useState(true)
+  return (
+    <section className="mt-5 border-t pt-4" aria-label="지급 정보 변경이력">
+      <div className="flex items-center justify-between gap-3">
+        <FormFieldHeader label="지급 정보 변경이력" />
+        <Button variant="ghost-neutral" size="sm" aria-expanded={expanded} aria-controls="deal-payment-history" onClick={() => setExpanded(open => !open)}>
+          {expanded ? "접기" : "전체 보기"}<ChevronDown data-icon="inline-end" className={cn(expanded && "rotate-180")} />
+        </Button>
+      </div>
+      <div id="deal-payment-history" hidden={!expanded} className="mt-3">
+        {paymentHistory.length ? <ol>
+          {paymentHistory.map((item, index) => (
+            <li key={item.id} className="flex items-start gap-3">
+              <div aria-hidden="true" className="flex w-3 shrink-0 flex-col items-center self-stretch gap-1 pt-1.5">
+                <span className="size-2.5 rounded-full bg-primary" />
+                {index < paymentHistory.length - 1 && <span className="w-0.5 flex-1 bg-border" />}
+              </div>
+              <div className="min-w-0 flex-1 break-words pb-3.5">
+                <p className="text-[13px] leading-[18px]">{item.action}</p>
+                <p className="mt-0.5 text-[13px] leading-[18px]">{item.detail}</p>
+                <p className="mt-1 text-[11px] leading-4 text-muted-foreground">{formatDateTime(item.time, dateTag)} · {item.actor}</p>
+              </div>
+            </li>
+          ))}
+        </ol> : <p className="py-3 text-sm text-muted-foreground">변경 이력이 없습니다.</p>}
+      </div>
+    </section>
+  )
+}
+
 function DealFieldsPanel({
   profile,
   fields,
@@ -2449,6 +2481,7 @@ function DealFieldsPanel({
   onItemCommit,
   onAddItem,
   onRemoveItem,
+  paymentHistory,
 }: {
   profile: DealProfile
   fields: DealFieldDetail[]
@@ -2466,6 +2499,7 @@ function DealFieldsPanel({
   ) => void
   onAddItem: () => void
   onRemoveItem: (id: number) => void
+  paymentHistory: AuditItem[]
 }) {
   const [query, setQuery] = useState("")
   const [editingPrice, setEditingPrice] = useState<number | null>(null)
@@ -2798,6 +2832,7 @@ function DealFieldsPanel({
         tabIndex={-1}
         className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] py-5 outline-none"
       >
+        <div className="flex items-center justify-between gap-3">
         <h4 className="flex items-center gap-2 text-base font-semibold">
           {group === "결제 정보"
             ? profile.direction === "sales"
@@ -2805,6 +2840,7 @@ function DealFieldsPanel({
               : profile.direction === "purchase" ? "지급 정보" : "결제 정보"
             : group}
         </h4>
+        </div>
         <div className="mt-3 grid min-w-0 gap-x-4 gap-y-2 @min-[640px]/fields:grid-cols-2">
           {groupFields.map((field) => (
             <FormField
@@ -2881,6 +2917,7 @@ function DealFieldsPanel({
             </FormField>
           ))}
         </div>
+        {group === "결제 정보" && <PaymentHistory paymentHistory={paymentHistory} />}
       </section>
     )
   }
@@ -2890,7 +2927,7 @@ function DealFieldsPanel({
         <span className="text-xs text-muted-foreground">
           필드·품목 {directionalFields.length + items.length}개
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <StatusBadge tone={reviewCount ? "warning" : "success"}>
             {reviewCount ? `${reviewCount}개 확인` : "대조 완료"}
           </StatusBadge>
@@ -3118,56 +3155,43 @@ function DealHealthReference({
     ["규정", 82, "통관 서류 준비 중"],
   ] as const
   return (
-    <section aria-label="거래 건강도와 서류 대조" className="px-4 py-4">
-      <div className="flex items-end justify-between gap-3">
-        <h4 className="text-sm font-semibold">거래 건강도</h4>
-        <strong className="text-2xl font-semibold text-warning-foreground">
-          72
-        </strong>
+    <section aria-label="거래 건강도와 서류 대조" className="p-5">
+      <div className="flex items-center justify-between gap-2">
+        <h4 className="text-base font-bold leading-6">거래 건강도</h4>
+        <strong className="text-lg font-bold leading-[26px] text-[var(--color-orange-1)]">72</strong>
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
+      <div aria-hidden="true" className="relative mt-3.5 h-4 text-[11px] leading-4 text-muted-foreground">
+        <span className="absolute left-0">0</span>
+        <span className="absolute left-[60%] -translate-x-1/2">60</span>
+        <span className="absolute left-[80%] -translate-x-1/2">80</span>
+        <span className="absolute right-0">100</span>
+      </div>
+      <div className="mt-3.5 flex flex-col gap-3.5">
         {health.map(([label, score, detail]) => (
-          <div key={label} className="min-w-0">
-            <div className="mb-1 flex items-center justify-between gap-2 text-xs">
-              <span className="font-medium">{label}</span>
-              <strong className="font-medium tabular-nums">{score}</strong>
+          <div key={label} className="flex min-w-0 flex-col gap-1.5">
+            <div className="flex items-center justify-between gap-2 text-[13px] font-semibold leading-[18px]">
+              <span>{label}</span>
+              <strong className={cn("font-semibold tabular-nums", score < 60 ? "text-destructive" : score < 80 ? "text-[var(--color-orange-1)]" : "text-[var(--color-green-1)]")}>{score}</strong>
             </div>
-            <div
-              role="meter"
-              aria-label={label}
-              aria-valuenow={score}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              className="h-1.5 overflow-hidden rounded-full bg-muted"
-            >
-              <div
-                className={cn(
-                  "h-full",
-                  score < 60
-                    ? "bg-destructive"
-                    : score < 75
-                      ? "bg-warning"
-                      : "bg-success"
-                )}
-                style={{ width: `${score}%` }}
-              />
+            <div role="meter" aria-label={label} aria-valuenow={score} aria-valuemin={0} aria-valuemax={100} className="relative h-2">
+              <div aria-hidden="true" className="grid h-full grid-cols-[3fr_1fr_1fr] gap-0.5">
+                <span className="rounded-full bg-[var(--color-red-8)]" />
+                <span className="rounded-full bg-[var(--color-orange-6)]" />
+                <span className="rounded-full bg-[var(--color-green-6)]" />
+              </div>
+              <span aria-hidden="true" className={cn("absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white", score < 60 ? "bg-destructive" : score < 80 ? "bg-[var(--color-orange-1)]" : "bg-[var(--color-green-1)]")} style={{ left: `${score}%` }} />
             </div>
-            <p className="mt-1 text-xs leading-4 text-muted-foreground">
-              {detail}
-            </p>
+            <p className="text-[11px] leading-4 text-muted-foreground">{detail}</p>
           </div>
         ))}
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t pt-3">
-        <div>
-          <h4 className="text-xs font-semibold">서류 대조 (5-Way Match)</h4>
-          <p className="mt-1 text-xs text-muted-foreground">
-            서류 {documentSummary.connected}/{documentSummary.total}건 연결
-          </p>
+      <Separator className="my-4" />
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h4 className="text-[13px] font-semibold leading-[18px]">서류 대조 (5-Way Match)</h4>
+          <p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">서류 {documentSummary.connected}/{documentSummary.total}건 연결</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setExpanded(true)}>
-          전체 대조 보기
-        </Button>
+        <Button variant="outline" size="sm" onClick={() => setExpanded(true)}>전체 대조 보기</Button>
       </div>
       <DealDocumentComparisonDialog open={expanded} onOpenChange={setExpanded} documents={documentSummary.documents} />
     </section>
@@ -3638,11 +3662,24 @@ function DocumentsTab({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (refresh.data) applyRefreshedDocuments(refresh.data)
   }, [refresh.data])
+  // Prototype examples for the settlement-in-progress deal; latest values match its payment fields.
+  const [paymentHistory, setPaymentHistory] = useState<AuditItem[]>(() => dealId === "DL-260629-03" ? [
+    { id: 3, action: "지급 계좌 수정", detail: "이전 값 8830043970 → 변경 값 8830043968", actor: "조민영", time: "2026-10-30T14:20:00+09:00" },
+    { id: 2, action: "SWIFT 수정", detail: "이전 값 DBSSSGSG → 변경 값 CHASSGSG", actor: "박서윤", time: "2026-10-29T10:30:00+09:00" },
+    { id: 1, action: "지급 은행 수정", detail: "이전 값 DBS Bank Singapore → 변경 값 JPMorgan Chase Singapore", actor: "박서윤", time: "2026-10-29T10:30:00+09:00" },
+  ] : [])
   const recordCommittedEdit = (target: string, finalValue: string) => {
     const session = editSessionsRef.current.get(target)
     if (!session || session.before === finalValue) {
       editSessionsRef.current.delete(target)
       return
+    }
+    if (["field:bank_name", "field:bank_account", "field:bank_swift", "field:payment_due"].includes(target)) {
+      setPaymentHistory(current => [{
+        id: Date.now(), action: `${session.label} 수정`,
+        detail: `이전 값 ${session.before || "—"} → 변경 값 ${finalValue || "—"}`,
+        actor: currentEditorName, time: new Date().toISOString(),
+      }, ...current])
     }
     addAudit(
       `${session.label} 수정`,
@@ -3982,6 +4019,7 @@ function DocumentsTab({
               </div>
             ) : null}
             <DealFieldsPanel
+              paymentHistory={paymentHistory}
               profile={profile}
               fields={dealFields}
               visibleGroups={visibleGroups}
@@ -4545,12 +4583,12 @@ function FulfillmentTab({
             </section>
             <section className="border-t pt-4">
               <SectionHeading title="주문 이력" action={
-                <Button size="sm" variant="link" aria-expanded={orderHistoryOpen} aria-controls="deal-order-history" onClick={() => setOrderHistoryOpen(open => !open)}>
-                  전체 이력<ChevronDown data-icon="inline-end" className={cn(orderHistoryOpen && "rotate-180")} />
+                <Button size="sm" variant="ghost-neutral" className="shrink-0" aria-expanded={orderHistoryOpen} aria-controls="deal-order-history" onClick={() => setOrderHistoryOpen(open => !open)}>
+                  {orderHistoryOpen ? "접기" : "전체 보기"}<ChevronDown data-icon="inline-end" className={cn(orderHistoryOpen && "rotate-180")} />
                 </Button>
               } />
-              <ol id="deal-order-history" className="mt-2">
-                {(orderHistoryOpen ? orderEvents : orderEvents.slice(0, 3)).map((event, index, visible) => (
+              <ol id="deal-order-history" className="mt-2" hidden={!orderHistoryOpen}>
+                {orderEvents.map((event, index, visible) => (
                   <li key={event.id} className="flex items-start gap-3">
                     <div aria-hidden="true" className="flex w-3 shrink-0 flex-col items-center self-stretch gap-1 pt-1.5">
                       <span className="size-2.5 rounded-full bg-primary" />
@@ -6430,12 +6468,12 @@ export function DealDetailScreen({
                 <div className="divide-y divide-[var(--surface-border)]">
                   <section
                     aria-label="주요 거래 정보"
-                    className="space-y-2 px-4 py-3"
+                    className="flex flex-col gap-4 p-5"
                   >
-                    <div className="flex min-w-0 items-center gap-2">
+                    <div className="flex min-w-0 flex-col items-start gap-1.5">
                       <a
                         href={`/erp/counterparties/${encodeURIComponent(mainInformation.counterparty)}`}
-                        className="min-w-0 text-sm font-medium text-primary break-words hover:underline"
+                        className="min-w-0 text-base font-bold leading-6 break-words hover:underline"
                       >
                         {mainInformation.counterparty}
                       </a>
@@ -6448,7 +6486,7 @@ export function DealDetailScreen({
                       </StatusBadge>
                     </div>
                     {nextDocument ? (
-                      <div data-next-document className="rounded-md bg-primary/5 p-2">
+                      <div data-next-document className="rounded-lg bg-muted/40 px-3.5 py-3">
                         <div className="flex items-center justify-between gap-2">
                           <span className="min-w-0 text-xs font-semibold text-primary break-keep">다음 서류: {nextDocument.label}</span>
                         {canMutate(role) && (
@@ -6464,7 +6502,7 @@ export function DealDetailScreen({
                         <p className="mt-1 text-xs text-muted-foreground">{{ upload: "PDF를 업로드하고 검토한 뒤 이 거래에 연결하세요.", create: "양식을 선택해 거래에 필요한 문서를 만드세요.", confirm: "문서 내용과 승인 상태를 검토한 뒤 확정하세요.", deliver: "확정한 문서를 고객에게 전달하세요.", reconcile: "포장명세서와 선하증권의 중량을 확인하세요." }[nextDocument.kind]}</p>
                       </div>
                     ) : (
-                      <div className="rounded-md bg-primary/5 p-2">
+                      <div className="rounded-lg bg-muted/40 px-3.5 py-3">
                         <span className="text-xs text-muted-foreground">
                           다음 할 일
                         </span>
