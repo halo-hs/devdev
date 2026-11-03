@@ -1,4 +1,5 @@
 "use client";
+import { ReportsFXEvidencePanel } from "./ReportsFXEvidencePanel";
 import { Badge } from "@/components/ui/badge";
 import { Button as ShadcnButton } from "@/components/ui/button";
 import { KpiCard } from "@/components/platform/KpiCard";
@@ -2085,6 +2086,8 @@ function ReportsConnectedSession({
               </ReportCard>
             </div>
           </div>
+
+      <ReportsFXEvidencePanel isManager={isManager} />
 
       {/* ── 월마감 확인 다이얼로그 ── */}
       {closeDialogPeriod ? (
