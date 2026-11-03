@@ -46,6 +46,7 @@ import {
   Unlink,
   LoaderCircle,
   MoreHorizontal,
+  MoreVertical,
   NotebookPen,
   Pencil,
   Plus,
@@ -95,6 +96,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { Progress } from "@/components/ui/progress"
 import {
   Popover,
   PopoverContent,
@@ -2426,6 +2428,13 @@ function CandidateValuePicker({
   )
 }
 
+// Preserve decimal strings (including a trailing dot) while adding display separators.
+function groupItemDecimal(value: string, fixedCents = false) {
+  const [whole, fraction] = value.replaceAll(",", "").split(".")
+  return whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+    (fixedCents && value ? `.${(fraction ?? "").padEnd(2, "0")}` : fraction === undefined ? "" : `.${fraction}`)
+}
+
 function DealFieldsPanel({
   profile,
   fields,
@@ -2457,6 +2466,7 @@ function DealFieldsPanel({
   onRemoveItem: (id: number) => void
 }) {
   const [query, setQuery] = useState("")
+  const [editingPrice, setEditingPrice] = useState<number | null>(null)
   const editable = canMutate(role)
   const sections: (DealFieldGroup | "품목")[] = [
     "품목",
@@ -2585,7 +2595,8 @@ function DealFieldsPanel({
                         "border-destructive/55 text-destructive"
                     )}
                     aria-describedby={key === "goods" && needsReview(item.match) ? `deal-item-${item.id}-goods-message` : undefined}
-                    value={item[key]}
+                    value={key === "unitPrice" ? groupItemDecimal(item[key], item.currency === "USD" && editingPrice !== item.id) : item[key]}
+                    onFocus={() => { if (key === "unitPrice") setEditingPrice(item.id) }}
                     inputMode={
                       ["goods", "hsCode"].includes(key)
                         ? "text"
@@ -2597,17 +2608,41 @@ function DealFieldsPanel({
                     aria-invalid={
                       ["goods", "quantity"].includes(key) && item.match === "확인 필요"
                     }
-                    onChange={(event) =>
-                      onItemChange(item.id, key, event.target.value)
-                    }
-                    onBlur={() =>
-                      onItemCommit(
-                        item.id,
-                        key,
-                        item[key],
-                        `품목 ${number} · ${label}`
-                      )
-                    }
+                    onChange={(event) => {
+                      const control = event.currentTarget
+                      const entered = control.value
+                      const numeric = !["goods", "hsCode"].includes(key)
+                      const value = numeric ? entered.replaceAll(",", "") : entered
+                      const pattern = key === "packageCount" ? /^\d*$/
+                        : key === "unitPrice" && item.currency === "USD" ? /^\d*(?:\.\d{0,2})?$/
+                        : /^\d*(?:\.\d*)?$/
+                      if (numeric && !pattern.test(value)) return
+                      const caret = control.selectionStart ?? entered.length
+                      const beforeCaret = entered.slice(0, caret).replaceAll(",", "").length
+                      onItemChange(item.id, key, value)
+                      if (key === "unitPrice") requestAnimationFrame(() => {
+                        if (document.activeElement !== control) return
+                        let remaining = beforeCaret
+                        let position = 0
+                        while (position < control.value.length && remaining > 0) {
+                          if (control.value[position] !== ",") remaining--
+                          position++
+                        }
+                        control.setSelectionRange(position, position)
+                      })
+                    }}
+                    onBlur={() => {
+                      if (key === "unitPrice") setEditingPrice(null)
+                      let value = item[key]
+                      if (key === "unitPrice" && item.currency === "USD" && value && value !== ".") {
+                        const [whole, fraction = ""] = value.replaceAll(",", "").split(".")
+                        value = `${whole || "0"}.${fraction.padEnd(2, "0")}`
+                      } else if (!["goods", "hsCode"].includes(key)) {
+                        value = value === "." ? "" : value.replace(/\.$/, "")
+                      }
+                      if (value !== item[key]) onItemChange(item.id, key, value)
+                      onItemCommit(item.id, key, value, `품목 ${number} · ${label}`)
+                    }}
                   />
                 )
                 const unit = (
@@ -2647,8 +2682,8 @@ function DealFieldsPanel({
                 )
                 return (
                   <tbody key={item.id} className="mb-3 block rounded-xl border bg-card p-3 last:mb-0 @min-[480px]/items:p-4">
-                    <tr className="relative grid grid-cols-2 gap-x-3 gap-y-0 @min-[480px]/items:grid-cols-3 @min-[760px]/items:grid-cols-[minmax(0,2fr)_minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,1.15fr)_32px] @min-[760px]/items:grid-rows-[auto_40px_auto] @min-[760px]/items:gap-y-0 [&>td:not(:last-child)]:row-span-3 [&>td:not(:last-child)]:grid [&>td:not(:last-child)]:grid-rows-subgrid [&>td:not(:last-child)]:pb-4 @min-[760px]/items:[&>td:not(:last-child)]:pb-0 [&>td]:min-w-0">
-                      <td className="col-span-2 pr-9 @min-[480px]/items:col-span-3 @min-[760px]/items:col-span-1 @min-[760px]/items:pr-0">
+                    <tr className="relative grid grid-cols-2 gap-x-3 gap-y-0 @min-[480px]/items:grid-cols-3 @min-[680px]/items:grid-cols-[minmax(0,1fr)_minmax(160px,1fr)_124px_100px_24px] @min-[680px]/items:grid-rows-[auto_40px_auto] @min-[680px]/items:gap-y-0 [&>td:not(:last-child)]:row-span-3 [&>td:not(:last-child)]:grid [&>td:not(:last-child)]:grid-rows-subgrid [&>td:not(:last-child)]:pb-4 @min-[680px]/items:[&>td:not(:last-child)]:pb-0 [&>td]:min-w-0">
+                      <td className="col-span-2 pr-9 @min-[480px]/items:col-span-3 @min-[680px]/items:col-span-1 @min-[680px]/items:pr-0">
                         <FormFieldHeader className="mb-2" label={`품목 ${number} · 품목명`} htmlFor={`deal-item-${item.id}-goods`} badge={needsReview(item.match) ? <StatusBadge tone={matchTone(item.match)}>{item.match === "확인 필요" ? "불일치" : item.match}</StatusBadge> : undefined} />
                         {input("goods", "품목명")}
                         {needsReview(item.match) && <FormFieldMessage id={`deal-item-${item.id}-goods-message`} tone="danger" className="mt-2">{item.evidence.join(" · ")}</FormFieldMessage>}
@@ -2691,20 +2726,15 @@ function DealFieldsPanel({
                           <FormFieldHeader data-item-unit-price-heading className="mb-2 scroll-mt-[calc(var(--deal-header-height,128px)+16px)]" label={`단가 · ${item.currency}/${item.quantityUnit}`} htmlFor={`deal-item-${item.id}-unitPrice`} />
                         {input("unitPrice", "단가")}
                       </td>
-                      <td className="col-span-2 @min-[760px]/items:col-span-1">
+                      <td className="col-span-2 @min-[680px]/items:col-span-1">
                         <FormFieldHeader className="mb-2" label={profile.direction === "direction_pending" ? "거래 금액" : `${directionLabels[profile.direction]} 금액`} htmlFor={`deal-item-${item.id}-amount`} />
                         <div className="flex min-w-0 items-center gap-2">
-                        <Input
-                          id={`deal-item-${item.id}-amount`}
-                          aria-label={`품목 ${number} 금액`}
-                          className="h-10 px-3 py-0 text-right tabular-nums"
-                          value={itemAmount(item)}
-                          readOnly
-                        />
-                          <span className="shrink-0 text-sm text-muted-foreground">{item.currency}</span>
+                          <output id={`deal-item-${item.id}-amount`} aria-label={`품목 ${number} 금액`} className="min-w-0 break-words text-xs tabular-nums">
+                            {itemAmount(item)} {item.currency}
+                          </output>
                         </div>
                       </td>
-                      <td className="absolute top-0 right-0 text-right @min-[760px]/items:static @min-[760px]/items:flex @min-[760px]/items:h-10 @min-[760px]/items:items-center @min-[760px]/items:row-start-2 @min-[760px]/items:col-start-5">
+                      <td className="absolute top-0 right-0 text-right @min-[680px]/items:static @min-[680px]/items:flex @min-[680px]/items:h-10 @min-[680px]/items:items-center @min-[680px]/items:row-start-2 @min-[680px]/items:col-start-5">
                         {editable && items.length > 1 && (
                           <Button size="icon-sm" variant="ghost" aria-label={`품목 ${number} 삭제`} onClick={() => onRemoveItem(item.id)}>
                             <Trash2 />
@@ -2712,16 +2742,16 @@ function DealFieldsPanel({
                         )}
                       </td>
                     </tr>
-                    <tr className="mt-4 block border-t border-dashed pt-3">
+                    <tr className="mt-3.5 block">
                       <td colSpan={5} className="block">
-                        <div className="grid grid-cols-2 gap-3 @min-[480px]/items:grid-cols-3 @min-[760px]/items:grid-cols-[minmax(0,1fr)_minmax(0,1.8fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,.65fr)] [&>div]:min-w-0">
+                        <div className="grid grid-cols-2 gap-3 @min-[480px]/items:grid-cols-3 @min-[680px]/items:grid-cols-[minmax(0,1fr)_184px_minmax(0,1fr)_minmax(0,1fr)_88px] [&>div]:min-w-0">
                           <div className="order-1 @min-[480px]/items:order-none">
                             <FormFieldHeader className="mb-2" label="HS Code" htmlFor={`deal-item-${item.id}-hsCode`} />
                             {input("hsCode", "HS Code")}
                           </div>
-                          <div className="order-3 col-span-2 @min-[480px]/items:order-none @min-[760px]/items:col-span-1">
+                          <div className="order-3 col-span-2 @min-[480px]/items:order-none @min-[680px]/items:col-span-1">
                             <FormFieldHeader className="mb-2" label="포장 수 / 단위" htmlFor={`deal-item-${item.id}-packageCount`} />
-                            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-1">
+                            <div className="grid grid-cols-[minmax(72px,.7fr)_minmax(108px,1fr)] gap-1">
                               {input("packageCount", "포장 수")}
                               {unit("packageUnit", "포장 단위", [
                                 "bundles",
@@ -4331,6 +4361,7 @@ function FulfillmentTab({
   shipmentContent?: ReactNode
 }) {
   const refresh = useDealRefresh()
+  const dateTag = useLocaleTag()
   const [lifecycle, setLifecycle] = useState<OrderState>(() => dealFixtures.find((deal) => deal.id === dealId)?.orderLifecycle ?? "open")
   const [action, setAction] = useState<OrderAction>(null)
   const [reason, setReason] = useState("")
@@ -4476,91 +4507,66 @@ function FulfillmentTab({
   return (
     <>
       <div className="flex flex-col gap-4">
-        <DetailCard>
-          <div className="flex flex-col gap-7">
+        <DetailCard className="bg-card">
+          <div className="flex flex-col gap-6">
             <section>
               <SectionHeading
-                title={<span className="flex flex-wrap items-center gap-2">주문 이행<StatusBadge tone={lifecycle === "closed" || lifecycle === "short_closed" ? "success" : lifecycle === "cancelled" ? "neutral" : "warning"}>{labels[lifecycle]}</StatusBadge></span>}
+                title={<span className="flex flex-wrap items-center gap-2 text-lg">주문 이행<StatusBadge tone={lifecycle === "closed" || lifecycle === "short_closed" ? "success" : lifecycle === "cancelled" ? "neutral" : "warning"}>{labels[lifecycle]}</StatusBadge></span>}
                 description="계약 20MT · 누적 선적 16MT"
-                action={<div className="ml-auto"><DealContractTool /></div>}
+                action={
+                  <div className="flex flex-wrap items-center gap-2">
+                    <DealContractTool />
+                    {canMutate(role) ? <>
+                      {terminal ? <Button size="sm" variant="outline" onClick={() => setAction("reopen")}><RotateCcw data-icon="inline-start" />재오픈</Button> : <>
+                        <Button size="sm" variant="outline" onClick={() => setAction("close")}>완료 마감</Button>
+                        <Button size="sm" variant="outline" onClick={() => setAction("short_close")}>미달 마감</Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild><Button size="icon-sm" variant="outline" aria-label="주문 이행 더보기"><MoreVertical /></Button></DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={onEditUnitPrice}>단가 수정</DropdownMenuItem>
+                            <DropdownMenuItem variant="destructive" onClick={() => setAction("cancel")}>취소</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </>}
+                    </> : null}
+                  </div>
+                }
               />
-              <div className="mt-5 grid items-center gap-5 md:grid-cols-[1fr_auto]">
-                <div>
-                  <div className="h-3 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full w-[80%] bg-primary" />
-                  </div>
-                  <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-                    <span>누적 16 MT</span>
-                    <span>
-                      {terminal ? "마감 상태 · 잔량 경고 제외" : "잔여 4 MT"}
-                    </span>
-                  </div>
+              <div className="mt-4">
+                <Progress value={80} className="h-1" aria-label="주문 이행률" />
+                <div className="mt-2 flex justify-between text-[11px] leading-4 text-muted-foreground">
+                  <span>누적 16 MT · 80%</span>
+                  <span>{terminal ? "마감 상태 · 잔량 경고 제외" : "잔여 4 MT"}</span>
                 </div>
-                {canMutate(role) ? (
-                  <div className="flex flex-wrap gap-2">
-                    {terminal ? (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setAction("reopen")}
-                      >
-                        <RotateCcw data-icon="inline-start" />
-                        재오픈
-                      </Button>
-                    ) : (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setAction("close")}
-                        >
-                          완료 마감
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setAction("short_close")}
-                        >
-                          미달 마감
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={onEditUnitPrice}
-                        >
-                          단가 수정
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => setAction("cancel")}
-                        >
-                          취소
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                ) : (
-                  <span className="text-xs text-muted-foreground">
-                    Owner 또는 관리자만 주문 상태를 변경할 수 있습니다.
-                  </span>
-                )}
+                {!canMutate(role) && <p className="mt-2 text-xs text-muted-foreground">Owner 또는 관리자만 주문 상태를 변경할 수 있습니다.</p>}
               </div>
             </section>
-            {orderEvents.length ? (
-              <>
-                <Separator />
-                <section>
-                  <SectionHeading
-                    title="주문 이력"
-                    action={
-                      <DealDisclosureButton expanded={orderHistoryOpen} onClick={() => setOrderHistoryOpen((open) => !open)} label="주문 이력" controls="deal-order-history" />
-                    }
-                  />
-                  {orderHistoryOpen ? <div id="deal-order-history"><AuditTrail items={orderEvents} /></div> : null}
-                </section>
-              </>
-            ) : null}
+            <section className="border-t pt-4">
+              <SectionHeading title="주문 이력" action={
+                <Button size="sm" variant="link" aria-expanded={orderHistoryOpen} aria-controls="deal-order-history" onClick={() => setOrderHistoryOpen(open => !open)}>
+                  전체 이력<ChevronDown data-icon="inline-end" className={cn(orderHistoryOpen && "rotate-180")} />
+                </Button>
+              } />
+              <ol id="deal-order-history" className="mt-2">
+                {(orderHistoryOpen ? orderEvents : orderEvents.slice(0, 3)).map((event, index, visible) => (
+                  <li key={event.id} className="flex items-start gap-3">
+                    <div aria-hidden="true" className="flex w-3 shrink-0 flex-col items-center self-stretch gap-1 pt-1.5">
+                      <span className="size-2.5 rounded-full bg-primary" />
+                      {(index < visible.length - 1 || !terminal) && <span className="w-0.5 flex-1 bg-border" />}
+                    </div>
+                    <div className="min-w-0 flex-1 pb-3.5">
+                      <p className="text-[15px] leading-[22px]">{event.action}</p>
+                      <p className="mt-0.5 text-[13px] leading-[18px] text-muted-foreground">{event.detail} · {formatDate(event.time, dateTag)} · {event.actor}</p>
+                    </div>
+                  </li>
+                ))}
+                {!terminal && <li className="flex items-start gap-3">
+                  <div aria-hidden="true" className="flex w-3 shrink-0 justify-center pt-1.5"><span className="size-2.5 rounded-full border-2 border-primary bg-card" /></div>
+                  <div className="min-w-0 flex-1"><p className="text-[15px] leading-[22px]">추가 선적 대기</p><p className="mt-0.5 text-[13px] leading-[18px] text-muted-foreground">잔여 4 MT</p></div>
+                  <span className="text-[13px] text-muted-foreground">잔여 4 MT</span>
+                </li>}
+              </ol>
+            </section>
           </div>
         </DetailCard>
         {shipmentContent ?? <DetailCard>
