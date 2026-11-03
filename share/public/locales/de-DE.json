@@ -29,23 +29,23 @@
     "download": "Haupt-PDF"
   },
   "temporaryError": {
-    "title": "Dieser Link ist vorübergehend nicht erreichbar",
-    "body": "Es liegt ein vorübergehendes Verbindungsproblem vor. Laden Sie die Seite erneut.",
+    "title": "Vorübergehend nicht erreichbar",
+    "body": "Bitte laden Sie die Seite gleich erneut.",
     "retry": "Neu laden",
     "retryCountdown": "In {seconds} s neu laden"
   },
   "linkGone": {
     "expired": {
-      "title": "Der Dokumentlink ist abgelaufen",
-      "body": "Der Zeitraum zum Ansehen ist abgelaufen. Bitten Sie den Absender um einen neuen Link, um das Dokument erneut zu öffnen."
+      "title": "Dieser Link ist abgelaufen",
+      "body": "Fordern Sie beim Absender einen neuen Link an."
     },
     "open_cap": {
-      "title": "Alle zulässigen Aufrufe wurden verbraucht",
-      "body": "Das vom Absender festgelegte Aufruflimit ist erreicht. Bitten Sie den Absender um einen neuen Link."
+      "title": "Das Aufruflimit wurde erreicht",
+      "body": "Fordern Sie beim Absender einen neuen Link an."
     },
     "not_found": {
       "title": "Link nicht gefunden",
-      "body": "Prüfen Sie die Linkadresse. Falls sich der Link weiterhin nicht öffnen lässt, kontaktieren Sie den Absender."
+      "body": "Prüfen Sie die Adresse oder kontaktieren Sie den Absender."
     },
     "requestNew": "Neuen Link anfordern",
     "requesting": "Anfrage wird gesendet…",

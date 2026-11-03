@@ -29,23 +29,23 @@
     "download": "Main PDF"
   },
   "temporaryError": {
-    "title": "This link is temporarily unavailable",
-    "body": "There is a temporary connection problem. Refresh to try again.",
+    "title": "Temporarily unavailable",
+    "body": "Please refresh in a moment.",
     "retry": "Refresh",
     "retryCountdown": "Refresh in {seconds}s"
   },
   "linkGone": {
     "expired": {
-      "title": "This document link has expired",
-      "body": "The viewing period has ended. To view the document again, ask the sender for a new link."
+      "title": "This link has expired",
+      "body": "Request a new link from the sender."
     },
     "open_cap": {
-      "title": "All permitted views have been used",
-      "body": "The sender's viewing limit has been reached. Ask the sender for a new link."
+      "title": "The viewing limit has been reached",
+      "body": "Request a new link from the sender."
     },
     "not_found": {
       "title": "Link not found",
-      "body": "Check the link address. If it still does not open, contact the sender."
+      "body": "Check the address or contact the sender."
     },
     "requestNew": "Request a new link",
     "requesting": "Sending request…",

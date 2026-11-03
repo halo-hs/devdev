@@ -29,23 +29,23 @@
     "download": "PDF principal"
   },
   "temporaryError": {
-    "title": "Ce lien est temporairement inaccessible",
-    "body": "Un problème de connexion temporaire est survenu. Actualisez pour réessayer.",
+    "title": "Temporairement inaccessible",
+    "body": "Veuillez actualiser dans un instant.",
     "retry": "Actualiser",
     "retryCountdown": "Actualiser dans {seconds} s"
   },
   "linkGone": {
     "expired": {
-      "title": "Le lien du document a expiré",
-      "body": "La période de consultation est terminée. Pour consulter à nouveau le document, demandez un nouveau lien à l'expéditeur."
+      "title": "Ce lien a expiré",
+      "body": "Demandez un nouveau lien à l’expéditeur."
     },
     "open_cap": {
-      "title": "Toutes les consultations autorisées ont été utilisées",
-      "body": "La limite de consultation fixée par l'expéditeur est atteinte. Demandez un nouveau lien à l'expéditeur."
+      "title": "La limite de consultations est atteinte",
+      "body": "Demandez un nouveau lien à l’expéditeur."
     },
     "not_found": {
       "title": "Lien introuvable",
-      "body": "Vérifiez l’adresse du lien. Si le problème persiste, contactez l’expéditeur."
+      "body": "Vérifiez l’adresse ou contactez l’expéditeur."
     },
     "requestNew": "Demander un nouveau lien",
     "requesting": "Envoi de la demande…",
