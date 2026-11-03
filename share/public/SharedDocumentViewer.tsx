@@ -24,7 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   ShareLocaleContext,
   shareDocumentTitle,
@@ -597,8 +596,7 @@ function Unavailable({
         requestLock.current = false
         setRequestState("idle")
         return
-      }
-      else {
+      } else {
         const response = await fetch(
           `/api/platform/public/documents/${encodeURIComponent(token)}/request-new`,
           {
@@ -630,27 +628,21 @@ function Unavailable({
     result.state === "active" || result.state === "loading"
       ? "error"
       : result.state
-  const Icon = loading
-    ? LoaderCircle
-    : state === "expired"
-      ? Clock3
-      : state === "error"
-        ? RefreshCw
-        : FileX2
+  const Icon = loading ? LoaderCircle : FileX2
   return (
     <main className="flex flex-1 items-center justify-center px-5 py-24">
       <section
-        className="w-full max-w-lg text-center"
+        className="w-full max-w-md text-center"
         aria-live="polite"
         aria-busy={loading}
       >
-        <span className="mx-auto flex size-16 items-center justify-center rounded-2xl border bg-card text-primary">
+        <span className="mx-auto flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
           <Icon
-            className={`size-7 ${loading ? "motion-safe:animate-spin" : ""}`}
+            className={`size-6 ${loading ? "motion-safe:animate-spin" : ""}`}
             aria-hidden
           />
         </span>
-        <h1 className="mt-6 text-2xl leading-9 font-semibold tracking-tight">
+        <h1 className="mt-5 text-xl leading-7 font-semibold tracking-tight">
           {loading
             ? t("loading.title")
             : t(
@@ -660,46 +652,34 @@ function Unavailable({
               )}
         </h1>
         <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
-          {loading
-            ? t("loading.body")
-            : t(
-                state === "error"
-                  ? "temporaryError.body"
-                  : `linkGone.${state}.body`
-              )}
-        </p>
-        {!loading && (state === "expired" || state === "open_cap") && (
-          <div className="mt-6 flex flex-col items-center gap-3">
-            {requestState === "success" ? (
-              <Alert role="status">
-                <AlertDescription>
-                  {t("linkGone.requestSucceeded")}
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <>
-                <Button
-                  disabled={requestState === "pending"}
-                  aria-busy={requestState === "pending"}
-                  onClick={() => void requestNew()}
-                >
-                  {t(
-                    requestState === "pending"
-                      ? "linkGone.requesting"
-                      : "linkGone.requestNew"
+          {requestState === "success"
+            ? t("linkGone.requestSucceeded")
+            : requestState === "failure"
+              ? t("linkGone.requestFailed")
+              : loading
+                ? t("loading.body")
+                : t(
+                    state === "error"
+                      ? "temporaryError.body"
+                      : `linkGone.${state}.body`
                   )}
-                </Button>
-                {requestState === "failure" && (
-                  <Alert variant="destructive">
-                    <AlertDescription>
-                      {t("linkGone.requestFailed")}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </>
-            )}
-          </div>
-        )}
+        </p>
+        {!loading &&
+          (state === "expired" || state === "open_cap") &&
+          requestState !== "success" && (
+            <Button
+              className="mt-6"
+              disabled={requestState === "pending"}
+              aria-busy={requestState === "pending"}
+              onClick={() => void requestNew()}
+            >
+              {t(
+                requestState === "pending"
+                  ? "linkGone.requesting"
+                  : "linkGone.requestNew"
+              )}
+            </Button>
+          )}
         {state === "error" && !loading && (
           <Button className="mt-6" disabled={remaining > 0} onClick={retry}>
             <RefreshCw className="size-4" />
@@ -707,11 +687,6 @@ function Unavailable({
               ? t("temporaryError.retryCountdown", { seconds: remaining })
               : t("temporaryError.retry")}
           </Button>
-        )}
-        {!loading && state !== "error" && (
-          <p className="mt-8 border-t pt-5 text-xs text-muted-foreground">
-            {t("contactSender")}
-          </p>
         )}
       </section>
     </main>
