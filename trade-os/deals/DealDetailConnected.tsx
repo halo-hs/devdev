@@ -1,3 +1,4 @@
+import { DealCustomsDocuments } from "./DealCustomsDocuments"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/Table"
 import { formatDate, formatDateTime } from "@trade-os/lib/orgDate"
 import { useLocaleTag } from "@trade-os/lib/i18n/useLocaleTag"
@@ -3889,6 +3890,7 @@ function DocumentsTab({
     [orderedImportantDocuments, linkedDocuments, unlinked, documentRecords, dealId]
   )
   const visibleSupplementaryDocuments = documentRecords
+    .filter(record => !(["INS", "CUSTOMS_ENTRY"].includes(record.code) && record.state === "ready"))
     .filter(record => (record.originDealId !== dealId || !documents.some(slot => slot.code === record.originCode)) && !unlinked.includes(record.id))
     .map(documentSlot)
   const connectedImportantCount = visibleImportantDocuments.filter(
@@ -5675,6 +5677,9 @@ export function DealDetailScreen({
   onOpenSettlement: () => void
   workspaceActionsTarget?: HTMLElement | null
 }) {
+  const refresh = useDealRefreshController(dealId, role)
+  const customsDocuments = refresh.data?.customsDocuments ?? []
+  const pendingCustoms = customsDocuments.find(document => document.status === "review")
   const createdProfile = prototypeBackend.deals.getCreated(dealId)
   const fixture = dealFixtures.find((deal) => deal.id === dealId)
   const exists = Boolean(dealProfiles[dealId] || createdProfile || fixture)
@@ -5684,7 +5689,11 @@ export function DealDetailScreen({
     ?? (createdProfile ? { ...createdProfile, direction: createdDirection ?? createdProfile.direction } : null)
     ?? (fixture ? { ...fixture, direction: "purchase" as const } : dealProfiles["DL-260708-01"])
   const settled = fixture?.stage === "settled"
-  const nextDocument = !settled && fixture?.orderLifecycle !== "closed" && fixture?.orderLifecycle !== "cancelled" ? fixture?.nextDocument : undefined
+  const fixtureNextDocument = !settled && fixture?.orderLifecycle !== "closed" && fixture?.orderLifecycle !== "cancelled" ? fixture?.nextDocument : undefined
+  const customsNextDocument = fixtureNextDocument?.label === "수입신고필증" && customsDocuments.length > 0
+  const nextDocument = customsNextDocument
+    ? pendingCustoms ? { ...fixtureNextDocument!, label: "수입신고필증 검토", kind: "confirm" as const } : undefined
+    : fixtureNextDocument
   const nextDraft = generatedDocuments.find((document) => document.number.startsWith(`${nextDocument?.templateCode}-`) && document.state === "draft")
   const nextDeliverable = generatedDocuments.find((document) => document.number.startsWith(`${nextDocument?.templateCode}-`) && document.state !== "draft")
   const [mainInformation, setMainInformation] =
@@ -5764,19 +5773,25 @@ export function DealDetailScreen({
     () => (focusTarget?.tab === "finance" ? "finance" : undefined)
   )
   const plan = useMemo(
-    () =>
-      getDealWorkPlan(
+    () => {
+      const nextPlan = getDealWorkPlan(
         dealId,
         [
           ...startedWork,
+          ...(customsDocuments.length ? ["customs" as const] : []),
           ...(earlyGroups.includes("선적 정보")
             ? ["fulfillment" as const]
             : []),
           ...(earlyGroups.includes("결제 정보") ? ["finance" as const] : []),
         ],
         preferredWork
-      ),
-    [dealId, startedWork, earlyGroups, preferredWork]
+      )
+      if (nextPlan.current === "customs" && customsDocuments.length) {
+        return { ...nextPlan, nextAction: pendingCustoms ? "수입신고필증 검토" : "통관 데이터 확인" }
+      }
+      return nextPlan
+    },
+    [dealId, startedWork, earlyGroups, preferredWork, customsDocuments.length, pendingCustoms]
   )
   const previewSection = (key: DealWorkKey) =>
     setPreviewWork((current) =>
@@ -5872,7 +5887,6 @@ export function DealDetailScreen({
   const [issueNote, setIssueNote] = useState("")
   const [archived, setArchived] = useState(false)
   const [failedPanel, setFailedPanel] = useState<Tab | null>(null)
-  const refresh = useDealRefreshController(dealId, role)
   const refreshing = refresh.busy
   const [savingAssignee, setSavingAssignee] = useState(false)
   const [notes, setNotes] = useState<DealNoteItem[]>([
@@ -6690,26 +6704,7 @@ export function DealDetailScreen({
                         tabIndex={-1}
                         className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] p-5 outline-none"
                       >
-                        <h2 className="text-base font-semibold">
-                          통관 문서 확인
-                        </h2>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          수출입 신고서를 거래에 연결하고 문서의
-                          신고번호·신고일·품목 정보를 확인합니다.
-                        </p>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setDocumentOpen(true)}
-                          >
-                            거래 서류 확인
-                          </Button>
-                          {canMutate(role) && (
-                            <Button onClick={onUpload}>
-                              이 거래로 통관 서류 올리기
-                            </Button>
-                          )}
-                        </div>
+                        <DealCustomsDocuments canWrite={canMutate(role)} onUpload={onUpload} />
                       </section>
                     ),
                     finance: (
@@ -6805,7 +6800,8 @@ export function DealDetailScreen({
                           <span className="min-w-0 text-xs font-semibold text-primary break-keep">다음 서류: {nextDocument.label}</span>
                         {canMutate(role) && (
                           <Button size="xs" variant="link" className="h-auto shrink-0 gap-1 py-0 text-xs" onClick={() => {
-                            if (nextDocument.kind === "upload") onUpload()
+                            if (customsNextDocument && pendingCustoms) window.location.assign(pendingCustoms.reviewUrl)
+                            else if (nextDocument.kind === "upload") onUpload()
                             else if (nextDocument.kind === "create") onCreateDocument(nextDocument.templateCode)
                             else if (nextDocument.kind === "confirm" && nextDraft) onReviewDocument(nextDraft.number)
                             else if (nextDocument.kind === "deliver" && nextDeliverable) onDeliver(nextDeliverable.number, [])

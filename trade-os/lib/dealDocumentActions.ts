@@ -1,3 +1,4 @@
+import { readDocumentReview, type ReviewedField } from "./erpDocumentWorkflow"
 import { deals } from "./prototypeDeals"
 
 // Local preview adapter. These demo IDs are never sent to the real ERP API.
@@ -15,6 +16,7 @@ export type DealDocumentRecord = {
   state: "ready" | "needs_review" | "needs_type" | "processing"
   revision: number
   fileDataUrl?: string
+  reviewedFields?: Record<string, ReviewedField>
 }
 export const dealDocumentStorageKey = "ecoya-preview-deal-documents-v1"
 type Store = { documents: Record<string, DealDocumentRecord>; history: Array<{ documentId: string; action: string; from: string | null; to: string | null; reason: string; at: string }> }
@@ -102,7 +104,7 @@ export async function replaceDealDocument(record: DealDocumentRecord, file: File
     reader.readAsDataURL(new Blob([file], { type: "application/pdf" }))
   })
   currentDocument(record) // Recheck after asynchronous file reading.
-  return saveDocument(current, { ...current, file: file.name, fileDataUrl, state: current.state === "needs_type" ? "needs_type" : "needs_review", revision: current.revision + 1 }, "파일 교체")
+  return saveDocument(current, { ...current, file: file.name, fileDataUrl, reviewedFields: undefined, state: current.state === "needs_type" ? "needs_type" : "needs_review", revision: current.revision + 1 }, "파일 교체")
 }
 export type DocumentMovePreview = { documentId: string; revision: number; sourceId: string; targetId: string; sourceCount: number; targetCount: number }
 export function previewDocumentMove(record: DealDocumentRecord, targetId: string): DocumentMovePreview {
@@ -121,7 +123,9 @@ export function moveDealDocument(record: DealDocumentRecord, preview: DocumentMo
 export function completeDealDocumentReview(record: DealDocumentRecord) {
   const current = currentDocument(record)
   if (current.state !== "needs_review") throw new Error("현재 서류 상태를 다시 확인해 주세요.")
-  return saveDocument(current, { ...current, state: "ready", revision: current.revision + 1 }, "원문 검토 완료")
+  const fields = readDocumentReview(`${current.id}:${current.revision}`).fields
+  const customs = ["INS", "CUSTOMS_ENTRY"].includes(current.code)
+  return saveDocument(current, { ...current, reviewedFields: fields, ...(customs ? { fileDataUrl: undefined } : {}), state: "ready", revision: current.revision + 1 }, "원문 검토 완료")
 }
 
 export const importantDealDocuments = [

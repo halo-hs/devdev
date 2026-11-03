@@ -1294,13 +1294,13 @@ export function InboxScreen({
   const reviewMatches = (document: RecentDocument) => dealReviewDocument
     ? document.dealDocumentId === dealReviewDocument.id
     : document.name === initialDocumentName
-  const reviewCode = dealReviewDocument?.code === "CO" ? "C/O" : dealReviewDocument?.code === "IC" ? "INSURANCE_CERTIFICATE" : dealReviewDocument?.code
+  const reviewCode = dealReviewDocument?.code === "INS" ? "CUSTOMS_ENTRY" : dealReviewDocument?.code === "CO" ? "C/O" : dealReviewDocument?.code === "IC" ? "INSURANCE_CERTIFICATE" : dealReviewDocument?.code
   const reviewEntry: RecentDocument | null = dealReviewDocument ? {
     name: dealReviewDocument.file, uploadedAt: "거래 서류", dealDocumentId: dealReviewDocument.id,
     documentType: (manualUploadDocumentTypeOptions.some(option => option.value === reviewCode) ? reviewCode : "UNK") as UploadDocumentType,
     fileDataUrl: dealReviewDocument.fileDataUrl,
     status: "검토 대기", tone: "warning", stage: "field", pdfReviewCompleted: false,
-    reviewedFields: readDocumentReview(`${dealReviewDocument.id}:${dealReviewDocument.revision}`).fields,
+    reviewedFields: { ...dealReviewDocument.reviewedFields, ...readDocumentReview(`${dealReviewDocument.id}:${dealReviewDocument.revision}`).fields },
   } : null
   const queue = readUploadQueue().filter(document => !dealReviewDocument || document.dealDocumentId !== dealReviewDocument.id)
   const initialUploadDocuments: RecentDocument[] = (reviewEntry ? [reviewEntry, ...queue] : queue).map(
@@ -1314,6 +1314,9 @@ export function InboxScreen({
       if (review.connectionKnown && !link) document = { ...document, dealLabel: undefined, stage: "field", status: "거래 연결 필요", tone: "warning" }
       const opensConnectedStep =
         initialStep === "deal" && document.name === initialDocumentName
+      if (originDealId && document.documentType === "CUSTOMS_ENTRY" && link?.dealId === originDealId && review.status !== "committed") {
+        return { ...document, dealLabel: link.dealLabel, stage: "field", status: "검토 대기", tone: "warning", pdfReviewCompleted: false }
+      }
       return link
         ? {
             ...document,
@@ -1475,7 +1478,27 @@ export function InboxScreen({
     : []
 
   const handlePdfReviewComplete = () => {
-    if (isDealBlocked) return
+    if (isDealBlocked || linkingDocument) return
+    if (!dealReviewDocument && originDealId && selectedDocument.documentType === "CUSTOMS_ENTRY" &&
+      (readDocumentReview(selectedDocument.name).dealId === originDealId || linkedDealsByDocument[selectedDocument.name]?.dealId === originDealId)) {
+      setLinkingDocument(true)
+      void (async () => {
+        try {
+          const result = await prototypeBackend.tradeDocuments.confirmTransition({
+            id: selectedDocument.name, dealId: originDealId, documentType: selectedDocument.documentType,
+            dealLabel: linkedDealLabel ?? originDealId, expectedRevision: readDocumentReview(selectedDocument.name).revision,
+            idempotencyKey: crypto.randomUUID(),
+          })
+          if (!result.ok) { toast.error(result.error); return }
+          setUploadDocuments(current => current.map(document => document.name === selectedDocument.name
+            ? { ...document, stage: "confirmed", status: "거래 연결 완료", tone: "success", fileDataUrl: undefined, pdfReviewCompleted: true } : document))
+          toast.success("문서가 확인되었어요.")
+          onOpenDeal(originDealId)
+        } catch (error) { toast.error(error instanceof Error ? error.message : "문서를 확정하지 못했습니다.") }
+        finally { setLinkingDocument(false) }
+      })()
+      return
+    }
     if (dealReviewDocument && selectedDocument.dealDocumentId === dealReviewDocument.id) {
       try {
         prototypeBackend.dealDocuments.completeReview(dealReviewDocument)
@@ -1986,7 +2009,7 @@ export function InboxScreen({
           <Button
             data-guide-target="review"
             size="sm"
-            disabled={isDealBlocked}
+            disabled={isDealBlocked || linkingDocument}
             title={
               isDealBlocked
                 ? isTypeUnresolved
@@ -1998,7 +2021,7 @@ export function InboxScreen({
               handlePdfReviewComplete()
             }}
           >
-            {dealReviewDocument && selectedDocument.dealDocumentId === dealReviewDocument.id ? "검토 완료 · 거래로 돌아가기" : "거래 연결"}
+            {(dealReviewDocument && selectedDocument.dealDocumentId === dealReviewDocument.id) || (originDealId && selectedDocument.documentType === "CUSTOMS_ENTRY" && linkedDealLabel) ? "검토 완료 · 거래로 돌아가기" : "거래 연결"}
             <ChevronRight data-icon="inline-end" />
           </Button>
         ) : (

@@ -176,7 +176,7 @@ export function confirmDocumentReview(input: {
   if (!input.dealId) throw new Error("연결할 거래를 선택해 주세요.")
   if (!current.connectionKnown) {
     const legacy = JSON.parse(localStorage.getItem("ecoya-prototype-upload-document-deal-links") ?? "{}")
-    if (legacy[input.id]?.dealId) throw new Error("이미 연결된 문서입니다. 연결 변경에서 처리해 주세요.")
+    if (legacy[input.id]?.dealId && legacy[input.id].dealId !== input.dealId) throw new Error("이미 연결된 문서입니다. 연결 변경에서 처리해 주세요.")
   }
   if (current.revision !== input.expectedRevision)
     throw new Error(
