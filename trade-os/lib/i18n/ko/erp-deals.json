@@ -899,12 +899,12 @@
         "confirmedBy": "확인자 {by}",
         "providerAt": "제공자 조회 시각 {at}",
         "status": {
-          "booked": "부킹",
+          "booked": "예약",
           "loaded": "적재",
-          "departed": "출항",
+          "departed": "운송 중",
           "arrived": "도착",
-          "delivered": "인도완료",
-          "unknown": "확인 중"
+          "delivered": "인도",
+          "unknown": "미확인"
         },
         "none": "연결된 선적(B/L)이 아직 없습니다.",
         "loadError": "선적 진행을 불러오지 못했습니다.",
@@ -1049,12 +1049,12 @@
           "providerAt": "제공자 조회 시각 {at}",
           "staleNote": "동기화 실패 — 최신 정보 아닐 수 있음",
           "status": {
-            "booked": "부킹",
+            "booked": "예약",
             "loaded": "적재",
-            "departed": "출항",
+            "departed": "운송 중",
             "arrived": "도착",
-            "delivered": "인도완료",
-            "unknown": "확인 중"
+            "delivered": "인도",
+            "unknown": "미확인"
           }
         },
         "customs": {
@@ -1378,12 +1378,12 @@
         "partial": "부분",
         "unknownScore": "점수화할 근거 부족",
         "components": {
-          "document_completion": "서류",
-          "crosscheck_consistency": "대조",
+          "document_completion": "서류 완성도",
+          "crosscheck_consistency": "교차 대조",
           "payment_risk": "결제",
           "shipment_risk": "선적",
           "margin_risk": "마진",
-          "compliance_release": "컴플라이언스"
+          "compliance_release": "규정"
         },
         "loadError": "거래 건강도를 불러오지 못했습니다.",
         "retry": "다시 시도"

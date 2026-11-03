@@ -4435,7 +4435,7 @@ function FulfillmentTab({
       route: "Busan → Incheon",
       startDay: 0,
       duration: 14,
-      status: "출항",
+      status: "운송 중",
       tone: "blue" as const,
     },
     {
@@ -4444,7 +4444,7 @@ function FulfillmentTab({
       route: "Melbourne → Busan",
       startDay: 7,
       duration: 15,
-      status: "부킹",
+      status: "예약",
       tone: "neutral" as const,
     },
     {
