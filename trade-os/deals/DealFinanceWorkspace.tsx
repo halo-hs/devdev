@@ -179,7 +179,7 @@ export function DealFinanceWorkspace({
             <h3 className="text-base font-semibold">거래 경제 (Deal Economics)</h3>
             <FinanceHelp label="거래 손익 계산 기준">
               <p>
-                매출송장 금액 − 매입송장 금액 = 송장 기준 매매차익 · 매매차익 − 등록 부대비용 = 예상 거래손익
+                매출송장 금액 − 매입송장 금액 = 송장 매출총이익 · 송장 매출총이익 − 등록 부대비용 = 예상 거래손익
               </p>
               <p>
                 통화별로 계산하며 가격 포함 원가는 다시 차감하지 않습니다. 송장
@@ -220,7 +220,7 @@ export function DealFinanceWorkspace({
                   {[
                     ["매출송장 금액", money.invoiceSales],
                     ["매입송장 금액", money.invoicePurchases],
-                    ["송장 기준 매매차익", money.tradeResult],
+                    ["송장 매출총이익", money.tradeResult],
                     ["등록 부대비용", money.costs],
                     ["예상 거래손익", money.adjustedResult],
                   ].map(([label, value]) => (
@@ -516,7 +516,7 @@ export function DealFinanceWorkspace({
                 "통화",
                 "확정 매출송장",
                 "확정 매입송장",
-                "송장 기준 매매차익",
+                "송장 매출총이익",
                 "등록 부대비용",
                 "예상 거래손익",
                 "현재 받을 돈",
