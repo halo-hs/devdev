@@ -1,8 +1,8 @@
-import { useStartGuide } from "@trade-os/onboarding/StartGuideProvider"
+import { useStartGuide } from "@trade-os/onboarding/startGuideContext"
 import { useRef, useState } from "react"
 import { FileUp, Send } from "lucide-react"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import type { ErpMenuTarget } from "@trade-os/ErpScreens"
 import { RoleHomeBoard, type HomeBoardState, type HomeRole } from "@share/home/RoleHomeBoard"
 
@@ -32,7 +32,9 @@ export function PlatformHomeOverview({
   const [query, setQuery] = useState("")
   const input = useRef<HTMLInputElement>(null)
   const submit = () => {
-    if (query.trim() && guideAnchor?.dealId) {
+    const mentionedDeals = query.match(/DL-\d+-\d+/g) ?? []
+    const hasOtherDeal = mentionedDeals.some(dealId => dealId !== guideAnchor?.dealId)
+    if (query.trim() && guideAnchor?.dealId && guideAnchor.stage === "ready" && !hasOtherDeal) {
       setGuideAnswer({ id: crypto.randomUUID(), dealId: guideAnchor.dealId, documentId: guideAnchor.documentId, question: query.trim() })
       return
     }
@@ -95,6 +97,12 @@ export function PlatformHomeOverview({
                     ref={input}
                     aria-label="AI에게 질문"
                     data-guide-target="question"
+                    onKeyDown={(event) => {
+                      if ((event.ctrlKey || event.metaKey) && event.key === "Enter" && !event.nativeEvent.isComposing) {
+                        event.preventDefault()
+                        submit()
+                      }
+                    }}
                     placeholder="값을 입력하세요"
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
@@ -132,7 +140,7 @@ export function PlatformHomeOverview({
             )}
           </div>
         </section>
-        {guideAnswer && guideAnswer.dealId === guide?.state?.anchor?.dealId && (!guide.state.access || guide.state.access === "active") && (
+        {guideAnswer && guide?.state?.trade.T3 && guideAnswer.dealId === guide.state.anchor?.dealId && guideAnswer.documentId === guide.state.anchor?.documentId && (!guide.state.access || guide.state.access === "active") && (
           <section aria-label="거래 질문 답변" className="rounded-xl border bg-card p-5">
             <p className="text-xs text-muted-foreground">예시 답변 · {guideAnswer.dealId}</p>
             <h2 className="mt-2 font-semibold">{guideAnswer.question}</h2>

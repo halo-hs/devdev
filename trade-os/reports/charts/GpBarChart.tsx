@@ -2,8 +2,10 @@
 
 import type { ReactNode } from "react";
 
-import { ChartTooltip, useChartTooltip } from "./ChartTooltip";
-import { innerSize, XLabels, type ChartPad } from "./ChartFrame";
+import { ChartTooltip } from "./ChartTooltip"
+import { useChartTooltip } from "./useChartTooltip";
+import { XLabels } from "./ChartFrame"
+import { innerSize, type ChartPad } from "./chartGeometry";
 import {
   barPathBottom,
   barPathTop,

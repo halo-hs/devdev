@@ -32,9 +32,9 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/ui/Badge"
+import { Badge } from "@/components/ui/badge"
 import { HeroBanner } from "@/components/platform/HeroBanner"
-import { Button } from "@/components/ui/Button"
+import { Button } from "@/components/ui/button"
 import {
   Empty,
   EmptyContent,
@@ -42,17 +42,17 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/Empty"
+} from "@/components/ui/empty"
 import { StatusBadge as PlatformStatusBadge } from "@/components/platform/StatusBadge"
 import {
   BusinessFilterSearch,
   BusinessFilterSelect,
   BusinessListToolbar,
 } from "@/components/platform/SearchFilterBar"
-import { Card, CardContent, CardHeader } from "@/components/ui/Card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs"
-import { Input } from "@/components/ui/Input"
-import { Skeleton } from "@/components/ui/Skeleton"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Sheet,
   SheetContent,
@@ -60,7 +60,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/Sheet"
+} from "@/components/ui/sheet"
 import {
   Table,
   TableBody,
@@ -68,14 +68,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/Table"
+} from "@/components/ui/table"
 import { TablePagination } from "@/components/ui/TablePagination"
-import { Textarea } from "@/components/ui/Textarea"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/Tooltip"
+} from "@/components/ui/tooltip"
 import { snapApi, type SnapPage } from "@snap/lib/snapApi"
 import {
   snapApiConfigured,

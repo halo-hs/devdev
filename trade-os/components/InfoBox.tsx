@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 
 import { Info } from "lucide-react";
 
-import { Alert } from "@/components/ui/Alert";
+import { Alert } from "@/components/ui/alert";
 
 type InfoBoxTone = "positive" | "neutral" | "caution" | "risk";
 

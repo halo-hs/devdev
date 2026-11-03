@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils"
 // Same photo as the develop login (public/images/auth/cargo-operations-banner.jpg).
 import loginCargo from "@/assets/auth/cargo-operations-banner.jpg"
 import signupVessel from "@/assets/auth/signup-vessel.jpg"
-import ecoyaWhiteLogo from "@/components/ds2/assets/logos/logo-ecoya-white.png"
-import ecoyaColorLogo from "@/components/ds2/assets/logos/logo-ecoya-snap-color.png"
+import ecoyaWhiteLogo from "@/assets/logos/logo-ecoya-white.png"
+import ecoyaColorLogo from "@/assets/logos/logo-ecoya-snap-color.png"
 
 const linkClass =
   "rounded-sm text-base text-muted-foreground transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"

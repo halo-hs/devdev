@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 
-import { Badge } from "@/components/ui/Badge"
+import { Badge } from "@/components/ui/badge"
 import { MoneyValue } from "@/components/platform/Money"
 import { cn } from "@/lib/utils"
 

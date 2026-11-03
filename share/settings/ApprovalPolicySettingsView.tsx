@@ -16,18 +16,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/AlertDialog"
-import { Badge } from "@/components/ui/Badge"
-import { Button } from "@/components/ui/Button"
-import { Checkbox } from "@/components/ui/Checkbox"
-import { Input } from "@/components/ui/Input"
+} from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select"
+} from "@/components/ui/select"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import { cn } from "@/lib/utils"
 

@@ -27,7 +27,7 @@ import {
   TradeQuestionPreview,
 } from "./Sections"
 import { LandingShell, StartButton } from "../shared/layout"
-import { useT } from "../shared/Locale"
+import { useT } from "../shared/useLocale"
 
 function WorkflowGuide() {
   const t = useT()

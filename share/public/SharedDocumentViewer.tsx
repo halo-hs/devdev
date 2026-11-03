@@ -16,7 +16,7 @@ import {
   ShieldCheck,
   Ship,
 } from "lucide-react"
-import { Button } from "@/components/ui/Button"
+import { Button } from "@/components/ui/button"
 import {
   readShareResponse,
   previewPackage,

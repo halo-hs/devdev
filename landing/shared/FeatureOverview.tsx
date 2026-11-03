@@ -1,7 +1,7 @@
 import { Children, useRef, useState, type ReactNode } from "react"
 import { ArrowLeft, ArrowRight, Check } from "lucide-react"
-import { Button } from "@/components/ui/Button"
-import { useT } from "./Locale"
+import { Button } from "@/components/ui/button"
+import { useT } from "./useLocale"
 
 /* Product-led composition based on the selected Glide reference.
  * Earlier Inspo source captures remain archived in docs/design/inspo-source/.

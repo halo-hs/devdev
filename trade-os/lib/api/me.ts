@@ -283,7 +283,7 @@ export function isSafePlatformPath(raw: string): boolean {
     raw.startsWith("//") ||
     raw.includes("\\") ||
     raw.includes("#") ||
-    /[\u0000-\u001F\u007F]/.test(raw)
+    Array.from(raw).some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)
   ) {
     return false;
   }

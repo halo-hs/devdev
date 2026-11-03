@@ -14,20 +14,20 @@ export default defineConfig({
     {
       name: "firefox",
       testMatch: [
-        "**/erp-popup-layering.spec.ts",
-        "**/erp-ai-handoff.spec.ts",
-        "**/erp-deal-additions.spec.ts",
-        "**/erp-document-workspace.spec.ts",
+        "**/start-guide.spec.ts",
+        "**/page-scroll-layout.spec.ts",
+        "**/ui-audit-regression.spec.ts",
+        "**/operations-month-close-demo.spec.ts",
       ],
       use: { browserName: "firefox" },
     },
     {
       name: "webkit",
       testMatch: [
-        "**/erp-popup-layering.spec.ts",
-        "**/erp-ai-handoff.spec.ts",
-        "**/erp-deal-additions.spec.ts",
-        "**/erp-document-workspace.spec.ts",
+        "**/start-guide.spec.ts",
+        "**/page-scroll-layout.spec.ts",
+        "**/ui-audit-regression.spec.ts",
+        "**/operations-month-close-demo.spec.ts",
       ],
       use: { browserName: "webkit" },
     },

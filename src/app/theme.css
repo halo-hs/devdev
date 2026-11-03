@@ -948,6 +948,13 @@
 [data-slot="pagination-controller"] [data-slot="pagination-item"] > button > svg { width: 16px; height: 16px; }
 [data-slot="pagination-controller"] [data-slot="pagination-item"] > button:has(svg):disabled { color: var(--color-gray-8); }
 [data-slot="pagination-controller"] [data-slot="pagination-ellipsis"] { color: var(--color-gray-2); }
+[data-slot="pagination-controller"] [data-slot="select-trigger"] {
+  line-height: var(--leading-button-3);
+  padding-right: calc(var(--spacing) * 2.5);
+}
+[data-slot="pagination-controller"] [data-slot="select-trigger"] > svg {
+  color: var(--color-gray-4);
+}
 
 /* Progress (151:216): both ends of the fill are rounded. */
 [data-slot="progress-indicator"] { border-radius: 9999px; }
@@ -983,4 +990,158 @@ input[type="color"]::-moz-color-swatch { border: 0; border-radius: 5px; }
    popup layer like the other in-dialog menus. */
 [data-slot="popover-content"]:has([data-slot="calendar"]) {
   z-index: var(--z-popup);
+}
+
+/* Figma values for the single shadcn layer. Reuse existing tokens locally so
+   changing a component size or variant does not retheme other controls. */
+:where(.group\/button) {
+  --radius: 10px;
+}
+:where([data-slot="card"]) {
+  --card-content-px: 14px;
+  --card-content-pt: 20px;
+}
+:where([data-slot="card"]:has(> [data-slot="card-header"])) {
+  --card-content-px: 20px;
+  --card-content-pt: 16px;
+}
+:where([data-slot="tabs-list"]) {
+  --shadow-input: var(--shadow-input-default);
+}
+:where([data-slot="tabs-list"][data-variant="segment"]) {
+  --tabs-list-background: #f1f2f5;
+  --tabs-trigger-background-active: #e8eaee;
+  --tabs-trigger-disabled-foreground: #b2b4bc;
+  --shadow-input: 0 1px 1.5px rgb(0 0 0 / 8%);
+}
+
+:where([data-slot="tabs-count"], [data-slot="dropdown-menu-label"]) {
+  --text-badge-default: 12px;
+}
+
+/* Figma Badge 891:1212. Palette variants reuse the existing per-badge slots;
+   no extra component or global color-token scale is introduced. */
+:where(.badge-palette-powder) {
+  --badge-background: #dbecfc;
+  --badge-border: #1c92ff;
+  --badge-fill-foreground: #00315e;
+  --badge-outline-foreground: #00315e;
+}
+:where(.badge-palette-indigo) {
+  --badge-background: #e2e7f8;
+  --badge-border: #99a8e6;
+  --badge-fill-foreground: #3251ca;
+  --badge-outline-foreground: #3251ca;
+}
+:where(.badge-palette-forest) {
+  --badge-background: #eaf2e3;
+  --badge-border: #9dc57d;
+  --badge-fill-foreground: #537836;
+  --badge-outline-foreground: #537836;
+}
+:where(.badge-palette-teal) {
+  --badge-background: #e1faf5;
+  --badge-border: #35dbc0;
+  --badge-fill-foreground: #147363;
+  --badge-outline-foreground: #147363;
+}
+:where(.badge-palette-pine) {
+  --badge-background: #e6f4f4;
+  --badge-border: #95d0ce;
+  --badge-fill-foreground: #479e9d;
+  --badge-outline-foreground: #479e9d;
+}
+:where(.badge-palette-sky) {
+  --badge-background: #dcf1ff;
+  --badge-border: #68c3fd;
+  --badge-fill-foreground: #038be2;
+  --badge-outline-foreground: #038be2;
+}
+:where(.badge-palette-ocean) {
+  --badge-background: #dbf1fa;
+  --badge-border: #43b7e5;
+  --badge-fill-foreground: #136686;
+  --badge-outline-foreground: #136686;
+}
+:where(.badge-palette-violet) {
+  --badge-background: #e5ddfd;
+  --badge-border: #916df8;
+  --badge-fill-foreground: #400adc;
+  --badge-outline-foreground: #400adc;
+}
+:where(.badge-palette-purple) {
+  --badge-background: #f0dffb;
+  --badge-border: #bd75f0;
+  --badge-fill-foreground: #8217cf;
+  --badge-outline-foreground: #8217cf;
+}
+:where(.badge-palette-plum) {
+  --badge-background: #f8dbff;
+  --badge-border: #e366ff;
+  --badge-fill-foreground: #bb00e6;
+  --badge-outline-foreground: #bb00e6;
+}
+:where(.badge-palette-mauve) {
+  --badge-background: #eae4f7;
+  --badge-border: #a48adb;
+  --badge-fill-foreground: #5d36b0;
+  --badge-outline-foreground: #5d36b0;
+}
+:where(.badge-palette-rose) {
+  --badge-background: #fddee8;
+  --badge-border: #f5709b;
+  --badge-fill-foreground: #d70e4f;
+  --badge-outline-foreground: #d70e4f;
+}
+:where(.badge-palette-wine) {
+  --badge-background: #f5e5e7;
+  --badge-border: #d4919a;
+  --badge-fill-foreground: #a5404e;
+  --badge-outline-foreground: #a5404e;
+}
+:where(.badge-palette-flame) {
+  --badge-background: #ffe5dc;
+  --badge-border: #fd8e68;
+  --badge-fill-foreground: #e33c03;
+  --badge-outline-foreground: #e33c03;
+}
+:where(.badge-palette-tangerine) {
+  --badge-background: #feecdc;
+  --badge-border: #fcae69;
+  --badge-fill-foreground: #e16b04;
+  --badge-outline-foreground: #e16b04;
+}
+:where(.badge-palette-brown) {
+  --badge-background: #f4ece6;
+  --badge-border: #d0ad95;
+  --badge-fill-foreground: #9e6b47;
+  --badge-outline-foreground: #9e6b47;
+}
+:where(.badge-palette-khaki) {
+  --badge-background: #f1f4e6;
+  --badge-border: #c3d095;
+  --badge-fill-foreground: #8b9e47;
+  --badge-outline-foreground: #8b9e47;
+}
+:where(.badge-palette-fuchsia) {
+  --badge-background: #f8e2f1;
+  --badge-border: #de7ac0;
+  --badge-fill-foreground: #a52980;
+  --badge-outline-foreground: #a52980;
+}
+:where(.badge-palette-sand) {
+  --badge-background: #fff2db;
+  --badge-border: #ffc766;
+  --badge-fill-foreground: #e69100;
+  --badge-outline-foreground: #e69100;
+}
+
+:root:not(.dark) {
+  --badge-palette-gray-cancel-fill-foreground: var(--color-gray-7);
+  --badge-palette-gray-cancel-outline-foreground: var(--color-gray-7);
+  --badge-palette-gray-complete-fill-foreground: var(--color-gray-4);
+  --badge-palette-gray-complete-outline-foreground: var(--color-gray-4);
+  --badge-palette-red-fill-foreground: var(--color-red-2);
+  --badge-palette-green-fill-foreground: var(--color-green-1);
+  --badge-palette-orange-fill-foreground: var(--color-orange-1);
 }

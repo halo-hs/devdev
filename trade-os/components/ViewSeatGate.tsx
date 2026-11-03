@@ -1,6 +1,6 @@
+import { ViewSeatContext } from "./useViewSeat"
 import {
   cloneElement,
-  createContext,
   useCallback,
   useContext,
   type MouseEvent,
@@ -15,11 +15,6 @@ import { SettingsDemoContext } from "@share/settings/useSettingsDemo"
 // existing PDFs (PRICING-POLICY 2장). Work actions stay visible; using one
 // explains the View limit and offers one permission request, which OWNER·ADMIN
 // approve or reject in 설정 > 사용자 관리 (CS-09, Figma 설정 · 04 사용자 관리).
-const ViewSeatContext = createContext<{ viewOnly: boolean; guard: () => boolean }>({
-  viewOnly: false,
-  guard: () => false,
-})
-
 const MEMBER_ID = "member"
 
 export function ViewSeatProvider({ role, children }: { role: string; children: ReactNode }) {
@@ -87,15 +82,6 @@ export function ViewSeatProvider({ role, children }: { role: string; children: R
     return true
   }, [viewOnly, pending, setRequests])
   return <ViewSeatContext.Provider value={{ viewOnly, guard }}>{children}</ViewSeatContext.Provider>
-}
-
-export function useViewOnly() {
-  return useContext(ViewSeatContext).viewOnly
-}
-
-/** Returns true (after showing the View notice) when the action must not run. */
-export function useViewSeatGuard() {
-  return useContext(ViewSeatContext).guard
 }
 
 type ActionElement = ReactElement<{

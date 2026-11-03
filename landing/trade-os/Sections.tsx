@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { ArrowRight, FileText } from "lucide-react"
-import { useT } from "../shared/Locale"
+import { useT } from "../shared/useLocale"
 
 export function TradeDealPreview() {
   const t = useT()

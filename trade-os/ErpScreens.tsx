@@ -1,4 +1,4 @@
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { counterpartyPreview, counterpartyPreviewAccess, type CounterpartyAccess } from "@trade-os/counterparties/Counterparty360View"
 import { listDealDocuments } from "@trade-os/lib/dealDocumentActions"
 import { orderProgress } from "@trade-os/lib/dealFinanceWorkspace"
@@ -19,10 +19,10 @@ import {
   WalletCards,
 } from "lucide-react"
 
-import { Badge } from "@/components/ui/Badge"
+import { Badge } from "@/components/ui/badge"
 import { SummaryMetricStrip } from "@/components/platform/SummaryMetricStrip"
 import { HeroBanner } from "@/components/platform/HeroBanner"
-import { Button } from "@/components/ui/Button"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardAction,
@@ -30,14 +30,14 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/Card"
+} from "@/components/ui/card"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select"
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -45,8 +45,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/Table"
-import { Textarea } from "@/components/ui/Textarea"
+} from "@/components/ui/table"
+import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import {
   SettingsHubV2,
@@ -876,9 +876,14 @@ export function CounterpartyPrototype({ onNavigate, counterpartyId = "acme", rol
   const [attempt, setAttempt] = useState(0)
   const [page, setPage] = useState(1)
   const [currency, setCurrency] = useState("all")
+  const queryKey = `${requestKey}:${attempt}`
+  const [previousQuery, setPreviousQuery] = useState(queryKey)
+  if (previousQuery !== queryKey) {
+    setPreviousQuery(queryKey)
+    setLoadState("loading"); setPage(1); setCurrency("all"); setModel(null)
+  }
   useEffect(() => {
     let active = true
-    setLoadState("loading"); setPage(1); setCurrency("all")
     counterpartyPreview.read(counterpartyId, { userId, canReadOrganizationSettlement }).then(value => {
       if (active) { setModel(value); setLoadedFor(requestKey); setLoadState("ready") }
     }).catch(() => { if (active) { setLoadedFor(requestKey); setLoadState("error") } })

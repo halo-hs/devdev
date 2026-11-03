@@ -1,24 +1,25 @@
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/Popover"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { useState, useRef, type DragEvent as ReactDragEvent, useEffect } from "react"
-import { ViewSeatAction, useViewSeatGuard } from "@trade-os/components/ViewSeatGate"
+import { ViewSeatAction } from "@trade-os/components/ViewSeatGate"
+import { useViewSeatGuard } from "@trade-os/components/useViewSeat"
 import { cn } from "@/lib/utils"
-import { Mail, Check, Copy, X, ChevronDown, AlertTriangle, FileText, ChevronUp, Plus, Upload, LoaderCircle, MoreHorizontal, Trash2, Info, RefreshCw, ChevronRight, ChevronLeft } from "lucide-react"
-import { Button } from "@/components/ui/Button"
+import { Mail, Check, Copy, X, ChevronDown, AlertTriangle, FileText, ChevronUp, Plus, Upload, LoaderCircle, MoreHorizontal, Trash2, Info, ChevronRight, ChevronLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
 import { DocumentTypeBadge } from "@trade-os/components/DocumentTypeBadge"
 import { AppSelect } from "@trade-os/components/AppSelect"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/Table"
-import { Checkbox } from "@/components/ui/Checkbox"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+import { Checkbox } from "@/components/ui/checkbox"
 import { createPortal } from "react-dom"
-import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/Alert"
-import { Card, CardContent, CardHeader } from "@/components/ui/Card"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/DropdownMenu"
-import { LabeledProgress } from "@/components/ds2/extensions/LabeledProgress"
+import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/alert"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { LabeledProgress } from "@/components/platform/LabeledProgress"
 import { BusinessListToolbar, BusinessFilterField } from "@/components/platform/SearchFilterBar"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select"
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/AlertDialog"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog"
 import { useTradeSeatAssigned } from "@share/settings/useSettingsDemo"
-import { useStartGuide } from "@trade-os/onboarding/StartGuideProvider"
+import { useStartGuide } from "@trade-os/onboarding/startGuideContext"
 import { type DealDocumentRecord, dealDocumentFromReviewUrl } from "@trade-os/lib/dealDocumentActions"
 import { readDocumentReview, type ReviewedField, type BankCashInput } from "@trade-os/lib/erpDocumentWorkflow"
 import { decimalMagnitude, FINANCE_DECIMAL_SCALE } from "@trade-os/lib/financeDecimal"
@@ -30,12 +31,12 @@ import { toast } from "sonner"
 import { appLocation } from "@/app/appLocation"
 import { type DocumentConnection } from "@trade-os/lib/documentDealConnection"
 import { downloadRenderedDocumentPdf } from "@trade-os/documents/documentTemplateModel"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/Dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { AutoSaveStatus } from "@/components/platform/AutoSaveStatus"
 import { PdfPanelWorkspaceCard } from "@/components/platform/PdfPanelResizeHandle"
 import { DocumentReviewWorkspace } from "@trade-os/confirm/ConfirmFlowConnected"
 import { TablePagination } from "@/components/ui/TablePagination"
-import { type FileDropZoneRef, FileDropZone } from "@/components/ds2/extensions/FileDropZone"
+import { type FileDropZoneRef, FileDropZone } from "@/components/platform/FileDropZone"
 import { HeroBanner } from "@/components/platform/HeroBanner"
 import { type RecentDocument, type UploadDocumentType, type UploadDetailStep, type UploadDocumentDealLinks, type UploadDocumentDealLink, type DocumentStageKey } from "@/App"
 import { uploadDocumentTypeLabel, manualUploadDocumentTypeOptions, reviewFieldsForDocument, resolvedReviewFields, isUploadDocumentTypeUnresolved } from "@trade-os/inbox/uploadDocumentModel"
@@ -118,7 +119,7 @@ const recentDocuments: RecentDocument[] = [
     name: "계약서_안심찬.pdf",
     uploadedAt: "2026.08.27 13:58",
     pages: 8,
-    dealLabel: "안심찬상사 · SC-2026-0812",
+    dealLabel: "DL-260708-01 · KATAMAN ASIA-PACIFIC PTE LTD",
     status: "거래 연결 완료",
     tone: "success",
     stage: "confirmed",
@@ -339,7 +340,7 @@ function EmailForwardInPanel({
     <section
       className={cn(
         "rounded-lg border bg-background text-left",
-        compact ? "mt-4 p-3" : "p-5"
+        compact ? "mt-4 p-3" : "rounded-none border-0 p-0"
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -391,7 +392,7 @@ function EmailForwardInPanel({
         </div>
       ) : (
         <div className="mt-3">
-          <div className="grid grid-cols-2 gap-2 rounded-[var(--r-lg)] bg-[var(--surface-background)] px-3 py-3 shadow-[var(--shadow-section)] ring-1 ring-[var(--surface-border)]">
+          <div className="grid grid-cols-2 gap-3">
             <label className="grid gap-1">
               <span className="text-[11px] font-medium text-muted-foreground">
                 수신일자
@@ -555,9 +556,9 @@ function EmailForwardQueue({
   // Portaled to body so the panel stacks above the shell header instead of
   // inside the page's stacking context.
   return createPortal(
-    <div className="fixed inset-y-0 right-0 z-50 w-[min(560px,calc(100vw-24px))] border-l bg-background shadow-2xl">
+    <div className="fixed inset-y-0 right-0 z-50 w-[min(480px,100vw)] border-l bg-background shadow-2xl">
       <div className="flex h-full min-h-0 flex-col">
-        <div className="flex h-14 shrink-0 items-center justify-between border-b px-5">
+        <div className="flex min-h-20 shrink-0 items-start justify-between px-6 pt-6 pb-4">
           <div>
             <div className="text-sm font-semibold">수신 메일에서 첨부 선택</div>
             <div className="mt-0.5 text-xs text-muted-foreground">
@@ -573,7 +574,7 @@ function EmailForwardQueue({
             <X className="size-4" />
           </Button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto p-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-5">
           <EmailForwardInPanel
             onImportFiles={(files) => {
               onImportFiles(files)
@@ -607,6 +608,37 @@ function AiDocumentProcessingNotice() {
   )
 }
 
+function DuplicateInvoiceWarning() {
+  const [groups, setGroups] = useState<{ invoice_number: string; count: number }[]>([])
+  const [failed, setFailed] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [attempt, setAttempt] = useState(0)
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    prototypeBackend.tradeDocuments.listDuplicateInvoices()
+      .then(({ items }) => { if (active) { setGroups(items); setFailed(false) } })
+      .catch(() => { if (active) setFailed(true) })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [attempt])
+  if (!failed && groups.length === 0) return null
+  return (
+    <Alert variant={failed ? "caution" : "riskHigh"} data-component="DuplicateInvoiceWarning">
+      <AlertTriangle className="size-4" />
+      <AlertTitle className="text-xs">
+        {failed ? "중복 인보이스 번호를 확인하지 못했습니다." : `중복 인보이스 번호 ${groups.length}건 발견`}
+      </AlertTitle>
+      <AlertDescription className="text-[11px] leading-5">
+        {failed ? "잠시 후 다시 시도해 주세요. 파일은 계속 올릴 수 있습니다." :
+          groups.map((group) => `${group.invoice_number} · 문서 ${group.count}개`).join(" / ")}
+      </AlertDescription>
+      {failed ? <AlertAction><Button variant="ghost" size="xs" disabled={loading}
+        onClick={() => setAttempt((value) => value + 1)}>다시 시도</Button></AlertAction> : null}
+    </Alert>
+  )
+}
+
 function DuplicateUploadAlert({
   notice,
   onDismiss,
@@ -637,7 +669,7 @@ function DuplicateUploadAlert({
 }
 
 // Kept as a fallback for older prototype routes while the horizontal tray ships.
-type DocumentTrayFilter = "all" | "processing" | "review" | "failed" | "confirmed"
+type DocumentTrayFilter = "all" | "processing" | "review" | "failed"
 
 type DocumentQueueSort = "recent" | "oldest"
 
@@ -646,7 +678,6 @@ function matchesDocumentQueueStatus(
   filter: DocumentTrayFilter
 ) {
   if (filter === "all") return true
-  if (filter === "confirmed") return document.stage === "confirmed"
   if (filter === "processing") return ["ocr", "queued"].includes(document.stage)
   if (filter === "review")
     return document.stage === "field"
@@ -851,12 +882,12 @@ function HorizontalDocumentTray({
               </div>
               <div className="truncate text-[11px] leading-4 text-[var(--color-gray-5)]">
                 {uploadDocumentTypeLabel(selectedDocument.documentType)}
-                {selectedIndex >= 0 ? ` · ${selectedIndex + 1} / ${documents.length}` : " · 연결 완료"}
+                {selectedIndex >= 0 ? ` · ${selectedIndex + 1} / ${documents.length}` : ""}
               </div>
             </div>
-            <ToneBadge tone={selectedDocument.tone}>
+            {selectedDocument.stage !== "confirmed" ? <ToneBadge tone={selectedDocument.tone}>
               {selectedDocument.status}
-            </ToneBadge>
+            </ToneBadge> : null}
           </div>
         ) : null}
 
@@ -958,6 +989,7 @@ function HorizontalDocumentTray({
               />
             </div>
           ) : null}
+          <div className="mb-2 empty:hidden"><DuplicateInvoiceWarning /></div>
           {documents.length === 0 && !uploadProgress ? (
             <div className="rounded-[var(--r-md)] border border-dashed border-[var(--surface-border)] px-4 py-5 text-center text-xs text-[var(--surface-muted-foreground)]">
               파일 추가 버튼에서 문서를 추가해 주세요.
@@ -1843,16 +1875,19 @@ export function InboxScreen({
       }
     }, 650)
   }
+  const rereadingDocuments = useRef(new Set<string>())
   const retryDocument = async (index: number) => {
     const document = uploadDocuments[index]
-    if (!document || document.stage !== "failed" || (document.retryCount ?? 0) >= 3) return
+    if (!document || isUploadDocumentTypeUnresolved(document) || (document.stage !== "failed" && !document.rereadAfterTypeSelection) || (document.retryCount ?? 0) >= 3 || rereadingDocuments.current.has(document.name)) return
     const name = document.name
+    rereadingDocuments.current.add(name)
     setUploadDocuments((current) => current.map((item) => item.name === name
       ? { ...item, retryCount: (item.retryCount ?? 0) + 1, stage: "ocr", status: "분석 중...", tone: "blue" } : item))
-    const result = await prototypeBackend.tradeDocuments.retry({ id: name })
+    const result = await prototypeBackend.tradeDocuments.retry({ id: name, documentType: document.documentType }).catch(() => ({ ok: false }))
+    rereadingDocuments.current.delete(name)
     const failed = !result.ok || /encrypted|password|fail/i.test(name)
     setUploadDocuments((current) => current.map((item) => item.name === name
-      ? { ...item, stage: failed ? "failed" : "field", status: failed ? "처리 실패 · 파일 확인 필요" : "검토 대기", tone: failed ? "danger" : "warning" } : item))
+      ? { ...item, rereadAfterTypeSelection: false, stage: failed ? "failed" : "field", status: failed ? "처리 실패 · 파일 확인 필요" : "검토 대기", tone: failed ? "danger" : "warning" } : item))
     if (!failed) guide?.record({ type: "document-created", documentId: name, receipt: crypto.randomUUID() })
     guide?.record({ type: "extraction", documentId: name, stage: failed ? "failed" : "ready" })
     if (failed) toast.error("재추출하지 못했습니다. 잠금 해제 또는 원본 파일 확인 후 다시 올려 주세요.")
@@ -1898,17 +1933,19 @@ export function InboxScreen({
     if (deletedName) toast.success(`${deletedName} 파일을 삭제했습니다.`)
   }
   const handleDocumentTypeChange = (documentType: UploadDocumentType) => {
+    if (rereadingDocuments.current.has(selectedDocument.name) || (documentType === selectedDocument.documentType && !isUploadDocumentTypeUnresolved(selectedDocument))) return
     setUploadDocuments((current) =>
       current.map((document, index) =>
         index === selectedIndex
           ? {
               ...document,
               documentType,
-              reviewedFields: {},
+              documentTypeConfirmed: true,
+              rereadAfterTypeSelection: document.rereadAfterTypeSelection || isUploadDocumentTypeUnresolved(document),
               sourcePages: undefined,
-              stage: "field",
-              status: "검토 대기",
-              tone: "warning",
+              stage: document.stage === "failed" ? "failed" : "field",
+              status: document.stage === "failed" ? "처리 실패" : "검토 대기",
+              tone: document.stage === "failed" ? "danger" : "warning",
               pdfReviewCompleted: false,
             }
           : document
@@ -1929,7 +1966,7 @@ export function InboxScreen({
           await handleFilesSelected([new File([pdf.output("blob")], "PO_시작가이드_예시.pdf", { type: "application/pdf" })])
         }}>예시 PDF 사용</Button></Alert></div>}
         <BeforeUploadState
-          documents={uploadDocuments.map((document, index) => ({ document, index }))}
+          documents={pendingUploadDocuments}
           onOpenDocument={(index) => {
             openUploadDocument(index)
             setHasFile(true)
@@ -1986,16 +2023,15 @@ export function InboxScreen({
             다시 저장
           </Button>
         ) : null}
-        {selectedDocument.stage === "failed" ? (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={(selectedDocument.retryCount ?? 0) >= 3}
-            onClick={() => void retryDocument(selectedIndex)}
-          >
-            <RefreshCw data-icon="inline-start" /> {(selectedDocument.retryCount ?? 0) >= 3 ? "재추출 한도 도달" : "다시 추출"}
+        {(selectedDocument.stage === "failed" || selectedDocument.rereadAfterTypeSelection || isTypeUnresolved) && selectedDocument.stage !== "ocr" && selectedDocument.stage !== "queued" && (selectedDocument.retryCount ?? 0) < 3 ? (
+          <Button size="sm" variant="outline"
+            disabled={isTypeUnresolved}
+            title={isTypeUnresolved ? "문서 유형을 먼저 선택해 주세요." : undefined}
+            onClick={() => void retryDocument(selectedIndex)}>
+            다시 읽기 ({selectedDocument.retryCount ?? 0}/3)
           </Button>
-        ) : selectedDocument.stage === "ocr" ||
+        ) : null}
+        {selectedDocument.stage === "ocr" ||
           selectedDocument.stage === "queued" ? (
           <Button size="sm" disabled>
             <LoaderCircle className="animate-spin" data-icon="inline-start" />
@@ -2184,7 +2220,6 @@ function PendingUploadDocumentsTable({
                     <SelectItem value="processing">처리 중</SelectItem>
                     <SelectItem value="review">확인 필요</SelectItem>
                     <SelectItem value="failed">실패·제외</SelectItem>
-                    <SelectItem value="confirmed">거래 연결 완료</SelectItem>
                   </SelectContent>
                 </Select>
               </BusinessFilterField>
@@ -2416,10 +2451,10 @@ function BeforeUploadState({
           title="문서 올리기"
           description="PDF를 올려 내용을 검토한 뒤, 거래를 선택하고 반영할 내용을 확인하세요."
           summary={
-        <div className="mx-auto w-full max-w-5xl">
-          <Card className="w-full bg-[var(--color-gray-12)]! shadow-[var(--shadow-modal)]" size="sm">
-            <CardContent className="p-4 sm:p-5">
-              <div className="mb-3 grid gap-2">
+        <div className="mx-auto w-full max-w-[1200px]">
+          <Card className="w-full rounded-[22px] border bg-[var(--color-gray-12)]! shadow-[var(--shadow-section)]" size="sm">
+            <CardContent className="p-5 sm:px-[30px]">
+              <div className="mb-5 grid gap-5">
                 <div className="flex flex-wrap items-start gap-x-6 gap-y-2">
                   <ol
                     aria-label="문서 처리 순서"
@@ -2466,6 +2501,7 @@ function BeforeUploadState({
                     onDismiss={onDismissDuplicateUpload}
                   />
                 ) : null}
+                <DuplicateInvoiceWarning />
               </div>
               <FileDropZone
                 ref={fileDropZoneRef}
@@ -2482,7 +2518,7 @@ function BeforeUploadState({
                   if (!viewSeatGuard()) onFilesSelected(files)
                 }}
                 // 문서 올리기 V2 (6273:100113): Blue 10 drop area, stacked and centered.
-                className="min-h-[112px] flex-col gap-2 border-[var(--color-primary-6)] bg-[var(--color-primary-10)] px-4 text-center text-[var(--color-primary-4)]"
+                className="min-h-[148px] flex-col gap-2 border-[var(--color-primary-6)] bg-[var(--color-primary-10)] px-4 text-center text-[var(--color-primary-4)]"
               >
                 <Upload className="size-5" />
                 <span>

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { LottieLight, type LottieHandle } from "lottie-react"
 import { useReducedMotion } from "@/lib/useReducedMotion"
 import { FileText, Pause, Play } from "lucide-react"
-import { useT } from "./Locale"
+import { useT } from "./useLocale"
 
 export function TradeLottie({
   src,

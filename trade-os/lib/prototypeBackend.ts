@@ -349,6 +349,10 @@ export const prototypeBackend = {
     completeReview: completeDealDocumentReview,
   },
   tradeDocuments: {
+    // Preview fixture for #1049; production uses GET /trade/documents/duplicate-invoices.
+    listDuplicateInvoices: async () => ({ items: [
+      { invoice_number: "INV-2607-003", count: 2 },
+    ] }),
     listCandidates: async <T extends Parameters<typeof documentCandidates>[0][number]>(deals: T[], facts: Parameters<typeof documentCandidates>[1]) => documentCandidates(deals, facts),
     getConnection: async (...args: Parameters<typeof getDocumentConnection>) => getDocumentConnection(...args),
     previewConnectionChange: async (...args: Parameters<typeof previewConnectionChange>) => previewConnectionChange(...args),
@@ -381,7 +385,7 @@ export const prototypeBackend = {
       }
     },
     delete: ({ id }: EntityMutationInput) => localMutation(id),
-    retry: ({ id }: EntityMutationInput) => localMutation(id),
+    retry: ({ id }: EntityMutationInput & { documentType?: string }) => localMutation(id),
     commit: ({ id }: EntityMutationInput) => localMutation(id),
     assignToDeal: ({ id }: EntityMutationInput) => localMutation(id),
     unassignFromDeal: ({ id }: EntityMutationInput) => localMutation(id),

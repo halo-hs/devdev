@@ -1,15 +1,14 @@
 import { appLocation } from "@/app/appLocation"
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
   type ReactNode,
 } from "react"
-import { Button } from "@/components/ui/Button"
+import { Button } from "@/components/ui/button"
+import { StartGuideContext } from "./startGuideContext"
 import {
   applicableItems,
   applyGuideEvent,
@@ -77,51 +76,38 @@ function destination(item: GuideItem, state: GuideState) {
   if (!state.anchor) return "/erp/documents/upload"
   return `/erp/documents/upload/${encodeURIComponent(state.anchor.documentId)}/${item === "T3" ? "connect" : "review"}`
 }
-type Runtime = {
-  state: GuideState | null
-  error: boolean
-  role: GuideRole
-  complete: boolean
-  count: number
-  total: number
-  reload: () => void
-  start: (item: GuideItem) => void
-  record: (event: GuideEvent) => void
-}
-const Context = createContext<Runtime | null>(null)
-export const useStartGuide = () => useContext(Context)
+type ProviderProps = { scope: string; role: GuideRole; children: ReactNode }
 
-export function StartGuideProvider({
+export function StartGuideProvider(props: ProviderProps) {
+  return <StartGuideSession key={props.scope} {...props} />
+}
+
+function readGuide(key: string) {
+  try {
+    return { key, state: parseGuide(localStorage.getItem(key)), error: false }
+  } catch {
+    return { key, state: null, error: true }
+  }
+}
+
+function StartGuideSession({
   scope,
   role,
   children,
-}: {
-  scope: string
-  role: GuideRole
-  children: ReactNode
-}) {
+}: ProviderProps) {
   const key = `ecoya.preview.start-guide.v1:${scope}`
   const [loaded, setLoaded] = useState<{
     key: string
     state: GuideState | null
     error: boolean
-  }>({ key, state: null, error: false })
+  }>(() => readGuide(key))
   const pendingIntent = useRef<Intent | null | undefined>(undefined)
   const [hint, setHint] = useState<GuideItem | null>(null)
   const [target, setTarget] = useState<HTMLElement | null>(null)
   const reload = useCallback(() => {
-    try {
-      setLoaded({
-        key,
-        state: parseGuide(localStorage.getItem(key)),
-        error: false,
-      })
-    } catch {
-      setLoaded({ key, state: null, error: true })
-    }
+    setLoaded(readGuide(key))
   }, [key])
   useEffect(() => {
-    reload()
     const refresh = (event: StorageEvent) => {
       if (event.key === key || event.key === null) reload()
     }
@@ -293,7 +279,7 @@ export function StartGuideProvider({
     [state, error, role, complete, count, items.length, reload, start, record]
   )
   return (
-    <Context.Provider value={value}>
+    <StartGuideContext.Provider value={value}>
       {children}
       {hint && (
         <aside
@@ -317,6 +303,6 @@ export function StartGuideProvider({
           </Button>
         </aside>
       )}
-    </Context.Provider>
+    </StartGuideContext.Provider>
   )
 }

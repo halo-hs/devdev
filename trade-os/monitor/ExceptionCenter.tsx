@@ -5,8 +5,8 @@ import Link from "@trade-os/lib/AppLink";
 import { useEffect, useState } from "react";
 
 import { InfoBox } from "@trade-os/components/InfoBox";
-import { Button } from "@/components/ui/Button";
-import { usePlatformAuth } from "@trade-os/lib/session/PlatformSessionContext";
+import { Button } from "@/components/ui/button";
+import { usePlatformAuth } from "@trade-os/lib/session/platformSession";
 import { getExceptions, type ExceptionsResponse } from "@trade-os/lib/api/exceptions";
 import { withRetry } from "@trade-os/lib/api/retry";
 import { useLocaleTag } from "@trade-os/lib/i18n/useLocaleTag";

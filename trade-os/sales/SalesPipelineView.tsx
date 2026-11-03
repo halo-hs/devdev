@@ -1,12 +1,12 @@
 import { type ReactNode, useState, useEffect } from "react"
 import { XCircle, AlertTriangle, CheckCircle2, ShieldCheck, Clock3, Sparkles, Plus, RefreshCcw, Search, ArrowLeft, ArrowRight, Pencil, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Badge } from "@/components/ui/Badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/Dialog"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select"
-import { Textarea } from "@/components/ui/Textarea"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 
 type Tone = "neutral" | "success" | "warning" | "danger" | "info"
 

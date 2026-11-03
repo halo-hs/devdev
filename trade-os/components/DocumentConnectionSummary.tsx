@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
-import { Button } from "@/components/ui/Button"
-import { Textarea } from "@/components/ui/Textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/Dialog"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import type { DocumentConnection, DocumentDealLink, ConnectionChangePreview } from "@trade-os/lib/documentDealConnection"
 
@@ -50,10 +50,15 @@ export function DocumentConnectionChangeDialog({ documentId, connection, target,
   const [displayConnection, setDisplayConnection] = useState(connection)
   const submitting = useRef(false)
   const title = target ? "거래 연결 변경" : "거래 연결 해제"
+  const requestKey = JSON.stringify([open, documentId, connection, target, attempt])
+  const [previousRequest, setPreviousRequest] = useState("")
+  if (previousRequest !== requestKey) {
+    setPreviousRequest(requestKey)
+    setLoading(Boolean(open && connection.link)); setError(""); setPreview(null)
+  }
   useEffect(() => {
     if (!open || !connection.link) return
     let active = true
-    setLoading(true); setError(""); setPreview(null)
     // On retry, refresh the snapshot shown in the dialog. Preserve the reason;
     // a concurrent edit must never leave the user retrying the stale revision.
     const load = async () => {
@@ -67,7 +72,7 @@ export function DocumentConnectionChangeDialog({ documentId, connection, target,
       .catch(cause => { if (active) setError(cause instanceof Error ? cause.message : "변경 영향을 불러오지 못했습니다.") })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [open, documentId, connection.revision, connection.link?.dealId, target?.dealId, attempt])
+  }, [open, documentId, connection, target, attempt])
   const apply = async () => {
     if (submitting.current || !preview || preview.blockedReason || !reason.trim()) return
     submitting.current = true; setBusy(true); setError("")

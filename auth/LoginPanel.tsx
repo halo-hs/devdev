@@ -4,7 +4,7 @@ import {
   authFieldError,
   authSocialButtonClass,
 } from "@auth/lib/authValidation"
-import { Button } from "@/components/ui/Button"
+import { Button } from "@/components/ui/button"
 import {
   Loader2,
   Building2,
@@ -21,11 +21,11 @@ import {
   CardTitle,
   CardDescription,
   CardFooter,
-} from "@/components/ui/Card"
+} from "@/components/ui/card"
 import { AuthInputField } from "@auth/AuthInputField"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover"
-import googleIcon from "@/components/ds2/assets/icons/icon-google.svg"
-import appleIcon from "@/components/ds2/assets/icons/icon-apple.svg"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import googleIcon from "@/assets/icons/icon-google.svg"
+import appleIcon from "@/assets/icons/icon-apple.svg"
 import {
   Select,
   SelectTrigger,
@@ -33,7 +33,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-} from "@/components/ui/Select"
+} from "@/components/ui/select"
 import {
   type CommonPreviewPlan,
   type CommonPreviewRole,

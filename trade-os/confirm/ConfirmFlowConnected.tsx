@@ -1,23 +1,22 @@
 import { type BankCashInput, type ReviewedField } from "@trade-os/lib/erpDocumentWorkflow"
 import { type DocumentConnection } from "@trade-os/lib/documentDealConnection"
 import { useIsMobile } from "@/hooks/useIsMobile"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/Button"
-import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/Alert"
+import { Button } from "@/components/ui/button"
+import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/alert"
 import { OcrFieldReviewList, UploadFieldHistory } from "@trade-os/confirm/ConfirmStepOneView"
 import { AlertTriangle, ChevronLeft, LoaderCircle } from "lucide-react"
 import { DocumentStage } from "@trade-os/components/DocumentStage"
 import { dealDocumentPreviews } from "@trade-os/lib/dealDocumentActions"
 import { DealConfirmPanel } from "@trade-os/confirm/ConfirmStepTwoView"
-import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/Resizable"
+import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable"
 import { PdfPanelResizeHandle } from "@/components/platform/PdfPanelResizeHandle"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
-import { Field, FieldLabel } from "@/components/ui/Field"
-import { Combobox, ComboboxInput, ComboboxContent, ComboboxEmpty, ComboboxList, ComboboxItem } from "@/components/ui/Combobox"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { Combobox, ComboboxInput, ComboboxContent, ComboboxEmpty, ComboboxList, ComboboxItem } from "@/components/ui/combobox"
 import { type Tone } from "@trade-os/documents/documentTemplateModel"
-import { ItemGroup, Item, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/Item"
-import { Skeleton } from "@/components/ui/Skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
 import { type RecentDocument, type UploadDetailStep, type UploadDocumentType } from "@/App"
 import { isUploadDocumentTypeUnresolved, uploadDocumentTypeLabel, manualUploadDocumentTypeOptions } from "@trade-os/inbox/uploadDocumentModel"
 
@@ -67,7 +66,12 @@ export function DocumentReviewWorkspace({
   const isCompact = useIsMobile()
   const [requestedPage, setRequestedPage] = useState<{ page: number }>()
   const previewRef = useRef<HTMLElement>(null)
-  useEffect(() => setRequestedPage(undefined), [document.name, document.documentType])
+  const documentKey = `${document.name}:${document.documentType}`
+  const [previousDocument, setPreviousDocument] = useState(documentKey)
+  if (previousDocument !== documentKey) {
+    setPreviousDocument(documentKey)
+    setRequestedPage(undefined)
+  }
 
   const fieldsPanel = (
     <section
@@ -110,9 +114,11 @@ export function DocumentReviewWorkspace({
             </Alert>
           ) : null}
 
-          {typeUnresolved ? (
-            <DocumentTypeResolution onChange={onDocumentTypeChange} />
-          ) : document.stage === "excluded" ? (
+          <DocumentTypeResolution
+            document={document}
+            onChange={onDocumentTypeChange}
+          />
+          {typeUnresolved ? null : document.stage === "excluded" ? (
             <NonTradeDocumentNotice documentType={document.documentType} />
           ) : document.stage === "failed" ||
             document.stage === "duplicate" ||
@@ -249,25 +255,30 @@ export function DocumentReviewWorkspace({
 }
 
 function DocumentTypeResolution({
+  document,
   onChange,
 }: {
+  document: RecentDocument
   onChange: (documentType: UploadDocumentType) => void
 }) {
+  const unresolved = isUploadDocumentTypeUnresolved(document)
+  const busy = document.stage === "ocr" || document.stage === "queued"
   return (
-    <Alert className="mt-4 px-4 py-3" variant="default">
-      <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[var(--color-orange-2)]" />
+    <section className="mt-4 py-3" aria-label="문서 유형 확인">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-sm font-semibold">문서 유형을 확인해 주세요</div>
-          <ToneBadge tone="warning">AI 분류 미확정</ToneBadge>
+          <div className="text-sm font-semibold">{unresolved ? "문서 유형을 확인해 주세요" : "문서 유형"}</div>
+          {unresolved ? <ToneBadge tone="warning">AI 분류 미확정</ToneBadge> : null}
         </div>
         <p className="mt-1 text-xs leading-5 text-[var(--surface-muted-foreground)]">
-          AI가 문서 유형을 확정하지 못했습니다. 유형을 선택하면 해당 문서
-          기준으로 검토 필드가 다시 구성됩니다.
+          유형 선택만으로 AI가 다시 읽지는 않습니다.
         </p>
         <Field className="mt-3 gap-1.5">
           <FieldLabel className="text-xs">문서 유형</FieldLabel>
           <Combobox
+            value={unresolved ? null : document.documentType}
+            disabled={busy}
+            itemToStringLabel={(value) => uploadDocumentTypeLabel(value as UploadDocumentType)}
             items={manualUploadDocumentTypeOptions.map(
               (option) => option.value
             )}
@@ -291,11 +302,9 @@ function DocumentTypeResolution({
             </ComboboxContent>
           </Combobox>
         </Field>
-        <p className="mt-2 text-xs text-[var(--color-orange-1)]">
-          유형을 선택해야 필드 검토와 거래 연결을 진행할 수 있습니다.
-        </p>
+        {unresolved ? <p className="mt-2 text-xs text-[var(--color-orange-2)]">문서 유형을 먼저 선택해 주세요.</p> : null}
       </div>
-    </Alert>
+    </section>
   )
 }
 
@@ -322,9 +331,9 @@ function DocumentProcessingNotice({ document }: { document: RecentDocument }) {
   const content =
     document.stage === "failed"
       ? {
-          title: "문서를 처리하지 못했어요",
-          body: "원본 파일은 목록에 유지됩니다. 상단의 다시 추출로 재시도할 수 있습니다.",
-          badge: "재시도 가능",
+          title: (document.retryCount ?? 0) >= 3 ? "다시 읽기 횟수를 모두 사용했어요" : "문서를 처리하지 못했어요",
+          body: (document.retryCount ?? 0) >= 3 ? "필요한 정보를 직접 입력하거나 원본 파일을 다시 올려주세요." : "원본 파일은 목록에 유지됩니다. 상단의 다시 읽기로 재시도할 수 있습니다.",
+          badge: (document.retryCount ?? 0) >= 3 ? "한도 소진" : "재시도 가능",
           tone: "danger" as Tone,
         }
       : document.stage === "duplicate"
@@ -350,9 +359,11 @@ function DocumentProcessingNotice({ document }: { document: RecentDocument }) {
 
   return (
     <Alert
-      className="p-5"
+      className="px-4 py-3"
       variant={
-        document.stage === "failed"
+        document.stage === "duplicate"
+          ? "caution"
+          : document.stage === "failed"
           ? "riskHigh"
           : document.stage === "ocr"
             ? "blue"
@@ -372,28 +383,13 @@ function DocumentProcessingNotice({ document }: { document: RecentDocument }) {
         <ToneBadge tone={content.tone}>{content.badge}</ToneBadge>
       </AlertAction>
       {document.stage === "duplicate" ? (
-        <ItemGroup className="col-span-full mt-3 gap-2">
-          <Item variant="outline" size="xs">
-            <ItemContent className="flex-row items-center gap-2">
-              <ItemDescription className="text-xs">기존 파일</ItemDescription>
-              <ItemTitle className="text-xs">인보이스_2607_003.pdf</ItemTitle>
-            </ItemContent>
-          </Item>
-          <Item variant="outline" size="xs">
-            <ItemContent className="flex-row items-center gap-2">
-              <ItemDescription className="text-xs">연결 거래</ItemDescription>
-              <ItemTitle className="text-xs">
-                한빛무역 · INV-2026-0703
-              </ItemTitle>
-            </ItemContent>
-          </Item>
-          <Alert variant="default">
-            <AlertTriangle className="text-[var(--color-orange-2)]" />
-            <AlertDescription className="text-xs">
-              동일 인보이스 번호가 2건 감지되어 이중 지급 검토가 필요합니다.
-            </AlertDescription>
-          </Alert>
-        </ItemGroup>
+        <div className="col-span-full mt-3 space-y-2">
+          <dl className="grid grid-cols-2 gap-6 text-xs">
+            <div><dt className="text-[11px] text-muted-foreground">기존 파일</dt><dd className="mt-1 break-words text-foreground">인보이스_2607_003.pdf</dd></div>
+            <div><dt className="text-[11px] text-muted-foreground">연결 거래</dt><dd className="mt-1 break-words text-foreground">한빛무역 · INV-2026-0703</dd></div>
+          </dl>
+          <p className="text-xs">동일 인보이스 번호가 2건 감지되어 이중 지급 검토가 필요합니다.</p>
+        </div>
       ) : document.stage === "ocr" ? (
         <div
           className="col-span-full mt-3 space-y-2"

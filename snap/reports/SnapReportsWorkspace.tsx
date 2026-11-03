@@ -35,23 +35,23 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/AlertDialog"
+} from "@/components/ui/alert-dialog"
 import { HeroBanner } from "@/components/platform/HeroBanner"
-import { Button } from "@/components/ui/Button"
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/Empty"
-import { Alert, AlertDescription, alertVariants } from "@/components/ui/Alert"
+import { Button } from "@/components/ui/button"
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import { Alert, AlertDescription, alertVariants } from "@/components/ui/alert"
 import { StatusBadge as PlatformStatusBadge } from "@/components/platform/StatusBadge"
 import { BusinessFilterBar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar"
-import { Card, CardContent, CardHeader } from "@/components/ui/Card"
-import { Input } from "@/components/ui/Input"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/Sheet"
-import { Skeleton } from "@/components/ui/Skeleton"
+} from "@/components/ui/sheet"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -59,9 +59,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/Table"
-import { Tabs, TabsCount, TabsList, TabsTrigger } from "@/components/ui/Tabs"
-import { Textarea } from "@/components/ui/Textarea"
+} from "@/components/ui/table"
+import { Tabs, TabsCount, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import type { SnapNavigationOptions } from "@snap/operations/SnapOperationsPages"
 import type { SnapScreenKey } from "@snap/SnapScreens"
 import { snapApi, type SnapPage } from "@snap/lib/snapApi"

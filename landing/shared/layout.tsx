@@ -1,9 +1,10 @@
 import { type ReactNode } from "react"
 import { ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/Button"
-import ecoyaWhiteLogo from "@/components/ds2/assets/logos/logo-ecoya-white.png"
-import ecoyaColorLogo from "@/components/ds2/assets/logos/logo-ecoya-snap-color.png"
-import { LocaleToggle, useT } from "./Locale"
+import { Button } from "@/components/ui/button"
+import ecoyaWhiteLogo from "@/assets/logos/logo-ecoya-white.png"
+import ecoyaColorLogo from "@/assets/logos/logo-ecoya-snap-color.png"
+import { LocaleToggle } from "./Locale"
+import { useT } from "./useLocale"
 import "./base.css"
 import "./theme.css"
 import "./pages.css"
@@ -16,7 +17,7 @@ const pages = [
 ] as const
 
 // develop LandingAppLink: login/signup links return to the product after auth.
-export function withNext(href: string) {
+function withNext(href: string) {
   const [pathname, query] = href.split("?")
   const params = new URLSearchParams(query)
   const product = params.get("product")

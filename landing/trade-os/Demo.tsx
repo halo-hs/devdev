@@ -13,10 +13,10 @@ import {
 
 import { useReducedMotion } from "@/lib/useReducedMotion"
 import { TradeLottie } from "@landing/shared/TradeLottie"
-import ocrAnimation from "@/components/ds2/assets/lottie/ocr-document.json?url"
+import ocrAnimation from "@/assets/lottie/ocr-document.json?url"
 
 import { tradeFunctions } from "@landing/trade-os/content"
-import { useT } from "../shared/Locale"
+import { useT } from "../shared/useLocale"
 
 function Invoice() {
   const t = useT()

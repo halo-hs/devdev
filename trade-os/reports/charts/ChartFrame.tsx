@@ -1,14 +1,5 @@
 // 공용 SVG 프레임 조각 — 헤어라인 그리드 + y 눈금 라벨 + x 축 라벨 (시안 frame/xLabels 이식).
-import { CHART_COLORS, CHART_PAD, xLabelEvery } from "./chartGeometry";
-
-export type ChartPad = { l: number; r: number; t: number; b: number };
-
-export function innerSize(width: number, height: number, pad: ChartPad = CHART_PAD) {
-  return {
-    iw: Math.max(0, width - pad.l - pad.r),
-    ih: Math.max(0, height - pad.t - pad.b),
-  };
-}
+import { CHART_COLORS, CHART_PAD, xLabelEvery, innerSize, type ChartPad } from "./chartGeometry";
 
 export function YGrid({
   ticks,

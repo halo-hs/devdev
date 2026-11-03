@@ -20,17 +20,17 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/ui/Badge"
+import { Badge } from "@/components/ui/badge"
 import { HeroBanner } from "@/components/platform/HeroBanner"
-import { Button } from "@/components/ui/Button"
-import { alertVariants } from "@/components/ui/Alert"
+import { Button } from "@/components/ui/button"
+import { alertVariants } from "@/components/ui/alert"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/Card"
+} from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -38,17 +38,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/Dialog"
-import { Input } from "@/components/ui/Input"
-import { Progress } from "@/components/ui/Progress"
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Progress } from "@/components/ui/progress"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select"
-import { Skeleton } from "@/components/ui/Skeleton"
+} from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -56,8 +56,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/Table"
-import { Textarea } from "@/components/ui/Textarea"
+} from "@/components/ui/table"
+import { Textarea } from "@/components/ui/textarea"
 import type { SnapScreenKey } from "@snap/SnapScreens"
 import type { SnapNavigationOptions } from "@snap/operations/SnapOperationsPages"
 import { snapApi, type SnapPage } from "@snap/lib/snapApi"

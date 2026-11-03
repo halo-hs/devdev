@@ -8,6 +8,10 @@ import { defineConfig, globalIgnores } from "eslint/config"
 export default defineConfig([
   globalIgnores([
     "dist",
+    "**/dist/**",
+    "reference-3030/**",
+    "test-results/**",
+    "playwright-report/**",
   ]),
   {
     files: ["**/*.{ts,tsx}"],
@@ -24,7 +28,6 @@ export default defineConfig([
   {
     files: [
       "src/components/ui/**/*.{ts,tsx}",
-      "src/components/ds2/**/*.{ts,tsx}",
     ],
     rules: {
       "react-refresh/only-export-components": "off",

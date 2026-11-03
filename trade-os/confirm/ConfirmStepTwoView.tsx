@@ -6,24 +6,24 @@ import { normalizeDecimalInput } from "@trade-os/lib/money"
 import { toast } from "sonner"
 import { focusDocumentRequirement } from "@trade-os/lib/documentRequirementNavigation"
 import { type DocumentBlockingIssue, DocumentBlockingAlerts } from "@trade-os/components/DocumentBlockingAlerts"
-import { Button } from "@/components/ui/Button"
+import { Button } from "@/components/ui/button"
 import { LoaderCircle, AlertTriangle, Sparkles, Building2, RefreshCw, Plus, Search } from "lucide-react"
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { createPortal } from "react-dom"
-import { ScrollArea } from "@/components/ui/ScrollArea"
-import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/Alert"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/alert"
 import { DocumentConnectionSummary, DocumentConnectionChangeDialog } from "@trade-os/components/DocumentConnectionSummary"
-import { Badge } from "@/components/ui/Badge"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
-import { Skeleton } from "@/components/ui/Skeleton"
-import { Field, FieldLabel } from "@/components/ui/Field"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select"
-import { Input } from "@/components/ui/Input"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { DatePicker } from "@/components/ui/DatePicker"
-import { type RecentDocument, type ReviewField, type DocumentSourceDeal } from "@/App"
+import { type RecentDocument, type DocumentSourceDeal } from "@/App"
 import { documentSourceDeals, quotationMoney } from "@trade-os/documents/documentTemplateModel"
 import { resolvedReviewFields, readUploadDocumentDealLinks } from "@trade-os/inbox/uploadDocumentModel"
+
 
 export function DealConfirmPanel({
   document,
@@ -53,26 +53,6 @@ export function DealConfirmPanel({
     documentReviewFields
       .find((field) => ["counterparty", "buyer", "seller"].includes(field.key))
       ?.value.trim() ?? ""
-  const dealMatchingFieldKeys = [
-    "counterparty",
-    "seller",
-    "buyer",
-    "total_amount",
-    "currency",
-    "item_name",
-    "quantity",
-    "invoice_number",
-    "sc_number",
-    "po_number",
-  ]
-  const documentDealValues = dealMatchingFieldKeys
-    .map((key) => documentReviewFields.find((field) => field.key === key))
-    .filter((field): field is ReviewField => Boolean(field?.value.trim()))
-    .filter(
-      (field, index, values) =>
-        values.findIndex((value) => value.key === field.key) === index
-    )
-    .slice(0, 3)
   const readCounterparty =
     documentReviewFields.find((field) => field.key === "counterparty")?.value ??
     documentReviewFields.find((field) => field.key === "seller")?.value ??
@@ -85,42 +65,54 @@ export function DealConfirmPanel({
     documentReviewFields.find((field) => field.key === "currency")?.value ??
     readAmountField?.unit?.split("/")[0] ??
     ""
+  const documentDealValues = [
+    { key: "counterparty", label: "거래처", value: readCounterparty, unit: "" },
+    { key: "amount", label: "금액", value: readAmountField?.value ?? "", unit: readCurrency },
+    ...([['po_number', 'PO 번호']] as const).map(([key, label]) => ({
+      key, label, value: documentReviewFields.find(field => field.key === key)?.value ?? "", unit: "",
+    })),
+  ].filter(field => field.value.trim()).slice(0, 3)
   const [connection, setConnection] = useState<DocumentConnection | null>(null)
   const [connectionError, setConnectionError] = useState("")
   const [connectionAttempt, setConnectionAttempt] = useState(0)
   const [changingConnection, setChangingConnection] = useState(false)
   const [changeDialog, setChangeDialog] = useState<{ target: DocumentDealLink | null; evidence: string[] } | null>(null)
-  useEffect(() => {
-    if (!connection?.link || new URLSearchParams(window.location.search).get("undo") !== "1") return
-    const url = new URL(window.location.href)
-    url.searchParams.delete("undo")
-    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}`)
-    setChangeDialog({ target: null, evidence: [] })
-  }, [connection?.link])
   const [loadedCandidates, setLoadedCandidates] = useState<(DocumentSourceDeal & CandidateEvidence)[]>([])
   const [candidateAttempt, setCandidateAttempt] = useState(0)
   const recommendedDealId = loadedCandidates.find(candidate => candidate.recommended)?.id ?? null
   const activeLink = connection?.link ?? null
   const connectionReady = Boolean(connection) && !connectionError
+  const connectionRequest = JSON.stringify([document.name, connectionAttempt, linkedDealLabel])
+  const [previousConnectionRequest, setPreviousConnectionRequest] = useState(connectionRequest)
+  if (previousConnectionRequest !== connectionRequest) {
+    setPreviousConnectionRequest(connectionRequest)
+    setConnectionError(""); setConnection(null)
+  }
   useEffect(() => {
     let active = true
-    setConnectionError(""); setConnection(null)
     const legacy = readUploadDocumentDealLinks()[document.name]
     prototypeBackend.tradeDocuments.getConnection(document.name, legacy)
       .then(value => {
         if (!active) return
         if (linkedDealLabel && !value.link && !value.connectionKnown) throw new Error("현재 연결의 거래 정보를 확인하지 못했습니다.")
         setConnection(value)
+        if (value.link && new URLSearchParams(window.location.search).get("undo") === "1") {
+          const url = new URL(window.location.href)
+          url.searchParams.delete("undo")
+          window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}`)
+          setChangeDialog({ target: null, evidence: [] })
+        }
       })
       .catch(error => { if (active) setConnectionError(error instanceof Error ? error.message : "현재 연결 정보를 불러오지 못했습니다.") })
     return () => { active = false }
-  }, [document.name, connectionAttempt])
+  }, [document.name, connectionAttempt, linkedDealLabel])
   const [pendingCreatedDeal] = useState(() => {
     const review = readDocumentReview(document.name)
     return review.status !== "committed" && !review.connectionHistory?.length
       ? prototypeBackend.deals.listCreated().find(deal => deal.sourceDocumentId === document.name) ?? null : null
   })
-  const [selectedDealId, setSelectedDealId] = useState<string | null>(null)
+  const [selectedDeal, setSelectedDealId] = useState<string | null>(null)
+  const selectedDealId = selectedDeal ?? (!activeLink && loadedCandidates.some(candidate => candidate.id === originDealId) ? originDealId : null)
   const [searchQuery, setSearchQuery] = useState("")
   const [newDealFormOpen, setNewDealFormOpen] = useState(Boolean(pendingCreatedDeal))
   const [newDealName, setNewDealName] = useState(pendingCreatedDeal?.counterparty ?? aiCounterpartyName)
@@ -136,21 +128,20 @@ export function DealConfirmPanel({
   const [candidateLoadState, setCandidateLoadState] = useState<
     "loading" | "ready" | "error"
   >("loading")
+  const candidateRequest = JSON.stringify([document.name, readCounterparty, readAmountField?.value, readCurrency, candidateAttempt])
+  const [previousCandidateRequest, setPreviousCandidateRequest] = useState(candidateRequest)
+  if (previousCandidateRequest !== candidateRequest) {
+    setPreviousCandidateRequest(candidateRequest)
+    setCandidateLoadState("loading"); setLoadedCandidates([])
+  }
   useEffect(() => {
     let active = true
-    setCandidateLoadState("loading")
     const created: DocumentSourceDeal[] = prototypeBackend.deals.listCreated().map(deal => ({ id: deal.id, title: deal.title, party: deal.counterparty, amount: deal.amount, currency: deal.currency, item: "품목 미등록", stage: "신규 거래", tone: "neutral" }))
     prototypeBackend.tradeDocuments.listCandidates([...documentSourceDeals, ...created], { counterparty: readCounterparty, amount: readAmountField?.value ?? "", currency: readCurrency })
       .then(rows => { if (active) { setLoadedCandidates(rows); setCandidateLoadState("ready") } })
       .catch(() => { if (active) setCandidateLoadState("error") })
     return () => { active = false }
   }, [document.name, readCounterparty, readAmountField?.value, readCurrency, candidateAttempt])
-  useEffect(() => {
-    if (!originDealId || activeLink || candidateLoadState !== "ready") return
-    if (loadedCandidates.some(candidate => candidate.id === originDealId)) {
-      setSelectedDealId(current => current ?? originDealId)
-    }
-  }, [originDealId, activeLink, candidateLoadState, loadedCandidates])
   const [creatingDeal, setCreatingDeal] = useState(false)
   const creatingRef = useRef(false)
   const [createdDeal, setCreatedDeal] = useState<DocumentDealLink | null>(() => pendingCreatedDeal ? { dealId: pendingCreatedDeal.id, dealLabel: `${pendingCreatedDeal.id} · ${pendingCreatedDeal.counterparty}` } : null)
@@ -173,11 +164,6 @@ export function DealConfirmPanel({
     loadedCandidates.find((candidate) => candidate.id === selectedDealId) ??
     null
   const ambiguousCandidates = loadedCandidates.filter((candidate) => candidate.ambiguous).length
-  const comparisonRows = selectedCandidate ? [
-    { label: "거래처", result: readCounterparty && readCounterparty.trim().toLowerCase() === selectedCandidate.party.trim().toLowerCase() ? "일치" : "확인 필요" },
-    { label: "금액", result: readAmountField?.value && readCurrency && normalizeDecimalInput(readAmountField.value) === normalizeDecimalInput(selectedCandidate.amount) && readCurrency.toUpperCase() === selectedCandidate.currency.toUpperCase() ? "일치" : "확인 필요" },
-    { label: "수량", result: "기준 수량 확인 필요" },
-  ] : []
   const bankSchedules = eligibleBankSchedules(currentBankSchedules(), selectedDealId ?? "", readCurrency)
   const bankMatchRequired = !activeLink && document.documentType === "BANK_STATEMENT" && Boolean(selectedCandidate) && !newDealFormOpen
   const bankCashError = bankScheduleId && bankScheduleId !== "document-only"
@@ -322,7 +308,7 @@ export function DealConfirmPanel({
             : "거래처·거래 생성 중"
           : "연결 중"
         : activeLink
-          ? changingConnection ? newDealReady ? createdDeal ? "생성한 거래로 변경 검토" : "새 거래 등록 후 변경 검토" : "연결 변경 확인" : "거래 연결 완료"
+          ? newDealReady ? createdDeal ? "생성한 거래로 변경 검토" : "새 거래 등록 후 변경 검토" : "연결 변경 확인"
           : createdDeal && newDealFormOpen
             ? "생성한 거래에 연결 재시도"
           : newDealReady
@@ -334,7 +320,7 @@ export function DealConfirmPanel({
               : "선택한 거래 연결"}
     </Button>
   )
-  const primaryAction = (
+  const primaryAction = activeLink && !changingConnection ? null : (
     <>
     <DocumentBlockingAlerts errors={connectionErrors} checks={connectionChecks} />
     {tradeSeatAssigned ? primaryButton : (
@@ -376,8 +362,8 @@ export function DealConfirmPanel({
           </div>
         </div>
 
-        <ScrollArea className="min-h-0 flex-1">
-          <div data-document-requirement="connection" className="mx-auto w-full max-w-4xl space-y-5 p-6">
+        <ScrollArea className="min-h-0 flex-1 [&_[data-slot=scroll-area-viewport]>div]:!block">
+          <div data-document-requirement="connection" className="mx-auto w-full max-w-4xl space-y-5 px-5 py-4">
             {connectionError ? <Alert variant="destructive"><AlertTitle>현재 거래 연결을 불러오지 못했습니다</AlertTitle><AlertDescription>{connectionError}</AlertDescription><Button className="mt-3" size="sm" variant="outline" onClick={() => setConnectionAttempt(value => value + 1)}>현재 연결 다시 확인</Button></Alert>
               : connection ? <DocumentConnectionSummary connection={connection} changing={changingConnection} disabled={!tradeSeatAssigned || linking || candidateLoadState !== "ready" || !onConnectionChanged}
                 onChange={() => {
@@ -419,13 +405,7 @@ export function DealConfirmPanel({
                         <dt className="truncate text-[11px] leading-4 text-[var(--color-gray-4)]">
                           {field.label}
                         </dt>
-                        <Badge
-                          size="sm"
-                          palette={field.tone === "success" ? "green" : "orange"}
-                          className="ml-auto shrink-0"
-                        >
-                          {field.confidence}
-                        </Badge>
+
                       </div>
                       <dd
                         className="mt-1.5 truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold"
@@ -439,6 +419,8 @@ export function DealConfirmPanel({
                 </dl>
               </section>
             ) : null}
+
+
 
             {(!activeLink || changingConnection) && connectionReady ? <section>
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -653,15 +635,16 @@ export function DealConfirmPanel({
                           const selected = selectedDealId === candidate.id
                           const recommended = candidate.id === recommendedDealId
                           return (
+                            <div key={candidate.id} className={cn("flex flex-wrap items-center border-b border-[var(--color-gray-10)] last:border-b-0", selected && "bg-[var(--color-primary-10)]")}>
                             <button
-                              key={candidate.id}
                               type="button"
                               role="radio"
                               aria-checked={selected}
+                              aria-controls={selected ? `candidate-comparison-${candidate.id}` : undefined}
                               className={cn(
                                 // 문서 올리기 V2 거래 후보 (6233:82241): 20px radio, 15 title,
                                 // 13 meta, Blue 10 row when selected.
-                                "flex w-full items-center gap-4 border-b border-[var(--color-gray-10)] px-5 py-3.5 text-left last:border-b-0 hover:bg-[var(--color-gray-11)]",
+                                "flex min-w-0 flex-1 basis-64 items-center gap-4 px-5 py-3.5 text-left hover:bg-[var(--color-gray-11)]",
                                 selected && "bg-[var(--color-primary-10)] hover:bg-[var(--color-primary-10)]"
                               )}
                               disabled={creatingDeal || linking || candidate.id === activeLink?.dealId}
@@ -682,28 +665,67 @@ export function DealConfirmPanel({
                               </span>
                               <span className="min-w-0 flex-1">
                                 <span className="flex min-w-0 items-center gap-2">
-                                  <strong className="truncate text-[15px] leading-[22px] font-medium text-[var(--color-gray-1)]">
+                                  <strong className="truncate text-[15px] leading-[22px] font-normal text-[var(--color-gray-1)]">
                                     {candidate.title}
                                   </strong>
                                   <ToneBadge tone={candidate.tone}>
                                     {candidate.stage}
                                   </ToneBadge>
                                 </span>
-                                <span className="mt-0.5 block truncate text-[13px] leading-[18px] text-[var(--color-gray-5)]">
+                                <span className="mt-0.5 block truncate text-[11px] leading-4 text-[var(--color-gray-5)]">
                                   {candidate.id} · {candidate.party}
                                 </span>
-                                <span className="mt-0.5 block text-[13px] leading-[18px] text-[var(--primary)]">
+                                <span className="mt-0.5 block text-[11px] leading-4 text-[var(--primary)]">
                                   {candidate.item} · {candidate.amount}{" "}
                                   {candidate.currency}
                                 </span>
                                 {candidate.id === activeLink?.dealId ? <span className="mt-2 block text-[10px] font-medium">현재 연결</span> : null}
                               </span>
-                              {recommended ? (
-                                <span className="flex shrink-0 items-center gap-1 text-[13px] text-[#6b4ee6]">
-                                  <Sparkles className="size-3.5" /> AI 추천
-                                </span>
-                              ) : null}
                             </button>
+                            {recommended ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span tabIndex={0} aria-label={`${candidate.id} AI 추천 근거`}
+                                    className="mr-5 flex shrink-0 cursor-help items-center gap-1 rounded-sm text-[11px] text-[#6b4ee6] outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                    <Sparkles className="size-3.5" aria-hidden="true" /> AI 추천
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-72">
+                                  <p className="font-medium">추천 근거 · 시안 예시</p>
+                                  {candidate.reasons.length ? candidate.reasons.map(reason => (
+                                    <p key={reason}>{reason.replace("거래처 일치", "거래처명 동일")}</p>
+                                  )) : <p>제공된 추천 근거가 없습니다.</p>}
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : null}
+                            {selected ? (
+                              <div id={`candidate-comparison-${candidate.id}`} className="w-full min-w-0 basis-full px-5 pb-4 pt-1">
+                                <section className="rounded-[var(--r-md)] border border-[var(--color-gray-9)] bg-background p-4">
+                                <dl className="grid gap-y-3 sm:grid-cols-3" aria-label={`${candidate.id} 현재 문서값과 선택한 거래값 비교`}>
+                                  {[
+                                    ["거래처", readCounterparty, candidate.party],
+                                    ["금액·통화", readAmountField?.value ? [readAmountField.value, readCurrency].filter(Boolean).join(" ") : "", candidate.amount ? [candidate.amount, candidate.currency].filter(Boolean).join(" ") : ""],
+                                    ["수량", documentReviewFields.filter(field => field.key === "quantity").map(field => [field.value, field.unit].filter(Boolean).join(" ")).join(" / "), candidate.item.split(" · ")[1] ?? ""],
+                                  ].map(([label, documentValue, candidateValue]) => (
+                                    <div key={label} className="min-w-0 border-t border-[var(--color-gray-10)] py-2.5 first:border-t-0 sm:border-t-0 sm:border-l sm:px-3 sm:first:border-l-0 sm:first:pl-0 sm:last:pr-0">
+                                      <dt className="text-[11px] leading-4 text-[var(--color-gray-4)]">{label}</dt>
+                                      <dd className="mt-2 flex flex-col gap-2">
+                                        <div className="min-w-0">
+                                          <span className="text-[11px] leading-4 text-muted-foreground">현재 문서</span>
+                                          <p className="mt-0.5 truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold" title={documentValue || "값 없음"}>{documentValue || "—"}</p>
+                                        </div>
+                                        <div className="min-w-0">
+                                          <span className="text-[11px] leading-4 text-muted-foreground">선택한 거래</span>
+                                          <p className="mt-0.5 truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-semibold" title={candidateValue || "값 없음"}>{candidateValue || "—"}</p>
+                                        </div>
+                                      </dd>
+                                    </div>
+                                  ))}
+                                </dl>
+                                </section>
+                              </div>
+                            ) : null}
+                            </div>
                           )
                         })}
                         {candidates.length === 0 ? (
@@ -712,20 +734,6 @@ export function DealConfirmPanel({
                           </div>
                         ) : null}
                       </div>
-
-                      {selectedCandidate && document.documentType !== "BANK_STATEMENT" ? (
-                        <details className="mt-3 border-y py-3 text-xs">
-                          <summary className="cursor-pointer font-medium">서류 대조 보기</summary>
-                          <dl className="mt-2 divide-y">
-                            {comparisonRows.map((row) => (
-                              <div key={row.label} className="flex justify-between gap-4 py-2">
-                                <dt>{row.label}</dt>
-                                <dd className="text-muted-foreground">{row.result}</dd>
-                              </div>
-                            ))}
-                          </dl>
-                        </details>
-                      ) : null}
 
                       {selectedCandidate ? (
                         document.documentType === "BANK_STATEMENT" ? (

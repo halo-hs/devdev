@@ -19,12 +19,12 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/DropdownMenu"
+} from "@/components/ui/dropdown-menu"
 import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/Sidebar"
+} from "@/components/ui/sidebar"
 
 export function SidebarProfileMenu({
   onSettings,

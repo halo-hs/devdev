@@ -1,9 +1,10 @@
 import { type ReactNode, useState } from "react"
-import { languageOptions, SearchableSetting, countryOptions, timeZoneOptions } from "@share/settings/RegionControls"
+import { SearchableSetting } from "@share/settings/RegionControls"
+import { languageOptions, countryOptions, timeZoneOptions } from "@share/settings/regionOptions"
 import { PageHeading } from "@share/settings/views/SettingsSection"
-import { Card, CardContent } from "@/components/ui/Card"
-import { Input } from "@/components/ui/Input"
-import { Button } from "@/components/ui/Button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { type SettingsRole, type ProductEntitlement } from "@share/settings/SettingsRoutePage"
 
 function OrganizationField({ label, htmlFor, children }: { label: string; htmlFor?: string; children: ReactNode }) {

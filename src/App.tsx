@@ -20,7 +20,7 @@ import { workspaceOptions, type WorkspaceKey } from "@/lib/workspaces"
 import {
   SidebarInset,
   SidebarProvider,
-} from "@/components/ui/Sidebar"
+} from "@/components/ui/sidebar"
 import {
   DealDetailScreen,
   DealsScreen,
@@ -139,6 +139,8 @@ export type RecentDocument = {
   contentHash?: string
   dealDocumentId?: string
   fileDataUrl?: string
+  documentTypeConfirmed?: boolean
+  rereadAfterTypeSelection?: boolean
   retryCount?: number
 }
 export type UploadDocumentDealLink = {

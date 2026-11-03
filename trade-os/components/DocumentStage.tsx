@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils"
-import { Separator } from "@/components/ui/Separator"
+import { Separator } from "@/components/ui/separator"
 import { type ReactNode, useRef, useState, useEffect } from "react"
 import { FileText, Check } from "lucide-react"
 import { PdfViewerToolbar, PdfFloatingControls } from "@/components/platform/PageNavigator"
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip"
-import { Button } from "@/components/ui/Button"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Button } from "@/components/ui/button"
 import { PannablePdfViewport } from "@/components/platform/DocumentViewerStage"
 import { type PrototypeSlot, sampleValueForSlot, isNumericInputKind, type DocumentStyle, type DocumentLogo, templateMeta, templateSchemas, type Tone, downloadRenderedDocumentPdf } from "@trade-os/documents/documentTemplateModel"
 
@@ -238,9 +238,13 @@ export function DocumentStage({
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [pdfGenerating, setPdfGenerating] = useState(false)
   const pageCount = pageCountOverride ?? (reviewMode || result ? 2 : 1)
-  useEffect(() => {
-    if (requestedPage) setPage(Math.min(pageCount, Math.max(1, requestedPage.page)))
-  }, [requestedPage, pageCount])
+  const [previousRequest, setPreviousRequest] = useState(requestedPage)
+  const [previousPageCount, setPreviousPageCount] = useState(pageCount)
+  if (previousRequest !== requestedPage || previousPageCount !== pageCount) {
+    setPreviousRequest(requestedPage)
+    setPreviousPageCount(pageCount)
+    setPage(Math.min(pageCount, Math.max(1, requestedPage?.page ?? page)))
+  }
   const aiDetectionVisible = showAiDetection ?? !result
   const controlsAtTop = controlsPlacement
     ? controlsPlacement === "top"

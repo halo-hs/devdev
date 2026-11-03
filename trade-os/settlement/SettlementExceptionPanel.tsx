@@ -6,10 +6,10 @@ import { ApiError } from "@trade-os/lib/api/client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/Button";
-import { AsyncButton } from "@/components/ds2/extensions/AsyncButton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
+import { AsyncButton } from "@/components/platform/AsyncButton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import {
   listOverpaymentRefunds,
   listSchedulePayments,

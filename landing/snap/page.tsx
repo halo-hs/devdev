@@ -11,7 +11,7 @@ import {
   Play,
 } from "lucide-react"
 import { LandingShell, StartButton } from "../shared/layout"
-import { useT } from "../shared/Locale"
+import { useT } from "../shared/useLocale"
 import { snapUseCases, moreSnapUses, snapFaq } from "./content"
 import { useSnapPreviewPlayback } from "@landing/snap/usePreviewPlayback"
 import { SnapScreen, type SnapScreenName } from "./Illustrations"

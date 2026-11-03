@@ -8,8 +8,8 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/DropdownMenu"
-import { Button } from "@/components/ui/Button"
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
   workspaceOptions,

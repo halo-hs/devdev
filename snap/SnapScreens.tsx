@@ -59,8 +59,8 @@ import {
 import { toast } from "sonner"
 
 import { HeroBanner } from "@/components/platform/HeroBanner"
-import { Button } from "@/components/ui/Button"
-import { alertVariants } from "@/components/ui/Alert"
+import { Button } from "@/components/ui/button"
+import { alertVariants } from "@/components/ui/alert"
 import { StatusBadge as PlatformStatusBadge } from "@/components/platform/StatusBadge"
 import {
   Card,
@@ -68,18 +68,18 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/Card"
-import { Checkbox } from "@/components/ui/Checkbox"
-import { Input } from "@/components/ui/Input"
-import { Progress } from "@/components/ui/Progress"
+} from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+import { Progress } from "@/components/ui/progress"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select"
-import { Separator } from "@/components/ui/Separator"
+} from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import {
   Sheet,
   SheetContent,
@@ -87,7 +87,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/Sheet"
+} from "@/components/ui/sheet"
 import {
   Table,
   TableBody,
@@ -95,9 +95,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/Table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
-import { Textarea } from "@/components/ui/Textarea"
+} from "@/components/ui/table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import {
   demoPreSendCheck,
   demoShareLink,

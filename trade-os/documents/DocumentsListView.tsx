@@ -1,18 +1,18 @@
-import { getGeneratedDocumentListStage, generatedDocumentListStages } from "@trade-os/lib/generatedDocumentListStage"
-import { useViewSeatGuard } from "@trade-os/components/ViewSeatGate"
+import { getGeneratedDocumentListStage, generatedDocumentListTabs, formatDocumentUpdatedAt } from "@trade-os/lib/generatedDocumentListStage"
+import { useViewSeatGuard } from "@trade-os/components/useViewSeat"
 import { useState, useRef } from "react"
 import { cn } from "@/lib/utils"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/Table"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { FilePlus2, FileX2, FileClock, FileCheck2, ShieldCheck, MoreHorizontal, Copy, Trash2, AlertTriangle, LoaderCircle } from "lucide-react"
 import { ToneBadge } from "@trade-os/components/ToneBadge"
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip"
-import { Button } from "@/components/ui/Button"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/DropdownMenu"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { TablePagination } from "@/components/ui/TablePagination"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/Dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { DocumentStage } from "@trade-os/components/DocumentStage"
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/AlertDialog"
-import { Alert, AlertDescription } from "@/components/ui/Alert"
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 import { toast } from "sonner"
 import { templateSchemas, templateMeta } from "@trade-os/documents/documentTemplateModel"
@@ -20,9 +20,9 @@ import { HeroBanner } from "@/components/platform/HeroBanner"
 import { TemplateStrip, RelatedDealNotice } from "@trade-os/documents/DocumentCreatePanels"
 import { ResultScreen } from "@trade-os/documents/DocumentCreateConnected"
 import { StructuredDocumentCreateEditor } from "@trade-os/documents/DocumentCreateStepViews"
-import { Card, CardContent } from "@/components/ui/Card"
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/Empty"
-import { Tabs, TabsList, TabsTrigger, TabsCount, TabsContent } from "@/components/ui/Tabs"
+import { Card, CardContent } from "@/components/ui/card"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import { Tabs, TabsList, TabsTrigger, TabsCount, TabsContent } from "@/components/ui/tabs"
 import { DocumentTypeBadge } from "@trade-os/components/DocumentTypeBadge"
 import { BusinessListToolbar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar"
 import { type GeneratedDraft, type CreateStartMode, type GeneratedDocumentOpenOptions, type ErpPreviewRole, type GeneratedDocumentDestination, type DocumentCreateWorkspaceStep, type DealDocumentContext, type DocumentDirection } from "@/App"
@@ -93,11 +93,11 @@ export function RecentDocumentsTable({
       <Table className="min-w-[1040px] table-fixed">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[29.7%] pl-5 text-left">문서</TableHead>
+            <TableHead className="w-[26.2%] pl-5 text-left">문서</TableHead>
             <TableHead className="w-[13.3%] text-center">거래</TableHead>
             <TableHead className="w-[18%] text-center">상태</TableHead>
             <TableHead className="w-[10.9%] text-center">생성자</TableHead>
-            <TableHead className="w-[10.9%] text-center">수정</TableHead>
+            <TableHead className="w-[14.4%] text-center">수정</TableHead>
             <TableHead className="w-[17.2%] text-center">작업</TableHead>
             <TableHead className="w-12" aria-label="더보기" />
           </TableRow>
@@ -513,13 +513,15 @@ export function CreateScreen({
       value.toLowerCase().includes(documentSearch.trim().toLowerCase())
     )
   )
-  const documentTabs = [
-    { value: "all", label: "전체", docs: searchedDocuments },
-    ...generatedDocumentListStages.map((stage) => ({
-      ...stage,
-      docs: searchedDocuments.filter((doc) => generatedDraftListStage(doc).value === stage.value),
-    })),
-  ]
+  // 탭·건수는 서버 업무 상태(draft/confirmed/sent) 기준. 승인 단계는 `작성 중` 탭 안 배지로만 노출.
+  const documentBusinessStatus = (doc: GeneratedDraft) =>
+    doc.tab === "done" ? "sent" : doc.status === "확정" ? "confirmed" : "draft"
+  const documentTabs = generatedDocumentListTabs.map((tab) => ({
+    ...tab,
+    docs: tab.value === "all"
+      ? searchedDocuments
+      : searchedDocuments.filter((doc) => documentBusinessStatus(doc) === tab.value),
+  }))
   const handleDeleteCreatedDocument = async (number: string) => {
     const result =
       await prototypeBackend.generatedDocuments.archiveWithShareLinks({
@@ -560,7 +562,7 @@ export function CreateScreen({
       approvalRequirement: "required",
       creatorName: currentAccount.name,
       creatorAccountId: currentAccount.id,
-      updated: "방금 전",
+      updated: formatDocumentUpdatedAt(),
     }
     setCreatedDocuments((current) => [duplicatedDraft, ...current])
     if (openAfterDuplicate) {
@@ -621,7 +623,7 @@ export function CreateScreen({
             tab: "confirmed" as const,
             creatorName: currentAccount.name,
             creatorAccountId: currentAccount.id,
-            updated: "방금 전",
+            updated: formatDocumentUpdatedAt(),
             memberCanAccessDeal: Boolean(relatedDeal),
             memberCanDeliver: true,
             pdfState: "final" as const,

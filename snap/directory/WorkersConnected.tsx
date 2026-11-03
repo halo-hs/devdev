@@ -19,15 +19,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/AlertDialog"
-import { Badge } from "@/components/ui/Badge"
+} from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
 import { HeroBanner } from "@/components/platform/HeroBanner"
-import { Button } from "@/components/ui/Button"
-import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/Empty"
-import { Alert, AlertDescription } from "@/components/ui/Alert"
+import { Button } from "@/components/ui/button"
+import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { StatusBadge as PlatformStatusBadge } from "@/components/platform/StatusBadge"
 import { BusinessFilterBar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar"
-import { Card } from "@/components/ui/Card"
+import { Card } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -35,15 +35,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/Dialog"
-import { Input } from "@/components/ui/Input"
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-} from "@/components/ui/Select"
-import { Skeleton } from "@/components/ui/Skeleton"
+} from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -51,7 +51,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/Table"
+} from "@/components/ui/table"
 import { snapApi } from "@snap/lib/snapApi"
 import {
   snapApiConfigured,

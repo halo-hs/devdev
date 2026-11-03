@@ -9,7 +9,7 @@ import {
 } from "lucide-react"
 import { useReducedMotion } from "@/lib/useReducedMotion"
 import { useSnapPreviewPlayback } from "@landing/snap/usePreviewPlayback"
-import { useT } from "../shared/Locale"
+import { useT } from "../shared/useLocale"
 import { moreSnapUses, snapUseCases } from "./content"
 import { SnapScreen, type SnapScreenName } from "./Illustrations"
 
