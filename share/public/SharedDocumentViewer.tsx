@@ -1,5 +1,5 @@
 import { appLocation } from "@/app/appLocation"
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import {
   ArrowRight,
   CalendarDays,
@@ -570,50 +570,11 @@ function DocumentPackage({
   )
 }
 
-function Unavailable({
-  result,
-  retry,
-  token,
-  preview,
-}: {
+function Unavailable({ result, retry }: {
   result: ShareResult
   retry: () => void
-  token: string
-  preview: boolean
 }) {
   const { t } = useShareCopy()
-  const requestLock = useRef(false)
-  const [requestState, setRequestState] = useState<
-    "idle" | "pending" | "success" | "failure"
-  >("idle")
-  const requestNew = async () => {
-    if (requestLock.current) return
-    requestLock.current = true
-    setRequestState("pending")
-    try {
-      if (preview) {
-        await new Promise((resolve) => window.setTimeout(resolve, 350))
-        requestLock.current = false
-        setRequestState("idle")
-        return
-      } else {
-        const response = await fetch(
-          `/api/platform/public/documents/${encodeURIComponent(token)}/request-new`,
-          {
-            method: "POST",
-            credentials: "omit",
-            cache: "no-store",
-            referrerPolicy: "no-referrer",
-          }
-        )
-        if (!response.ok) throw new Error("request failed")
-      }
-      setRequestState("success")
-    } catch {
-      requestLock.current = false
-      setRequestState("failure")
-    }
-  }
   const [remaining, setRemaining] = useState(result.retryAfter ?? 0)
   useEffect(() => {
     if (!remaining) return
@@ -652,34 +613,10 @@ function Unavailable({
               )}
         </h1>
         <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
-          {requestState === "success"
-            ? t("linkGone.requestSucceeded")
-            : requestState === "failure"
-              ? t("linkGone.requestFailed")
-              : loading
-                ? t("loading.body")
-                : t(
-                    state === "error"
-                      ? "temporaryError.body"
-                      : `linkGone.${state}.body`
-                  )}
+          {loading
+            ? t("loading.body")
+            : t(state === "error" ? "temporaryError.body" : `linkGone.${state}.body`)}
         </p>
-        {!loading &&
-          (state === "expired" || state === "open_cap") &&
-          requestState !== "success" && (
-            <Button
-              className="mt-6"
-              disabled={requestState === "pending"}
-              aria-busy={requestState === "pending"}
-              onClick={() => void requestNew()}
-            >
-              {t(
-                requestState === "pending"
-                  ? "linkGone.requesting"
-                  : "linkGone.requestNew"
-              )}
-            </Button>
-          )}
         {state === "error" && !loading && (
           <Button className="mt-6" disabled={remaining > 0} onClick={retry}>
             <RefreshCw className="size-4" />
@@ -796,8 +733,6 @@ export function PublicSharePage({
           <Unavailable
             key={`${current.state}-${attempt}`}
             result={current}
-            token={token}
-            preview={preview}
             retry={() => {
               if (preview) setPreviewState("active")
               else {
