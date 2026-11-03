@@ -21,6 +21,16 @@ import { cn } from "@/lib/utils"
 import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { ShareDeliveryPanel } from "@trade-os/documents/DocumentDeliverConnected"
 import { type DocumentApprover, type DocumentDiscrepancyReview, type DocumentDiscrepancyFinding, type ReviewFocusTarget, type DocumentDirection, type DocumentApprovalPreviewState, type DealDocumentContext, type DocumentCreateWorkspaceStep, type GeneratedDocumentPdfState, type ErpPreviewRole, type DocumentElementStatus, type DocumentSourceMode, type DocumentComparisonFacts, type DocumentApprovalChoice, type DocumentApprovalEvent, type DeliveryLink, type EmailRecord, type DocumentSaveState, type ReviewFocusRequest, type DocumentSourceDeal } from "@/App"
@@ -358,6 +368,7 @@ export function ResultScreen({
     initialSharePanelOpen && deliveryAllowed
   )
   const [dealPickerOpen, setDealPickerOpen] = useState(false)
+  const [disconnectConfirmOpen, setDisconnectConfirmOpen] = useState(false)
   const [dealPickerQuery, setDealPickerQuery] = useState("")
   const [saveState, setSaveState] = useState<DocumentSaveState>("saved")
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(
@@ -418,7 +429,14 @@ export function ResultScreen({
         : `${deal.id} 거래를 문서에 연결했습니다.`
     )
   }
+  // SC-18 C27: 해제 전 확인. devdev는 서버가 없어 확인 후 로컬 해제를 성공으로 처리한다
+  // (실제 제품은 서버 성공 응답 후에만 성공 토스트).
+  const requestDisconnectDeal = () => {
+    if (!selectedDeal) return
+    setDisconnectConfirmOpen(true)
+  }
   const disconnectDealFromReview = () => {
+    setDisconnectConfirmOpen(false)
     if (!selectedDeal) return
     const previousId = selectedDeal.id
     setSelectedDeal(null)
@@ -1328,7 +1346,7 @@ export function ResultScreen({
                           }
                           size="xs"
                           onClick={() => selectedDeal?.id === deal.id
-                            ? disconnectDealFromReview()
+                            ? requestDisconnectDeal()
                             : connectDealFromReview(deal)}
                         >
                           {selectedDeal?.id === deal.id ? "연결 해제" : "연결"}
@@ -1385,6 +1403,20 @@ export function ResultScreen({
           />
         </SheetContent>
       </Sheet>
+      <AlertDialog open={disconnectConfirmOpen} onOpenChange={setDisconnectConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>거래 연결을 해제할까요?</AlertDialogTitle>
+            <AlertDialogDescription>
+              거래 연결을 해제하면 PDF 검토와 필요한 승인을 다시 진행해야 합니다. 거래에 다시 연결하기 전에는 확정·공유·고객 전달을 할 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={disconnectDealFromReview}>연결 해제</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
