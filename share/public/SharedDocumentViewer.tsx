@@ -592,8 +592,12 @@ function Unavailable({
     requestLock.current = true
     setRequestState("pending")
     try {
-      if (preview)
+      if (preview) {
         await new Promise((resolve) => window.setTimeout(resolve, 350))
+        requestLock.current = false
+        setRequestState("idle")
+        return
+      }
       else {
         const response = await fetch(
           `/api/platform/public/documents/${encodeURIComponent(token)}/request-new`,
@@ -669,11 +673,6 @@ function Unavailable({
             {requestState === "success" ? (
               <Alert role="status">
                 <AlertDescription>
-                  {preview ? (
-                    <span className="block">
-                      디자인 미리보기 · 실제 요청은 전송되지 않았습니다.
-                    </span>
-                  ) : null}
                   {t("linkGone.requestSucceeded")}
                 </AlertDescription>
               </Alert>
