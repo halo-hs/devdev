@@ -1,0 +1,93 @@
+{
+  "documentTitle": "共有ドキュメント | ECOYA Trade OS",
+  "protectedLinkBadge": "保護された文書リンク",
+  "brandSubtitle": "貿易書類の送付",
+  "languageSelectorLabel": "言語を選択",
+  "documentFallback": "書類",
+  "verifying": "リンクを確認中…",
+  "currencyOnlyPrefix": "通貨",
+  "downloadPack": "パッケージをダウンロード（{count}件）",
+  "attachmentSummaryWithExtra": "本文PDFと同封ファイル{count}件",
+  "attachmentSummaryMainOnly": "本文PDF",
+  "opensUsed": "{used} / {max}回閲覧",
+  "noOpenCap": "閲覧回数の制限なし",
+  "expiresOn": "{date} に有効期限が切れます",
+  "expiresOnZoned": "{date} ({zone}) に有効期限が切れます",
+  "expiryZoneKorea": "韓国時間",
+  "notShared": "未共有",
+  "recipientNotice1": "この書類は、送信元の組織からECOYAを通じて共有されました。機密情報として取り扱ってください。リンクが利用できなくなった場合はアクセスできません。",
+  "recipientNotice2": "この書類を使用する前に、送信者に真正性を確認してください。情報漏えいの疑いを報告する場合は、送信者およびlegal@ecoya.ioまでご連絡ください。",
+  "commercial": {
+    "title": "取引条件",
+    "amount": "金額",
+    "paymentTerms": "支払条件",
+    "incoterms": "インコタームズ"
+  },
+  "preview": {
+    "header": "書類プレビュー",
+    "iframeTitle": "送付された書類",
+    "download": "本文PDF"
+  },
+  "temporaryError": {
+    "title": "ドキュメントを読み込めませんでした",
+    "body": "一時的に接続できません。しばらくしてからもう一度お試しください。",
+    "retry": "再試行",
+    "retryCountdown": "{seconds}秒後に再試行"
+  },
+  "linkGone": {
+    "expired": {
+      "title": "ドキュメントのリンクの有効期限が切れました",
+      "body": "閲覧可能な期間が過ぎました。ドキュメントを再度確認するには、送信者に新しいリンクをリクエストしてください。"
+    },
+    "open_cap": {
+      "title": "閲覧可能な回数をすべて使用しました",
+      "body": "送信者が設定した閲覧上限に達しました。送信者に新しいリンクをリクエストしてください。"
+    },
+    "not_found": {
+      "title": "この文書リンクは利用できません",
+      "body": "このリンクは利用できません。送信者に新しいリンクの発行を依頼してください。"
+    },
+    "requestNew": "新しいリンクをリクエスト",
+    "requesting": "リクエストを送信中…",
+    "requestSucceeded": "新しいリンクのリクエストを記録しました。担当者には自動で通知されないため、直接連絡してください。",
+    "requestFailed": "リクエストを送信できませんでした。後でもう一度試すか、送信者にお問い合わせください。"
+  },
+  "brandName": "ECOYA <product>Trade OS</product>",
+  "arrived": "書類が届きました",
+  "downloadCaption": "本文と同封ファイルをまとめて保存します",
+  "downloadCaptionMainOnly": "本文ファイルを保存します",
+  "previewFallback": "プレビューが表示されない場合は、本文PDFをダウンロードしてご確認ください。",
+  "packageContents": {
+    "title": "パッケージ内容",
+    "total": "全{count}件",
+    "mainRole": "本文書類",
+    "attachmentFallback": "同封ファイル",
+    "includedNote": "同封ファイルはパッケージのダウンロードに含まれます。",
+    "noneNote": "このパッケージには追加の同封ファイルはありません。"
+  },
+  "shipment": {
+    "title": "船積情報",
+    "route": "航路",
+    "departure": "出港予定",
+    "arrival": "到着予定",
+    "vessel": "船名・航海番号",
+    "timing": "船積時期",
+    "polMissing": "積出港 未共有",
+    "podMissing": "陸揚港 未共有"
+  },
+  "linkInfo": {
+    "title": "リンクのご利用について",
+    "noExpiry": "有効期限 未共有",
+    "notice": "送信者が共有した書類です。内容をご確認のうえ、リンクと書類を安全に保管してください。"
+  },
+  "loading": {
+    "title": "文書リンクを確認しています",
+    "body": "しばらくお待ちください。閲覧できる書類を確認しています。"
+  },
+  "contactSender": "書類に関するお問い合わせは、リンクを送った送信者にご連絡ください。",
+  "footerTagline": "書類の送付をもっと簡単に、ECOYA Trade OS",
+  "footerLinkNotice": "このリンクは有効期限切れになるか、送信者によって取り消される場合があります。",
+  "otherDocument": "その他の書類",
+  "downloadPending": "ダウンロードを準備中",
+  "downloadFailed": "ダウンロードを開始できませんでした。もう一度お試しください。"
+}

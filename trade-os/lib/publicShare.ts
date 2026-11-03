@@ -13,6 +13,7 @@ export type PublicPackage = {
   pol?: string
   pod?: string
   vessel?: string
+  timezone?: string
   expires_at?: string
   max_opens?: number
   open_count?: number
@@ -82,6 +83,7 @@ export async function readShareResponse(
     "pod",
     "vessel",
     "expires_at",
+    "timezone",
   ] as const) {
     if (typeof body[key] === "string") pkg[key] = body[key].trim() || undefined
   }
@@ -126,6 +128,7 @@ export const previewPackage: PublicPackage = {
   pol: "Busan, Korea",
   pod: "Hamburg, Germany",
   vessel: "HMM AMBITION / 026W",
+  timezone: "Asia/Seoul",
   expires_at: "2026-09-30T23:59:59+09:00",
   max_opens: 10,
   open_count: 3,
