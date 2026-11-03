@@ -1307,7 +1307,7 @@ function DealDisclosureButton({ expanded, onClick, label, collapsedLabel = "보�
   collapsedLabel?: string
   controls?: string
 }) {
-  return <Button type="button" variant="ghost" size="sm" className="shrink-0 gap-1 text-muted-foreground" aria-label={`${label} ${expanded ? "접기" : "펼치기"}`} aria-expanded={expanded} aria-controls={controls} onClick={onClick}>
+  return <Button type="button" variant="ghost-neutral" size="sm" className="shrink-0 gap-1" aria-label={`${label} ${expanded ? "접기" : "펼치기"}`} aria-expanded={expanded} aria-controls={controls} onClick={onClick}>
     {expanded ? "접기" : collapsedLabel}
     <ChevronDown data-icon="inline-end" className={cn("size-4 transition-transform", expanded && "rotate-180")} />
   </Button>
