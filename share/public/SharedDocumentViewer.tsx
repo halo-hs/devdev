@@ -45,10 +45,10 @@ import {
 const states: [ShareState, string][] = [
   ["active", "정상 열람"],
   ["loading", "확인 중"],
-  ["expired", "만료"],
+  ["expired", "링크 기간 만료"],
   ["open_cap", "열람 한도"],
-  ["not_found", "철회·잘못된 링크"],
-  ["error", "일시 오류"],
+  ["not_found", "링크를 찾을 수 없음"],
+  ["error", "일시 접속장애"],
 ]
 function Header({
   locale,
@@ -592,8 +592,12 @@ function Unavailable({
     requestLock.current = true
     setRequestState("pending")
     try {
-      if (preview)
+      if (preview) {
         await new Promise((resolve) => window.setTimeout(resolve, 350))
+        requestLock.current = false
+        setRequestState("idle")
+        return
+      }
       else {
         const response = await fetch(
           `/api/platform/public/documents/${encodeURIComponent(token)}/request-new`,
@@ -669,11 +673,6 @@ function Unavailable({
             {requestState === "success" ? (
               <Alert role="status">
                 <AlertDescription>
-                  {preview ? (
-                    <span className="block">
-                      디자인 미리보기 · 실제 요청은 전송되지 않았습니다.
-                    </span>
-                  ) : null}
                   {t("linkGone.requestSucceeded")}
                 </AlertDescription>
               </Alert>

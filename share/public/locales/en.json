@@ -29,10 +29,10 @@
     "download": "Main PDF"
   },
   "temporaryError": {
-    "title": "We couldn't load the document",
-    "body": "The connection is temporarily unavailable. Please try again in a moment.",
-    "retry": "Try again",
-    "retryCountdown": "Retry in {seconds}s"
+    "title": "This link is temporarily unavailable",
+    "body": "There is a temporary connection problem. Refresh to try again.",
+    "retry": "Refresh",
+    "retryCountdown": "Refresh in {seconds}s"
   },
   "linkGone": {
     "expired": {
@@ -44,8 +44,8 @@
       "body": "The sender's viewing limit has been reached. Ask the sender for a new link."
     },
     "not_found": {
-      "title": "This document link is unavailable",
-      "body": "This link cannot be used. Ask the sender to issue a fresh link."
+      "title": "Link not found",
+      "body": "Check the link address. If it still does not open, contact the sender."
     },
     "requestNew": "Request a new link",
     "requesting": "Sending request…",
