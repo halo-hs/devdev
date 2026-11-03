@@ -273,3 +273,9 @@
   line-height: 20px;
 }
 
+
+/* Keep navigation actions white even while their existing callbacks are unavailable. */
+.ops-screen [data-ui="monitor-navigation-action"]:disabled {
+  background: var(--color-gray-12);
+  opacity: 1;
+}

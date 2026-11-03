@@ -52,7 +52,7 @@
       "description": "Owner 운영 감시 · 막힌 작업, 리스크, 플래그, 대기 액션을 우선 확인합니다.",
       "descriptionOps": "운영 상세 감시 · 막힌 작업 / 리스크 / 플래그 / 대기 액션",
       "actionsOpsDetail": "운영 상세",
-      "actionsDealsList": "Deals 목록",
+      "actionsDealsList": "거래 목록",
       "actionsSummary": "요약",
       "actionsThisWeek": "이번 주",
       "statusFilter": "필터 적용",
