@@ -1762,11 +1762,13 @@ function DealWorkBlock({
       data-work-section={work}
       data-work-state="planned"
       tabIndex={-1}
-      className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-lg border bg-muted/20 p-4 outline-none"
+      className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
     >
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold">
-          {workLabels[work]}<StatusBadge>예정</StatusBadge>
+      <div className="flex flex-wrap items-center gap-3 pt-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <span className="text-sm font-semibold tabular-nums text-muted-foreground">{{ documents: "01", fulfillment: "02", customs: "03", finance: "04" }[work]}</span>
+          <h2 className="text-lg font-semibold">{workLabels[work]}</h2>
+          <StatusBadge>예정</StatusBadge>
         </div>
         <DealDisclosureButton expanded={previewOpen} onClick={() => onPreview(work)} label={workLabels[work]} collapsedLabel="미리 보기" controls={`planned-${work}`} />
         {canWrite && (
@@ -1776,7 +1778,7 @@ function DealWorkBlock({
         )}
       </div>
       {previewOpen && (
-        <div id={`planned-${work}`} className="mt-3 border-t pt-3">
+        <Card id={`planned-${work}`} className="mt-3 gap-0 bg-card p-5 shadow-[var(--shadow-section)]">
           <p className="text-xs text-muted-foreground">
             업무가 시작되면 아래 정보를 확인하고 입력합니다.
           </p>
@@ -1790,7 +1792,7 @@ function DealWorkBlock({
               </li>
             ))}
           </ul>
-        </div>
+        </Card>
       )}
     </section>
   )
