@@ -538,10 +538,10 @@ function MonitorActions({
         </>
       ) : (
         <>
-          <Button variant="outline" className={heroOutlineButtonClass} disabled={live && !actions?.onOpsDetail} onClick={actions?.onOpsDetail}>
+          <Button data-ui="monitor-navigation-action" variant="ghost" className="h-10 rounded-[var(--r-md)] bg-white text-[var(--color-gray-1)] shadow-[0_1px_2px_rgba(5,29,57,0.1)] hover:bg-[var(--color-gray-11)] hover:text-[var(--color-gray-1)] disabled:bg-white disabled:opacity-100 disabled:text-[var(--color-gray-7)]" disabled={live && !actions?.onOpsDetail} onClick={actions?.onOpsDetail}>
             {copy.actionsOpsDetail}
           </Button>
-          <Button variant="outline" className={heroOutlineButtonClass} disabled={live && !actions?.onDealsList} onClick={actions?.onDealsList}>
+          <Button data-ui="monitor-navigation-action" variant="ghost" className="h-10 rounded-[var(--r-md)] bg-white text-[var(--color-gray-1)] shadow-[0_1px_2px_rgba(5,29,57,0.1)] hover:bg-[var(--color-gray-11)] hover:text-[var(--color-gray-1)] disabled:bg-white disabled:opacity-100 disabled:text-[var(--color-gray-7)]" disabled={live && !actions?.onDealsList} onClick={actions?.onDealsList}>
             {copy.actionsDealsList}
           </Button>
         </>
