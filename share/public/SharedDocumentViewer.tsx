@@ -1,5 +1,5 @@
 import { appLocation } from "@/app/appLocation"
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import {
   ArrowRight,
   CalendarDays,
@@ -16,6 +16,23 @@ import {
   ShieldCheck,
   Ship,
 } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  ShareLocaleContext,
+  shareDocumentTitle,
+  initialShareLocale,
+  shareLanguages,
+  useShareCopy,
+  type ShareLocale,
+} from "./publicShareLocale"
 import { Button } from "@/components/ui/button"
 import {
   readShareResponse,
@@ -33,26 +50,14 @@ const states: [ShareState, string][] = [
   ["not_found", "철회·잘못된 링크"],
   ["error", "일시 오류"],
 ]
-const unavailableCopy = {
-  expired: [
-    "문서 링크가 만료되었습니다",
-    "열람 가능한 기간이 지났습니다. 문서를 다시 확인하려면 발신자에게 새 링크를 요청해 주세요.",
-  ],
-  open_cap: [
-    "열람 가능한 횟수를 모두 사용했습니다",
-    "발신자가 설정한 열람 한도에 도달했습니다. 발신자에게 새 링크를 요청해 주세요.",
-  ],
-  not_found: [
-    "이 문서 링크는 사용할 수 없습니다",
-    "전달받은 링크 주소를 다시 확인해 주세요. 계속 열리지 않으면 발신자에게 새 링크를 요청해 주세요.",
-  ],
-  error: [
-    "문서를 불러오지 못했습니다",
-    "일시적으로 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.",
-  ],
-}
-
-function Header() {
+function Header({
+  locale,
+  onLocaleChange,
+}: {
+  locale: ShareLocale
+  onLocaleChange: (locale: ShareLocale) => void
+}) {
+  const { t } = useShareCopy()
   return (
     <header className="border-b bg-card px-5 sm:px-8">
       <div className="mx-auto flex min-h-20 max-w-[1280px] items-center justify-between gap-4">
@@ -67,45 +72,90 @@ function Header() {
               ECOYA <span className="font-medium">Trade OS</span>
             </span>
           </div>
-          <p className="mt-1.5 text-xs text-muted-foreground">무역 문서 전달</p>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            {t("brandSubtitle")}{" "}
+          </p>
         </div>
-        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <ShieldCheck className="size-4 text-primary" aria-hidden />
-          보호된 문서 링크
-        </span>
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <Select
+            value={locale}
+            onValueChange={(value) => onLocaleChange(value as ShareLocale)}
+          >
+            <SelectTrigger aria-label={t("languageSelectorLabel")} size="sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {shareLanguages.map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <span className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:flex">
+            <ShieldCheck className="size-4 text-primary" aria-hidden />
+            {t("protectedLinkBadge")}
+          </span>
+        </div>
       </div>
     </header>
   )
 }
 function Footer() {
+  const { t } = useShareCopy()
   return (
-    <footer className="mx-auto flex w-full max-w-[1280px] flex-col gap-2 px-5 py-7 text-xs leading-5 text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8 xl:px-0">
-      <span className="font-semibold">전달을 더 간편하게, ECOYA Trade OS</span>
-      <span>이 링크는 만료되거나 발신자가 회수할 수 있습니다.</span>
+    <footer className="mx-auto flex w-full max-w-[1280px] flex-col gap-2 px-5 py-7 text-xs leading-5 text-muted-foreground sm:px-8 xl:px-0">
+      <div className="flex flex-col justify-between gap-2 sm:flex-row">
+        <span className="font-semibold">{t("footerTagline")}</span>
+        <span>{t("footerLinkNotice")}</span>
+      </div>
+      <div className="flex flex-col gap-1" data-ui="share-recipient-notice">
+        <p>{t("recipientNotice1")}</p>
+        <p>{t("recipientNotice2")}</p>
+      </div>
     </footer>
   )
 }
 function Field({ label, children }: { label: string; children: ReactNode }) {
+  const { t } = useShareCopy()
   return (
     <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-3 text-sm leading-6">
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="min-w-0 font-medium break-words">
-        {children || "미공유"}
+        {children || t("notShared")}
       </dd>
     </div>
   )
 }
-function dateLabel(value?: string) {
-  if (!value) return "미공유"
-  const date = new Date(value)
-  return Number.isNaN(date.getTime())
-    ? "미공유"
-    : new Intl.DateTimeFormat("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        timeZone: "Asia/Seoul",
-      }).format(date)
+export function publicShareTimeZone(zone?: string) {
+  if (zone) {
+    try {
+      new Intl.DateTimeFormat("en", { timeZone: zone })
+      return zone
+    } catch {
+      /* Browser fallback for invalid legacy values. */
+    }
+  }
+  return Intl.DateTimeFormat().resolvedOptions().timeZone
+}
+export function dateLabel(value?: string, zone?: string, withTime = false) {
+  if (!value || Number.isNaN(new Date(value).getTime())) return "—"
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    ...(withTime
+      ? { hour: "2-digit", minute: "2-digit", hourCycle: "h23" as const }
+      : {}),
+    timeZone: /^\d{4}-\d{2}-\d{2}$/.test(value)
+      ? "UTC"
+      : publicShareTimeZone(zone),
+  }).formatToParts(new Date(value))
+  const get = (type: string) =>
+    parts.find((part) => part.type === type)?.value ?? ""
+  return `${get("year")}.${get("month")}.${get("day")}${withTime ? ` ${get("hour")}:${get("minute")}` : ""}`
 }
 
 /** The design sample is deliberately isolated from real token responses. */
@@ -289,20 +339,22 @@ function DocumentPackage({
   token: string
   preview: boolean
 }) {
+  const { t } = useShareCopy()
+  const zone = publicShareTimeZone(pkg.timezone)
   const [downloading, setDownloading] = useState(false)
-  const [downloadError, setDownloadError] = useState("")
+  const [downloadError, setDownloadError] = useState(false)
   const attachments = pkg.attachments ?? []
-  const title = pkg.label || pkg.doc_type || "공유 문서"
+  const title = pkg.label || pkg.doc_type || t("otherDocument")
   const number = pkg.doc_number || title
   const endpoint = `/api/platform/public/documents/${encodeURIComponent(token)}`
   const download = async (bundle: boolean) => {
     setDownloading(true)
-    setDownloadError("")
+    setDownloadError(false)
     try {
       if (preview) await downloadSample(bundle)
       else appLocation.assign(endpoint + (bundle ? "/bundle" : ""))
     } catch {
-      setDownloadError("다운로드를 시작하지 못했습니다. 다시 시도해 주세요.")
+      setDownloadError(true)
     } finally {
       setDownloading(false)
     }
@@ -316,14 +368,17 @@ function DocumentPackage({
               <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Check className="size-3.5" aria-hidden />
               </span>
-              문서가 도착했습니다
+              {t("arrived")}
             </div>
             <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
             <p className="mt-2 text-sm break-all text-muted-foreground">
-              {number} <span className="mx-1.5 text-border">/</span> 본문 PDF
-              {attachments.length
-                ? ` 및 동봉 파일 ${attachments.length}개`
-                : ""}
+              {number} <span className="mx-1.5 text-border">/</span>{" "}
+              {t(
+                attachments.length
+                  ? "attachmentSummaryWithExtra"
+                  : "attachmentSummaryMainOnly",
+                { count: attachments.length }
+              )}
             </p>
           </div>
           <div className="shrink-0">
@@ -334,17 +389,15 @@ function DocumentPackage({
             >
               <Download className="size-4" />
               {downloading
-                ? "다운로드 준비 중"
-                : `패키지 다운로드 (${attachments.length + 1}개)`}
+                ? t("downloadPending")
+                : t("downloadPack", { count: attachments.length + 1 })}
             </Button>
             <p className="mt-2 text-center text-xs text-muted-foreground">
-              {preview
-                ? "샘플 PDF 패키지가 저장됩니다"
-                : "본문과 동봉 파일을 함께 저장합니다"}
+              {preview ? "샘플 PDF 패키지가 저장됩니다" : t("downloadCaption")}
             </p>
             {downloadError && (
               <p role="alert" className="mt-2 text-xs text-destructive">
-                {downloadError}
+                {t("downloadFailed")}
               </p>
             )}
           </div>
@@ -352,13 +405,13 @@ function DocumentPackage({
       </section>
       <main className="mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:grid-rows-[auto_1fr] xl:px-0">
         <section
-          aria-label="문서 미리보기"
+          aria-label={t("preview.header")}
           className="order-2 min-w-0 overflow-hidden rounded-xl border bg-muted/60 lg:order-1 lg:row-span-2"
         >
           <div className="flex min-h-14 flex-wrap items-center justify-between gap-2 border-b bg-card px-4 py-2">
             <h2 className="flex items-center gap-2 text-sm font-semibold">
               <FileText className="size-4 text-muted-foreground" aria-hidden />
-              문서 미리보기
+              {t("preview.header")}
             </h2>
             <Button
               variant="ghost"
@@ -367,7 +420,7 @@ function DocumentPackage({
               onClick={() => void download(false)}
             >
               <Download className="size-4" />
-              본문 PDF
+              {t("preview.download")}
             </Button>
           </div>
           <div className="p-3 sm:p-6">
@@ -375,7 +428,7 @@ function DocumentPackage({
               <SampleInvoice />
             ) : (
               <iframe
-                title="전달된 문서"
+                title={t("preview.iframeTitle")}
                 src={endpoint}
                 referrerPolicy="no-referrer"
                 className="h-[750px] w-full bg-white"
@@ -383,17 +436,19 @@ function DocumentPackage({
             )}
           </div>
           <p className="px-4 pb-4 text-center text-xs leading-5 text-muted-foreground">
-            미리보기가 보이지 않으면 본문 PDF를 내려받아 확인하세요.
+            {t("previewFallback")}
           </p>
         </section>
         <section
-          aria-label="패키지 구성"
+          aria-label={t("packageContents.title")}
           className="order-1 overflow-hidden rounded-xl border bg-card lg:order-2"
         >
           <div className="flex items-center justify-between border-b px-5 py-4">
-            <h2 className="text-sm font-semibold">패키지 구성</h2>
+            <h2 className="text-sm font-semibold">
+              {t("packageContents.title")}{" "}
+            </h2>
             <span className="text-xs text-muted-foreground">
-              총 {attachments.length + 1}개
+              {t("packageContents.total", { count: attachments.length + 1 })}
             </span>
           </div>
           <ul className="divide-y px-5">
@@ -403,7 +458,9 @@ function DocumentPackage({
               </span>
               <div className="min-w-0">
                 <p className="text-sm font-medium break-all">{number}.pdf</p>
-                <p className="mt-1 text-xs text-primary">본문 문서</p>
+                <p className="mt-1 text-xs text-primary">
+                  {t("packageContents.mainRole")}{" "}
+                </p>
               </div>
             </li>
             {attachments.map((file, index) => (
@@ -419,7 +476,7 @@ function DocumentPackage({
                     {file.filename}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {file.label || "동봉 파일"}
+                    {file.label || t("packageContents.attachmentFallback")}
                   </p>
                 </div>
               </li>
@@ -428,26 +485,30 @@ function DocumentPackage({
           <p className="flex items-start gap-2 border-t bg-muted/40 px-5 py-3 text-xs leading-5 text-muted-foreground">
             <Package className="mt-0.5 size-4 shrink-0" aria-hidden />
             {attachments.length
-              ? "동봉 파일은 패키지 다운로드에 포함됩니다."
-              : "이 패키지에는 추가 동봉 파일이 없습니다."}
+              ? t("packageContents.includedNote")
+              : t("packageContents.noneNote")}
           </p>
         </section>
         <div className="order-3 min-w-0 space-y-5">
           <section className="rounded-xl border bg-card p-5">
-            <h2 className="mb-4 text-sm font-semibold">상업 조건</h2>
+            <h2 className="mb-4 text-sm font-semibold">
+              {t("commercial.title")}{" "}
+            </h2>
             <dl className="space-y-3">
-              <Field label="금액">
+              <Field label={t("commercial.amount")}>
                 {[pkg.currency, pkg.amount].filter(Boolean).join(" ")}
               </Field>
-              <Field label="인코텀즈">{pkg.incoterms}</Field>
-              <Field label="결제 조건">{pkg.payment_terms}</Field>
+              <Field label={t("commercial.incoterms")}>{pkg.incoterms}</Field>
+              <Field label={t("commercial.paymentTerms")}>
+                {pkg.payment_terms}
+              </Field>
             </dl>
           </section>
           <details open className="rounded-xl border bg-card p-5">
             <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
               <span className="flex items-center gap-2">
                 <Ship className="size-4 text-muted-foreground" aria-hidden />
-                선적 정보
+                {t("shipment.title")}
               </span>
               <ChevronDown
                 className="size-4 text-muted-foreground"
@@ -456,23 +517,25 @@ function DocumentPackage({
             </summary>
             <div className="mt-4">
               <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/60 px-3 py-3 text-xs font-medium">
-                <span>{pkg.pol || "출발항 미공유"}</span>
+                <span>{pkg.pol || t("shipment.polMissing")}</span>
                 <ArrowRight
                   className="size-3.5 text-muted-foreground"
                   aria-hidden
                 />
-                <span>{pkg.pod || "도착항 미공유"}</span>
+                <span>{pkg.pod || t("shipment.podMissing")}</span>
               </div>
               <dl className="mt-4 space-y-3">
-                <Field label="출발 예정">
+                <Field label={t("shipment.departure")}>
                   {pkg.etd ? dateLabel(pkg.etd) : undefined}
                 </Field>
-                <Field label="도착 예정">
+                <Field label={t("shipment.arrival")}>
                   {pkg.eta ? dateLabel(pkg.eta) : undefined}
                 </Field>
-                <Field label="선박·항차">{pkg.vessel}</Field>
+                <Field label={t("shipment.vessel")}>{pkg.vessel}</Field>
                 {pkg.shipment_timing && (
-                  <Field label="선적 일정">{pkg.shipment_timing}</Field>
+                  <Field label={t("shipment.timing")}>
+                    {pkg.shipment_timing}
+                  </Field>
                 )}
               </dl>
             </div>
@@ -480,24 +543,27 @@ function DocumentPackage({
           <section className="px-1 text-xs leading-5 text-muted-foreground">
             <h2 className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
               <LockKeyhole className="size-4" aria-hidden />
-              링크 이용 안내
+              {t("linkInfo.title")}
             </h2>
             <p className="flex items-center gap-2">
               <CalendarDays className="size-3.5" aria-hidden />
               {pkg.expires_at
-                ? `${dateLabel(pkg.expires_at)} 만료 (한국 시간)`
-                : "만료일 미공유"}
+                ? t("expiresOnZoned", {
+                    date: dateLabel(pkg.expires_at, zone, true),
+                    zone: zone === "Asia/Seoul" ? t("expiryZoneKorea") : zone,
+                  })
+                : t("linkInfo.noExpiry")}
             </p>
             <p className="mt-1 flex items-center gap-2">
               <Clock3 className="size-3.5" aria-hidden />
               {pkg.max_opens !== undefined
-                ? `${pkg.open_count ?? 0} / ${pkg.max_opens}회 열람`
-                : "열람 횟수 제한 없음"}
+                ? t("opensUsed", {
+                    used: pkg.open_count ?? 0,
+                    max: pkg.max_opens,
+                  })
+                : t("noOpenCap")}
             </p>
-            <p className="mt-3 border-t pt-3">
-              발신자가 공유한 문서입니다. 내용을 확인하고 링크와 문서를 안전하게
-              보관해 주세요.
-            </p>
+            <p className="mt-3 border-t pt-3">{t("linkInfo.notice")}</p>
           </section>
         </div>
       </main>
@@ -508,10 +574,44 @@ function DocumentPackage({
 function Unavailable({
   result,
   retry,
+  token,
+  preview,
 }: {
   result: ShareResult
   retry: () => void
+  token: string
+  preview: boolean
 }) {
+  const { t } = useShareCopy()
+  const requestLock = useRef(false)
+  const [requestState, setRequestState] = useState<
+    "idle" | "pending" | "success" | "failure"
+  >("idle")
+  const requestNew = async () => {
+    if (requestLock.current) return
+    requestLock.current = true
+    setRequestState("pending")
+    try {
+      if (preview)
+        await new Promise((resolve) => window.setTimeout(resolve, 350))
+      else {
+        const response = await fetch(
+          `/api/platform/public/documents/${encodeURIComponent(token)}/request-new`,
+          {
+            method: "POST",
+            credentials: "omit",
+            cache: "no-store",
+            referrerPolicy: "no-referrer",
+          }
+        )
+        if (!response.ok) throw new Error("request failed")
+      }
+      setRequestState("success")
+    } catch {
+      requestLock.current = false
+      setRequestState("failure")
+    }
+  }
   const [remaining, setRemaining] = useState(result.retryAfter ?? 0)
   useEffect(() => {
     if (!remaining) return
@@ -548,23 +648,70 @@ function Unavailable({
         </span>
         <h1 className="mt-6 text-2xl leading-9 font-semibold tracking-tight">
           {loading
-            ? "문서 링크를 확인하고 있습니다"
-            : unavailableCopy[state][0]}
+            ? t("loading.title")
+            : t(
+                state === "error"
+                  ? "temporaryError.title"
+                  : `linkGone.${state}.title`
+              )}
         </h1>
         <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
           {loading
-            ? "잠시만 기다려 주세요. 열람 가능한 문서를 확인하고 있습니다."
-            : unavailableCopy[state][1]}
+            ? t("loading.body")
+            : t(
+                state === "error"
+                  ? "temporaryError.body"
+                  : `linkGone.${state}.body`
+              )}
         </p>
+        {!loading && (state === "expired" || state === "open_cap") && (
+          <div className="mt-6 flex flex-col items-center gap-3">
+            {requestState === "success" ? (
+              <Alert role="status">
+                <AlertDescription>
+                  {preview ? (
+                    <span className="block">
+                      디자인 미리보기 · 실제 요청은 전송되지 않았습니다.
+                    </span>
+                  ) : null}
+                  {t("linkGone.requestSucceeded")}
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <Button
+                  disabled={requestState === "pending"}
+                  aria-busy={requestState === "pending"}
+                  onClick={() => void requestNew()}
+                >
+                  {t(
+                    requestState === "pending"
+                      ? "linkGone.requesting"
+                      : "linkGone.requestNew"
+                  )}
+                </Button>
+                {requestState === "failure" && (
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      {t("linkGone.requestFailed")}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </>
+            )}
+          </div>
+        )}
         {state === "error" && !loading && (
           <Button className="mt-6" disabled={remaining > 0} onClick={retry}>
             <RefreshCw className="size-4" />
-            {remaining ? `${remaining}초 후 다시 시도` : "다시 시도"}
+            {remaining
+              ? t("temporaryError.retryCountdown", { seconds: remaining })
+              : t("temporaryError.retry")}
           </Button>
         )}
         {!loading && state !== "error" && (
           <p className="mt-8 border-t pt-5 text-xs text-muted-foreground">
-            문서 문의는 링크를 보내주신 발신자에게 연락해 주세요.
+            {t("contactSender")}
           </p>
         )}
       </section>
@@ -579,6 +726,7 @@ export function PublicSharePage({
   token: string
   search: string
 }) {
+  const [locale, setLocale] = useState<ShareLocale>(initialShareLocale)
   const preview = token === "preview"
   const requested = new URLSearchParams(search).get("state")
   const initialState = states.some(([state]) => state === requested)
@@ -589,11 +737,11 @@ export function PublicSharePage({
   const [attempt, setAttempt] = useState(0)
   useEffect(() => {
     const previousTitle = document.title
-    document.title = "공유 문서 | ECOYA Trade OS"
+    document.title = shareDocumentTitle(locale)
     return () => {
       document.title = previousTitle
     }
-  }, [])
+  }, [locale])
   useEffect(() => {
     if (preview || !token) return
     const controller = new AbortController()
@@ -616,64 +764,77 @@ export function PublicSharePage({
     return () => controller.abort()
   }, [token, preview, attempt])
   const current: ShareResult = preview
-    ? { state: previewState, package: previewPackage }
+    ? {
+        state: previewState,
+        package: {
+          ...previewPackage,
+          timezone:
+            new URLSearchParams(search).get("timezone") ??
+            previewPackage.timezone,
+        },
+      }
     : !token
       ? { state: "not_found" }
       : result
   return (
-    <div
-      className="flex min-h-svh flex-col bg-muted/40"
-      data-share-state={current.state}
-    >
-      {preview && (
-        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-b bg-primary/5 px-5 py-2 text-xs">
-          <span className="text-muted-foreground">
-            디자인 미리보기 · 샘플 문서
-          </span>
-          <label className="flex items-center gap-2">
-            화면 상태
-            <select
-              aria-label="공유 화면 상태"
-              className="rounded-md border bg-card px-2 py-1 focus-visible:outline-2 focus-visible:outline-ring"
-              value={previewState}
-              onChange={(event) => {
-                const next = event.target.value as ShareState
-                setPreviewState(next)
-                const url = new URL(appLocation.href)
-                url.searchParams.set("state", next)
-                window.history.replaceState({}, "", url)
-              }}
-            >
-              {states.map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      )}
-      <Header />
-      {current.state === "active" && current.package ? (
-        <DocumentPackage
-          pkg={current.package}
-          token={token}
-          preview={preview}
-        />
-      ) : (
-        <Unavailable
-          key={`${current.state}-${attempt}`}
-          result={current}
-          retry={() => {
-            if (preview) setPreviewState("active")
-            else {
-              setResult({ state: "loading" })
-              setAttempt((value) => value + 1)
-            }
-          }}
-        />
-      )}
-      <Footer />
-    </div>
+    <ShareLocaleContext.Provider value={locale}>
+      <div
+        lang={locale}
+        className="flex min-h-svh flex-col bg-muted/40"
+        data-share-state={current.state}
+      >
+        {preview && (
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-b bg-primary/5 px-5 py-2 text-xs">
+            <span className="text-muted-foreground">
+              디자인 미리보기 · 샘플 문서
+            </span>
+            <label className="flex items-center gap-2">
+              화면 상태
+              <select
+                aria-label="공유 화면 상태"
+                className="rounded-md border bg-card px-2 py-1 focus-visible:outline-2 focus-visible:outline-ring"
+                value={previewState}
+                onChange={(event) => {
+                  const next = event.target.value as ShareState
+                  setPreviewState(next)
+                  const url = new URL(appLocation.href)
+                  url.searchParams.set("state", next)
+                  window.history.replaceState({}, "", url)
+                }}
+              >
+                {states.map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        )}
+        <Header locale={locale} onLocaleChange={setLocale} />
+        {current.state === "active" && current.package ? (
+          <DocumentPackage
+            pkg={current.package}
+            token={token}
+            preview={preview}
+          />
+        ) : (
+          <Unavailable
+            key={`${current.state}-${attempt}`}
+            result={current}
+            token={token}
+            preview={preview}
+            retry={() => {
+              if (preview) setPreviewState("active")
+              else {
+                setResult({ state: "loading" })
+                setAttempt((value) => value + 1)
+              }
+            }}
+          />
+        )}
+        <Footer />
+      </div>
+    </ShareLocaleContext.Provider>
   )
 }

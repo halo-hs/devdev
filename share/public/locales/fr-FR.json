@@ -1,0 +1,93 @@
+{
+  "documentTitle": "Document partagé | ECOYA Trade OS",
+  "protectedLinkBadge": "Lien de document protégé",
+  "brandSubtitle": "Livraison de documents commerciaux",
+  "languageSelectorLabel": "Choisir la langue",
+  "documentFallback": "document",
+  "verifying": "Vérification du lien…",
+  "currencyOnlyPrefix": "Devise",
+  "downloadPack": "Télécharger le pack ({count, plural, one {# fichier} other {# fichiers}})",
+  "attachmentSummaryWithExtra": "PDF principal et {count, plural, one {# fichier joint} other {# fichiers joints}}",
+  "attachmentSummaryMainOnly": "PDF principal",
+  "opensUsed": "{used} / {max} ouvertures",
+  "noOpenCap": "Aucune limite d'ouverture communiquée",
+  "expiresOn": "Expire le {date}",
+  "expiresOnZoned": "Expire le {date} ({zone})",
+  "expiryZoneKorea": "heure de Corée",
+  "notShared": "Non partagé",
+  "recipientNotice1": "Ce document vous a été partagé par l'organisation expéditrice via ECOYA. Traitez-le comme confidentiel. L'accès peut prendre fin lorsque le lien n'est plus disponible.",
+  "recipientNotice2": "Vérifiez l'authenticité auprès de l'expéditeur avant de vous y fier. Pour signaler une fuite suspectée, contactez l'expéditeur et legal@ecoya.io.",
+  "commercial": {
+    "title": "Conditions commerciales",
+    "amount": "Montant",
+    "paymentTerms": "Conditions de paiement",
+    "incoterms": "Incoterms"
+  },
+  "preview": {
+    "header": "Aperçu du document",
+    "iframeTitle": "Document livré",
+    "download": "PDF principal"
+  },
+  "temporaryError": {
+    "title": "Impossible de charger le document",
+    "body": "La connexion est momentanément indisponible. Veuillez réessayer dans un instant.",
+    "retry": "Réessayer",
+    "retryCountdown": "Nouvel essai dans {seconds}s"
+  },
+  "linkGone": {
+    "expired": {
+      "title": "Le lien du document a expiré",
+      "body": "La période de consultation est terminée. Pour consulter à nouveau le document, demandez un nouveau lien à l'expéditeur."
+    },
+    "open_cap": {
+      "title": "Toutes les consultations autorisées ont été utilisées",
+      "body": "La limite de consultation fixée par l'expéditeur est atteinte. Demandez un nouveau lien à l'expéditeur."
+    },
+    "not_found": {
+      "title": "Ce lien de document n'est pas disponible",
+      "body": "Ce lien ne peut pas être utilisé. Demandez à l'expéditeur d'émettre un nouveau lien."
+    },
+    "requestNew": "Demander un nouveau lien",
+    "requesting": "Envoi de la demande…",
+    "requestSucceeded": "La demande d’un nouveau lien a été enregistrée. Elle n’est pas transmise automatiquement ; contactez directement la personne responsable.",
+    "requestFailed": "La demande n'a pas pu être envoyée. Réessayez plus tard ou contactez l'expéditeur."
+  },
+  "brandName": "ECOYA <product>Trade OS</product>",
+  "arrived": "Votre document est arrivé",
+  "downloadCaption": "Enregistre le document principal et ses fichiers joints ensemble",
+  "downloadCaptionMainOnly": "Enregistre le document principal",
+  "previewFallback": "Si l'aperçu ne s'affiche pas, téléchargez le PDF principal pour le consulter.",
+  "packageContents": {
+    "title": "Contenu du pack",
+    "total": "{count, plural, one {# fichier} other {# fichiers}}",
+    "mainRole": "Document principal",
+    "attachmentFallback": "Fichier joint",
+    "includedNote": "Les fichiers joints sont inclus dans le téléchargement du pack.",
+    "noneNote": "Ce pack ne contient aucun fichier joint supplémentaire."
+  },
+  "shipment": {
+    "title": "Informations d'expédition",
+    "route": "Itinéraire",
+    "departure": "Départ (ETD)",
+    "arrival": "Arrivée (ETA)",
+    "vessel": "Navire / voyage",
+    "timing": "Calendrier d'expédition",
+    "polMissing": "Port de chargement non partagé",
+    "podMissing": "Port de déchargement non partagé"
+  },
+  "linkInfo": {
+    "title": "À propos de ce lien",
+    "noExpiry": "Date d'expiration non partagée",
+    "notice": "Ce document a été partagé par l'expéditeur. Consultez-le et conservez le lien et le document en lieu sûr."
+  },
+  "loading": {
+    "title": "Vérification de votre lien de document",
+    "body": "Veuillez patienter pendant que nous vérifions le document que vous pouvez ouvrir."
+  },
+  "contactSender": "Pour toute question sur ce document, contactez l'expéditeur du lien.",
+  "footerTagline": "Une livraison de documents simplifiée avec ECOYA Trade OS",
+  "footerLinkNotice": "Ce lien peut expirer ou être retiré par l'expéditeur.",
+  "otherDocument": "Autre document",
+  "downloadPending": "Préparation du téléchargement",
+  "downloadFailed": "Impossible de démarrer le téléchargement. Veuillez réessayer."
+}

@@ -1,0 +1,93 @@
+{
+  "documentTitle": "공유 문서 | ECOYA Trade OS",
+  "protectedLinkBadge": "보호된 문서 링크",
+  "brandSubtitle": "무역 문서 전달",
+  "languageSelectorLabel": "언어 선택",
+  "documentFallback": "문서",
+  "verifying": "링크 확인 중…",
+  "currencyOnlyPrefix": "통화",
+  "downloadPack": "패키지 다운로드 ({count}개)",
+  "attachmentSummaryWithExtra": "본문 PDF 및 동봉 파일 {count}개",
+  "attachmentSummaryMainOnly": "본문 PDF",
+  "opensUsed": "{used} / {max}회 열람",
+  "noOpenCap": "열람 횟수 제한 없음",
+  "expiresOn": "{date} 만료",
+  "expiresOnZoned": "{date} 만료 ({zone})",
+  "expiryZoneKorea": "한국 시간",
+  "notShared": "미공유",
+  "recipientNotice1": "이 문서는 발신 조직이 ECOYA를 통해 공유한 것입니다. 기밀로 취급하세요. 링크를 더 이상 사용할 수 없으면 접근이 <keep>종료될 수 있습니다.</keep>",
+  "recipientNotice2": "신뢰하기 전에 발신자에게 진위를 확인하세요. <keep>유출이 의심되면</keep> 발신자와 legal@ecoya.io로 연락하세요.",
+  "commercial": {
+    "title": "상업 조건",
+    "amount": "금액",
+    "paymentTerms": "결제 조건",
+    "incoterms": "인코텀즈"
+  },
+  "preview": {
+    "header": "문서 미리보기",
+    "iframeTitle": "전달된 문서",
+    "download": "본문 PDF"
+  },
+  "temporaryError": {
+    "title": "문서를 불러오지 못했습니다",
+    "body": "일시적으로 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+    "retry": "다시 시도",
+    "retryCountdown": "{seconds}초 후 다시 시도"
+  },
+  "linkGone": {
+    "expired": {
+      "title": "문서 링크가 만료되었습니다",
+      "body": "열람 가능한 기간이 지났습니다. 문서를 다시 확인하려면 발신자에게 새 링크를 요청해 주세요."
+    },
+    "open_cap": {
+      "title": "열람 가능한 횟수를 모두 사용했습니다",
+      "body": "발신자가 설정한 열람 한도에 도달했습니다. 발신자에게 새 링크를 요청해 주세요."
+    },
+    "not_found": {
+      "title": "<keep>링크를 사용할 수 없습니다</keep>",
+      "body": "<keep>링크를 사용할 수 없습니다.</keep> 주소를 다시 확인하거나 문서를 보낸 담당자에게 문의해 주세요."
+    },
+    "requestNew": "새 링크 요청",
+    "requesting": "요청 중…",
+    "requestSucceeded": "새 링크 요청이 기록되었습니다. 담당자에게 자동으로 전달되지 않으니 직접 연락해 주세요.",
+    "requestFailed": "새 링크 요청을 보내지 못했습니다. 잠시 후 다시 시도하거나 문서를 보낸 담당자에게 문의해 주세요."
+  },
+  "brandName": "ECOYA <product>Trade OS</product>",
+  "arrived": "문서가 도착했습니다",
+  "downloadCaption": "본문과 동봉 파일을 함께 저장합니다",
+  "downloadCaptionMainOnly": "본문 파일을 저장합니다",
+  "previewFallback": "미리보기가 보이지 않으면 본문 PDF를 내려받아 확인하세요.",
+  "packageContents": {
+    "title": "패키지 구성",
+    "total": "총 {count}개",
+    "mainRole": "본문 문서",
+    "attachmentFallback": "동봉 파일",
+    "includedNote": "동봉 파일은 패키지 다운로드에 포함됩니다.",
+    "noneNote": "이 패키지에는 추가 동봉 파일이 없습니다."
+  },
+  "shipment": {
+    "title": "선적 정보",
+    "route": "항로",
+    "departure": "출발 예정",
+    "arrival": "도착 예정",
+    "vessel": "선박·항차",
+    "timing": "선적 일정",
+    "polMissing": "출발항 미공유",
+    "podMissing": "도착항 미공유"
+  },
+  "linkInfo": {
+    "title": "링크 이용 안내",
+    "noExpiry": "만료일 미공유",
+    "notice": "발신자가 공유한 문서입니다. 내용을 확인하고 링크와 문서를 안전하게 보관해 주세요."
+  },
+  "loading": {
+    "title": "문서 링크를 확인하고 있습니다",
+    "body": "잠시만 기다려 주세요. 열람 가능한 문서를 확인하고 있습니다."
+  },
+  "contactSender": "문서 문의는 링크를 보내주신 발신자에게 연락해 주세요.",
+  "footerTagline": "전달을 더 간편하게, ECOYA Trade OS",
+  "footerLinkNotice": "이 링크는 만료되거나 발신자가 회수할 수 있습니다.",
+  "otherDocument": "기타 문서",
+  "downloadPending": "다운로드 준비 중",
+  "downloadFailed": "다운로드를 시작하지 못했습니다. 다시 시도해 주세요."
+}

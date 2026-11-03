@@ -1,0 +1,93 @@
+{
+  "documentTitle": "Shared document | ECOYA Trade OS",
+  "protectedLinkBadge": "Protected document link",
+  "brandSubtitle": "Trade document delivery",
+  "languageSelectorLabel": "Select language",
+  "documentFallback": "document",
+  "verifying": "Checking link…",
+  "currencyOnlyPrefix": "Currency",
+  "downloadPack": "Download pack ({count, plural, one {# file} other {# files}})",
+  "attachmentSummaryWithExtra": "Main PDF and {count, plural, one {# attached file} other {# attached files}}",
+  "attachmentSummaryMainOnly": "Main PDF",
+  "opensUsed": "{used} / {max} opens",
+  "noOpenCap": "No open cap shared",
+  "expiresOn": "Expires {date}",
+  "expiresOnZoned": "Expires {date} ({zone})",
+  "expiryZoneKorea": "Korea time",
+  "notShared": "Not shared",
+  "recipientNotice1": "This document was shared with you by the sending organisation through ECOYA. Treat it as confidential. Access may end when the link is no longer available.",
+  "recipientNotice2": "Verify authenticity with the sender before relying on it. To report a suspected leak, contact the sender and legal@ecoya.io.",
+  "commercial": {
+    "title": "Commercial terms",
+    "amount": "Amount",
+    "paymentTerms": "Payment terms",
+    "incoterms": "Incoterms"
+  },
+  "preview": {
+    "header": "Document preview",
+    "iframeTitle": "Delivered document",
+    "download": "Main PDF"
+  },
+  "temporaryError": {
+    "title": "We couldn't load the document",
+    "body": "The connection is temporarily unavailable. Please try again in a moment.",
+    "retry": "Try again",
+    "retryCountdown": "Retry in {seconds}s"
+  },
+  "linkGone": {
+    "expired": {
+      "title": "This document link has expired",
+      "body": "The viewing period has ended. To view the document again, ask the sender for a new link."
+    },
+    "open_cap": {
+      "title": "All permitted views have been used",
+      "body": "The sender's viewing limit has been reached. Ask the sender for a new link."
+    },
+    "not_found": {
+      "title": "This document link is unavailable",
+      "body": "This link cannot be used. Ask the sender to issue a fresh link."
+    },
+    "requestNew": "Request a new link",
+    "requesting": "Sending request…",
+    "requestSucceeded": "Your request for a new link has been recorded. It is not forwarded automatically; please contact the person in charge directly.",
+    "requestFailed": "We couldn't send the request. Try again later or contact the sender."
+  },
+  "brandName": "ECOYA <product>Trade OS</product>",
+  "arrived": "Your document has arrived",
+  "downloadCaption": "Saves the main document and its attached files together",
+  "downloadCaptionMainOnly": "Saves the main document",
+  "previewFallback": "If the preview does not appear, download the Main PDF to view it.",
+  "packageContents": {
+    "title": "Package contents",
+    "total": "{count, plural, one {# file} other {# files}}",
+    "mainRole": "Main document",
+    "attachmentFallback": "Attached file",
+    "includedNote": "Attached files are included in the package download.",
+    "noneNote": "This package has no additional attached files."
+  },
+  "shipment": {
+    "title": "Shipment details",
+    "route": "Route",
+    "departure": "Departure (ETD)",
+    "arrival": "Arrival (ETA)",
+    "vessel": "Vessel / voyage",
+    "timing": "Shipment timing",
+    "polMissing": "Port of loading not shared",
+    "podMissing": "Port of discharge not shared"
+  },
+  "linkInfo": {
+    "title": "About this link",
+    "noExpiry": "Expiry date not shared",
+    "notice": "This document was shared by the sender. Review it and keep the link and the document safe."
+  },
+  "loading": {
+    "title": "Checking your document link",
+    "body": "Please wait while we check which document you can open."
+  },
+  "contactSender": "For questions about this document, contact the sender who shared the link.",
+  "footerTagline": "Simpler document delivery with ECOYA Trade OS",
+  "footerLinkNotice": "This link may expire or be withdrawn by the sender.",
+  "otherDocument": "Other document",
+  "downloadPending": "Preparing download",
+  "downloadFailed": "Could not start the download. Please try again."
+}
