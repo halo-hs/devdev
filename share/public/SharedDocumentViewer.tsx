@@ -45,10 +45,10 @@ import {
 const states: [ShareState, string][] = [
   ["active", "정상 열람"],
   ["loading", "확인 중"],
-  ["expired", "만료"],
+  ["expired", "링크 기간 만료"],
   ["open_cap", "열람 한도"],
-  ["not_found", "철회·잘못된 링크"],
-  ["error", "일시 오류"],
+  ["not_found", "링크를 찾을 수 없음"],
+  ["error", "일시 접속장애"],
 ]
 function Header({
   locale,

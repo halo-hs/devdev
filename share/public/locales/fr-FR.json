@@ -29,10 +29,10 @@
     "download": "PDF principal"
   },
   "temporaryError": {
-    "title": "Impossible de charger le document",
-    "body": "La connexion est momentanément indisponible. Veuillez réessayer dans un instant.",
-    "retry": "Réessayer",
-    "retryCountdown": "Nouvel essai dans {seconds}s"
+    "title": "Ce lien est temporairement inaccessible",
+    "body": "Un problème de connexion temporaire est survenu. Actualisez pour réessayer.",
+    "retry": "Actualiser",
+    "retryCountdown": "Actualiser dans {seconds} s"
   },
   "linkGone": {
     "expired": {
@@ -44,8 +44,8 @@
       "body": "La limite de consultation fixée par l'expéditeur est atteinte. Demandez un nouveau lien à l'expéditeur."
     },
     "not_found": {
-      "title": "Ce lien de document n'est pas disponible",
-      "body": "Ce lien ne peut pas être utilisé. Demandez à l'expéditeur d'émettre un nouveau lien."
+      "title": "Lien introuvable",
+      "body": "Vérifiez l’adresse du lien. Si le problème persiste, contactez l’expéditeur."
     },
     "requestNew": "Demander un nouveau lien",
     "requesting": "Envoi de la demande…",
