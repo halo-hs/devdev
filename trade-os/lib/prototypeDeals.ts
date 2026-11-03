@@ -9,7 +9,7 @@ export type Deal = {
   counterparty: string
   primaryItem: string
   itemCount: number
-  orderLifecycle?: "open" | "closed" | "cancelled"
+  orderLifecycle?: "open" | "closed" | "short_closed" | "cancelled"
   stage: DealStage
   assignee: string
   amount: string

@@ -272,11 +272,19 @@ type FilterOptions = Array<[string, string]>
 
 const lifecycleOptions: FilterOptions = [
   ["all", "전체"],
-  ["open", "열림"],
-  ["closed", "종결"],
+  ["open", "마감 전"],
+  ["closed", "완료 마감"],
+  ["short_closed", "미달 마감"],
   ["cancelled", "취소"],
-  ["unknown", "미확인"],
+  ["unknown", "확인 필요"],
 ]
+// Missing or unrecognized source values are a UI category, not an order state.
+function lifecycleCategory(value: Deal["orderLifecycle"]) {
+  return value === "open" || value === "closed" || value === "short_closed" || value === "cancelled"
+    ? value
+    : "unknown"
+}
+
 const stageOptions: FilterOptions = [
   ["active", "전체"],
   ["contract", "계약"],
@@ -461,7 +469,7 @@ export function DealsScreen({
         return false
       if (
         lifecycle !== "all" &&
-        (deal.orderLifecycle ?? "unknown") !== lifecycle
+        lifecycleCategory(deal.orderLifecycle) !== lifecycle
       )
         return false
       if (counterparty !== "all" && deal.counterparty !== counterparty)
@@ -766,15 +774,35 @@ export function DealsScreen({
                       className="flex w-full min-w-0 flex-col gap-3"
                     >
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-                        <SelectControl
-                          label="주문 결정"
-                          value={lifecycle}
-                          onChange={(value) => {
-                            setLifecycle(value)
-                            setPage(1)
-                          }}
-                          options={lifecycleOptions}
-                        />
+                        <div className="flex items-end gap-1">
+                          <SelectControl
+                            label="주문 결정"
+                            value={lifecycle}
+                            onChange={(value) => {
+                              setLifecycle(value)
+                              setPage(1)
+                            }}
+                            options={lifecycleOptions}
+                          />
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label="주문 결정 안내"
+                                className="mb-2 size-6 text-white/70 hover:bg-white/10 hover:text-white"
+                              >
+                                <Info className="size-3.5" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent align="start" className="max-w-[calc(100vw-32px)] space-y-2 text-[13px] leading-5">
+                              <p>미달 마감: 주문한 양보다 적게 선적하고, 남은 이행을 더 진행하지 않기로 마감한 주문입니다.</p>
+                              <p>완료 마감과 미달 마감은 주문 마감 결과이며, 정산 완료를 뜻하지 않습니다.</p>
+                              <p>확인 필요: 주문 상태가 없거나 인식할 수 없는 경우입니다.</p>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
                         <SelectControl
                           label="단계"
                           value={stage}
@@ -963,7 +991,7 @@ export function DealsScreen({
               {
                 label: "오픈 오더",
                 count: baseDeals.filter((deal) => deal.orderLifecycle === "open").length,
-                detail: "주문 결정이 열려 있는 거래",
+                detail: "주문 결정이 마감 전인 거래",
                 active: lifecycle === "open",
                 toggle: () => setLifecycle(lifecycle === "open" ? "all" : "open"),
               },
