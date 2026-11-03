@@ -1378,12 +1378,12 @@
         "partial": "부분",
         "unknownScore": "점수화할 근거 부족",
         "components": {
-          "document_completion": "서류",
-          "crosscheck_consistency": "대조",
+          "document_completion": "서류 완성도",
+          "crosscheck_consistency": "교차 대조",
           "payment_risk": "결제",
           "shipment_risk": "선적",
           "margin_risk": "마진",
-          "compliance_release": "컴플라이언스"
+          "compliance_release": "규정"
         },
         "loadError": "거래 건강도를 불러오지 못했습니다.",
         "retry": "다시 시도"

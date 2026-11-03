@@ -31,7 +31,7 @@
     "status": {
       "booked": "예약",
       "loaded": "적재",
-      "departed": "출항",
+      "departed": "운송 중",
       "arrived": "도착",
       "delivered": "인도",
       "unknown": "미확인"
