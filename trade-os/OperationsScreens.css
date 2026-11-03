@@ -3,7 +3,7 @@
 .ops-screen.ops-screen { background: transparent; }
 /* The host main owns page scrolling. Tables keep their horizontal overflow. */
 .ops-screen .ops-page-scroll { min-height: 0; background: transparent; }
-.ops-screen .ops-monitor-shell { display: grid; min-height: 0; grid-template-columns: minmax(0, 1fr); background: var(--color-gray-12); }
+.ops-screen .ops-monitor-shell { display: grid; min-height: 0; grid-template-columns: minmax(0, 1fr); background: transparent; }
 .ops-screen .ops-monitor-shell [data-component="MonitorConnected"],
 .ops-screen .ops-monitor-shell [data-layout="dashboard"],
 .ops-screen .ops-monitor-shell [data-layout="dashboard"] > div:has(> [data-ui="dashboard-body"]) {

@@ -23,6 +23,8 @@ import { SectionPanel } from "@trade-os/components/SectionPanel";
 import { StatusBadge } from "@/components/platform/StatusBadge";
 import { TaskQueue, type TaskQueueItem } from "@trade-os/components/TaskQueue";
 import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import { ErpScreenFrame } from "../components/ErpScreenFrame";
 
@@ -399,12 +401,14 @@ function FilterPills({
 function MonitorFilters({
   actions,
   copy,
+  navigation,
 }: {
   actions?: MonitorBodyActions;
   copy: MonitorBodyCopy;
+  navigation?: ReactNode;
 }) {
   const { onPeriodChange, onLimitChange, onRefresh } = actions ?? {}
-  if (!onPeriodChange && !onLimitChange && !onRefresh) return null
+  if (!onPeriodChange && !onLimitChange && !onRefresh && !navigation) return null
   const period = actions?.period ?? "current"
   const limit = actions?.limit ?? MONITOR_LIMIT_CHOICES[1]
   const busy = Boolean(actions?.refreshBusy)
@@ -414,16 +418,23 @@ function MonitorFilters({
       data-ui="monitor-filters"
       aria-label={copy.filtersLabel}
       actions={
-        onRefresh ? (
-          <Button variant="outline" size="xs"
+        <>
+        {onRefresh ? (
+          <Button variant="ghost" size="icon-lg"
+            className="size-10 rounded-[var(--r-md)] bg-white text-[var(--color-gray-1)] shadow-[0_1px_2px_rgba(5,29,57,0.1)] hover:bg-[var(--color-gray-11)] hover:text-[var(--color-gray-1)]"
+            aria-label={copy.refresh}
+            aria-busy={busy}
+            title={copy.refresh}
             data-ui="monitor-refresh"
             disabled={busy}
             onClick={onRefresh}
             type="button"
           >
-            {copy.refresh}
+            <RefreshCw className={cn("size-5", busy && "animate-spin")} aria-hidden="true" />
           </Button>
-        ) : null
+        ) : null}
+        {navigation}
+        </>
       }
     >
       {onPeriodChange ? (
@@ -817,10 +828,10 @@ function MonitorBody({
     () => (
       <div className="ops-content-width w-full px-5 pt-1.5">
       <HeroBanner
-        actions={<MonitorActions actions={actions} variant={variant} copy={copy} live={Boolean(live)} />}
+        actions={ops ? <MonitorActions actions={actions} variant={variant} copy={copy} live={Boolean(live)} /> : undefined}
         title={ops ? copy.titleOps : copy.titleDefault}
         description={ops ? copy.descriptionOps : copy.description}
-        controls={<MonitorFilters actions={actions} copy={copy} />}
+        controls={<MonitorFilters actions={actions} copy={copy} navigation={!ops ? <MonitorActions actions={actions} variant={variant} copy={copy} live={Boolean(live)} /> : undefined} />}
       />
       {/* KPIs sit 16px under the hero instead of overlapping it, like 결산 리포트. */}
       <div className="mt-4">
@@ -833,6 +844,7 @@ function MonitorBody({
 
   return (
     <DashboardLayout
+      className="bg-transparent"
       data-screen-component="MonitorScreen"
       data-screen-variant={variant}
       titleBar={titleBar}
