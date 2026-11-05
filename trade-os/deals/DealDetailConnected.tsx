@@ -2641,7 +2641,7 @@ function DealFieldsPanel({
                     inputMode={
                       ["goods", "hsCode"].includes(key)
                         ? "text"
-                        : key === "unitPrice"
+                        : ["unitPrice", "grossWeight", "netWeight"].includes(key)
                           ? "decimal"
                           : "numeric"
                     }
@@ -2654,7 +2654,9 @@ function DealFieldsPanel({
                       const entered = control.value
                       const numeric = !["goods", "hsCode"].includes(key)
                       const value = numeric ? entered.replaceAll(",", "") : entered
-                      const pattern = key === "unitPrice" ? /^\d*(?:\.\d{0,2})?$/ : /^\d*$/
+                      const pattern = key === "unitPrice" ? /^\d*(?:\.\d{0,2})?$/
+                        : ["grossWeight", "netWeight"].includes(key) ? /^\d*(?:\.\d{0,3})?$/
+                        : /^\d*$/
                       if (numeric && !pattern.test(value)) return
                       const caret = control.selectionStart ?? entered.length
                       const beforeCaret = entered.slice(0, caret).replaceAll(",", "").length

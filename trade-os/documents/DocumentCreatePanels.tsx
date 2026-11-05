@@ -632,7 +632,8 @@ export function CreateFieldReviewPanel({
                 className={cn("h-10 text-sm font-medium", row.kind === "money" && "pr-14")}
                 aria-invalid={reviewIssueKeys.has(row.key) || requiredIssues.some((issue) => issue.key === row.key) || undefined}
                 type={inputTypeForKind(row.kind)}
-        numericFormat={row.kind === "money" ? "amount" : row.kind === "number" ? "integer" : undefined}
+        maxFractionDigits={row.key.includes("weight") ? 3 : undefined}
+        numericFormat={row.kind === "money" ? "amount" : row.kind === "number" ? (row.key.includes("weight") ? "decimal" : "integer") : undefined}
                 inputMode={
                   isNumericInputKind(row.kind as PrototypeSlotKind)
                     ? "decimal"

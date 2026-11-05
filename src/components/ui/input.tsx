@@ -2,7 +2,7 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Input({ className, type, numericFormat, maxIntegerDigits, ...props }: React.ComponentProps<"input"> & { numericFormat?: "amount" | "decimal" | "integer"; maxIntegerDigits?: number }) {
+function Input({ className, type, numericFormat, maxIntegerDigits, maxFractionDigits, ...props }: React.ComponentProps<"input"> & { numericFormat?: "amount" | "decimal" | "integer"; maxIntegerDigits?: number; maxFractionDigits?: number }) {
   const [focused, setFocused] = React.useState(false)
   const [localValue, setLocalValue] = React.useState(String(props.defaultValue ?? ""))
   const mode = numericFormat
@@ -37,7 +37,7 @@ function Input({ className, type, numericFormat, maxIntegerDigits, ...props }: R
       const entered = control.value
       const next = entered.replaceAll(",", "")
       const pattern = mode === "integer" ? /^\d*$/ : mode === "amount" ? /^\d*(?:\.\d{0,2})?$/ : /^\d*(?:\.\d*)?$/
-      if (!pattern.test(next) || (maxIntegerDigits !== undefined && next.split(".")[0].length > maxIntegerDigits)) { control.value = format(raw, true); return }
+      if (!pattern.test(next) || (maxFractionDigits !== undefined && (next.split(".")[1]?.length ?? 0) > maxFractionDigits) || (maxIntegerDigits !== undefined && next.split(".")[0].length > maxIntegerDigits)) { control.value = format(raw, true); return }
       const caret = entered.slice(0, control.selectionStart ?? entered.length).replaceAll(",", "").length
       setLocalValue(next)
       // Capture the canonical value for callbacks that read it inside a state updater.

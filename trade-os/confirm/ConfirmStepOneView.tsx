@@ -111,6 +111,7 @@ export function OcrFieldReviewList({
               )}
             >
                 <SavingField
+                  isWeight={field.key.includes("weight")}
                   id={`upload-field-${field.key}`}
                   describedBy={`upload-field-${field.key}-message`}
                   value={field.value}
@@ -218,6 +219,7 @@ function EditableUnitInput({
 }
 
 function SavingField({
+  isWeight,
   id,
   describedBy,
   value,
@@ -231,6 +233,7 @@ function SavingField({
   onValueChange,
   onUnitChange,
 }: {
+  isWeight: boolean
   id?: string
   describedBy?: string
   value: string
@@ -261,8 +264,9 @@ function SavingField({
           emphasized && !danger && "border-warning/50 ring-1 ring-warning/20"
         )}
         type={inputTypeForKind(kind)}
-        numericFormat={kind === "money" ? "amount" : kind === "number" ? "integer" : undefined}
+        numericFormat={kind === "money" ? "amount" : kind === "number" ? (isWeight ? "decimal" : "integer") : undefined}
         inputMode={isNumericInputKind(kind) ? "decimal" : undefined}
+        maxFractionDigits={isWeight ? 3 : undefined}
         step={isNumericInputKind(kind) ? "any" : undefined}
         defaultValue={isNumericInputKind(kind) ? normalizeDecimalInput(value) : value}
         aria-label={unitLabel}
