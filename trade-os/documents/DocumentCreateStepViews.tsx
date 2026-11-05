@@ -564,7 +564,7 @@ export function StructuredDocumentCreateEditor({
                                 </TableCell>
                                 <TableCell className="text-left!">
                                   <Input
-                                    inputMode="decimal"
+                                    inputMode="decimal" numericFormat="decimal"
                                     value={item.quantity}
                                     aria-label={`${item.name} 수량`}
                                     onChange={(event) =>
@@ -578,7 +578,7 @@ export function StructuredDocumentCreateEditor({
                                 </TableCell>
                                 <TableCell className="text-left!">
                                   <Input
-                                    inputMode="decimal"
+                                    inputMode="decimal" numericFormat="amount"
                                     value={item.unitPrice}
                                     aria-label={`${item.name} 단가`}
                                     onChange={(event) =>

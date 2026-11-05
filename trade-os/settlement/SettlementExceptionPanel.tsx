@@ -681,7 +681,7 @@ export function SettlementExceptionPanel({
                             {copy.overpayments.refundAmount}
                             <Input
                               className="h-8 px-3 w-24"
-                              inputMode="decimal"
+                              inputMode="decimal" numericFormat="amount"
                               value={refundDraft.amount}
                               ref={(element) => {
                                 refundAmountRefs.current[overpayment.id] = element;
@@ -779,7 +779,7 @@ export function SettlementExceptionPanel({
                   {copy.overpayments.amount}
                   <Input
                     className="h-8 px-3 w-24"
-                    inputMode="decimal"
+                    inputMode="decimal" numericFormat="amount"
                     value={overpaymentDraft.amount}
                     ref={overpaymentAmountRef}
                     aria-describedby={validationField === "overpayment.amount" ? exceptionErrorId : undefined}
@@ -891,7 +891,7 @@ export function SettlementExceptionPanel({
                   {copy.adjustments.amount}
                   <Input
                     className="h-8 px-3 w-24"
-                    inputMode="decimal"
+                    inputMode="decimal" numericFormat="amount"
                     value={adjustmentDraft.amount}
                     ref={adjustmentAmountRef}
                     aria-describedby={validationField === "adjustment.amount" ? exceptionErrorId : undefined}
