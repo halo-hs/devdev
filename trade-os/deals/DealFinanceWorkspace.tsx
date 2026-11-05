@@ -287,12 +287,13 @@ export function DealFinanceWorkspace({
                   className="h-10"
                   aria-label="원가 금액"
                   title="금액은 정수 16자리, 소수점 2자리까지 입력할 수 있습니다."
-                  inputMode="decimal"
+                  inputMode="decimal" numericFormat="amount" maxIntegerDigits={16}
                   ref={amountInputRef}
                   value={draft.amount}
-                  onChange={(e) =>
-                    setDraft({ ...draft, amount: e.target.value })
-                  }
+                  onChange={(event) => {
+                    if (event.target.value.split(".")[0].length <= 16)
+                      setDraft({ ...draft, amount: event.target.value })
+                  }}
                   aria-invalid={
                     !!draft.amount && !validDealCost({ ...draft, note: "" })
                   }

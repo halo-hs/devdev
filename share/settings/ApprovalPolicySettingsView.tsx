@@ -296,7 +296,7 @@ export function ApprovalPolicySettings() {
               <Input
                 value={form.amountThreshold}
                 disabled={!form.amountEnabled}
-                inputMode="decimal"
+                inputMode="decimal" numericFormat="amount"
                 aria-label="승인 기준 금액"
                 onChange={(event) =>
                   setForm((current) => ({ ...current, amountThreshold: event.target.value }))

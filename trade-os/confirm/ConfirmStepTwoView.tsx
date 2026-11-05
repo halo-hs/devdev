@@ -804,7 +804,7 @@ export function DealConfirmPanel({
                                   onChange={(event) =>
                                     setBankMatchAmount(event.target.value)
                                   }
-                                  inputMode="decimal"
+                                  inputMode="decimal" numericFormat="amount"
                                 />
                               </Field>
                               <Field className="gap-1.5">

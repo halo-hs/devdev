@@ -1,5 +1,7 @@
 "use client";
 
+import { Input } from "@/components/ui/input"
+
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/components/HostTable";
 import { BusinessListToolbar } from "@/components/platform/SearchFilterBar";
 import { cn } from "@/lib/utils";
@@ -3995,13 +3997,13 @@ function SettlementView({
                             {!hasOpenDispute ? <div className="flex flex-wrap items-end gap-3">
                               <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                                 {copy.ledger.dispute.normalAmount}
-                                <input
+                                <Input
                                   aria-describedby={disputeInvalidField === "normalAmount" ? "settlement-dispute-error" : undefined}
                                   aria-invalid={disputeInvalidField === "normalAmount"}
                                   aria-required="true"
                                   required
                                   type="text"
-                                  inputMode="decimal"
+                                  inputMode="decimal" numericFormat="amount"
                                   value={disputeNormalAmount}
                                   ref={(element) => {
                                     disputeFieldRefs.current.normalAmount = element;
@@ -4018,13 +4020,13 @@ function SettlementView({
                               </label>
                               <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                                 {copy.ledger.dispute.disputedAmount}
-                                <input
+                                <Input
                                   aria-describedby={disputeInvalidField === "amount" ? "settlement-dispute-error" : undefined}
                                   aria-invalid={disputeInvalidField === "amount"}
                                   aria-required="true"
                                   required
                                   type="text"
-                                  inputMode="decimal"
+                                  inputMode="decimal" numericFormat="amount"
                                   value={disputeAmount}
                                   ref={(element) => {
                                     disputeFieldRefs.current.amount = element;
@@ -4325,11 +4327,11 @@ function SettlementView({
           </label>
           <label className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
             {copy.ledger.amount}
-            <input
+            <Input
               aria-label={copy.ledger.amount}
               className="h-9 rounded-md border border-border px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]"
               disabled={manualScheduleBusy}
-              inputMode="decimal"
+              inputMode="decimal" numericFormat="amount"
               onChange={(event) => setManualScheduleAmount(event.target.value)}
               value={manualScheduleAmount}
             />

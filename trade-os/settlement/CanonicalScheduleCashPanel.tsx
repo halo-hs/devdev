@@ -1,5 +1,7 @@
 "use client";
 
+import { Input } from "@/components/ui/input"
+
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -517,9 +519,9 @@ export function CanonicalScheduleCashPanel({
               {correction.kind === "replacement" ? (
                 <label className="block text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.replacementAmount}
-                  <input
+                  <Input
                     className={`${inputClass} mt-1 w-40`}
-                    inputMode="decimal"
+                    inputMode="decimal" numericFormat="amount"
                     value={correction.replacementAmount}
                     onChange={(event) =>
                       setCorrection((current) =>
@@ -559,23 +561,23 @@ export function CanonicalScheduleCashPanel({
               <legend className="sr-only">{copy.save}</legend>
               <label className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                 {copy.actual}
-                <input
+                <Input
                   // The panel is mounted only after the operator explicitly opens
                   // the record action, so focusing its first field preserves the
                   // existing keyboard flow without stealing focus on page load.
                   // a11y-exception(justified, SC-2.4.3): focus follows the user's explicit record-cash action into the opened form.
                   autoFocus
                   className={`${inputClass} mt-1 w-full`}
-                  inputMode="decimal"
+                  inputMode="decimal" numericFormat="amount"
                   value={actualAmount}
                   onChange={(event) => setActualAmount(event.target.value)}
                 />
               </label>
               <label className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                 {copy.applied}
-                <input
+                <Input
                   className={`${inputClass} mt-1 w-full`}
-                  inputMode="decimal"
+                  inputMode="decimal" numericFormat="amount"
                   value={applicationAmount}
                   onChange={(event) => setApplicationAmount(event.target.value)}
                 />
@@ -591,9 +593,9 @@ export function CanonicalScheduleCashPanel({
               </label>
               <label className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                 {copy.fee}
-                <input
+                <Input
                   className={`${inputClass} mt-1 w-full`}
-                  inputMode="decimal"
+                  inputMode="decimal" numericFormat="amount"
                   value={fee}
                   onChange={(event) => setFee(event.target.value)}
                 />

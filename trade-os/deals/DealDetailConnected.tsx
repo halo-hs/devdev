@@ -2432,9 +2432,14 @@ function CandidateValuePicker({
 
 // Preserve decimal strings (including a trailing dot) while adding display separators.
 function groupItemDecimal(value: string, fixedCents = false) {
-  const [whole, fraction] = value.replaceAll(",", "").split(".")
+  let [whole, fraction] = value.replaceAll(",", "").split(".")
+  if (fixedCents && value && /^\d*(?:\.\d*)?$/.test(value.replaceAll(",", ""))) {
+    const cents = BigInt(whole || "0") * 100n + BigInt((fraction ?? "").padEnd(2, "0").slice(0, 2)) + ((fraction?.[2] ?? "0") >= "5" ? 1n : 0n)
+    whole = String(cents / 100n)
+    fraction = String(cents % 100n).padStart(2, "0")
+  }
   return whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
-    (fixedCents && value ? `.${(fraction ?? "").padEnd(2, "0")}` : fraction === undefined ? "" : `.${fraction}`)
+    (fraction === undefined ? "" : `.${fraction}`)
 }
 
 function PaymentHistory({ paymentHistory }: { paymentHistory: AuditItem[] }) {
@@ -2631,7 +2636,7 @@ function DealFieldsPanel({
                         "border-destructive/55 text-destructive"
                     )}
                     aria-describedby={key === "goods" && needsReview(item.match) ? `deal-item-${item.id}-goods-message` : undefined}
-                    value={key === "unitPrice" ? groupItemDecimal(item[key], item.currency === "USD" && editingPrice !== item.id) : item[key]}
+                    value={key === "unitPrice" ? groupItemDecimal(item[key], editingPrice !== item.id) : item[key]}
                     onFocus={() => { if (key === "unitPrice") setEditingPrice(item.id) }}
                     inputMode={
                       ["goods", "hsCode"].includes(key)
@@ -2650,7 +2655,7 @@ function DealFieldsPanel({
                       const numeric = !["goods", "hsCode"].includes(key)
                       const value = numeric ? entered.replaceAll(",", "") : entered
                       const pattern = key === "packageCount" ? /^\d*$/
-                        : key === "unitPrice" && item.currency === "USD" ? /^\d*(?:\.\d{0,2})?$/
+                        : key === "unitPrice" ? /^\d*(?:\.\d{0,2})?$/
                         : /^\d*(?:\.\d*)?$/
                       if (numeric && !pattern.test(value)) return
                       const caret = control.selectionStart ?? entered.length
