@@ -2641,9 +2641,9 @@ function DealFieldsPanel({
                     inputMode={
                       ["goods", "hsCode"].includes(key)
                         ? "text"
-                        : key === "packageCount"
-                          ? "numeric"
-                          : "decimal"
+                        : key === "unitPrice"
+                          ? "decimal"
+                          : "numeric"
                     }
                     disabled={!editable}
                     aria-invalid={
@@ -2654,9 +2654,7 @@ function DealFieldsPanel({
                       const entered = control.value
                       const numeric = !["goods", "hsCode"].includes(key)
                       const value = numeric ? entered.replaceAll(",", "") : entered
-                      const pattern = key === "packageCount" ? /^\d*$/
-                        : key === "unitPrice" ? /^\d*(?:\.\d{0,2})?$/
-                        : /^\d*(?:\.\d*)?$/
+                      const pattern = key === "unitPrice" ? /^\d*(?:\.\d{0,2})?$/ : /^\d*$/
                       if (numeric && !pattern.test(value)) return
                       const caret = control.selectionStart ?? entered.length
                       const beforeCaret = entered.slice(0, caret).replaceAll(",", "").length

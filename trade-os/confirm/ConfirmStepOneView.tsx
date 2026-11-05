@@ -261,7 +261,7 @@ function SavingField({
           emphasized && !danger && "border-warning/50 ring-1 ring-warning/20"
         )}
         type={inputTypeForKind(kind)}
-        numericFormat={kind === "money" ? "amount" : kind === "number" ? "decimal" : undefined}
+        numericFormat={kind === "money" ? "amount" : kind === "number" ? "integer" : undefined}
         inputMode={isNumericInputKind(kind) ? "decimal" : undefined}
         step={isNumericInputKind(kind) ? "any" : undefined}
         defaultValue={isNumericInputKind(kind) ? normalizeDecimalInput(value) : value}

@@ -632,7 +632,7 @@ export function CreateFieldReviewPanel({
                 className={cn("h-10 text-sm font-medium", row.kind === "money" && "pr-14")}
                 aria-invalid={reviewIssueKeys.has(row.key) || requiredIssues.some((issue) => issue.key === row.key) || undefined}
                 type={inputTypeForKind(row.kind)}
-        numericFormat={row.kind === "money" ? "amount" : row.kind === "number" ? "decimal" : undefined}
+        numericFormat={row.kind === "money" ? "amount" : row.kind === "number" ? "integer" : undefined}
                 inputMode={
                   isNumericInputKind(row.kind as PrototypeSlotKind)
                     ? "decimal"
@@ -778,7 +778,7 @@ export function CreateFieldReviewPanel({
                         aria-label={`품목 ${index + 1} 수량`}
                         aria-required="true"
                         type="number"
-                        inputMode="decimal" numericFormat="decimal"
+                        inputMode="numeric" numericFormat="integer"
                         step="any"
                         value={itemValues[item.id]?.quantity ?? ""}
                         placeholder="필수"

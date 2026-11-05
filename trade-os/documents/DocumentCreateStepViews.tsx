@@ -564,7 +564,7 @@ export function StructuredDocumentCreateEditor({
                                 </TableCell>
                                 <TableCell className="text-left!">
                                   <Input
-                                    inputMode="decimal" numericFormat="decimal"
+                                    inputMode="numeric" numericFormat="integer"
                                     value={item.quantity}
                                     aria-label={`${item.name} 수량`}
                                     onChange={(event) =>
