@@ -2718,8 +2718,8 @@ function DealFieldsPanel({
                 )
                 return (
                   <tbody key={item.id} className="mb-3 block rounded-xl border bg-card p-3 last:mb-0 @min-[480px]/items:p-4">
-                    <tr className="relative grid grid-cols-2 gap-x-3 gap-y-0 @min-[480px]/items:grid-cols-3 @min-[680px]/items:grid-cols-[minmax(0,1fr)_minmax(160px,1fr)_124px_100px_24px] @min-[680px]/items:grid-rows-[auto_40px_auto] @min-[680px]/items:gap-y-0 [&>td:not(:last-child)]:row-span-3 [&>td:not(:last-child)]:grid [&>td:not(:last-child)]:grid-rows-subgrid [&>td:not(:last-child)]:pb-4 @min-[680px]/items:[&>td:not(:last-child)]:pb-0 [&>td]:min-w-0">
-                      <td className="col-span-2 pr-9 @min-[480px]/items:col-span-3 @min-[680px]/items:col-span-1 @min-[680px]/items:pr-0">
+                    <tr className="relative grid grid-cols-2 gap-x-3 gap-y-0 @min-[480px]/items:grid-cols-3 @min-[760px]/items:grid-cols-[minmax(0,2fr)_minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,1.4fr)_32px] @min-[760px]/items:grid-rows-[auto_40px_auto] @min-[760px]/items:gap-y-0 [&>td:not(:last-child)]:row-span-3 [&>td:not(:last-child)]:grid [&>td:not(:last-child)]:grid-rows-subgrid [&>td:not(:last-child)]:pb-4 @min-[760px]/items:[&>td:not(:last-child)]:pb-0 [&>td]:min-w-0">
+                      <td className="col-span-2 pr-9 @min-[480px]/items:col-span-3 @min-[760px]/items:col-span-1 @min-[760px]/items:pr-0">
                         <FormFieldHeader className="mb-2" label={`품목 ${number} · 품목명`} htmlFor={`deal-item-${item.id}-goods`} badge={needsReview(item.match) ? <StatusBadge tone={matchTone(item.match)}>{item.match === "확인 필요" ? "불일치" : item.match}</StatusBadge> : undefined} />
                         {input("goods", "품목명")}
                         {needsReview(item.match) && <FormFieldMessage id={`deal-item-${item.id}-goods-message`} tone="danger" className="mt-2">{item.evidence.join(" · ")}</FormFieldMessage>}
@@ -2762,15 +2762,20 @@ function DealFieldsPanel({
                           <FormFieldHeader data-item-unit-price-heading className="mb-2 scroll-mt-[calc(var(--deal-header-height,128px)+16px)]" label={`단가 · ${item.currency}/${item.quantityUnit}`} htmlFor={`deal-item-${item.id}-unitPrice`} />
                         {input("unitPrice", "단가")}
                       </td>
-                      <td className="col-span-2 @min-[680px]/items:col-span-1">
+                      <td className="col-span-2 @min-[760px]/items:col-span-1">
                         <FormFieldHeader className="mb-2" label={profile.direction === "direction_pending" ? "거래 금액" : `${directionLabels[profile.direction]} 금액`} htmlFor={`deal-item-${item.id}-amount`} />
                         <div className="flex min-w-0 items-center gap-2">
-                          <output id={`deal-item-${item.id}-amount`} aria-label={`품목 ${number} 금액`} className="min-w-0 break-words text-xs tabular-nums">
-                            {itemAmount(item)} {item.currency}
-                          </output>
+                          <Input
+                            id={`deal-item-${item.id}-amount`}
+                            aria-label={`품목 ${number} 금액`}
+                            className="h-10 px-2 py-0 text-right tabular-nums"
+                            value={itemAmount(item)}
+                            readOnly
+                          />
+                          <span className="shrink-0 text-sm text-muted-foreground">{item.currency}</span>
                         </div>
                       </td>
-                      <td className="absolute top-0 right-0 text-right @min-[680px]/items:static @min-[680px]/items:flex @min-[680px]/items:h-10 @min-[680px]/items:items-center @min-[680px]/items:row-start-2 @min-[680px]/items:col-start-5">
+                      <td className="absolute top-0 right-0 text-right @min-[760px]/items:static @min-[760px]/items:flex @min-[760px]/items:h-10 @min-[760px]/items:items-center @min-[760px]/items:row-start-2 @min-[760px]/items:col-start-5">
                         {editable && items.length > 1 && (
                           <Button size="icon-sm" variant="ghost" aria-label={`품목 ${number} 삭제`} onClick={() => onRemoveItem(item.id)}>
                             <Trash2 />
