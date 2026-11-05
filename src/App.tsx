@@ -229,6 +229,7 @@ export type GeneratedDraft = {
   status: "작성 중" | "승인 대기" | "승인 완료" | "반려" | "확정" | "발송됨"
   tone: Tone
   readiness: string
+  deliveryState?: "failed" | "delivered"
   tab: "draft" | "confirmed" | "progress" | "sharing" | "done"
   creatorName: string
   creatorAccountId: string | null

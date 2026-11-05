@@ -358,7 +358,7 @@ export function ResultScreen({
             subject: `[ECOYA] ${templateTitle} 전달`,
             sentAt: "2026.08.28 14:32",
             linkCount: 1,
-            status: "requested",
+            status: initialDraft?.deliveryState === "failed" ? "failed" : "requested",
             attempts: 1,
           },
         ]
