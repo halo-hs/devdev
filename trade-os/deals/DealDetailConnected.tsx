@@ -3136,6 +3136,20 @@ function DealVerificationPanels({
   )
 }
 
+// Server bandForScore: Critical <50, Risk <70, Watch <85, Good >=85.
+const healthTicks = [0, 50, 70, 85, 100] as const
+const healthSegments = [
+  { min: 0, max: 50, color: "var(--color-red-8)" },
+  { min: 50, max: 70, color: "var(--color-red-8)" },
+  { min: 70, max: 85, color: "var(--color-yellow-6)" },
+  { min: 85, max: 100, color: "var(--color-green-6)" },
+] as const
+function healthScoreColor(score: number) {
+  if (score >= healthTicks[3]) return "var(--color-green-1)"
+  if (score >= healthTicks[2]) return "var(--color-yellow-1)"
+  return "var(--color-red-2)"
+}
+
 function DealHealthReference({
   documentSummary,
 }: {
@@ -3158,28 +3172,27 @@ function DealHealthReference({
     <section aria-label="거래 건강도와 서류 대조" className="p-5">
       <div className="flex items-center justify-between gap-2">
         <h4 className="text-base font-bold leading-6">거래 건강도</h4>
-        <strong className="text-lg font-bold leading-[26px] text-[var(--color-orange-1)]">72</strong>
+        <strong className="text-lg font-bold leading-[26px]" style={{ color: healthScoreColor(72) }}>72</strong>
       </div>
       <div aria-hidden="true" className="relative mt-3.5 h-4 text-[11px] leading-4 text-muted-foreground">
-        <span className="absolute left-0">0</span>
-        <span className="absolute left-[60%] -translate-x-1/2">60</span>
-        <span className="absolute left-[80%] -translate-x-1/2">80</span>
-        <span className="absolute right-0">100</span>
+        {healthTicks.map((tick) => (
+          <span key={tick} className={cn("absolute", tick === 0 ? "left-0" : tick === 100 ? "right-0" : "-translate-x-1/2")} style={tick > 0 && tick < 100 ? { left: `${tick}%` } : undefined}>{tick}</span>
+        ))}
       </div>
       <div className="mt-3.5 flex flex-col gap-3.5">
         {health.map(([label, score, detail]) => (
           <div key={label} className="flex min-w-0 flex-col gap-1.5">
             <div className="flex items-center justify-between gap-2 text-[13px] font-semibold leading-[18px]">
               <span>{label}</span>
-              <strong className={cn("font-semibold tabular-nums", score < 60 ? "text-destructive" : score < 80 ? "text-[var(--color-orange-1)]" : "text-[var(--color-green-1)]")}>{score}</strong>
+              <strong className="font-semibold tabular-nums" style={{ color: healthScoreColor(score) }}>{score}</strong>
             </div>
             <div role="meter" aria-label={label} aria-valuenow={score} aria-valuemin={0} aria-valuemax={100} className="relative h-2">
-              <div aria-hidden="true" className="grid h-full grid-cols-[3fr_1fr_1fr] gap-0.5">
-                <span className="rounded-full bg-[var(--color-red-8)]" />
-                <span className="rounded-full bg-[var(--color-orange-6)]" />
-                <span className="rounded-full bg-[var(--color-green-6)]" />
+              <div aria-hidden="true" className="absolute inset-0">
+                {healthSegments.map(({ min, max, color }) => (
+                  <span key={min} className="absolute inset-y-0 rounded-full" style={{ left: `${min}%`, width: `calc(${max - min}% - 2px)`, backgroundColor: color }} />
+                ))}
               </div>
-              <span aria-hidden="true" className={cn("absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white", score < 60 ? "bg-destructive" : score < 80 ? "bg-[var(--color-orange-1)]" : "bg-[var(--color-green-1)]")} style={{ left: `${score}%` }} />
+              <span aria-hidden="true" className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white" style={{ left: `${score}%`, backgroundColor: healthScoreColor(score) }} />
             </div>
             <p className="text-[11px] leading-4 text-muted-foreground">{detail}</p>
           </div>
