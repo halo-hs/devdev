@@ -1,4 +1,5 @@
 import * as React from "react"
+import { flushSync } from "react-dom"
 
 import { ACTIVE_CURRENCIES, currencyDigits, validNumericPaste } from "@/lib/currencyInput"
 
@@ -29,8 +30,9 @@ function Input({ className, type, numericFormat, maxIntegerDigits, maxFractionDi
     defaultValue: undefined,
     inputMode: mode === "integer" ? "numeric" : "decimal",
     onFocus: (event) => {
-      setLocalValue(event.currentTarget.value.replaceAll(",", ""))
-      setFocused(true)
+      const displayValue = event.currentTarget.value.replaceAll(",", "")
+      // Finish focus formatting before the browser applies the next edit/paste.
+      flushSync(() => { setLocalValue(displayValue); setFocused(true) })
       props.onFocus?.(event)
     },
     onBlur: (event) => { setFocused(false); props.onBlur?.(event) },
