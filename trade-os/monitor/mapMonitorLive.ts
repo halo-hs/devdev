@@ -18,7 +18,7 @@ export type MonitorLiveCopy = {
   todayProcessed: string;
   completionRate: string;
   deltaVsYesterday: string;
-  deltaVsLastWeek: string;
+  confirmationBasis: string;
   statusWithP0: string;
   p0Title: string;
   p1Title: string;
@@ -48,9 +48,9 @@ export type MonitorLiveCopy = {
 
 export const DEFAULT_MONITOR_LIVE_COPY: MonitorLiveCopy = {
   todayProcessed: "Processed today",
-  completionRate: "Completion rate",
+  completionRate: "Document confirmation rate",
   deltaVsYesterday: "{delta}% vs yesterday",
-  deltaVsLastWeek: "{delta}pp vs last week",
+  confirmationBasis: "This week's registered documents",
   statusWithP0: "{message} — {count} unresolved P0",
   p0Title: "{docType} · unresolved for {hours}h",
   p1Title: "ETD D-{dday} · not confirmed",
@@ -100,7 +100,8 @@ export type MonitorLiveView = {
   riskBadge: string;
   pendingItems: TaskQueueItem[];
   pendingBadge: string;
-  throughputDaily: Array<{ day: string; count: string; active: boolean }>;
+  throughputRate?: string;
+  throughputDaily: Array<{ day: string; count: string; uploaded?: string; active: boolean }>;
   throughputRows: Array<{ key: string; owner: string; uploads: string; confirms: string; rate: ReactNode }>;
   flagItems: TaskQueueItem[];
   flagBadge: string;
@@ -146,12 +147,6 @@ function fmtDeltaPct(value: number | null | undefined, copy: MonitorLiveCopy): s
   if (value == null || Number.isNaN(value)) return undefined;
   const sign = value >= 0 ? "▲" : "▼";
   return fill(copy.deltaVsYesterday, { delta: `${sign}${Math.abs(value).toFixed(1)}` });
-}
-
-function fmtDeltaPP(value: number | null | undefined, copy: MonitorLiveCopy): string | undefined {
-  if (value == null || Number.isNaN(value)) return undefined;
-  const sign = value >= 0 ? "▲" : "▼";
-  return fill(copy.deltaVsLastWeek, { delta: `${sign}${Math.abs(value).toFixed(1)}` });
 }
 
 function fmtAmount(amount: string, currency: string, locale?: string): string {
@@ -415,9 +410,9 @@ export function mapMonitorSnapshot(
         {
           id: "rate",
           label: copy.completionRate,
-          value: `${Math.round(kpi.completion_rate.rate_pct)}%`,
-          meta: fmtDeltaPP(kpi.completion_rate.delta_pp_vs_last_week, copy),
-          tone: bandToMetricTone(kpi.completion_rate.band),
+          value: kpi.completion_rate.uploaded_this_week === 0 ? "—" : `${Math.round(kpi.completion_rate.rate_pct)}%`,
+          meta: copy.confirmationBasis,
+          tone: kpi.completion_rate.uploaded_this_week === 0 ? undefined : bandToMetricTone(kpi.completion_rate.band),
         },
       ]
     : [];
@@ -486,6 +481,7 @@ export function mapMonitorSnapshot(
     return {
       day: dayLabel,
       count: String(d.confirmed),
+      uploaded: String(d.uploaded),
       active: d.confirmed > 0,
     };
   });
@@ -517,6 +513,7 @@ export function mapMonitorSnapshot(
     riskBadge,
     pendingItems,
     pendingBadge,
+    throughputRate: throughput && throughput.uploaded > 0 ? `${Math.round(throughput.rate_pct)}%` : "—",
     throughputDaily,
     throughputRows,
     flagItems: [],
