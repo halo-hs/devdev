@@ -118,6 +118,8 @@ export function RecentDocumentsTable({
             const resumeWorkspaceStep: DocumentCreateWorkspaceStep =
               draft.pdfState === "none" ? "source" : "editor"
             const listStage = generatedDraftListStage(draft)
+            const isSent = draft.tab === "done"
+            const deliveryFailed = isSent && draft.deliveryState === "failed"
             const canOpenDeal = role !== "member" || draft.memberCanAccessDeal
             // Generated documents belong to the organization; Deal access is independent.
             const canDeliver = true
@@ -200,8 +202,10 @@ export function RecentDocumentsTable({
                   )}
                 </TableCell>
                 <TableCell className="py-2 text-center whitespace-normal">
-                  <ToneBadge tone={listStage.tone}>{listStage.label}</ToneBadge>
-                  {draft.readiness && (
+                  <ToneBadge tone={deliveryFailed ? "danger" : listStage.tone}>
+                    {deliveryFailed ? "전달 실패" : listStage.label}
+                  </ToneBadge>
+                  {!isSent && draft.readiness && (
                     <div
                       className="mt-0.5 truncate text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]"
                       title={draft.readiness}
