@@ -1,3 +1,4 @@
+import { validCurrencyAmount } from "@/lib/currencyInput"
 import { type DocumentConnection, type DocumentDealLink, type CandidateEvidence } from "@trade-os/lib/documentDealConnection"
 import { type BankCashInput, readDocumentReview, eligibleBankSchedules, currentBankSchedules, bankCashValidation } from "@trade-os/lib/erpDocumentWorkflow"
 import { useState, useEffect, useRef } from "react"
@@ -169,7 +170,7 @@ export function DealConfirmPanel({
   const bankCashError = bankScheduleId && bankScheduleId !== "document-only"
     ? bankCashValidation({ scheduleId: bankScheduleId, amount: bankMatchAmount, currency: readCurrency, valueDate: bankValueDate }, bankSchedules)
     : null
-  const bankMatchIncomplete = bankMatchRequired && (!bankScheduleId || Boolean(bankCashError))
+  const bankMatchIncomplete = bankMatchRequired && (!bankScheduleId || Boolean(bankCashError) || (bankScheduleId !== "document-only" && !validCurrencyAmount(bankMatchAmount, readCurrency)))
   const hasReadCounterparty = aiCounterpartyName.length > 0
   const newDealReady =
     newDealFormOpen &&
@@ -804,7 +805,7 @@ export function DealConfirmPanel({
                                   onChange={(event) =>
                                     setBankMatchAmount(event.target.value)
                                   }
-                                  inputMode="decimal" numericFormat="amount"
+                                  inputMode="decimal" numericFormat="amount" currency={readCurrency}
                                 />
                               </Field>
                               <Field className="gap-1.5">

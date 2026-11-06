@@ -1,3 +1,5 @@
+import { CurrencySelect } from "@/components/platform/currency-select"
+import { validCurrencyAmount } from "@/lib/currencyInput"
 import { PageHeading, SettingsSection } from "./views/SettingsSection"
 import {
   useState,
@@ -113,7 +115,7 @@ export function ApprovalPolicySettings() {
           ].reduce((sum, value) => sum + value, 0)
   const amountInvalid =
     form.amountEnabled &&
-    (!/^[A-Z]{3}$/.test(form.amountCurrency) ||
+    (!validCurrencyAmount(form.amountThreshold, form.amountCurrency) ||
       !Number.isFinite(Number(form.amountThreshold)) ||
       Number(form.amountThreshold) < 0)
   const scopeInvalid = form.scopeKind === "document_type" && !form.scopeRef.trim()
@@ -284,19 +286,11 @@ export function ApprovalPolicySettings() {
                 />
                 금액 기준
               </label>
-              <Input
-                value={form.amountCurrency}
-                disabled={!form.amountEnabled}
-                maxLength={3}
-                aria-label="승인 기준 통화"
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, amountCurrency: event.target.value.toUpperCase() }))
-                }
-              />
+              <CurrencySelect value={form.amountCurrency} disabled={!form.amountEnabled} label="승인 기준 통화" onChange={value => setForm(current => ({ ...current, amountCurrency: value }))} />
               <Input
                 value={form.amountThreshold}
                 disabled={!form.amountEnabled}
-                inputMode="decimal" numericFormat="amount"
+                inputMode="decimal" numericFormat="amount" currency={form.amountCurrency}
                 aria-label="승인 기준 금액"
                 onChange={(event) =>
                   setForm((current) => ({ ...current, amountThreshold: event.target.value }))

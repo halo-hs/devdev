@@ -1,3 +1,4 @@
+import { validCurrencyAmount } from "@/lib/currencyInput";
 import { Input } from "@/components/ui/input"
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ export function OverpaymentAllocationPanel({id, canRecord, disabled, onSaved}: {
   const history=demoAllocations(id);
   const submit=()=>{
     if(!canRecord || disabled)return;
+    if (!validCurrencyAmount(draft.amount, candidates.find(row => row.id === draft.schedule_id)?.currency ?? "USD")) { setError("통화에 맞는 금액을 입력해 주세요."); return; }
     try { demoAllocate(id,draft);setDraft({schedule_id:'',amount:'',reason:'',evidence:''});setError('');setVersion(version+1);onSaved(); }
     catch(e){setError(e instanceof Error?e.message:'배정하지 못했습니다. 입력한 값을 확인해 주세요.');}
   };
@@ -21,7 +23,7 @@ export function OverpaymentAllocationPanel({id, canRecord, disabled, onSaved}: {
     <>
       {canRecord && candidates.length>0 ? <div className="mt-2 grid min-w-0 gap-2 sm:grid-cols-2">
         <label className="min-w-0 sm:col-span-2">대상 일정<select aria-label="배정 대상 일정" className={input} disabled={disabled} value={draft.schedule_id} onChange={e=>setDraft({...draft,schedule_id:e.target.value})}><option value="">일정을 선택하세요</option>{candidates.map(row=><option key={row.id} value={row.id}>{row.counterparty_name} · {row.currency} {row.outstanding.replace(/0+$/,'').replace(/\.$/,'')} · {row.due_date.slice(0,10)} · {row.id.slice(0,8)}</option>)}</select></label>
-        <label>나눠 넣을 금액<Input className={input} inputMode="decimal" numericFormat="amount" value={draft.amount} disabled={disabled} onChange={e=>setDraft({...draft,amount:e.target.value})}/></label>
+        <label>나눠 넣을 금액<Input className={input} inputMode="decimal" numericFormat="amount" currency={candidates.find(row => row.id === draft.schedule_id)?.currency ?? "USD"} value={draft.amount} disabled={disabled} onChange={e=>setDraft({...draft,amount:e.target.value})}/></label>
         <label>배정 사유<input className={input} value={draft.reason} disabled={disabled} onChange={e=>setDraft({...draft,reason:e.target.value})}/></label>
         <label className="sm:col-span-2">배정 근거<input className={input} value={draft.evidence} disabled={disabled} onChange={e=>setDraft({...draft,evidence:e.target.value})}/></label>
         {error && <p role="alert" className="text-[var(--color-red-1)] sm:col-span-2">{error}</p>}

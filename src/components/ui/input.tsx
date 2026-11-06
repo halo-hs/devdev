@@ -1,19 +1,26 @@
 import * as React from "react"
 
+import { ACTIVE_CURRENCIES, currencyDigits, validNumericPaste } from "@/lib/currencyInput"
+
 import { cn } from "@/lib/utils"
 
-function Input({ className, type, numericFormat, maxIntegerDigits, maxFractionDigits, ...props }: React.ComponentProps<"input"> & { numericFormat?: "amount" | "decimal" | "integer"; maxIntegerDigits?: number; maxFractionDigits?: number }) {
+function Input({ className, type, numericFormat, maxIntegerDigits, maxFractionDigits, currency = "USD", ...props }: React.ComponentProps<"input"> & { numericFormat?: "amount" | "decimal" | "integer"; maxIntegerDigits?: number; maxFractionDigits?: number; currency?: string }) {
   const [focused, setFocused] = React.useState(false)
   const [localValue, setLocalValue] = React.useState(String(props.defaultValue ?? ""))
   const mode = numericFormat
   const raw = String(props.value ?? localValue).replaceAll(",", "")
+  const digits = maxFractionDigits ?? (mode === "amount" ? currencyDigits(currency) : undefined) ?? 2
+  const unsupportedCurrency = mode === "amount" && !(ACTIVE_CURRENCIES as readonly string[]).includes(currency.toUpperCase())
+  const invalidPrecision = unsupportedCurrency || (mode === "amount" && (raw.split(".")[1]?.length ?? 0) > digits)
+  const errorId = React.useId()
+  const precisionMessage = unsupportedCurrency ? "지원하는 통화를 선택해 주세요." : `${currency}: ${digits === 0 ? "정수로" : `소수 ${digits}자리까지`} 입력해 주세요.`
   const format = (value: string, editing: boolean) => {
     if (mode !== "amount" || !value || !/^\d*(?:\.\d*)?$/.test(value)) return value
-    let [whole, fraction] = value.split(".")
-    if (!editing) {
-      const cents = BigInt(whole || "0") * 100n + BigInt((fraction ?? "").padEnd(2, "0").slice(0, 2)) + ((fraction?.[2] ?? "0") >= "5" ? 1n : 0n)
-      whole = String(cents / 100n)
-      fraction = String(cents % 100n).padStart(2, "0")
+    let whole = value.split(".")[0]
+    let fraction: string | undefined = value.split(".")[1]
+    if (!editing && (fraction?.length ?? 0) <= digits) {
+      whole = whole || "0"
+      fraction = digits ? (fraction ?? "").padEnd(maxFractionDigits === undefined ? digits : Math.min(2, digits), "0") : undefined
     }
     return whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (fraction === undefined ? "" : `.${fraction}`)
   }
@@ -27,17 +34,25 @@ function Input({ className, type, numericFormat, maxIntegerDigits, maxFractionDi
       props.onFocus?.(event)
     },
     onBlur: (event) => { setFocused(false); props.onBlur?.(event) },
+    "aria-invalid": invalidPrecision || props["aria-invalid"],
+    "aria-describedby": [props["aria-describedby"], invalidPrecision ? errorId : ""].filter(Boolean).join(" ") || undefined,
+    onKeyDown: (event) => {
+      if (event.key === ",") event.preventDefault()
+      props.onKeyDown?.(event)
+    },
     onPaste: (event) => {
       const pasted = event.clipboardData.getData("text").trim()
-      if (pasted.includes(",") && !/^\d{1,3}(?:,\d{3})+(?:\.\d*)?$/.test(pasted)) event.preventDefault()
+      if (!validNumericPaste(pasted)) event.preventDefault()
       else props.onPaste?.(event)
     },
     onChange: (event) => {
       const control = event.currentTarget
       const entered = control.value
+      const native = event.nativeEvent as InputEvent
+      if (native.inputType === "insertText" && native.data?.includes(",")) { control.value = format(raw, true); return }
       const next = entered.replaceAll(",", "")
-      const pattern = mode === "integer" ? /^\d*$/ : mode === "amount" ? /^\d*(?:\.\d{0,2})?$/ : /^\d*(?:\.\d*)?$/
-      if (!pattern.test(next) || (maxFractionDigits !== undefined && (next.split(".")[1]?.length ?? 0) > maxFractionDigits) || (maxIntegerDigits !== undefined && next.split(".")[0].length > maxIntegerDigits)) { control.value = format(raw, true); return }
+      const pattern = mode === "integer" ? /^\d*$/ : /^\d*(?:\.\d*)?$/
+      if (!pattern.test(next) || ((mode === "amount" || maxFractionDigits !== undefined) && (next.split(".")[1]?.length ?? 0) > digits && (next.split(".")[1]?.length ?? 0) >= (raw.split(".")[1]?.length ?? 0)) || (maxIntegerDigits !== undefined && next.split(".")[0].length > maxIntegerDigits)) { control.value = format(raw, true); return }
       const caret = entered.slice(0, control.selectionStart ?? entered.length).replaceAll(",", "").length
       setLocalValue(next)
       // Capture the canonical value for callbacks that read it inside a state updater.
@@ -57,6 +72,7 @@ function Input({ className, type, numericFormat, maxIntegerDigits, maxFractionDi
     },
   } : {}
   return (
+    <>
     <input
       type={mode ? "text" : type}
       data-slot="input"
@@ -68,6 +84,8 @@ function Input({ className, type, numericFormat, maxIntegerDigits, maxFractionDi
       {...props}
       {...numericProps}
     />
+    {invalidPrecision && <span id={errorId} role="alert" className="text-xs text-destructive">{precisionMessage}</span>}
+    </>
   )
 }
 
