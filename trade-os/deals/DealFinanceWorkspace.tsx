@@ -259,7 +259,7 @@ export function DealFinanceWorkspace({
           >
             <fieldset
               disabled={busy}
-              className="grid items-end gap-3 sm:grid-cols-2 @min-[860px]:grid-cols-[100px_140px_104px_130px_minmax(140px,1fr)_auto]"
+              className="grid items-end gap-3 sm:grid-cols-2 @min-[860px]:grid-cols-[100px_104px_140px_130px_minmax(140px,1fr)_auto]"
             >
               <label className="grid min-w-0 gap-1.5 text-sm">
                 <span>항목</span>
@@ -282,25 +282,6 @@ export function DealFinanceWorkspace({
                 </Select>
               </label>
               <label className="grid min-w-0 gap-1.5 text-sm">
-                <span>금액</span>
-                <Input
-                  className="h-10"
-                  aria-label="원가 금액"
-                  title="금액은 정수 16자리, 소수점 2자리까지 입력할 수 있습니다."
-                  inputMode="decimal" numericFormat="amount" maxIntegerDigits={16}
-                  ref={amountInputRef}
-                  value={draft.amount}
-                  onChange={(event) => {
-                    if (event.target.value.split(".")[0].length <= 16)
-                      setDraft({ ...draft, amount: event.target.value })
-                  }}
-                  aria-invalid={
-                    !!draft.amount && !validDealCost({ ...draft, note: "" })
-                  }
-                  placeholder="0.00"
-                />
-              </label>
-              <label className="grid min-w-0 gap-1.5 text-sm">
                 <span>통화</span>
                 <Select
                   value={draft.currency}
@@ -319,6 +300,25 @@ export function DealFinanceWorkspace({
                     ))}
                   </SelectContent>
                 </Select>
+              </label>
+              <label className="grid min-w-0 gap-1.5 text-sm">
+                <span>금액</span>
+                <Input
+                  className="h-10"
+                  aria-label="원가 금액"
+                  title="금액은 정수 16자리까지, 소수는 선택한 통화의 자릿수에 맞춰 입력합니다."
+                  inputMode="decimal" numericFormat="amount" currency={draft.currency} maxIntegerDigits={16}
+                  ref={amountInputRef}
+                  value={draft.amount}
+                  onChange={(event) => {
+                    if (event.target.value.split(".")[0].length <= 16)
+                      setDraft({ ...draft, amount: event.target.value })
+                  }}
+                  aria-invalid={
+                    !!draft.amount && !validDealCost({ ...draft, note: "" })
+                  }
+                  placeholder={["KRW", "JPY", "VND"].includes(draft.currency) ? "0" : "0.00"}
+                />
               </label>
               <label className="grid min-w-0 gap-1.5 text-sm">
                 <span>기준</span>

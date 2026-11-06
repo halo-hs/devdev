@@ -1,3 +1,5 @@
+import { CurrencySelect } from "@/components/platform/currency-select"
+import { validCurrencyAmount } from "@/lib/currencyInput"
 import { useState, useRef, useEffect } from "react"
 import { templateSchemas, templates, sampleValueForSlot, type PrototypeSlotKind, type Tone, isNumericInputKind, type DocumentStyle } from "@trade-os/documents/documentTemplateModel"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -255,7 +257,7 @@ export function CreateFieldReviewPanel({
   }>
   const [fieldValues, setFieldValues] = useState<Record<string, string>>(
     Object.fromEntries(
-      fieldRows.map((row) => [row.key, startBlank ? "" : row.value])
+      fieldRows.map((row) => [row.key, startBlank ? (row.key === "currency" ? "USD" : "") : row.value])
     )
   )
   const [itemRows, setItemRows] = useState(initialItemRows)
@@ -315,6 +317,10 @@ export function CreateFieldReviewPanel({
     const slot = activeSchema.slots.find((candidate) => candidate.key === row.key)
     return slot?.required && !fieldValues[row.key]?.trim()
       ? [{ key: row.key, label: `${row.label} · 필수값 누락` }] : []
+  })
+  fieldRows.filter(row => row.kind === "money" && row.key !== "unit_price").forEach(row => {
+    const value = fieldValues[row.key]?.trim()
+    if (value && !validCurrencyAmount(value, fieldValues.currency || "USD")) requiredIssues.push({ key: row.key, label: `${row.label} · 통화에 맞는 자릿수로 입력하세요` })
   })
   if (hasLineItems) {
     if (!visibleItemRows.length) requiredIssues.push({ key: "item_name", label: "품목 · 1개 이상 입력" })
@@ -585,7 +591,7 @@ export function CreateFieldReviewPanel({
 
       <div className="field-scrollbar min-h-0 flex-1 overflow-y-auto">
         <div className="grid grid-cols-1 @min-[720px]:grid-cols-2">
-          {fieldRows.map((row) => (
+          {[...fieldRows].sort((a, b) => Number(b.key === "currency") - Number(a.key === "currency")).map((row) => (
             <div
               key={row.key}
               data-review-key={row.key}
@@ -626,13 +632,16 @@ export function CreateFieldReviewPanel({
                 ) : undefined}
               >
               <div className="relative">
+              {row.key === "currency" ? <CurrencySelect id={`create-field-${row.key}`} label={row.label} value={fieldValues.currency ?? ""} onChange={value => setFieldValues(current => ({ ...current, currency: value }))} className="w-full" /> : (
               <Input
                 id={`create-field-${row.key}`}
                 aria-describedby={reviewIssueKeys.has(row.key) ? `create-field-${row.key}-message` : undefined}
                 className={cn("h-10 text-sm font-medium", row.kind === "money" && "pr-14")}
                 aria-invalid={reviewIssueKeys.has(row.key) || requiredIssues.some((issue) => issue.key === row.key) || undefined}
                 type={inputTypeForKind(row.kind)}
-        numericFormat={row.kind === "money" ? "amount" : row.kind === "number" ? "decimal" : undefined}
+        maxFractionDigits={row.key === "unit_price" ? 4 : row.key.includes("weight") ? 3 : undefined}
+        currency={fieldValues.currency || "USD"}
+        numericFormat={row.kind === "money" ? "amount" : row.kind === "number" ? (row.key.includes("weight") ? "decimal" : "integer") : undefined}
                 inputMode={
                   isNumericInputKind(row.kind as PrototypeSlotKind)
                     ? "decimal"
@@ -654,6 +663,7 @@ export function CreateFieldReviewPanel({
                   !fieldValues[row.key] ? `${row.label} 입력` : undefined
                 }
               />
+              )}
               {row.kind === "money" ? (
                 <div className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[11px] font-medium text-muted-foreground">
                   {fieldValues.currency?.trim() || "USD"}
@@ -778,7 +788,7 @@ export function CreateFieldReviewPanel({
                         aria-label={`품목 ${index + 1} 수량`}
                         aria-required="true"
                         type="number"
-                        inputMode="decimal" numericFormat="decimal"
+                        inputMode="numeric" numericFormat="integer"
                         step="any"
                         value={itemValues[item.id]?.quantity ?? ""}
                         placeholder="필수"
@@ -835,7 +845,7 @@ export function CreateFieldReviewPanel({
                         aria-label={`품목 ${index + 1} 단가`}
                         aria-required="true"
                         type="number"
-                        inputMode="decimal" numericFormat="amount"
+                        inputMode="decimal" numericFormat="amount" maxFractionDigits={4}
                         step="any"
                         value={itemValues[item.id]?.unitPrice ?? ""}
                         placeholder="필수"

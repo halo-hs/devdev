@@ -1,3 +1,4 @@
+import { ACTIVE_CURRENCIES, validCurrencyAmount } from "@/lib/currencyInput"
 import { statusPreviewFinance } from "./dealStatusFixtures"
 import {
   bankScheduleFixtures,
@@ -23,7 +24,7 @@ export type DealCost = {
 }
 export type FinanceFact = Partial<TradeFinanceFact> &
   Pick<TradeFinanceFact, "currency">
-export const costCurrencies = ["USD", "KRW", "EUR", "JPY", "CNY"] as const
+export const costCurrencies = ACTIVE_CURRENCIES
 export const costTypes = [
   "운임",
   "관세",
@@ -86,11 +87,12 @@ export function initialDealCosts(dealId: string): DealCost[] {
 export function isValidCostAmount(amount: string) {
   return /^\d{1,16}(?:\.\d{1,2})?$/.test(amount.trim())
 }
-export function validDealCost(cost: DealCost) {
+export function validDealCost(cost: DealCost, validatePrecision = true) {
   return (
     Boolean(cost.id) &&
     costTypes.includes(cost.type) &&
     isValidCostAmount(cost.amount) &&
+    (!validatePrecision || validCurrencyAmount(cost.amount, cost.currency)) &&
     (costCurrencies as readonly string[]).includes(cost.currency) &&
     ["additive", "already_in_price"].includes(cost.basis) &&
     typeof cost.note === "string" &&
@@ -105,7 +107,7 @@ export function readDealCosts(dealId: string): DealCost[] {
       const parsed: unknown = JSON.parse(raw)
       if (
         Array.isArray(parsed) &&
-        parsed.every((item) => item && validDealCost(item))
+        parsed.every((item) => item && validDealCost(item, false))
       )
         return parsed
     }
@@ -115,7 +117,8 @@ export function readDealCosts(dealId: string): DealCost[] {
   return initialDealCosts(dealId)
 }
 export function writeDealCosts(dealId: string, costs: DealCost[]) {
-  if (!costs.every(validDealCost))
+  const existing = readDealCosts(dealId)
+  if (!costs.every(cost => validDealCost(cost) || (validDealCost(cost, false) && existing.some(previous => previous.id === cost.id && previous.amount === cost.amount && previous.currency === cost.currency))))
     throw new Error("원가의 금액·통화·메모를 확인해주세요.")
   localStorage.setItem(costStorageKey(dealId), JSON.stringify(costs))
   window.dispatchEvent(new CustomEvent(costChangeEvent, { detail: dealId }))

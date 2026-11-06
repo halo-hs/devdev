@@ -1,3 +1,5 @@
+import { CurrencySelect } from "@/components/platform/currency-select";
+import { validCurrencyAmount } from "@/lib/currencyInput";
 "use client";
 
 import { OverpaymentAllocationPanel } from "./OverpaymentAllocationPanel";
@@ -236,13 +238,13 @@ export function SettlementExceptionPanel({
   const overpaymentKind: SettlementOverpaymentKind = entry.type === "payable" ? "advance" : "overpay";
   const [overpaymentDraft, setOverpaymentDraft] = useState({
     amount: "",
-    currency: entry.currency,
+    currency: entry.currency || "USD",
     kind: overpaymentKind,
     paymentId: "",
   });
   const [adjustmentDraft, setAdjustmentDraft] = useState({
     amount: "",
-    currency: entry.currency,
+    currency: entry.currency || "USD",
     kind: "adjustment" as SettlementAdjustmentKind,
     reason: "",
     evidence: "",
@@ -408,6 +410,7 @@ export function SettlementExceptionPanel({
     const draft = overpaymentDraft;
     const amount = normalizeDecimalInput(draft.amount);
     const amountNumber = Number(amount);
+    if (!validCurrencyAmount(amount, draft.currency)) { setError(copy.validation); return; }
     if (
       !amount ||
       !Number.isFinite(amountNumber) ||
@@ -465,6 +468,7 @@ export function SettlementExceptionPanel({
     const draft = adjustmentDraft;
     const amount = normalizeDecimalInput(draft.amount);
     const amountNumber = Number(amount);
+    if (!validCurrencyAmount(amount, draft.currency)) { setError(copy.validation); return; }
     if (
       !amount ||
       !Number.isFinite(amountNumber) ||
@@ -523,6 +527,7 @@ export function SettlementExceptionPanel({
     const draft = refundDrafts[overpayment.id] ?? EMPTY_REFUND_DRAFT;
     const amount = normalizeDecimalInput(draft.amount);
     const amountNumber = Number(amount);
+    if (!validCurrencyAmount(amount, overpayment.currency)) { setError(copy.validation); return; }
     if (
       !amount ||
       !Number.isFinite(amountNumber) ||
@@ -681,7 +686,7 @@ export function SettlementExceptionPanel({
                             {copy.overpayments.refundAmount}
                             <Input
                               className="h-8 px-3 w-24"
-                              inputMode="decimal" numericFormat="amount"
+                              inputMode="decimal" numericFormat="amount" currency={overpayment.currency}
                               value={refundDraft.amount}
                               ref={(element) => {
                                 refundAmountRefs.current[overpayment.id] = element;
@@ -776,10 +781,14 @@ export function SettlementExceptionPanel({
               <p className="mb-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] font-medium text-[var(--color-gray-4)]">{copy.overpayments.recordTitle}</p>
               <div className="flex flex-wrap items-end gap-2">
                 <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
+                  {copy.overpayments.currency}
+                  <CurrencySelect label={copy.overpayments.currency} value={overpaymentDraft.currency} onChange={value => setOverpaymentDraft(current => ({ ...current, currency: value }))} className="h-8 w-24" />
+                </label>
+                <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.overpayments.amount}
                   <Input
                     className="h-8 px-3 w-24"
-                    inputMode="decimal" numericFormat="amount"
+                    inputMode="decimal" numericFormat="amount" currency={overpaymentDraft.currency}
                     value={overpaymentDraft.amount}
                     ref={overpaymentAmountRef}
                     aria-describedby={validationField === "overpayment.amount" ? exceptionErrorId : undefined}
@@ -787,20 +796,6 @@ export function SettlementExceptionPanel({
                     onChange={(event) => {
                       clearValidation("overpayment.amount");
                       setOverpaymentDraft((current) => ({ ...current, amount: event.target.value }));
-                    }}
-                  />
-                </label>
-                <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
-                  {copy.overpayments.currency}
-                  <Input
-                    className="h-8 px-3 w-20 uppercase"
-                    value={overpaymentDraft.currency}
-                    ref={overpaymentCurrencyRef}
-                    aria-describedby={validationField === "overpayment.currency" ? exceptionErrorId : undefined}
-                    aria-invalid={validationField === "overpayment.currency" || undefined}
-                    onChange={(event) => {
-                      clearValidation("overpayment.currency");
-                      setOverpaymentDraft((current) => ({ ...current, currency: event.target.value }));
                     }}
                   />
                 </label>
@@ -888,10 +883,14 @@ export function SettlementExceptionPanel({
               </p>
               <div className="flex flex-wrap items-end gap-2">
                 <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
+                  {copy.adjustments.currency}
+                  <CurrencySelect label={copy.adjustments.currency} value={adjustmentDraft.currency} onChange={value => setAdjustmentDraft(current => ({ ...current, currency: value }))} className="h-8 w-24" />
+                </label>
+                <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
                   {copy.adjustments.amount}
                   <Input
                     className="h-8 px-3 w-24"
-                    inputMode="decimal" numericFormat="amount"
+                    inputMode="decimal" numericFormat="amount" currency={adjustmentDraft.currency}
                     value={adjustmentDraft.amount}
                     ref={adjustmentAmountRef}
                     aria-describedby={validationField === "adjustment.amount" ? exceptionErrorId : undefined}
@@ -899,20 +898,6 @@ export function SettlementExceptionPanel({
                     onChange={(event) => {
                       clearValidation("adjustment.amount");
                       setAdjustmentDraft((current) => ({ ...current, amount: event.target.value }));
-                    }}
-                  />
-                </label>
-                <label className="flex flex-col gap-0.5 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
-                  {copy.adjustments.currency}
-                  <Input
-                    className="h-8 px-3 w-20 uppercase"
-                    value={adjustmentDraft.currency}
-                    ref={adjustmentCurrencyRef}
-                    aria-describedby={validationField === "adjustment.currency" ? exceptionErrorId : undefined}
-                    aria-invalid={validationField === "adjustment.currency" || undefined}
-                    onChange={(event) => {
-                      clearValidation("adjustment.currency");
-                      setAdjustmentDraft((current) => ({ ...current, currency: event.target.value }));
                     }}
                   />
                 </label>

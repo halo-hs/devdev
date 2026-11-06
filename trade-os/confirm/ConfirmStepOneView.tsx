@@ -1,3 +1,4 @@
+import { ACTIVE_CURRENCIES } from "@/lib/currencyInput"
 import { useState, type ChangeEvent } from "react"
 import { History, ChevronUp, ChevronDown, Check } from "lucide-react"
 import { type ReviewedField } from "@trade-os/lib/erpDocumentWorkflow"
@@ -111,6 +112,8 @@ export function OcrFieldReviewList({
               )}
             >
                 <SavingField
+                  isWeight={field.key.includes("weight")}
+                  isUnitPrice={field.key === "unit_price"}
                   id={`upload-field-${field.key}`}
                   describedBy={`upload-field-${field.key}-message`}
                   value={field.value}
@@ -135,7 +138,7 @@ export function OcrFieldReviewList({
   )
 }
 
-const REVIEW_CURRENCIES = ["USD", "EUR", "KRW", "JPY", "CNY"]
+const REVIEW_CURRENCIES = Array.from(ACTIVE_CURRENCIES) as string[]
 
 function CurrencyUnitSelect({
   value,
@@ -218,6 +221,8 @@ function EditableUnitInput({
 }
 
 function SavingField({
+  isUnitPrice,
+  isWeight,
   id,
   describedBy,
   value,
@@ -231,6 +236,8 @@ function SavingField({
   onValueChange,
   onUnitChange,
 }: {
+  isUnitPrice: boolean
+  isWeight: boolean
   id?: string
   describedBy?: string
   value: string
@@ -251,6 +258,17 @@ function SavingField({
 
   return (
     <div className="flex items-center gap-2">
+      {unit !== undefined && (kind === "money" || REVIEW_CURRENCIES.includes(unit)) ? (
+          <CurrencyUnitSelect
+            value={unit}
+            label={unitLabel}
+            onChange={(nextUnit) => {
+              onUnitChange?.(nextUnit)
+              onAutoSave?.("pending")
+              onAutoSave?.("commit")
+            }}
+          />
+      ) : null}
       <Input
         id={id}
         aria-describedby={describedBy}
@@ -261,8 +279,10 @@ function SavingField({
           emphasized && !danger && "border-warning/50 ring-1 ring-warning/20"
         )}
         type={inputTypeForKind(kind)}
-        numericFormat={kind === "money" ? "amount" : kind === "number" ? "decimal" : undefined}
+        numericFormat={kind === "money" ? "amount" : kind === "number" ? (isWeight ? "decimal" : "integer") : undefined}
         inputMode={isNumericInputKind(kind) ? "decimal" : undefined}
+        currency={unit?.split("/")[0] || "USD"}
+        maxFractionDigits={isUnitPrice ? 4 : isWeight ? 3 : undefined}
         step={isNumericInputKind(kind) ? "any" : undefined}
         defaultValue={isNumericInputKind(kind) ? normalizeDecimalInput(value) : value}
         aria-label={unitLabel}
@@ -270,18 +290,7 @@ function SavingField({
         onChange={handleChange}
         onBlur={() => onAutoSave?.("commit")}
       />
-      {unit !== undefined ? (
-        kind === "money" || REVIEW_CURRENCIES.includes(unit) ? (
-          <CurrencyUnitSelect
-            value={unit}
-            label={unitLabel}
-            onChange={(nextUnit) => {
-              onUnitChange?.(nextUnit)
-              onAutoSave?.("pending")
-              onAutoSave?.("commit")
-            }}
-          />
-        ) : (
+      {unit !== undefined && kind !== "money" && !REVIEW_CURRENCIES.includes(unit) ? (
           <EditableUnitInput
             value={unit}
             label={unitLabel}
@@ -291,8 +300,9 @@ function SavingField({
             }}
             onCommit={() => onAutoSave?.("commit")}
           />
-        )
       ) : null}
+
+
     </div>
   )
 }

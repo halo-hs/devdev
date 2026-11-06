@@ -1,3 +1,5 @@
+import { CurrencySelect } from "@/components/platform/currency-select";
+import { validCurrencyAmount } from "@/lib/currencyInput";
 "use client";
 
 import { Input } from "@/components/ui/input"
@@ -1900,7 +1902,7 @@ function SettlementView({
   const [manualScheduleOpen, setManualScheduleOpen] = useState(false);
   const [manualScheduleAmount, setManualScheduleAmount] = useState("");
   const [manualScheduleCounterparty, setManualScheduleCounterparty] = useState("");
-  const [manualScheduleCurrency, setManualScheduleCurrency] = useState("");
+  const [manualScheduleCurrency, setManualScheduleCurrency] = useState("USD");
   const [manualScheduleDueDate, setManualScheduleDueDate] = useState("");
   const [manualScheduleType, setManualScheduleType] = useState<"receivable" | "payable">("payable");
   const [manualScheduleBusy, setManualScheduleBusy] = useState(false);
@@ -1964,7 +1966,7 @@ function SettlementView({
   const openManualSchedule = () => {
     setManualScheduleAmount("");
     setManualScheduleCounterparty("");
-    setManualScheduleCurrency(ledgerCurrency ?? "");
+    setManualScheduleCurrency(ledgerCurrency || "USD");
     setManualScheduleDueDate(asOfISO || localTodayISO());
     setManualScheduleType("payable");
     setManualScheduleError(null);
@@ -1976,6 +1978,7 @@ function SettlementView({
     const currency = manualScheduleCurrency.trim().toUpperCase();
     const dueDate = manualScheduleDueDate.trim();
     if (
+      !validCurrencyAmount(amount, currency) ||
       !isFinanceDecimal(amount) ||
       financeDecimalMagnitude(amount) <= FINANCE_ZERO ||
       !/^[A-Z]{3}$/.test(currency) ||
@@ -2150,7 +2153,7 @@ function SettlementView({
     const disputedAmount = normalizeDecimalInput(disputeAmount);
     const reason = disputeReason.trim();
     const evidence = disputeEvidence.trim();
-    if (!normalAmount || !disputedAmount || !reason) {
+    if (!validCurrencyAmount(normalAmount, entry.currency) || !validCurrencyAmount(disputedAmount, entry.currency) || !reason) {
       markDisputeInvalid(
         copy.ledger.dispute.errors.required,
         !normalAmount ? "normalAmount" : !disputedAmount ? "amount" : "reason",
@@ -4003,7 +4006,7 @@ function SettlementView({
                                   aria-required="true"
                                   required
                                   type="text"
-                                  inputMode="decimal" numericFormat="amount"
+                                  inputMode="decimal" numericFormat="amount" currency={e.currency}
                                   value={disputeNormalAmount}
                                   ref={(element) => {
                                     disputeFieldRefs.current.normalAmount = element;
@@ -4026,7 +4029,7 @@ function SettlementView({
                                   aria-required="true"
                                   required
                                   type="text"
-                                  inputMode="decimal" numericFormat="amount"
+                                  inputMode="decimal" numericFormat="amount" currency={e.currency}
                                   value={disputeAmount}
                                   ref={(element) => {
                                     disputeFieldRefs.current.amount = element;
@@ -4326,25 +4329,18 @@ function SettlementView({
             />
           </label>
           <label className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
+            {copy.controls.currencyLabel}
+            <CurrencySelect label={copy.controls.currencyLabel} disabled={manualScheduleBusy} value={manualScheduleCurrency} onChange={setManualScheduleCurrency} className="w-full" />
+          </label>
+          <label className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
             {copy.ledger.amount}
             <Input
               aria-label={copy.ledger.amount}
               className="h-9 rounded-md border border-border px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]"
               disabled={manualScheduleBusy}
-              inputMode="decimal" numericFormat="amount"
+              inputMode="decimal" numericFormat="amount" currency={manualScheduleCurrency}
               onChange={(event) => setManualScheduleAmount(event.target.value)}
               value={manualScheduleAmount}
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">
-            {copy.controls.currencyLabel}
-            <input
-              aria-label={copy.controls.currencyLabel}
-              className="h-9 rounded-md border border-border px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]"
-              disabled={manualScheduleBusy}
-              maxLength={3}
-              onChange={(event) => setManualScheduleCurrency(event.target.value)}
-              value={manualScheduleCurrency}
             />
           </label>
           <label className="flex flex-col gap-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-4)]">

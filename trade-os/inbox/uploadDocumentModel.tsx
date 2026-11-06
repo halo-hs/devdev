@@ -1,3 +1,4 @@
+import { validCurrencyAmount } from "@/lib/currencyInput"
 import { type PrototypeSlotKind } from "@trade-os/documents/documentTemplateModel"
 import { type UploadDocumentDealLinks, type UploadDocumentType, type RecentDocument, type ReviewField } from "@/App"
 
@@ -315,3 +316,9 @@ export function reviewFieldsForDocument(
 
 export const UPLOAD_DOCUMENT_DEAL_LINKS_STORAGE_KEY =
   "ecoya-prototype-upload-document-deal-links"
+
+// Existing extracted facts keep their precision; validate user edits before saving.
+export function invalidEditedMoneyFields(fields: ReviewField[]) {
+  return fields.filter(field => field.userEdited && field.kind === "money" && field.key !== "unit_price" && field.value.trim() &&
+    !validCurrencyAmount(field.value.replaceAll(",", ""), field.unit?.split("/")[0] || fields.find(item => item.key === "currency")?.value || "USD"))
+}

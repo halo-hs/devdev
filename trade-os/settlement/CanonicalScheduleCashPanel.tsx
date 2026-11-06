@@ -1,3 +1,4 @@
+import { validCurrencyAmount } from "@/lib/currencyInput";
 "use client";
 
 import { Input } from "@/components/ui/input"
@@ -217,6 +218,9 @@ export function CanonicalScheduleCashPanel({
     const normalizedFee = normalizeDecimalInput(fee) || "0";
     const source = sourceDocumentId.trim();
     if (
+      !validCurrencyAmount(amount, currency) ||
+      !validCurrencyAmount(applied, currency) ||
+      !validCurrencyAmount(normalizedFee, currency) ||
       !isPositiveMoney(amount) ||
       !isPositiveMoney(applied) ||
       financeDecimalMagnitude(applied) > financeDecimalMagnitude(amount) ||
@@ -299,7 +303,7 @@ export function CanonicalScheduleCashPanel({
     if (
       reason === "" ||
       [...reason].length > 500 ||
-      (correction.kind === "replacement" && !isPositiveMoney(replacementAmount))
+      (correction.kind === "replacement" && (!isPositiveMoney(replacementAmount) || !validCurrencyAmount(replacementAmount, currency)))
     ) {
       setError(copy.invalid);
       return;
@@ -521,7 +525,7 @@ export function CanonicalScheduleCashPanel({
                   {copy.replacementAmount}
                   <Input
                     className={`${inputClass} mt-1 w-40`}
-                    inputMode="decimal" numericFormat="amount"
+                    inputMode="decimal" numericFormat="amount" currency={currency}
                     value={correction.replacementAmount}
                     onChange={(event) =>
                       setCorrection((current) =>
@@ -568,7 +572,7 @@ export function CanonicalScheduleCashPanel({
                   // a11y-exception(justified, SC-2.4.3): focus follows the user's explicit record-cash action into the opened form.
                   autoFocus
                   className={`${inputClass} mt-1 w-full`}
-                  inputMode="decimal" numericFormat="amount"
+                  inputMode="decimal" numericFormat="amount" currency={currency}
                   value={actualAmount}
                   onChange={(event) => setActualAmount(event.target.value)}
                 />
@@ -577,7 +581,7 @@ export function CanonicalScheduleCashPanel({
                 {copy.applied}
                 <Input
                   className={`${inputClass} mt-1 w-full`}
-                  inputMode="decimal" numericFormat="amount"
+                  inputMode="decimal" numericFormat="amount" currency={currency}
                   value={applicationAmount}
                   onChange={(event) => setApplicationAmount(event.target.value)}
                 />
@@ -595,7 +599,7 @@ export function CanonicalScheduleCashPanel({
                 {copy.fee}
                 <Input
                   className={`${inputClass} mt-1 w-full`}
-                  inputMode="decimal" numericFormat="amount"
+                  inputMode="decimal" numericFormat="amount" currency={currency}
                   value={fee}
                   onChange={(event) => setFee(event.target.value)}
                 />

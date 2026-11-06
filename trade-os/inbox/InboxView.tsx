@@ -1,3 +1,4 @@
+import { invalidEditedMoneyFields } from "@trade-os/inbox/uploadDocumentModel"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { useState, useRef, type DragEvent as ReactDragEvent, useEffect } from "react"
 import { ViewSeatAction } from "@trade-os/components/ViewSeatGate"
@@ -1486,7 +1487,7 @@ export function InboxScreen({
     selectedDocument.pdfReviewCompleted === true ||
     selectedDocument.stage === "confirmed"
   const linkedDealLabel = selectedDocument.dealLabel ?? null
-  const isDealBlocked = isTypeUnresolved || uploadFieldErrors.length > 0
+  const isDealBlocked = isTypeUnresolved || uploadFieldErrors.length > 0 || invalidEditedMoneyFields(currentReviewFields).length > 0
     || Boolean(etd && eta && eta < etd) || autoSaving || autoSavePending || autoSaveError
     || !["field", "confirmed"].includes(selectedDocument.stage)
 
@@ -1615,6 +1616,10 @@ export function InboxScreen({
       return
     }
     if (phase === "commit" && !autoSavePendingRef.current) return
+    if (invalidEditedMoneyFields(resolvedReviewFields(selectedDocumentRef.current)).length) {
+      setAutoSaveError(true)
+      return
+    }
     autoSavePendingRef.current = false
     const version = ++autoSaveVersionRef.current
     setAutoSavePending(false)
