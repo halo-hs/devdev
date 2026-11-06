@@ -23,7 +23,8 @@ import { SectionPanel } from "@trade-os/components/SectionPanel";
 import { StatusBadge } from "@/components/platform/StatusBadge";
 import { TaskQueue, type TaskQueueItem } from "@trade-os/components/TaskQueue";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { RefreshCw, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { ErpScreenFrame } from "../components/ErpScreenFrame";
@@ -86,6 +87,7 @@ type MonitorBodyCopy = {
   throughputUploads: string;
   throughputConfirms: string;
   throughputRate: string;
+  throughputRateHelp: string;
   throughputEmpty: string;
   filterSchedule: string;
   filterQty: string;
@@ -146,12 +148,13 @@ const DEFAULT_MONITOR_BODY_COPY: MonitorBodyCopy = {
   flagFilterLabel: "Check state",
   flagFilterUnchecked: "Unchecked",
   flagFilterChecked: "Checked",
-  throughputTitle: "Completion-rate drilldown",
+  throughputTitle: "Document processing status",
   throughputDesc: "Bars by date + counts by owner",
   throughputOwner: "Owner",
   throughputUploads: "Uploads",
   throughputConfirms: "Confirms",
-  throughputRate: "Completion rate",
+  throughputRate: "Confirmation rate",
+  throughputRateHelp: "The share of documents registered in this period that are currently confirmed.",
   throughputEmpty: "No completed confirms to show yet.",
   filterSchedule: "Schedule",
   filterQty: "Quantity",
@@ -211,7 +214,26 @@ function buildThroughputColumns(copy: MonitorBodyCopy): ColumnTableColumn<Throug
     { key: "owner", header: copy.throughputOwner, align: "left", sortable: true, render: (row) => row.owner },
     { key: "uploads", header: copy.throughputUploads, align: "center", render: (row) => row.uploads },
     { key: "confirms", header: copy.throughputConfirms, align: "center", render: (row) => row.confirms },
-    { key: "rate", header: copy.throughputRate, align: "center", render: (row) => row.rate },
+    {
+      key: "rate",
+      header: (
+        <span className="inline-flex items-center gap-1">
+          {copy.throughputRate}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon-sm" className="size-6" aria-label={`${copy.throughputRate} 안내`}>
+                <Info className="size-3.5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="max-w-[calc(100vw-32px)] text-[13px] leading-5">
+              {copy.throughputRateHelp}
+            </PopoverContent>
+          </Popover>
+        </span>
+      ),
+      align: "center",
+      render: (row) => row.rate,
+    },
   ];
 }
 
@@ -324,30 +346,19 @@ const pendingItems: TaskQueueItem[] = [
 
 const defaultMetrics: MonitorMetric[] = [
   { id: "today", label: "오늘 처리", value: "128", meta: "▲ 12.8% vs 어제", tone: "success" },
-  { id: "rate", label: "완료율", value: "68%", meta: <MetricBar value={68} />, tone: "warning" },
+  { id: "rate", label: "문서 확정률", value: "68%", meta: "이번 주 등록 문서 기준" },
   { id: "payment", label: "대기 결제", value: "34건", meta: "payment_schedules pending" },
   { id: "ar", label: "AR 회수예정", value: "$9.62M", meta: "▲ 15.2% vs 어제", tone: "success" },
 ];
 
 const opsMetrics: MonitorMetric[] = [
   { id: "today", label: "오늘 처리", value: "128", meta: "어제보다 +12.8%", tone: "success" },
-  { id: "rate", label: "완료율", value: "68%", meta: "지난주 대비 -4%p", tone: "warning" },
+  { id: "rate", label: "문서 확정률", value: "68%", meta: "이번 주 등록 문서 기준" },
 ];
-
-function MetricBar({ value }: { value: number }) {
-  return (
-    <span className="block h-2 w-full overflow-hidden rounded-full bg-[var(--color-gray-10)]">
-      <span
-        className="block h-full rounded-full bg-[var(--color-primary-4)]"
-        style={{ width: `${value}%` }}
-      />
-    </span>
-  );
-}
 
 // empty 모드: KPI 값은 "—", meta/tone 은 드롭(라벨은 정적 UI 이므로 유지).
 function toEmptyMetrics(items: MonitorMetric[]): MonitorMetric[] {
-  return items.map((item) => ({ id: item.id, label: item.label, value: "—" }));
+  return items.map((item) => ({ id: item.id, label: item.label, value: "—", meta: item.id === "rate" ? item.meta : undefined }));
 }
 
 function MonitorMetricGrid({ items, empty = false }: { items: MonitorMetric[]; empty?: boolean }) {
@@ -362,7 +373,7 @@ function MonitorMetricGrid({ items, empty = false }: { items: MonitorMetric[]; e
           key={item.id}
           label={item.label}
           value={item.value}
-          meta={item.meta}
+          meta={item.id === "rate" ? <span className="text-[var(--color-gray-4)]">{item.meta}</span> : item.meta}
           tone={item.tone}
         />
       ))}
@@ -606,10 +617,10 @@ function MonitorRightPanel({
 
 // empty 모드: 요일 라벨(정적)은 유지하되 건수 값은 "—"·active 톤 제거(ProgressBar/MetricBar=0 규칙 준용).
 const throughputBars = [
-  { day: "월", count: "18", active: true },
-  { day: "화", count: "24", active: true },
-  { day: "수", count: "31", active: true },
-  { day: "목", count: "12", active: false },
+  { day: "월", count: "18", uploaded: "24", active: true },
+  { day: "화", count: "24", uploaded: "30", active: true },
+  { day: "수", count: "31", uploaded: "38", active: true },
+  { day: "목", count: "12", uploaded: "20", active: false },
 ];
 
 function ThroughputPanel({
@@ -628,7 +639,7 @@ function ThroughputPanel({
   const hasLiveActivity = bars.some((item) => item.active) || rows.length > 0;
   const showLiveEmpty = Boolean(live) && !empty && !hasLiveActivity;
   const rateBadge = live
-    ? live.metrics.find((metric) => metric.id === "rate")?.value ?? "—"
+    ? live.throughputRate ?? "—"
     : ops
       ? undefined
       : "68%";
@@ -645,7 +656,7 @@ function ThroughputPanel({
           empty || showLiveEmpty ? (
             <StatusBadge size="sm" tone="neutral">—</StatusBadge>
           ) : ops ? undefined : (
-            <StatusBadge size="sm" tone="info">{String(rateBadge)}</StatusBadge>
+            <StatusBadge size="sm" tone={rateBadge === "—" ? "neutral" : "info"}>{String(rateBadge)}</StatusBadge>
           )
         )
       }
@@ -669,7 +680,7 @@ function ThroughputPanel({
                   }`}
                   key={item.day}
                 >
-                  <span>{item.day}<br />{empty ? "—" : item.count}</span>
+                  <span>{item.day}<br />{copy.throughputUploads} {empty ? "—" : item.uploaded ?? "—"}<br />{copy.throughputConfirms} {empty ? "—" : item.count}</span>
                 </div>
               );
             })}
