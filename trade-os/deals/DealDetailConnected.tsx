@@ -41,6 +41,7 @@ import {
   CircleAlert,
   FilePlus2,
   FileSearch,
+  FolderOpen,
   GripVertical,
   Link2,
   Unlink,
@@ -328,84 +329,6 @@ const dealDeliveryAttachmentOptions = [
   ...documents,
   ...supplementaryDocuments,
 ].filter((document) => document.file.toLowerCase().endsWith(".pdf"))
-
-function ImportantDealDocumentsPanel({
-  importantDocuments,
-  selected,
-  onSelect,
-  onUpload,
-}: {
-  importantDocuments: DocumentSlot[]
-  selected: DocumentSlot
-  onSelect: (document: DocumentSlot) => void
-  onUpload: (document: DocumentSlot) => void
-}) {
-  return (
-    <section
-      aria-label="중요 서류"
-      className="mt-2 rounded-[var(--r-md)] border border-[var(--surface-border)] bg-background p-2"
-    >
-      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-5">
-        {importantDocuments.map((document) => {
-          const isMissing = !document.file
-          const isManual = document.status === "원본 미첨부"
-          const isNew = document.code === "PO"
-          const isSelected = documentKey(selected) === documentKey(document)
-
-          return (
-            <button
-              key={documentKey(document)}
-              type="button"
-              className={cn(
-                "flex h-10 min-w-0 items-center gap-2 rounded-[var(--r-sm)] border px-2.5 text-left transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
-                isMissing
-                  ? "border-dashed border-warning/55 hover:border-warning"
-                  : isSelected
-                    ? "border-[var(--control-selected-border)] bg-[var(--control-selected-soft-background)]"
-                    : "border-[var(--surface-border)] hover:border-[var(--control-hover-border)]"
-              )}
-              onClick={() =>
-                isMissing ? onUpload(document) : onSelect(document)
-              }
-              aria-label={
-                isMissing
-                  ? `${document.type} ${isManual ? "원본 파일 추가" : "파일 추가"}`
-                  : `${document.type} 원본 보기`
-              }
-            >
-              <span
-                className={cn(
-                  "shrink-0 text-[10px] font-semibold",
-                  isMissing
-                    ? "text-warning"
-                    : isSelected || isNew
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                )}
-              >
-                {document.code}
-              </span>
-              <span className="min-w-0 flex-1 truncate text-[11px] font-semibold">
-                {document.type}
-              </span>
-              {isMissing ? (
-                <span className="shrink-0 text-[10px] font-semibold text-warning">
-                  {isManual ? "원본 없음" : "미비"}
-                </span>
-              ) : isNew ? (
-                <span className="flex shrink-0 items-center gap-1 text-[10px] font-medium text-primary">
-                  <span className="size-1.5 rounded-full bg-primary" /> 신규
-                </span>
-              ) : (
-                <Check className="size-3.5 shrink-0 text-success" />
-              )}
-            </button>
-          )
-        })}
-      </div>
-    </section>
-  )
-}
 
 type DealFieldMatch = "일치" | "확인 필요" | "누락" | "단일 출처"
 type DealFieldGroup = "거래 기본" | "상업 조건" | "선적 정보" | "결제 정보"
@@ -2206,15 +2129,116 @@ function DealRecordSections({
   )
 }
 
+/**
+ * The deal's document box: lists only documents linked to this deal and opens
+ * over the PDF, so choosing a document never pushes the original down.
+ */
+function DealDocumentBox({
+  documents,
+  selected,
+  onSelect,
+  onAdd,
+}: {
+  documents: DocumentSlot[]
+  selected: DocumentSlot
+  onSelect: (document: DocumentSlot) => void
+  onAdd?: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const toCheck = documents.filter((document) => document.status === "검토").length
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className="relative shrink-0"
+          aria-label={`서류함 ${documents.length}건${toCheck ? `, 확인 전 ${toCheck}건` : ""}`}
+        >
+          <FolderOpen data-icon="inline-start" />
+          서류함
+          <span className="text-muted-foreground">{documents.length}</span>
+          <ChevronDown />
+          {toCheck ? (
+            <span aria-hidden="true" className="absolute -top-1.5 -right-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-warning px-1 text-[10px] leading-none font-semibold text-white">
+              {toCheck}
+            </span>
+          ) : null}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-[min(32rem,calc(100vw-2rem))] gap-0 p-0">
+        <div className="flex items-center gap-2 border-b border-[var(--surface-border)] px-3 py-2.5">
+          <span className="text-xs font-semibold">이 거래의 서류 {documents.length}건</span>
+          {onAdd ? (
+            <Button
+              variant="outline"
+              size="xs"
+              className="ml-auto"
+              onClick={() => {
+                setOpen(false)
+                onAdd()
+              }}
+            >
+              <FilePlus2 data-icon="inline-start" />서류 추가
+            </Button>
+          ) : null}
+        </div>
+        {documents.length ? (
+          <div role="list" aria-label="이 거래의 서류">
+            {documents.map((document) => {
+              const isSelected = documentKey(document) === documentKey(selected)
+              return (
+                <button
+                  key={documentKey(document)}
+                  type="button"
+                  role="listitem"
+                  aria-current={isSelected ? "true" : undefined}
+                  className={cn(
+                    "grid h-10 w-full grid-cols-[84px_minmax(0,1fr)_auto] items-center gap-3 border-t border-[var(--surface-border)] px-3 text-left first:border-t-0 focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
+                    isSelected ? "bg-[var(--control-selected-soft-background)]" : "hover:bg-[var(--surface-muted-background)]"
+                  )}
+                  onClick={() => {
+                    onSelect(document)
+                    setOpen(false)
+                  }}
+                >
+                  <span className="truncate text-xs font-semibold">{document.type}</span>
+                  <span className={cn("truncate text-xs", isSelected ? "text-foreground" : "text-muted-foreground")}>{document.file}</span>
+                  <span className="flex justify-end">
+                    {/* Only the real needs_review state is called out here;
+                        every other document is just listed. */}
+                    {document.status === "검토" ? (
+                      <StatusBadge tone={dealDocumentStatusTone(document.status)}>
+                        {dealDocumentStatusLabel(document.status)}
+                      </StatusBadge>
+                    ) : isSelected ? (
+                      <Check className="size-3.5 text-primary" aria-label="지금 보는 서류" />
+                    ) : null}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          <p className="px-3 py-6 text-center text-xs text-muted-foreground">이 거래에 연결된 서류가 없습니다.</p>
+        )}
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 function DealPdf({
   slot,
   fieldSummary,
+  navigator,
   actions,
   canUnlink,
   onUnlink,
 }: {
   slot: DocumentSlot
   fieldSummary: string
+  /** Document picker shown before the file name (the deal's document box). */
+  navigator?: ReactNode
   actions?: ReactNode
   canUnlink: boolean
   onUnlink: () => void
@@ -2258,9 +2282,16 @@ function DealPdf({
           viewer tools (right). Fixed two rows so nothing reflows with width. */}
       <div className="grid shrink-0 gap-2 border-b border-[var(--surface-border)] bg-background px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[9px] font-semibold text-[var(--color-red-2)]">
-            PDF
-          </span>
+          {navigator ? (
+            <>
+              {navigator}
+              <span aria-hidden="true" className="h-6 w-px shrink-0 bg-[var(--surface-border)]" />
+            </>
+          ) : (
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[9px] font-semibold text-[var(--color-red-2)]">
+              PDF
+            </span>
+          )}
           <span className="min-w-0">
             <span className="block truncate text-xs font-semibold">{file}</span>
             <span className="mt-0.5 block truncate text-[10px] text-muted-foreground">
@@ -3204,108 +3235,6 @@ function DealHealthReference({
   )
 }
 
-function DealDocumentBundleRail({
-  availableDocuments,
-  selected,
-  expanded,
-  onSelect,
-}: {
-  availableDocuments: DocumentSlot[]
-  selected: DocumentSlot
-  expanded: boolean
-  onSelect: (document: DocumentSlot) => void
-}) {
-  const [filter, setFilter] = useState<"all" | "connected" | "missing">("all")
-  const connectedCount = availableDocuments.filter(
-    (document) => document.file
-  ).length
-  const missingCount = availableDocuments.length - connectedCount
-  const filteredDocuments = availableDocuments.filter((document) => {
-    if (filter === "connected" && !document.file) return false
-    if (filter === "missing" && document.file) return false
-    return true
-  })
-
-  if (!expanded) return null
-
-  return (
-    <div className="mt-2 overflow-hidden rounded-[var(--r-md)] border border-[var(--surface-border)]">
-      <div className="bg-[var(--surface-muted-background)] p-2.5">
-        <div className="flex items-center justify-end gap-1 px-1">
-          {[
-            ["all", `전체 ${availableDocuments.length}`],
-            ["connected", `연결 ${connectedCount}`],
-            ["missing", `미연결 ${missingCount}`],
-          ].map(([value, label]) => (
-            <Button
-              key={value}
-              variant={filter === value ? "secondary" : "ghost"}
-              size="xs"
-              onClick={() =>
-                setFilter(value as "all" | "connected" | "missing")
-              }
-            >
-              {label}
-            </Button>
-          ))}
-        </div>
-        <div className="field-scrollbar mt-2 max-h-64 overflow-y-auto rounded-[var(--r-md)] ring-1 ring-[var(--table-border)]">
-          <div className="sticky top-0 z-10 grid grid-cols-[38px_minmax(0,1fr)_90px] gap-2 border-b border-[var(--table-border)] bg-[var(--table-header-background)] px-2.5 py-2 text-[10px] font-medium text-muted-foreground">
-            <span>종류</span>
-            <span>파일</span>
-            <span className="text-right">상태</span>
-          </div>
-          {filteredDocuments.length ? (
-            filteredDocuments.map((document) => {
-              const isSelected = documentKey(selected) === documentKey(document)
-              return (
-                <Button
-                  key={documentKey(document)}
-                  variant="ghost"
-                  className={cn(
-                    "grid h-auto w-full grid-cols-[38px_minmax(0,1fr)_90px] items-center gap-2 rounded-none border-b border-[var(--table-border)] px-2.5 py-2 text-left font-normal text-foreground last:border-b-0 hover:text-foreground",
-                    isSelected && "bg-accent"
-                  )}
-                  onClick={() => {
-                    onSelect(document)
-                  }}
-                >
-                  <Badge
-                    variant="secondary"
-                    className="justify-center px-1 text-[10px]"
-                  >
-                    {document.code}
-                  </Badge>
-                  <span className="min-w-0">
-                    <span className="block truncate text-xs font-medium">
-                      {document.file || `${document.type} 미연결`}
-                    </span>
-                    <span className="mt-0.5 block text-[10px] text-muted-foreground">
-                      {document.type}
-                    </span>
-                  </span>
-                  <span className="flex items-center justify-end gap-1.5">
-                    <StatusBadge tone={dealDocumentStatusTone(document.status)}>
-                      {dealDocumentStatusLabel(document.status)}
-                    </StatusBadge>
-                    {isSelected ? (
-                      <Check className="size-3.5 shrink-0 text-primary" />
-                    ) : null}
-                  </span>
-                </Button>
-              )
-            })
-          ) : (
-            <p className="px-3 py-8 text-center text-xs text-muted-foreground">
-              해당 상태의 기타 서류가 없습니다.
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function GeneratedDealDocumentsList({
   documents: generatedDocuments,
   selectedDocumentNumber,
@@ -3550,9 +3479,6 @@ function DocumentsTab({
   >({})
   const directFileInputRef = useRef<HTMLInputElement | null>(null)
   const directFileCodeRef = useRef<string | null>(null)
-  const [documentsExpanded, setDocumentsExpanded] = useState(false)
-  const [supplementaryDocumentsExpanded, setSupplementaryDocumentsExpanded] =
-    useState(false)
   const [missingDocumentPrompt, setMissingDocumentPrompt] =
     useState<DocumentSlot | null>(null)
   const [confirmUnlink, setConfirmUnlink] = useState(false)
@@ -3594,8 +3520,6 @@ function DocumentsTab({
     visibleImportantDocuments,
     onDocumentSummaryChange,
   ])
-  const totalDocumentCount =
-    connectedImportantCount + visibleSupplementaryDocuments.length
   const selectableDocuments = [
     ...visibleImportantDocuments.filter((item) => item.file),
     ...visibleSupplementaryDocuments,
@@ -3835,6 +3759,14 @@ function DocumentsTab({
     }
     openDirectFilePicker(document.code)
   }
+  const documentBox = (
+    <DealDocumentBox
+      documents={selectableDocuments}
+      selected={selected}
+      onSelect={setSelected}
+      onAdd={canMutate(role) ? () => openDirectFilePicker() : undefined}
+    />
+  )
   const addDirectFile = async (file: File, requestedCode?: string | null) => {
     const detectedCode = detectDealDocumentCode(file.name)
     const fallbackCode =
@@ -3908,8 +3840,6 @@ function DocumentsTab({
                 )}
                 onClick={() => {
                   setSelected(document)
-                  setDocumentsExpanded(false)
-                  setSupplementaryDocumentsExpanded(false)
                   onDocumentOpenChange(true)
                 }}
               >
@@ -3929,8 +3859,7 @@ function DocumentsTab({
               type="button"
               className="flex min-h-8 items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground hover:bg-muted"
               onClick={() => {
-                setDocumentsExpanded(false)
-                setSupplementaryDocumentsExpanded(true)
+                if (visibleSupplementaryDocuments[0]) setSelected(visibleSupplementaryDocuments[0])
                 onDocumentOpenChange(true)
               }}
             >
@@ -4115,76 +4044,6 @@ function DocumentsTab({
         }
         preview={
           <aside className="field-scrollbar min-w-0 border-t px-4 py-4 xl:h-full xl:overflow-y-auto xl:border-t-0 xl:px-5 xl:pb-8">
-            <div className="border-b border-[var(--surface-border)] pb-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-base font-semibold">거래 서류</h3>
-                <StatusBadge tone="neutral">전체 {totalDocumentCount}건</StatusBadge>
-                <DealDisclosureButton expanded={documentsExpanded} onClick={() => {
-                  setDocumentsExpanded((value) => !value)
-                  setSupplementaryDocumentsExpanded(false)
-                }} label="거래 서류" />
-                <div
-                  className="flex w-full min-w-0 items-center gap-1 overflow-x-auto"
-                  aria-label="중요 서류 요약"
-                >
-                  {visibleImportantDocuments.map((document) => {
-                    const isMissing = !document.file
-                    const isSelected = documentKey(selected) === documentKey(document)
-                    return (
-                      <button
-                        key={documentKey(document)}
-                        type="button"
-                        className={cn(
-                          "flex h-7 shrink-0 items-center gap-1 rounded-[var(--r-sm)] px-2 text-[10px] font-medium whitespace-nowrap transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
-                          isSelected
-                            ? "bg-[var(--control-selected-soft-background)] text-primary"
-                            : "text-muted-foreground hover:bg-[var(--surface-muted-background)] hover:text-foreground"
-                        )}
-                        onClick={() => {
-                          setDocumentsExpanded(false)
-                          setSupplementaryDocumentsExpanded(false)
-                          if (isMissing) {
-                            requestDocumentUpload(document)
-                          } else {
-                            setSelected(document)
-                          }
-                        }}
-                        aria-label={`${document.type} ${isMissing ? "미비" : dealDocumentStatusLabel(document.status)}`}
-                      >
-                        <span
-                          className={cn(
-                            "size-1.5 rounded-full",
-                            isMissing ? "bg-warning" : dealDocumentNeedsAction(document.status) ? "border border-warning bg-transparent" : "bg-success"
-                          )}
-                        />
-                        <span>{document.type}</span>
-                      </button>
-                    )
-                  })}
-                  <button
-                    type="button"
-                    className={cn(
-                      "flex h-7 shrink-0 items-center gap-1 rounded-[var(--r-sm)] px-2 text-[10px] font-medium transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
-                      documentsExpanded || supplementaryDocumentsExpanded
-                        ? "bg-muted text-foreground"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    )}
-                    aria-pressed={
-                      documentsExpanded || supplementaryDocumentsExpanded
-                    }
-                    onClick={() => {
-                      setDocumentsExpanded(false)
-                      setSupplementaryDocumentsExpanded((value) =>
-                        documentsExpanded ? true : !value
-                      )
-                    }}
-                  >
-                    <span className="size-1.5 rounded-full bg-muted-foreground/60" />
-                    기타 서류 {visibleSupplementaryDocuments.length}건
-                  </button>
-                </div>
-              </div>
-            </div>
             <input
               ref={directFileInputRef}
               type="file"
@@ -4198,55 +4057,14 @@ function DocumentsTab({
                 event.target.value = ""
               }}
             />
-            {documentsExpanded || supplementaryDocumentsExpanded ? (
-              <div className="pb-2">
-                {documentsExpanded ? (
-                  <>
-                    <div className="mt-3 flex items-center justify-between px-1">
-                      <h4 className="text-xs font-semibold">중요 서류</h4>
-                      <span className="text-[10px] text-muted-foreground">
-                        거래 진행에 필요한 기준 서류
-                      </span>
-                    </div>
-                    <ImportantDealDocumentsPanel
-                      importantDocuments={visibleImportantDocuments}
-                      selected={selected}
-                      onSelect={(document) => {
-                        setSelected(document)
-                        setDocumentsExpanded(false)
-                        setSupplementaryDocumentsExpanded(false)
-                      }}
-                      onUpload={requestDocumentUpload}
-                    />
-                  </>
-                ) : null}
-                <div className="mt-3 flex items-center justify-between px-1">
-                  <h4 className="text-xs font-semibold">기타 서류</h4>
-                  <span className="text-[10px] text-muted-foreground">
-                    {visibleSupplementaryDocuments.length}건
-                  </span>
-                </div>
-                <DealDocumentBundleRail
-                  availableDocuments={visibleSupplementaryDocuments}
-                  selected={selected}
-                  expanded
-                  onSelect={(document) => {
-                    setSelected(document)
-                    setDocumentsExpanded(false)
-                    setSupplementaryDocumentsExpanded(false)
-                  }}
-                />
-              </div>
-            ) : null}
             {movedDocument && <p role="status" className="my-2 rounded-md bg-muted px-3 py-2 text-xs">
               {movedDocument.file} 서류를 이동했습니다. <a href={`/erp/deals/${movedDocument.dealId}`} className="font-medium text-primary underline">이동한 거래 보기</a>
             </p>}
             <div className="mt-2">
               {!selected.file ? (
-                <div className="flex min-w-0 items-center gap-2 border-y border-[var(--surface-border)] px-1 py-2.5">
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[9px] font-semibold text-[var(--color-red-2)]">
-                    PDF
-                  </span>
+                <div className="flex min-w-0 items-center gap-2 border-b border-[var(--surface-border)] px-3 py-2">
+                  {documentBox}
+                  <span aria-hidden="true" className="h-6 w-px shrink-0 bg-[var(--surface-border)]" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-xs font-semibold">
                       {selected.type} 미연결
@@ -4267,6 +4085,7 @@ function DocumentsTab({
                 <DealPdf
                   key={selected.code}
                   slot={selected}
+                  navigator={documentBox}
                   fieldSummary={
                     selectedFieldSet
                       ? `${selectedFieldSet.fields.length}/${selectedFieldSet.total} 필드`
