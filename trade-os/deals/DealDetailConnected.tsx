@@ -47,7 +47,6 @@ import {
   Unlink,
   LoaderCircle,
   MoreHorizontal,
-  MoreVertical,
   NotebookPen,
   Pencil,
   Plus,
@@ -4191,14 +4190,12 @@ function FulfillmentTab({
   role,
   addAudit,
   onSummaryChange,
-  onEditUnitPrice,
   shipmentContent,
 }: {
   dealId: string
   role: Role
   addAudit: (action: string, detail: string) => void
   onSummaryChange: (summary: DealShipmentSummary) => void
-  onEditUnitPrice: () => void
   shipmentContent?: ReactNode
 }) {
   const refresh = useDealRefresh()
@@ -4361,13 +4358,6 @@ function FulfillmentTab({
                       {terminal ? <Button size="sm" variant="outline" onClick={() => setAction("reopen")}><RotateCcw data-icon="inline-start" />재오픈</Button> : <>
                         <Button size="sm" variant="outline" onClick={() => setAction("close")}>완료 마감</Button>
                         <Button size="sm" variant="outline" onClick={() => setAction("short_close")}>미달 마감</Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild><Button size="icon-sm" variant="outline" aria-label="주문 이행 더보기"><MoreVertical /></Button></DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={onEditUnitPrice}>단가 수정</DropdownMenuItem>
-                            <DropdownMenuItem variant="destructive" onClick={() => setAction("cancel")}>취소</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </>}
                     </> : null}
                   </div>
@@ -5188,7 +5178,6 @@ export function DealDetailScreen({
   const [documentOpen, setDocumentOpen] = useState(false)
   const scrollViewportRef = useRef<HTMLDivElement>(null)
   const stickyHeaderRef = useRef<HTMLDivElement>(null)
-  const fieldNavigationRef = useRef<{ label: HTMLElement; input?: HTMLInputElement | null } | null>(null)
   const informationRailRef = useRef<HTMLElement>(null)
   const alertsRef = useRef<HTMLElement>(null)
   const compactAlertsRef = useRef<HTMLDivElement>(null)
@@ -5221,11 +5210,6 @@ export function DealDetailScreen({
     const measure = () => {
       const totalHeight = header.offsetHeight
       viewport.style.setProperty("--deal-header-height", `${totalHeight}px`)
-      const pending = fieldNavigationRef.current
-      if (pending?.label.isConnected && document.activeElement === pending.input) {
-        const offset = pending.label.getBoundingClientRect().top - header.getBoundingClientRect().bottom - 16
-        if (offset < 0) viewport.scrollBy({ top: offset, behavior: "instant" })
-      }
       viewport.style.setProperty(
         "--deal-rail-sticky-top",
         `${Math.min(totalHeight + 16, viewport.clientHeight - (informationRailRef.current?.offsetHeight ?? 0) - 16)}px`
@@ -5417,25 +5401,6 @@ export function DealDetailScreen({
           : "smooth",
         block: "start",
       })
-    })
-  }
-  const openItemUnitPrice = () => {
-    setDocumentOpen(false)
-    requestAnimationFrame(() => {
-      const label = scrollViewportRef.current?.querySelector<HTMLElement>(
-        "[data-deal-page-content] [data-item-unit-price-heading]"
-      )
-      const input = label?.parentElement?.querySelector<HTMLInputElement>("input")
-      const target = label ?? scrollViewportRef.current?.querySelector<HTMLElement>("[data-deal-items]")
-      if (!target) return
-      const viewport = scrollViewportRef.current
-      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      // The sticky header grows when compact alerts appear; its ResizeObserver
-      // keeps this focused label below the final header boundary.
-      fieldNavigationRef.current = { label: target, input }
-      viewport?.style.setProperty("--deal-header-height", `${stickyHeaderRef.current?.offsetHeight ?? 128}px`)
-      input?.focus({ preventScroll: true })
-      target.scrollIntoView({ behavior: reducedMotion ? "instant" : "smooth", block: "start" })
     })
   }
   const openReviewNotice = (id: DealReviewNotice["id"]) => {
@@ -6164,7 +6129,6 @@ export function DealDetailScreen({
                         <FulfillmentTab
                           shipmentContent={<OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} />}
                           onSummaryChange={setShipmentSummary}
-                          onEditUnitPrice={openItemUnitPrice}
                           dealId={dealId}
                           role={role}
                           addAudit={addAudit}
