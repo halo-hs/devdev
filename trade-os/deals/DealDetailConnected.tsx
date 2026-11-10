@@ -7,6 +7,7 @@ import { DealRefreshContext, useDealRefresh, useDealRefreshController } from "@t
 import { PostWriteRefreshNotice } from "@trade-os/components/PostWriteRefreshNotice"
 import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, dealDocumentStatusLabel, dealDocumentStatusTone, dealDocumentNeedsAction, type DealDocumentRecord } from "@trade-os/lib/dealDocumentActions"
 import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
+import { DocumentTypeBadge } from "@trade-os/components/DocumentTypeBadge"
 import { InfoBox } from "@trade-os/components/InfoBox"
 import { OperationsScreen } from "@trade-os/OperationsScreens"
 import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@/components/platform/FormItem"
@@ -47,7 +48,6 @@ import {
   Unlink,
   LoaderCircle,
   MoreHorizontal,
-  MoreVertical,
   NotebookPen,
   Pencil,
   Plus,
@@ -2184,41 +2184,52 @@ function DealDocumentBox({
           ) : null}
         </div>
         {documents.length ? (
-          <div role="list" aria-label="이 거래의 서류">
-            {documents.map((document) => {
-              const isSelected = documentKey(document) === documentKey(selected)
-              return (
-                <button
-                  key={documentKey(document)}
-                  type="button"
-                  role="listitem"
-                  aria-current={isSelected ? "true" : undefined}
-                  className={cn(
-                    "grid h-10 w-full grid-cols-[84px_minmax(0,1fr)_auto] items-center gap-3 border-t border-[var(--surface-border)] px-3 text-left first:border-t-0 focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
-                    isSelected ? "bg-[var(--control-selected-soft-background)]" : "hover:bg-[var(--surface-muted-background)]"
-                  )}
-                  onClick={() => {
-                    onSelect(document)
-                    setOpen(false)
-                  }}
-                >
-                  <span className="truncate text-xs font-semibold">{document.type}</span>
-                  <span className={cn("truncate text-xs", isSelected ? "text-foreground" : "text-muted-foreground")}>{document.file}</span>
-                  <span className="flex justify-end">
-                    {/* Only the real needs_review state is called out here;
-                        every other document is just listed. */}
-                    {document.status === "검토" ? (
-                      <StatusBadge tone={dealDocumentStatusTone(document.status)}>
-                        {dealDocumentStatusLabel(document.status)}
-                      </StatusBadge>
-                    ) : isSelected ? (
-                      <Check className="size-3.5 text-primary" aria-label="지금 보는 서류" />
-                    ) : null}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
+          // Grouped by where the document came from: 문서 올리기 (uploaded or
+          // received) vs 문서 만들기 (issued). One group title instead of a
+          // per-row badge keeps '확인 전' the only badge, so a badge always
+          // means there is something to do.
+          [
+            { label: "올린 서류", items: documents.filter((document) => document.source !== "발행") },
+            { label: "만든 서류", items: documents.filter((document) => document.source === "발행") },
+          ].filter((group) => group.items.length).map((group) => (
+            <div key={group.label} role="group" aria-label={`${group.label} ${group.items.length}건`}>
+              <div className="border-t border-[var(--surface-border)] bg-[var(--surface-muted-background)] px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
+                {group.label} {group.items.length}
+              </div>
+              {group.items.map((document) => {
+                const isSelected = documentKey(document) === documentKey(selected)
+                return (
+                  <button
+                    key={documentKey(document)}
+                    type="button"
+                    aria-current={isSelected ? "true" : undefined}
+                    className={cn(
+                      "grid h-10 w-full grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 border-t border-[var(--surface-border)] px-3 text-left focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
+                      isSelected ? "bg-[var(--control-selected-soft-background)]" : "hover:bg-[var(--surface-muted-background)]"
+                    )}
+                    onClick={() => {
+                      onSelect(document)
+                      setOpen(false)
+                    }}
+                  >
+                    <DocumentTypeBadge code={document.code} title={document.type} aria-label={document.type} />
+                    <span className={cn("truncate text-xs", isSelected ? "text-foreground" : "text-muted-foreground")}>{document.file}</span>
+                    <span className="flex justify-end">
+                      {/* Only the real needs_review state is called out here;
+                          every other document is just listed. */}
+                      {document.status === "검토" ? (
+                        <StatusBadge tone={dealDocumentStatusTone(document.status)}>
+                          {dealDocumentStatusLabel(document.status)}
+                        </StatusBadge>
+                      ) : isSelected ? (
+                        <Check className="size-3.5 text-primary" aria-label="지금 보는 서류" />
+                      ) : null}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          ))
         ) : (
           <p className="px-3 py-6 text-center text-xs text-muted-foreground">이 거래에 연결된 서류가 없습니다.</p>
         )}
@@ -4191,14 +4202,12 @@ function FulfillmentTab({
   role,
   addAudit,
   onSummaryChange,
-  onEditUnitPrice,
   shipmentContent,
 }: {
   dealId: string
   role: Role
   addAudit: (action: string, detail: string) => void
   onSummaryChange: (summary: DealShipmentSummary) => void
-  onEditUnitPrice: () => void
   shipmentContent?: ReactNode
 }) {
   const refresh = useDealRefresh()
@@ -4361,13 +4370,6 @@ function FulfillmentTab({
                       {terminal ? <Button size="sm" variant="outline" onClick={() => setAction("reopen")}><RotateCcw data-icon="inline-start" />재오픈</Button> : <>
                         <Button size="sm" variant="outline" onClick={() => setAction("close")}>완료 마감</Button>
                         <Button size="sm" variant="outline" onClick={() => setAction("short_close")}>미달 마감</Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild><Button size="icon-sm" variant="outline" aria-label="주문 이행 더보기"><MoreVertical /></Button></DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={onEditUnitPrice}>단가 수정</DropdownMenuItem>
-                            <DropdownMenuItem variant="destructive" onClick={() => setAction("cancel")}>취소</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </>}
                     </> : null}
                   </div>
@@ -5188,7 +5190,6 @@ export function DealDetailScreen({
   const [documentOpen, setDocumentOpen] = useState(false)
   const scrollViewportRef = useRef<HTMLDivElement>(null)
   const stickyHeaderRef = useRef<HTMLDivElement>(null)
-  const fieldNavigationRef = useRef<{ label: HTMLElement; input?: HTMLInputElement | null } | null>(null)
   const informationRailRef = useRef<HTMLElement>(null)
   const alertsRef = useRef<HTMLElement>(null)
   const compactAlertsRef = useRef<HTMLDivElement>(null)
@@ -5221,11 +5222,6 @@ export function DealDetailScreen({
     const measure = () => {
       const totalHeight = header.offsetHeight
       viewport.style.setProperty("--deal-header-height", `${totalHeight}px`)
-      const pending = fieldNavigationRef.current
-      if (pending?.label.isConnected && document.activeElement === pending.input) {
-        const offset = pending.label.getBoundingClientRect().top - header.getBoundingClientRect().bottom - 16
-        if (offset < 0) viewport.scrollBy({ top: offset, behavior: "instant" })
-      }
       viewport.style.setProperty(
         "--deal-rail-sticky-top",
         `${Math.min(totalHeight + 16, viewport.clientHeight - (informationRailRef.current?.offsetHeight ?? 0) - 16)}px`
@@ -5417,25 +5413,6 @@ export function DealDetailScreen({
           : "smooth",
         block: "start",
       })
-    })
-  }
-  const openItemUnitPrice = () => {
-    setDocumentOpen(false)
-    requestAnimationFrame(() => {
-      const label = scrollViewportRef.current?.querySelector<HTMLElement>(
-        "[data-deal-page-content] [data-item-unit-price-heading]"
-      )
-      const input = label?.parentElement?.querySelector<HTMLInputElement>("input")
-      const target = label ?? scrollViewportRef.current?.querySelector<HTMLElement>("[data-deal-items]")
-      if (!target) return
-      const viewport = scrollViewportRef.current
-      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      // The sticky header grows when compact alerts appear; its ResizeObserver
-      // keeps this focused label below the final header boundary.
-      fieldNavigationRef.current = { label: target, input }
-      viewport?.style.setProperty("--deal-header-height", `${stickyHeaderRef.current?.offsetHeight ?? 128}px`)
-      input?.focus({ preventScroll: true })
-      target.scrollIntoView({ behavior: reducedMotion ? "instant" : "smooth", block: "start" })
     })
   }
   const openReviewNotice = (id: DealReviewNotice["id"]) => {
@@ -6164,7 +6141,6 @@ export function DealDetailScreen({
                         <FulfillmentTab
                           shipmentContent={<OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} />}
                           onSummaryChange={setShipmentSummary}
-                          onEditUnitPrice={openItemUnitPrice}
                           dealId={dealId}
                           role={role}
                           addAudit={addAudit}
