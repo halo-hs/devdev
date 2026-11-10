@@ -5,7 +5,7 @@ import { useLocaleTag } from "@trade-os/lib/i18n/useLocaleTag"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { DealRefreshContext, useDealRefresh, useDealRefreshController } from "@trade-os/deals/useDealRefresh"
 import { PostWriteRefreshNotice } from "@trade-os/components/PostWriteRefreshNotice"
-import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, type DealDocumentRecord } from "@trade-os/lib/dealDocumentActions"
+import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, dealDocumentStatusLabel, dealDocumentStatusTone, dealDocumentNeedsAction, type DealDocumentRecord } from "@trade-os/lib/dealDocumentActions"
 import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
 import { InfoBox } from "@trade-os/components/InfoBox"
 import { OperationsScreen } from "@trade-os/OperationsScreens"
@@ -2254,7 +2254,9 @@ function DealPdf({
       aria-modal={fullscreen ? "true" : undefined}
       aria-label={fullscreen ? `${slot.type} 전체 화면 미리보기` : undefined}
     >
-      <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--surface-border)] bg-background px-3 py-2">
+      {/* Row 1: which file + its status. Row 2: document actions (left) and
+          viewer tools (right). Fixed two rows so nothing reflows with width. */}
+      <div className="grid shrink-0 gap-2 border-b border-[var(--surface-border)] bg-background px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
           <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[9px] font-semibold text-[var(--color-red-2)]">
             PDF
@@ -2262,26 +2264,20 @@ function DealPdf({
           <span className="min-w-0">
             <span className="block truncate text-xs font-semibold">{file}</span>
             <span className="mt-0.5 block truncate text-[10px] text-muted-foreground">
-              {slot.code} · {slot.type} · {fieldSummary}
+              {[slot.code, slot.type, fieldSummary].filter(Boolean).join(" · ")}
             </span>
           </span>
-        </div>
-        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-          <StatusBadge
-            tone={
-              slot.status === "검토"
-                ? "blue"
-                : slot.status === "발행" || slot.status === "분석 중"
-                  ? "blue"
-                  : "success"
-            }
-          >
-            {slot.status === "검토" ? "확인 전" : slot.status}
+          <StatusBadge tone={dealDocumentStatusTone(slot.status)}>
+            {dealDocumentStatusLabel(slot.status)}
           </StatusBadge>
-          {canUnlink ? (
-            <Tooltip><TooltipTrigger asChild><Button variant="outline" size="icon-sm" className="shrink-0" aria-label="거래 연결 해제" onClick={onUnlink}><Unlink /></Button></TooltipTrigger><TooltipContent>거래 연결 해제</TooltipContent></Tooltip>
-          ) : null}
-          {actions}
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {actions}
+            {canUnlink ? (
+              <Tooltip><TooltipTrigger asChild><Button variant="outline" size="icon-sm" className="shrink-0" aria-label="거래 연결 해제" onClick={onUnlink}><Unlink /></Button></TooltipTrigger><TooltipContent>거래 연결 해제</TooltipContent></Tooltip>
+            ) : null}
+          </div>
           <PdfViewerToolbar
             zoom={zoom}
             onZoomChange={setZoom}
@@ -3289,18 +3285,8 @@ function DealDocumentBundleRail({
                     </span>
                   </span>
                   <span className="flex items-center justify-end gap-1.5">
-                    <StatusBadge
-                      tone={
-                        document.status === "미비"
-                          ? "warning"
-                          : document.status === "발행"
-                            ? "blue"
-                            : document.status === "검토"
-                              ? "warning"
-                              : "success"
-                      }
-                    >
-                      {document.status}
+                    <StatusBadge tone={dealDocumentStatusTone(document.status)}>
+                      {dealDocumentStatusLabel(document.status)}
                     </StatusBadge>
                     {isSelected ? (
                       <Check className="size-3.5 shrink-0 text-primary" />
@@ -3912,7 +3898,7 @@ function DocumentsTab({
               <button
                 key={documentKey(document)}
                 type="button"
-                aria-label={`${document.type} ${document.file ? "보유" : "미비"}`}
+                aria-label={`${document.type} ${document.file ? dealDocumentStatusLabel(document.status) : "미비"}`}
                 aria-pressed={documentKey(selected) === documentKey(document)}
                 className={cn(
                   "flex min-h-8 items-center gap-1.5 rounded-md px-2 text-xs",
@@ -3930,12 +3916,12 @@ function DocumentsTab({
                 <span
                   className={cn(
                     "size-1.5 rounded-full",
-                    document.file ? document.status === "검토" || document.status === "유형 확인 필요" ? "border border-success bg-transparent" : "bg-success" : "bg-warning"
+                    !document.file ? "bg-warning" : dealDocumentNeedsAction(document.status) ? "border border-warning bg-transparent" : "bg-success"
                   )}
                 />
                 {document.type}
                 <span className="sr-only">
-                  {document.file ? "보유" : "미비"}
+                  {document.file ? dealDocumentStatusLabel(document.status) : "미비"}
                 </span>
               </button>
             ))}
@@ -4163,12 +4149,12 @@ function DocumentsTab({
                             setSelected(document)
                           }
                         }}
-                        aria-label={`${document.type} ${isMissing ? "미비" : "보유"}`}
+                        aria-label={`${document.type} ${isMissing ? "미비" : dealDocumentStatusLabel(document.status)}`}
                       >
                         <span
                           className={cn(
                             "size-1.5 rounded-full",
-                            isMissing ? "bg-warning" : document.status === "검토" || document.status === "유형 확인 필요" ? "border border-success bg-transparent" : "bg-success"
+                            isMissing ? "bg-warning" : dealDocumentNeedsAction(document.status) ? "border border-warning bg-transparent" : "bg-success"
                           )}
                         />
                         <span>{document.type}</span>
@@ -4269,22 +4255,8 @@ function DocumentsTab({
                       {selected.code} · {selected.type} · 파일 추가 필요
                     </span>
                   </span>
-                  <StatusBadge
-                    tone={
-                      selected.status === "미비"
-                        ? "warning"
-                        : selected.status === "원본 미첨부"
-                          ? "warning"
-                          : selected.status === "발행"
-                            ? "blue"
-                            : selected.status === "분석 중"
-                              ? "blue"
-                              : selected.status === "검토"
-                                ? "blue"
-                                : "success"
-                    }
-                  >
-                    {selected.status === "검토" ? "확인 전" : selected.status}
+                  <StatusBadge tone={dealDocumentStatusTone(selected.status)}>
+                    {dealDocumentStatusLabel(selected.status)}
                   </StatusBadge>
                   {selected.file && canMutate(role) ? (
                     <Tooltip><TooltipTrigger asChild><Button variant="outline" size="icon-sm" className="shrink-0" aria-label="거래 연결 해제" onClick={() => setConfirmUnlink(true)}><Unlink /></Button></TooltipTrigger><TooltipContent>거래 연결 해제</TooltipContent></Tooltip>
@@ -4298,7 +4270,7 @@ function DocumentsTab({
                   fieldSummary={
                     selectedFieldSet
                       ? `${selectedFieldSet.fields.length}/${selectedFieldSet.total} 필드`
-                      : "필드 분석 중"
+                      : selected.status === "분석 중" ? "필드 분석 중" : ""
                   }
                   actions={selectedRecord && <DealDocumentActions
                     key={selectedRecord.id}
@@ -6269,7 +6241,7 @@ export function DealDetailScreen({
                                 </span>
                               </span>
                               <StatusBadge tone="neutral">
-                                {document.status}
+                                {dealDocumentStatusLabel(document.status)}
                               </StatusBadge>
                             </button>
                           )

@@ -109,9 +109,9 @@ export function DealDocumentActions({ document, canWrite, onChanged }: {
     }
   }
   return <>
-    <div className="flex flex-wrap items-center gap-2" role="group" aria-label={`${document.type} 문서 작업`}>
+    <div className="flex flex-wrap items-center gap-2" role="group" aria-label={`${document.type} 서류 작업`}>
       {document.state === "needs_review" && document.erpDocumentId && <Button variant="outline" size="sm" asChild><a href={dealDocumentReviewUrl(document)}><FileSearch />검토 화면 열기</a></Button>}
-      {document.state === "needs_type" && <Button variant="outline" size="sm" disabled={busy} onClick={() => open("type")}><Tags />서류 종류 선택</Button>}
+      {document.state === "needs_type" && <Button variant="outline" size="sm" disabled={busy} onClick={() => open("type")}><Tags />유형 선택</Button>}
       <Button id={`document-actions-${document.id}`} variant="outline" size="sm" disabled={busy || processing} onClick={() => open("replace")}><RefreshCw />파일 교체</Button>
       {document.state === "ready" && <Button variant="outline" size="sm" disabled={busy} onClick={() => open("move")}><ArrowRightLeft />다른 거래로 이동</Button>}
     </div>
