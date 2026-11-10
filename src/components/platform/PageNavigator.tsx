@@ -57,7 +57,8 @@ export function PdfViewerToolbar({
         >
           <Minus />
         </Button>
-        <ButtonGroupText className="min-w-14 justify-center text-xs text-[var(--surface-muted-foreground)] tabular-nums">
+        {/* Same outline as the − / + buttons so the group reads as one control. */}
+        <ButtonGroupText className="min-w-14 justify-center border-[var(--button-outline-border)] text-xs text-[var(--surface-muted-foreground)] tabular-nums">
           {zoom}%
         </ButtonGroupText>
         <Button

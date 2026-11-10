@@ -52,6 +52,26 @@ export function getDealDocument(id: string): DealDocumentRecord | null {
   if (!id.startsWith("demo-trade-doc:") || !deals.some(deal => deal.id === dealId)) return null
   return listDealDocuments(dealId).find(record => record.originCode === code) ?? null
 }
+// One label/tone per document status, shared by every place the deal screen
+// shows it (panel header badge, document list, document tabs).
+// Internal status values stay as-is; only what the user reads is unified.
+const dealDocumentStatusLabels: Record<string, string> = {
+  검토: "확인 전",
+  보유: "확인 완료",
+  "유형 확인 필요": "유형 선택 필요",
+}
+export function dealDocumentStatusLabel(status: string) {
+  return dealDocumentStatusLabels[status] ?? status
+}
+export function dealDocumentStatusTone(status: string): "warning" | "blue" | "success" {
+  if (status === "분석 중" || status === "발행") return "blue"
+  if (status === "보유") return "success"
+  return "warning"
+}
+/** Linked, but the user still has to act (check content or pick a type). */
+export function dealDocumentNeedsAction(status: string) {
+  return status === "검토" || status === "유형 확인 필요"
+}
 export function dealDocumentReviewUrl(record: DealDocumentRecord) {
   const query = new URLSearchParams({ from: "deal", dealId: record.dealId ?? "", tradeDocId: record.id })
   return `/erp/documents/upload/${encodeURIComponent(record.erpDocumentId)}/review?${query}`
