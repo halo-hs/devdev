@@ -576,7 +576,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                       {refreshError ? <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]" role="alert">{refreshError}</p> : null}
                     </HostTableCell>
                     <HostTableCell className="text-right">
-                      {canRefresh && <HostButton title="일정 및 운송 상태 수정" aria-label="일정 및 운송 상태 수정" disabled={refreshState.status === "pending"} onClick={event => { editTrigger.current = event.currentTarget; setEditing(ship); }} size="icon-sm" className="size-8" type="button" variant="ghost"><Pencil aria-hidden="true" className="size-4" /></HostButton>}
+                      {canRefresh && <HostButton title="B/L·컨테이너·일정 수정" aria-label="B/L·컨테이너·일정 수정" disabled={refreshState.status === "pending"} onClick={event => { editTrigger.current = event.currentTarget; setEditing(ship); }} size="icon-sm" className="size-8" type="button" variant="ghost"><Pencil aria-hidden="true" className="size-4" /></HostButton>}
                     </HostTableCell>
                   </HostTableRow>
                 );
@@ -588,7 +588,9 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
       )}
       </div>
       </div>
-      {editing ? <ShipmentConfirmationDialog shipment={editing} canWrite={canRefresh} copy={copy} returnFocus={() => editTrigger.current?.focus()} onReload={async () => { const result = await listAllShipments(getIdToken); const latest = result.shipments.find(row => row.id === editing.id); if (!latest) throw new Error("선적을 찾을 수 없습니다."); return latest; }} onClose={() => setEditing(null)} onSave={async (body) => {
+      {editing ? <ShipmentConfirmationDialog shipment={editing} canWrite={canRefresh} copy={copy} returnFocus={() => editTrigger.current?.focus()} onReload={async () => { const result = await listAllShipments(getIdToken); const latest = result.shipments.find(row => row.id === editing.id); if (!latest) throw new Error("선적을 찾을 수 없습니다."); return latest; }} onClose={() => setEditing(null)} onSaveIdentity={(identity) => {
+        setState(current => current.status === "ready" ? { ...current, shipments: current.shipments.map(row => row.id === editing.id ? { ...row, bl_number: identity.blNumber || null, container_number: identity.containers.map(container => container.number).join(", ") || null } : row) } : current);
+      }} onSave={async (body) => {
         if (!canRefresh) throw new Error("수정 권한이 없습니다.");
         const { shipment } = await confirmShipment(getIdToken, editing.id, body);
         setState(current => current.status === "ready" ? { ...current, shipments: current.shipments.map(row => row.id === shipment.id ? { ...row, ...shipment, snap_evidence_count: shipment.snap_evidence_count ?? row.snap_evidence_count } : row) } : current);

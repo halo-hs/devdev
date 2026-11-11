@@ -80,6 +80,7 @@ const blankCost = (): DealCost => ({
   basis: "additive",
   note: "",
   source: "수동 입력",
+  payee: "",
 })
 
 export function DealFinanceWorkspace({
@@ -259,7 +260,7 @@ export function DealFinanceWorkspace({
           >
             <fieldset
               disabled={busy}
-              className="grid items-end gap-3 sm:grid-cols-2 @min-[860px]:grid-cols-[100px_140px_104px_130px_minmax(140px,1fr)_auto]"
+              className="grid items-end gap-3 sm:grid-cols-2 @min-[860px]:grid-cols-[100px_140px_104px_150px_130px_minmax(140px,1fr)_auto]"
             >
               <label className="grid min-w-0 gap-1.5 text-sm">
                 <span>항목</span>
@@ -321,7 +322,18 @@ export function DealFinanceWorkspace({
                 </Select>
               </label>
               <label className="grid min-w-0 gap-1.5 text-sm">
-                <span>기준</span>
+                <span>지급처</span>
+                <Input
+                  className="h-10"
+                  aria-label="원가 지급처"
+                  maxLength={120}
+                  value={draft.payee ?? ""}
+                  onChange={(e) => setDraft({ ...draft, payee: e.target.value })}
+                  placeholder="예: HMM Logistics"
+                />
+              </label>
+              <label className="grid min-w-0 gap-1.5 text-sm">
+                <span>손익 반영</span>
                 <Select
                   value={draft.basis}
                   onValueChange={(value) =>
@@ -335,8 +347,8 @@ export function DealFinanceWorkspace({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="additive">가산</SelectItem>
-                    <SelectItem value="already_in_price">가격포함</SelectItem>
+                    <SelectItem value="additive">가산 · 별도 비용으로 손익에서 차감</SelectItem>
+                    <SelectItem value="already_in_price">가격포함 · 단가에 이미 포함(차감 0)</SelectItem>
                   </SelectContent>
                 </Select>
               </label>
@@ -381,13 +393,14 @@ export function DealFinanceWorkspace({
           </p>
         )}
         <div className="mt-4">
-          <Table aria-label="원가 계산 내역" className="min-w-[760px]">
+          <Table aria-label="원가 계산 내역" className="min-w-[860px]">
             <TableHeader>
               <TableRow>
                 {[
                   "유형 / 근거",
+                  "지급처",
                   "금액",
-                  "기준",
+                  "손익 반영",
                   "손익 차감액",
                   "메모",
                   "관리",
@@ -405,11 +418,17 @@ export function DealFinanceWorkspace({
                       {cost.source}
                     </small>
                   </TableCell>
+                  <TableCell>
+                    {cost.payee ? cost.payee : <span className="text-[var(--color-orange-1)]">지급처 미입력</span>}
+                  </TableCell>
                   <TableCell className="tabular-nums">
                     {exactFinanceMoney(cost.amount, cost.currency)}
                   </TableCell>
                   <TableCell>
                     {cost.basis === "additive" ? "가산" : "가격포함"}
+                    <small className="mt-1 block text-muted-foreground">
+                      {cost.basis === "additive" ? "가격 외 별도 비용" : "판매가에 포함 · 중복 차감 안 함"}
+                    </small>
                   </TableCell>
                   <TableCell className="tabular-nums">
                     {exactFinanceMoney(
