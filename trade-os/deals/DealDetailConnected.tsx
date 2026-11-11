@@ -22,6 +22,9 @@ import {
 import { orderProgress } from "@trade-os/lib/dealFinanceWorkspace"
 import { deals as dealFixtures } from "@trade-os/lib/prototypeDeals"
 import { DealFinanceWorkspace } from "@trade-os/deals/DealFinanceWorkspace"
+import { focusFirst } from "@trade-os/deals/dealFocus"
+import { DealBankNoticeContext, useDealBankNotice, DealCustomsContext, useDealCustoms, type CustomsManual, type Ports } from "@trade-os/deals/dealStructure"
+import { BankChangeCheck, CustomsApplicabilityMenu, CustomsNotApplicableNote, DealCustomsWorkspace, DealItemSummary, DealLinkedDeals, PaymentSchedulePlan } from "@trade-os/deals/DealPractitionerFeedback"
 import {
   useEffect,
   useEffectEvent,
@@ -39,6 +42,7 @@ import {
   Check,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   CircleAlert,
   FilePlus2,
   FileSearch,
@@ -397,6 +401,7 @@ function DealProgressNavigation({
     { value: "customs", label: "통관", tab: "customs", groups: [] },
     { value: "settled", label: "정산", tab: "finance", groups: ["결제 정보"] },
   ]
+  const { notApplicable: customsNotApplicable, route: customsRoute } = useDealCustoms()
   const current = Math.max(
     0,
     stages.findIndex((item) => item.value === (dealStage(dealId) === "settlement" ? "settled" : dealStage(dealId)))
@@ -487,7 +492,9 @@ function DealProgressNavigation({
                         complete ? "bg-[var(--color-green-6)] text-[var(--color-green-1)]" : active ? "bg-primary/10 text-primary" : "text-muted-foreground"
                       )}
                     >
-                      {complete
+                      {stage.value === "customs" && customsNotApplicable && !complete
+                        ? "해당 없음"
+                        : complete
                         ? "완료"
                         : active
                           ? "현재 할 일"
@@ -507,7 +514,7 @@ function DealProgressNavigation({
                     )}
                     {stage.value === "customs" && !complete && (
                       <p className="py-1 text-[13px] leading-[18px] text-muted-foreground">
-                        {active ? "통관 업무 확인" : "B/L 연결 후 진행"}
+                        {customsNotApplicable ? customsRoute : active ? "통관 업무 확인" : "B/L 연결 후 진행"}
                       </p>
                     )}
                     {stage.groups.map((group) => {
@@ -765,7 +772,7 @@ const initialDealFields: DealFieldDetail[] = [
   },
   {
     key: "container",
-    label: "컨테이너",
+    label: "컨테이너 규격·수량",
     value: "1 x 40FT HC",
     group: "선적 정보",
     match: "단일 출처",
@@ -780,8 +787,17 @@ const initialDealFields: DealFieldDetail[] = [
     evidence: ["B/L 문서 미연결"],
   },
   {
+    key: "latest_shipment_date",
+    label: "최종 선적일 (L/S)",
+    value: "2026-07-31",
+    group: "선적 정보",
+    match: "단일 출처",
+    evidence: ["SC-2026-0708.pdf 계약 조건"],
+    inputType: "date",
+  },
+  {
     key: "etd",
-    label: "ETD",
+    label: "ETD · 출항 예정일",
     value: "2026-07-20",
     group: "선적 정보",
     match: "일치",
@@ -790,7 +806,7 @@ const initialDealFields: DealFieldDetail[] = [
   },
   {
     key: "eta",
-    label: "ETA",
+    label: "ETA · 도착 예정일",
     value: "2026-08-03",
     group: "선적 정보",
     match: "단일 출처",
@@ -1374,14 +1390,14 @@ type DealReviewNotice = {
   description: string
   dismissible?: boolean
 }
-function dealReviewNotices(riskDismissed: boolean): DealReviewNotice[] {
+function dealReviewNotices(riskDismissed: boolean, bankAcknowledged = false): DealReviewNotice[] {
   return [
-    {
+    ...(bankAcknowledged ? [] : [{
       id: "account_change" as const,
       title: "수취 계좌 변경 확인",
       description:
         "확정 문서 DBS Bank · SC-2026-0708 → 현재 송장 JPMorgan Chase · INV-2026-0703",
-    },
+    }]),
     ...(!riskDismissed
       ? [
           {
@@ -1464,7 +1480,7 @@ function DealAssistBar({
                 >
                   <span>{notice.title}</span>
                   <span className="shrink-0 text-xs text-primary">
-                    검토하기 ↗
+                    위치로 이동
                   </span>
                 </button>
               </li>
@@ -1639,6 +1655,7 @@ function DealWorkBlock({
   children: ReactNode
 }) {
   const state = plan.states[work]
+  const { notApplicable } = useDealCustoms()
   if (state !== "planned")
     return (
       <div
@@ -1691,16 +1708,18 @@ function DealWorkBlock({
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <span className="text-sm font-semibold tabular-nums text-muted-foreground">{{ documents: "01", fulfillment: "02", customs: "03", finance: "04" }[work]}</span>
           <h2 className="text-lg font-semibold">{workLabels[work]}</h2>
-          <StatusBadge>예정</StatusBadge>
+          {work === "customs" && notApplicable ? <StatusBadge>해당 없음</StatusBadge> : <StatusBadge>예정</StatusBadge>}
+          {work === "customs" && <CustomsNotApplicableNote />}
         </div>
-        <DealDisclosureButton expanded={previewOpen} onClick={() => onPreview(work)} label={workLabels[work]} collapsedLabel="미리 보기" controls={`planned-${work}`} />
-        {canWrite && (
+        {!(work === "customs" && notApplicable) && <DealDisclosureButton expanded={previewOpen} onClick={() => onPreview(work)} label={workLabels[work]} collapsedLabel="미리 보기" controls={`planned-${work}`} />}
+        {canWrite && !(work === "customs" && notApplicable) && (
           <Button size="sm" variant="outline" onClick={() => onStart(work)}>
             직접 입력
           </Button>
         )}
+        {work === "customs" && <CustomsApplicabilityMenu canWrite={canWrite} />}
       </div>
-      {previewOpen && (
+      {previewOpen && !(work === "customs" && notApplicable) && (
         <Card id={`planned-${work}`} className="mt-3 gap-0 bg-card p-5 shadow-[var(--shadow-section)]">
           <p className="text-xs text-muted-foreground">
             업무가 시작되면 아래 정보를 확인하고 입력합니다.
@@ -1737,7 +1756,9 @@ function DealDocumentPanels({
   onDocumentOpenChange,
   failedPanel,
   onRetry,
+  items,
 }: {
+  items: DealLineItem[]
   plan: DealWorkPlan
   aiQuestion: ReactNode
   workspaces: Partial<Record<DealWorkKey, ReactNode>>
@@ -1828,6 +1849,7 @@ function DealDocumentPanels({
               ? `다음 작업: ${plan.nextAction}`
               : "거래 업무가 완료되었습니다."}
           </p>
+          <DealItemSummary items={items} />
         </Card>
       </section>
       {plan.order.map((work) => (
@@ -2889,6 +2911,7 @@ function DealFieldsPanel({
             : group}
         </h4>
         </div>
+        {group === "결제 정보" && <BankChangeCheck />}
         <div className="mt-3 grid min-w-0 gap-x-4 gap-y-2 @min-[640px]/fields:grid-cols-2">
           {groupFields.map((field) => (
             <FormField
@@ -2965,6 +2988,19 @@ function DealFieldsPanel({
             </FormField>
           ))}
         </div>
+        {group === "상업 조건" && (
+          <PaymentSchedulePlan
+            terms={fields.find((field) => field.key === "payment_terms")?.value ?? ""}
+            amount={fields.find((field) => field.key === "amount_total")?.value ?? "0"}
+            currency={fields.find((field) => field.key === "currency")?.value ?? "USD"}
+            basisDates={{
+              contract_date: fields.find((field) => field.key === "contract_date")?.value || undefined,
+              eta: fields.find((field) => field.key === "eta")?.value || undefined,
+            }}
+            direction={profile.direction}
+            canWrite={editable}
+          />
+        )}
         {group === "결제 정보" && <PaymentHistory paymentHistory={paymentHistory} />}
       </section>
     )
@@ -3026,7 +3062,7 @@ function DealVerificationPanels({
   const [riskSaving, setRiskSaving] = useState(false)
   const [reason, setReason] = useState("within_tolerance")
   const [note, setNote] = useState("")
-  const verificationIssues = dealReviewNotices(riskDismissed)
+  const verificationIssues = dealReviewNotices(riskDismissed, useDealBankNotice().acknowledged)
   const dismissRisk = async () => {
     if (!canMutate(role) || riskSaving || (reason === "other" && !note.trim())) return
     setRiskSaving(true)
@@ -3186,27 +3222,36 @@ function DealVerificationPanels({
 
 function DealHealthReference({
   documentSummary,
+  onOpenField,
+  onNavigateSection,
+  onOpenVerification,
 }: {
   documentSummary: DealDocumentSummary
+  onOpenField: (key: string) => void
+  onNavigateSection: (tab: Tab) => void
+  onOpenVerification: (id: DealReviewNotice["id"]) => void
 }) {
   const [expanded, setExpanded] = useState(false)
-  const health = [
-    [
-      "서류 완성도",
-      86,
-      `중요 서류 ${documentSummary.connected}/${documentSummary.total}건`,
-    ],
-    ["교차 대조", 58, "금액·수량 불일치"],
-    ["결제", 70, "계좌 변경 확인 필요"],
-    ["선적", 74, "잔량 4 MT"],
-    ["마진", 68, "원가 2건 추정값"],
-    ["규정", 82, "통관 서류 준비 중"],
-  ] as const
+  // 점수 규칙은 백엔드 internal/service/trade/deal_health.go 기준.
+  //  결제(payment_risk): 연체 20 · 송장 금액≠계약 60 · 그 외 100
+  //  규정(compliance_release): 지급 계좌가 이전 송장과 다르면 0, 아니면 100
+  //  종합 = 가중 평균(서류20·대조20·결제20·선적15·마진15·규정10). 서류·대조·선적·마진 값은 시안 예시.
+  const bankNotice = useDealBankNotice()
+  const health: { label: string; score: number; weight: number; detail: string; go: () => void; target: string }[] = [
+    { label: "서류 완성도", score: 86, weight: 20, detail: `중요 서류 ${documentSummary.connected}/${documentSummary.total}건`, target: "빠진 서류", go: () => focusFirst(['[aria-label="거래 상세 서류 목록"] button[aria-label$=" 미비"]', "#deal-documents"]) },
+    { label: "교차 대조", score: 58, weight: 20, detail: "금액·수량 불일치", target: "불일치 필드", go: () => onOpenField("amount_total") },
+    { label: "결제", score: 60, weight: 20, detail: "송장 금액이 계약 금액과 다름", target: "거래 금액", go: () => onOpenField("amount_total") },
+    { label: "선적", score: 74, weight: 15, detail: "잔량 4 MT", target: "주문 이행 잔량", go: () => { onNavigateSection("fulfillment"); focusFirst(["[data-order-progress]", "#deal-fulfillment"]) } },
+    { label: "마진", score: 68, weight: 15, detail: "원가 2건 추정값", target: "원가 내역", go: () => { onNavigateSection("finance"); focusFirst(['[aria-label="원가 계산 내역"]', "#planned-finance", '[data-work-section="finance"]']) } },
+    { label: "규정", score: 0, weight: 10, detail: bankNotice.acknowledged ? "지급 계좌가 이전 송장과 다름 · 안내 확인함" : "지급 계좌가 이전 송장과 다름", target: "지급 계좌", go: () => onOpenVerification("account_change") },
+  ]
+  const total = Math.round(health.reduce((sum, row) => sum + row.score * row.weight, 0) / health.reduce((sum, row) => sum + row.weight, 0))
+  const totalTone = total >= 85 ? "text-[var(--color-green-1)]" : total >= 70 ? "text-[var(--color-orange-1)]" : "text-destructive"
   return (
     <section aria-label="거래 건강도와 서류 대조" className="p-5">
       <div className="flex items-center justify-between gap-2">
         <h4 className="text-base font-bold leading-6">거래 건강도</h4>
-        <strong className="text-lg font-bold leading-[26px] text-[var(--color-orange-1)]">72</strong>
+        <strong className={cn("text-lg font-bold leading-[26px] tabular-nums", totalTone)}>{total}</strong>
       </div>
       <div aria-hidden="true" className="relative mt-3.5 h-4 text-[11px] leading-4 text-muted-foreground">
         <span className="absolute left-0">0</span>
@@ -3214,23 +3259,32 @@ function DealHealthReference({
         <span className="absolute left-[80%] -translate-x-1/2">80</span>
         <span className="absolute right-0">100</span>
       </div>
-      <div className="mt-3.5 flex flex-col gap-3.5">
-        {health.map(([label, score, detail]) => (
-          <div key={label} className="flex min-w-0 flex-col gap-1.5">
-            <div className="flex items-center justify-between gap-2 text-[13px] font-semibold leading-[18px]">
-              <span>{label}</span>
+      <div className="-mx-2 mt-2.5 flex flex-col gap-0.5">
+        {health.map(({ label, score, detail, go, target }) => (
+          <button
+            key={label}
+            type="button"
+            onClick={go}
+            aria-label={`${label} ${score}점 · ${detail} · ${target}(으)로 이동`}
+            className="group flex min-w-0 cursor-pointer flex-col gap-1.5 rounded-[var(--r-sm)] px-2 py-1.5 text-left transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none"
+          >
+            <span className="flex items-center justify-between gap-2 text-[13px] font-semibold leading-[18px]">
+              <span className="flex items-center gap-1">
+                {label}
+                <ChevronRight aria-hidden="true" className="size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 [@media(hover:none)]:opacity-100" />
+              </span>
               <strong className={cn("font-semibold tabular-nums", score < 60 ? "text-destructive" : score < 80 ? "text-[var(--color-orange-1)]" : "text-[var(--color-green-1)]")}>{score}</strong>
-            </div>
-            <div role="meter" aria-label={label} aria-valuenow={score} aria-valuemin={0} aria-valuemax={100} className="relative h-2">
-              <div aria-hidden="true" className="grid h-full grid-cols-[3fr_1fr_1fr] gap-0.5">
+            </span>
+            <span role="meter" aria-label={label} aria-valuenow={score} aria-valuemin={0} aria-valuemax={100} className="relative block h-2">
+              <span aria-hidden="true" className="grid h-full grid-cols-[3fr_1fr_1fr] gap-0.5">
                 <span className="rounded-full bg-[var(--color-red-8)]" />
                 <span className="rounded-full bg-[var(--color-orange-6)]" />
                 <span className="rounded-full bg-[var(--color-green-6)]" />
-              </div>
+              </span>
               <span aria-hidden="true" className={cn("absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white", score < 60 ? "bg-destructive" : score < 80 ? "bg-[var(--color-orange-1)]" : "bg-[var(--color-green-1)]")} style={{ left: `${score}%` }} />
-            </div>
-            <p className="text-[11px] leading-4 text-muted-foreground">{detail}</p>
-          </div>
+            </span>
+            <span className="text-[11px] leading-4 text-muted-foreground">{detail}</span>
+          </button>
         ))}
       </div>
       <Separator className="my-4" />
@@ -3397,9 +3451,20 @@ function DocumentsTab({
             ? profile.amount
             : field.key === "currency"
               ? profile.currency
-              : field.value,
+              : field.key === "port_loading" && new URLSearchParams(window.location.search).get("pol")
+                ? new URLSearchParams(window.location.search).get("pol")!
+                : field.key === "port_discharge" && new URLSearchParams(window.location.search).get("pod")
+                  ? new URLSearchParams(window.location.search).get("pod")!
+                  : field.value,
     }))
   )
+  const customs = useDealCustoms()
+  const portLoading = dealFields.find((field) => field.key === "port_loading")?.value ?? ""
+  const portDischarge = dealFields.find((field) => field.key === "port_discharge")?.value ?? ""
+  const setCustomsPorts = customs.setPorts
+  useEffect(() => {
+    setCustomsPorts?.({ pol: portLoading, pod: portDischarge })
+  }, [portLoading, portDischarge, setCustomsPorts])
   const profileKey = `${profile.direction}:${profile.counterparty}`
   const [previousProfile, setPreviousProfile] = useState(profileKey)
   if (previousProfile !== profileKey) {
@@ -3437,7 +3502,22 @@ function DocumentsTab({
   useEffect(() => {
     onMainInformationChange(mainInformation)
   }, [mainInformation, onMainInformationChange])
-  const [lineItems, setLineItems] = useState(initialDealLineItems)
+  // 로컬 시안: ?items=many 로 품목이 많은 거래(요약 테이블 줄 수 제한)를 확인한다.
+  const [lineItems, setLineItems] = useState(() =>
+    new URLSearchParams(window.location.search).get("items") === "many"
+      ? [
+          ...initialDealLineItems,
+          ...["Copper Scrap Berry", "Brass Scrap Honey", "Stainless Scrap 304", "Zinc Die Cast Scrap", "Lead Battery Scrap", "Aluminium UBC Scrap"].map((goods, index) => ({
+            ...initialDealLineItems[0],
+            id: 3 + index,
+            goods,
+            quantity: String(2 + index),
+            unitPrice: String(90000 + index * 7000),
+            match: "일치" as const,
+          })),
+        ]
+      : initialDealLineItems
+  )
   useEffect(() => {
     onMissingFieldsChange(
       requiredDealReviews(
@@ -3824,6 +3904,7 @@ function DocumentsTab({
   return (
     <div className="min-w-0">
       <DealDocumentPanels
+        items={lineItems}
         aiQuestion={aiQuestion}
         plan={plan}
         workspaces={workspaces}
@@ -3898,6 +3979,7 @@ function DocumentsTab({
               action={
                 canMutate(role) ? (
                   <div className="flex items-center gap-2">
+                    <span className="hidden text-[11px] text-muted-foreground sm:inline" title="여기서 고친 값은 거래 대표값에만 저장됩니다. 연결된 원본 서류 파일과 추출값은 바뀌지 않으며, 서류 원문 값은 ‘문서별 값’에서 계속 볼 수 있습니다.">거래 대표값에 저장 · 원본 서류는 유지</span>
                     <AutoSaveStatus state={saveState} savedAt={lastSavedAt} />
                     {saveState === "error" && !fieldConflict ? (
                       <Button
@@ -4375,7 +4457,7 @@ function FulfillmentTab({
                   </div>
                 }
               />
-              <div className="mt-4">
+              <div data-order-progress className="mt-4 rounded-[var(--r-sm)]">
                 <Progress value={80} className="h-1" aria-label="주문 이행률" />
                 <div className="mt-2 flex justify-between text-[11px] leading-4 text-muted-foreground">
                   <span>누적 16 MT · 80%</span>
@@ -5188,6 +5270,8 @@ export function DealDetailScreen({
     focusTarget?.tab ?? stageEntryTab(dealId)
   )
   const [documentOpen, setDocumentOpen] = useState(false)
+  const [customsPorts, setCustomsPorts] = useState<Ports>({ pol: "", pod: "" })
+  const [customsManual, setCustomsManual] = useState<CustomsManual>(null)
   const scrollViewportRef = useRef<HTMLDivElement>(null)
   const stickyHeaderRef = useRef<HTMLDivElement>(null)
   const informationRailRef = useRef<HTMLElement>(null)
@@ -5285,16 +5369,20 @@ export function DealDetailScreen({
         ?.scrollIntoView({ behavior: "smooth", block: "start" })
     )
   }
+  // 알림에서 위치로 이동할 때만 보이게 펼친 그룹(업무 단계는 시작하지 않는다).
+  const [revealedGroups, setRevealedGroups] = useState<DealFieldGroup[]>([])
   const visibleGroups = useMemo(
     () =>
       fieldGroups.filter((group) =>
-        group === "선적 정보"
+        revealedGroups.includes(group)
+          ? true
+          : group === "선적 정보"
           ? plan.states.fulfillment !== "planned"
           : group === "결제 정보"
             ? plan.states.finance !== "planned"
             : true
       ),
-    [plan]
+    [plan, revealedGroups]
   )
   const [missingFields, setMissingFields] = useState<DealMissingField[]>([])
   const openFieldGroup = (group: DealFieldGroup) => {
@@ -5372,6 +5460,14 @@ export function DealDetailScreen({
     },
   ])
   const [riskDismissed, setRiskDismissed] = useState(false)
+  const bankAckKey = `ecoya:bank-change-ack:v1:${dealId}:8830043968`
+  const [bankAcknowledged, setBankAcknowledged] = useState(() => {
+    try { return localStorage.getItem(bankAckKey) === "1" } catch { return false }
+  })
+  const acknowledgeBankNotice = () => {
+    setBankAcknowledged(true)
+    try { localStorage.setItem(bankAckKey, "1") } catch { /* 저장 없이도 이번 화면에서는 닫힌다. */ }
+  }
   const [previousDealRead, setPreviousDealRead] = useState(refresh.data)
   if (refresh.data && refresh.data !== previousDealRead) {
     setPreviousDealRead(refresh.data)
@@ -5382,7 +5478,7 @@ export function DealDetailScreen({
     setRiskDismissed(data.riskDismissed)
   }
   const [verificationOpen, setVerificationOpen] = useState(false)
-  const [reviewFocusId, setReviewFocusId] =
+  const [reviewFocusId] =
     useState<DealReviewNotice["id"]>("account_change")
   const [audit, setAudit] = useState<AuditItem[]>([
     {
@@ -5400,24 +5496,21 @@ export function DealDetailScreen({
       time: "2026-07-08T09:20:00+09:00",
     },
   ])
+  // 알림·건강도에서 누르면 패널을 거치지 않고 바로 해당 위치로 이동해 잠깐 강조한다.
   const openMissingField = (key: string) => {
     setDocumentOpen(false)
-    requestAnimationFrame(() => {
-      const field = document.getElementById(`deal-field-${key}`)
-      const label = document.getElementById(`deal-field-label-${key}`)
-      const target = label ?? field
-      field?.focus({ preventScroll: true })
-      target?.scrollIntoView({
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "instant"
-          : "smooth",
-        block: "start",
-      })
-    })
+    focusFirst([`#deal-field-label-${key}`, `#deal-field-${key}`], { focus: true })
   }
   const openReviewNotice = (id: DealReviewNotice["id"]) => {
-    setReviewFocusId(id)
-    setVerificationOpen(true)
+    setDocumentOpen(false)
+    if (id === "account_change") {
+      setRevealedGroups((current) => (current.includes("결제 정보") ? current : [...current, "결제 정보"]))
+      focusFirst(["#deal-bank-check", "#deal-field-label-bank_account"])
+    } else if (id === "amount_quantity") {
+      focusFirst(["#deal-field-label-amount_total"], { focus: true })
+    } else {
+      focusFirst(['[aria-label="거래 상세 서류 목록"] button[aria-label$=" 미비"]', "#deal-documents"])
+    }
   }
   const navigateSection = (value: Tab) => {
     setDocumentOpen(false)
@@ -5677,6 +5770,16 @@ export function DealDetailScreen({
         onOpenSettlement={onOpenSettlement}
       >
         <DealRefreshContext.Provider value={refresh}>
+        <DealBankNoticeContext.Provider value={{ acknowledged: bankAcknowledged, acknowledge: acknowledgeBankNotice }}>
+        <DealCustomsContext.Provider value={{
+          ports: customsPorts,
+          setPorts: setCustomsPorts,
+          manual: customsManual,
+          setManual: (manual) => {
+            setCustomsManual(manual)
+            addAudit("통관 해당 여부 변경", manual === "not_applicable" ? "해당 없음" : manual === "required" ? "통관 필요" : "항구 기준으로 되돌림")
+          },
+        }}>
         <div className="min-w-0">
           <div
             ref={stickyHeaderRef}
@@ -5860,7 +5963,7 @@ export function DealDetailScreen({
                 >
                   <DealCompactAlerts
                     missingFields={missingFields}
-                    notices={dealReviewNotices(riskDismissed)}
+                    notices={dealReviewNotices(riskDismissed, bankAcknowledged)}
                     onOpenMissingField={openMissingField}
                     onOpenVerification={openReviewNotice}
                   />
@@ -6108,7 +6211,7 @@ export function DealDetailScreen({
             className="mx-4 mt-4 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-4 py-3 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] empty:hidden sm:mx-5 sm:px-5"
           >
             <DealAssistBar
-              notices={dealReviewNotices(riskDismissed)}
+              notices={dealReviewNotices(riskDismissed, bankAcknowledged)}
               missingFields={missingFields}
               onOpenMissingField={openMissingField}
               onOpenVerification={openReviewNotice}
@@ -6153,26 +6256,12 @@ export function DealDetailScreen({
                         tabIndex={-1}
                         className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] p-5 outline-none"
                       >
-                        <h2 className="text-base font-semibold">
-                          통관 문서 확인
-                        </h2>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          수출입 신고서를 거래에 연결하고 문서의
-                          신고번호·신고일·품목 정보를 확인합니다.
-                        </p>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setDocumentOpen(true)}
-                          >
-                            거래 서류 확인
-                          </Button>
-                          {canMutate(role) && (
-                            <Button onClick={onUpload}>
-                              이 거래로 통관 서류 올리기
-                            </Button>
-                          )}
-                        </div>
+                        <DealCustomsWorkspace
+                          canWrite={canMutate(role)}
+                          onOpenDocuments={() => setDocumentOpen(true)}
+                          onUpload={onUpload}
+                          onOpenSettlement={() => navigateSection("finance")}
+                        />
                       </section>
                     ),
                     finance: (
@@ -6205,6 +6294,13 @@ export function DealDetailScreen({
                   onDocumentOpenChange={setDocumentOpen}
                   failedPanel={failedPanel}
                   onRetry={() => setFailedPanel(null)}
+                />
+                <DealLinkedDeals
+                  direction={profile.direction}
+                  totalQuantity={initialDealLineItems.reduce((sum, item) => sum + Number(item.quantity.replaceAll(",", "")), 0)}
+                  unit={initialDealLineItems[0]?.quantityUnit ?? "MT"}
+                  costPerUnit={Number(String(mainInformation.amount).replaceAll(",", "")) / Math.max(1, initialDealLineItems.reduce((sum, item) => sum + Number(item.quantity.replaceAll(",", "")), 0))}
+                  canWrite={canMutate(role)}
                 />
                 <section
                   id="deal-people"
@@ -6318,7 +6414,7 @@ export function DealDetailScreen({
                     onOpenGroup={openFieldGroup}
                     onNavigate={navigateSection}
                   />
-                  <DealHealthReference documentSummary={documentSummary} />
+                  <DealHealthReference documentSummary={documentSummary} onOpenField={openMissingField} onNavigateSection={navigateSection} onOpenVerification={openReviewNotice} />
                 </div>
               </aside>
             </div>
@@ -6359,6 +6455,8 @@ export function DealDetailScreen({
             </div>
           </SheetContent>
         </Sheet>
+        </DealCustomsContext.Provider>
+        </DealBankNoticeContext.Provider>
         </DealRefreshContext.Provider>
       </DealHandoffProvider>
       {workspaceActionsTarget

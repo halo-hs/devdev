@@ -20,6 +20,8 @@ export type DealCost = {
   basis: "additive" | "already_in_price"
   note: string
   source: string
+  /** 실제 지급처(선사·포워더·관세사 등). 실무 피드백 #69/#77. */
+  payee?: string
 }
 export type FinanceFact = Partial<TradeFinanceFact> &
   Pick<TradeFinanceFact, "currency">
