@@ -2046,6 +2046,7 @@ function DealDocumentPanels({
   primary,
   preview,
   documentOpen,
+  documentPanelTarget,
   onDocumentOpenChange,
   failedPanel,
   onRetry,
@@ -2063,66 +2064,23 @@ function DealDocumentPanels({
   primary: ReactNode
   preview: ReactNode
   documentOpen: boolean
+  documentPanelTarget: HTMLElement | null
   onDocumentOpenChange: (open: boolean) => void
   failedPanel: Tab | null
   onRetry: () => void
 }) {
-  const workspaceRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
-  const [workspaceBounds, setWorkspaceBounds] = useState({
-    left: 0,
-    top: 0,
-    width: 0,
-    height: 0,
-  })
   useEffect(() => {
-    if (!documentOpen) return
-    const main = workspaceRef.current?.closest<HTMLElement>(
-      "[data-deal-scroll-viewport]"
-    )
-    if (!main) return
-    // The comparison covers the whole deal area, sticky deal header included.
-    const measure = () => {
-      const rect = main.getBoundingClientRect()
-      const top = rect.top
-      const panelWidth = Math.min(rect.width, Math.max(360, Math.round(rect.width * 0.46)))
-      setWorkspaceBounds({
-        left: rect.right - panelWidth,
-        top,
-        width: panelWidth,
-        height: Math.max(0, Math.min(window.innerHeight, rect.bottom) - top),
-      })
-    }
-    const previousOverflow = main.style.overflowY
-    main.style.overflowY = "hidden"
-    measure()
+    if (!documentOpen || !documentPanelTarget) return
     const returnFocus = editButtonRef.current
-    const observer = new ResizeObserver(measure)
-    observer.observe(main)
-    window.addEventListener("resize", measure)
-    window.addEventListener("scroll", measure, true)
     closeRef.current?.focus({ preventScroll: true })
     return () => {
-      observer.disconnect()
-      window.removeEventListener("resize", measure)
-      window.removeEventListener("scroll", measure, true)
-      main.style.overflowY = previousOverflow
       returnFocus?.focus({ preventScroll: true })
     }
-  }, [documentOpen])
-  const inlineRef = useRef<HTMLDivElement>(null)
+  }, [documentOpen, documentPanelTarget])
   const editButtonRef = useRef<HTMLButtonElement>(null)
-  const [inlineHeight, setInlineHeight] = useState(0)
-  useEffect(() => {
-    if (documentOpen || !inlineRef.current) return
-    const observer = new ResizeObserver(([entry]) =>
-      setInlineHeight(entry.contentRect.height)
-    )
-    observer.observe(inlineRef.current)
-    return () => observer.disconnect()
-  }, [documentOpen])
   return (
-    <div ref={workspaceRef} className="space-y-5">
+    <div className="space-y-5">
       <section
         id="deal-overview"
         tabIndex={-1}
@@ -2180,10 +2138,7 @@ function DealDocumentPanels({
               {failedPanel === "documents" ? (
                 <PanelFailure title="상세" onRetry={onRetry} />
               ) : (
-                <div
-                  ref={inlineRef}
-                  style={documentOpen ? { height: inlineHeight } : undefined}
-                >
+                <div>
                   <PdfPanelWorkspaceCard className="-mx-5 rounded-none bg-transparent shadow-none ring-0">{primary}</PdfPanelWorkspaceCard>
                 </div>
               )}
@@ -2198,15 +2153,14 @@ function DealDocumentPanels({
           )}
         </DealWorkBlock>
       ))}
-      {documentOpen &&
+      {documentOpen && documentPanelTarget &&
         createPortal(
           <section
-            role="dialog"
+            role="region"
             aria-label="거래 상세 · 문서 대조"
             aria-describedby="deal-comparison-description"
             data-deal-comparison
-            style={workspaceBounds}
-            className="fixed z-40 flex min-w-0 flex-col overflow-hidden border-l bg-background shadow-2xl animate-in slide-in-from-right duration-200"
+            className="flex h-full min-w-0 flex-col overflow-hidden bg-background animate-in slide-in-from-right duration-200"
             onKeyDown={(event) => {
               if (
                 event.key === "Escape" &&
@@ -2248,7 +2202,7 @@ function DealDocumentPanels({
               </div>
             </div>
           </section>,
-          document.body
+          documentPanelTarget
         )}
     </div>
   )
@@ -3686,6 +3640,7 @@ function DocumentsTab({
   linkedInvoiceTargets,
   onEditShipment,
   documentOpen,
+  documentPanelTarget,
   onDocumentOpenChange,
   failedPanel,
   onRetry,
@@ -3711,6 +3666,7 @@ function DocumentsTab({
   linkedInvoiceTargets?: Record<string, string>
   onEditShipment: (bill: SplitShipmentView["billsOfLading"][number], trigger: HTMLButtonElement) => void
   documentOpen: boolean
+  documentPanelTarget: HTMLElement | null
   onDocumentOpenChange: (open: boolean) => void
   failedPanel: Tab | null
   onRetry: () => void
@@ -4291,6 +4247,7 @@ function DocumentsTab({
           </div>
         }
         documentOpen={documentOpen}
+        documentPanelTarget={documentPanelTarget}
         onDocumentOpenChange={onDocumentOpenChange}
         failedPanel={failedPanel}
         onRetry={onRetry}
@@ -5750,6 +5707,7 @@ export function DealDetailScreen({
     focusTarget?.tab ?? stageEntryTab(dealId)
   )
   const [documentOpen, setDocumentOpen] = useState(false)
+  const [documentPanelTarget, setDocumentPanelTarget] = useState<HTMLElement | null>(null)
   const [linkedInvoiceTargets] = useState<Record<string, string>>({})
   const [connectedShipmentDrafts, setConnectedShipmentDrafts] = useState<Record<string, Partial<Shipment>>>({})
   const [connectedShipmentContainerDrafts, setConnectedShipmentContainerDrafts] = useState<Record<string, ShipmentContainerEdit[]>>({})
@@ -6772,9 +6730,20 @@ export function DealDetailScreen({
               <PostWriteRefreshNotice failure={refresh.failure} busy={refresh.busy} onRetry={() => void refresh.refresh()} />
             </div>}
             <div
-              className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_320px]"
+              className={cn(
+                "grid items-start",
+                documentOpen
+                  ? "overflow-hidden rounded-[var(--r-lg)] bg-[var(--surface-background)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:grid-cols-2"
+                  : "gap-5 xl:grid-cols-[minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_320px]"
+              )}
             >
-              <div data-deal-page-content className="min-w-0 space-y-6">
+              <div
+                data-deal-page-content
+                className={cn(
+                  "min-w-0 space-y-6",
+                  documentOpen && "xl:max-h-[calc(100vh-180px)] xl:overflow-y-auto xl:p-5"
+                )}
+              >
                 <DocumentsTab
                   aiQuestion={<DealAiQuestion onAskAi={onAskAi} />}
                   key={dealId}
@@ -6861,6 +6830,7 @@ export function DealDetailScreen({
                   onMainInformationChange={setMainInformation}
                   onDocumentSummaryChange={setDocumentSummary}
                   documentOpen={documentOpen}
+                  documentPanelTarget={documentPanelTarget}
                   onDocumentOpenChange={setDocumentOpen}
                   failedPanel={failedPanel}
                   onRetry={() => setFailedPanel(null)}
@@ -6895,12 +6865,19 @@ export function DealDetailScreen({
                   />
                 </section>
               </div>
-              <aside
-                aria-label="거래 현황"
-                data-deal-information-aside
-                ref={informationRailRef}
-                className="min-w-0 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
-              >
+              {documentOpen ? (
+                <aside
+                  ref={setDocumentPanelTarget}
+                  aria-label="원문 문서 패널"
+                  className="min-w-0 min-h-[620px] overflow-hidden bg-[var(--surface-background)] xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] xl:h-[calc(100vh-180px)] xl:border-l xl:border-[var(--surface-border)]"
+                />
+              ) : (
+                <aside
+                  aria-label="거래 현황"
+                  data-deal-information-aside
+                  ref={informationRailRef}
+                  className="min-w-0 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
+                >
                 <div className="divide-y divide-[var(--surface-border)]">
                   <section
                     aria-label="주요 거래 정보"
@@ -6979,7 +6956,8 @@ export function DealDetailScreen({
                   />
                   <DealHealthReference documentSummary={documentSummary} />
                 </div>
-              </aside>
+                </aside>
+              )}
             </div>
           </div>
         </div>
