@@ -1708,9 +1708,9 @@ const splitShipmentReviewFixture = (dealId: string, onOpenDocument: (fileName: s
       blNumber: "HMM-014W-2607",
       fileName: "B/L_2607_014.pdf",
       uploadedAt: "2026.11.18 14:20",
-      fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "014W", shippedOnBoardDate: "2026.11.20", containerNumber: "HMMU1234567", sealNumber: "SEAL-01402", packageCount: "12", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "16,480 KG", volume: "32.4 CBM" },
+      fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "014W", shippedOnBoardDate: "2026.11.20", containerNumber: "HMMU1234567", containerCount: 2, sealNumber: "SEAL-01402", packageCount: "12", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "16,480 KG", volume: "32.4 CBM" },
       connectedCommercialInvoices: [
-        { documentId: "ci-0703", fileName: "Invoice_HB-2607-003.pdf", uploadedAt: "2026.11.18 14:22", invoiceNumber: "CI-2026-0703", invoiceDate: "2026.11.17", currency: "USD", totalAmount: 1539996, item: "Aluminium Scrap Tough Taboo", quantity: "12 MT", unitPrice: "128,333 USD/MT", onOpen: () => onOpenDocument("Invoice_HB-2607-003.pdf", "ci-0703") },
+        { documentId: "ci-0703", fileName: "Invoice_HB-2607-003.pdf", uploadedAt: "2026.11.18 14:22", invoiceNumber: "CI-2026-0703", invoiceDate: "2026.11.17", currency: "USD", totalAmount: 1539996, item: "Aluminium Scrap Tough Taboo", quantity: "12 MT", unitPrice: "128,333 USD/MT", packageCount: "12", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_HB-2607-003.pdf", "ci-0703") },
       ],
     },
     {
@@ -1718,27 +1718,32 @@ const splitShipmentReviewFixture = (dealId: string, onOpenDocument: (fileName: s
       blNumber: "HMM-015W-2607",
       fileName: "B/L_2607_015.pdf",
       uploadedAt: "2026.11.19 09:10",
-      fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "015W", shippedOnBoardDate: "2026.11.27", containerNumber: "HMMU7654321", sealNumber: "SEAL-01503", packageCount: "6", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "8,200 KG", volume: "16.1 CBM" },
-      connectedCommercialInvoices: [{ documentId: "ci-0712", fileName: "Invoice_HB-2607-012.pdf", uploadedAt: "2026.11.19 09:12", invoiceNumber: "CI-2026-0712", invoiceDate: "2026.11.18", currency: "USD", totalAmount: 770000, item: "Aluminium Scrap", quantity: "6 MT", unitPrice: "128,333 USD/MT", onOpen: () => onOpenDocument("Invoice_HB-2607-012.pdf", "ci-0712") }],
+      fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "015W", shippedOnBoardDate: "2026.11.27", containerNumber: "HMMU7654321", containerCount: 1, sealNumber: "SEAL-01503", packageCount: "6", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "8,200 KG", volume: "16.1 CBM" },
+      connectedCommercialInvoices: [{ documentId: "ci-0712", fileName: "Invoice_HB-2607-012.pdf", uploadedAt: "2026.11.19 09:12", invoiceNumber: "CI-2026-0712", invoiceDate: "2026.11.18", currency: "USD", totalAmount: 770000, item: "Aluminium Scrap", quantity: "6 MT", unitPrice: "128,333 USD/MT", packageCount: "6", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_HB-2607-012.pdf", "ci-0712") }],
     },
     {
       documentId: "bl-016w-04",
       blNumber: "HMM-016W-2607",
       fileName: "B/L_2607_016.pdf",
       uploadedAt: "2026.11.20 10:05",
-      fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "016W", shippedOnBoardDate: "2026.12.03", containerNumber: "HMMU9876543", sealNumber: "SEAL-01604", packageCount: "8", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "10,400 KG", volume: "20.2 CBM" },
-      connectedCommercialInvoices: [{ documentId: "ci-0715", fileName: "Invoice_HB-2607-015.pdf", uploadedAt: "2026.11.20 10:07", invoiceNumber: "CI-2026-0715", invoiceDate: "2026.11.19", currency: "USD", totalAmount: 1026400, item: "Aluminium Scrap", quantity: "8 MT", unitPrice: "128,300 USD/MT", onOpen: () => onOpenDocument("Invoice_HB-2607-015.pdf", "ci-0715") }],
+      fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "016W", shippedOnBoardDate: "2026.12.03", containerNumber: "HMMU9876543", containerCount: 2, sealNumber: "SEAL-01604", packageCount: "8", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "10,400 KG", volume: "20.2 CBM" },
+      connectedCommercialInvoices: [{ documentId: "ci-0715", fileName: "Invoice_HB-2607-015.pdf", uploadedAt: "2026.11.20 10:07", invoiceNumber: "CI-2026-0715", invoiceDate: "2026.11.19", currency: "USD", totalAmount: 1026400, item: "Aluminium Scrap", quantity: "8 MT", unitPrice: "128,300 USD/MT", packageCount: "8", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_HB-2607-015.pdf", "ci-0715") }],
     },
   ]
   return {
     billsOfLading: billsOfLading.slice(0, shipmentCount),
-    unlinkedDocuments: [{ documentId: "ci-unlinked-01", fileName: "Invoice_awaiting_bl.pdf", uploadedAt: "2026.11.19 09:18", invoiceNumber: "CI-2026-0718", invoiceDate: "2026.11.19", currency: "USD", totalAmount: 256600, item: "Aluminium Scrap", quantity: "2 MT", unitPrice: "128,300 USD/MT", onOpen: () => onOpenDocument("Invoice_awaiting_bl.pdf", "ci-unlinked-01") }],
+    unlinkedDocuments: [{ documentId: "ci-unlinked-01", fileName: "Invoice_awaiting_bl.pdf", uploadedAt: "2026.11.19 09:18", invoiceNumber: "CI-2026-0718", invoiceDate: "2026.11.19", currency: "USD", totalAmount: 256600, item: "Aluminium Scrap", quantity: "2 MT", unitPrice: "128,300 USD/MT", packageCount: "2", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_awaiting_bl.pdf", "ci-unlinked-01") }],
   }
 }
 
 type CommercialInvoiceRecord = {
   invoice: SplitShipmentView["billsOfLading"][number]["connectedCommercialInvoices"][number]
   billOfLadingIds: string[]
+}
+
+const containerCountLabel = (bill: SplitShipmentView["billsOfLading"][number]) => {
+  const count = bill.fields.containerCount ?? (bill.fields.containerNumber ? 1 : 0)
+  return count ? `컨테이너 ${count}대` : "컨테이너 미확인"
 }
 
 function CommercialInvoiceTransactionCard({
@@ -1812,7 +1817,16 @@ function CommercialInvoiceTransactionCard({
             <article key={invoice.documentId} className="overflow-hidden rounded-[var(--r-md)] border">
               <div className="flex items-center gap-2 bg-muted/30 px-4 py-3">
                 <button type="button" className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left hover:bg-muted/50" aria-expanded={isOpen} onClick={() => toggle(invoice.documentId)}>
-                  <span className="flex min-w-0 items-center gap-2"><span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">CI</span><strong className="truncate text-sm">{invoice.invoiceNumber || invoice.fileName}</strong><StatusBadge size="sm" tone={linkedBills.length ? "success" : "warning"}>{linkedBills.length ? `B/L ${linkedBills.length}건 연결` : "B/L 연결 필요"}</StatusBadge></span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">CI</span>
+                    <span className="min-w-0">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <strong className="truncate text-sm">{invoice.invoiceNumber || invoice.fileName}</strong>
+                        <StatusBadge size="sm" tone={linkedBills.length ? "success" : "warning"}>{linkedBills.length ? `B/L ${linkedBills.length}건 연결` : "B/L 연결 필요"}</StatusBadge>
+                      </span>
+                      {linkedBills.length ? <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">{linkedBills.map((bill) => `${bill?.blNumber || "B/L 번호 미확인"} · ${bill ? containerCountLabel(bill) : "컨테이너 미확인"}`).join(" · ")}</span> : null}
+                    </span>
+                  </span>
                   <ChevronDown className={cn("size-4 shrink-0 transition-transform", isOpen && "rotate-180")} aria-hidden="true" />
                 </button>
                 {invoice.onOpen ? <Button type="button" size="xs" variant="outline" onClick={invoice.onOpen}>문서 보기</Button> : null}
@@ -1826,6 +1840,7 @@ function CommercialInvoiceTransactionCard({
                       ["품목", invoice.item ?? ""],
                       ["수량", invoice.quantity ?? ""],
                       ["단가", invoice.unitPrice ?? ""],
+                      ["포장 수 / 단위", invoice.packageCount && invoice.packageUnit ? `${invoice.packageCount} ${invoice.packageUnit}` : invoice.packageCount ?? invoice.packageUnit ?? ""],
                       ["통화·금액", invoice.currency && invoice.totalAmount != null ? `${invoice.currency} ${invoice.totalAmount.toLocaleString()}` : invoice.currency ?? ""],
                     ].map(([label, fallback]) => <div key={label}><dt className="text-xs text-muted-foreground">{label}</dt><dd className="mt-1">{label === "송장일자" ? <DatePicker ariaLabel={`${invoice.invoiceNumber ?? invoice.fileName} ${label}`} value={value(label, fallback)} onValueChange={(next) => updateDraft(invoice.documentId, label, next)} className="w-full" /> : <Input aria-label={`${invoice.invoiceNumber ?? invoice.fileName} ${label}`} value={value(label, fallback)} onChange={(event) => updateDraft(invoice.documentId, label, event.target.value)} className="h-10" />}</dd></div>)}
                   </dl>
@@ -1833,7 +1848,7 @@ function CommercialInvoiceTransactionCard({
                     <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">연결된 선적</h3><span className="text-xs text-muted-foreground">{linkedBills.length ? `${linkedBills.length}건` : "연결 필요"}</span></div>
                     {linkedBills.length ? (
                       <ul className="mt-2 grid gap-2">
-                        {linkedBills.map((bill) => bill ? <li key={bill.documentId} className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/20 px-3 py-2 text-sm"><span><strong>{bill.blNumber || "B/L 번호 미확인"}</strong><span className="ml-2 text-muted-foreground">{bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}</span></span><span className="flex items-center gap-2"><span className="text-xs text-muted-foreground">{bill.fields.shippedOnBoardDate ?? "출항일 미확인"}</span>{onEditShipment ? <Button type="button" size="icon-sm" variant="ghost" aria-label={`${bill.blNumber || "연결된 선적"} 수정`} title="연결된 선적 수정" onClick={(event) => onEditShipment(bill, event.currentTarget)}><Pencil aria-hidden="true" className="size-4" /></Button> : null}</span></li> : null)}
+                        {linkedBills.map((bill) => bill ? <li key={bill.documentId} className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/20 px-3 py-2 text-sm"><span><strong>{bill.blNumber || "B/L 번호 미확인"}</strong><span className="ml-2 text-muted-foreground">{bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"} · {containerCountLabel(bill)}</span></span><span className="flex items-center gap-2"><span className="text-xs text-muted-foreground">{bill.fields.shippedOnBoardDate ?? "출항일 미확인"}</span>{onEditShipment ? <Button type="button" size="icon-sm" variant="ghost" aria-label={`${bill.blNumber || "연결된 선적"} 수정`} title="연결된 선적 수정" onClick={(event) => onEditShipment(bill, event.currentTarget)}><Pencil aria-hidden="true" className="size-4" /></Button> : null}</span></li> : null)}
                       </ul>
                     ) : (
                       <div className="mt-2 rounded-md border border-warning/40 bg-warning/5 p-3">
@@ -2402,6 +2417,7 @@ function CommercialInvoicePreview({ invoice }: { invoice: CommercialInvoiceDocum
           ["품목", invoice.item ?? "—"],
           ["수량", invoice.quantity ?? "—"],
           ["단가", invoice.unitPrice ?? "—"],
+          ["포장 수 / 단위", invoice.packageCount && invoice.packageUnit ? `${invoice.packageCount} ${invoice.packageUnit}` : invoice.packageCount ?? invoice.packageUnit ?? "—"],
           ["통화·금액", amount],
         ].map(([label, value]) => (
           <div key={label} className="min-w-0">
@@ -4564,6 +4580,7 @@ function DocumentsTab({
                       ["Item", selectedCommercialInvoice.item ?? "—"],
                       ["Quantity", selectedCommercialInvoice.quantity ?? "—"],
                       ["Unit Price", selectedCommercialInvoice.unitPrice ?? "—"],
+                      ["Packages", selectedCommercialInvoice.packageCount && selectedCommercialInvoice.packageUnit ? `${selectedCommercialInvoice.packageCount} ${selectedCommercialInvoice.packageUnit}` : selectedCommercialInvoice.packageCount ?? selectedCommercialInvoice.packageUnit ?? "—"],
                       [
                         "Amount",
                         selectedCommercialInvoice.currency && selectedCommercialInvoice.totalAmount != null

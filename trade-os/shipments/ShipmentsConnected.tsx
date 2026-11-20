@@ -114,6 +114,8 @@ export type CommercialInvoiceCard = {
   item?: string | null;
   quantity?: string | null;
   unitPrice?: string | null;
+  packageCount?: string | null;
+  packageUnit?: string | null;
   onOpen?: () => void;
 };
 export type BillOfLadingCard = {
@@ -129,6 +131,7 @@ export type BillOfLadingCard = {
     voyageNo?: string | null;
     shippedOnBoardDate?: string | null;
     containerNumber?: string | null;
+    containerCount?: number | null;
     sealNumber?: string | null;
     packageCount?: string | null;
     packageType?: string | null;
