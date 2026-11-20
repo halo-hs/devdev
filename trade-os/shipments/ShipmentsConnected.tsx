@@ -1,7 +1,7 @@
 "use client";
 import { BusinessListToolbar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar";
 
-import { RefreshCw, Pencil } from "lucide-react";
+import { FileSearch, RefreshCw, Pencil } from "lucide-react";
 import { ShipmentConfirmationDialog } from "./ShipmentConfirmationDialog";
 import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
 import { carrierTrackingAction } from "./carrierSites";
@@ -155,7 +155,7 @@ export type SplitShipmentView = {
   unlinkedDocuments: CommercialInvoiceCard[];
 };
 
-export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange }: { copy: ShipmentsCopy; renderHeader?: (controls: ReactNode) => ReactNode; dealId?: string; onSummaryChange?: (summary: ShipmentSummary) => void }) {
+export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange, onOpenDocument }: { copy: ShipmentsCopy; renderHeader?: (controls: ReactNode) => ReactNode; dealId?: string; onSummaryChange?: (summary: ShipmentSummary) => void; onOpenDocument?: () => void }) {
   const { entitlements, getIdToken } = usePlatformSession();
   const dateTag = useLocaleTag();
   const [state, setState] = useState<LoadState>({ status: "loading" });
@@ -537,7 +537,11 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                   {[group.rows[0].deal_counterparty, copy.shipmentCount.replace("{count}", String(group.rows.length))].filter(Boolean).join(" · ")}
                 </p>
               </div>
-              {!dealId && group.key !== "__none__" ? (
+              {dealId && onOpenDocument ? (
+                <HostButton variant="outline" size="sm" onClick={onOpenDocument}>
+                  <FileSearch data-icon="inline-start" />문서와 같이 보기
+                </HostButton>
+              ) : !dealId && group.key !== "__none__" ? (
                 <HostButton variant="outline" size="sm" asChild>
                   <Link href={`/erp/deals/${encodeURIComponent(group.key)}`} data-ui="shipments-deal-link">{copy.dealLink}</Link>
                 </HostButton>
@@ -572,6 +576,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                     <HostTableCell>
                       {ship.bl_number ? <div className="font-medium" data-ui="shipment-bl-number">{ship.bl_number}</div> : null}
                       {ship.container_number ? <div className={ship.bl_number ? "mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" : "font-medium"} data-ui="shipment-container-number">{ship.container_number}</div> : null}
+                      {((ship.container_count ?? (ship.container_number ? 1 : 0)) > 0) ? <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">컨테이너 {ship.container_count ?? 1}대</div> : null}
                       {!ship.bl_number && !ship.container_number ? <span data-ui="shipment-identifier-fallback">{copy.rowFallback}</span> : null}
                     </HostTableCell>
                     <HostTableCell>

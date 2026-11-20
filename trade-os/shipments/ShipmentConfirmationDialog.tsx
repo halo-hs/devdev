@@ -186,7 +186,7 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto" onCloseAutoFocus={(event) => { event.preventDefault(); returnFocus(); }}>
+      <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] gap-5 overflow-y-auto p-6 sm:max-w-3xl" onCloseAutoFocus={(event) => { event.preventDefault(); returnFocus(); }}>
         <DialogHeader>
           <DialogTitle>선적 정보 확인·수정</DialogTitle>
           <DialogDescription>선적 기본 정보, 일정과 운송 상태를 수정합니다.</DialogDescription>

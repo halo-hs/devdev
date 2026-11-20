@@ -20,6 +20,7 @@ export type Shipment = {
   deal_id?: string | null;
   bl_number?: string | null;
   container_number?: string | null;
+  container_count?: number | null;
   carrier?: string | null;
   vessel?: string | null;
   pol?: string | null;
