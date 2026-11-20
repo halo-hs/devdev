@@ -17,6 +17,15 @@ import { effectiveShipmentEta, effectiveShipmentEtd, type Shipment, type Shipmen
 import type { AppMessages } from '../lib/i18n/messages';
 type ShipmentsCopy = AppMessages['erpShipments']['shipments'];
 
+export type ShipmentContainerEdit = {
+  number: string;
+  sealNumber?: string | null;
+  packageCount?: string | null;
+  packageUnit?: string | null;
+  grossWeight?: string | null;
+  volume?: string | null;
+};
+
 type ConfirmationField = "confirmed_eta" | "confirmed_etd" | "confirmed_status";
 type Edits = Partial<Pick<ShipmentConfirmation, ConfirmationField>>;
 type DetailField = "bl_number" | "container_number" | "pol" | "pod" | "vessel" | "carrier";
@@ -51,7 +60,27 @@ function detailValues(ship: Shipment): Record<DetailField, string> {
   };
 }
 
-export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, onReload, onClose, returnFocus }: {
+type ContainerDetailDraft = {
+  number: string;
+  sealNumber: string;
+  packageCount: string;
+  packageUnit: string;
+  grossWeight: string;
+  volume: string;
+};
+
+function containerValues(containers?: ShipmentContainerEdit[]): ContainerDetailDraft[] {
+  return (containers ?? []).map((container) => ({
+    number: container.number,
+    sealNumber: container.sealNumber ?? "",
+    packageCount: container.packageCount ?? "",
+    packageUnit: container.packageUnit ?? "",
+    grossWeight: container.grossWeight ?? "",
+    volume: container.volume ?? "",
+  }));
+}
+
+export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, onReload, onClose, returnFocus, containerDetails, onSaveContainerDetails }: {
   shipment: Shipment;
   copy: ShipmentsCopy;
   canWrite: boolean;
@@ -59,12 +88,16 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
   onReload: () => Promise<Shipment>;
   onClose: () => void;
   returnFocus: () => void;
+  containerDetails?: ShipmentContainerEdit[];
+  onSaveContainerDetails?: (containers: ShipmentContainerEdit[]) => void;
 }) {
   const c = copy.confirmation;
   const [baseline, setBaseline] = useState(shipment);
   const [draft, setDraft] = useState(() => values(shipment));
   const [edits, setEdits] = useState<Edits>({});
   const [details, setDetails] = useState(() => detailValues(shipment));
+  const [initialContainerDetails] = useState(() => containerValues(containerDetails));
+  const [containerDrafts, setContainerDrafts] = useState<ContainerDetailDraft[]>(() => containerValues(containerDetails));
   const [detailEdits, setDetailEdits] = useState<DetailEdits>({});
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +110,8 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
   const initial = values(baseline);
   const invalidDate = fields.some((field) => field !== "confirmed_status" && edits[field] !== undefined && edits[field] !== null && !draft[field]);
   const writable = canWrite && Boolean(baseline.edit_token);
-  const hasChanges = Object.keys(edits).length > 0 || Object.keys(detailEdits).length > 0;
+  const containerDetailsChanged = JSON.stringify(containerDrafts) !== JSON.stringify(initialContainerDetails);
+  const hasChanges = Object.keys(edits).length > 0 || Object.keys(detailEdits).length > 0 || containerDetailsChanged;
 
   const setField = (field: ConfirmationField, value: string) => {
     setDraft((old) => ({ ...old, [field]: value }));
@@ -100,6 +134,10 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
     });
   };
 
+  const setContainerField = (index: number, field: keyof ContainerDetailDraft, value: string) => {
+    setContainerDrafts((current) => current.map((container, containerIndex) => containerIndex === index ? { ...container, [field]: value } : container));
+  };
+
   const submit = async () => {
     if (!writable || saving.current || needsReview || invalidDate || !hasChanges) return;
     saving.current = true;
@@ -107,6 +145,14 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
     setError(null);
     try {
       await onSave({ expected_edit_token: baseline.edit_token!, ...edits, ...detailEdits });
+      if (containerDetailsChanged) onSaveContainerDetails?.(containerDrafts.map((container) => ({
+        number: container.number,
+        sealNumber: container.sealNumber || null,
+        packageCount: container.packageCount || null,
+        packageUnit: container.packageUnit || null,
+        grossWeight: container.grossWeight || null,
+        volume: container.volume || null,
+      })));
       if (live.current) onClose();
     } catch (failure) {
       if (!live.current) return;
@@ -150,13 +196,58 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
           <section className="rounded-lg border p-4" aria-label="선적 기본 정보">
             <h3 className="text-sm font-semibold">선적 기본 정보</h3>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              {detailFields.map(({ key, label }) => (
+              {detailFields.filter(({ key }) => !(containerDetails && key === "container_number")).map(({ key, label }) => (
                 <Field key={key} data-disabled={pending || !writable}>
                   <FieldLabel htmlFor={`shipment-${key}`}>{label}</FieldLabel>
                   <Input id={`shipment-${key}`} value={details[key]} disabled={pending || !writable} onChange={(event) => setDetailField(key, event.target.value)} />
                 </Field>
               ))}
             </div>
+            {containerDetails ? (
+              <section className="mt-4 border-t pt-4" aria-label="컨테이너 정보">
+                <div className="flex items-center justify-between gap-2">
+                  <h4 className="text-sm font-semibold">컨테이너 정보</h4>
+                  <span className="text-xs text-muted-foreground">{containerDrafts.length}대</span>
+                </div>
+                <div className="mt-3 grid gap-3">
+                  {containerDrafts.map((container, index) => (
+                    <fieldset key={`${container.number}-${index}`} className="rounded-md border bg-muted/20 p-3">
+                      <legend className="px-1 text-xs font-medium text-muted-foreground">컨테이너 {index + 1}</legend>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <Field data-disabled={pending || !writable}>
+                          <FieldLabel htmlFor={`shipment-container-${index}-number`}>컨테이너 번호</FieldLabel>
+                          <Input id={`shipment-container-${index}-number`} value={container.number} disabled={pending || !writable} onChange={(event) => setContainerField(index, "number", event.target.value)} />
+                        </Field>
+                        <Field data-disabled={pending || !writable}>
+                          <FieldLabel htmlFor={`shipment-container-${index}-sealNumber`}>씰 번호</FieldLabel>
+                          <Input id={`shipment-container-${index}-sealNumber`} value={container.sealNumber} disabled={pending || !writable} onChange={(event) => setContainerField(index, "sealNumber", event.target.value)} />
+                        </Field>
+                        <Field data-disabled={pending || !writable}>
+                          <FieldLabel htmlFor={`shipment-container-${index}-packageCount`}>포장 수 / 단위</FieldLabel>
+                          <div className="flex gap-2">
+                            <Input id={`shipment-container-${index}-packageCount`} className="min-w-0 flex-1" value={container.packageCount} disabled={pending || !writable} onChange={(event) => setContainerField(index, "packageCount", event.target.value)} />
+                            <Select disabled={pending || !writable} value={container.packageUnit || "bundles"} onValueChange={(value) => setContainerField(index, "packageUnit", value)}>
+                              <SelectTrigger aria-label={`컨테이너 ${index + 1} 포장 단위`} className="w-28"><SelectValue /></SelectTrigger>
+                              <SelectContent position="popper"><SelectGroup>
+                                {['bundles', 'cartons', 'pallets', 'bags'].map((unit) => <SelectItem key={unit} value={unit}>{unit}</SelectItem>)}
+                              </SelectGroup></SelectContent>
+                            </Select>
+                          </div>
+                        </Field>
+                        <Field data-disabled={pending || !writable}>
+                          <FieldLabel htmlFor={`shipment-container-${index}-grossWeight`}>총중량</FieldLabel>
+                          <Input id={`shipment-container-${index}-grossWeight`} value={container.grossWeight} disabled={pending || !writable} onChange={(event) => setContainerField(index, "grossWeight", event.target.value)} />
+                        </Field>
+                        <Field data-disabled={pending || !writable}>
+                          <FieldLabel htmlFor={`shipment-container-${index}-volume`}>용적</FieldLabel>
+                          <Input id={`shipment-container-${index}-volume`} value={container.volume} disabled={pending || !writable} onChange={(event) => setContainerField(index, "volume", event.target.value)} />
+                        </Field>
+                      </div>
+                    </fieldset>
+                  ))}
+                </div>
+              </section>
+            ) : null}
           </section>
           <FieldGroup className="gap-4">
           {fields.map((field) => {

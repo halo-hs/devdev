@@ -10,7 +10,7 @@ import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
 import { InfoBox } from "@trade-os/components/InfoBox"
 import { OperationsScreen } from "@trade-os/OperationsScreens"
 import type { SplitShipmentView } from "@trade-os/shipments/ShipmentsConnected"
-import { ShipmentConfirmationDialog } from "@trade-os/shipments/ShipmentConfirmationDialog"
+import { ShipmentConfirmationDialog, type ShipmentContainerEdit } from "@trade-os/shipments/ShipmentConfirmationDialog"
 import type { Shipment } from "@trade-os/lib/api/shipments"
 import { messages } from "@trade-os/lib/i18n/messages"
 import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@/components/platform/FormItem"
@@ -5749,6 +5749,7 @@ export function DealDetailScreen({
   const [documentOpen, setDocumentOpen] = useState(false)
   const [linkedInvoiceTargets] = useState<Record<string, string>>({})
   const [connectedShipmentDrafts, setConnectedShipmentDrafts] = useState<Record<string, Partial<Shipment>>>({})
+  const [connectedShipmentContainerDrafts, setConnectedShipmentContainerDrafts] = useState<Record<string, ShipmentContainerEdit[]>>({})
   const [editingConnectedShipment, setEditingConnectedShipment] = useState<Shipment | null>(null)
   const shipmentEditTrigger = useRef<HTMLButtonElement | null>(null)
   const splitShipmentView = useMemo(
@@ -5761,24 +5762,33 @@ export function DealDetailScreen({
         ...fixture,
         billsOfLading: fixture.billsOfLading.map((bill) => {
           const draft = connectedShipmentDrafts[bill.documentId]
-          if (!draft) return bill
+          const containerDraft = connectedShipmentContainerDrafts[bill.documentId]
+          if (!draft && !containerDraft) return bill
+          const firstContainer = containerDraft?.[0]
           return {
             ...bill,
-            blNumber: draft.bl_number ?? bill.blNumber,
+            blNumber: draft?.bl_number ?? bill.blNumber,
+            containers: containerDraft ?? bill.containers,
             fields: {
               ...bill.fields,
-              portOfLoading: draft.pol ?? bill.fields.portOfLoading,
-              portOfDischarge: draft.pod ?? bill.fields.portOfDischarge,
-              carrier: draft.carrier ?? bill.fields.carrier,
-              vessel: draft.vessel ?? bill.fields.vessel,
-              containerNumber: draft.container_number ?? bill.fields.containerNumber,
-              shippedOnBoardDate: draft.confirmed_etd ?? bill.fields.shippedOnBoardDate,
+              portOfLoading: draft?.pol ?? bill.fields.portOfLoading,
+              portOfDischarge: draft?.pod ?? bill.fields.portOfDischarge,
+              carrier: draft?.carrier ?? bill.fields.carrier,
+              vessel: draft?.vessel ?? bill.fields.vessel,
+              containerNumber: firstContainer?.number ?? draft?.container_number ?? bill.fields.containerNumber,
+              sealNumber: firstContainer?.sealNumber ?? bill.fields.sealNumber,
+              packageCount: firstContainer?.packageCount ?? bill.fields.packageCount,
+              packageType: firstContainer?.packageUnit ?? bill.fields.packageType,
+              grossWeight: firstContainer?.grossWeight ?? bill.fields.grossWeight,
+              volume: firstContainer?.volume ?? bill.fields.volume,
+              containerCount: containerDraft?.length ?? bill.fields.containerCount,
+              shippedOnBoardDate: draft?.confirmed_etd ?? bill.fields.shippedOnBoardDate,
             },
           }
         }),
       }
     },
-    [connectedShipmentDrafts, dealId]
+    [connectedShipmentContainerDrafts, connectedShipmentDrafts, dealId]
   )
   const openConnectedShipmentEdit = (bill: SplitShipmentView["billsOfLading"][number], trigger: HTMLButtonElement) => {
     shipmentEditTrigger.current = trigger
@@ -7075,6 +7085,7 @@ export function DealDetailScreen({
           shipment={editingConnectedShipment}
           copy={messages.erpShipments.shipments}
           canWrite={canMutate(role)}
+          containerDetails={connectedShipmentContainerDrafts[editingConnectedShipment.id] ?? splitShipmentView.billsOfLading.find((bill) => bill.documentId === editingConnectedShipment.id)?.containers}
           returnFocus={() => shipmentEditTrigger.current?.focus()}
           onReload={async () => editingConnectedShipment}
           onClose={() => setEditingConnectedShipment(null)}
@@ -7087,6 +7098,11 @@ export function DealDetailScreen({
               }
               return { ...current, [editingConnectedShipment.id]: next }
             })
+          }}
+          onSaveContainerDetails={(containers) => {
+            setConnectedShipmentContainerDrafts((current) => ({ ...current, [editingConnectedShipment.id]: containers }))
+            const firstContainer = containers[0]
+            if (firstContainer) setConnectedShipmentDrafts((current) => ({ ...current, [editingConnectedShipment.id]: { ...(current[editingConnectedShipment.id] ?? {}), container_number: firstContainer.number } }))
           }}
         />
       ) : null}
