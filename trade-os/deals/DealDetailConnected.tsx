@@ -10,7 +10,7 @@ import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
 import { InfoBox } from "@trade-os/components/InfoBox"
 import { OperationsScreen } from "@trade-os/OperationsScreens"
 import type { SplitShipmentView } from "@trade-os/shipments/ShipmentsConnected"
-import { ShipmentConfirmationDialog } from "@trade-os/shipments/ShipmentConfirmationDialog"
+import { ShipmentConfirmationDialog, type ShipmentContainerEdit } from "@trade-os/shipments/ShipmentConfirmationDialog"
 import type { Shipment } from "@trade-os/lib/api/shipments"
 import { messages } from "@trade-os/lib/i18n/messages"
 import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@/components/platform/FormItem"
@@ -71,7 +71,6 @@ import {
 } from "@/components/platform/PageNavigator"
 import {
   PdfPanelWorkspaceCard,
-  ResponsivePdfPanelSplit,
 } from "@/components/platform/PdfPanelResizeHandle"
 import { PannablePdfViewport } from "@/components/platform/DocumentViewerStage"
 import { AutoSaveStatus } from "@/components/platform/AutoSaveStatus"
@@ -1851,7 +1850,7 @@ function CommercialInvoiceTransactionCard({
                   </span>
                   <ChevronDown className={cn("size-4 shrink-0 transition-transform", isOpen && "rotate-180")} aria-hidden="true" />
                 </button>
-                {invoice.onOpen ? <Button type="button" size="xs" variant="outline" onClick={invoice.onOpen}>문서 보기</Button> : null}
+                {invoice.onOpen ? <Button type="button" size="xs" variant="outline" onClick={invoice.onOpen}><FileSearch data-icon="inline-start" />문서와 같이 보기</Button> : null}
               </div>
               {isOpen ? (
                 <div className="border-t p-4">
@@ -1882,18 +1881,14 @@ function CommercialInvoiceTransactionCard({
                                   <StatusBadge size="sm" tone="neutral">{containerCountLabel(bill)}</StatusBadge>
                                 </div>
                                 {containers.length ? (
-                                  <ul className="mt-2 grid gap-1.5 sm:grid-cols-2" aria-label={`${bill.blNumber || "연결된 선적"} 컨테이너 목록`}>
+                                  <ul className="mt-2 grid gap-1.5" aria-label={`${bill.blNumber || "연결된 선적"} 컨테이너 목록`}>
                                     {containers.map((container) => (
-                                      <li key={container.number} className="rounded border bg-background px-2.5 py-2 text-xs">
-                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                                          <span className="font-medium">{container.number}</span>
-                                          {container.sealNumber ? <span className="text-muted-foreground">씰 {container.sealNumber}</span> : null}
-                                        </div>
-                                        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-muted-foreground">
-                                          {container.packageCount ? <span>포장 {container.packageCount}{container.packageUnit ? ` ${container.packageUnit}` : ""}</span> : null}
-                                          {container.grossWeight ? <span>총중량 {container.grossWeight}</span> : null}
-                                          {container.volume ? <span>용적 {container.volume}</span> : null}
-                                        </div>
+                                      <li key={container.number} className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded border bg-background px-2.5 py-2 text-xs">
+                                        <span className="font-medium">{container.number}</span>
+                                        {container.sealNumber ? <span className="text-muted-foreground">씰 {container.sealNumber}</span> : null}
+                                        {container.packageCount ? <span className="text-muted-foreground">포장 {container.packageCount}{container.packageUnit ? ` ${container.packageUnit}` : ""}</span> : null}
+                                        {container.grossWeight ? <span className="text-muted-foreground">총중량 {container.grossWeight}</span> : null}
+                                        {container.volume ? <span className="text-muted-foreground">용적 {container.volume}</span> : null}
                                       </li>
                                     ))}
                                   </ul>
@@ -2090,10 +2085,11 @@ function DealDocumentPanels({
     const measure = () => {
       const rect = main.getBoundingClientRect()
       const top = rect.top
+      const panelWidth = Math.min(rect.width, Math.max(360, Math.round(rect.width * 0.46)))
       setWorkspaceBounds({
-        left: rect.left,
+        left: rect.right - panelWidth,
         top,
-        width: rect.width,
+        width: panelWidth,
         height: Math.max(0, Math.min(window.innerHeight, rect.bottom) - top),
       })
     }
@@ -2161,8 +2157,6 @@ function DealDocumentPanels({
           {work === "documents" ? (
             <section
               id="deal-documents"
-              inert={documentOpen}
-              aria-hidden={documentOpen || undefined}
               aria-label="거래 상세 정보"
               tabIndex={-1}
               // Title, document tabs and the detail editor share one card; the
@@ -2190,9 +2184,7 @@ function DealDocumentPanels({
                   ref={inlineRef}
                   style={documentOpen ? { height: inlineHeight } : undefined}
                 >
-                  {!documentOpen && (
-                    <PdfPanelWorkspaceCard className="-mx-5 rounded-none bg-transparent shadow-none ring-0">{primary}</PdfPanelWorkspaceCard>
-                  )}
+                  <PdfPanelWorkspaceCard className="-mx-5 rounded-none bg-transparent shadow-none ring-0">{primary}</PdfPanelWorkspaceCard>
                 </div>
               )}
             </section>
@@ -2214,7 +2206,7 @@ function DealDocumentPanels({
             aria-describedby="deal-comparison-description"
             data-deal-comparison
             style={workspaceBounds}
-            className="fixed z-40 flex min-w-0 flex-col overflow-hidden bg-background"
+            className="fixed z-40 flex min-w-0 flex-col overflow-hidden border-l bg-background shadow-2xl animate-in slide-in-from-right duration-200"
             onKeyDown={(event) => {
               if (
                 event.key === "Escape" &&
@@ -2250,17 +2242,10 @@ function DealDocumentPanels({
                 거래로 돌아가기
               </Button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto xl:overflow-hidden">
-              <ResponsivePdfPanelSplit
-                label="거래 상세와 원본 문서 너비 조절"
-                desktopHeight="100%"
-                primary={primary}
-                preview={
-                  <div id="deal-document-preview" className="h-full min-h-0">
-                    {preview}
-                  </div>
-                }
-              />
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <div id="deal-document-preview" className="min-h-full p-4 sm:p-5">
+                {preview}
+              </div>
             </div>
           </section>,
           document.body
@@ -3878,6 +3863,24 @@ function DocumentsTab({
     }
     window.addEventListener("ecoya:open-ci-document", handleCiOpen)
     return () => window.removeEventListener("ecoya:open-ci-document", handleCiOpen)
+  }, [])
+  useEffect(() => {
+    const handleShipmentOpen = (event: Event) => {
+      const detail = (event as CustomEvent<{ fileName?: string }>).detail
+      const bl = documents.find(document => document.code === "BL")
+      if (!bl) return
+      setSelected({
+        ...bl,
+        file: detail?.fileName ?? bl.file,
+        status: detail?.fileName ? "검토" : bl.status,
+        source: detail?.fileName ? "업로드" : bl.source,
+      })
+      setSelectedCommercialInvoiceId(null)
+      setDocumentsExpanded(false)
+      setSupplementaryDocumentsExpanded(false)
+    }
+    window.addEventListener("ecoya:open-shipment-document", handleShipmentOpen)
+    return () => window.removeEventListener("ecoya:open-shipment-document", handleShipmentOpen)
   }, [])
   const [missingDocumentPrompt, setMissingDocumentPrompt] =
     useState<DocumentSlot | null>(null)
@@ -5749,6 +5752,7 @@ export function DealDetailScreen({
   const [documentOpen, setDocumentOpen] = useState(false)
   const [linkedInvoiceTargets] = useState<Record<string, string>>({})
   const [connectedShipmentDrafts, setConnectedShipmentDrafts] = useState<Record<string, Partial<Shipment>>>({})
+  const [connectedShipmentContainerDrafts, setConnectedShipmentContainerDrafts] = useState<Record<string, ShipmentContainerEdit[]>>({})
   const [editingConnectedShipment, setEditingConnectedShipment] = useState<Shipment | null>(null)
   const shipmentEditTrigger = useRef<HTMLButtonElement | null>(null)
   const splitShipmentView = useMemo(
@@ -5761,24 +5765,33 @@ export function DealDetailScreen({
         ...fixture,
         billsOfLading: fixture.billsOfLading.map((bill) => {
           const draft = connectedShipmentDrafts[bill.documentId]
-          if (!draft) return bill
+          const containerDraft = connectedShipmentContainerDrafts[bill.documentId]
+          if (!draft && !containerDraft) return bill
+          const firstContainer = containerDraft?.[0]
           return {
             ...bill,
-            blNumber: draft.bl_number ?? bill.blNumber,
+            blNumber: draft?.bl_number ?? bill.blNumber,
+            containers: containerDraft ?? bill.containers,
             fields: {
               ...bill.fields,
-              portOfLoading: draft.pol ?? bill.fields.portOfLoading,
-              portOfDischarge: draft.pod ?? bill.fields.portOfDischarge,
-              carrier: draft.carrier ?? bill.fields.carrier,
-              vessel: draft.vessel ?? bill.fields.vessel,
-              containerNumber: draft.container_number ?? bill.fields.containerNumber,
-              shippedOnBoardDate: draft.confirmed_etd ?? bill.fields.shippedOnBoardDate,
+              portOfLoading: draft?.pol ?? bill.fields.portOfLoading,
+              portOfDischarge: draft?.pod ?? bill.fields.portOfDischarge,
+              carrier: draft?.carrier ?? bill.fields.carrier,
+              vessel: draft?.vessel ?? bill.fields.vessel,
+              containerNumber: firstContainer?.number ?? draft?.container_number ?? bill.fields.containerNumber,
+              sealNumber: firstContainer?.sealNumber ?? bill.fields.sealNumber,
+              packageCount: firstContainer?.packageCount ?? bill.fields.packageCount,
+              packageType: firstContainer?.packageUnit ?? bill.fields.packageType,
+              grossWeight: firstContainer?.grossWeight ?? bill.fields.grossWeight,
+              volume: firstContainer?.volume ?? bill.fields.volume,
+              containerCount: containerDraft?.length ?? bill.fields.containerCount,
+              shippedOnBoardDate: draft?.confirmed_etd ?? bill.fields.shippedOnBoardDate,
             },
           }
         }),
       }
     },
-    [connectedShipmentDrafts, dealId]
+    [connectedShipmentContainerDrafts, connectedShipmentDrafts, dealId]
   )
   const openConnectedShipmentEdit = (bill: SplitShipmentView["billsOfLading"][number], trigger: HTMLButtonElement) => {
     shipmentEditTrigger.current = trigger
@@ -6759,8 +6772,6 @@ export function DealDetailScreen({
               <PostWriteRefreshNotice failure={refresh.failure} busy={refresh.busy} onRetry={() => void refresh.refresh()} />
             </div>}
             <div
-              inert={documentOpen}
-              aria-hidden={documentOpen || undefined}
               className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_320px]"
             >
               <div data-deal-page-content className="min-w-0 space-y-6">
@@ -6782,7 +6793,11 @@ export function DealDetailScreen({
                         className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
                       >
                         <FulfillmentTab
-                          shipmentContent={<OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} />}
+                          shipmentContent={<OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} onOpenDocument={() => {
+                            const bill = splitShipmentView.billsOfLading[0]
+                            if (bill) window.dispatchEvent(new CustomEvent("ecoya:open-shipment-document", { detail: { fileName: bill.fileName } }))
+                            setDocumentOpen(true)
+                          }} />}
                           onSummaryChange={setShipmentSummary}
                           onEditUnitPrice={openItemUnitPrice}
                           dealId={dealId}
@@ -7075,6 +7090,7 @@ export function DealDetailScreen({
           shipment={editingConnectedShipment}
           copy={messages.erpShipments.shipments}
           canWrite={canMutate(role)}
+          containerDetails={connectedShipmentContainerDrafts[editingConnectedShipment.id] ?? splitShipmentView.billsOfLading.find((bill) => bill.documentId === editingConnectedShipment.id)?.containers}
           returnFocus={() => shipmentEditTrigger.current?.focus()}
           onReload={async () => editingConnectedShipment}
           onClose={() => setEditingConnectedShipment(null)}
@@ -7087,6 +7103,11 @@ export function DealDetailScreen({
               }
               return { ...current, [editingConnectedShipment.id]: next }
             })
+          }}
+          onSaveContainerDetails={(containers) => {
+            setConnectedShipmentContainerDrafts((current) => ({ ...current, [editingConnectedShipment.id]: containers }))
+            const firstContainer = containers[0]
+            if (firstContainer) setConnectedShipmentDrafts((current) => ({ ...current, [editingConnectedShipment.id]: { ...(current[editingConnectedShipment.id] ?? {}), container_number: firstContainer.number } }))
           }}
         />
       ) : null}
