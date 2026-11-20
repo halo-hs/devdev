@@ -2102,7 +2102,6 @@ function DealDocumentPanels({
           canWrite={canWrite}
         >
           {work === "documents" ? (
-            <>
             <section
               id="deal-documents"
               inert={documentOpen}
@@ -2140,12 +2139,13 @@ function DealDocumentPanels({
                 </div>
               )}
             </section>
-            {commercialInvoiceContent}
-            </>
           ) : failedPanel === work ? (
             <PanelFailure title={workLabels[work]} onRetry={onRetry} />
           ) : (
-            workspaces[work]
+            <>
+              {workspaces[work]}
+              {work === "fulfillment" ? commercialInvoiceContent : null}
+            </>
           )}
         </DealWorkBlock>
       ))}
