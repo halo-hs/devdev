@@ -169,6 +169,9 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
         saved.status = body.confirmed_status || 'unknown'; saved.confirmed_status = body.confirmed_status
         saved.confirmed_status_by = 'ECOYA Demo'; saved.confirmed_status_at = now
       }
+      for (const field of ['bl_number', 'container_number', 'carrier', 'vessel', 'pol', 'pod'] as const) {
+        if (body[field] !== undefined) saved[field] = body[field] || null
+      }
       localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(shipments().map(row => [row.id, row.id === saved.id ? saved : row]))))
       value = {shipment:saved}
     } else if (method === 'POST' && match) {

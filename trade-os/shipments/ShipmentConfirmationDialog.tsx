@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { ApiError } from "../lib/api/client";
@@ -18,7 +19,17 @@ type ShipmentsCopy = AppMessages['erpShipments']['shipments'];
 
 type ConfirmationField = "confirmed_eta" | "confirmed_etd" | "confirmed_status";
 type Edits = Partial<Pick<ShipmentConfirmation, ConfirmationField>>;
+type DetailField = "bl_number" | "container_number" | "pol" | "pod" | "vessel" | "carrier";
+type DetailEdits = Partial<Pick<ShipmentConfirmation, DetailField>>;
 const fields: ConfirmationField[] = ["confirmed_etd", "confirmed_eta", "confirmed_status"];
+const detailFields: Array<{ key: DetailField; label: string }> = [
+  { key: "bl_number", label: "B/L 번호" },
+  { key: "container_number", label: "컨테이너 번호" },
+  { key: "pol", label: "선적항" },
+  { key: "pod", label: "도착항" },
+  { key: "vessel", label: "선박명" },
+  { key: "carrier", label: "선사" },
+];
 const statuses: ShipmentStatus[] = ["unknown", "booked", "loaded", "departed", "arrived", "delivered"];
 
 function values(ship: Shipment): Record<ConfirmationField, string> {
@@ -26,6 +37,17 @@ function values(ship: Shipment): Record<ConfirmationField, string> {
     confirmed_eta: effectiveShipmentEta(ship)?.slice(0, 10) ?? "",
     confirmed_etd: effectiveShipmentEtd(ship)?.slice(0, 10) ?? "",
     confirmed_status: ship.status,
+  };
+}
+
+function detailValues(ship: Shipment): Record<DetailField, string> {
+  return {
+    bl_number: ship.bl_number ?? "",
+    container_number: ship.container_number ?? "",
+    pol: ship.pol ?? "",
+    pod: ship.pod ?? "",
+    vessel: ship.vessel ?? "",
+    carrier: ship.carrier ?? "",
   };
 }
 
@@ -42,6 +64,8 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
   const [baseline, setBaseline] = useState(shipment);
   const [draft, setDraft] = useState(() => values(shipment));
   const [edits, setEdits] = useState<Edits>({});
+  const [details, setDetails] = useState(() => detailValues(shipment));
+  const [detailEdits, setDetailEdits] = useState<DetailEdits>({});
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsReview, setNeedsReview] = useState(false);
@@ -53,6 +77,7 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
   const initial = values(baseline);
   const invalidDate = fields.some((field) => field !== "confirmed_status" && edits[field] !== undefined && edits[field] !== null && !draft[field]);
   const writable = canWrite && Boolean(baseline.edit_token);
+  const hasChanges = Object.keys(edits).length > 0 || Object.keys(detailEdits).length > 0;
 
   const setField = (field: ConfirmationField, value: string) => {
     setDraft((old) => ({ ...old, [field]: value }));
@@ -65,13 +90,23 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
     });
   };
 
+  const setDetailField = (field: DetailField, value: string) => {
+    setDetails((old) => ({ ...old, [field]: value }));
+    setDetailEdits((old) => {
+      const next = { ...old };
+      if (value === detailValues(baseline)[field]) delete next[field];
+      else next[field] = value;
+      return next;
+    });
+  };
+
   const submit = async () => {
-    if (!writable || saving.current || needsReview || invalidDate || !Object.keys(edits).length) return;
+    if (!writable || saving.current || needsReview || invalidDate || !hasChanges) return;
     saving.current = true;
     setPending(true);
     setError(null);
     try {
-      await onSave({ expected_edit_token: baseline.edit_token!, ...edits });
+      await onSave({ expected_edit_token: baseline.edit_token!, ...edits, ...detailEdits });
       if (live.current) onClose();
     } catch (failure) {
       if (!live.current) return;
@@ -107,11 +142,22 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto" onCloseAutoFocus={(event) => { event.preventDefault(); returnFocus(); }}>
         <DialogHeader>
-          <DialogTitle>{c.title}</DialogTitle>
-          <DialogDescription>{c.description}</DialogDescription>
+          <DialogTitle>선적 정보 확인·수정</DialogTitle>
+          <DialogDescription>선적 기본 정보, 일정과 운송 상태를 수정합니다.</DialogDescription>
         </DialogHeader>
         <form className="flex flex-col gap-4" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
           <FieldDescription className="text-[var(--color-gray-4)]">{c.manualHint}</FieldDescription>
+          <section className="rounded-lg border p-4" aria-label="선적 기본 정보">
+            <h3 className="text-sm font-semibold">선적 기본 정보</h3>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {detailFields.map(({ key, label }) => (
+                <Field key={key} data-disabled={pending || !writable}>
+                  <FieldLabel htmlFor={`shipment-${key}`}>{label}</FieldLabel>
+                  <Input id={`shipment-${key}`} value={details[key]} disabled={pending || !writable} onChange={(event) => setDetailField(key, event.target.value)} />
+                </Field>
+              ))}
+            </div>
+          </section>
           <FieldGroup className="gap-4">
           {fields.map((field) => {
             const label = field === "confirmed_etd" ? c.etd : field === "confirmed_eta" ? c.eta : c.status;
@@ -154,13 +200,13 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
                 <dt>{c.eta}</dt><dd>{values(latest).confirmed_eta || "—"}</dd>
                 <dt>{c.status}</dt><dd>{copy.status[latest.status]}</dd>
               </dl>
-              <Button disabled={!latest.edit_token} onClick={() => { setBaseline(latest); setDraft((old) => ({ ...values(latest), ...Object.fromEntries(Object.keys(edits).map((key) => [key, old[key as ConfirmationField]])) })); setLatest(null); setNeedsReview(false); setError(null); }} type="button" variant="outline">{c.keepDraft}</Button>
+              <Button disabled={!latest.edit_token} onClick={() => { setBaseline(latest); setDraft((old) => ({ ...values(latest), ...Object.fromEntries(Object.keys(edits).map((key) => [key, old[key as ConfirmationField]])) })); setDetails((old) => ({ ...detailValues(latest), ...Object.fromEntries(Object.keys(detailEdits).map((key) => [key, old[key as DetailField]])) })); setLatest(null); setNeedsReview(false); setError(null); }} type="button" variant="outline">{c.keepDraft}</Button>
               </AlertDescription>
             </Alert>
           ) : null}
           <DialogFooter>
             <Button onClick={onClose} size="lg" type="button" variant="outline">{pending ? c.close : c.cancel}</Button>
-            <Button disabled={!writable || pending || needsReview || invalidDate || !Object.keys(edits).length} size="lg" type="submit">{pending ? c.saving : c.save}</Button>
+              <Button disabled={!writable || pending || needsReview || invalidDate || !hasChanges} size="lg" type="submit">{pending ? c.saving : c.save}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

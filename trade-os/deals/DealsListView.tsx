@@ -24,7 +24,6 @@ import {
   ChevronRight,
   CircleAlert,
   FileText,
-  GitBranch,
   Info,
   Download,
   Loader2,
@@ -410,11 +409,9 @@ function optionLabel(options: FilterOptions, value: string) {
 
 export function DealsScreen({
   onOpenDeal,
-  onOpenContacts,
   role = "owner",
 }: {
   onOpenDeal: (dealId: string, tab?: DealWorkKey) => void
-  onOpenContacts?: () => void
   role?: DealsRole
 }) {
   const [view, setView] = useState("operations")
@@ -1107,12 +1104,6 @@ export function DealsScreen({
                 options={sortOptions}
               />
             </BusinessFilterBar>
-            {/* SSOT SC-14 / #443 P3: only moves to 연락처·파이프라인 (/erp/sales);
-                the deals list has no stage board. */}
-            <Button variant="outline" onClick={onOpenContacts}>
-              <GitBranch />
-              연락처·파이프라인
-            </Button>
           </div>
         </div>
         <CardContent

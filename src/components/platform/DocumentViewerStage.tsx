@@ -68,7 +68,15 @@ export function PannablePdfViewport({
       onPointerUp={stopPanning}
       onPointerCancel={stopPanning}
     >
-      {children}
+      <div
+        className="min-h-full min-w-full"
+        style={canPan ? {
+          paddingRight: `${zoom - 100}%`,
+          paddingBottom: `${zoom - 100}%`,
+        } : undefined}
+      >
+        {children}
+      </div>
     </div>
   )
 }

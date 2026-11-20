@@ -719,6 +719,7 @@ export function App() {
       documentName?: string
       documentNumber?: string
       originDealId?: string
+      counterpartyId?: string
       replace?: boolean
     }
   ) => {
@@ -758,6 +759,7 @@ export function App() {
           dealId: options?.dealId,
           documentName: options?.documentName,
           documentNumber: options?.documentNumber,
+          counterpartyId: options?.counterpartyId,
         },
         options?.replace,
         nextScreen === "inbox" ? options?.originDealId ?? null : null
@@ -1174,7 +1176,6 @@ export function App() {
                   ) : screen === "deals" ? (
                     <DealsScreen
                       role={erpHomeRole}
-                      onOpenContacts={() => navigateTo("contacts")}
                       onOpenDeal={(dealId, tab) => {
                         setDealNotificationTarget(tab ? { tab: tab === "documents" ? "overview" : tab, sectionId: tab === "documents" ? "deal-documents" : tab === "fulfillment" ? "deal-fulfillment" : tab === "customs" ? "deal-customs" : "deal-finance" } : null)
                         setSelectedDealId(dealId)
@@ -1213,19 +1214,15 @@ export function App() {
                   ) : screen === "contacts" ? (
                     // SSOT SC-27: its own screen with its own contact search;
                     // it does not inherit the deals list filters.
-                    <div data-slot="business-page" className="h-full overflow-y-auto bg-transparent">
-                      <div className="w-full p-4 sm:p-5">
-                        <div className="rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
-                          <SalesPrototype
-                            embedded
-                            onOpenDeal={(dealId) => {
-                              setSelectedDealId(dealId)
-                              navigateTo("deal", { dealId })
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
+                    <SalesPrototype
+                      onOpenDeal={(dealId) => {
+                        setSelectedDealId(dealId)
+                        navigateTo("deal", { dealId })
+                      }}
+                      onOpenRelationship={(counterpartyId) => navigateTo("counterparty", { counterpartyId })}
+                    />
+                  ) : screen === "salesAccounts" ? (
+                    <SalesPrototype mode="accounts" onOpenRelationship={(counterpartyId) => navigateTo("counterparty", { counterpartyId })} />
                   ) : screen === "notifications" ? (
                     <NotificationsPrototype
                       readIds={readNotificationIds}

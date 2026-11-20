@@ -83,7 +83,8 @@ export function WorkspaceHeader({
     monitoring: "운영 감시",
     reports: "결산 리포트",
     sales: "영업 성과",
-    contacts: "연락처·파이프라인",
+    contacts: "영업",
+    salesAccounts: "내 담당 거래처",
     notifications: "알림",
     settings: "설정",
     counterparty: "거래처 360",
@@ -102,10 +103,11 @@ export function WorkspaceHeader({
     ask: "AI 서류 처리",
     deals: "기록",
     deal: "기록",
-    contacts: "기록",
+    contacts: "영업",
+    salesAccounts: "영업",
+    counterparty: "기록",
     shipments: "기록",
     settlement: "기록",
-    counterparty: "기록",
     snap: "기록",
     monitoring: "경영·성과",
     reports: "경영·성과",
@@ -124,8 +126,14 @@ export function WorkspaceHeader({
       ? [...activeSnapRoute.breadcrumb]
       : settingsLabel
         ? ["설정", settingsLabel]
-      : screen === "deal" || screen === "contacts"
+      : screen === "deal"
         ? ["기록", "거래", title]
+      : screen === "contacts"
+          ? ["영업"]
+          : screen === "salesAccounts"
+            ? ["영업", title]
+            : screen === "counterparty"
+              ? ["기록", title]
         : section !== title
           ? [section, title]
           : [title]
