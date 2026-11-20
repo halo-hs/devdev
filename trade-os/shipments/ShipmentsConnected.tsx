@@ -103,6 +103,14 @@ function summarizeEvidence(rows: SnapContainerEvidence[]): Map<string, EvidenceS
 }
 
 export type ShipmentSummary = { state: string; eta: string; count: number; snap: string };
+export type ShipmentContainerCard = {
+  number: string;
+  sealNumber?: string | null;
+  packageCount?: string | null;
+  packageUnit?: string | null;
+  grossWeight?: string | null;
+  volume?: string | null;
+};
 export type CommercialInvoiceCard = {
   documentId: string;
   fileName: string;
@@ -139,6 +147,7 @@ export type BillOfLadingCard = {
     grossWeight?: string | null;
     volume?: string | null;
   };
+  containers?: ShipmentContainerCard[];
   connectedCommercialInvoices: CommercialInvoiceCard[];
 };
 export type SplitShipmentView = {
