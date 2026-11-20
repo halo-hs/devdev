@@ -1709,6 +1709,10 @@ const splitShipmentReviewFixture = (dealId: string, onOpenDocument: (fileName: s
       fileName: "B/L_2607_014.pdf",
       uploadedAt: "2026.11.18 14:20",
       fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "014W", shippedOnBoardDate: "2026.11.20", containerNumber: "HMMU1234567", containerCount: 2, sealNumber: "SEAL-01402", packageCount: "12", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "16,480 KG", volume: "32.4 CBM" },
+      containers: [
+        { number: "HMMU1234567", sealNumber: "SEAL-01402-A", packageCount: "6", packageUnit: "bundles", grossWeight: "8,240 KG", volume: "16.2 CBM" },
+        { number: "HMMU1234568", sealNumber: "SEAL-01402-B", packageCount: "6", packageUnit: "bundles", grossWeight: "8,240 KG", volume: "16.2 CBM" },
+      ],
       connectedCommercialInvoices: [
         { documentId: "ci-0703", fileName: "Invoice_HB-2607-003.pdf", uploadedAt: "2026.11.18 14:22", invoiceNumber: "CI-2026-0703", invoiceDate: "2026.11.17", currency: "USD", totalAmount: 1539996, item: "Aluminium Scrap Tough Taboo", quantity: "12 MT", unitPrice: "128,333 USD/MT", packageCount: "12", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_HB-2607-003.pdf", "ci-0703") },
       ],
@@ -1719,6 +1723,7 @@ const splitShipmentReviewFixture = (dealId: string, onOpenDocument: (fileName: s
       fileName: "B/L_2607_015.pdf",
       uploadedAt: "2026.11.19 09:10",
       fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "015W", shippedOnBoardDate: "2026.11.27", containerNumber: "HMMU7654321", containerCount: 1, sealNumber: "SEAL-01503", packageCount: "6", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "8,200 KG", volume: "16.1 CBM" },
+      containers: [{ number: "HMMU7654321", sealNumber: "SEAL-01503", packageCount: "6", packageUnit: "bundles", grossWeight: "8,200 KG", volume: "16.1 CBM" }],
       connectedCommercialInvoices: [{ documentId: "ci-0712", fileName: "Invoice_HB-2607-012.pdf", uploadedAt: "2026.11.19 09:12", invoiceNumber: "CI-2026-0712", invoiceDate: "2026.11.18", currency: "USD", totalAmount: 770000, item: "Aluminium Scrap", quantity: "6 MT", unitPrice: "128,333 USD/MT", packageCount: "6", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_HB-2607-012.pdf", "ci-0712") }],
     },
     {
@@ -1727,6 +1732,10 @@ const splitShipmentReviewFixture = (dealId: string, onOpenDocument: (fileName: s
       fileName: "B/L_2607_016.pdf",
       uploadedAt: "2026.11.20 10:05",
       fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "016W", shippedOnBoardDate: "2026.12.03", containerNumber: "HMMU9876543", containerCount: 2, sealNumber: "SEAL-01604", packageCount: "8", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "10,400 KG", volume: "20.2 CBM" },
+      containers: [
+        { number: "HMMU9876543", sealNumber: "SEAL-01604-A", packageCount: "4", packageUnit: "bundles", grossWeight: "5,200 KG", volume: "10.1 CBM" },
+        { number: "HMMU9876544", sealNumber: "SEAL-01604-B", packageCount: "4", packageUnit: "bundles", grossWeight: "5,200 KG", volume: "10.1 CBM" },
+      ],
       connectedCommercialInvoices: [{ documentId: "ci-0715", fileName: "Invoice_HB-2607-015.pdf", uploadedAt: "2026.11.20 10:07", invoiceNumber: "CI-2026-0715", invoiceDate: "2026.11.19", currency: "USD", totalAmount: 1026400, item: "Aluminium Scrap", quantity: "8 MT", unitPrice: "128,300 USD/MT", packageCount: "8", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_HB-2607-015.pdf", "ci-0715") }],
     },
   ]
@@ -1742,8 +1751,21 @@ type CommercialInvoiceRecord = {
 }
 
 const containerCountLabel = (bill: SplitShipmentView["billsOfLading"][number]) => {
-  const count = bill.fields.containerCount ?? (bill.fields.containerNumber ? 1 : 0)
+  const count = bill.containers?.length || bill.fields.containerCount || (bill.fields.containerNumber ? 1 : 0)
   return count ? `컨테이너 ${count}대` : "컨테이너 미확인"
+}
+
+const billContainers = (bill: SplitShipmentView["billsOfLading"][number]) => {
+  if (bill.containers?.length) return bill.containers
+  if (!bill.fields.containerNumber) return []
+  return [{
+    number: bill.fields.containerNumber,
+    sealNumber: bill.fields.sealNumber,
+    packageCount: bill.fields.packageCount,
+    packageUnit: bill.fields.packageType,
+    grossWeight: bill.fields.grossWeight,
+    volume: bill.fields.volume,
+  }]
 }
 
 function CommercialInvoiceTransactionCard({
@@ -1848,7 +1870,42 @@ function CommercialInvoiceTransactionCard({
                     <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">연결된 선적</h3><span className="text-xs text-muted-foreground">{linkedBills.length ? `${linkedBills.length}건` : "연결 필요"}</span></div>
                     {linkedBills.length ? (
                       <ul className="mt-2 grid gap-2">
-                        {linkedBills.map((bill) => bill ? <li key={bill.documentId} className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/20 px-3 py-2 text-sm"><span><strong>{bill.blNumber || "B/L 번호 미확인"}</strong><span className="ml-2 text-muted-foreground">{bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"} · {containerCountLabel(bill)}</span></span><span className="flex items-center gap-2"><span className="text-xs text-muted-foreground">{bill.fields.shippedOnBoardDate ?? "출항일 미확인"}</span>{onEditShipment ? <Button type="button" size="icon-sm" variant="ghost" aria-label={`${bill.blNumber || "연결된 선적"} 수정`} title="연결된 선적 수정" onClick={(event) => onEditShipment(bill, event.currentTarget)}><Pencil aria-hidden="true" className="size-4" /></Button> : null}</span></li> : null)}
+                        {linkedBills.map((bill) => {
+                          if (!bill) return null
+                          const containers = billContainers(bill)
+                          return (
+                            <li key={bill.documentId} className="flex flex-wrap items-start justify-between gap-3 rounded-md border bg-muted/20 px-3 py-2 text-sm">
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                  <strong>{bill.blNumber || "B/L 번호 미확인"}</strong>
+                                  <span className="text-muted-foreground">{bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}</span>
+                                  <StatusBadge size="sm" tone="neutral">{containerCountLabel(bill)}</StatusBadge>
+                                </div>
+                                {containers.length ? (
+                                  <ul className="mt-2 grid gap-1.5 sm:grid-cols-2" aria-label={`${bill.blNumber || "연결된 선적"} 컨테이너 목록`}>
+                                    {containers.map((container) => (
+                                      <li key={container.number} className="rounded border bg-background px-2.5 py-2 text-xs">
+                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                          <span className="font-medium">{container.number}</span>
+                                          {container.sealNumber ? <span className="text-muted-foreground">씰 {container.sealNumber}</span> : null}
+                                        </div>
+                                        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-muted-foreground">
+                                          {container.packageCount ? <span>포장 {container.packageCount}{container.packageUnit ? ` ${container.packageUnit}` : ""}</span> : null}
+                                          {container.grossWeight ? <span>총중량 {container.grossWeight}</span> : null}
+                                          {container.volume ? <span>용적 {container.volume}</span> : null}
+                                        </div>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : <p className="mt-2 text-xs text-muted-foreground">컨테이너 정보 미확인</p>}
+                              </div>
+                              <span className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">{bill.fields.shippedOnBoardDate ?? "출항일 미확인"}</span>
+                                {onEditShipment ? <Button type="button" size="icon-sm" variant="ghost" aria-label={`${bill.blNumber || "연결된 선적"} 수정`} title="연결된 선적 수정" onClick={(event) => onEditShipment(bill, event.currentTarget)}><Pencil aria-hidden="true" className="size-4" /></Button> : null}
+                              </span>
+                            </li>
+                          )
+                        })}
                       </ul>
                     ) : (
                       <div className="mt-2 rounded-md border border-warning/40 bg-warning/5 p-3">
