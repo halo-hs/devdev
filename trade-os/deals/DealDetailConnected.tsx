@@ -5,11 +5,14 @@ import { useLocaleTag } from "@trade-os/lib/i18n/useLocaleTag"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { DealRefreshContext, useDealRefresh, useDealRefreshController } from "@trade-os/deals/useDealRefresh"
 import { PostWriteRefreshNotice } from "@trade-os/components/PostWriteRefreshNotice"
-import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, dealDocumentStatusLabel, dealDocumentStatusTone, dealDocumentNeedsAction, type DealDocumentRecord } from "@trade-os/lib/dealDocumentActions"
+import { dealDocumentPreviews, importantDealDocuments as documents, supplementaryDealDocuments as supplementaryDocuments, listDealDocuments, type DealDocumentRecord } from "@trade-os/lib/dealDocumentActions"
 import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
-import { DocumentTypeBadge } from "@trade-os/components/DocumentTypeBadge"
 import { InfoBox } from "@trade-os/components/InfoBox"
 import { OperationsScreen } from "@trade-os/OperationsScreens"
+import type { SplitShipmentView } from "@trade-os/shipments/ShipmentsConnected"
+import { ShipmentConfirmationDialog } from "@trade-os/shipments/ShipmentConfirmationDialog"
+import type { Shipment } from "@trade-os/lib/api/shipments"
+import { messages } from "@trade-os/lib/i18n/messages"
 import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@/components/platform/FormItem"
 import {
   getDealWorkPlan,
@@ -42,12 +45,12 @@ import {
   CircleAlert,
   FilePlus2,
   FileSearch,
-  FolderOpen,
   GripVertical,
   Link2,
   Unlink,
   LoaderCircle,
   MoreHorizontal,
+  MoreVertical,
   NotebookPen,
   Pencil,
   Plus,
@@ -316,7 +319,7 @@ const detectDealDocumentCode = (fileName: string) => {
   return matchers.find(([, pattern]) => pattern.test(normalized))?.[0] ?? null
 }
 
-type DocumentSlot = (typeof documents)[number] & { documentId?: string; erpDocumentId?: string; documentState?: DealDocumentRecord["state"]; revision?: number; fileDataUrl?: string }
+type DocumentSlot = (typeof documents)[number] & { documentId?: string; erpDocumentId?: string; documentState?: DealDocumentRecord["state"]; revision?: number; fileDataUrl?: string; commercialInvoiceId?: string }
 const documentKey = (document: DocumentSlot) => document.documentId ?? document.code
 const documentSlot = (record: DealDocumentRecord): DocumentSlot => ({
   code: record.code, type: record.type, file: record.file, source: "업로드",
@@ -329,6 +332,84 @@ const dealDeliveryAttachmentOptions = [
   ...documents,
   ...supplementaryDocuments,
 ].filter((document) => document.file.toLowerCase().endsWith(".pdf"))
+
+function ImportantDealDocumentsPanel({
+  importantDocuments,
+  selected,
+  onSelect,
+  onUpload,
+}: {
+  importantDocuments: DocumentSlot[]
+  selected: DocumentSlot
+  onSelect: (document: DocumentSlot) => void
+  onUpload: (document: DocumentSlot) => void
+}) {
+  return (
+    <section
+      aria-label="중요 서류"
+      className="mt-2 rounded-[var(--r-md)] border border-[var(--surface-border)] bg-background p-2"
+    >
+      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-5">
+        {importantDocuments.map((document) => {
+          const isMissing = !document.file
+          const isManual = document.status === "원본 미첨부"
+          const isNew = document.code === "PO"
+          const isSelected = documentKey(selected) === documentKey(document)
+
+          return (
+            <button
+              key={documentKey(document)}
+              type="button"
+              className={cn(
+                "flex h-10 min-w-0 items-center gap-2 rounded-[var(--r-sm)] border px-2.5 text-left transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
+                isMissing
+                  ? "border-dashed border-warning/55 hover:border-warning"
+                  : isSelected
+                    ? "border-[var(--control-selected-border)] bg-[var(--control-selected-soft-background)]"
+                    : "border-[var(--surface-border)] hover:border-[var(--control-hover-border)]"
+              )}
+              onClick={() =>
+                isMissing ? onUpload(document) : onSelect(document)
+              }
+              aria-label={
+                isMissing
+                  ? `${document.type} ${isManual ? "원본 파일 추가" : "파일 추가"}`
+                  : `${document.type} 원본 보기`
+              }
+            >
+              <span
+                className={cn(
+                  "shrink-0 text-[10px] font-semibold",
+                  isMissing
+                    ? "text-warning"
+                    : isSelected || isNew
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                )}
+              >
+                {document.code}
+              </span>
+              <span className="min-w-0 flex-1 truncate text-[11px] font-semibold">
+                {document.type}
+              </span>
+              {isMissing ? (
+                <span className="shrink-0 text-[10px] font-semibold text-warning">
+                  {isManual ? "원본 없음" : "미비"}
+                </span>
+              ) : isNew ? (
+                <span className="flex shrink-0 items-center gap-1 text-[10px] font-medium text-primary">
+                  <span className="size-1.5 rounded-full bg-primary" /> 신규
+                </span>
+              ) : (
+                <Check className="size-3.5 shrink-0 text-success" />
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
 
 type DealFieldMatch = "일치" | "확인 필요" | "누락" | "단일 출처"
 type DealFieldGroup = "거래 기본" | "상업 조건" | "선적 정보" | "결제 정보"
@@ -616,7 +697,7 @@ const dealFieldCandidates: Record<string, DealFieldCandidate[]> = {
     { source: "PO", document: "PO-260704-18.pdf", value: "2,400,000" },
     { source: "SC", document: "SC-2026-0708.pdf", value: "2,400,000" },
     { source: "CI", document: "Invoice_HB-2607-003.pdf", value: "2,566,000" },
-  ],
+  ]
 }
 
 const lineItemQuantityCandidates: Record<number, DealFieldCandidate[]> = {
@@ -1615,6 +1696,169 @@ type DealShipmentSummary = {
   count: number
   snap: string
 }
+
+// Prototype relation fixture for the split-shipment review. In production this
+// shape is supplied by the document relationship API; the UI never infers a
+// relationship from matching filenames or extracted field values.
+const splitShipmentReviewFixture = (dealId: string, onOpenDocument: (fileName: string, invoiceId: string) => void): SplitShipmentView => {
+  const shipmentCount = dealId === "DL-260708-01" ? 3 : dealId === "DL-260707-04" ? 2 : 3
+  const billsOfLading: SplitShipmentView["billsOfLading"] = [
+    {
+      documentId: "bl-014w-02",
+      blNumber: "HMM-014W-2607",
+      fileName: "B/L_2607_014.pdf",
+      uploadedAt: "2026.11.18 14:20",
+      fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "014W", shippedOnBoardDate: "2026.11.20", containerNumber: "HMMU1234567", sealNumber: "SEAL-01402", packageCount: "12", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "16,480 KG", volume: "32.4 CBM" },
+      connectedCommercialInvoices: [
+        { documentId: "ci-0703", fileName: "Invoice_HB-2607-003.pdf", uploadedAt: "2026.11.18 14:22", invoiceNumber: "CI-2026-0703", invoiceDate: "2026.11.17", currency: "USD", totalAmount: 1539996, item: "Aluminium Scrap Tough Taboo", quantity: "12 MT", unitPrice: "128,333 USD/MT", onOpen: () => onOpenDocument("Invoice_HB-2607-003.pdf", "ci-0703") },
+      ],
+    },
+    {
+      documentId: "bl-015w-03",
+      blNumber: "HMM-015W-2607",
+      fileName: "B/L_2607_015.pdf",
+      uploadedAt: "2026.11.19 09:10",
+      fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "015W", shippedOnBoardDate: "2026.11.27", containerNumber: "HMMU7654321", sealNumber: "SEAL-01503", packageCount: "6", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "8,200 KG", volume: "16.1 CBM" },
+      connectedCommercialInvoices: [{ documentId: "ci-0712", fileName: "Invoice_HB-2607-012.pdf", uploadedAt: "2026.11.19 09:12", invoiceNumber: "CI-2026-0712", invoiceDate: "2026.11.18", currency: "USD", totalAmount: 770000, item: "Aluminium Scrap", quantity: "6 MT", unitPrice: "128,333 USD/MT", onOpen: () => onOpenDocument("Invoice_HB-2607-012.pdf", "ci-0712") }],
+    },
+    {
+      documentId: "bl-016w-04",
+      blNumber: "HMM-016W-2607",
+      fileName: "B/L_2607_016.pdf",
+      uploadedAt: "2026.11.20 10:05",
+      fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "016W", shippedOnBoardDate: "2026.12.03", containerNumber: "HMMU9876543", sealNumber: "SEAL-01604", packageCount: "8", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "10,400 KG", volume: "20.2 CBM" },
+      connectedCommercialInvoices: [{ documentId: "ci-0715", fileName: "Invoice_HB-2607-015.pdf", uploadedAt: "2026.11.20 10:07", invoiceNumber: "CI-2026-0715", invoiceDate: "2026.11.19", currency: "USD", totalAmount: 1026400, item: "Aluminium Scrap", quantity: "8 MT", unitPrice: "128,300 USD/MT", onOpen: () => onOpenDocument("Invoice_HB-2607-015.pdf", "ci-0715") }],
+    },
+  ]
+  return {
+    billsOfLading: billsOfLading.slice(0, shipmentCount),
+    unlinkedDocuments: [{ documentId: "ci-unlinked-01", fileName: "Invoice_awaiting_bl.pdf", uploadedAt: "2026.11.19 09:18", invoiceNumber: "CI-2026-0718", invoiceDate: "2026.11.19", currency: "USD", totalAmount: 256600, item: "Aluminium Scrap", quantity: "2 MT", unitPrice: "128,300 USD/MT", onOpen: () => onOpenDocument("Invoice_awaiting_bl.pdf", "ci-unlinked-01") }],
+  }
+}
+
+type CommercialInvoiceRecord = {
+  invoice: SplitShipmentView["billsOfLading"][number]["connectedCommercialInvoices"][number]
+  billOfLadingIds: string[]
+}
+
+function CommercialInvoiceTransactionCard({
+  view,
+  linkedInvoiceTargets = {},
+  onEditShipment,
+}: {
+  view: SplitShipmentView
+  linkedInvoiceTargets?: Record<string, string>
+  onEditShipment?: (bill: SplitShipmentView["billsOfLading"][number], trigger: HTMLButtonElement) => void
+}) {
+  const [expanded, setExpanded] = useState<Set<string>>(
+    () => new Set([
+      ...view.billsOfLading.flatMap((bill) => bill.connectedCommercialInvoices.slice(0, 1).map((invoice) => invoice.documentId)),
+      ...view.unlinkedDocuments.map((invoice) => invoice.documentId),
+    ])
+  )
+  const [drafts, setDrafts] = useState<Record<string, Record<string, string>>>({})
+  const [localInvoiceLinks, setLocalInvoiceLinks] = useState<Record<string, string>>({})
+  const [invoiceLinkSelections, setInvoiceLinkSelections] = useState<Record<string, string>>({})
+  const invoiceLinks = useMemo(() => ({ ...linkedInvoiceTargets, ...localInvoiceLinks }), [linkedInvoiceTargets, localInvoiceLinks])
+  const records = useMemo<CommercialInvoiceRecord[]>(() => {
+    const byId = new Map<string, CommercialInvoiceRecord>()
+    for (const bill of view.billsOfLading) {
+      for (const invoice of bill.connectedCommercialInvoices) {
+        const existing = byId.get(invoice.documentId)
+        byId.set(invoice.documentId, {
+          invoice,
+          billOfLadingIds: [...new Set([...(existing?.billOfLadingIds ?? []), bill.documentId])],
+        })
+      }
+    }
+    for (const invoice of view.unlinkedDocuments) {
+      if (!byId.has(invoice.documentId)) byId.set(invoice.documentId, { invoice, billOfLadingIds: [] })
+    }
+    for (const [invoiceId, billId] of Object.entries(invoiceLinks)) {
+      const record = byId.get(invoiceId)
+      if (record && !record.billOfLadingIds.includes(billId)) record.billOfLadingIds.push(billId)
+    }
+    return [...byId.values()]
+  }, [invoiceLinks, view])
+  const toggle = (id: string) => setExpanded((current) => {
+    const next = new Set(current)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    return next
+  })
+  const updateDraft = (invoiceId: string, field: string, value: string) => {
+    setDrafts((current) => ({ ...current, [invoiceId]: { ...current[invoiceId], [field]: value } }))
+  }
+  const linkInvoice = (invoiceId: string, billId: string) => {
+    setLocalInvoiceLinks((current) => ({ ...current, [invoiceId]: billId }))
+  }
+  const billById = new Map(view.billsOfLading.map((bill) => [bill.documentId, bill]))
+  return (
+    <Card className="gap-0 px-5 py-4" aria-label="상업송장 정보">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 className="text-base font-semibold">상업송장(CI)</h2>
+          <p className="mt-1 text-sm text-muted-foreground">계약 품목을 실제 청구 단위로 확인하고 연결된 선적을 추적합니다.</p>
+        </div>
+        <StatusBadge tone="info">{records.length}건</StatusBadge>
+      </div>
+      <div className="mt-4 grid gap-2">
+        {records.map(({ invoice, billOfLadingIds }) => {
+          const isOpen = expanded.has(invoice.documentId)
+          const draft = drafts[invoice.documentId] ?? {}
+          const value = (field: string, fallback: string) => draft[field] ?? fallback
+          const linkedBills = billOfLadingIds.map((id) => billById.get(id)).filter(Boolean)
+          return (
+            <article key={invoice.documentId} className="overflow-hidden rounded-[var(--r-md)] border">
+              <div className="flex items-center gap-2 bg-muted/30 px-4 py-3">
+                <button type="button" className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left hover:bg-muted/50" aria-expanded={isOpen} onClick={() => toggle(invoice.documentId)}>
+                  <span className="flex min-w-0 items-center gap-2"><span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">CI</span><strong className="truncate text-sm">{invoice.invoiceNumber || invoice.fileName}</strong><StatusBadge size="sm" tone={linkedBills.length ? "success" : "warning"}>{linkedBills.length ? `B/L ${linkedBills.length}건 연결` : "B/L 연결 필요"}</StatusBadge></span>
+                  <ChevronDown className={cn("size-4 shrink-0 transition-transform", isOpen && "rotate-180")} aria-hidden="true" />
+                </button>
+                {invoice.onOpen ? <Button type="button" size="xs" variant="outline" onClick={invoice.onOpen}>문서 보기</Button> : null}
+              </div>
+              {isOpen ? (
+                <div className="border-t p-4">
+                  <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {[
+                      ["송장번호", invoice.invoiceNumber ?? ""],
+                      ["송장일자", invoice.invoiceDate ?? ""],
+                      ["품목", invoice.item ?? ""],
+                      ["수량", invoice.quantity ?? ""],
+                      ["단가", invoice.unitPrice ?? ""],
+                      ["통화·금액", invoice.currency && invoice.totalAmount != null ? `${invoice.currency} ${invoice.totalAmount.toLocaleString()}` : invoice.currency ?? ""],
+                    ].map(([label, fallback]) => <div key={label}><dt className="text-xs text-muted-foreground">{label}</dt><dd className="mt-1">{label === "송장일자" ? <DatePicker ariaLabel={`${invoice.invoiceNumber ?? invoice.fileName} ${label}`} value={value(label, fallback)} onValueChange={(next) => updateDraft(invoice.documentId, label, next)} className="w-full" /> : <Input aria-label={`${invoice.invoiceNumber ?? invoice.fileName} ${label}`} value={value(label, fallback)} onChange={(event) => updateDraft(invoice.documentId, label, event.target.value)} className="h-10" />}</dd></div>)}
+                  </dl>
+                  <div className="mt-4 border-t pt-4">
+                    <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">연결된 선적</h3><span className="text-xs text-muted-foreground">{linkedBills.length ? `${linkedBills.length}건` : "연결 필요"}</span></div>
+                    {linkedBills.length ? (
+                      <ul className="mt-2 grid gap-2">
+                        {linkedBills.map((bill) => bill ? <li key={bill.documentId} className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/20 px-3 py-2 text-sm"><span><strong>{bill.blNumber || "B/L 번호 미확인"}</strong><span className="ml-2 text-muted-foreground">{bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}</span></span><span className="flex items-center gap-2"><span className="text-xs text-muted-foreground">{bill.fields.shippedOnBoardDate ?? "출항일 미확인"}</span>{onEditShipment ? <Button type="button" size="icon-sm" variant="ghost" aria-label={`${bill.blNumber || "연결된 선적"} 수정`} title="연결된 선적 수정" onClick={(event) => onEditShipment(bill, event.currentTarget)}><Pencil aria-hidden="true" className="size-4" /></Button> : null}</span></li> : null)}
+                      </ul>
+                    ) : (
+                      <div className="mt-2 rounded-md border border-warning/40 bg-warning/5 p-3">
+                        <div className="flex flex-wrap items-center gap-2"><StatusBadge size="sm" tone="warning">B/L 연결 필요</StatusBadge><span className="text-sm font-medium">연결할 선적 후보를 선택하세요.</span></div>
+                        <p className="mt-1 text-xs text-muted-foreground">선적 목록의 B/L 중 하나를 선택하면 이 상업송장에 연결됩니다.</p>
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <select aria-label={`${invoice.invoiceNumber || invoice.fileName} 연결할 선적 후보`} className="h-9 min-w-56 rounded-md border border-input bg-background px-3 text-sm" value={invoiceLinkSelections[invoice.documentId] ?? ""} onChange={(event) => setInvoiceLinkSelections((current) => ({ ...current, [invoice.documentId]: event.target.value }))}>
+                            <option value="">연결할 B/L 선택</option>
+                            {view.billsOfLading.map((bill) => <option key={bill.documentId} value={bill.documentId}>{bill.blNumber || bill.fileName} · {bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}</option>)}
+                          </select>
+                          <Button type="button" size="sm" disabled={!invoiceLinkSelections[invoice.documentId]} onClick={() => { const billId = invoiceLinkSelections[invoice.documentId]; if (billId) linkInvoice(invoice.documentId, billId) }}>B/L 연결</Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+            </article>
+          )
+        })}
+      </div>
+    </Card>
+  )
+}
+
 const workPreviewFields: Record<DealWorkKey, string[]> = {
   documents: ["품목·수량·단가", "거래처·계약번호", "인코텀즈·지급조건"],
   fulfillment: ["계약·선적·잔여 수량", "B/L·선박·항구", "출항일·도착 예정일"],
@@ -1730,6 +1974,7 @@ function DealDocumentPanels({
   onStartWork,
   canWrite,
   profile,
+  commercialInvoiceContent,
   documentStrip,
   primary,
   preview,
@@ -1746,6 +1991,7 @@ function DealDocumentPanels({
   onStartWork: (key: DealWorkKey) => void
   canWrite: boolean
   profile: DealProfile
+  commercialInvoiceContent: ReactNode
   documentStrip: ReactNode
   primary: ReactNode
   preview: ReactNode
@@ -1841,6 +2087,7 @@ function DealDocumentPanels({
           canWrite={canWrite}
         >
           {work === "documents" ? (
+            <>
             <section
               id="deal-documents"
               inert={documentOpen}
@@ -1878,6 +2125,8 @@ function DealDocumentPanels({
                 </div>
               )}
             </section>
+            {commercialInvoiceContent}
+            </>
           ) : failedPanel === work ? (
             <PanelFailure title={workLabels[work]} onRetry={onRetry} />
           ) : (
@@ -2129,133 +2378,60 @@ function DealRecordSections({
   )
 }
 
-/**
- * The deal's document box: lists only documents linked to this deal and opens
- * over the PDF, so choosing a document never pushes the original down.
- */
-function DealDocumentBox({
-  documents,
-  selected,
-  onSelect,
-  onAdd,
-}: {
-  documents: DocumentSlot[]
-  selected: DocumentSlot
-  onSelect: (document: DocumentSlot) => void
-  onAdd?: () => void
-}) {
-  const [open, setOpen] = useState(false)
-  const toCheck = documents.filter((document) => document.status === "검토").length
+type CommercialInvoiceDocument = SplitShipmentView["unlinkedDocuments"][number]
+
+function CommercialInvoicePreview({ invoice }: { invoice: CommercialInvoiceDocument }) {
+  const amount = invoice.currency && invoice.totalAmount != null
+    ? `${invoice.currency} ${invoice.totalAmount.toLocaleString()}`
+    : invoice.currency ?? "—"
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="relative shrink-0"
-          aria-label={`서류함 ${documents.length}건${toCheck ? `, 확인 전 ${toCheck}건` : ""}`}
-        >
-          <FolderOpen data-icon="inline-start" />
-          서류함
-          <span className="text-muted-foreground">{documents.length}</span>
-          <ChevronDown />
-          {toCheck ? (
-            <span aria-hidden="true" className="absolute -top-1.5 -right-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-warning px-1 text-[10px] leading-none font-semibold text-white">
-              {toCheck}
-            </span>
-          ) : null}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-[min(32rem,calc(100vw-2rem))] gap-0 p-0">
-        <div className="flex items-center gap-2 border-b border-[var(--surface-border)] px-3 py-2.5">
-          <span className="text-xs font-semibold">이 거래의 서류 {documents.length}건</span>
-          {onAdd ? (
-            <Button
-              variant="outline"
-              size="xs"
-              className="ml-auto"
-              onClick={() => {
-                setOpen(false)
-                onAdd()
-              }}
-            >
-              <FilePlus2 data-icon="inline-start" />서류 추가
-            </Button>
-          ) : null}
+    <section aria-label="선택한 상업송장 정보" className="mt-3 rounded-md border bg-muted/20 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">CI</span>
+          <div className="min-w-0">
+            <h4 className="truncate text-xs font-semibold">상업송장 정보</h4>
+            <p className="truncate text-[10px] text-muted-foreground">{invoice.invoiceNumber ?? invoice.fileName}</p>
+          </div>
         </div>
-        {documents.length ? (
-          // Grouped by where the document came from: 문서 올리기 (uploaded or
-          // received) vs 문서 만들기 (issued). One group title instead of a
-          // per-row badge keeps '확인 전' the only badge, so a badge always
-          // means there is something to do.
-          [
-            { label: "올린 서류", items: documents.filter((document) => document.source !== "발행") },
-            { label: "만든 서류", items: documents.filter((document) => document.source === "발행") },
-          ].filter((group) => group.items.length).map((group) => (
-            <div key={group.label} role="group" aria-label={`${group.label} ${group.items.length}건`}>
-              <div className="border-t border-[var(--surface-border)] bg-[var(--surface-muted-background)] px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
-                {group.label} {group.items.length}
-              </div>
-              {group.items.map((document) => {
-                const isSelected = documentKey(document) === documentKey(selected)
-                return (
-                  <button
-                    key={documentKey(document)}
-                    type="button"
-                    aria-current={isSelected ? "true" : undefined}
-                    className={cn(
-                      "grid h-10 w-full grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 border-t border-[var(--surface-border)] px-3 text-left focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
-                      isSelected ? "bg-[var(--control-selected-soft-background)]" : "hover:bg-[var(--surface-muted-background)]"
-                    )}
-                    onClick={() => {
-                      onSelect(document)
-                      setOpen(false)
-                    }}
-                  >
-                    <DocumentTypeBadge code={document.code} title={document.type} aria-label={document.type} />
-                    <span className={cn("truncate text-xs", isSelected ? "text-foreground" : "text-muted-foreground")}>{document.file}</span>
-                    <span className="flex justify-end">
-                      {/* Only the real needs_review state is called out here;
-                          every other document is just listed. */}
-                      {document.status === "검토" ? (
-                        <StatusBadge tone={dealDocumentStatusTone(document.status)}>
-                          {dealDocumentStatusLabel(document.status)}
-                        </StatusBadge>
-                      ) : isSelected ? (
-                        <Check className="size-3.5 text-primary" aria-label="지금 보는 서류" />
-                      ) : null}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          ))
-        ) : (
-          <p className="px-3 py-6 text-center text-xs text-muted-foreground">이 거래에 연결된 서류가 없습니다.</p>
-        )}
-      </PopoverContent>
-    </Popover>
+        <StatusBadge size="sm" tone="neutral">읽기 전용</StatusBadge>
+      </div>
+      <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+        {[
+          ["송장일자", invoice.invoiceDate ?? "—"],
+          ["품목", invoice.item ?? "—"],
+          ["수량", invoice.quantity ?? "—"],
+          ["단가", invoice.unitPrice ?? "—"],
+          ["통화·금액", amount],
+        ].map(([label, value]) => (
+          <div key={label} className="min-w-0">
+            <dt className="text-[10px] text-muted-foreground">{label}</dt>
+            <dd className="mt-0.5 truncate font-medium">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   )
 }
 
 function DealPdf({
   slot,
   fieldSummary,
-  navigator,
+  previewFields,
   actions,
   canUnlink,
   onUnlink,
 }: {
   slot: DocumentSlot
   fieldSummary: string
-  /** Document picker shown before the file name (the deal's document box). */
-  navigator?: ReactNode
+  previewFields?: [string, string][]
   actions?: ReactNode
   canUnlink: boolean
   onUnlink: () => void
 }) {
   const file = slot.file
   const preview = dealDocumentPreviews[slot.code] ?? dealDocumentPreviews.PO
+  const fields = previewFields ?? preview.fields
   const [page, setPage] = useState(1)
   const [zoom, setZoom] = useState(100)
   const [fullscreen, setFullscreen] = useState(false)
@@ -2289,37 +2465,34 @@ function DealPdf({
       aria-modal={fullscreen ? "true" : undefined}
       aria-label={fullscreen ? `${slot.type} 전체 화면 미리보기` : undefined}
     >
-      {/* Row 1: which file + its status. Row 2: document actions (left) and
-          viewer tools (right). Fixed two rows so nothing reflows with width. */}
-      <div className="grid shrink-0 gap-2 border-b border-[var(--surface-border)] bg-background px-3 py-2">
+      <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--surface-border)] bg-background px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
-          {navigator ? (
-            <>
-              {navigator}
-              <span aria-hidden="true" className="h-6 w-px shrink-0 bg-[var(--surface-border)]" />
-            </>
-          ) : (
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[9px] font-semibold text-[var(--color-red-2)]">
-              PDF
-            </span>
-          )}
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[9px] font-semibold text-[var(--color-red-2)]">
+            PDF
+          </span>
           <span className="min-w-0">
             <span className="block truncate text-xs font-semibold">{file}</span>
             <span className="mt-0.5 block truncate text-[10px] text-muted-foreground">
-              {[slot.code, slot.type, fieldSummary].filter(Boolean).join(" · ")}
+              {slot.code} · {slot.type} · {fieldSummary}
             </span>
           </span>
-          <StatusBadge tone={dealDocumentStatusTone(slot.status)}>
-            {dealDocumentStatusLabel(slot.status)}
-          </StatusBadge>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            {actions}
-            {canUnlink ? (
-              <Tooltip><TooltipTrigger asChild><Button variant="outline" size="icon-sm" className="shrink-0" aria-label="거래 연결 해제" onClick={onUnlink}><Unlink /></Button></TooltipTrigger><TooltipContent>거래 연결 해제</TooltipContent></Tooltip>
-            ) : null}
-          </div>
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+          <StatusBadge
+            tone={
+              slot.status === "검토"
+                ? "blue"
+                : slot.status === "발행" || slot.status === "분석 중"
+                  ? "blue"
+                  : "success"
+            }
+          >
+            {slot.status === "검토" ? "확인 전" : slot.status}
+          </StatusBadge>
+          {canUnlink ? (
+            <Tooltip><TooltipTrigger asChild><Button variant="outline" size="icon-sm" className="shrink-0" aria-label="거래 연결 해제" onClick={onUnlink}><Unlink /></Button></TooltipTrigger><TooltipContent>거래 연결 해제</TooltipContent></Tooltip>
+          ) : null}
+          {actions}
           <PdfViewerToolbar
             zoom={zoom}
             onZoomChange={setZoom}
@@ -2348,7 +2521,7 @@ function DealPdf({
             {file} · page {page}
           </p>
           <Separator className="my-8" />
-          {preview.fields.map(([label, value]) => (
+          {fields.map(([label, value]) => (
             <div
               key={label}
               className="grid grid-cols-[120px_1fr] border-b py-3 text-sm"
@@ -3246,6 +3419,118 @@ function DealHealthReference({
   )
 }
 
+function DealDocumentBundleRail({
+  availableDocuments,
+  selected,
+  expanded,
+  onSelect,
+}: {
+  availableDocuments: DocumentSlot[]
+  selected: DocumentSlot
+  expanded: boolean
+  onSelect: (document: DocumentSlot) => void
+}) {
+  const [filter, setFilter] = useState<"all" | "connected" | "missing">("all")
+  const connectedCount = availableDocuments.filter(
+    (document) => document.file
+  ).length
+  const missingCount = availableDocuments.length - connectedCount
+  const filteredDocuments = availableDocuments.filter((document) => {
+    if (filter === "connected" && !document.file) return false
+    if (filter === "missing" && document.file) return false
+    return true
+  })
+
+  if (!expanded) return null
+
+  return (
+    <div className="mt-2 overflow-hidden rounded-[var(--r-md)] border border-[var(--surface-border)]">
+      <div className="bg-[var(--surface-muted-background)] p-2.5">
+        <div className="flex items-center justify-end gap-1 px-1">
+          {[
+            ["all", `전체 ${availableDocuments.length}`],
+            ["connected", `연결 ${connectedCount}`],
+            ["missing", `미연결 ${missingCount}`],
+          ].map(([value, label]) => (
+            <Button
+              key={value}
+              variant={filter === value ? "secondary" : "ghost"}
+              size="xs"
+              onClick={() =>
+                setFilter(value as "all" | "connected" | "missing")
+              }
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+        <div className="field-scrollbar mt-2 max-h-64 overflow-y-auto rounded-[var(--r-md)] ring-1 ring-[var(--table-border)]">
+          <div className="sticky top-0 z-10 grid grid-cols-[38px_minmax(0,1fr)_90px] gap-2 border-b border-[var(--table-border)] bg-[var(--table-header-background)] px-2.5 py-2 text-[10px] font-medium text-muted-foreground">
+            <span>종류</span>
+            <span>파일</span>
+            <span className="text-right">상태</span>
+          </div>
+          {filteredDocuments.length ? (
+            filteredDocuments.map((document) => {
+              const isSelected = documentKey(selected) === documentKey(document)
+              return (
+                <Button
+                  key={documentKey(document)}
+                  variant="ghost"
+                  className={cn(
+                    "grid h-auto w-full grid-cols-[38px_minmax(0,1fr)_90px] items-center gap-2 rounded-none border-b border-[var(--table-border)] px-2.5 py-2 text-left font-normal text-foreground last:border-b-0 hover:text-foreground",
+                    isSelected && "bg-accent"
+                  )}
+                  onClick={() => {
+                    onSelect(document)
+                  }}
+                >
+                  <Badge
+                    variant="secondary"
+                    className="justify-center px-1 text-[10px]"
+                  >
+                    {document.code}
+                  </Badge>
+                  <span className="min-w-0">
+                    <span className="block truncate text-xs font-medium">
+                      {document.file || `${document.type} 미연결`}
+                    </span>
+                    <span className="mt-0.5 block text-[10px] text-muted-foreground">
+                      {document.type}
+                    </span>
+                  </span>
+                  <span className="flex items-center justify-end gap-1.5">
+                    <StatusBadge
+                      tone={
+                        document.status === "미비"
+                          ? "warning"
+                          : document.status === "발행"
+                            ? "blue"
+                            : document.status === "검토"
+                              ? "warning"
+                              : "success"
+                      }
+                    >
+                      {document.status}
+                    </StatusBadge>
+                    {isSelected ? (
+                      <Check className="size-3.5 shrink-0 text-primary" />
+                    ) : null}
+                  </span>
+                </Button>
+              )
+            })
+          ) : (
+            <p className="px-3 py-8 text-center text-xs text-muted-foreground">
+              해당 상태의 기타 서류가 없습니다.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function GeneratedDealDocumentsList({
   documents: generatedDocuments,
   selectedDocumentNumber,
@@ -3339,6 +3624,9 @@ function DocumentsTab({
   onMissingFieldsChange,
   onMainInformationChange,
   onDocumentSummaryChange,
+  commercialInvoiceView,
+  linkedInvoiceTargets,
+  onEditShipment,
   documentOpen,
   onDocumentOpenChange,
   failedPanel,
@@ -3361,6 +3649,9 @@ function DocumentsTab({
     info: Pick<DealProfile, "counterparty" | "amount" | "currency">
   ) => void
   onDocumentSummaryChange: (summary: DealDocumentSummary) => void
+  commercialInvoiceView: SplitShipmentView
+  linkedInvoiceTargets?: Record<string, string>
+  onEditShipment: (bill: SplitShipmentView["billsOfLading"][number], trigger: HTMLButtonElement) => void
   documentOpen: boolean
   onDocumentOpenChange: (open: boolean) => void
   failedPanel: Tab | null
@@ -3490,6 +3781,31 @@ function DocumentsTab({
   >({})
   const directFileInputRef = useRef<HTMLInputElement | null>(null)
   const directFileCodeRef = useRef<string | null>(null)
+  const [documentsExpanded, setDocumentsExpanded] = useState(false)
+  const [supplementaryDocumentsExpanded, setSupplementaryDocumentsExpanded] =
+    useState(false)
+  const [selectedCommercialInvoiceId, setSelectedCommercialInvoiceId] = useState<string | null>(null)
+  useEffect(() => {
+    const handleCiOpen = (event: Event) => {
+      const detail = (event as CustomEvent<string | { fileName: string; invoiceId?: string }>).detail
+      const fileName = typeof detail === "string" ? detail : detail?.fileName
+      if (!fileName) return
+      const ci = documents.find(document => document.code === "CI")
+      if (!ci) return
+      setSelected({
+        ...ci,
+        file: fileName,
+        status: "검토",
+        source: "업로드",
+        commercialInvoiceId: typeof detail === "string" ? undefined : detail.invoiceId,
+      })
+      setSelectedCommercialInvoiceId(typeof detail === "string" ? null : detail.invoiceId ?? null)
+      setDocumentsExpanded(false)
+      setSupplementaryDocumentsExpanded(false)
+    }
+    window.addEventListener("ecoya:open-ci-document", handleCiOpen)
+    return () => window.removeEventListener("ecoya:open-ci-document", handleCiOpen)
+  }, [])
   const [missingDocumentPrompt, setMissingDocumentPrompt] =
     useState<DocumentSlot | null>(null)
   const [confirmUnlink, setConfirmUnlink] = useState(false)
@@ -3515,6 +3831,27 @@ function DocumentsTab({
   const visibleSupplementaryDocuments = documentRecords
     .filter(record => (record.originDealId !== dealId || !documents.some(slot => slot.code === record.originCode)) && !unlinked.includes(record.id))
     .map(documentSlot)
+  const commercialInvoices = useMemo(
+    () => [
+      ...commercialInvoiceView.billsOfLading.flatMap((bill) => bill.connectedCommercialInvoices),
+      ...commercialInvoiceView.unlinkedDocuments,
+    ].filter((invoice, index, all) => all.findIndex((candidate) => candidate.documentId === invoice.documentId) === index),
+    [commercialInvoiceView]
+  )
+  const selectedCommercialInvoice = selected.code === "CI"
+    ? commercialInvoices.find((invoice) =>
+        invoice.documentId === selectedCommercialInvoiceId ||
+        (!selectedCommercialInvoiceId && invoice.fileName === selected.file)
+      )
+    : undefined
+  const selectDocument = (document: DocumentSlot) => {
+    setSelected(document)
+    setSelectedCommercialInvoiceId(
+      document.code === "CI"
+        ? commercialInvoices.find((invoice) => invoice.fileName === document.file)?.documentId ?? null
+        : null
+    )
+  }
   const connectedImportantCount = visibleImportantDocuments.filter(
     (item) => item.file
   ).length
@@ -3531,6 +3868,8 @@ function DocumentsTab({
     visibleImportantDocuments,
     onDocumentSummaryChange,
   ])
+  const totalDocumentCount =
+    connectedImportantCount + visibleSupplementaryDocuments.length
   const selectableDocuments = [
     ...visibleImportantDocuments.filter((item) => item.file),
     ...visibleSupplementaryDocuments,
@@ -3770,14 +4109,6 @@ function DocumentsTab({
     }
     openDirectFilePicker(document.code)
   }
-  const documentBox = (
-    <DealDocumentBox
-      documents={selectableDocuments}
-      selected={selected}
-      onSelect={setSelected}
-      onAdd={canMutate(role) ? () => openDirectFilePicker() : undefined}
-    />
-  )
   const addDirectFile = async (file: File, requestedCode?: string | null) => {
     const detectedCode = detectDealDocumentCode(file.name)
     const fallbackCode =
@@ -3832,6 +4163,7 @@ function DocumentsTab({
         onStartWork={onStartWork}
         canWrite={canMutate(role)}
         profile={profile}
+        commercialInvoiceContent={<CommercialInvoiceTransactionCard view={commercialInvoiceView} linkedInvoiceTargets={linkedInvoiceTargets} onEditShipment={onEditShipment} />}
         documentStrip={
           <div
             aria-label="거래 상세 서류 목록"
@@ -3841,7 +4173,7 @@ function DocumentsTab({
               <button
                 key={documentKey(document)}
                 type="button"
-                aria-label={`${document.type} ${document.file ? dealDocumentStatusLabel(document.status) : "미비"}`}
+                aria-label={`${document.type} ${document.file ? "보유" : "미비"}`}
                 aria-pressed={documentKey(selected) === documentKey(document)}
                 className={cn(
                   "flex min-h-8 items-center gap-1.5 rounded-md px-2 text-xs",
@@ -3850,19 +4182,21 @@ function DocumentsTab({
                     : "text-muted-foreground hover:bg-muted"
                 )}
                 onClick={() => {
-                  setSelected(document)
+                  selectDocument(document)
+                  setDocumentsExpanded(false)
+                  setSupplementaryDocumentsExpanded(false)
                   onDocumentOpenChange(true)
                 }}
               >
                 <span
                   className={cn(
                     "size-1.5 rounded-full",
-                    !document.file ? "bg-warning" : dealDocumentNeedsAction(document.status) ? "border border-warning bg-transparent" : "bg-success"
+                    document.file ? document.status === "검토" || document.status === "유형 확인 필요" ? "border border-success bg-transparent" : "bg-success" : "bg-warning"
                   )}
                 />
                 {document.type}
                 <span className="sr-only">
-                  {document.file ? dealDocumentStatusLabel(document.status) : "미비"}
+                  {document.file ? "보유" : "미비"}
                 </span>
               </button>
             ))}
@@ -3870,7 +4204,8 @@ function DocumentsTab({
               type="button"
               className="flex min-h-8 items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground hover:bg-muted"
               onClick={() => {
-                if (visibleSupplementaryDocuments[0]) setSelected(visibleSupplementaryDocuments[0])
+                setDocumentsExpanded(false)
+                setSupplementaryDocumentsExpanded(true)
                 onDocumentOpenChange(true)
               }}
             >
@@ -4055,6 +4390,76 @@ function DocumentsTab({
         }
         preview={
           <aside className="field-scrollbar min-w-0 border-t px-4 py-4 xl:h-full xl:overflow-y-auto xl:border-t-0 xl:px-5 xl:pb-8">
+            <div className="border-b border-[var(--surface-border)] pb-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-base font-semibold">거래 서류</h3>
+                <StatusBadge tone="neutral">전체 {totalDocumentCount}건</StatusBadge>
+                <DealDisclosureButton expanded={documentsExpanded} onClick={() => {
+                  setDocumentsExpanded((value) => !value)
+                  setSupplementaryDocumentsExpanded(false)
+                }} label="거래 서류" />
+                <div
+                  className="flex w-full min-w-0 items-center gap-1 overflow-x-auto"
+                  aria-label="중요 서류 요약"
+                >
+                  {visibleImportantDocuments.map((document) => {
+                    const isMissing = !document.file
+                    const isSelected = documentKey(selected) === documentKey(document)
+                    return (
+                      <button
+                        key={documentKey(document)}
+                        type="button"
+                        className={cn(
+                          "flex h-7 shrink-0 items-center gap-1 rounded-[var(--r-sm)] px-2 text-[10px] font-medium whitespace-nowrap transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
+                          isSelected
+                            ? "bg-[var(--control-selected-soft-background)] text-primary"
+                            : "text-muted-foreground hover:bg-[var(--surface-muted-background)] hover:text-foreground"
+                        )}
+                        onClick={() => {
+                          setDocumentsExpanded(false)
+                          setSupplementaryDocumentsExpanded(false)
+                          if (isMissing) {
+                            requestDocumentUpload(document)
+                          } else {
+                            selectDocument(document)
+                          }
+                        }}
+                        aria-label={`${document.type} ${isMissing ? "미비" : "보유"}`}
+                      >
+                        <span
+                          className={cn(
+                            "size-1.5 rounded-full",
+                            isMissing ? "bg-warning" : document.status === "검토" || document.status === "유형 확인 필요" ? "border border-success bg-transparent" : "bg-success"
+                          )}
+                        />
+                        <span>{document.type}</span>
+                      </button>
+                    )
+                  })}
+                  <button
+                    type="button"
+                    className={cn(
+                      "flex h-7 shrink-0 items-center gap-1 rounded-[var(--r-sm)] px-2 text-[10px] font-medium transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
+                      documentsExpanded || supplementaryDocumentsExpanded
+                        ? "bg-muted text-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                    aria-pressed={
+                      documentsExpanded || supplementaryDocumentsExpanded
+                    }
+                    onClick={() => {
+                      setDocumentsExpanded(false)
+                      setSupplementaryDocumentsExpanded((value) =>
+                        documentsExpanded ? true : !value
+                      )
+                    }}
+                  >
+                    <span className="size-1.5 rounded-full bg-muted-foreground/60" />
+                    기타 서류 {visibleSupplementaryDocuments.length}건
+                  </button>
+                </div>
+              </div>
+            </div>
             <input
               ref={directFileInputRef}
               type="file"
@@ -4068,14 +4473,55 @@ function DocumentsTab({
                 event.target.value = ""
               }}
             />
+            {documentsExpanded || supplementaryDocumentsExpanded ? (
+              <div className="pb-2">
+                {documentsExpanded ? (
+                  <>
+                    <div className="mt-3 flex items-center justify-between px-1">
+                      <h4 className="text-xs font-semibold">중요 서류</h4>
+                      <span className="text-[10px] text-muted-foreground">
+                        거래 진행에 필요한 기준 서류
+                      </span>
+                    </div>
+                    <ImportantDealDocumentsPanel
+                      importantDocuments={visibleImportantDocuments}
+                      selected={selected}
+                      onSelect={(document) => {
+                        selectDocument(document)
+                        setDocumentsExpanded(false)
+                        setSupplementaryDocumentsExpanded(false)
+                      }}
+                      onUpload={requestDocumentUpload}
+                    />
+                  </>
+                ) : null}
+                <div className="mt-3 flex items-center justify-between px-1">
+                  <h4 className="text-xs font-semibold">기타 서류</h4>
+                  <span className="text-[10px] text-muted-foreground">
+                    {visibleSupplementaryDocuments.length}건
+                  </span>
+                </div>
+                <DealDocumentBundleRail
+                  availableDocuments={visibleSupplementaryDocuments}
+                  selected={selected}
+                  expanded
+                  onSelect={(document) => {
+                    selectDocument(document)
+                    setDocumentsExpanded(false)
+                    setSupplementaryDocumentsExpanded(false)
+                  }}
+                />
+              </div>
+            ) : null}
             {movedDocument && <p role="status" className="my-2 rounded-md bg-muted px-3 py-2 text-xs">
               {movedDocument.file} 서류를 이동했습니다. <a href={`/erp/deals/${movedDocument.dealId}`} className="font-medium text-primary underline">이동한 거래 보기</a>
             </p>}
             <div className="mt-2">
               {!selected.file ? (
-                <div className="flex min-w-0 items-center gap-2 border-b border-[var(--surface-border)] px-3 py-2">
-                  {documentBox}
-                  <span aria-hidden="true" className="h-6 w-px shrink-0 bg-[var(--surface-border)]" />
+                <div className="flex min-w-0 items-center gap-2 border-y border-[var(--surface-border)] px-1 py-2.5">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[9px] font-semibold text-[var(--color-red-2)]">
+                    PDF
+                  </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-xs font-semibold">
                       {selected.type} 미연결
@@ -4084,8 +4530,22 @@ function DocumentsTab({
                       {selected.code} · {selected.type} · 파일 추가 필요
                     </span>
                   </span>
-                  <StatusBadge tone={dealDocumentStatusTone(selected.status)}>
-                    {dealDocumentStatusLabel(selected.status)}
+                  <StatusBadge
+                    tone={
+                      selected.status === "미비"
+                        ? "warning"
+                        : selected.status === "원본 미첨부"
+                          ? "warning"
+                          : selected.status === "발행"
+                            ? "blue"
+                            : selected.status === "분석 중"
+                              ? "blue"
+                              : selected.status === "검토"
+                                ? "blue"
+                                : "success"
+                    }
+                  >
+                    {selected.status === "검토" ? "확인 전" : selected.status}
                   </StatusBadge>
                   {selected.file && canMutate(role) ? (
                     <Tooltip><TooltipTrigger asChild><Button variant="outline" size="icon-sm" className="shrink-0" aria-label="거래 연결 해제" onClick={() => setConfirmUnlink(true)}><Unlink /></Button></TooltipTrigger><TooltipContent>거래 연결 해제</TooltipContent></Tooltip>
@@ -4093,24 +4553,40 @@ function DocumentsTab({
                 </div>
               ) : null}
               {selected.file ? (
-                <DealPdf
-                  key={selected.code}
-                  slot={selected}
-                  navigator={documentBox}
-                  fieldSummary={
-                    selectedFieldSet
-                      ? `${selectedFieldSet.fields.length}/${selectedFieldSet.total} 필드`
-                      : selected.status === "분석 중" ? "필드 분석 중" : ""
-                  }
-                  actions={selectedRecord && <DealDocumentActions
-                    key={selectedRecord.id}
-                    document={selectedRecord}
-                    canWrite={canMutate(role)}
-                    onChanged={handleDocumentChanged}
-                  />}
-                  canUnlink={canMutate(role)}
-                  onUnlink={() => setConfirmUnlink(true)}
-                />
+                <>
+                  {selectedCommercialInvoice ? <CommercialInvoicePreview invoice={selectedCommercialInvoice} /> : null}
+                  <DealPdf
+                    key={`${selected.code}-${selectedCommercialInvoice?.documentId ?? selected.file}`}
+                    slot={selected}
+                    previewFields={selectedCommercialInvoice ? [
+                      ["Invoice No.", selectedCommercialInvoice.invoiceNumber ?? "—"],
+                      ["Invoice Date", selectedCommercialInvoice.invoiceDate ?? "—"],
+                      ["Item", selectedCommercialInvoice.item ?? "—"],
+                      ["Quantity", selectedCommercialInvoice.quantity ?? "—"],
+                      ["Unit Price", selectedCommercialInvoice.unitPrice ?? "—"],
+                      [
+                        "Amount",
+                        selectedCommercialInvoice.currency && selectedCommercialInvoice.totalAmount != null
+                          ? `${selectedCommercialInvoice.totalAmount.toLocaleString()} ${selectedCommercialInvoice.currency}`
+                          : "—",
+                      ],
+                      ["Payment", "T/T 30 days"],
+                    ] : undefined}
+                    fieldSummary={
+                      selectedFieldSet
+                        ? `${selectedFieldSet.fields.length}/${selectedFieldSet.total} 필드`
+                        : "필드 분석 중"
+                    }
+                    actions={selectedRecord && <DealDocumentActions
+                      key={selectedRecord.id}
+                      document={selectedRecord}
+                      canWrite={canMutate(role)}
+                      onChanged={handleDocumentChanged}
+                    />}
+                    canUnlink={canMutate(role)}
+                    onUnlink={() => setConfirmUnlink(true)}
+                  />
+                </>
               ) : (
                 <div className="mt-4 flex min-h-[360px] items-center justify-center rounded-md border border-dashed bg-sidebar/40 px-6 text-center">
                   <div>
@@ -4202,12 +4678,14 @@ function FulfillmentTab({
   role,
   addAudit,
   onSummaryChange,
+  onEditUnitPrice,
   shipmentContent,
 }: {
   dealId: string
   role: Role
   addAudit: (action: string, detail: string) => void
   onSummaryChange: (summary: DealShipmentSummary) => void
+  onEditUnitPrice: () => void
   shipmentContent?: ReactNode
 }) {
   const refresh = useDealRefresh()
@@ -4370,6 +4848,13 @@ function FulfillmentTab({
                       {terminal ? <Button size="sm" variant="outline" onClick={() => setAction("reopen")}><RotateCcw data-icon="inline-start" />재오픈</Button> : <>
                         <Button size="sm" variant="outline" onClick={() => setAction("close")}>완료 마감</Button>
                         <Button size="sm" variant="outline" onClick={() => setAction("short_close")}>미달 마감</Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild><Button size="icon-sm" variant="outline" aria-label="주문 이행 더보기"><MoreVertical /></Button></DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={onEditUnitPrice}>단가 수정</DropdownMenuItem>
+                            <DropdownMenuItem variant="destructive" onClick={() => setAction("cancel")}>취소</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </>}
                     </> : null}
                   </div>
@@ -5188,8 +5673,65 @@ export function DealDetailScreen({
     focusTarget?.tab ?? stageEntryTab(dealId)
   )
   const [documentOpen, setDocumentOpen] = useState(false)
+  const [linkedInvoiceTargets] = useState<Record<string, string>>({})
+  const [connectedShipmentDrafts, setConnectedShipmentDrafts] = useState<Record<string, Partial<Shipment>>>({})
+  const [editingConnectedShipment, setEditingConnectedShipment] = useState<Shipment | null>(null)
+  const shipmentEditTrigger = useRef<HTMLButtonElement | null>(null)
+  const splitShipmentView = useMemo(
+    () => {
+      const fixture = splitShipmentReviewFixture(dealId, (fileName, invoiceId) => {
+        window.dispatchEvent(new CustomEvent("ecoya:open-ci-document", { detail: { fileName, invoiceId } }))
+        setDocumentOpen(true)
+      })
+      return {
+        ...fixture,
+        billsOfLading: fixture.billsOfLading.map((bill) => {
+          const draft = connectedShipmentDrafts[bill.documentId]
+          if (!draft) return bill
+          return {
+            ...bill,
+            blNumber: draft.bl_number ?? bill.blNumber,
+            fields: {
+              ...bill.fields,
+              portOfLoading: draft.pol ?? bill.fields.portOfLoading,
+              portOfDischarge: draft.pod ?? bill.fields.portOfDischarge,
+              carrier: draft.carrier ?? bill.fields.carrier,
+              vessel: draft.vessel ?? bill.fields.vessel,
+              containerNumber: draft.container_number ?? bill.fields.containerNumber,
+              shippedOnBoardDate: draft.confirmed_etd ?? bill.fields.shippedOnBoardDate,
+            },
+          }
+        }),
+      }
+    },
+    [connectedShipmentDrafts, dealId]
+  )
+  const openConnectedShipmentEdit = (bill: SplitShipmentView["billsOfLading"][number], trigger: HTMLButtonElement) => {
+    shipmentEditTrigger.current = trigger
+    const draft = connectedShipmentDrafts[bill.documentId] ?? {}
+    const shippedOnBoardDate = (draft.confirmed_etd ?? bill.fields.shippedOnBoardDate ?? "").replaceAll(".", "-")
+    setEditingConnectedShipment({
+      id: bill.documentId,
+      deal_id: dealId,
+      bl_number: draft.bl_number ?? bill.blNumber,
+      container_number: draft.container_number ?? bill.fields.containerNumber,
+      carrier: draft.carrier ?? bill.fields.carrier,
+      vessel: draft.vessel ?? bill.fields.vessel,
+      pol: draft.pol ?? bill.fields.portOfLoading,
+      pod: draft.pod ?? bill.fields.portOfDischarge,
+      etd: shippedOnBoardDate || null,
+      eta: draft.confirmed_eta ?? null,
+      confirmed_etd: (draft.confirmed_etd ?? shippedOnBoardDate) || null,
+      confirmed_eta: draft.confirmed_eta ?? null,
+      confirmed_status: draft.confirmed_status ?? "booked",
+      edit_token: `fixture-edit-${bill.documentId}`,
+      status: draft.confirmed_status ?? "booked",
+      source: "document",
+    })
+  }
   const scrollViewportRef = useRef<HTMLDivElement>(null)
   const stickyHeaderRef = useRef<HTMLDivElement>(null)
+  const fieldNavigationRef = useRef<{ label: HTMLElement; input?: HTMLInputElement | null } | null>(null)
   const informationRailRef = useRef<HTMLElement>(null)
   const alertsRef = useRef<HTMLElement>(null)
   const compactAlertsRef = useRef<HTMLDivElement>(null)
@@ -5222,6 +5764,11 @@ export function DealDetailScreen({
     const measure = () => {
       const totalHeight = header.offsetHeight
       viewport.style.setProperty("--deal-header-height", `${totalHeight}px`)
+      const pending = fieldNavigationRef.current
+      if (pending?.label.isConnected && document.activeElement === pending.input) {
+        const offset = pending.label.getBoundingClientRect().top - header.getBoundingClientRect().bottom - 16
+        if (offset < 0) viewport.scrollBy({ top: offset, behavior: "instant" })
+      }
       viewport.style.setProperty(
         "--deal-rail-sticky-top",
         `${Math.min(totalHeight + 16, viewport.clientHeight - (informationRailRef.current?.offsetHeight ?? 0) - 16)}px`
@@ -5413,6 +5960,25 @@ export function DealDetailScreen({
           : "smooth",
         block: "start",
       })
+    })
+  }
+  const openItemUnitPrice = () => {
+    setDocumentOpen(false)
+    requestAnimationFrame(() => {
+      const label = scrollViewportRef.current?.querySelector<HTMLElement>(
+        "[data-deal-page-content] [data-item-unit-price-heading]"
+      )
+      const input = label?.parentElement?.querySelector<HTMLInputElement>("input")
+      const target = label ?? scrollViewportRef.current?.querySelector<HTMLElement>("[data-deal-items]")
+      if (!target) return
+      const viewport = scrollViewportRef.current
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      // The sticky header grows when compact alerts appear; its ResizeObserver
+      // keeps this focused label below the final header boundary.
+      fieldNavigationRef.current = { label: target, input }
+      viewport?.style.setProperty("--deal-header-height", `${stickyHeaderRef.current?.offsetHeight ?? 128}px`)
+      input?.focus({ preventScroll: true })
+      target.scrollIntoView({ behavior: reducedMotion ? "instant" : "smooth", block: "start" })
     })
   }
   const openReviewNotice = (id: DealReviewNotice["id"]) => {
@@ -6037,7 +6603,7 @@ export function DealDetailScreen({
                                 </span>
                               </span>
                               <StatusBadge tone="neutral">
-                                {dealDocumentStatusLabel(document.status)}
+                                {document.status}
                               </StatusBadge>
                             </button>
                           )
@@ -6131,6 +6697,9 @@ export function DealDetailScreen({
                   previewWork={previewWork}
                   onPreviewWork={previewSection}
                   onStartWork={startWork}
+                  commercialInvoiceView={splitShipmentView}
+                  linkedInvoiceTargets={linkedInvoiceTargets}
+                  onEditShipment={openConnectedShipmentEdit}
                   workspaces={{
                     fulfillment: (
                       <section
@@ -6141,6 +6710,7 @@ export function DealDetailScreen({
                         <FulfillmentTab
                           shipmentContent={<OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} />}
                           onSummaryChange={setShipmentSummary}
+                          onEditUnitPrice={openItemUnitPrice}
                           dealId={dealId}
                           role={role}
                           addAudit={addAudit}
@@ -6423,6 +6993,26 @@ export function DealDetailScreen({
           onClose={() => {
             setShareDialogOpen(false)
             setShareCandidate("")
+          }}
+        />
+      ) : null}
+      {editingConnectedShipment ? (
+        <ShipmentConfirmationDialog
+          shipment={editingConnectedShipment}
+          copy={messages.erpShipments.shipments}
+          canWrite={canMutate(role)}
+          returnFocus={() => shipmentEditTrigger.current?.focus()}
+          onReload={async () => editingConnectedShipment}
+          onClose={() => setEditingConnectedShipment(null)}
+          onSave={async (body) => {
+            setConnectedShipmentDrafts((current) => {
+              const next = { ...(current[editingConnectedShipment.id] ?? {}) }
+              const fields = ["bl_number", "container_number", "carrier", "vessel", "pol", "pod", "confirmed_etd", "confirmed_eta", "confirmed_status"] as const
+              for (const field of fields) {
+                if (body[field] !== undefined) Object.assign(next, { [field]: body[field] })
+              }
+              return { ...current, [editingConnectedShipment.id]: next }
+            })
           }}
         />
       ) : null}

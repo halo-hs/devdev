@@ -1,5 +1,5 @@
 import { type ReactNode, useState, useEffect } from "react"
-import { XCircle, AlertTriangle, CheckCircle2, ShieldCheck, Clock3, Sparkles, Plus, RefreshCcw, Search, ArrowLeft, ArrowRight, Pencil, ChevronRight } from "lucide-react"
+import { XCircle, AlertTriangle, CheckCircle2, ShieldCheck, Clock3, Plus, RefreshCcw, Search, ArrowLeft, ArrowRight, Pencil, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -7,6 +7,11 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { HeroBanner } from "@/components/platform/HeroBanner"
+import { SummaryMetricStrip } from "@/components/platform/SummaryMetricStrip"
 
 type Tone = "neutral" | "success" | "warning" | "danger" | "info"
 
@@ -70,6 +75,7 @@ function AppPage({
   description,
   badge,
   actions,
+  heroSummary,
   children,
   embedded = false,
 }: {
@@ -78,6 +84,7 @@ function AppPage({
   description: string
   badge?: ReactNode
   actions?: ReactNode
+  heroSummary?: ReactNode
   children: ReactNode
   embedded?: boolean
 }) {
@@ -97,33 +104,21 @@ function AppPage({
   }
   return (
     <div className="min-h-full w-full bg-transparent text-foreground">
-      <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur">
-        <div className="flex h-14 items-center justify-between gap-3 px-4 sm:px-6 xl:px-8">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <Sparkles className="size-4" aria-hidden="true" />
+      <main className="w-full px-5 py-5 sm:px-6 sm:py-6 xl:px-8">
+        <HeroBanner
+          className="[&_header]:flex-wrap"
+          eyebrow={eyebrow}
+          title={title}
+          description={description}
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              {badge}
+              {actions}
             </div>
-            <div className="min-w-0">
-              <p className="truncate text-xs text-muted-foreground">
-                {eyebrow}
-              </p>
-              <p className="truncate text-sm font-semibold">{title}</p>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {badge}
-            {actions}
-          </div>
-        </div>
-      </header>
-      <main className="w-full px-4 py-6 sm:px-6 xl:px-8">
-        <div className="mb-6 flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-normal">{title}</h1>
-          <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-            {description}
-          </p>
-        </div>
-        {children}
+          }
+          summary={heroSummary}
+        />
+        <div className="mt-6">{children}</div>
       </main>
     </div>
   )
@@ -162,6 +157,7 @@ const salesContacts = [
     deals: 2,
     stageCounts: ["계약 1", "정산 1"],
     dealIds: ["DL-260707-04", "DL-260918-91"],
+    ownership: "primary",
   },
   {
     id: "kenji-sato",
@@ -173,6 +169,7 @@ const salesContacts = [
     deals: 1,
     stageCounts: ["계약 1"],
     dealIds: ["DL-260625-07"],
+    ownership: "co",
   },
   {
     id: "mia-chen",
@@ -184,22 +181,178 @@ const salesContacts = [
     deals: 0,
     stageCounts: [],
     dealIds: [],
+    ownership: "primary",
   },
 ]
 
-type SalesPreviewContact = (typeof salesContacts)[number] & {
+type SalesPreviewContact = {
+  id: string
+  name: string
+  company: string
+  email: string
+  phone: string
+  status: string
+  deals: number
+  stageCounts: string[]
+  dealIds: string[]
   kind?: string
   title?: string
   note?: string
+  ownership?: "primary" | "co"
+  accountStatus?: "prospect" | "active"
 }
 
 type SalesContactForm = Pick<SalesPreviewContact, "name" | "company" | "email" | "phone" | "kind" | "title" | "note">
+
+const salesContactExamples: SalesPreviewContact[] = [
+  ...salesContacts.map((contact) => ({ ...contact, ownership: contact.ownership as "primary" | "co", accountStatus: contact.deals > 0 ? "active" as const : "prospect" as const })),
+  ...Array.from({ length: 97 }, (_, index) => {
+    const number = index + 4
+    const regions = ["Berlin", "Osaka", "Singapore", "Busan", "Rotterdam", "Helsinki", "Toronto", "Dubai"]
+    const region = regions[index % regions.length]
+    const ownership = index % 5 === 1 ? "co" : "primary"
+    return {
+      id: `account-${String(number).padStart(3, "0")}`,
+      name: `${region} 담당자 ${String(number).padStart(3, "0")}`,
+      company: `${region} Trading ${String(number).padStart(3, "0")}`,
+      email: `contact${number}@example.com`,
+      phone: `+00 20 5550 ${String(1000 + number)}`,
+      status: "활성",
+      deals: 0,
+      stageCounts: [],
+      dealIds: [],
+      ownership: ownership as "primary" | "co",
+      accountStatus: "prospect" as const,
+    }
+  }),
+]
 
 const emptySalesContactForm: SalesContactForm = {
   name: "", company: "", email: "", phone: "", kind: "counterparty", title: "", note: "",
 }
 
-export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: (dealId: string) => void; embedded?: boolean } = {}) {
+function OwnedAccountsPanel({
+  contacts,
+  role,
+  query,
+  onQueryChange,
+  onRoleChange,
+  onOpenRelationship,
+}: {
+  contacts: SalesPreviewContact[]
+  role: "any" | "primary" | "co"
+  query: string
+  onQueryChange: (value: string) => void
+  onRoleChange: (value: "any" | "primary" | "co") => void
+  onOpenRelationship?: (counterpartyId: string) => void
+}) {
+  const [page, setPage] = useState(1)
+  const [period, setPeriod] = useState<"all" | "30" | "90" | "year">("all")
+  const [sort, setSort] = useState<"recent" | "name">("recent")
+  const expandedContacts = contacts.length >= 100
+    ? contacts
+    : contacts.length === 0
+      ? []
+      : Array.from({ length: 100 }, (_, index) => contacts[index % contacts.length])
+  const accountRows = expandedContacts.map((source, index) => {
+    const ownership = source.ownership ?? (index % 5 === 0 ? "co" : "primary")
+    const ageDays = index * 2 + 4
+    const assignedAt = new Date(Date.UTC(2026, 10, 11 - ageDays)).toISOString().slice(0, 10).replaceAll("-", ".")
+    return {
+      ...source,
+      id: source.id,
+      ownership,
+      accountStatus: source.accountStatus ?? (source.deals > 0 ? "active" : "prospect"),
+      assignedAt,
+      coOwners: ownership === "co" ? "조민영" : "없음",
+      ageDays,
+    }
+  })
+  const rows = accountRows
+    .filter((contact) => role === "any" || contact.ownership === role)
+    .filter((contact) => period === "all" || period === "year" || (period === "90" ? contact.ageDays <= 90 : contact.ageDays <= 30))
+    .filter((contact) => `${contact.name} ${contact.company}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))
+    .sort((left, right) => sort === "name" ? left.company.localeCompare(right.company) : right.assignedAt.localeCompare(left.assignedAt))
+  const pageSize = 20
+  const visibleRows = rows.slice((page - 1) * pageSize, page * pageSize)
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize))
+  return (
+    <div className="grid gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2" aria-label="담당 유형 필터">
+          <span className="mr-1 text-sm text-muted-foreground">담당 유형</span>
+          <Tabs value={role} onValueChange={(value) => { setPage(1); onRoleChange(value as typeof role) }}>
+            <TabsList variant="segment" aria-label="담당 유형">
+              <TabsTrigger value="any">전체</TabsTrigger>
+              <TabsTrigger value="primary">주 담당</TabsTrigger>
+              <TabsTrigger value="co">공동 담당</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={period} onValueChange={(value) => { setPage(1); setPeriod(value as typeof period) }}>
+            <SelectTrigger className="w-[132px]" aria-label="담당 기간"><SelectValue placeholder="담당 기간" /></SelectTrigger>
+            <SelectContent><SelectItem value="all">전체 기간</SelectItem><SelectItem value="30">최근 30일</SelectItem><SelectItem value="90">최근 90일</SelectItem><SelectItem value="year">올해</SelectItem></SelectContent>
+          </Select>
+          <Select value={sort} onValueChange={(value) => { setPage(1); setSort(value as typeof sort) }}>
+            <SelectTrigger className="w-[132px]" aria-label="정렬"><SelectValue placeholder="정렬" /></SelectTrigger>
+            <SelectContent><SelectItem value="recent">최근 담당순</SelectItem><SelectItem value="name">거래처명순</SelectItem></SelectContent>
+          </Select>
+          <div className="relative w-full sm:w-[220px]">
+          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+          <Input className="pl-9" placeholder="거래처 검색" value={query} onChange={(event) => { setPage(1); onQueryChange(event.target.value) }} />
+          </div>
+        </div>
+      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>내 담당 거래처 <span className="ml-1 text-sm font-normal text-muted-foreground">{rows.length}곳</span></CardTitle>
+          <CardDescription>내가 주 담당자이거나 공동 담당자로 맡고 있는 거래처입니다.</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          {rows.length > 0 ? <Table className="min-w-[760px] table-fixed">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[38%] px-4 text-sm">거래처</TableHead>
+                <TableHead className="w-[14%] text-sm">상태</TableHead>
+                <TableHead className="w-[14%] text-sm">내 역할</TableHead>
+                <TableHead className="w-[16%] text-sm">다른 담당자</TableHead>
+                <TableHead className="w-[18%] text-sm">담당 시작일</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {visibleRows.map((contact) => (
+                <TableRow
+                  key={contact.id}
+                  data-clickable="true"
+                  tabIndex={0}
+                  className="group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+                  aria-label={`${contact.company} 거래처 360 열기`}
+                  onClick={() => onOpenRelationship?.(contact.company)}
+                  onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onOpenRelationship?.(contact.company) } }}
+                >
+                  <TableCell className="px-4"><div className="min-w-0"><p className="text-[15px] font-semibold group-hover:text-primary">{contact.company}</p><p className="mt-1 text-[15px] text-muted-foreground">{contact.name}</p></div></TableCell>
+                  <TableCell className="text-[15px]"><Badge variant={contact.accountStatus === "active" ? "secondary" : "outline"}>{contact.accountStatus === "active" ? "거래처" : "잠재 거래처"}</Badge></TableCell>
+                  <TableCell className="text-[15px]"><Badge variant={contact.ownership === "primary" ? "secondary" : "outline"}>{contact.ownership === "primary" ? "주 담당" : "공동 담당"}</Badge></TableCell>
+                  <TableCell className="text-[15px] text-muted-foreground">{contact.coOwners}</TableCell>
+                  <TableCell className="text-[15px] tabular-nums text-muted-foreground">{contact.assignedAt}<ChevronRight className="ml-2 inline size-4 align-[-2px] transition-transform group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" /></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table> : <p className="px-5 py-10 text-center text-[15px] text-muted-foreground">조건에 맞는 담당 거래처가 없습니다.</p>}
+          {rows.length > 0 ? (
+            <div className="flex items-center justify-between gap-3 border-t px-5 py-3 text-sm text-muted-foreground">
+              <span>{(page - 1) * pageSize + 1}–{Math.min(page * pageSize, rows.length)} / {rows.length}곳</span>
+              <div className="flex items-center gap-2"><Button type="button" size="sm" variant="outline" disabled={page === 1} onClick={() => setPage((current) => current - 1)}>이전</Button><span>{page} / {totalPages}</span><Button type="button" size="sm" variant="outline" disabled={page === totalPages} onClick={() => setPage((current) => current + 1)}>다음</Button></div>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+export function SalesPrototype({ onOpenDeal, onOpenRelationship, embedded = false, mode = "contacts" }: { onOpenDeal?: (dealId: string) => void; onOpenRelationship?: (counterpartyId: string) => void; embedded?: boolean; mode?: "contacts" | "accounts" } = {}) {
   // Explicit prototype fixtures; these are not server authorization decisions.
   const [preview] = useState(() => new URLSearchParams(window.location.search).get("salesState") ?? "ready")
   const [listState, setListState] = useState<"ready" | "loading" | "error">(preview === "list-error" ? "error" : preview === "list-loading" ? "loading" : "ready")
@@ -222,14 +375,18 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
     else setDetailState("loading")
     setRetryTarget(target)
   }
-  const [contacts, setContacts] = useState<SalesPreviewContact[]>(() => preview === "list-empty" ? [] : salesContacts.map((contact, index) => preview === "archived" && index === 0 ? { ...contact, status: "보관" } : contact))
-  const [selectedId, setSelectedId] = useState(salesContacts[0].id)
+  const [contacts, setContacts] = useState<SalesPreviewContact[]>(() => preview === "list-empty" ? [] : salesContactExamples.map((contact, index) => ({ ...contact, ...(preview === "archived" && index === 0 ? { status: "보관" } : {}) })))
+  const [selectedId, setSelectedId] = useState(salesContactExamples[0].id)
   const [query, setQuery] = useState("")
   const [page, setPage] = useState(1)
+  const [accountRole, setAccountRole] = useState<"any" | "primary" | "co">("any")
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<SalesContactForm>(emptySalesContactForm)
-  const visibleContacts = contacts.filter((contact) =>
+  const roleFilteredContacts = mode === "accounts" && accountRole !== "any"
+    ? contacts.filter((contact) => contact.ownership === accountRole)
+    : contacts
+  const visibleContacts = roleFilteredContacts.filter((contact) =>
     `${contact.name} ${contact.company}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())
   )
   const selected = listState === "ready" ? visibleContacts.find((contact) => contact.id === selectedId) : undefined
@@ -238,14 +395,22 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
     setDetailState("loading")
     setRetryTarget("detail")
   }
+  const changeAccountRole = (value: "any" | "primary" | "co") => {
+    setAccountRole(value)
+    const first = contacts.find((contact) => value === "any" || contact.ownership === value)
+    setSelectedId(first?.id ?? "")
+    setPage(1)
+    setDetailState("ready")
+  }
   const loadingNotice = (label: string) => (
     <div role="status" aria-label={label} className="space-y-3 p-4" aria-busy="true">
       <span className="sr-only">{label}</span>
       {[0, 1, 2].map((row) => <div key={row} className="h-12 animate-pulse rounded-md bg-muted" />)}
     </div>
   )
-  const totalPages = Math.max(1, Math.ceil(visibleContacts.length / 50))
-  const pagedContacts = visibleContacts.slice((page - 1) * 50, page * 50)
+  const contactPageSize = 20
+  const totalPages = Math.max(1, Math.ceil(visibleContacts.length / contactPageSize))
+  const pagedContacts = visibleContacts.slice((page - 1) * contactPageSize, page * contactPageSize)
   const openEditor = (contact?: SalesPreviewContact) => {
     if (!canWrite || (contact && (contact.status === "보관" || detailState !== "ready"))) return
     setEditingId(contact?.id ?? null)
@@ -281,12 +446,39 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
     { id: "DL-260625-07", amount: "—", stage: "계약", owner: "나", risk: 0 },
   ].filter((deal) => selected?.dealIds.includes(deal.id))
   const dealStages = ["계약", "선적", "통관", "정산"]
+  const activeContactCount = contacts.filter((contact) => contact.status === "활성").length
+  const dealCount = contacts.reduce((total, contact) => total + contact.deals, 0)
+  const isAccountsView = mode === "accounts"
+  if (isAccountsView) {
+    return (
+      <AppPage
+        embedded={embedded}
+        eyebrow="영업"
+        title="내 담당 거래처"
+        description="내가 주 담당자이거나 공동 담당자로 맡고 있는 거래처를 확인합니다."
+        heroSummary={<SummaryMetricStrip items={[{ label: "전체 담당 거래처", value: "100곳", note: "내 담당", tone: "blue" }, { label: "주 담당", value: "80곳", note: "책임 담당", tone: "neutral" }, { label: "공동 담당", value: "20곳", note: "협업 중", tone: "green" }, { label: "진행 중인 거래", value: `${dealCount}건`, note: "전체 단계", tone: "amber" }]} />}
+        actions={<Button size="icon-sm" variant="outline" aria-label="새로고침" title="새로고침" onClick={() => retry("list")} disabled={listState === "loading"}><RefreshCcw aria-hidden="true" /></Button>}
+      >
+        <OwnedAccountsPanel contacts={contacts} role={accountRole} query={query} onQueryChange={(value) => { setQuery(value); setPage(1) }} onRoleChange={changeAccountRole} onOpenRelationship={onOpenRelationship} />
+      </AppPage>
+    )
+  }
   return (
     <AppPage
       embedded={embedded}
       eyebrow="영업"
-      title="연락처·파이프라인"
-      description="연락처를 선택해 현재 단계, 관련 Deal과 읽기 전용 활동 이력을 한 화면에서 확인합니다."
+      title={isAccountsView ? "내 담당 거래처" : "영업"}
+      description={isAccountsView ? "내가 관계 담당자로 맡고 있는 거래처와 영업 관계를 확인합니다." : "담당 거래처와 영업 관계를 확인하고, 관련 거래·활동·후속 일정을 한 화면에서 관리합니다."}
+      heroSummary={
+        <SummaryMetricStrip
+          items={[
+            { label: "활성 거래처", value: `${activeContactCount}곳`, note: "관계 담당" , tone: "blue" },
+            { label: "진행 중인 거래", value: `${dealCount}건`, note: "전체 단계", tone: "neutral" },
+            { label: "영업 활동", value: "3건", note: "최근 30일", tone: "green" },
+            { label: "후속 일정", value: "2건", note: "이번 주", tone: "amber" },
+          ]}
+        />
+      }
       actions={
         <div className="flex flex-wrap items-center gap-2">
           {canWrite && <Button size="sm" onClick={() => openEditor()}>
@@ -299,6 +491,16 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
         </div>
       }
     >
+      {isAccountsView ? (
+        <div className="mb-4 flex flex-wrap items-center gap-2" aria-label="담당 유형 필터">
+          <span className="mr-1 text-sm text-muted-foreground">담당 유형</span>
+          {(["any", "primary", "co"] as const).map((value) => (
+            <Button key={value} type="button" size="sm" variant={accountRole === value ? "secondary" : "outline"} aria-pressed={accountRole === value} onClick={() => changeAccountRole(value)}>
+              {value === "any" ? "전체" : value === "primary" ? "주 담당" : "공동 담당"}
+            </Button>
+          ))}
+        </div>
+      ) : null}
       <div className={cn("grid min-h-[620px] overflow-hidden rounded-[var(--r-lg)] bg-[var(--color-gray-12)] lg:grid-cols-[340px_minmax(0,1fr)]", embedded ? "border border-[var(--color-gray-9)]" : "shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]")}>
         <aside className="border-b border-[var(--color-gray-10)] bg-[var(--color-gray-12)] lg:border-r lg:border-b-0">
           <div className="border-b p-4">
@@ -320,22 +522,20 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <p className="font-medium">{contact.name}</p>
-                  <Badge variant="outline">{contact.status}</Badge>
+                <p className="text-[15px] font-medium">{contact.company}</p>
+                  <div className="flex items-center gap-1"><Badge variant={contact.accountStatus === "active" ? "secondary" : "outline"}>{contact.accountStatus === "active" ? "거래처" : "잠재"}</Badge><Badge variant="outline">{contact.status}</Badge></div>
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {contact.company}
-                </p>
-                <p className="mt-1 truncate text-xs text-muted-foreground">
+                <p className="mt-1 text-[15px] text-muted-foreground">담당자 {contact.name}</p>
+                <p className="mt-1 truncate text-sm text-muted-foreground">
                   {contact.email} · {contact.phone}
                 </p>
               </button>
             ))}
             {listState === "ready" && visibleContacts.length === 0 ? <p className="p-4 text-sm text-muted-foreground">{query.trim() ? "검색 결과가 없습니다." : canWrite ? "연락처가 없습니다. ‘연락처 추가’로 등록하거나 거래 상세에서 연결하세요." : "표시할 연락처가 없습니다. 권한이 있는 팀원에게 등록을 요청하세요."}</p> : null}
           </div>
-          {listState === "ready" && visibleContacts.length > 50 ? (
+          {listState === "ready" && visibleContacts.length > contactPageSize ? (
             <div className="flex items-center justify-between gap-2 p-3 text-xs text-muted-foreground">
-              <span>연락처 {visibleContacts.length}명</span>
+              <span>{(page - 1) * contactPageSize + 1}–{Math.min(page * contactPageSize, visibleContacts.length)} / {visibleContacts.length}명</span>
               <div className="flex items-center gap-1">
                 <Button size="sm" variant="outline" disabled={page === 1} onClick={() => setPage(page - 1)} aria-label="이전 페이지"><ArrowLeft /></Button>
                 <span>{page} / {totalPages}</span>
@@ -344,7 +544,7 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
             </div>
           ) : null}
         </aside>
-        <section className="min-w-0 p-4 sm:p-6" aria-label="선택 연락처 상세">
+        <section className="min-w-0 p-4 sm:p-6" aria-label="선택 거래처 상세">
           {!selected ? null : detailState === "loading" ? loadingNotice("연락처 상세 불러오는 중") : detailState === "error" ? (
             <Notice tone="danger" title="영업 파이프라인을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요." action={<Button size="sm" variant="outline" onClick={() => retry("detail")}>다시 시도</Button>} />
           ) : detailState === "forbidden" ? (
@@ -356,10 +556,11 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
           {!canWrite && <p className="mb-3 text-sm text-muted-foreground">보기 전용 · 연락처를 추가하거나 수정할 권한이 없습니다.</p>}
           <div className="flex flex-col gap-3 pb-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs text-muted-foreground">선택 연락처</p>
-              <h2 className="mt-1 text-xl font-semibold">{selected.name}</h2>
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                <span>{selected.company}</span>
+              <p className="text-sm text-muted-foreground">선택 거래처</p>
+              <button type="button" className="mt-1 text-left text-2xl font-semibold hover:text-primary" onClick={() => onOpenRelationship?.(selected.company)}>{selected.company}</button>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-[15px] text-muted-foreground">
+                <span>{selected.name}</span>
+                <Badge variant={selected.accountStatus === "active" ? "secondary" : "outline"}>{selected.accountStatus === "active" ? "거래처" : "잠재 거래처"}</Badge>
                 <Badge variant="outline">{selected.status}</Badge>
                 <span>{selected.phone}</span>
               </div>
@@ -379,8 +580,8 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
           <div className="mt-6 grid gap-8">
             <div>
               <SectionHeading
-                title="관련 Deal"
-                description="이 연락처와 연결된 거래입니다. 거래를 누르면 상세로 이동합니다."
+                title="영업 관계"
+                description="담당 거래처와 연결된 거래를 단계별로 확인합니다."
               />
               <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                 {selected.deals === 0 ? (
@@ -410,10 +611,10 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
                                 <strong className="text-sm">{deal.id}</strong>
                                 {deal.risk > 0 && <Badge variant="destructive">리스크 {deal.risk}건</Badge>}
                               </span>
-                              <span className="mt-2 block text-xs text-muted-foreground">
+                              <span className="mt-2 block text-sm text-muted-foreground">
                                 받을 원금 {deal.amount}
                               </span>
-                              <span className="mt-1 block text-xs text-muted-foreground">담당자 {deal.owner}</span>
+                              <span className="mt-1 block text-sm text-muted-foreground">담당자 {deal.owner}</span>
                               <ChevronRight className="mt-2 ml-auto size-4 text-muted-foreground" />
                             </button>
                           ))}
@@ -428,11 +629,12 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
               </div>
             </div>
             <div>
-              <SectionHeading
-                title="활동 이력"
-                description="연결된 거래에서 일어난 최근 일입니다."
-              />
-              <div className="mt-3 border-y">
+              <Card>
+                <CardHeader>
+                  <CardTitle>영업 활동</CardTitle>
+                  <CardDescription>거래처와 주고받은 최근 활동을 시간순으로 확인합니다.</CardDescription>
+                </CardHeader>
+                <CardContent>
                 {(selected.deals === 0 ? [] : [
                   { type: "견적서 전달", time: "2026.07.31 16:20", description: "견적서를 고객에게 전달했습니다.", deal: "DL-260707-04" },
                   { type: "연락처 업데이트", time: "2026.07.30 11:02", description: "전화번호와 담당 범위를 업데이트했습니다.", deal: "DL-260707-04" },
@@ -445,13 +647,45 @@ export function SalesPrototype({ onOpenDeal, embedded = false }: { onOpenDeal?: 
                     <Clock3 className="mt-0.5 size-4 text-muted-foreground" />
                     <div className="min-w-0">
                       <p>{event.type} · {event.time}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">{event.description}</p>
-                      <button type="button" onClick={() => onOpenDeal?.(event.deal)} className="mt-1 text-xs font-medium text-primary hover:underline">{event.deal} 거래 보기</button>
+                      <p className="mt-1 text-sm text-muted-foreground">{event.description}</p>
+                      <button type="button" onClick={() => onOpenDeal?.(event.deal)} className="mt-1 text-sm font-medium text-primary hover:underline">{event.deal} 거래 보기</button>
                     </div>
                   </div>
                 ))}
                 {!selected.dealIds.some((id) => ["DL-260707-04", "DL-260918-91"].includes(id)) ? <p className="py-4 text-sm text-muted-foreground">활동 이력이 없습니다.</p> : null}
-              </div>
+                </CardContent>
+              </Card>
+            </div>
+            <div>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <CardTitle>영업 후속 일정</CardTitle>
+                      <CardDescription>선택한 거래처의 다음 연락과 확인 일정을 관리합니다.</CardDescription>
+                    </div>
+                    <Button size="sm" variant="outline">일정 추가</Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="grid gap-3">
+                {(selected.id === "anna-keller" ? [
+                  { date: "오늘 16:00", title: "계약 조건 확인", detail: `${selected.company} · DL-260707-04`, tone: "bg-amber-50 text-amber-800" },
+                  { date: "11월 12일", title: "선적 일정 공유", detail: `${selected.company} · DL-260625-07`, tone: "bg-blue-50 text-blue-800" },
+                ] : selected.deals > 0 ? [
+                  { date: "이번 주", title: "거래 진행 상황 확인", detail: `${selected.company} · 담당자 ${selected.name}`, tone: "bg-blue-50 text-blue-800" },
+                ] : []).map((followup) => (
+                  <div key={followup.title} className="flex items-start justify-between gap-3 rounded-[var(--r-lg)] border border-[var(--color-gray-9)] bg-background p-4 shadow-[var(--shadow-card)]">
+                    <div className="min-w-0">
+                      <Badge className={cn("mb-2 border-0", followup.tone)}>{followup.date}</Badge>
+                      <p className="font-semibold">{followup.title}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{followup.detail}</p>
+                    </div>
+                    <ChevronRight className="mt-1 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                  </div>
+                ))}
+                {selected.id !== "anna-keller" && selected.deals === 0 ? <p className="py-4 text-sm text-muted-foreground">예정된 후속 일정이 없습니다.</p> : null}
+                </CardContent>
+              </Card>
             </div>
           </div>
           </>}

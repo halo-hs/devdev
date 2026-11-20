@@ -20,6 +20,8 @@ import icon12 from "@/assets/navigation/help.svg?url"
 import icon13 from "@/assets/navigation/notification.svg?url"
 import icon14 from "@/assets/navigation/slide.svg?url"
 import icon15 from "@/assets/navigation/chevron-down.svg?url"
+import contactsIcon from "@/assets/navigation/contacts.svg?url"
+import accountOwnersIcon from "@/assets/navigation/account-owners.svg?url"
 
 const icons = {
   usage: usageIcon, billing: billingIcon, language: languageIcon, logout: logoutIcon,
@@ -34,6 +36,8 @@ const icons = {
   "monitoring": icon8,
   "report": icon9,
   "sales": icon10,
+  "contacts": contactsIcon,
+  "account-owners": accountOwnersIcon,
   "settings": icon11,
   "help": icon12,
   "notification": icon13,

@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge"
 import { SummaryMetricStrip } from "@/components/platform/SummaryMetricStrip"
 import { HeroBanner } from "@/components/platform/HeroBanner"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Card,
   CardAction,
@@ -47,6 +48,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import {
   SettingsHubV2,
@@ -69,6 +71,7 @@ export type ErpMenuTarget =
   | "reports"
   | "sales"
   | "contacts"
+  | "salesAccounts"
   | "notifications"
   | "settings"
   | "counterparty"
@@ -83,6 +86,7 @@ export type Navigate = (
     submit?: boolean
     dealId?: string
     documentName?: string
+    counterpartyId?: string
   }
 ) => void
 export type Tone = "neutral" | "blue" | "green" | "amber" | "red"
@@ -876,6 +880,30 @@ export function CounterpartyPrototype({ onNavigate, counterpartyId = "acme", rol
   const [attempt, setAttempt] = useState(0)
   const [page, setPage] = useState(1)
   const [currency, setCurrency] = useState("all")
+  const [relationshipDialog, setRelationshipDialog] = useState<"activity" | "followup" | null>(null)
+  const [relationshipActivities, setRelationshipActivities] = useState([
+    { title: "견적서 전달", time: "2026.07.31 16:20", detail: "견적서를 고객에게 전달했습니다." },
+    { title: "통화 기록", time: "2026.07.30 11:02", detail: "전화번호와 담당 범위를 확인했습니다." },
+    { title: "거래 연결", time: "2026.07.29 09:14", detail: "진행 중인 거래를 거래처 관계에 연결했습니다." },
+  ])
+  const [relationshipFollowups, setRelationshipFollowups] = useState([
+    { date: "오늘 16:00", title: "계약 조건 확인" },
+    { date: "11월 12일", title: "선적 일정 공유" },
+  ])
+  const [activityDraft, setActivityDraft] = useState({ title: "", detail: "" })
+  const [followupDraft, setFollowupDraft] = useState({ title: "", date: "" })
+  const saveRelationshipEntry = () => {
+    if (relationshipDialog === "activity" && activityDraft.title.trim() && activityDraft.detail.trim()) {
+      setRelationshipActivities((current) => [{ title: activityDraft.title.trim(), detail: activityDraft.detail.trim(), time: "방금 전" }, ...current])
+      setActivityDraft({ title: "", detail: "" })
+      setRelationshipDialog(null)
+    }
+    if (relationshipDialog === "followup" && followupDraft.title.trim() && followupDraft.date.trim()) {
+      setRelationshipFollowups((current) => [...current, { title: followupDraft.title.trim(), date: followupDraft.date.trim() }])
+      setFollowupDraft({ title: "", date: "" })
+      setRelationshipDialog(null)
+    }
+  }
   const queryKey = `${requestKey}:${attempt}`
   const [previousQuery, setPreviousQuery] = useState(queryKey)
   if (previousQuery !== queryKey) {
@@ -898,15 +926,71 @@ export function CounterpartyPrototype({ onNavigate, counterpartyId = "acme", rol
   >
     {loadState === "loading" || loadedFor !== requestKey ? <p role="status">거래처 정보를 불러오는 중입니다.</p> : loadState === "error" ? <div role="alert"><p>거래처 정보를 불러오지 못했습니다.</p><Button variant="outline" onClick={() => setAttempt(value => value + 1)}>다시 시도</Button></div> : !model ? <p>거래처를 찾을 수 없습니다.</p> : <>
       {model.mergedFrom && <p role="status" className="mb-4 text-sm text-muted-foreground">‘{model.mergedFrom}’은 ‘{model.name}’으로 합쳐졌습니다.</p>}
-      <SummaryMetricStrip items={([['receivable', '받을 돈'], ['payable', '지급할 돈'], ['overdue', '연체'], ['trust', '결제 신뢰']] as const).map(([key, label]) => ({
-        label, tone: key === "overdue" ? "red" : key === "trust" ? "amber" : "neutral",
-        detail: key === "trust" ? "회사 전체 기준" : model.financeScope === "assigned" ? "담당·공동 작업 기준" : "회사 전체 기준",
-        value: <span className="block space-y-1" role="region" aria-label={label}>{(key === "trust" ? model.trustCurrencies : model.currencies).map(row => <span className="block" key={row.currency}>{row[key]} <span className="text-xs font-normal text-muted-foreground">{row.currency}</span></span>)}{key !== "trust" && model.currencies.length === 0 ? <span className="text-sm font-normal text-muted-foreground">해당 거래 없음</span> : null}</span>,
-      }))} />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="거래처 재무 요약">
+        {(["receivable", "payable", "overdue", "trust"] as const).map((key) => {
+          const label = key === "receivable" ? "받을 돈" : key === "payable" ? "지급할 돈" : key === "overdue" ? "연체" : "결제 신뢰"
+          const rows = key === "trust" ? model.trustCurrencies : model.currencies
+          const primary = rows[0]
+          const Icon = key === "receivable" ? WalletCards : key === "payable" ? Send : key === "overdue" ? ShieldAlert : CheckCircle2
+          const tone = key === "overdue" ? "border-red-200 bg-red-50/70" : key === "trust" ? "border-amber-200 bg-amber-50/70" : "border-border bg-card"
+          return (
+            <section key={key} className={`rounded-xl border p-4 shadow-sm ${tone}`} aria-label={label}>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-sm font-semibold"><Icon className="size-4 text-muted-foreground" aria-hidden="true" />{label}</div>
+                <span className="text-[11px] text-muted-foreground">{key === "trust" ? "회사 전체" : model.financeScope === "assigned" ? "담당 범위" : "회사 전체"}</span>
+              </div>
+              {primary ? (
+                <>
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <strong className="text-2xl leading-8 font-bold tabular-nums">{key === "trust" ? primary.trust : primary[key]}</strong>
+                    <span className="text-xs font-medium text-muted-foreground">{primary.currency}{key === "trust" ? " 기준" : ""}</span>
+                  </div>
+                  {rows.length > 1 ? <div className="mt-3 grid gap-1 border-t border-black/10 pt-2">{rows.slice(1).map((row) => <div key={row.currency} className="flex items-center justify-between gap-3 text-xs"><span className="text-muted-foreground">{row.currency}</span><span className="font-medium tabular-nums">{key === "trust" ? row.trust : row[key]}</span></div>)}</div> : null}
+                </>
+              ) : <p className="mt-4 text-sm text-muted-foreground">해당 거래 없음</p>}
+            </section>
+          )
+        })}
+      </div>
       {model.financeScope === "assigned" && <p className="mt-3 text-xs text-muted-foreground">회사 전체 금액·일정 조회는 조직 소유자에게 권한을 요청하세요.</p>}
       <Tabs defaultValue="ops" key={counterpartyId} className="mt-8">
-        <TabsList aria-label="거래처 보기"><TabsTrigger value="ops">운영</TabsTrigger><TabsTrigger value="analytics">분석</TabsTrigger></TabsList>
+        <TabsList aria-label="거래처 보기"><TabsTrigger value="ops">운영</TabsTrigger><TabsTrigger value="relationship">영업 관계</TabsTrigger><TabsTrigger value="analytics">분석</TabsTrigger></TabsList>
         <TabsContent value="analytics" className="mt-8"><ContentPanel><SectionHeader title="분석 준비 중" /><p className="text-sm text-muted-foreground">거래처 분석은 준비 중입니다.</p></ContentPanel></TabsContent>
+        <TabsContent value="relationship" className="mt-8">
+          <div className="grid gap-8">
+            <ContentPanel>
+                <SectionHeader title="영업 관계" trailing={<Badge variant="outline">{model.role}</Badge>} />
+                <dl className="mt-4 grid gap-4 text-sm">
+                  <div className="flex items-center justify-between gap-3 border-b pb-3"><dt className="text-muted-foreground">관계 담당자</dt><dd className="font-medium">조민영</dd></div>
+                  <div className="flex items-center justify-between gap-3 border-b pb-3"><dt className="text-muted-foreground">진행 거래</dt><dd className="font-medium">{model.deals.length}건</dd></div>
+                  <div className="flex items-center justify-between gap-3"><dt className="text-muted-foreground">최근 접점</dt><dd className="font-medium">2026.07.31</dd></div>
+                </dl>
+            </ContentPanel>
+            <ContentPanel>
+                <SectionHeader title="영업 후속 일정" trailing={<Button size="sm" variant="outline" onClick={() => setRelationshipDialog("followup")}>일정 추가</Button>} />
+                <div className="mt-3 divide-y">
+                  {relationshipFollowups.map((followup) => (
+                    <div key={`${followup.date}-${followup.title}`} className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                      <div className="min-w-0"><p className="font-medium">{followup.title}</p><p className="mt-1 text-xs text-muted-foreground">{followup.date} · 담당 조민영</p></div>
+                      <Badge variant="secondary">예정</Badge>
+                    </div>
+                  ))}
+                </div>
+            </ContentPanel>
+            <ContentPanel>
+              <SectionHeader title="영업 활동" trailing={<Button size="sm" onClick={() => setRelationshipDialog("activity")}>활동 기록</Button>} />
+              <div className="mt-3 divide-y">
+                {relationshipActivities.map((activity) => (
+                  <div key={`${activity.title}-${activity.time}`} className="flex min-w-0 items-center gap-3 py-3 first:pt-0 last:pb-0">
+                    <div className="size-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+                    <p className="min-w-0 flex-1 truncate text-[15px] leading-6"><span className="font-medium">{activity.title}</span><span className="text-muted-foreground"> · {activity.detail}</span></p>
+                    <time className="shrink-0 text-sm text-muted-foreground">{activity.time}</time>
+                  </div>
+                ))}
+              </div>
+            </ContentPanel>
+          </div>
+        </TabsContent>
         <TabsContent value="ops" className="mt-8">
           <div className="grid gap-8 lg:grid-cols-2">
             <ContentPanel id="counterparty-deals" className="self-start">
@@ -931,6 +1015,31 @@ export function CounterpartyPrototype({ onNavigate, counterpartyId = "acme", rol
           </div>
         </TabsContent>
       </Tabs>
+      <Dialog open={relationshipDialog !== null} onOpenChange={(open) => { if (!open) setRelationshipDialog(null) }}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{relationshipDialog === "activity" ? "영업 활동 기록" : "영업 후속 일정 추가"}</DialogTitle>
+            <DialogDescription>
+              {relationshipDialog === "activity" ? "거래처와의 접점과 메모를 기록합니다." : "다음 연락이나 확인이 필요한 일정을 추가합니다."}
+            </DialogDescription>
+          </DialogHeader>
+          {relationshipDialog === "activity" ? (
+            <div className="grid gap-4">
+              <label className="grid gap-1.5 text-sm font-medium">활동 제목<Input value={activityDraft.title} onChange={(event) => setActivityDraft((current) => ({ ...current, title: event.target.value }))} placeholder="예: 계약 조건 확인" /></label>
+              <label className="grid gap-1.5 text-sm font-medium">메모<Textarea value={activityDraft.detail} onChange={(event) => setActivityDraft((current) => ({ ...current, detail: event.target.value }))} placeholder="활동 내용을 입력하세요." /></label>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              <label className="grid gap-1.5 text-sm font-medium">일정 제목<Input value={followupDraft.title} onChange={(event) => setFollowupDraft((current) => ({ ...current, title: event.target.value }))} placeholder="예: 선적 일정 공유" /></label>
+              <label className="grid gap-1.5 text-sm font-medium">일정<span className="flex gap-2"><Input value={followupDraft.date} onChange={(event) => setFollowupDraft((current) => ({ ...current, date: event.target.value }))} placeholder="예: 11월 14일 15:00" /><Badge variant="secondary" className="shrink-0 self-center">담당 조민영</Badge></span></label>
+            </div>
+          )}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setRelationshipDialog(null)}>취소</Button>
+            <Button type="button" onClick={saveRelationshipEntry}>저장</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>}
   </Page>
 }

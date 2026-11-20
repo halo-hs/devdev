@@ -230,6 +230,14 @@ export type ShipmentConfirmation = {
   confirmed_eta?: string | null;
   confirmed_etd?: string | null;
   confirmed_status?: ShipmentStatus | null;
+  // B/L master data edited from the shipment detail dialog in the local
+  // Trade OS prototype.
+  bl_number?: string | null;
+  container_number?: string | null;
+  carrier?: string | null;
+  vessel?: string | null;
+  pol?: string | null;
+  pod?: string | null;
 };
 
 export async function confirmShipment(

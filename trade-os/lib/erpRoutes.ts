@@ -24,9 +24,10 @@ const ERP_SCREEN_PATHS: Partial<Record<ErpRouteScreen, string>> = {
   settlement: "/erp/settlement",
   monitoring: "/erp/monitoring",
   reports: "/erp/reports",
-  // SSOT SC-25 / SC-27: 영업 성과 and 연락처·파이프라인 are separate screens.
+  // 영업 성과와 영업 관계 화면은 서로 다른 업무 진입점이다.
   sales: "/erp/sales-performance",
   contacts: "/erp/sales",
+  salesAccounts: "/erp/sales/accounts",
   notifications: "/erp/notifications",
   counterparty: "/erp/counterparties",
   snap: "/erp/evidence",

@@ -112,7 +112,19 @@ export const counterpartyPreview = {
     const alias = id === "ACME Germany"
     const name = alias || id === "acme" ? "ACME GmbH" : id
     const related = deals.filter((deal) => deal.counterparty === name)
-    if (!related.length) return null
+    if (!related.length) {
+      return {
+        name,
+        role: "잠재 거래처",
+        asOf: "2026-07-31 09:00",
+        partial: false,
+        deals: [],
+        schedules: [],
+        financeScope: access.canReadOrganizationSettlement ? "organization" : "assigned",
+        currencies: [],
+        trustCurrencies: [],
+      }
+    }
     const scopedDeals = access.canReadOrganizationSettlement
       ? related
       : related.filter((deal) => {

@@ -1,4 +1,4 @@
-import { Wand2, Home, Upload, Sparkles, Bot, Building2, Ship, Calculator, Monitor, ClipboardList, History, Camera } from "lucide-react"
+import { Wand2, Home, Upload, Sparkles, Bot, Building2, Ship, Calculator, Monitor, ClipboardList, History, Camera, UsersRound } from "lucide-react"
 import ecoyaWhiteLogoSrc from "@/assets/logos/logo-ecoya-white.png"
 import { cn } from "@/lib/utils"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
@@ -17,7 +17,7 @@ import { type ProductKey, type Screen, type ErpPreviewRole } from "@/App"
 import { snapNavGroups } from "@/shell/erpRouteMeta"
 import ecoyaSnapColorLogo from "@/assets/logos/logo-ecoya-snap-color.png"
 
-const erpNavigationIcons = { onboarding: "start", home: "home", inbox: "upload", create: "document", ask: "chat", deals: "deals", shipments: "ship", settlement: "settlement", monitoring: "monitoring", reports: "report", sales: "sales" } as const
+const erpNavigationIcons = { onboarding: "start", home: "home", inbox: "upload", create: "document", ask: "chat", deals: "deals", contacts: "contacts", salesAccounts: "account-owners", shipments: "ship", settlement: "settlement", monitoring: "monitoring", reports: "report", sales: "sales" } as const
 
 const erpNavGroups = [
   {
@@ -28,6 +28,13 @@ const erpNavGroups = [
       ["문서 올리기", Upload, "inbox"],
       ["문서 만들기", Sparkles, "create"],
       ["AI에게 묻기", Bot, "ask"],
+    ],
+  },
+  {
+    label: "영업",
+    items: [
+      ["영업", UsersRound, "contacts"],
+      ["내 담당 거래처", UsersRound, "salesAccounts"],
     ],
   },
   {
@@ -309,7 +316,7 @@ export function AppNav({
                       const active =
                         key === screen ||
                         (key === "deals" &&
-                          (screen === "deals" || screen === "deal" || screen === "contacts")) ||
+                          (screen === "deals" || screen === "deal")) ||
                         (key === "create" && screen === "result") ||
                         (key === "shipments" && screen === "snap")
                       return (
