@@ -1873,31 +1873,31 @@ function CommercialInvoiceTransactionCard({
                           if (!bill) return null
                           const containers = billContainers(bill)
                           return (
-                            <li key={bill.documentId} className="flex flex-wrap items-start justify-between gap-3 py-3 text-sm">
-                              <div className="min-w-0 flex-1">
+                            <li key={bill.documentId} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 py-3 text-sm">
+                              <div className="min-w-0">
                                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                                   <strong>{bill.blNumber || "B/L 번호 미확인"}</strong>
                                   <span className="text-muted-foreground">{bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}</span>
                                   <StatusBadge size="sm" tone="neutral">{containerCountLabel(bill)}</StatusBadge>
                                 </div>
-                                {containers.length ? (
-                                  <ul className="mt-2 divide-y divide-border border-t" aria-label={`${bill.blNumber || "연결된 선적"} 컨테이너 목록`}>
-                                    {containers.map((container) => (
-                                      <li key={container.number} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2 text-xs">
-                                        <span className="font-medium">{container.number}</span>
-                                        {container.sealNumber ? <span className="text-muted-foreground">씰 {container.sealNumber}</span> : null}
-                                        {container.packageCount ? <span className="text-muted-foreground">포장 {container.packageCount}{container.packageUnit ? ` ${container.packageUnit}` : ""}</span> : null}
-                                        {container.grossWeight ? <span className="text-muted-foreground">총중량 {container.grossWeight}</span> : null}
-                                        {container.volume ? <span className="text-muted-foreground">용적 {container.volume}</span> : null}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                ) : <p className="mt-2 text-xs text-muted-foreground">컨테이너 정보 미확인</p>}
                               </div>
                               <span className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground">{bill.fields.shippedOnBoardDate ?? "출항일 미확인"}</span>
                                 {onEditShipment ? <Button type="button" size="icon-sm" variant="ghost" aria-label={`${bill.blNumber || "연결된 선적"} 수정`} title="연결된 선적 수정" onClick={(event) => onEditShipment(bill, event.currentTarget)}><Pencil aria-hidden="true" className="size-4" /></Button> : null}
                               </span>
+                              {containers.length ? (
+                                <ul className="col-span-2 mt-2 divide-y divide-border border-t" aria-label={`${bill.blNumber || "연결된 선적"} 컨테이너 목록`}>
+                                  {containers.map((container) => (
+                                    <li key={container.number} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2 text-xs">
+                                      <span className="font-medium">{container.number}</span>
+                                      {container.sealNumber ? <span className="text-muted-foreground">씰 {container.sealNumber}</span> : null}
+                                      {container.packageCount ? <span className="text-muted-foreground">포장 {container.packageCount}{container.packageUnit ? ` ${container.packageUnit}` : ""}</span> : null}
+                                      {container.grossWeight ? <span className="text-muted-foreground">총중량 {container.grossWeight}</span> : null}
+                                      {container.volume ? <span className="text-muted-foreground">용적 {container.volume}</span> : null}
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : <p className="col-span-2 mt-2 text-xs text-muted-foreground">컨테이너 정보 미확인</p>}
                             </li>
                           )
                         })}
