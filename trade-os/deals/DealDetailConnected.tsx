@@ -1777,6 +1777,9 @@ function CommercialInvoiceTransactionCard({
   const [drafts, setDrafts] = useState<Record<string, Record<string, string>>>({})
   const [localInvoiceLinks, setLocalInvoiceLinks] = useState<Record<string, string>>({})
   const [invoiceLinkSelections, setInvoiceLinkSelections] = useState<Record<string, string>>({})
+  const [saleInvoiceId, setSaleInvoiceId] = useState<string | null>(null)
+  const [saleDraft, setSaleDraft] = useState({ amount: "", customer: "", date: new Date().toISOString().slice(0, 10), evidence: "" })
+  const [registeredSales, setRegisteredSales] = useState<Record<string, typeof saleDraft>>({})
   const invoiceLinks = useMemo(() => ({ ...linkedInvoiceTargets, ...localInvoiceLinks }), [linkedInvoiceTargets, localInvoiceLinks])
   const records = useMemo<CommercialInvoiceRecord[]>(() => {
     const byId = new Map<string, CommercialInvoiceRecord>()
@@ -1836,6 +1839,7 @@ function CommercialInvoiceTransactionCard({
                       <span className="flex flex-wrap items-center gap-2">
                         <strong className="truncate text-sm">{invoice.invoiceNumber || invoice.fileName}</strong>
                         <StatusBadge size="sm" tone={linkedBills.length ? "success" : "warning"}>{linkedBills.length ? `B/L ${linkedBills.length}건 연결` : "B/L 연결 필요"}</StatusBadge>
+                        {registeredSales[invoice.documentId] ? <StatusBadge size="sm" tone="info">판매 등록됨</StatusBadge> : null}
                       </span>
                       {linkedBills.length ? <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">{linkedBills.map((bill) => `${bill?.blNumber || "B/L 번호 미확인"} · ${bill ? containerCountLabel(bill) : "컨테이너 미확인"}`).join(" · ")}</span> : null}
                     </span>
@@ -1843,7 +1847,7 @@ function CommercialInvoiceTransactionCard({
                   <ChevronDown className={cn("size-4 shrink-0 transition-transform", isOpen && "rotate-180")} aria-hidden="true" />
                 </button>
                 {invoice.onOpen ? <Button type="button" size="xs" variant="outline" onClick={invoice.onOpen}><FileSearch data-icon="inline-start" />문서와 보기</Button> : null}
-                <Button type="button" size="xs" variant="outline" onClick={() => toggle(invoice.documentId)}><Plus data-icon="inline-start" />판매 등록</Button>
+                <Button type="button" size="xs" variant="outline" onClick={() => { setSaleInvoiceId(invoice.documentId); setSaleDraft(registeredSales[invoice.documentId] ?? { amount: invoice.totalAmount?.toString() ?? "", customer: "", date: new Date().toISOString().slice(0, 10), evidence: invoice.invoiceNumber ?? "" }) }}><Plus data-icon="inline-start" />판매 등록</Button>
               </div>
               {isOpen ? (
                 <div className="border-t p-4">
@@ -1925,6 +1929,18 @@ function CommercialInvoiceTransactionCard({
                   </div>
                 </div>
               ) : null}
+              <AlertDialog open={saleInvoiceId === invoice.documentId} onOpenChange={(open) => { if (!open) setSaleInvoiceId(null) }}>
+                <AlertDialogContent>
+                  <AlertDialogHeader><AlertDialogTitle>판매 등록</AlertDialogTitle><AlertDialogDescription>{invoice.invoiceNumber ?? invoice.fileName}의 판매 정보를 입력합니다.</AlertDialogDescription></AlertDialogHeader>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="grid gap-1.5 text-sm"><span>판매 금액</span><Input value={saleDraft.amount} onChange={(event) => setSaleDraft({ ...saleDraft, amount: event.target.value })} /></label>
+                    <label className="grid gap-1.5 text-sm"><span>판매일</span><Input type="date" value={saleDraft.date} onChange={(event) => setSaleDraft({ ...saleDraft, date: event.target.value })} /></label>
+                    <label className="grid gap-1.5 text-sm"><span>판매처</span><Input placeholder="판매처 입력" value={saleDraft.customer} onChange={(event) => setSaleDraft({ ...saleDraft, customer: event.target.value })} /></label>
+                    <label className="grid gap-1.5 text-sm"><span>판매 근거</span><Input placeholder="계약서·견적서 등" value={saleDraft.evidence} onChange={(event) => setSaleDraft({ ...saleDraft, evidence: event.target.value })} /></label>
+                  </div>
+                  <AlertDialogFooter><AlertDialogCancel>취소</AlertDialogCancel><AlertDialogAction disabled={!saleDraft.amount || !saleDraft.customer} onClick={() => { setRegisteredSales((current) => ({ ...current, [invoice.documentId]: saleDraft })); setSaleInvoiceId(null) }}>저장</AlertDialogAction></AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </article>
           )
         })}
