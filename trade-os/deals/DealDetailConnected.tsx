@@ -5708,6 +5708,31 @@ export function DealDetailScreen({
   )
   const [documentOpen, setDocumentOpen] = useState(false)
   const [documentPanelTarget, setDocumentPanelTarget] = useState<HTMLElement | null>(null)
+  const comparisonGridRef = useRef<HTMLDivElement>(null)
+  const [comparisonHeight, setComparisonHeight] = useState<number | null>(null)
+  useEffect(() => {
+    if (!documentOpen) return
+    const grid = comparisonGridRef.current
+    if (!grid) return
+    const viewport = grid.closest<HTMLElement>("[data-deal-scroll-viewport]")
+    const updateHeight = () => {
+      const gridRect = grid.getBoundingClientRect()
+      const viewportRect = viewport?.getBoundingClientRect()
+      const top = Math.max(gridRect.top, viewportRect?.top ?? 0)
+      const bottom = viewportRect?.bottom ?? window.innerHeight
+      setComparisonHeight(Math.max(620, Math.round(bottom - top - 16)))
+    }
+    updateHeight()
+    const observer = new ResizeObserver(updateHeight)
+    observer.observe(viewport ?? grid)
+    viewport?.addEventListener("scroll", updateHeight)
+    window.addEventListener("resize", updateHeight)
+    return () => {
+      observer.disconnect()
+      viewport?.removeEventListener("scroll", updateHeight)
+      window.removeEventListener("resize", updateHeight)
+    }
+  }, [documentOpen])
   const [linkedInvoiceTargets] = useState<Record<string, string>>({})
   const [connectedShipmentDrafts, setConnectedShipmentDrafts] = useState<Record<string, Partial<Shipment>>>({})
   const [connectedShipmentContainerDrafts, setConnectedShipmentContainerDrafts] = useState<Record<string, ShipmentContainerEdit[]>>({})
@@ -6730,6 +6755,8 @@ export function DealDetailScreen({
               <PostWriteRefreshNotice failure={refresh.failure} busy={refresh.busy} onRetry={() => void refresh.refresh()} />
             </div>}
             <div
+              ref={comparisonGridRef}
+              style={documentOpen && comparisonHeight ? { height: comparisonHeight } : undefined}
               className={cn(
                 "grid items-start",
                 documentOpen
@@ -6741,7 +6768,7 @@ export function DealDetailScreen({
                 data-deal-page-content
                 className={cn(
                   "min-w-0 space-y-6",
-                  documentOpen && "xl:max-h-[calc(100vh-180px)] xl:overflow-y-auto xl:p-5"
+                  documentOpen && "xl:h-full xl:overflow-y-auto xl:p-5"
                 )}
               >
                 <DocumentsTab
@@ -6869,7 +6896,7 @@ export function DealDetailScreen({
                 <aside
                   ref={setDocumentPanelTarget}
                   aria-label="원문 문서 패널"
-                  className="min-w-0 min-h-[620px] overflow-hidden bg-[var(--surface-background)] xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] xl:h-[calc(100vh-180px)] xl:border-l xl:border-[var(--surface-border)]"
+                  className="min-w-0 min-h-[620px] overflow-hidden bg-[var(--surface-background)] xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] xl:h-full xl:border-l xl:border-[var(--surface-border)]"
                 />
               ) : (
                 <aside
