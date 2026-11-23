@@ -5,7 +5,7 @@ import {
   EmptyDescription,
 } from "@/components/ui/empty"
 import { DealClaimTool } from "@trade-os/deals/DealHandoffTools"
-import { useRef, useState, type ReactNode } from "react"
+import { useMemo, useRef, useState, type ReactNode } from "react"
 import { Info, Pencil, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -82,6 +82,26 @@ const blankCost = (): DealCost => ({
   source: "수동 입력",
 })
 
+type SaleEntry = {
+  id: string
+  amount: string
+  currency: string
+  basis: "total" | "unit"
+  date: string
+  customer: string
+  evidence: string
+}
+
+const blankSale = (): SaleEntry => ({
+  id: "draft",
+  amount: "",
+  currency: "USD",
+  basis: "total",
+  date: new Date().toISOString().slice(0, 10),
+  customer: "",
+  evidence: "",
+})
+
 export function DealFinanceWorkspace({
   dealId,
   canWrite,
@@ -92,6 +112,8 @@ export function DealFinanceWorkspace({
   addAudit: (action: string, detail: string) => void
 }) {
   const [costs, setCosts] = useState(() => readDealCosts(dealId))
+  const [sales, setSales] = useState<SaleEntry[]>([])
+  const [saleDraft, setSaleDraft] = useState<SaleEntry>(blankSale)
   const [draft, setDraft] = useState<DealCost>(blankCost)
   const amountInputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState("")
@@ -108,6 +130,27 @@ export function DealFinanceWorkspace({
         : costs.map((c) => (c.id === draft.id ? draft : c))
       : costs
   const previewFacts = calculateDealFinance(dealId, previewCosts)
+  const saleTotals = useMemo(() => sales.reduce<Record<string, number>>((totals, sale) => {
+    const amount = Number(sale.amount)
+    if (Number.isFinite(amount)) totals[sale.currency] = (totals[sale.currency] ?? 0) + amount
+    return totals
+  }, {}), [sales])
+  const saleMargins = useMemo(() => Object.entries(saleTotals).reduce<Record<string, { amount: number; rate: number | null }>>((result, [currency, total]) => {
+    const fact = savedFacts.find((item) => item.currency === currency)
+    const purchase = Number(fact?.goods_cost_amount)
+    const additiveCosts = costs.filter((cost) => cost.currency === currency && cost.basis === "additive").reduce((sum, cost) => sum + Number(cost.amount || 0), 0)
+    if (!Number.isFinite(purchase)) return result
+    const amount = total - purchase - additiveCosts
+    result[currency] = { amount, rate: total ? (amount / total) * 100 : null }
+    return result
+  }, {}), [costs, saleTotals, savedFacts])
+  const saleDraftValid = canWrite && /^\d{1,16}(?:\.\d{1,2})?$/.test(saleDraft.amount.trim()) && saleDraft.customer.trim().length > 0
+  const addSale = () => {
+    if (!saleDraftValid) return
+    setSales((current) => [...current, { ...saleDraft, id: crypto.randomUUID(), amount: saleDraft.amount.trim() }])
+    addAudit("판매 내역 추가", `${saleDraft.customer} ${saleDraft.amount} ${saleDraft.currency}`)
+    setSaleDraft(blankSale())
+  }
   const mutate = async (
     next: DealCost[],
     action: string,
@@ -207,6 +250,12 @@ export function DealFinanceWorkspace({
               >
                 <div className="mb-3 flex items-center gap-2">
                   <strong>{fact.currency}</strong>
+                  {saleTotals[fact.currency] != null && (
+                    <Badge variant="outline">판매 입력 {exactFinanceMoney(String(saleTotals[fact.currency]), fact.currency)}</Badge>
+                  )}
+                  {saleMargins[fact.currency]?.rate != null && (
+                    <Badge variant="outline">판매 기준 예상 마진율 {saleMargins[fact.currency].rate!.toFixed(1)}%</Badge>
+                  )}
                   {fact.adjusted_gp_pct != null && (
                     <Badge variant="outline">
                       예상 마진율 {fact.adjusted_gp_pct}%
@@ -241,6 +290,41 @@ export function DealFinanceWorkspace({
             </p>
           )}
         </div>
+      </section>
+
+      <section aria-label="판매 내역">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-base font-semibold">판매 내역</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              선적과 별도로 실제 판매가 발생한 건을 입력합니다. 입력 합계는 거래 경제에 반영됩니다.
+            </p>
+          </div>
+          <Badge variant="outline">{sales.length}건</Badge>
+        </div>
+        {canWrite && (
+          <form className="@container mt-4 rounded-lg border bg-background p-4" aria-label="판매 내역 추가" onSubmit={(event) => { event.preventDefault(); addSale() }}>
+            <fieldset className="grid items-end gap-3 sm:grid-cols-2 @min-[860px]:grid-cols-[140px_100px_110px_140px_minmax(140px,1fr)_minmax(140px,1fr)_auto]">
+              <label className="grid gap-1.5 text-sm"><span>판매 금액</span><Input className="h-10" inputMode="decimal" numericFormat="amount" value={saleDraft.amount} onChange={(event) => setSaleDraft({ ...saleDraft, amount: event.target.value })} placeholder="0.00" /></label>
+              <label className="grid gap-1.5 text-sm"><span>통화</span><Select value={saleDraft.currency} onValueChange={(value) => setSaleDraft({ ...saleDraft, currency: value ?? "USD" })}><SelectTrigger className="h-10"><SelectValue /></SelectTrigger><SelectContent>{costCurrencies.map((currency) => <SelectItem key={currency} value={currency}>{currency}</SelectItem>)}</SelectContent></Select></label>
+              <label className="grid gap-1.5 text-sm"><span>기준</span><Select value={saleDraft.basis} onValueChange={(value) => setSaleDraft({ ...saleDraft, basis: value as SaleEntry["basis"] })}><SelectTrigger className="h-10"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="total">총액</SelectItem><SelectItem value="unit">단가</SelectItem></SelectContent></Select></label>
+              <label className="grid gap-1.5 text-sm"><span>판매일</span><Input className="h-10" type="date" value={saleDraft.date} onChange={(event) => setSaleDraft({ ...saleDraft, date: event.target.value })} /></label>
+              <label className="grid gap-1.5 text-sm"><span>판매처</span><Input className="h-10" value={saleDraft.customer} onChange={(event) => setSaleDraft({ ...saleDraft, customer: event.target.value })} placeholder="판매처 입력" /></label>
+              <label className="grid gap-1.5 text-sm"><span>판매 근거</span><Input className="h-10" value={saleDraft.evidence} onChange={(event) => setSaleDraft({ ...saleDraft, evidence: event.target.value })} placeholder="CI·계약서 등" /></label>
+              <Button type="submit" disabled={!saleDraftValid}><Plus data-icon="inline-start" />판매 추가</Button>
+            </fieldset>
+          </form>
+        )}
+        {Object.entries(saleMargins).length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 rounded-md bg-muted/40 px-3 py-2 text-xs">
+            {Object.entries(saleMargins).map(([currency, margin]) => (
+              <span key={currency}>판매 기준 예상 마진 <strong>{exactFinanceMoney(String(margin.amount), currency)}</strong> · {margin.rate == null ? "—" : `${margin.rate.toFixed(1)}%`}</span>
+            ))}
+          </div>
+        )}
+        {sales.length > 0 ? (
+          <Table aria-label="판매 내역" className="mt-4 min-w-[760px]"><TableHeader><TableRow>{["판매처 / 근거", "판매 금액", "기준", "판매일", "관리"].map((label) => <TableHead key={label}>{label}</TableHead>)}</TableRow></TableHeader><TableBody>{sales.map((sale) => <TableRow key={sale.id}><TableCell><strong>{sale.customer}</strong><small className="mt-1 block text-muted-foreground">{sale.evidence || "근거 미입력"}</small></TableCell><TableCell className="tabular-nums">{exactFinanceMoney(sale.amount, sale.currency)}</TableCell><TableCell>{sale.basis === "total" ? "총액" : "단가"}</TableCell><TableCell>{sale.date || "—"}</TableCell><TableCell><Button type="button" variant="ghost" size="icon-sm" aria-label={`${sale.customer} 판매 내역 삭제`} onClick={() => setSales((current) => current.filter((item) => item.id !== sale.id))}><Trash2 /></Button></TableCell></TableRow>)}</TableBody></Table>
+        ) : <p className="mt-4 rounded-md border border-dashed p-4 text-sm text-muted-foreground">판매 내역을 입력하면 거래 경제의 판매 합계와 마진 계산에 반영됩니다.</p>}
       </section>
 
       <section aria-label="원가 관리">
