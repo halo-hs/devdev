@@ -6348,15 +6348,6 @@ export function DealDetailScreen({
                 dealId={dealId}
                 canWrite={canMutate(role)}
                 addAudit={addAudit}
-                invoiceOptions={splitShipmentView.billsOfLading.flatMap((bill) => bill.connectedCommercialInvoices.map((invoice) => ({
-                  id: invoice.documentId,
-                  label: invoice.invoiceNumber ?? invoice.fileName,
-                  amount: invoice.totalAmount ?? undefined,
-                  currency: invoice.currency ?? undefined,
-                  item: invoice.item ?? undefined,
-                  quantity: invoice.quantity ?? undefined,
-                  packageInfo: invoice.packageCount && invoice.packageUnit ? `${invoice.packageCount} ${invoice.packageUnit}` : undefined,
-                })))}
               />
             </DetailCard>
           </section>

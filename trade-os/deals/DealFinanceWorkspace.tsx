@@ -93,31 +93,17 @@ type SaleEntry = {
   evidence: string
 }
 
-const blankSale = (): SaleEntry => ({
-  id: "draft",
-  invoiceId: "",
-  amount: "",
-  currency: "USD",
-  basis: "total",
-  date: new Date().toISOString().slice(0, 10),
-  customer: "",
-  evidence: "",
-})
-
 export function DealFinanceWorkspace({
   dealId,
   canWrite,
   addAudit,
-  invoiceOptions = [],
 }: {
   dealId: string
   canWrite: boolean
   addAudit: (action: string, detail: string) => void
-  invoiceOptions?: Array<{ id: string; label: string; amount?: number; currency?: string; item?: string; quantity?: string; packageInfo?: string }>
 }) {
   const [costs, setCosts] = useState(() => readDealCosts(dealId))
   const [sales, setSales] = useState<SaleEntry[]>([])
-  const [saleDraft, setSaleDraft] = useState<SaleEntry>(blankSale)
   const [draft, setDraft] = useState<DealCost>(blankCost)
   const amountInputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState("")
@@ -148,23 +134,6 @@ export function DealFinanceWorkspace({
     result[currency] = { amount, rate: total ? (amount / total) * 100 : null }
     return result
   }, {}), [costs, saleTotals, savedFacts])
-  const saleDraftValid = canWrite && /^\d{1,16}(?:\.\d{1,2})?$/.test(saleDraft.amount.trim()) && saleDraft.customer.trim().length > 0
-  const addSale = () => {
-    if (!saleDraftValid) return
-    setSales((current) => [...current, { ...saleDraft, id: crypto.randomUUID(), amount: saleDraft.amount.trim() }])
-    addAudit("판매 내역 추가", `${saleDraft.customer} ${saleDraft.amount} ${saleDraft.currency}`)
-    setSaleDraft(blankSale())
-  }
-  const selectSaleInvoice = (invoiceId: string) => {
-    const invoice = invoiceOptions.find((item) => item.id === invoiceId)
-    setSaleDraft((current) => ({
-      ...current,
-      invoiceId,
-      amount: invoice?.amount != null ? String(invoice.amount) : current.amount,
-      currency: invoice?.currency ?? current.currency,
-      evidence: invoice?.label ?? current.evidence,
-    }))
-  }
   const mutate = async (
     next: DealCost[],
     action: string,
@@ -316,21 +285,7 @@ export function DealFinanceWorkspace({
           </div>
           <Badge variant="outline">{sales.length}건</Badge>
         </div>
-        {canWrite && (
-          <form className="@container mt-4 rounded-lg border bg-background p-4" aria-label="판매 내역 추가" onSubmit={(event) => { event.preventDefault(); addSale() }}>
-            <fieldset className="grid items-end gap-3 sm:grid-cols-2 @min-[860px]:grid-cols-4">
-              <label className="grid gap-1.5 text-sm"><span>대상 CI</span><Select value={saleDraft.invoiceId} onValueChange={selectSaleInvoice}><SelectTrigger className="h-10"><SelectValue placeholder="CI를 선택하면 자동 입력" /></SelectTrigger><SelectContent>{invoiceOptions.map((invoice) => <SelectItem key={invoice.id} value={invoice.id}>{invoice.label}</SelectItem>)}</SelectContent></Select></label>
-              <label className="grid gap-1.5 text-sm"><span>판매 금액</span><Input className="h-10" inputMode="decimal" numericFormat="amount" value={saleDraft.amount} onChange={(event) => setSaleDraft({ ...saleDraft, amount: event.target.value })} placeholder="0.00" /></label>
-              <label className="grid gap-1.5 text-sm"><span>통화</span><Select value={saleDraft.currency} onValueChange={(value) => setSaleDraft({ ...saleDraft, currency: value ?? "USD" })}><SelectTrigger className="h-10"><SelectValue /></SelectTrigger><SelectContent>{costCurrencies.map((currency) => <SelectItem key={currency} value={currency}>{currency}</SelectItem>)}</SelectContent></Select></label>
-              <label className="grid gap-1.5 text-sm"><span>기준</span><Select value={saleDraft.basis} onValueChange={(value) => setSaleDraft({ ...saleDraft, basis: value as SaleEntry["basis"] })}><SelectTrigger className="h-10"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="total">총액</SelectItem><SelectItem value="unit">단가</SelectItem></SelectContent></Select></label>
-              <label className="grid gap-1.5 text-sm"><span>판매일</span><Input className="h-10" type="date" value={saleDraft.date} onChange={(event) => setSaleDraft({ ...saleDraft, date: event.target.value })} /></label>
-              <label className="grid gap-1.5 text-sm"><span>판매처</span><Input className="h-10" value={saleDraft.customer} onChange={(event) => setSaleDraft({ ...saleDraft, customer: event.target.value })} placeholder="판매처 입력" /></label>
-              <label className="grid gap-1.5 text-sm"><span>판매 근거</span><Input className="h-10" value={saleDraft.evidence} onChange={(event) => setSaleDraft({ ...saleDraft, evidence: event.target.value })} placeholder="CI·계약서 등" /></label>
-              <Button type="submit" disabled={!saleDraftValid}><Plus data-icon="inline-start" />판매 추가</Button>
-            </fieldset>
-            {saleDraft.invoiceId && invoiceOptions.find((invoice) => invoice.id === saleDraft.invoiceId) ? <p className="mt-3 rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground">CI에서 자동 입력됨 · {invoiceOptions.find((invoice) => invoice.id === saleDraft.invoiceId)?.item ?? "품목 정보"} · {invoiceOptions.find((invoice) => invoice.id === saleDraft.invoiceId)?.quantity ?? "수량 정보"} · {invoiceOptions.find((invoice) => invoice.id === saleDraft.invoiceId)?.packageInfo ?? "포장 정보"}</p> : <p className="mt-3 text-xs text-muted-foreground">CI를 연결하면 품목·수량·단가·통화·포장·금액이 자동으로 채워집니다.</p>}
-          </form>
-        )}
+        <p className="mt-4 rounded-md border border-dashed p-4 text-sm text-muted-foreground">판매 등록은 각 CI 카드에서 진행합니다. 등록된 판매 내역이 이 영역에 자동으로 집계됩니다.</p>
         {Object.entries(saleMargins).length > 0 && (
           <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 rounded-md bg-muted/40 px-3 py-2 text-xs">
             {Object.entries(saleMargins).map(([currency, margin]) => (
