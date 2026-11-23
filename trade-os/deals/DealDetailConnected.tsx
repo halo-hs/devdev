@@ -387,7 +387,7 @@ function DealDocumentShelf({
     </section>
   )
 
-  return (
+  const viewer = (
     <PopoverContent align="start" side="bottom" sideOffset={8} className="w-[min(480px,calc(100vw-2rem))] gap-0 p-2">
       <div className="flex items-center justify-between gap-3 border-b px-2 py-2">
         <span className="text-sm font-semibold">이 거래의 서류 {documents.length}건 · 확인 전 {reviewCount}</span>
@@ -399,6 +399,7 @@ function DealDocumentShelf({
       {renderGroup("만든 서류", "문서 만들기에서 생성", createdDocuments)}
     </PopoverContent>
   )
+  return viewer
 }
 
 type DealFieldMatch = "일치" | "확인 필요" | "누락" | "단일 출처"
@@ -2452,7 +2453,7 @@ function DealPdf({
     URL.revokeObjectURL(a.href)
     setDownloading(false)
   }
-  return (
+  const viewer = (
     <div
       className={cn(
         "relative mt-2 flex min-h-[480px] flex-col overflow-hidden bg-background",
@@ -2543,6 +2544,7 @@ function DealPdf({
       />
     </div>
   )
+  return fullscreen ? createPortal(viewer, document.body) : viewer
 }
 
 function matchTone(match: DealFieldMatch) {
@@ -6325,6 +6327,15 @@ export function DealDetailScreen({
                 dealId={dealId}
                 canWrite={canMutate(role)}
                 addAudit={addAudit}
+                invoiceOptions={splitShipmentView.billsOfLading.flatMap((bill) => bill.connectedCommercialInvoices.map((invoice) => ({
+                  id: invoice.documentId,
+                  label: invoice.invoiceNumber ?? invoice.fileName,
+                  amount: invoice.totalAmount ?? undefined,
+                  currency: invoice.currency ?? undefined,
+                  item: invoice.item ?? undefined,
+                  quantity: invoice.quantity ?? undefined,
+                  packageInfo: invoice.packageCount && invoice.packageUnit ? `${invoice.packageCount} ${invoice.packageUnit}` : undefined,
+                })))}
               />
             </DetailCard>
           </section>
