@@ -47,6 +47,7 @@ import {
   CircleAlert,
   FilePlus2,
   FileSearch,
+  FileText,
   GripVertical,
   Link2,
   Unlink,
@@ -335,81 +336,68 @@ const dealDeliveryAttachmentOptions = [
   ...supplementaryDocuments,
 ].filter((document) => document.file.toLowerCase().endsWith(".pdf"))
 
-function ImportantDealDocumentsPanel({
-  importantDocuments,
+function DealDocumentShelf({
+  documents,
+  uploadedDocuments,
+  createdDocuments,
   selected,
   onSelect,
-  onUpload,
+  onAddDocument,
 }: {
-  importantDocuments: DocumentSlot[]
+  documents: DocumentSlot[]
+  uploadedDocuments: DocumentSlot[]
+  createdDocuments: DocumentSlot[]
   selected: DocumentSlot
   onSelect: (document: DocumentSlot) => void
-  onUpload: (document: DocumentSlot) => void
+  onAddDocument: () => void
 }) {
-  return (
-    <section
-      aria-label="중요 서류"
-      className="mt-2 rounded-[var(--r-md)] border border-[var(--surface-border)] bg-background p-2"
-    >
-      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-5">
-        {importantDocuments.map((document) => {
-          const isMissing = !document.file
-          const isManual = document.status === "원본 미첨부"
-          const isNew = document.code === "PO"
+  const reviewCount = documents.filter(
+    (document) => document.status === "검토" || document.status === "유형 확인 필요"
+  ).length
+  const renderGroup = (title: string, helper: string, items: DocumentSlot[]) => (
+    <section className="mt-3 first:mt-0">
+      <div className="flex items-center gap-2 px-2 text-[11px] text-muted-foreground">
+        <span className="font-semibold text-foreground">{title} {items.length}</span>
+        <span>{helper}</span>
+      </div>
+      <div className="mt-1 divide-y divide-[var(--surface-border)]">
+        {items.map((document) => {
           const isSelected = documentKey(selected) === documentKey(document)
-
+          const needsReview = document.status === "검토" || document.status === "유형 확인 필요"
           return (
             <button
               key={documentKey(document)}
               type="button"
               className={cn(
-                "flex h-10 min-w-0 items-center gap-2 rounded-[var(--r-sm)] border px-2.5 text-left transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
-                isMissing
-                  ? "border-dashed border-warning/55 hover:border-warning"
-                  : isSelected
-                    ? "border-[var(--control-selected-border)] bg-[var(--control-selected-soft-background)]"
-                    : "border-[var(--surface-border)] hover:border-[var(--control-hover-border)]"
+                "flex min-h-9 w-full min-w-0 items-center gap-2 rounded-[var(--r-sm)] px-2 text-left transition-colors hover:bg-[var(--surface-muted-background)]",
+                isSelected && "bg-[var(--control-selected-soft-background)]"
               )}
-              onClick={() =>
-                isMissing ? onUpload(document) : onSelect(document)
-              }
-              aria-label={
-                isMissing
-                  ? `${document.type} ${isManual ? "원본 파일 추가" : "파일 추가"}`
-                  : `${document.type} 원본 보기`
-              }
+              aria-pressed={isSelected}
+              onClick={() => onSelect(document)}
             >
-              <span
-                className={cn(
-                  "shrink-0 text-[10px] font-semibold",
-                  isMissing
-                    ? "text-warning"
-                    : isSelected || isNew
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                )}
-              >
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-xs)] bg-primary/10 text-[10px] font-semibold text-primary">
                 {document.code}
               </span>
-              <span className="min-w-0 flex-1 truncate text-[11px] font-semibold">
-                {document.type}
-              </span>
-              {isMissing ? (
-                <span className="shrink-0 text-[10px] font-semibold text-warning">
-                  {isManual ? "원본 없음" : "미비"}
-                </span>
-              ) : isNew ? (
-                <span className="flex shrink-0 items-center gap-1 text-[10px] font-medium text-primary">
-                  <span className="size-1.5 rounded-full bg-primary" /> 신규
-                </span>
-              ) : (
-                <Check className="size-3.5 shrink-0 text-success" />
-              )}
+              <span className="min-w-0 flex-1 truncate text-xs">{document.file}</span>
+              {needsReview ? <span className="shrink-0 rounded-full bg-[var(--color-orange-6)] px-2 py-0.5 text-[10px] text-[var(--color-orange-1)]">확인 전</span> : null}
             </button>
           )
         })}
       </div>
     </section>
+  )
+
+  return (
+    <PopoverContent align="start" side="bottom" sideOffset={8} className="w-[min(480px,calc(100vw-2rem))] gap-0 p-2">
+      <div className="flex items-center justify-between gap-3 border-b px-2 py-2">
+        <span className="text-sm font-semibold">이 거래의 서류 {documents.length}건 · 확인 전 {reviewCount}</span>
+        <Button type="button" variant="outline" size="sm" onClick={onAddDocument}>
+          <FilePlus2 data-icon="inline-start" />서류 추가
+        </Button>
+      </div>
+      {renderGroup("올린 서류", "문서 올리기에서 업로드", uploadedDocuments)}
+      {renderGroup("만든 서류", "문서 만들기에서 생성", createdDocuments)}
+    </PopoverContent>
   )
 }
 
@@ -1969,7 +1957,8 @@ function DealWorkBlock({
   children: ReactNode
 }) {
   const state = plan.states[work]
-  const showPlannedDocumentAction = state === "planned" && Boolean(onOpenDocument)
+  const canCompareDocument = work !== "finance" && Boolean(onOpenDocument)
+  const showPlannedDocumentAction = state === "planned" && canCompareDocument
   if (state !== "planned")
     return (
       <div
@@ -2006,18 +1995,6 @@ function DealWorkBlock({
               {plan.nextAction}
             </p>
           )}
-          {work === "finance" && onOpenDocument ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="ml-auto"
-              onClick={() => onOpenDocument(work)}
-            >
-              <FileSearch data-icon="inline-start" />
-              문서와 같이 보기
-            </Button>
-          ) : null}
         </div>
         {children}
       </div>
@@ -3439,118 +3416,6 @@ function DealHealthReference({
   )
 }
 
-function DealDocumentBundleRail({
-  availableDocuments,
-  selected,
-  expanded,
-  onSelect,
-}: {
-  availableDocuments: DocumentSlot[]
-  selected: DocumentSlot
-  expanded: boolean
-  onSelect: (document: DocumentSlot) => void
-}) {
-  const [filter, setFilter] = useState<"all" | "connected" | "missing">("all")
-  const connectedCount = availableDocuments.filter(
-    (document) => document.file
-  ).length
-  const missingCount = availableDocuments.length - connectedCount
-  const filteredDocuments = availableDocuments.filter((document) => {
-    if (filter === "connected" && !document.file) return false
-    if (filter === "missing" && document.file) return false
-    return true
-  })
-
-  if (!expanded) return null
-
-  return (
-    <div className="mt-2 overflow-hidden rounded-[var(--r-md)] border border-[var(--surface-border)]">
-      <div className="bg-[var(--surface-muted-background)] p-2.5">
-        <div className="flex items-center justify-end gap-1 px-1">
-          {[
-            ["all", `전체 ${availableDocuments.length}`],
-            ["connected", `연결 ${connectedCount}`],
-            ["missing", `미연결 ${missingCount}`],
-          ].map(([value, label]) => (
-            <Button
-              key={value}
-              variant={filter === value ? "secondary" : "ghost"}
-              size="xs"
-              onClick={() =>
-                setFilter(value as "all" | "connected" | "missing")
-              }
-            >
-              {label}
-            </Button>
-          ))}
-        </div>
-        <div className="field-scrollbar mt-2 max-h-64 overflow-y-auto rounded-[var(--r-md)] ring-1 ring-[var(--table-border)]">
-          <div className="sticky top-0 z-10 grid grid-cols-[38px_minmax(0,1fr)_90px] gap-2 border-b border-[var(--table-border)] bg-[var(--table-header-background)] px-2.5 py-2 text-[10px] font-medium text-muted-foreground">
-            <span>종류</span>
-            <span>파일</span>
-            <span className="text-right">상태</span>
-          </div>
-          {filteredDocuments.length ? (
-            filteredDocuments.map((document) => {
-              const isSelected = documentKey(selected) === documentKey(document)
-              return (
-                <Button
-                  key={documentKey(document)}
-                  variant="ghost"
-                  className={cn(
-                    "grid h-auto w-full grid-cols-[38px_minmax(0,1fr)_90px] items-center gap-2 rounded-none border-b border-[var(--table-border)] px-2.5 py-2 text-left font-normal text-foreground last:border-b-0 hover:text-foreground",
-                    isSelected && "bg-accent"
-                  )}
-                  onClick={() => {
-                    onSelect(document)
-                  }}
-                >
-                  <Badge
-                    variant="secondary"
-                    className="justify-center px-1 text-[10px]"
-                  >
-                    {document.code}
-                  </Badge>
-                  <span className="min-w-0">
-                    <span className="block truncate text-xs font-medium">
-                      {document.file || `${document.type} 미연결`}
-                    </span>
-                    <span className="mt-0.5 block text-[10px] text-muted-foreground">
-                      {document.type}
-                    </span>
-                  </span>
-                  <span className="flex items-center justify-end gap-1.5">
-                    <StatusBadge
-                      tone={
-                        document.status === "미비"
-                          ? "warning"
-                          : document.status === "발행"
-                            ? "blue"
-                            : document.status === "검토"
-                              ? "warning"
-                              : "success"
-                      }
-                    >
-                      {document.status}
-                    </StatusBadge>
-                    {isSelected ? (
-                      <Check className="size-3.5 shrink-0 text-primary" />
-                    ) : null}
-                  </span>
-                </Button>
-              )
-            })
-          ) : (
-            <p className="px-3 py-8 text-center text-xs text-muted-foreground">
-              해당 상태의 기타 서류가 없습니다.
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function GeneratedDealDocumentsList({
   documents: generatedDocuments,
   selectedDocumentNumber,
@@ -3812,8 +3677,6 @@ function DocumentsTab({
   const directFileInputRef = useRef<HTMLInputElement | null>(null)
   const directFileCodeRef = useRef<string | null>(null)
   const [documentsExpanded, setDocumentsExpanded] = useState(false)
-  const [supplementaryDocumentsExpanded, setSupplementaryDocumentsExpanded] =
-    useState(false)
   const [selectedCommercialInvoiceId, setSelectedCommercialInvoiceId] = useState<string | null>(null)
   useEffect(() => {
     const handleCiOpen = (event: Event) => {
@@ -3831,7 +3694,6 @@ function DocumentsTab({
       })
       setSelectedCommercialInvoiceId(typeof detail === "string" ? null : detail.invoiceId ?? null)
       setDocumentsExpanded(false)
-      setSupplementaryDocumentsExpanded(false)
     }
     window.addEventListener("ecoya:open-ci-document", handleCiOpen)
     return () => window.removeEventListener("ecoya:open-ci-document", handleCiOpen)
@@ -3849,7 +3711,6 @@ function DocumentsTab({
       })
       setSelectedCommercialInvoiceId(null)
       setDocumentsExpanded(false)
-      setSupplementaryDocumentsExpanded(false)
     }
     window.addEventListener("ecoya:open-shipment-document", handleShipmentOpen)
     return () => window.removeEventListener("ecoya:open-shipment-document", handleShipmentOpen)
@@ -3873,7 +3734,6 @@ function DocumentsTab({
         documentRequest.code === "CI" ? documentRequest.invoiceId ?? null : null
       )
       setDocumentsExpanded(false)
-      setSupplementaryDocumentsExpanded(false)
     })
     return () => window.cancelAnimationFrame(frame)
   }, [documentRequest])
@@ -3941,6 +3801,18 @@ function DocumentsTab({
   ])
   const totalDocumentCount =
     connectedImportantCount + visibleSupplementaryDocuments.length
+  const availableDocuments = useMemo(
+    () => [...visibleImportantDocuments, ...visibleSupplementaryDocuments].filter((document) => document.file),
+    [visibleImportantDocuments, visibleSupplementaryDocuments]
+  )
+  const createdDocuments = useMemo(
+    () => availableDocuments.filter((document) => document.source === "발행" || (profile.direction === "purchase" && document.code === "PO")),
+    [availableDocuments, profile.direction]
+  )
+  const uploadedDocuments = useMemo(
+    () => availableDocuments.filter((document) => !createdDocuments.includes(document)),
+    [availableDocuments, createdDocuments]
+  )
   const selectableDocuments = [
     ...visibleImportantDocuments.filter((item) => item.file),
     ...visibleSupplementaryDocuments,
@@ -4256,7 +4128,6 @@ function DocumentsTab({
                 onClick={() => {
                   selectDocument(document)
                   setDocumentsExpanded(false)
-                  setSupplementaryDocumentsExpanded(false)
                   onDocumentOpenChange(true)
                 }}
               >
@@ -4276,8 +4147,7 @@ function DocumentsTab({
               type="button"
               className="flex min-h-8 items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground hover:bg-muted"
               onClick={() => {
-                setDocumentsExpanded(false)
-                setSupplementaryDocumentsExpanded(true)
+                setDocumentsExpanded(true)
                 onDocumentOpenChange(true)
               }}
             >
@@ -4464,15 +4334,28 @@ function DocumentsTab({
         preview={
           <aside className="field-scrollbar min-w-0 border-t px-4 py-4 xl:h-full xl:overflow-y-auto xl:border-t-0 xl:px-5 xl:pb-8">
             <div className="border-b border-[var(--surface-border)] pb-2">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-2">
                 <h3 className="text-base font-semibold">거래 서류</h3>
-                <StatusBadge tone="neutral">서류함 {totalDocumentCount}</StatusBadge>
-                <DealDisclosureButton expanded={documentsExpanded} onClick={() => {
-                  setDocumentsExpanded((value) => !value)
-                  setSupplementaryDocumentsExpanded(false)
-                }} label="거래 서류" />
+                <Popover open={documentsExpanded} onOpenChange={setDocumentsExpanded}>
+                  <PopoverTrigger asChild>
+                    <Button type="button" variant="outline" size="sm" className="h-8 gap-1.5">
+                      <FileText data-icon="inline-start" />서류함 {totalDocumentCount}
+                    </Button>
+                  </PopoverTrigger>
+                  <DealDocumentShelf
+                    documents={availableDocuments}
+                    uploadedDocuments={uploadedDocuments}
+                    createdDocuments={createdDocuments}
+                    selected={selected}
+                    onSelect={(document) => {
+                      selectDocument(document)
+                      setDocumentsExpanded(false)
+                    }}
+                    onAddDocument={() => openDirectFilePicker()}
+                  />
+                </Popover>
                 <div
-                  className="flex w-full min-w-0 items-center gap-1 overflow-x-auto"
+                  className="ml-auto flex min-w-0 items-center gap-1 overflow-x-auto"
                   aria-label="중요 서류 요약"
                 >
                   {visibleImportantDocuments.map((document) => {
@@ -4490,7 +4373,6 @@ function DocumentsTab({
                         )}
                         onClick={() => {
                           setDocumentsExpanded(false)
-                          setSupplementaryDocumentsExpanded(false)
                           if (isMissing) {
                             requestDocumentUpload(document)
                           } else {
@@ -4509,27 +4391,6 @@ function DocumentsTab({
                       </button>
                     )
                   })}
-                  <button
-                    type="button"
-                    className={cn(
-                      "flex h-7 shrink-0 items-center gap-1 rounded-[var(--r-sm)] px-2 text-[10px] font-medium transition-colors focus-visible:[box-shadow:var(--shadow-keyboard-focus)] focus-visible:outline-none",
-                      documentsExpanded || supplementaryDocumentsExpanded
-                        ? "bg-muted text-foreground"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    )}
-                    aria-pressed={
-                      documentsExpanded || supplementaryDocumentsExpanded
-                    }
-                    onClick={() => {
-                      setDocumentsExpanded(false)
-                      setSupplementaryDocumentsExpanded((value) =>
-                        documentsExpanded ? true : !value
-                      )
-                    }}
-                  >
-                    <span className="size-1.5 rounded-full bg-muted-foreground/60" />
-                    기타 서류 {visibleSupplementaryDocuments.length}건
-                  </button>
                 </div>
               </div>
             </div>
@@ -4546,46 +4407,6 @@ function DocumentsTab({
                 event.target.value = ""
               }}
             />
-            {documentsExpanded || supplementaryDocumentsExpanded ? (
-              <div className="pb-2">
-                {documentsExpanded ? (
-                  <>
-                    <div className="mt-3 flex items-center justify-between px-1">
-                      <h4 className="text-xs font-semibold">중요 서류</h4>
-                      <span className="text-[10px] text-muted-foreground">
-                        거래 진행에 필요한 기준 서류
-                      </span>
-                    </div>
-                    <ImportantDealDocumentsPanel
-                      importantDocuments={visibleImportantDocuments}
-                      selected={selected}
-                      onSelect={(document) => {
-                        selectDocument(document)
-                        setDocumentsExpanded(false)
-                        setSupplementaryDocumentsExpanded(false)
-                      }}
-                      onUpload={requestDocumentUpload}
-                    />
-                  </>
-                ) : null}
-                <div className="mt-3 flex items-center justify-between px-1">
-                  <h4 className="text-xs font-semibold">기타 서류</h4>
-                  <span className="text-[10px] text-muted-foreground">
-                    {visibleSupplementaryDocuments.length}건
-                  </span>
-                </div>
-                <DealDocumentBundleRail
-                  availableDocuments={visibleSupplementaryDocuments}
-                  selected={selected}
-                  expanded
-                  onSelect={(document) => {
-                    selectDocument(document)
-                    setDocumentsExpanded(false)
-                    setSupplementaryDocumentsExpanded(false)
-                  }}
-                />
-              </div>
-            ) : null}
             {movedDocument && <p role="status" className="my-2 rounded-md bg-muted px-3 py-2 text-xs">
               {movedDocument.file} 서류를 이동했습니다. <a href={`/erp/deals/${movedDocument.dealId}`} className="font-medium text-primary underline">이동한 거래 보기</a>
             </p>}
