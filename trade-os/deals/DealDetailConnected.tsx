@@ -2434,43 +2434,6 @@ function DealRecordSections({
   )
 }
 
-type CommercialInvoiceDocument = SplitShipmentView["unlinkedDocuments"][number]
-
-function CommercialInvoicePreview({ invoice }: { invoice: CommercialInvoiceDocument }) {
-  const amount = invoice.currency && invoice.totalAmount != null
-    ? `${invoice.currency} ${invoice.totalAmount.toLocaleString()}`
-    : invoice.currency ?? "—"
-  return (
-    <section aria-label="선택한 상업송장 정보" className="mt-3 rounded-md border bg-muted/20 p-3">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">CI</span>
-          <div className="min-w-0">
-            <h4 className="truncate text-xs font-semibold">상업송장 정보</h4>
-            <p className="truncate text-[10px] text-muted-foreground">{invoice.invoiceNumber ?? invoice.fileName}</p>
-          </div>
-        </div>
-        <StatusBadge size="sm" tone="neutral">읽기 전용</StatusBadge>
-      </div>
-      <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
-        {[
-          ["송장일자", invoice.invoiceDate ?? "—"],
-          ["품목", invoice.item ?? "—"],
-          ["수량", invoice.quantity ?? "—"],
-          ["단가", invoice.unitPrice ?? "—"],
-          ["포장 수 / 단위", invoice.packageCount && invoice.packageUnit ? `${invoice.packageCount} ${invoice.packageUnit}` : invoice.packageCount ?? invoice.packageUnit ?? "—"],
-          ["통화·금액", amount],
-        ].map(([label, value]) => (
-          <div key={label} className="min-w-0">
-            <dt className="text-[10px] text-muted-foreground">{label}</dt>
-            <dd className="mt-0.5 truncate font-medium">{value}</dd>
-          </div>
-        ))}
-      </dl>
-    </section>
-  )
-}
-
 function DealPdf({
   slot,
   fieldSummary,
@@ -4664,7 +4627,6 @@ function DocumentsTab({
               ) : null}
               {selected.file ? (
                 <>
-                  {selectedCommercialInvoice ? <CommercialInvoicePreview invoice={selectedCommercialInvoice} /> : null}
                   <DealPdf
                     key={`${selected.code}-${selectedCommercialInvoice?.documentId ?? selected.file}`}
                     slot={selected}
