@@ -5585,20 +5585,19 @@ export function DealDetailScreen({
     if (!grid) return
     const viewport = grid.closest<HTMLElement>("[data-deal-scroll-viewport]")
     const updateHeight = () => {
-      const gridRect = grid.getBoundingClientRect()
-      const viewportRect = viewport?.getBoundingClientRect()
-      const top = Math.max(gridRect.top, viewportRect?.top ?? 0)
-      const bottom = viewportRect?.bottom ?? window.innerHeight
-      setComparisonHeight(Math.max(620, Math.round(bottom - top - 16)))
+      // The comparison surface is a viewport-level workspace. Deriving its
+      // height from the grid's current document position makes it collapse
+      // when the user opens it from a scrolled section (the grid can be
+      // partially or completely outside the viewport at that moment).
+      const availableHeight = viewport?.clientHeight ?? window.innerHeight
+      setComparisonHeight(Math.max(620, Math.round(availableHeight - 16)))
     }
     updateHeight()
     const observer = new ResizeObserver(updateHeight)
     observer.observe(viewport ?? grid)
-    viewport?.addEventListener("scroll", updateHeight)
     window.addEventListener("resize", updateHeight)
     return () => {
       observer.disconnect()
-      viewport?.removeEventListener("scroll", updateHeight)
       window.removeEventListener("resize", updateHeight)
     }
   }, [documentOpen])
@@ -5625,9 +5624,10 @@ export function DealDetailScreen({
       comparisonRestoreScrollTopRef.current = viewport?.scrollTop ?? null
       const viewportRect = viewport?.getBoundingClientRect()
       const gridRect = grid?.getBoundingClientRect()
-      comparisonScrollTopRef.current = viewport && viewportRect && gridRect
-        ? Math.max(0, viewport.scrollTop + gridRect.top - viewportRect.top)
-        : viewport?.scrollTop ?? null
+      // Keep the outer deal viewport exactly where the user opened the
+      // comparison. The grid becomes sticky below the deal header, while its
+      // left pane receives the previous viewport offset below.
+      comparisonScrollTopRef.current = viewport?.scrollTop ?? null
       comparisonLeftScrollTopRef.current = viewportRect && gridRect
         ? Math.max(0, viewportRect.top - gridRect.top)
         : null
@@ -6925,7 +6925,12 @@ export function DealDetailScreen({
             </div>}
             <div
               ref={comparisonGridRef}
-              style={documentOpen && comparisonHeight ? { height: comparisonHeight } : undefined}
+              style={documentOpen && comparisonHeight ? {
+                height: comparisonHeight,
+                position: "sticky",
+                top: "var(--deal-header-height, 0px)",
+                zIndex: 20,
+              } : undefined}
               className={cn(
                 "min-h-0",
                 documentOpen &&
