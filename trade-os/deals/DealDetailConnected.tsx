@@ -2179,7 +2179,7 @@ function DealDocumentPanels({
         createPortal(
           <section
             role="region"
-            aria-label="거래 상세 · 문서 대조"
+            aria-label="문서 보기"
             aria-describedby="deal-comparison-description"
             data-deal-comparison
             className="flex h-full min-w-0 flex-col overflow-hidden bg-background animate-in slide-in-from-right duration-200"
@@ -2199,7 +2199,7 @@ function DealDocumentPanels({
             <div className="flex min-h-[72px] shrink-0 items-center justify-between gap-4 border-b px-4 sm:px-6">
               <div className="space-y-1">
                 <h2 className="text-base font-semibold">
-                  거래 상세 · 문서 대조
+                  문서 보기
                 </h2>
                 <p
                   id="deal-comparison-description"
@@ -2215,7 +2215,7 @@ function DealDocumentPanels({
                 onClick={() => onDocumentOpenChange(false)}
               >
                 <X data-icon="inline-start" />
-                거래로 돌아가기
+                문서 보기 닫기
               </Button>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto">
