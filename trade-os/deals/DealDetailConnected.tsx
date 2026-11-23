@@ -1777,6 +1777,9 @@ function CommercialInvoiceTransactionCard({
   const [drafts, setDrafts] = useState<Record<string, Record<string, string>>>({})
   const [localInvoiceLinks, setLocalInvoiceLinks] = useState<Record<string, string>>({})
   const [invoiceLinkSelections, setInvoiceLinkSelections] = useState<Record<string, string>>({})
+  const [saleInvoiceId, setSaleInvoiceId] = useState<string | null>(null)
+  const [saleDraft, setSaleDraft] = useState({ amount: "", currency: "KRW", customer: "", date: new Date().toISOString().slice(0, 10), evidence: "" })
+  const [registeredSales, setRegisteredSales] = useState<Record<string, typeof saleDraft>>({})
   const invoiceLinks = useMemo(() => ({ ...linkedInvoiceTargets, ...localInvoiceLinks }), [linkedInvoiceTargets, localInvoiceLinks])
   const records = useMemo<CommercialInvoiceRecord[]>(() => {
     const byId = new Map<string, CommercialInvoiceRecord>()
@@ -1826,6 +1829,7 @@ function CommercialInvoiceTransactionCard({
           const draft = drafts[invoice.documentId] ?? {}
           const value = (field: string, fallback: string) => draft[field] ?? fallback
           const linkedBills = billOfLadingIds.map((id) => billById.get(id)).filter(Boolean)
+          const saleAvailable = linkedBills.some((bill) => bill && (bill as { status?: string }).status === "arrived")
           return (
             <article key={invoice.documentId} className="overflow-hidden rounded-[var(--r-md)] border">
               <div className="flex items-center gap-2 bg-muted/30 px-4 py-3">
@@ -1836,6 +1840,7 @@ function CommercialInvoiceTransactionCard({
                       <span className="flex flex-wrap items-center gap-2">
                         <strong className="truncate text-sm">{invoice.invoiceNumber || invoice.fileName}</strong>
                         <StatusBadge size="sm" tone={linkedBills.length ? "success" : "warning"}>{linkedBills.length ? `B/L ${linkedBills.length}건 연결` : "B/L 연결 필요"}</StatusBadge>
+                        {registeredSales[invoice.documentId] ? <StatusBadge size="sm" tone="info">판매 등록됨</StatusBadge> : null}
                       </span>
                       {linkedBills.length ? <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">{linkedBills.map((bill) => `${bill?.blNumber || "B/L 번호 미확인"} · ${bill ? containerCountLabel(bill) : "컨테이너 미확인"}`).join(" · ")}</span> : null}
                     </span>
@@ -1921,9 +1926,25 @@ function CommercialInvoiceTransactionCard({
                         </div>
                       </div>
                     )}
+                    {saleAvailable ? <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
+                      <div><h3 className="text-sm font-semibold">판매 정보</h3><p className="mt-0.5 text-xs text-muted-foreground">도착 후 이 CI를 판매한 정보를 등록합니다.</p></div>
+                      <Button type="button" size="xs" variant="outline" onClick={() => { setSaleInvoiceId(invoice.documentId); setSaleDraft(registeredSales[invoice.documentId] ?? { amount: invoice.totalAmount?.toString() ?? "", currency: "KRW", customer: "", date: new Date().toISOString().slice(0, 10), evidence: invoice.invoiceNumber ?? invoice.fileName }) }}><Plus data-icon="inline-start" />{registeredSales[invoice.documentId] ? "판매 정보 수정" : "판매 등록"}</Button>
+                    </div> : null}
                   </div>
                 </div>
               ) : null}
+              <AlertDialog open={saleInvoiceId === invoice.documentId} onOpenChange={(open) => { if (!open) setSaleInvoiceId(null) }}>
+                <AlertDialogContent className="sm:max-w-xl">
+                  <AlertDialogHeader><AlertDialogTitle>판매 등록</AlertDialogTitle><AlertDialogDescription>{invoice.invoiceNumber ?? invoice.fileName}의 판매 정보를 입력합니다.</AlertDialogDescription></AlertDialogHeader>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="grid gap-1.5 text-sm"><span>판매 금액</span><div className="flex gap-2"><Input value={saleDraft.amount} onChange={(event) => setSaleDraft({ ...saleDraft, amount: event.target.value })} /><Select value={saleDraft.currency} onValueChange={(value) => setSaleDraft({ ...saleDraft, currency: value ?? "KRW" })}><SelectTrigger className="w-24"><SelectValue /></SelectTrigger><SelectContent>{["KRW", "USD", "EUR", "JPY", "CNY"].map((currency) => <SelectItem key={currency} value={currency}>{currency}</SelectItem>)}</SelectContent></Select></div></label>
+                    <label className="grid gap-1.5 text-sm"><span>판매일</span><Input type="date" value={saleDraft.date} onChange={(event) => setSaleDraft({ ...saleDraft, date: event.target.value })} /></label>
+                    <label className="grid gap-1.5 text-sm"><span>판매처</span><Input placeholder="판매처 입력" value={saleDraft.customer} onChange={(event) => setSaleDraft({ ...saleDraft, customer: event.target.value })} /></label>
+                    <div className="grid gap-1.5 text-sm"><span>판매 근거</span><p className="rounded-md bg-muted/40 px-3 py-2 text-sm text-muted-foreground">{saleDraft.evidence}</p></div>
+                  </div>
+                  <AlertDialogFooter><AlertDialogCancel>취소</AlertDialogCancel><AlertDialogAction disabled={!saleDraft.amount || !saleDraft.customer} onClick={() => { setRegisteredSales((current) => ({ ...current, [invoice.documentId]: saleDraft })); setSaleInvoiceId(null) }}>저장</AlertDialogAction></AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </article>
           )
         })}
@@ -1958,7 +1979,7 @@ function DealWorkBlock({
   children: ReactNode
 }) {
   const state = plan.states[work]
-  const canCompareDocument = work !== "finance" && Boolean(onOpenDocument)
+  const canCompareDocument = work !== "finance" && work !== "customs" && Boolean(onOpenDocument)
   const showPlannedDocumentAction = state === "planned" && canCompareDocument
   if (state !== "planned")
     return (
@@ -6393,7 +6414,7 @@ export function DealDetailScreen({
       aria-label="거래 현황"
       data-deal-information-aside
       ref={informationRailRef}
-      className="min-w-0 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
+      className="min-w-0 self-start rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:h-fit xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
     >
     <div className="divide-y divide-[var(--surface-border)]">
       <section
