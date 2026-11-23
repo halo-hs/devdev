@@ -1865,12 +1865,12 @@ function CommercialInvoiceTransactionCard({
                   <div className="mt-4 pt-4">
                     <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">연결된 선적</h3><span className="text-xs text-muted-foreground">{linkedBills.length ? `${linkedBills.length}건` : "연결 필요"}</span></div>
                     {linkedBills.length ? (
-                      <ul className="mt-2 divide-y divide-border border-y">
+                      <ul className="mt-2 space-y-2">
                         {linkedBills.map((bill) => {
                           if (!bill) return null
                           const containers = billContainers(bill)
                           return (
-                            <li key={bill.documentId} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 py-3 text-sm">
+                            <li key={bill.documentId} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 rounded-md bg-muted/30 px-3 py-2 text-sm">
                               <div className="min-w-0">
                                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                                   <strong>{bill.blNumber || "B/L 번호 미확인"}</strong>
@@ -1883,9 +1883,9 @@ function CommercialInvoiceTransactionCard({
                                 {onEditShipment ? <Button type="button" size="icon-sm" variant="ghost" aria-label={`${bill.blNumber || "연결된 선적"} 수정`} title="연결된 선적 수정" onClick={(event) => onEditShipment(bill, event.currentTarget)}><Pencil aria-hidden="true" className="size-4" /></Button> : null}
                               </span>
                               {containers.length ? (
-                                <ul className="col-span-2 mt-2 divide-y divide-border border-t" aria-label={`${bill.blNumber || "연결된 선적"} 컨테이너 목록`}>
+                                <ul className="col-span-2 mt-2 space-y-1" aria-label={`${bill.blNumber || "연결된 선적"} 컨테이너 목록`}>
                                   {containers.map((container) => (
-                                    <li key={container.number} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2 text-xs">
+                                    <li key={container.number} className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded bg-background/70 px-2 py-1.5 text-xs">
                                       <span className="font-medium">{container.number}</span>
                                       {container.sealNumber ? <span className="text-muted-foreground">씰 {container.sealNumber}</span> : null}
                                       {container.packageCount ? <span className="text-muted-foreground">포장 {container.packageCount}{container.packageUnit ? ` ${container.packageUnit}` : ""}</span> : null}
