@@ -318,7 +318,7 @@ export function DealFinanceWorkspace({
         </div>
         {canWrite && (
           <form className="@container mt-4 rounded-lg border bg-background p-4" aria-label="판매 내역 추가" onSubmit={(event) => { event.preventDefault(); addSale() }}>
-            <fieldset className="grid items-end gap-3 sm:grid-cols-2 @min-[860px]:grid-cols-[minmax(190px,1.4fr)_140px_100px_110px_140px_minmax(140px,1fr)_auto]">
+            <fieldset className="grid items-end gap-3 sm:grid-cols-2 @min-[860px]:grid-cols-4">
               <label className="grid gap-1.5 text-sm"><span>대상 CI</span><Select value={saleDraft.invoiceId} onValueChange={selectSaleInvoice}><SelectTrigger className="h-10"><SelectValue placeholder="CI를 선택하면 자동 입력" /></SelectTrigger><SelectContent>{invoiceOptions.map((invoice) => <SelectItem key={invoice.id} value={invoice.id}>{invoice.label}</SelectItem>)}</SelectContent></Select></label>
               <label className="grid gap-1.5 text-sm"><span>판매 금액</span><Input className="h-10" inputMode="decimal" numericFormat="amount" value={saleDraft.amount} onChange={(event) => setSaleDraft({ ...saleDraft, amount: event.target.value })} placeholder="0.00" /></label>
               <label className="grid gap-1.5 text-sm"><span>통화</span><Select value={saleDraft.currency} onValueChange={(value) => setSaleDraft({ ...saleDraft, currency: value ?? "USD" })}><SelectTrigger className="h-10"><SelectValue /></SelectTrigger><SelectContent>{costCurrencies.map((currency) => <SelectItem key={currency} value={currency}>{currency}</SelectItem>)}</SelectContent></Select></label>
