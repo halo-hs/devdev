@@ -2170,6 +2170,10 @@ function DealDocumentPanels({
               ? `다음 작업: ${plan.nextAction}`
               : "거래 업무가 완료되었습니다."}
           </p>
+          <div className="mt-4 border-t pt-3" aria-label="거래 서류 요약">
+            <p className="text-xs font-semibold text-foreground">거래 서류</p>
+            {documentStrip}
+          </div>
         </Card>
       </section>
       {plan.order.map((work) => (
@@ -2205,7 +2209,6 @@ function DealDocumentPanels({
                   문서와 보기
                 </Button>
               </div>
-              {documentStrip}
               {failedPanel === "documents" ? (
                 <PanelFailure title="상세" onRetry={onRetry} />
               ) : (
@@ -4161,7 +4164,7 @@ function DocumentsTab({
         documentStrip={
           <div
             aria-label="거래 상세 서류 목록"
-            className="mb-4 flex flex-wrap items-center gap-1 border-b pb-3"
+            className="mt-2 flex flex-wrap items-center gap-1"
           >
             {visibleImportantDocuments.map((document) => (
               <button
