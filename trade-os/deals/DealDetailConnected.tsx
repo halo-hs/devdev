@@ -1938,6 +1938,7 @@ function DealWorkBlock({
   previewOpen,
   onPreview,
   onStart,
+  onOpenDocument,
   canWrite,
   children,
 }: {
@@ -1946,10 +1947,12 @@ function DealWorkBlock({
   previewOpen: boolean
   onPreview: (key: DealWorkKey) => void
   onStart: (key: DealWorkKey) => void
+  onOpenDocument?: (key: DealWorkKey) => void
   canWrite: boolean
   children: ReactNode
 }) {
   const state = plan.states[work]
+  const showPlannedDocumentAction = state === "planned" && Boolean(onOpenDocument)
   if (state !== "planned")
     return (
       <div
@@ -1986,6 +1989,18 @@ function DealWorkBlock({
               {plan.nextAction}
             </p>
           )}
+          {work === "finance" && onOpenDocument ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="ml-auto"
+              onClick={() => onOpenDocument(work)}
+            >
+              <FileSearch data-icon="inline-start" />
+              문서와 같이 보기
+            </Button>
+          ) : null}
         </div>
         {children}
       </div>
@@ -2004,6 +2019,17 @@ function DealWorkBlock({
           <h2 className="text-lg font-semibold">{workLabels[work]}</h2>
           <StatusBadge>예정</StatusBadge>
         </div>
+        {showPlannedDocumentAction ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => onOpenDocument?.(work)}
+          >
+            <FileSearch data-icon="inline-start" />
+            문서와 같이 보기
+          </Button>
+        ) : null}
         <DealDisclosureButton expanded={previewOpen} onClick={() => onPreview(work)} label={workLabels[work]} collapsedLabel="미리 보기" controls={`planned-${work}`} />
         {canWrite && (
           <Button size="sm" variant="outline" onClick={() => onStart(work)}>
@@ -2039,6 +2065,7 @@ function DealDocumentPanels({
   previewWork,
   onPreviewWork,
   onStartWork,
+  onOpenDocument,
   canWrite,
   profile,
   commercialInvoiceContent,
@@ -2057,6 +2084,7 @@ function DealDocumentPanels({
   previewWork: DealWorkKey[]
   onPreviewWork: (key: DealWorkKey) => void
   onStartWork: (key: DealWorkKey) => void
+  onOpenDocument?: (key: DealWorkKey) => void
   canWrite: boolean
   profile: DealProfile
   commercialInvoiceContent: ReactNode
@@ -2110,6 +2138,7 @@ function DealDocumentPanels({
           previewOpen={previewWork.includes(work)}
           onPreview={onPreviewWork}
           onStart={onStartWork}
+          onOpenDocument={onOpenDocument}
           canWrite={canWrite}
         >
           {work === "documents" ? (
@@ -3627,6 +3656,7 @@ function DocumentsTab({
   previewWork,
   onPreviewWork,
   onStartWork,
+  onOpenDocument,
   dealId,
   profile,
   role,
@@ -3651,6 +3681,7 @@ function DocumentsTab({
   previewWork: DealWorkKey[]
   onPreviewWork: (key: DealWorkKey) => void
   onStartWork: (key: DealWorkKey) => void
+  onOpenDocument?: (key: DealWorkKey) => void
   dealId: string
   profile: DealProfile
   role: Role
@@ -3837,6 +3868,35 @@ function DocumentsTab({
     }
     window.addEventListener("ecoya:open-shipment-document", handleShipmentOpen)
     return () => window.removeEventListener("ecoya:open-shipment-document", handleShipmentOpen)
+  }, [])
+  useEffect(() => {
+    const handleDealDocumentOpen = (event: Event) => {
+      const detail = (event as CustomEvent<{
+        code?: string
+        fileName?: string
+        invoiceId?: string
+      }>).detail
+      if (!detail?.code) return
+      const baseDocument = [...documents, ...supplementaryDocuments].find(
+        (document) => document.code === detail.code
+      )
+      if (!baseDocument) return
+      const file = detail.fileName ?? baseDocument.file
+      setSelected({
+        ...baseDocument,
+        file,
+        status: file && detail.code === "BL" ? "검토" : baseDocument.status,
+        source: file && detail.fileName ? "업로드" : baseDocument.source,
+        commercialInvoiceId: detail.invoiceId,
+      })
+      setSelectedCommercialInvoiceId(
+        detail.code === "CI" ? detail.invoiceId ?? null : null
+      )
+      setDocumentsExpanded(false)
+      setSupplementaryDocumentsExpanded(false)
+    }
+    window.addEventListener("ecoya:open-deal-document", handleDealDocumentOpen)
+    return () => window.removeEventListener("ecoya:open-deal-document", handleDealDocumentOpen)
   }, [])
   const [missingDocumentPrompt, setMissingDocumentPrompt] =
     useState<DocumentSlot | null>(null)
@@ -4193,6 +4253,7 @@ function DocumentsTab({
         previewWork={previewWork}
         onPreviewWork={onPreviewWork}
         onStartWork={onStartWork}
+        onOpenDocument={onOpenDocument}
         canWrite={canMutate(role)}
         profile={profile}
         commercialInvoiceContent={<CommercialInvoiceTransactionCard view={commercialInvoiceView} linkedInvoiceTargets={linkedInvoiceTargets} onEditShipment={onEditShipment} />}
@@ -5741,7 +5802,7 @@ export function DealDetailScreen({
   const splitShipmentView = useMemo(
     () => {
       const fixture = splitShipmentReviewFixture(dealId, (fileName, invoiceId) => {
-        window.dispatchEvent(new CustomEvent("ecoya:open-ci-document", { detail: { fileName, invoiceId } }))
+        window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code: "CI", fileName, invoiceId } }))
         setDocumentOpen(true)
       })
       return {
@@ -5776,6 +5837,23 @@ export function DealDetailScreen({
     },
     [connectedShipmentContainerDrafts, connectedShipmentDrafts, dealId]
   )
+  const openDealDocument = (work: DealWorkKey) => {
+    const detail =
+      work === "fulfillment"
+        ? {
+            code: "BL",
+            fileName: splitShipmentView.billsOfLading[0]?.fileName,
+          }
+        : work === "customs"
+          ? { code: "CO" }
+          : work === "finance"
+            ? { code: "CI" }
+            : { code: profile.direction === "sales" ? "SC" : "PO" }
+    window.dispatchEvent(
+      new CustomEvent("ecoya:open-deal-document", { detail })
+    )
+    setDocumentOpen(true)
+  }
   const openConnectedShipmentEdit = (bill: SplitShipmentView["billsOfLading"][number], trigger: HTMLButtonElement) => {
     shipmentEditTrigger.current = trigger
     const draft = connectedShipmentDrafts[bill.documentId] ?? {}
@@ -6778,6 +6856,7 @@ export function DealDetailScreen({
                   previewWork={previewWork}
                   onPreviewWork={previewSection}
                   onStartWork={startWork}
+                  onOpenDocument={openDealDocument}
                   commercialInvoiceView={splitShipmentView}
                   linkedInvoiceTargets={linkedInvoiceTargets}
                   onEditShipment={openConnectedShipmentEdit}
@@ -6789,11 +6868,7 @@ export function DealDetailScreen({
                         className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
                       >
                         <FulfillmentTab
-                          shipmentContent={<OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} onOpenDocument={() => {
-                            const bill = splitShipmentView.billsOfLading[0]
-                            if (bill) window.dispatchEvent(new CustomEvent("ecoya:open-shipment-document", { detail: { fileName: bill.fileName } }))
-                            setDocumentOpen(true)
-                          }} />}
+                          shipmentContent={<OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} onOpenDocument={() => openDealDocument("fulfillment")} />}
                           onSummaryChange={setShipmentSummary}
                           onEditUnitPrice={openItemUnitPrice}
                           dealId={dealId}
@@ -6818,7 +6893,7 @@ export function DealDetailScreen({
                         <div className="mt-4 flex flex-wrap gap-2">
                           <Button
                             variant="outline"
-                            onClick={() => setDocumentOpen(true)}
+                            onClick={() => openDealDocument("customs")}
                           >
                             거래 서류 확인
                           </Button>
