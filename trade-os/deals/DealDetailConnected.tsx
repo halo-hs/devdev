@@ -6394,7 +6394,7 @@ export function DealDetailScreen({
       aria-label="거래 현황"
       data-deal-information-aside
       ref={informationRailRef}
-      className="min-w-0 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
+      className="min-w-0 self-start rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:h-fit xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
     >
     <div className="divide-y divide-[var(--surface-border)]">
       <section
