@@ -1926,10 +1926,10 @@ function CommercialInvoiceTransactionCard({
                         </div>
                       </div>
                     )}
-                    {saleAvailable ? <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
-                      <div><h3 className="text-sm font-semibold">판매 정보</h3><p className="mt-0.5 text-xs text-muted-foreground">도착 후 이 CI를 판매한 정보를 등록합니다.</p></div>
-                      <Button type="button" size="xs" variant="outline" onClick={() => { setSaleInvoiceId(invoice.documentId); setSaleDraft(registeredSales[invoice.documentId] ?? { amount: invoice.totalAmount?.toString() ?? "", currency: "KRW", customer: "", date: new Date().toISOString().slice(0, 10), evidence: invoice.invoiceNumber ?? invoice.fileName }) }}><Plus data-icon="inline-start" />{registeredSales[invoice.documentId] ? "판매 정보 수정" : "판매 등록"}</Button>
-                    </div> : null}
+                    <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
+                      <div><h3 className="text-sm font-semibold">판매 정보</h3><p className="mt-0.5 text-xs text-muted-foreground">{saleAvailable ? "판매 정보를 등록할 수 있습니다." : "도착 또는 통관 확인 후 판매 정보를 등록할 수 있습니다."}</p></div>
+                      <Button type="button" size="xs" variant="outline" disabled={!saleAvailable} onClick={() => { setSaleInvoiceId(invoice.documentId); setSaleDraft(registeredSales[invoice.documentId] ?? { amount: invoice.totalAmount?.toString() ?? "", currency: "KRW", customer: "", date: new Date().toISOString().slice(0, 10), evidence: invoice.invoiceNumber ?? invoice.fileName }) }}><Plus data-icon="inline-start" />{registeredSales[invoice.documentId] ? "판매 정보 수정" : "판매 등록"}</Button>
+                    </div>
                   </div>
                 </div>
               ) : null}
