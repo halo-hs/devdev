@@ -3688,6 +3688,7 @@ function DocumentsTab({
   documentOpen,
   documentPanelTarget,
   onDocumentOpenChange,
+  documentRequest,
   failedPanel,
   onRetry,
 }: {
@@ -3715,6 +3716,11 @@ function DocumentsTab({
   documentOpen: boolean
   documentPanelTarget: HTMLElement | null
   onDocumentOpenChange: (open: boolean) => void
+  documentRequest?: {
+    code: string
+    fileName?: string
+    invoiceId?: string
+  } | null
   failedPanel: Tab | null
   onRetry: () => void
 }) {
@@ -3886,34 +3892,28 @@ function DocumentsTab({
     return () => window.removeEventListener("ecoya:open-shipment-document", handleShipmentOpen)
   }, [])
   useEffect(() => {
-    const handleDealDocumentOpen = (event: Event) => {
-      const detail = (event as CustomEvent<{
-        code?: string
-        fileName?: string
-        invoiceId?: string
-      }>).detail
-      if (!detail?.code) return
-      const baseDocument = [...documents, ...supplementaryDocuments].find(
-        (document) => document.code === detail.code
-      )
-      if (!baseDocument) return
-      const file = detail.fileName ?? baseDocument.file
+    if (!documentRequest?.code) return
+    const baseDocument = [...documents, ...supplementaryDocuments].find(
+      (document) => document.code === documentRequest.code
+    )
+    if (!baseDocument) return
+    const file = documentRequest.fileName ?? baseDocument.file
+    const frame = window.requestAnimationFrame(() => {
       setSelected({
         ...baseDocument,
         file,
-        status: file && detail.code === "BL" ? "검토" : baseDocument.status,
-        source: file && detail.fileName ? "업로드" : baseDocument.source,
-        commercialInvoiceId: detail.invoiceId,
+        status: file && documentRequest.code === "BL" ? "검토" : baseDocument.status,
+        source: file && documentRequest.fileName ? "업로드" : baseDocument.source,
+        commercialInvoiceId: documentRequest.invoiceId,
       })
       setSelectedCommercialInvoiceId(
-        detail.code === "CI" ? detail.invoiceId ?? null : null
+        documentRequest.code === "CI" ? documentRequest.invoiceId ?? null : null
       )
       setDocumentsExpanded(false)
       setSupplementaryDocumentsExpanded(false)
-    }
-    window.addEventListener("ecoya:open-deal-document", handleDealDocumentOpen)
-    return () => window.removeEventListener("ecoya:open-deal-document", handleDealDocumentOpen)
-  }, [])
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [documentRequest])
   const [missingDocumentPrompt, setMissingDocumentPrompt] =
     useState<DocumentSlot | null>(null)
   const [confirmUnlink, setConfirmUnlink] = useState(false)
@@ -5784,6 +5784,11 @@ export function DealDetailScreen({
     focusTarget?.tab ?? stageEntryTab(dealId)
   )
   const [documentOpen, setDocumentOpen] = useState(false)
+  const [documentRequest, setDocumentRequest] = useState<{
+    code: string
+    fileName?: string
+    invoiceId?: string
+  } | null>(null)
   const [documentPanelTarget, setDocumentPanelTarget] = useState<HTMLElement | null>(null)
   const comparisonGridRef = useRef<HTMLDivElement>(null)
   const comparisonViewportRef = useRef<HTMLElement | null>(null)
@@ -5866,7 +5871,21 @@ export function DealDetailScreen({
     else closeDocumentPanel()
   }, [closeDocumentPanel, openDocumentPanel])
   useEffect(() => {
-    const handleDealDocumentRequest = () => openDocumentPanel()
+    const handleDealDocumentRequest = (event: Event) => {
+      const detail = (event as CustomEvent<{
+        code?: string
+        fileName?: string
+        invoiceId?: string
+      }>).detail
+      if (detail?.code) {
+        setDocumentRequest({
+          code: detail.code,
+          fileName: detail.fileName,
+          invoiceId: detail.invoiceId,
+        })
+      }
+      openDocumentPanel()
+    }
     window.addEventListener("ecoya:open-deal-document", handleDealDocumentRequest)
     return () => window.removeEventListener("ecoya:open-deal-document", handleDealDocumentRequest)
   }, [openDocumentPanel])
@@ -6540,6 +6559,7 @@ export function DealDetailScreen({
       documentOpen={documentOpen}
       documentPanelTarget={documentPanelTarget}
       onDocumentOpenChange={handleDocumentOpenChange}
+                  documentRequest={documentRequest}
       failedPanel={failedPanel}
       onRetry={() => setFailedPanel(null)}
     />
