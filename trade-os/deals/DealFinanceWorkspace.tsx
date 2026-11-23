@@ -5,7 +5,7 @@ import {
   EmptyDescription,
 } from "@/components/ui/empty"
 import { DealClaimTool } from "@trade-os/deals/DealHandoffTools"
-import { useMemo, useRef, useState, type ReactNode } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { Info, Pencil, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,10 +35,13 @@ import {
   calculateDealFinance,
   costCurrencies,
   costTypes,
+  readDealSales,
   readDealCosts,
+  saleChangeEvent,
   validDealCost,
   writeDealCosts,
   type DealCost,
+  type DealSale,
 } from "@trade-os/lib/dealFinanceWorkspace"
 import { prototypeBackend } from "@trade-os/lib/prototypeBackend"
 
@@ -82,17 +85,6 @@ const blankCost = (): DealCost => ({
   source: "수동 입력",
 })
 
-type SaleEntry = {
-  id: string
-  invoiceId: string
-  amount: string
-  currency: string
-  basis: "total" | "unit"
-  date: string
-  customer: string
-  evidence: string
-}
-
 export function DealFinanceWorkspace({
   dealId,
   canWrite,
@@ -103,13 +95,20 @@ export function DealFinanceWorkspace({
   addAudit: (action: string, detail: string) => void
 }) {
   const [costs, setCosts] = useState(() => readDealCosts(dealId))
-  const [sales, setSales] = useState<SaleEntry[]>([])
+  const [sales, setSales] = useState<DealSale[]>(() => readDealSales(dealId))
   const [draft, setDraft] = useState<DealCost>(blankCost)
   const amountInputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
   const busyRef = useRef(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  useEffect(() => {
+    const handleSalesChange = (event: Event) => {
+      if ((event as CustomEvent<string>).detail === dealId) setSales(readDealSales(dealId))
+    }
+    window.addEventListener(saleChangeEvent, handleSalesChange)
+    return () => window.removeEventListener(saleChangeEvent, handleSalesChange)
+  }, [dealId])
   const isNew = draft.id === "draft"
   const valid = canWrite && validDealCost(draft)
   const savedFacts = calculateDealFinance(dealId, costs)
@@ -285,7 +284,6 @@ export function DealFinanceWorkspace({
           </div>
           <Badge variant="outline">{sales.length}건</Badge>
         </div>
-        <p className="mt-4 rounded-md border border-dashed p-4 text-sm text-muted-foreground">판매 등록은 각 CI 카드에서 진행합니다. 등록된 판매 내역이 이 영역에 자동으로 집계됩니다.</p>
         {Object.entries(saleMargins).length > 0 && (
           <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 rounded-md bg-muted/40 px-3 py-2 text-xs">
             {Object.entries(saleMargins).map(([currency, margin]) => (
@@ -293,9 +291,7 @@ export function DealFinanceWorkspace({
             ))}
           </div>
         )}
-        {sales.length > 0 ? (
-          <Table aria-label="판매 내역" className="mt-4 min-w-[760px]"><TableHeader><TableRow>{["판매처 / 근거", "판매 금액", "기준", "판매일", "관리"].map((label) => <TableHead key={label}>{label}</TableHead>)}</TableRow></TableHeader><TableBody>{sales.map((sale) => <TableRow key={sale.id}><TableCell><strong>{sale.customer}</strong><small className="mt-1 block text-muted-foreground">{sale.evidence || "근거 미입력"}</small></TableCell><TableCell className="tabular-nums">{exactFinanceMoney(sale.amount, sale.currency)}</TableCell><TableCell>{sale.basis === "total" ? "총액" : "단가"}</TableCell><TableCell>{sale.date || "—"}</TableCell><TableCell><Button type="button" variant="ghost" size="icon-sm" aria-label={`${sale.customer} 판매 내역 삭제`} onClick={() => setSales((current) => current.filter((item) => item.id !== sale.id))}><Trash2 /></Button></TableCell></TableRow>)}</TableBody></Table>
-        ) : <p className="mt-4 rounded-md border border-dashed p-4 text-sm text-muted-foreground">판매 내역을 입력하면 거래 경제의 판매 합계와 마진 계산에 반영됩니다.</p>}
+        <Table aria-label="판매 내역" className="mt-4 min-w-[640px]"><TableHeader><TableRow>{["CI", "판매 금액", "판매처", "판매일"].map((label) => <TableHead key={label}>{label}</TableHead>)}</TableRow></TableHeader><TableBody>{sales.length > 0 ? sales.map((sale) => <TableRow key={sale.id}><TableCell><strong>{sale.invoiceNumber}</strong><small className="mt-1 block text-muted-foreground">{sale.evidence}</small></TableCell><TableCell className="tabular-nums">{exactFinanceMoney(sale.amount, sale.currency)}</TableCell><TableCell>{sale.customer}</TableCell><TableCell>{sale.date || "—"}</TableCell></TableRow>) : <TableRow><TableCell colSpan={4} className="py-6 text-center text-sm text-muted-foreground">CI 카드에서 판매를 등록하면 이 표에 자동으로 표시됩니다.</TableCell></TableRow>}</TableBody></Table>
       </section>
 
       <section aria-label="원가 관리">

@@ -21,6 +21,16 @@ export type DealCost = {
   note: string
   source: string
 }
+export type DealSale = {
+  id: string
+  invoiceId: string
+  invoiceNumber: string
+  amount: string
+  currency: string
+  date: string
+  customer: string
+  evidence: string
+}
 export type FinanceFact = Partial<TradeFinanceFact> &
   Pick<TradeFinanceFact, "currency">
 export const costCurrencies = ["USD", "KRW", "EUR", "JPY", "CNY"] as const
@@ -38,6 +48,8 @@ export const costTypes = [
 export const costStorageKey = (dealId: string) =>
   `ecoya-deal-costs-v1:${dealId}`
 export const costChangeEvent = "ecoya-deal-costs-changed"
+export const saleChangeEvent = "ecoya-deal-sales-changed"
+export const saleStorageKey = (dealId: string) => `ecoya-deal-sales-v1:${dealId}`
 
 // Shared explicit demo invoice facts. Missing facts stay unknown.
 export function baseFinanceFacts(dealId: string): FinanceFact[] {
@@ -119,6 +131,29 @@ export function writeDealCosts(dealId: string, costs: DealCost[]) {
     throw new Error("원가의 금액·통화·메모를 확인해주세요.")
   localStorage.setItem(costStorageKey(dealId), JSON.stringify(costs))
   window.dispatchEvent(new CustomEvent(costChangeEvent, { detail: dealId }))
+}
+export function readDealSales(dealId: string): DealSale[] {
+  try {
+    const raw = localStorage.getItem(saleStorageKey(dealId))
+    if (raw === null) return []
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter((item): item is DealSale => Boolean(item) && typeof item === "object" &&
+      typeof (item as DealSale).id === "string" &&
+      typeof (item as DealSale).invoiceId === "string" &&
+      typeof (item as DealSale).invoiceNumber === "string" &&
+      typeof (item as DealSale).amount === "string" &&
+      typeof (item as DealSale).currency === "string" &&
+      typeof (item as DealSale).date === "string" &&
+      typeof (item as DealSale).customer === "string" &&
+      typeof (item as DealSale).evidence === "string")
+  } catch {
+    return []
+  }
+}
+export function writeDealSales(dealId: string, sales: DealSale[]) {
+  localStorage.setItem(saleStorageKey(dealId), JSON.stringify(sales))
+  window.dispatchEvent(new CustomEvent(saleChangeEvent, { detail: dealId }))
 }
 export function calculateDealFinance(
   dealId: string,
