@@ -1865,7 +1865,7 @@ function CommercialInvoiceTransactionCard({
                       ["통화·금액", invoice.currency && invoice.totalAmount != null ? `${invoice.currency} ${invoice.totalAmount.toLocaleString()}` : invoice.currency ?? ""],
                     ].map(([label, fallback]) => <div key={label}><dt className="text-xs text-muted-foreground">{label}</dt><dd className="mt-1">{label === "송장일자" ? <DatePicker ariaLabel={`${invoice.invoiceNumber ?? invoice.fileName} ${label}`} value={value(label, fallback)} onValueChange={(next) => updateDraft(invoice.documentId, label, next)} className="w-full" /> : <Input aria-label={`${invoice.invoiceNumber ?? invoice.fileName} ${label}`} value={value(label, fallback)} onChange={(event) => updateDraft(invoice.documentId, label, event.target.value)} className="h-10" />}</dd></div>)}
                   </dl>
-                  <div className="mt-4 border-t pt-4">
+                  <div className="mt-4 pt-4">
                     <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">연결된 선적</h3><span className="text-xs text-muted-foreground">{linkedBills.length ? `${linkedBills.length}건` : "연결 필요"}</span></div>
                     {linkedBills.length ? (
                       <ul className="mt-2 divide-y divide-border border-y">
