@@ -26,8 +26,10 @@ import { orderProgress } from "@trade-os/lib/dealFinanceWorkspace"
 import { deals as dealFixtures } from "@trade-os/lib/prototypeDeals"
 import { DealFinanceWorkspace } from "@trade-os/deals/DealFinanceWorkspace"
 import {
+  useCallback,
   useEffect,
   useEffectEvent,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -71,6 +73,7 @@ import {
 } from "@/components/platform/PageNavigator"
 import {
   PdfPanelWorkspaceCard,
+  ResponsivePdfPanelSplit,
 } from "@/components/platform/PdfPanelResizeHandle"
 import { PannablePdfViewport } from "@/components/platform/DocumentViewerStage"
 import { AutoSaveStatus } from "@/components/platform/AutoSaveStatus"
@@ -1907,10 +1910,24 @@ function CommercialInvoiceTransactionCard({
                         <div className="flex flex-wrap items-center gap-2"><StatusBadge size="sm" tone="warning">B/L 연결 필요</StatusBadge><span className="text-sm font-medium">연결할 선적 후보를 선택하세요.</span></div>
                         <p className="mt-1 text-xs text-muted-foreground">선적 목록의 B/L 중 하나를 선택하면 이 상업송장에 연결됩니다.</p>
                         <div className="mt-3 flex flex-wrap items-center gap-2">
-                          <select aria-label={`${invoice.invoiceNumber || invoice.fileName} 연결할 선적 후보`} className="h-9 min-w-56 rounded-md border border-input bg-background px-3 text-sm" value={invoiceLinkSelections[invoice.documentId] ?? ""} onChange={(event) => setInvoiceLinkSelections((current) => ({ ...current, [invoice.documentId]: event.target.value }))}>
-                            <option value="">연결할 B/L 선택</option>
-                            {view.billsOfLading.map((bill) => <option key={bill.documentId} value={bill.documentId}>{bill.blNumber || bill.fileName} · {bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}</option>)}
-                          </select>
+                          <Select
+                            value={invoiceLinkSelections[invoice.documentId] ?? ""}
+                            onValueChange={(value) => setInvoiceLinkSelections((current) => ({ ...current, [invoice.documentId]: value }))}
+                          >
+                            <SelectTrigger
+                              aria-label={`${invoice.invoiceNumber || invoice.fileName} 연결할 선적 후보`}
+                              className="h-9 min-w-56"
+                            >
+                              <SelectValue placeholder="연결할 B/L 선택" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {view.billsOfLading.map((bill) => (
+                                <SelectItem key={bill.documentId} value={bill.documentId}>
+                                  {bill.blNumber || bill.fileName} · {bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <Button type="button" size="sm" disabled={!invoiceLinkSelections[invoice.documentId]} onClick={() => { const billId = invoiceLinkSelections[invoice.documentId]; if (billId) linkInvoice(invoice.documentId, billId) }}>B/L 연결</Button>
                         </div>
                       </div>
@@ -2101,7 +2118,6 @@ function DealDocumentPanels({
   useEffect(() => {
     if (!documentOpen || !documentPanelTarget) return
     const returnFocus = editButtonRef.current
-    closeRef.current?.focus({ preventScroll: true })
     return () => {
       returnFocus?.focus({ preventScroll: true })
     }
@@ -4487,7 +4503,7 @@ function DocumentsTab({
             <div className="border-b border-[var(--surface-border)] pb-2">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-base font-semibold">거래 서류</h3>
-                <StatusBadge tone="neutral">전체 {totalDocumentCount}건</StatusBadge>
+                <StatusBadge tone="neutral">서류함 {totalDocumentCount}</StatusBadge>
                 <DealDisclosureButton expanded={documentsExpanded} onClick={() => {
                   setDocumentsExpanded((value) => !value)
                   setSupplementaryDocumentsExpanded(false)
@@ -5770,6 +5786,10 @@ export function DealDetailScreen({
   const [documentOpen, setDocumentOpen] = useState(false)
   const [documentPanelTarget, setDocumentPanelTarget] = useState<HTMLElement | null>(null)
   const comparisonGridRef = useRef<HTMLDivElement>(null)
+  const comparisonViewportRef = useRef<HTMLElement | null>(null)
+  const comparisonRestoreScrollTopRef = useRef<number | null>(null)
+  const comparisonScrollTopRef = useRef<number | null>(null)
+  const comparisonLeftScrollTopRef = useRef<number | null>(null)
   const [comparisonHeight, setComparisonHeight] = useState<number | null>(null)
   useEffect(() => {
     if (!documentOpen) return
@@ -5794,6 +5814,62 @@ export function DealDetailScreen({
       window.removeEventListener("resize", updateHeight)
     }
   }, [documentOpen])
+  useLayoutEffect(() => {
+    if (!documentOpen || comparisonHeight == null) return
+    const grid = comparisonGridRef.current
+    const pageContent = grid?.querySelector<HTMLElement>("[data-deal-page-content]")
+    const viewport = grid?.closest<HTMLElement>("[data-deal-scroll-viewport]")
+    if (!grid || !pageContent || !viewport) return
+    const savedScrollTop = comparisonScrollTopRef.current
+    const frame = window.requestAnimationFrame(() => {
+      if (savedScrollTop != null) viewport.scrollTop = savedScrollTop
+      pageContent.scrollTop = comparisonLeftScrollTopRef.current ?? 0
+      comparisonScrollTopRef.current = null
+      comparisonLeftScrollTopRef.current = null
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [comparisonHeight, documentOpen])
+  const openDocumentPanel = useCallback(() => {
+    if (!documentOpen) {
+      const viewport = document.querySelector<HTMLElement>("[data-deal-scroll-viewport]")
+      const grid = comparisonGridRef.current
+      comparisonViewportRef.current = viewport
+      comparisonRestoreScrollTopRef.current = viewport?.scrollTop ?? null
+      const viewportRect = viewport?.getBoundingClientRect()
+      const gridRect = grid?.getBoundingClientRect()
+      comparisonScrollTopRef.current = viewport && viewportRect && gridRect
+        ? Math.max(0, viewport.scrollTop + gridRect.top - viewportRect.top)
+        : viewport?.scrollTop ?? null
+      comparisonLeftScrollTopRef.current = viewportRect && gridRect
+        ? Math.max(0, viewportRect.top - gridRect.top)
+        : null
+      if (viewport) viewport.style.overflowAnchor = "none"
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+    }
+    setDocumentOpen(true)
+  }, [documentOpen])
+  const closeDocumentPanel = useCallback(() => {
+    const viewport = comparisonViewportRef.current
+    const restoreScrollTop = comparisonRestoreScrollTopRef.current
+    if (viewport) viewport.style.overflowAnchor = ""
+    comparisonViewportRef.current = null
+    comparisonRestoreScrollTopRef.current = null
+    setDocumentOpen(false)
+    if (viewport && restoreScrollTop != null) {
+      window.requestAnimationFrame(() => {
+        viewport.scrollTop = restoreScrollTop
+      })
+    }
+  }, [])
+  const handleDocumentOpenChange = useCallback((open: boolean) => {
+    if (open) openDocumentPanel()
+    else closeDocumentPanel()
+  }, [closeDocumentPanel, openDocumentPanel])
+  useEffect(() => {
+    const handleDealDocumentRequest = () => openDocumentPanel()
+    window.addEventListener("ecoya:open-deal-document", handleDealDocumentRequest)
+    return () => window.removeEventListener("ecoya:open-deal-document", handleDealDocumentRequest)
+  }, [openDocumentPanel])
   const [linkedInvoiceTargets] = useState<Record<string, string>>({})
   const [connectedShipmentDrafts, setConnectedShipmentDrafts] = useState<Record<string, Partial<Shipment>>>({})
   const [connectedShipmentContainerDrafts, setConnectedShipmentContainerDrafts] = useState<Record<string, ShipmentContainerEdit[]>>({})
@@ -5803,7 +5879,6 @@ export function DealDetailScreen({
     () => {
       const fixture = splitShipmentReviewFixture(dealId, (fileName, invoiceId) => {
         window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code: "CI", fileName, invoiceId } }))
-        setDocumentOpen(true)
       })
       return {
         ...fixture,
@@ -5852,7 +5927,6 @@ export function DealDetailScreen({
     window.dispatchEvent(
       new CustomEvent("ecoya:open-deal-document", { detail })
     )
-    setDocumentOpen(true)
   }
   const openConnectedShipmentEdit = (bill: SplitShipmentView["billsOfLading"][number], trigger: HTMLButtonElement) => {
     shipmentEditTrigger.current = trigger
@@ -5993,7 +6067,7 @@ export function DealDetailScreen({
   )
   const [missingFields, setMissingFields] = useState<DealMissingField[]>([])
   const openFieldGroup = (group: DealFieldGroup) => {
-    setDocumentOpen(false)
+    closeDocumentPanel()
     if (!visibleGroups.includes(group) && canMutate(role)) {
       startWork(group === "결제 정보" ? "finance" : "fulfillment")
       const next = [...earlyGroups, group]
@@ -6096,7 +6170,7 @@ export function DealDetailScreen({
     },
   ])
   const openMissingField = (key: string) => {
-    setDocumentOpen(false)
+    closeDocumentPanel()
     requestAnimationFrame(() => {
       const field = document.getElementById(`deal-field-${key}`)
       const label = document.getElementById(`deal-field-label-${key}`)
@@ -6111,7 +6185,7 @@ export function DealDetailScreen({
     })
   }
   const openItemUnitPrice = () => {
-    setDocumentOpen(false)
+    closeDocumentPanel()
     requestAnimationFrame(() => {
       const label = scrollViewportRef.current?.querySelector<HTMLElement>(
         "[data-deal-page-content] [data-item-unit-price-heading]"
@@ -6134,7 +6208,7 @@ export function DealDetailScreen({
     setVerificationOpen(true)
   }
   const navigateSection = (value: Tab) => {
-    setDocumentOpen(false)
+    closeDocumentPanel()
     if (value === "verification") {
       setVerificationOpen(true)
       return
@@ -6163,7 +6237,7 @@ export function DealDetailScreen({
 
     const stateTimer = window.setTimeout(() => {
       setActiveSection(focusTarget.tab)
-      if (focusTarget.tab === "documents") setDocumentOpen(true)
+      if (focusTarget.tab === "documents") openDocumentPanel()
       if (focusTarget.sectionId === "deal-verification")
         setVerificationOpen(true)
       setFocusSectionId(focusTarget.sectionId)
@@ -6179,7 +6253,7 @@ export function DealDetailScreen({
       window.clearTimeout(scrollTimer)
       window.clearTimeout(clearTimer)
     }
-  }, [dealId, focusTarget])
+  }, [dealId, focusTarget, openDocumentPanel])
   const addAudit = (action: string, detail: string) =>
     setAudit((items) => [
       {
@@ -6373,6 +6447,220 @@ export function DealDetailScreen({
         </div>
       </div>
     )
+  const dealPageContent = (
+  <div
+    data-deal-page-content
+    className={cn(
+      "min-w-0 space-y-6",
+      documentOpen && "xl:h-full xl:overflow-y-auto xl:p-5"
+    )}
+  >
+    <DocumentsTab
+      aiQuestion={<DealAiQuestion onAskAi={onAskAi} />}
+      key={dealId}
+      plan={plan}
+      previewWork={previewWork}
+      onPreviewWork={previewSection}
+      onStartWork={startWork}
+      onOpenDocument={openDealDocument}
+      commercialInvoiceView={splitShipmentView}
+      linkedInvoiceTargets={linkedInvoiceTargets}
+      onEditShipment={openConnectedShipmentEdit}
+      workspaces={{
+        fulfillment: (
+          <section
+            id="deal-fulfillment"
+            tabIndex={-1}
+            className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
+          >
+            <FulfillmentTab
+              shipmentContent={<OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} onOpenDocument={() => openDealDocument("fulfillment")} />}
+              onSummaryChange={setShipmentSummary}
+              onEditUnitPrice={openItemUnitPrice}
+              dealId={dealId}
+              role={role}
+              addAudit={addAudit}
+            />
+          </section>
+        ),
+        customs: (
+          <section
+            id="deal-customs"
+            tabIndex={-1}
+            className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] p-5 outline-none"
+          >
+            <h2 className="text-base font-semibold">
+              통관 문서 확인
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              수출입 신고서를 거래에 연결하고 문서의
+              신고번호·신고일·품목 정보를 확인합니다.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                onClick={() => openDealDocument("customs")}
+              >
+                거래 서류 확인
+              </Button>
+              {canMutate(role) && (
+                <Button onClick={onUpload}>
+                  이 거래로 통관 서류 올리기
+                </Button>
+              )}
+            </div>
+          </section>
+        ),
+        finance: (
+          <section
+            id="deal-finance"
+            tabIndex={-1}
+            className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
+          >
+            <DetailCard>
+              <DealFinanceWorkspace
+                key={dealId}
+                dealId={dealId}
+                canWrite={canMutate(role)}
+                addAudit={addAudit}
+              />
+            </DetailCard>
+          </section>
+        ),
+      }}
+      dealId={dealId}
+      profile={profile}
+      role={role}
+      addAudit={addAudit}
+      onUpload={onUpload}
+      visibleGroups={visibleGroups}
+      onMissingFieldsChange={setMissingFields}
+      onMainInformationChange={setMainInformation}
+      onDocumentSummaryChange={setDocumentSummary}
+      documentOpen={documentOpen}
+      documentPanelTarget={documentPanelTarget}
+      onDocumentOpenChange={handleDocumentOpenChange}
+      failedPanel={failedPanel}
+      onRetry={() => setFailedPanel(null)}
+    />
+    <section
+      id="deal-people"
+      aria-label="관계자"
+      tabIndex={-1}
+      className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
+    >
+      <h2 className="mb-3 text-base font-semibold">관계자</h2>
+      <DetailCard>
+        <PeopleTab
+          dealId={currentDealId}
+          role={role}
+          addAudit={addAudit}
+        />
+      </DetailCard>
+    </section>
+    <section
+      aria-label="거래 메모·활동 이력"
+      id="deal-records-main"
+      tabIndex={-1}
+      className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] p-5"
+    >
+      <DealRecordSections
+        key={dealId}
+        audit={audit}
+        notes={notes}
+        onUpdateNote={updateSharedNote}
+        onDeleteNote={deleteSharedNote}
+      />
+    </section>
+  </div>
+  )
+  const informationRail = (
+    <aside
+      aria-label="거래 현황"
+      data-deal-information-aside
+      ref={informationRailRef}
+      className="min-w-0 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
+    >
+    <div className="divide-y divide-[var(--surface-border)]">
+      <section
+        aria-label="주요 거래 정보"
+        className="flex flex-col gap-4 p-5"
+      >
+        <div className="flex min-w-0 flex-col items-start gap-1.5">
+          <a
+            href={`/erp/counterparties/${encodeURIComponent(mainInformation.counterparty)}`}
+            className="min-w-0 text-base font-bold leading-6 break-words hover:underline"
+          >
+            {mainInformation.counterparty}
+          </a>
+          <StatusBadge
+            tone={profile.direction === "sales" ? "success" : profile.direction === "purchase" ? "blue" : "neutral"}
+            variant="outline"
+            className="shrink-0"
+          >
+            {directionLabels[profile.direction]}
+          </StatusBadge>
+        </div>
+        {nextDocument ? (
+          <div data-next-document className="rounded-lg bg-muted/40 px-3.5 py-3">
+            <div className="flex items-center justify-between gap-2">
+              <span className="min-w-0 text-xs font-semibold text-primary break-keep">다음 서류: {nextDocument.label}</span>
+            {canMutate(role) && (
+              <Button size="xs" variant="link" className="h-auto shrink-0 gap-1 py-0 text-xs" onClick={() => {
+                if (nextDocument.kind === "upload") onUpload()
+                else if (nextDocument.kind === "create") onCreateDocument(nextDocument.templateCode)
+                else if (nextDocument.kind === "confirm" && nextDraft) onReviewDocument(nextDraft.number)
+                else if (nextDocument.kind === "deliver" && nextDeliverable) onDeliver(nextDeliverable.number, [])
+                else navigateSection(nextDocument.kind === "reconcile" ? "verification" : "documents")
+              }}>진행하기<ArrowUpRight data-icon="inline-end" /></Button>
+            )}
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">{{ upload: "PDF를 업로드하고 검토한 뒤 이 거래에 연결하세요.", create: "양식을 선택해 거래에 필요한 문서를 만드세요.", confirm: "문서 내용과 승인 상태를 검토한 뒤 확정하세요.", deliver: "확정한 문서를 고객에게 전달하세요.", reconcile: "포장명세서와 선하증권의 중량을 확인하세요." }[nextDocument.kind]}</p>
+          </div>
+        ) : (
+          <div className="rounded-lg bg-muted/40 px-3.5 py-3">
+            <span className="text-xs text-muted-foreground">
+              다음 할 일
+            </span>
+            {plan.current ? (
+              <a
+                href={`#${workIds[plan.current]}`}
+                aria-label="현재 업무로 이동"
+                className="mt-1 flex w-full items-center justify-between gap-2 text-left text-xs font-medium text-primary"
+                onClick={(event) => {
+                  event.preventDefault()
+                  navigateSection(plan.current!)
+                }}
+              >
+                {plan.nextAction}
+              </a>
+            ) : (
+              <p className="mt-1 text-xs">{plan.nextAction}</p>
+            )}
+          </div>
+        )}
+      </section>
+      <DealProgressNavigation
+        metrics={
+          <DealKeyMetrics
+            profile={mainInformation}
+            dealId={dealId}
+            shipment={shipmentSummary}
+            documentSummary={documentSummary}
+          />
+        }
+        plan={plan}
+        dealId={dealId}
+        earlyGroups={earlyGroups}
+        shipment={shipmentSummary}
+        role={role}
+        onOpenGroup={openFieldGroup}
+        onNavigate={navigateSection}
+      />
+      <DealHealthReference documentSummary={documentSummary} />
+    </div>
+    </aside>
+  )
   return (
     <div
       ref={scrollViewportRef}
@@ -6836,229 +7124,30 @@ export function DealDetailScreen({
               ref={comparisonGridRef}
               style={documentOpen && comparisonHeight ? { height: comparisonHeight } : undefined}
               className={cn(
-                "grid items-start",
-                documentOpen
-                  ? "overflow-hidden rounded-[var(--r-lg)] bg-[var(--surface-background)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:grid-cols-2"
-                  : "gap-5 xl:grid-cols-[minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_320px]"
+                "min-h-0",
+                documentOpen &&
+                  "overflow-hidden rounded-[var(--r-lg)] bg-[var(--surface-background)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]"
               )}
             >
-              <div
-                data-deal-page-content
-                className={cn(
-                  "min-w-0 space-y-6",
-                  documentOpen && "xl:h-full xl:overflow-y-auto xl:p-5"
-                )}
-              >
-                <DocumentsTab
-                  aiQuestion={<DealAiQuestion onAskAi={onAskAi} />}
-                  key={dealId}
-                  plan={plan}
-                  previewWork={previewWork}
-                  onPreviewWork={previewSection}
-                  onStartWork={startWork}
-                  onOpenDocument={openDealDocument}
-                  commercialInvoiceView={splitShipmentView}
-                  linkedInvoiceTargets={linkedInvoiceTargets}
-                  onEditShipment={openConnectedShipmentEdit}
-                  workspaces={{
-                    fulfillment: (
-                      <section
-                        id="deal-fulfillment"
-                        tabIndex={-1}
-                        className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
-                      >
-                        <FulfillmentTab
-                          shipmentContent={<OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} onOpenDocument={() => openDealDocument("fulfillment")} />}
-                          onSummaryChange={setShipmentSummary}
-                          onEditUnitPrice={openItemUnitPrice}
-                          dealId={dealId}
-                          role={role}
-                          addAudit={addAudit}
-                        />
-                      </section>
-                    ),
-                    customs: (
-                      <section
-                        id="deal-customs"
-                        tabIndex={-1}
-                        className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] p-5 outline-none"
-                      >
-                        <h2 className="text-base font-semibold">
-                          통관 문서 확인
-                        </h2>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          수출입 신고서를 거래에 연결하고 문서의
-                          신고번호·신고일·품목 정보를 확인합니다.
-                        </p>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => openDealDocument("customs")}
-                          >
-                            거래 서류 확인
-                          </Button>
-                          {canMutate(role) && (
-                            <Button onClick={onUpload}>
-                              이 거래로 통관 서류 올리기
-                            </Button>
-                          )}
-                        </div>
-                      </section>
-                    ),
-                    finance: (
-                      <section
-                        id="deal-finance"
-                        tabIndex={-1}
-                        className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
-                      >
-                        <DetailCard>
-                          <DealFinanceWorkspace
-                            key={dealId}
-                            dealId={dealId}
-                            canWrite={canMutate(role)}
-                            addAudit={addAudit}
-                          />
-                        </DetailCard>
-                      </section>
-                    ),
-                  }}
-                  dealId={dealId}
-                  profile={profile}
-                  role={role}
-                  addAudit={addAudit}
-                  onUpload={onUpload}
-                  visibleGroups={visibleGroups}
-                  onMissingFieldsChange={setMissingFields}
-                  onMainInformationChange={setMainInformation}
-                  onDocumentSummaryChange={setDocumentSummary}
-                  documentOpen={documentOpen}
-                  documentPanelTarget={documentPanelTarget}
-                  onDocumentOpenChange={setDocumentOpen}
-                  failedPanel={failedPanel}
-                  onRetry={() => setFailedPanel(null)}
-                />
-                <section
-                  id="deal-people"
-                  aria-label="관계자"
-                  tabIndex={-1}
-                  className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
-                >
-                  <h2 className="mb-3 text-base font-semibold">관계자</h2>
-                  <DetailCard>
-                    <PeopleTab
-                      dealId={currentDealId}
-                      role={role}
-                      addAudit={addAudit}
-                    />
-                  </DetailCard>
-                </section>
-                <section
-                  aria-label="거래 메모·활동 이력"
-                  id="deal-records-main"
-                  tabIndex={-1}
-                  className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] p-5"
-                >
-                  <DealRecordSections
-                    key={dealId}
-                    audit={audit}
-                    notes={notes}
-                    onUpdateNote={updateSharedNote}
-                    onDeleteNote={deleteSharedNote}
-                  />
-                </section>
-              </div>
               {documentOpen ? (
-                <aside
-                  ref={setDocumentPanelTarget}
-                  aria-label="원문 문서 패널"
-                  className="min-w-0 min-h-[620px] overflow-hidden bg-[var(--surface-background)] xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] xl:h-full xl:border-l xl:border-[var(--surface-border)]"
+                <ResponsivePdfPanelSplit
+                  label="거래 정보와 문서 원문 너비 조절"
+                  className="h-full"
+                  desktopHeight="100%"
+                  primary={dealPageContent}
+                  preview={
+                    <aside
+                      ref={setDocumentPanelTarget}
+                      aria-label="원문 문서 패널"
+                      className="min-w-0 min-h-[620px] overflow-hidden bg-[var(--surface-background)] xl:h-full"
+                    />
+                  }
                 />
               ) : (
-                <aside
-                  aria-label="거래 현황"
-                  data-deal-information-aside
-                  ref={informationRailRef}
-                  className="min-w-0 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
-                >
-                <div className="divide-y divide-[var(--surface-border)]">
-                  <section
-                    aria-label="주요 거래 정보"
-                    className="flex flex-col gap-4 p-5"
-                  >
-                    <div className="flex min-w-0 flex-col items-start gap-1.5">
-                      <a
-                        href={`/erp/counterparties/${encodeURIComponent(mainInformation.counterparty)}`}
-                        className="min-w-0 text-base font-bold leading-6 break-words hover:underline"
-                      >
-                        {mainInformation.counterparty}
-                      </a>
-                      <StatusBadge
-                        tone={profile.direction === "sales" ? "success" : profile.direction === "purchase" ? "blue" : "neutral"}
-                        variant="outline"
-                        className="shrink-0"
-                      >
-                        {directionLabels[profile.direction]}
-                      </StatusBadge>
-                    </div>
-                    {nextDocument ? (
-                      <div data-next-document className="rounded-lg bg-muted/40 px-3.5 py-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="min-w-0 text-xs font-semibold text-primary break-keep">다음 서류: {nextDocument.label}</span>
-                        {canMutate(role) && (
-                          <Button size="xs" variant="link" className="h-auto shrink-0 gap-1 py-0 text-xs" onClick={() => {
-                            if (nextDocument.kind === "upload") onUpload()
-                            else if (nextDocument.kind === "create") onCreateDocument(nextDocument.templateCode)
-                            else if (nextDocument.kind === "confirm" && nextDraft) onReviewDocument(nextDraft.number)
-                            else if (nextDocument.kind === "deliver" && nextDeliverable) onDeliver(nextDeliverable.number, [])
-                            else navigateSection(nextDocument.kind === "reconcile" ? "verification" : "documents")
-                          }}>진행하기<ArrowUpRight data-icon="inline-end" /></Button>
-                        )}
-                        </div>
-                        <p className="mt-1 text-xs text-muted-foreground">{{ upload: "PDF를 업로드하고 검토한 뒤 이 거래에 연결하세요.", create: "양식을 선택해 거래에 필요한 문서를 만드세요.", confirm: "문서 내용과 승인 상태를 검토한 뒤 확정하세요.", deliver: "확정한 문서를 고객에게 전달하세요.", reconcile: "포장명세서와 선하증권의 중량을 확인하세요." }[nextDocument.kind]}</p>
-                      </div>
-                    ) : (
-                      <div className="rounded-lg bg-muted/40 px-3.5 py-3">
-                        <span className="text-xs text-muted-foreground">
-                          다음 할 일
-                        </span>
-                        {plan.current ? (
-                          <a
-                            href={`#${workIds[plan.current]}`}
-                            aria-label="현재 업무로 이동"
-                            className="mt-1 flex w-full items-center justify-between gap-2 text-left text-xs font-medium text-primary"
-                            onClick={(event) => {
-                              event.preventDefault()
-                              navigateSection(plan.current!)
-                            }}
-                          >
-                            {plan.nextAction}
-                          </a>
-                        ) : (
-                          <p className="mt-1 text-xs">{plan.nextAction}</p>
-                        )}
-                      </div>
-                    )}
-                  </section>
-                  <DealProgressNavigation
-                    metrics={
-                      <DealKeyMetrics
-                        profile={mainInformation}
-                        dealId={dealId}
-                        shipment={shipmentSummary}
-                        documentSummary={documentSummary}
-                      />
-                    }
-                    plan={plan}
-                    dealId={dealId}
-                    earlyGroups={earlyGroups}
-                    shipment={shipmentSummary}
-                    role={role}
-                    onOpenGroup={openFieldGroup}
-                    onNavigate={navigateSection}
-                  />
-                  <DealHealthReference documentSummary={documentSummary} />
+                <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_320px]">
+                  {dealPageContent}
+                  {informationRail}
                 </div>
-                </aside>
               )}
             </div>
           </div>
@@ -7092,7 +7181,7 @@ export function DealDetailScreen({
                 addAudit={addAudit}
                 onOpenDocuments={() => {
                   setVerificationOpen(false)
-                  setDocumentOpen(true)
+                  openDocumentPanel()
                 }}
               />
             </div>
