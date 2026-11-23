@@ -22,7 +22,7 @@ import {
   type DealWorkKey,
   type DealWorkPlan,
 } from "@trade-os/lib/dealWorkflow"
-import { orderProgress } from "@trade-os/lib/dealFinanceWorkspace"
+import { orderProgress, readDealSales, saleChangeEvent, writeDealSales, type DealSale } from "@trade-os/lib/dealFinanceWorkspace"
 import { deals as dealFixtures } from "@trade-os/lib/prototypeDeals"
 import { DealFinanceWorkspace } from "@trade-os/deals/DealFinanceWorkspace"
 import {
@@ -1760,10 +1760,12 @@ const billContainers = (bill: SplitShipmentView["billsOfLading"][number]) => {
 }
 
 function CommercialInvoiceTransactionCard({
+  dealId,
   view,
   linkedInvoiceTargets = {},
   onEditShipment,
 }: {
+  dealId: string
   view: SplitShipmentView
   linkedInvoiceTargets?: Record<string, string>
   onEditShipment?: (bill: SplitShipmentView["billsOfLading"][number], trigger: HTMLButtonElement) => void
@@ -1779,7 +1781,17 @@ function CommercialInvoiceTransactionCard({
   const [invoiceLinkSelections, setInvoiceLinkSelections] = useState<Record<string, string>>({})
   const [saleInvoiceId, setSaleInvoiceId] = useState<string | null>(null)
   const [saleDraft, setSaleDraft] = useState({ amount: "", currency: "KRW", customer: "", date: new Date().toISOString().slice(0, 10), evidence: "" })
-  const [registeredSales, setRegisteredSales] = useState<Record<string, typeof saleDraft>>({})
+  const [registeredSales, setRegisteredSales] = useState<Record<string, DealSale>>(() =>
+    Object.fromEntries(readDealSales(dealId).map((sale) => [sale.invoiceId, sale]))
+  )
+  useEffect(() => {
+    const handleSalesChange = (event: Event) => {
+      if ((event as CustomEvent<string>).detail !== dealId) return
+      setRegisteredSales(Object.fromEntries(readDealSales(dealId).map((sale) => [sale.invoiceId, sale])))
+    }
+    window.addEventListener(saleChangeEvent, handleSalesChange)
+    return () => window.removeEventListener(saleChangeEvent, handleSalesChange)
+  }, [dealId])
   const invoiceLinks = useMemo(() => ({ ...linkedInvoiceTargets, ...localInvoiceLinks }), [linkedInvoiceTargets, localInvoiceLinks])
   const records = useMemo<CommercialInvoiceRecord[]>(() => {
     const byId = new Map<string, CommercialInvoiceRecord>()
@@ -1829,7 +1841,7 @@ function CommercialInvoiceTransactionCard({
           const draft = drafts[invoice.documentId] ?? {}
           const value = (field: string, fallback: string) => draft[field] ?? fallback
           const linkedBills = billOfLadingIds.map((id) => billById.get(id)).filter(Boolean)
-          const saleAvailable = linkedBills.some((bill) => bill && (bill as { status?: string }).status === "arrived")
+          const saleAvailable = true
           return (
             <article key={invoice.documentId} className="overflow-hidden rounded-[var(--r-md)] border">
               <div className="flex items-center gap-2 bg-muted/30 px-4 py-3">
@@ -1928,21 +1940,36 @@ function CommercialInvoiceTransactionCard({
                     )}
                     <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
                       <div><h3 className="text-sm font-semibold">판매 정보</h3><p className="mt-0.5 text-xs text-muted-foreground">{saleAvailable ? "판매 정보를 등록할 수 있습니다." : "도착 또는 통관 확인 후 판매 정보를 등록할 수 있습니다."}</p></div>
-                      <Button type="button" size="xs" variant="outline" disabled={!saleAvailable} onClick={() => { setSaleInvoiceId(invoice.documentId); setSaleDraft(registeredSales[invoice.documentId] ?? { amount: invoice.totalAmount?.toString() ?? "", currency: "KRW", customer: "", date: new Date().toISOString().slice(0, 10), evidence: invoice.invoiceNumber ?? invoice.fileName }) }}><Plus data-icon="inline-start" />{registeredSales[invoice.documentId] ? "판매 정보 수정" : "판매 등록"}</Button>
+                      <Button type="button" size="xs" variant="outline" disabled={!saleAvailable} onClick={() => { setSaleInvoiceId(invoice.documentId); setSaleDraft(registeredSales[invoice.documentId] ?? { amount: "", currency: "KRW", customer: "", date: new Date().toISOString().slice(0, 10), evidence: invoice.invoiceNumber ?? invoice.fileName }) }}><Plus data-icon="inline-start" />{registeredSales[invoice.documentId] ? "판매 정보 수정" : "판매 등록"}</Button>
                     </div>
                   </div>
                 </div>
               ) : null}
               <AlertDialog open={saleInvoiceId === invoice.documentId} onOpenChange={(open) => { if (!open) setSaleInvoiceId(null) }}>
-                <AlertDialogContent className="sm:max-w-xl">
+                <AlertDialogContent className="w-[min(720px,calc(100vw-32px))] !max-w-[min(720px,calc(100vw-32px))]">
                   <AlertDialogHeader><AlertDialogTitle>판매 등록</AlertDialogTitle><AlertDialogDescription>{invoice.invoiceNumber ?? invoice.fileName}의 판매 정보를 입력합니다.</AlertDialogDescription></AlertDialogHeader>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <label className="grid gap-1.5 text-sm"><span>판매 금액</span><div className="flex gap-2"><Input value={saleDraft.amount} onChange={(event) => setSaleDraft({ ...saleDraft, amount: event.target.value })} /><Select value={saleDraft.currency} onValueChange={(value) => setSaleDraft({ ...saleDraft, currency: value ?? "KRW" })}><SelectTrigger className="w-24"><SelectValue /></SelectTrigger><SelectContent>{["KRW", "USD", "EUR", "JPY", "CNY"].map((currency) => <SelectItem key={currency} value={currency}>{currency}</SelectItem>)}</SelectContent></Select></div></label>
-                    <label className="grid gap-1.5 text-sm"><span>판매일</span><Input type="date" value={saleDraft.date} onChange={(event) => setSaleDraft({ ...saleDraft, date: event.target.value })} /></label>
+                    <label className="grid gap-1.5 text-sm"><span>판매 금액</span><div className="flex gap-2"><Input inputMode="decimal" numericFormat="amount" value={saleDraft.amount} onChange={(event) => setSaleDraft({ ...saleDraft, amount: event.target.value })} /><Select value={saleDraft.currency} onValueChange={(value) => setSaleDraft({ ...saleDraft, currency: value ?? "KRW" })}><SelectTrigger className="w-24"><SelectValue /></SelectTrigger><SelectContent>{["KRW", "USD", "EUR", "JPY", "CNY"].map((currency) => <SelectItem key={currency} value={currency}>{currency}</SelectItem>)}</SelectContent></Select></div></label>
+                    <label className="grid gap-1.5 text-sm"><span>판매일</span><DatePicker ariaLabel={`${invoice.invoiceNumber ?? invoice.fileName} 판매일`} value={saleDraft.date} onValueChange={(date) => setSaleDraft({ ...saleDraft, date })} className="w-full" /></label>
                     <label className="grid gap-1.5 text-sm"><span>판매처</span><Input placeholder="판매처 입력" value={saleDraft.customer} onChange={(event) => setSaleDraft({ ...saleDraft, customer: event.target.value })} /></label>
                     <div className="grid gap-1.5 text-sm"><span>판매 근거</span><p className="rounded-md bg-muted/40 px-3 py-2 text-sm text-muted-foreground">{saleDraft.evidence}</p></div>
                   </div>
-                  <AlertDialogFooter><AlertDialogCancel>취소</AlertDialogCancel><AlertDialogAction disabled={!saleDraft.amount || !saleDraft.customer} onClick={() => { setRegisteredSales((current) => ({ ...current, [invoice.documentId]: saleDraft })); setSaleInvoiceId(null) }}>저장</AlertDialogAction></AlertDialogFooter>
+                  <AlertDialogFooter><AlertDialogCancel>취소</AlertDialogCancel><AlertDialogAction disabled={!saleDraft.amount || !saleDraft.customer} onClick={() => {
+                    const existing = registeredSales[invoice.documentId]
+                    const nextSale: DealSale = {
+                      id: existing?.id ?? crypto.randomUUID(),
+                      invoiceId: invoice.documentId,
+                      invoiceNumber: invoice.invoiceNumber ?? invoice.fileName,
+                      amount: saleDraft.amount.trim(),
+                      currency: saleDraft.currency,
+                      date: saleDraft.date,
+                      customer: saleDraft.customer.trim(),
+                      evidence: invoice.invoiceNumber ?? invoice.fileName,
+                    }
+                    const nextSales = [...readDealSales(dealId).filter((sale) => sale.invoiceId !== invoice.documentId), nextSale]
+                    writeDealSales(dealId, nextSales)
+                    setSaleInvoiceId(null)
+                  }}>저장</AlertDialogAction></AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
             </article>
@@ -4130,7 +4157,7 @@ function DocumentsTab({
         onOpenDocument={onOpenDocument}
         canWrite={canMutate(role)}
         profile={profile}
-        commercialInvoiceContent={<CommercialInvoiceTransactionCard view={commercialInvoiceView} linkedInvoiceTargets={linkedInvoiceTargets} onEditShipment={onEditShipment} />}
+        commercialInvoiceContent={<CommercialInvoiceTransactionCard dealId={dealId} view={commercialInvoiceView} linkedInvoiceTargets={linkedInvoiceTargets} onEditShipment={onEditShipment} />}
         documentStrip={
           <div
             aria-label="거래 상세 서류 목록"
