@@ -1847,7 +1847,6 @@ function CommercialInvoiceTransactionCard({
                   <ChevronDown className={cn("size-4 shrink-0 transition-transform", isOpen && "rotate-180")} aria-hidden="true" />
                 </button>
                 {invoice.onOpen ? <Button type="button" size="xs" variant="outline" onClick={invoice.onOpen}><FileSearch data-icon="inline-start" />문서와 보기</Button> : null}
-                <Button type="button" size="xs" variant="outline" onClick={() => { setSaleInvoiceId(invoice.documentId); setSaleDraft(registeredSales[invoice.documentId] ?? { amount: invoice.totalAmount?.toString() ?? "", currency: "KRW", customer: "", date: new Date().toISOString().slice(0, 10), evidence: invoice.invoiceNumber ?? invoice.fileName }) }}><Plus data-icon="inline-start" />판매 등록</Button>
               </div>
               {isOpen ? (
                 <div className="border-t p-4">
@@ -1926,11 +1925,15 @@ function CommercialInvoiceTransactionCard({
                         </div>
                       </div>
                     )}
+                    <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
+                      <div><h3 className="text-sm font-semibold">판매 정보</h3><p className="mt-0.5 text-xs text-muted-foreground">도착 후 이 CI를 판매한 정보를 등록합니다.</p></div>
+                      <Button type="button" size="xs" variant="outline" onClick={() => { setSaleInvoiceId(invoice.documentId); setSaleDraft(registeredSales[invoice.documentId] ?? { amount: invoice.totalAmount?.toString() ?? "", currency: "KRW", customer: "", date: new Date().toISOString().slice(0, 10), evidence: invoice.invoiceNumber ?? invoice.fileName }) }}><Plus data-icon="inline-start" />{registeredSales[invoice.documentId] ? "판매 정보 수정" : "판매 등록"}</Button>
+                    </div>
                   </div>
                 </div>
               ) : null}
               <AlertDialog open={saleInvoiceId === invoice.documentId} onOpenChange={(open) => { if (!open) setSaleInvoiceId(null) }}>
-                <AlertDialogContent>
+                <AlertDialogContent className="sm:max-w-xl">
                   <AlertDialogHeader><AlertDialogTitle>판매 등록</AlertDialogTitle><AlertDialogDescription>{invoice.invoiceNumber ?? invoice.fileName}의 판매 정보를 입력합니다.</AlertDialogDescription></AlertDialogHeader>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <label className="grid gap-1.5 text-sm"><span>판매 금액</span><div className="flex gap-2"><Input value={saleDraft.amount} onChange={(event) => setSaleDraft({ ...saleDraft, amount: event.target.value })} /><Select value={saleDraft.currency} onValueChange={(value) => setSaleDraft({ ...saleDraft, currency: value ?? "KRW" })}><SelectTrigger className="w-24"><SelectValue /></SelectTrigger><SelectContent>{["KRW", "USD", "EUR", "JPY", "CNY"].map((currency) => <SelectItem key={currency} value={currency}>{currency}</SelectItem>)}</SelectContent></Select></div></label>
