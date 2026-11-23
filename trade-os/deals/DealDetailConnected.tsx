@@ -1843,6 +1843,7 @@ function CommercialInvoiceTransactionCard({
                   <ChevronDown className={cn("size-4 shrink-0 transition-transform", isOpen && "rotate-180")} aria-hidden="true" />
                 </button>
                 {invoice.onOpen ? <Button type="button" size="xs" variant="outline" onClick={invoice.onOpen}><FileSearch data-icon="inline-start" />문서와 보기</Button> : null}
+                <Button type="button" size="xs" variant="outline" onClick={() => toggle(invoice.documentId)}><Plus data-icon="inline-start" />판매 등록</Button>
               </div>
               {isOpen ? (
                 <div className="border-t p-4">
