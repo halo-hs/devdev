@@ -1975,7 +1975,7 @@ function DealWorkBlock({
   children: ReactNode
 }) {
   const state = plan.states[work]
-  const canCompareDocument = work !== "finance" && Boolean(onOpenDocument)
+  const canCompareDocument = work !== "finance" && work !== "customs" && Boolean(onOpenDocument)
   const showPlannedDocumentAction = state === "planned" && canCompareDocument
   if (state !== "planned")
     return (
