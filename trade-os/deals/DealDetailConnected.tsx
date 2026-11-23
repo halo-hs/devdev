@@ -1829,6 +1829,7 @@ function CommercialInvoiceTransactionCard({
           const draft = drafts[invoice.documentId] ?? {}
           const value = (field: string, fallback: string) => draft[field] ?? fallback
           const linkedBills = billOfLadingIds.map((id) => billById.get(id)).filter(Boolean)
+          const saleAvailable = linkedBills.some((bill) => bill && (bill as { status?: string }).status === "arrived")
           return (
             <article key={invoice.documentId} className="overflow-hidden rounded-[var(--r-md)] border">
               <div className="flex items-center gap-2 bg-muted/30 px-4 py-3">
@@ -1925,10 +1926,10 @@ function CommercialInvoiceTransactionCard({
                         </div>
                       </div>
                     )}
-                    <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
+                    {saleAvailable ? <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
                       <div><h3 className="text-sm font-semibold">판매 정보</h3><p className="mt-0.5 text-xs text-muted-foreground">도착 후 이 CI를 판매한 정보를 등록합니다.</p></div>
                       <Button type="button" size="xs" variant="outline" onClick={() => { setSaleInvoiceId(invoice.documentId); setSaleDraft(registeredSales[invoice.documentId] ?? { amount: invoice.totalAmount?.toString() ?? "", currency: "KRW", customer: "", date: new Date().toISOString().slice(0, 10), evidence: invoice.invoiceNumber ?? invoice.fileName }) }}><Plus data-icon="inline-start" />{registeredSales[invoice.documentId] ? "판매 정보 수정" : "판매 등록"}</Button>
-                    </div>
+                    </div> : null}
                   </div>
                 </div>
               ) : null}
