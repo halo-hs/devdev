@@ -1841,7 +1841,7 @@ function CommercialInvoiceTransactionCard({
                   </span>
                   <ChevronDown className={cn("size-4 shrink-0 transition-transform", isOpen && "rotate-180")} aria-hidden="true" />
                 </button>
-                {invoice.onOpen ? <Button type="button" size="xs" variant="outline" onClick={invoice.onOpen}><FileSearch data-icon="inline-start" />문서와 같이 보기</Button> : null}
+                {invoice.onOpen ? <Button type="button" size="xs" variant="outline" onClick={invoice.onOpen}><FileSearch data-icon="inline-start" />문서와 보기</Button> : null}
               </div>
               {isOpen ? (
                 <div className="border-t p-4">
@@ -2021,7 +2021,7 @@ function DealWorkBlock({
             onClick={() => onOpenDocument?.(work)}
           >
             <FileSearch data-icon="inline-start" />
-            문서와 같이 보기
+            문서와 보기
           </Button>
         ) : null}
         <DealDisclosureButton expanded={previewOpen} onClick={() => onPreview(work)} label={workLabels[work]} collapsedLabel="미리 보기" controls={`planned-${work}`} />
@@ -2153,7 +2153,7 @@ function DealDocumentPanels({
                   onClick={() => onDocumentOpenChange(true)}
                 >
                   <FileSearch data-icon="inline-start" />
-                  문서와 같이 보기
+                  문서와 보기
                 </Button>
               </div>
               {documentStrip}

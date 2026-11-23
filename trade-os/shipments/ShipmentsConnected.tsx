@@ -539,7 +539,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
               </div>
               {dealId && onOpenDocument ? (
                 <HostButton variant="outline" size="sm" onClick={onOpenDocument}>
-                  <FileSearch data-icon="inline-start" />문서와 같이 보기
+                  <FileSearch data-icon="inline-start" />문서와 보기
                 </HostButton>
               ) : !dealId && group.key !== "__none__" ? (
                 <HostButton variant="outline" size="sm" asChild>
