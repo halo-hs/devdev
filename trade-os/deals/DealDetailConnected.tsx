@@ -2176,7 +2176,7 @@ function DealDocumentPanels({
                   onClick={() => onDocumentOpenChange(true)}
                 >
                   <FileSearch data-icon="inline-start" />
-                  문서와 같이 보며 수정
+                  문서와 같이 보기
                 </Button>
               </div>
               {documentStrip}
