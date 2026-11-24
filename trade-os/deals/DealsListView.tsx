@@ -1190,7 +1190,9 @@ export function DealsScreen({
                                 {displayDealId}
                               </strong>
                               {deal.shared && (
-                                <StatusBadge tone="ocean" className="h-4 px-2.5 font-normal">공유</StatusBadge>
+                                <StatusBadge tone="ocean" className="h-4 px-2.5 font-normal">
+                                  공유
+                                </StatusBadge>
                               )}
                             </span>
                             <span className="mt-0.5 block text-[13px] leading-[18px] text-[var(--color-gray-1)]">
