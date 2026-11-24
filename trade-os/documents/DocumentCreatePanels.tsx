@@ -179,6 +179,178 @@ function CreateFieldValuePicker({ label, value, options, onSelect }: {
   )
 }
 
+type PackingLineValue = {
+  id: string
+  containerNumber: string
+  sealNumber: string
+  containerType: string
+  description: string
+  quantity: string
+  packageCount: string
+  grossWeight: string
+  netWeight: string
+  measurement: string
+}
+
+type PackingLineSummary = {
+  completedCount: number
+  rowCount: number
+  issues: ReviewFocusTarget[]
+  itemNames: string[]
+}
+
+function PackingListLineItemEditor({
+  startBlank,
+  onSummaryChange,
+  onContentChange,
+}: {
+  startBlank: boolean
+  onSummaryChange: (summary: PackingLineSummary) => void
+  onContentChange?: () => void
+}) {
+  const createRow = (id: string, values: Partial<PackingLineValue> = {}): PackingLineValue => ({
+    id,
+    containerNumber: values.containerNumber ?? "",
+    sealNumber: values.sealNumber ?? "",
+    containerType: values.containerType ?? "40FT HC",
+    description: values.description ?? "",
+    quantity: values.quantity ?? "",
+    packageCount: values.packageCount ?? "",
+    grossWeight: values.grossWeight ?? "",
+    netWeight: values.netWeight ?? "",
+    measurement: values.measurement ?? "",
+  })
+  const [rows, setRows] = useState<PackingLineValue[]>(() => startBlank
+    ? [createRow("pl-row-1")]
+    : [
+        createRow("pl-row-1", {
+          containerNumber: "HMMU1234567",
+          sealNumber: "SEAL-01402-A",
+          description: "Aluminium Scrap Tough Taboo",
+          quantity: "12",
+          packageCount: "6",
+          grossWeight: "8240",
+          netWeight: "8000",
+          measurement: "16.2",
+        }),
+        createRow("pl-row-2", {
+          containerNumber: "HMMU1234568",
+          sealNumber: "SEAL-01402-B",
+          description: "Aluminium Scrap Tough Taboo",
+          quantity: "12",
+          packageCount: "6",
+          grossWeight: "8240",
+          netWeight: "8000",
+          measurement: "16.2",
+        }),
+      ])
+
+  const updateRow = (id: string, field: keyof Omit<PackingLineValue, "id">, value: string) => {
+    setRows((current) => current.map((row) => row.id === id ? { ...row, [field]: value } : row))
+    onContentChange?.()
+  }
+  const addRow = () => {
+    setRows((current) => [...current, createRow(`pl-row-${crypto.randomUUID()}`)])
+    onContentChange?.()
+  }
+  const removeRow = (id: string) => {
+    setRows((current) => current.filter((row) => row.id !== id))
+    onContentChange?.()
+  }
+
+  useEffect(() => {
+    const issues: ReviewFocusTarget[] = []
+    if (!rows.length) {
+      issues.push({ key: "item_name", label: "포장 행 · 1개 이상 입력" })
+    }
+    if (rows.length && !rows.some((row) => row.containerNumber.trim())) {
+      issues.push({ key: "pl-container-number", label: "컨테이너 번호 · 1개 이상 입력" })
+    }
+    rows.forEach((row, index) => {
+      const requiredFields: Array<[keyof Omit<PackingLineValue, "id">, string]> = [
+        ["description", "품명"],
+        ["quantity", "수량"],
+        ["packageCount", "포장 수"],
+      ]
+      requiredFields.forEach(([field, label]) => {
+        if (!row[field].trim()) issues.push({ key: `pl-row:${index + 1}:${field}`, label: `행 ${index + 1} ${label} · 필수값 누락` })
+      })
+    })
+    onSummaryChange({
+      completedCount: rows.filter((row) => Boolean(row.description.trim() && row.quantity.trim() && row.packageCount.trim() && row.containerNumber.trim())).length,
+      rowCount: rows.length,
+      issues,
+      itemNames: rows.map((row) => row.description.trim()).filter(Boolean),
+    })
+  }, [onSummaryChange, rows])
+
+  const fields: Array<[keyof Omit<PackingLineValue, "id">, string, string]> = [
+    ["containerNumber", "컨테이너 번호", "예: HMMU1234567"],
+    ["sealNumber", "씰 번호", "선택"],
+    ["containerType", "컨테이너 유형", "예: 40FT HC"],
+    ["description", "품명", "필수"],
+    ["quantity", "수량", "필수"],
+    ["packageCount", "포장 수", "필수"],
+    ["grossWeight", "총중량", "선택"],
+    ["netWeight", "순중량", "선택"],
+    ["measurement", "용적", "선택"],
+  ]
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="text-sm font-semibold">컨테이너·품목 행</div>
+          <p className="mt-1 text-xs text-muted-foreground">컨테이너와 품목 조합마다 한 행으로 입력합니다. 같은 컨테이너에 품목이 여러 개면 컨테이너 번호를 반복합니다.</p>
+        </div>
+        <Button variant="outline" size="sm" type="button" onClick={addRow}>
+          <Plus data-icon="inline-start" /> 행 추가
+        </Button>
+      </div>
+      <div className="overflow-x-auto rounded-md border">
+        <Table className="min-w-[1180px] table-fixed">
+          <TableHeader>
+            <TableRow>
+              {fields.map(([, label]) => <TableHead key={label} className="text-left!">{label}</TableHead>)}
+              <TableHead className="sticky right-0 z-10 w-[72px] bg-background text-right!">삭제</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map((row, index) => (
+              <TableRow key={row.id}>
+                {fields.map(([field, label, placeholder]) => (
+                  <TableCell key={field} className="py-2 align-top">
+                    <Input
+                      className="h-8"
+                      aria-label={`포장 행 ${index + 1} ${label}`}
+                      aria-required={placeholder === "필수"}
+                      type={["quantity", "packageCount", "grossWeight", "netWeight", "measurement"].includes(field) ? "number" : "text"}
+                      inputMode={["quantity", "packageCount", "grossWeight", "netWeight", "measurement"].includes(field) ? "decimal" : undefined}
+                      step="any"
+                      value={row[field]}
+                      placeholder={placeholder}
+                      onChange={(event) => updateRow(row.id, field, event.target.value)}
+                    />
+                  </TableCell>
+                ))}
+                <TableCell className="sticky right-0 bg-background px-2 py-2 text-right! align-top">
+                  <Button variant="ghost" size="sm" type="button" className="px-2 text-muted-foreground hover:text-destructive" aria-label={`포장 행 ${index + 1} 삭제`} onClick={() => removeRow(row.id)}>
+                    <Trash2 className="size-3.5" /> 삭제
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+            {!rows.length ? (
+              <TableRow>
+                <TableCell colSpan={fields.length + 1} className="h-16 text-center text-xs text-muted-foreground">포장 행 없음. 행 추가를 눌러 입력하세요.</TableCell>
+              </TableRow>
+            ) : null}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  )
+}
+
 export function CreateFieldReviewPanel({
   itemFocusSignal,
   reviewFocusRequest,
@@ -230,6 +402,7 @@ export function CreateFieldReviewPanel({
   ]
   const activeSchema = templateSchemas[templateCode] ?? templateSchemas.SC
   const hasLineItems = Boolean(activeSchema.lineItems)
+  const isPackingList = templateCode === "PL"
   const fieldRows = activeSchema.slots.map((slot, index) => ({
     key: slot.key,
     label: slot.label,
@@ -278,6 +451,12 @@ export function CreateFieldReviewPanel({
     )
   )
   const [deletedItemIds, setDeletedItemIds] = useState<string[]>([])
+  const [packingSummary, setPackingSummary] = useState<PackingLineSummary>({
+    completedCount: 0,
+    rowCount: 0,
+    issues: [],
+    itemNames: [],
+  })
   const [assistPanelKey, setAssistPanelKey] = useState<string | null>(null)
   const [assistPanelPosition, setAssistPanelPosition] = useState<{
     left: number
@@ -316,7 +495,7 @@ export function CreateFieldReviewPanel({
     return slot?.required && !fieldValues[row.key]?.trim()
       ? [{ key: row.key, label: `${row.label} · 필수값 누락` }] : []
   })
-  if (hasLineItems) {
+  if (hasLineItems && !isPackingList) {
     if (!visibleItemRows.length) requiredIssues.push({ key: "item_name", label: "품목 · 1개 이상 입력" })
     visibleItemRows.forEach((item, index) => {
       const values = itemValues[item.id]
@@ -334,8 +513,9 @@ export function CreateFieldReviewPanel({
     })
   }
   const missingItemValueCount = requiredIssues.filter((issue) => issue.key.startsWith("item-field:")).length
-  const requiredIssuesKey = JSON.stringify(requiredIssues)
-  const reviewIssueCount = new Set([...requiredIssues.map((issue) => issue.key), ...reviewIssueKeys]).size
+  const effectiveRequiredIssues = isPackingList ? packingSummary.issues : requiredIssues
+  const requiredIssuesKey = JSON.stringify(effectiveRequiredIssues)
+  const reviewIssueCount = new Set([...effectiveRequiredIssues.map((issue) => issue.key), ...reviewIssueKeys]).size
   const comparisonCounterparty =
     [
       "buyer_name",
@@ -349,22 +529,32 @@ export function CreateFieldReviewPanel({
     ]
       .map((key) => fieldValues[key]?.trim())
       .find(Boolean) ?? ""
-  const comparisonItemNames = visibleItemRows
-    .map((item) => itemValues[item.id]?.name.trim() ?? "")
-    .filter(Boolean)
+  const comparisonItemNames = isPackingList
+    ? packingSummary.itemNames
+    : visibleItemRows
+      .map((item) => itemValues[item.id]?.name.trim() ?? "")
+      .filter(Boolean)
   const comparisonItemNamesKey = comparisonItemNames.join("\u001f")
-  const comparisonTotalAmount = exactDocumentMoneyTotals(
-    visibleItemRows.map((item) => ({
-      quantity: itemValues[item.id]?.quantity,
-      unit_price: itemValues[item.id]?.unitPrice,
-    })),
-    {},
-  ).grandTotal
+  const comparisonTotalAmount = isPackingList
+    ? null
+    : exactDocumentMoneyTotals(
+      visibleItemRows.map((item) => ({
+        quantity: itemValues[item.id]?.quantity,
+        unit_price: itemValues[item.id]?.unitPrice,
+      })),
+      {},
+    ).grandTotal
   const calculateItemAmount = (itemId: string) => {
     const values = itemValues[itemId]
     if (!values?.quantity.trim() || !values?.unitPrice.trim()) return "자동 계산"
     return `${quotationMoney(exactLineItemAmount(values.quantity, values.unitPrice))} ${fieldValues.currency?.trim() || "USD"}`
   }
+  const displayedCompletedItemCount = isPackingList
+    ? packingSummary.completedCount
+    : completedItemCount
+  const displayedItemRowCount = isPackingList
+    ? packingSummary.rowCount
+    : visibleItemRows.length
   const itemAssistRows = itemRows.flatMap((item) => [
     {
       key: `${item.id}:name`,
@@ -440,7 +630,7 @@ export function CreateFieldReviewPanel({
     fieldRows.find((row) => row.key === assistPanelKey) ??
     itemAssistRows.find((row) => row.key === assistPanelKey)
   useEffect(() => {
-    if (itemFocusSignal === 0) return
+    if (itemFocusSignal === 0 || isPackingList) return
     const hasOpenDraft = visibleItemRows.some((item) => {
       const values = itemValues[item.id]
       return (
@@ -492,7 +682,7 @@ export function CreateFieldReviewPanel({
       window.clearTimeout(focusTimer)
       window.clearTimeout(highlightTimer)
     }
-  }, [itemFocusSignal]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isPackingList, itemFocusSignal]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!reviewFocusRequest) return
     const primaryTarget = reviewFocusRequest.targets[0]
@@ -534,8 +724,8 @@ export function CreateFieldReviewPanel({
     }
   }, [reviewFocusRequest])
   useEffect(() => {
-    onItemCountChange(completedItemCount)
-  }, [completedItemCount, onItemCountChange])
+    onItemCountChange(displayedCompletedItemCount)
+  }, [displayedCompletedItemCount, onItemCountChange])
   useEffect(() => {
     onRequiredMissingChange(JSON.parse(requiredIssuesKey) as ReviewFocusTarget[])
   }, [requiredIssuesKey, onRequiredMissingChange])
@@ -675,7 +865,7 @@ export function CreateFieldReviewPanel({
         >
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-sm font-semibold">품목</div>
+              <div className="text-sm font-semibold">{isPackingList ? "포장 품목" : "품목"}</div>
               {lineItemIssueLabels.length > 0 ? (
                 <div className="mt-1 text-[11px] font-medium text-destructive">
                   은행 거절 전 점검 · {lineItemIssueLabels.join(", ")}
@@ -685,22 +875,24 @@ export function CreateFieldReviewPanel({
             <div className="flex items-center gap-1.5">
               <ToneBadge
                 tone={
-                  completedItemCount === visibleItemRows.length &&
-                  visibleItemRows.length > 0
+                  displayedCompletedItemCount === displayedItemRowCount &&
+                  displayedItemRowCount > 0
                     ? "success"
-                    : visibleItemRows.length > 0
+                    : displayedItemRowCount > 0
                       ? "warning"
                       : "neutral"
                 }
               >
-                {visibleItemRows.length > 0
-                  ? `${completedItemCount}/${visibleItemRows.length}`
+                {displayedItemRowCount > 0
+                  ? `${displayedCompletedItemCount}/${displayedItemRowCount}`
                   : "품목 없음"}
               </ToneBadge>
-              <Button variant="outline" size="sm" type="button" onClick={addItem}>
-                <Plus data-icon="inline-start" /> 품목 추가
-              </Button>
-              {visibleItemRows.length > 0 ? (
+              {!isPackingList ? (
+                <Button variant="outline" size="sm" type="button" onClick={addItem}>
+                  <Plus data-icon="inline-start" /> 품목 추가
+                </Button>
+              ) : null}
+              {!isPackingList && displayedItemRowCount > 0 ? (
                 <Button
                   variant="outline"
                   size="sm"
@@ -718,6 +910,13 @@ export function CreateFieldReviewPanel({
               ) : null}
             </div>
           </div>
+          {isPackingList ? (
+            <PackingListLineItemEditor
+              startBlank={startBlank}
+              onSummaryChange={setPackingSummary}
+              onContentChange={onContentChange}
+            />
+          ) : (
           <div className="overflow-x-auto rounded-md border">
             <Table className="min-w-[640px] table-fixed">
               <TableHeader>
@@ -910,6 +1109,7 @@ export function CreateFieldReviewPanel({
               </TableBody>
             </Table>
           </div>
+          )}
         </div>
       </div>
       {activeAssistRow && assistPanelPosition ? (

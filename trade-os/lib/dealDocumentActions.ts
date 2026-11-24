@@ -178,6 +178,20 @@ export const importantDealDocuments = [
 
 export const supplementaryDealDocuments = [
   {
+    code: "CUSTOMS_ENTRY",
+    type: "수입신고필증",
+    file: "",
+    status: "미비",
+    source: "-",
+  },
+  {
+    code: "CUSTOMS_EXPORT",
+    type: "수출신고필증",
+    file: "",
+    status: "미비",
+    source: "-",
+  },
+  {
     code: "CO",
     type: "원산지증명서",
     file: "Certificate_Origin_0708.pdf",

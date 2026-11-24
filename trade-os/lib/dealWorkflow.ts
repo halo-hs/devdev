@@ -20,6 +20,23 @@ export const workIds: Record<DealWorkKey, string> = {
   customs: "deal-customs",
   finance: "deal-finance",
 }
+
+export const documentStageRules: Record<string, { work: DealWorkKey; label: string }> = {
+  PO: { work: "documents", label: "발주서" },
+  SC: { work: "documents", label: "판매계약서" },
+  CI: { work: "documents", label: "상업송장" },
+  PL: { work: "documents", label: "포장명세서" },
+  BL: { work: "fulfillment", label: "선하증권" },
+  CUSTOMS_ENTRY: { work: "customs", label: "수입신고필증" },
+  CUSTOMS_EXPORT: { work: "customs", label: "수출신고필증" },
+}
+
+export const documentStageGuidance: Record<DealWorkKey, string> = {
+  documents: "PO·SC·CI·PL 등 계약 문서",
+  fulfillment: "B/L 확정 후 시작",
+  customs: "수입·수출신고필증 확정 후 시작",
+  finance: "정산·원장 정보",
+}
 export type DealWorkPlan = ReturnType<typeof getDealWorkPlan>
 
 // Both the body and progress rail consume this adapter. nextWork identifies the

@@ -172,8 +172,16 @@ export const initialDocumentFields: Record<string, DocumentFieldSet> = {
         "품목",
         "Aluminium Scrap Tough Taboo"
       ),
+      extracted(
+        "PackingList_0707.pdf",
+        1,
+        "description",
+        "품명",
+        "Aluminium Scrap Tough Taboo"
+      ),
       extracted("PackingList_0707.pdf", 1, "quantity", "문서 수량", "16 MT"),
       extracted("PackingList_0707.pdf", 1, "packages", "포장 수", "20 bundles"),
+      extracted("PackingList_0707.pdf", 1, "package_count", "포장 수", "20"),
       extracted(
         "PackingList_0707.pdf",
         1,
@@ -189,6 +197,28 @@ export const initialDocumentFields: Record<string, DocumentFieldSet> = {
         "컨테이너",
         "1 x 40FT HC"
       ),
+      extracted(
+        "PackingList_0707.pdf",
+        1,
+        "container_number",
+        "컨테이너 번호",
+        "HMMU1234567"
+      ),
+      extracted(
+        "PackingList_0707.pdf",
+        1,
+        "container_type",
+        "컨테이너 유형",
+        "40FT HC"
+      ),
+      extracted(
+        "PackingList_0707.pdf",
+        1,
+        "seal_number",
+        "씰 번호",
+        "SEAL-01402-A"
+      ),
+      extracted("PackingList_0707.pdf", 1, "measurement", "용적", "16.2 CBM"),
       extracted(
         "PackingList_0707.pdf",
         1,

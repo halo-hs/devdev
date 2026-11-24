@@ -194,6 +194,21 @@ const commonLineItemSlots: PrototypeSlot[] = [
   },
 ]
 
+// Packing lists are stored as one row per container and item. Keep the row
+// fields aligned with the backend PL contract so review values can be mapped
+// without falling back to the generic quotation fields.
+const packingLineItemSlots: PrototypeSlot[] = [
+  { key: "container_number", label: "컨테이너 번호", kind: "text", section: "line" },
+  { key: "seal_number", label: "씰 번호", kind: "text", section: "line" },
+  { key: "container_type", label: "컨테이너 유형", kind: "text", section: "line" },
+  { key: "description", label: "품명", kind: "text", required: true, section: "line" },
+  { key: "quantity", label: "수량", kind: "number", required: true, section: "line" },
+  { key: "package_count", label: "포장 수", kind: "number", required: true, section: "line" },
+  { key: "gross_weight", label: "총중량", kind: "number", section: "line" },
+  { key: "net_weight", label: "순중량", kind: "number", section: "line" },
+  { key: "measurement", label: "용적", kind: "number", section: "line" },
+]
+
 export const templateSchemas: Record<string, PrototypeTemplateSchema> = {
   QT: {
     slots: [
@@ -436,22 +451,8 @@ export const templateSchemas: Record<string, PrototypeTemplateSchema> = {
         kind: "date",
         section: "document",
       },
-      {
-        key: "container_no",
-        label: "컨테이너",
-        kind: "text",
-        section: "goods",
-      },
-      { key: "seal_no", label: "씰 번호", kind: "text", section: "goods" },
-      {
-        key: "gross_weight",
-        label: "총중량",
-        kind: "text",
-        section: "goods",
-      },
-      { key: "net_weight", label: "순중량", kind: "number", section: "goods" },
     ],
-    lineItems: commonLineItemSlots,
+    lineItems: packingLineItemSlots,
   },
   SI: {
     slots: [
