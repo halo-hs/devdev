@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { useEffect, useState } from "react"
 import { PlatformSessionProvider } from "./lib/session/PlatformSessionContext"
 import { useIdentity } from "./lib/session/platformSession"
@@ -67,7 +68,7 @@ function Body({ screen }: { screen: OperationsScreenName }) {
   </div>
 }
 
-export function OperationsScreen({ screen, dealId, onShipmentSummary, onOpenDocument }: { screen: OperationsScreenName | "deal-shipments"; dealId?: string; onShipmentSummary?: (summary: ShipmentSummary) => void; onOpenDocument?: () => void }) {
+export function OperationsScreen({ screen, dealId, onShipmentSummary, onOpenDocument, renderShipmentDetail, shipmentRowAnchorId }: { screen: OperationsScreenName | "deal-shipments"; dealId?: string; onShipmentSummary?: (summary: ShipmentSummary) => void; onOpenDocument?: () => void; renderShipmentDetail?: (shipment: { bl_number?: string | null }, index: number) => ReactNode; shipmentRowAnchorId?: (shipment: { bl_number?: string | null }, index: number) => string | undefined }) {
   const [session, setSession] = useState<{ identity: PlatformIdentityResponse; entitlements: EntitlementsResponse } | null>(null)
   const [error, setError] = useState("")
   const [attempt, setAttempt] = useState(0)
@@ -87,7 +88,7 @@ export function OperationsScreen({ screen, dealId, onShipmentSummary, onOpenDocu
       <p>화면 데이터를 불러오지 못했습니다.</p><p>{error}</p>
       <button className="mt-3 underline" onClick={() => { setError(""); setAttempt(n => n + 1) }}>다시 시도</button>
     </div> : session ? <PlatformSessionProvider {...session} getIdToken={getIdToken}>
-      {screen === "deal-shipments" && dealId ? <ShipmentsConnected key={dealId} copy={messages.erpShipments.shipments} dealId={dealId} onSummaryChange={onShipmentSummary} onOpenDocument={onOpenDocument} /> : screen !== "deal-shipments" ? <Body screen={screen} /> : null}
+      {screen === "deal-shipments" && dealId ? <ShipmentsConnected key={dealId} copy={messages.erpShipments.shipments} dealId={dealId} onSummaryChange={onShipmentSummary} onOpenDocument={onOpenDocument} renderDetail={renderShipmentDetail} rowAnchorId={shipmentRowAnchorId} /> : screen !== "deal-shipments" ? <Body screen={screen} /> : null}
     </PlatformSessionProvider> : <div className="p-6" role="status">화면 데이터를 불러오는 중입니다…</div>}
   </div></div>
 }

@@ -1,12 +1,12 @@
 "use client";
 import { BusinessListToolbar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar";
 
-import { FileSearch, RefreshCw, Pencil } from "lucide-react";
+import { ChevronDown, ExternalLink, FileSearch, RefreshCw, Pencil } from "lucide-react";
 import { ShipmentConfirmationDialog } from "./ShipmentConfirmationDialog";
 import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
 import { carrierTrackingAction } from "./carrierSites";
 import Link from "@trade-os/lib/AppLink";
-import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { Button as HostButton } from "@/components/ui/button";
 import { HostTable, HostTableHeader, HostTableBody, HostTableRow, HostTableHead, HostTableCell } from "@trade-os/components/HostTable";
@@ -124,6 +124,10 @@ export type CommercialInvoiceCard = {
   unitPrice?: string | null;
   packageCount?: string | null;
   packageUnit?: string | null;
+  /** Number of pages in the CI file; page chips show only when > 1. */
+  pageCount?: number | null;
+  /** Page each field was read from, keyed by the field label. */
+  fieldPages?: Record<string, number> | null;
   onOpen?: () => void;
 };
 export type ShipmentDocumentLink = {
@@ -162,7 +166,26 @@ export type SplitShipmentView = {
   unlinkedDocuments: CommercialInvoiceCard[];
 };
 
-export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange, onOpenDocument }: { copy: ShipmentsCopy; renderHeader?: (controls: ReactNode) => ReactNode; dealId?: string; onSummaryChange?: (summary: ShipmentSummary) => void; onOpenDocument?: () => void }) {
+// Opening 「문서와 보기」 re-mounts the deal page into a side-by-side split;
+// remember opened rows per deal so they survive that re-mount.
+const openedShipmentRows = new Map<string, Set<string>>();
+
+export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange, onOpenDocument, renderDetail, rowAnchorId }: { copy: ShipmentsCopy; renderHeader?: (controls: ReactNode) => ReactNode; dealId?: string; onSummaryChange?: (summary: ShipmentSummary) => void; onOpenDocument?: () => void; renderDetail?: (shipment: Shipment, index: number) => ReactNode; rowAnchorId?: (shipment: Shipment, index: number) => string | undefined }) {
+  // Deal detail only: a row opens its packing list and linked CI below it.
+  const [openRows, setOpenRows] = useState<Set<string>>(() => (dealId ? openedShipmentRows.get(dealId) : undefined) ?? new Set());
+  useEffect(() => { if (dealId) openedShipmentRows.set(dealId, openRows); }, [dealId, openRows]);
+  const toggleRow = (id: string) => setOpenRows((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  // `<a href="#anchor">` links elsewhere on the deal page (e.g. a CI's linked
+  // documents) scroll to a row; this event also opens that row.
+  const anchorToShipment = useRef(new Map<string, string>());
+  useEffect(() => {
+    const open = (event: Event) => {
+      const shipmentId = anchorToShipment.current.get((event as CustomEvent<string>).detail);
+      if (shipmentId) setOpenRows((current) => new Set([...current, shipmentId]));
+    };
+    window.addEventListener("ecoya:open-shipment-row", open);
+    return () => window.removeEventListener("ecoya:open-shipment-row", open);
+  }, []);
   const { entitlements, getIdToken } = usePlatformSession();
   const dateTag = useLocaleTag();
   const [state, setState] = useState<LoadState>({ status: "loading" });
@@ -539,8 +562,8 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
           <section key={group.key} className="ops-shipment-group" data-deal-id={group.key}>
             <div className="ops-shipment-group-heading">
               <div className="min-w-0">
-                <h2 className="text-[length:var(--text-body-6)] leading-[var(--leading-body-6)] font-bold text-[var(--color-gray-2)]">{group.label}</h2>
-                <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">
+                <h2 className="text-[18px] leading-[26px] font-bold text-[var(--color-gray-2)]">{group.label}</h2>
+                <p className="mt-1 text-[15px] leading-[22px] text-[var(--color-gray-5)]">
                   {[group.rows[0].deal_counterparty, copy.shipmentCount.replace("{count}", String(group.rows.length))].filter(Boolean).join(" · ")}
                 </p>
               </div>
@@ -555,17 +578,18 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
               ) : null}
             </div>
             <HostTable className={dealId ? "ops-shipment-table !min-w-[880px]" : "ops-shipment-table"} aria-label={`${group.label} 선적 정보`}>
-              <colgroup><col style={{ width: "17%" }} /><col style={{ width: "19%" }} /><col style={{ width: "22%" }} /><col style={{ width: "13%" }} /><col style={{ width: "8%" }} /><col style={{ width: "21%" }} /></colgroup>
+              <colgroup><col style={{ width: "18%" }} /><col style={{ width: "18%" }} /><col style={{ width: "18.6%" }} /><col style={{ width: "13.1%" }} /><col style={{ width: "9.1%" }} /><col style={{ width: "14.1%" }} /><col style={{ width: "9.1%" }} /></colgroup>
               <HostTableHeader><HostTableRow>
                 <HostTableHead>B/L · 컨테이너</HostTableHead>
                 <HostTableHead>항로 · 선박</HostTableHead>
                 <HostTableHead>ETD / ETA</HostTableHead>
                 <HostTableHead>서류·근거</HostTableHead>
-                <HostTableHead>{copy.cols.status}</HostTableHead>
-                <HostTableHead>작업</HostTableHead>
+                <HostTableHead className="text-center">{copy.cols.status}</HostTableHead>
+                <HostTableHead className="text-center">작업</HostTableHead>
+                <HostTableHead><span className="sr-only">수정</span></HostTableHead>
               </HostTableRow></HostTableHeader>
               <HostTableBody>
-              {group.rows.map((ship) => {
+              {group.rows.map((ship, rowIndex) => {
                 const effectiveEta = effectiveShipmentEta(ship);
                 const effectiveEtd = effectiveShipmentEtd(ship);
                 const settled = ship.status === "arrived" || ship.status === "delivered";
@@ -578,23 +602,32 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                 const refreshError = refreshState.status === "error" && refreshState.shipmentId === ship.id ? refreshState.message : null;
                 const fetchedAt = ship.provider_fetched_at || ship.last_carrier_sync_at;
                 const trackingAction = carrierTrackingAction(ship.carrier);
+                const rowOpen = openRows.has(ship.id);
+                const anchorId = rowAnchorId?.(ship, rowIndex);
+                if (anchorId) anchorToShipment.current.set(anchorId, ship.id);
                 return (
-                  <HostTableRow key={ship.id} data-shipment-id={ship.id} aria-busy={refreshing} data-refresh-state={refreshError ? "error" : refreshing ? "pending" : "ready"}>
+                  <Fragment key={ship.id}>
+                  <HostTableRow id={anchorId} data-shipment-id={ship.id} aria-busy={refreshing} data-refresh-state={refreshError ? "error" : refreshing ? "pending" : "ready"} className={renderDetail ? "cursor-pointer scroll-mt-[calc(var(--deal-header-height,128px)+16px)] has-aria-expanded:[&>td]:bg-transparent!" : undefined} onClick={renderDetail ? () => toggleRow(ship.id) : undefined}>
                     <HostTableCell>
-                      {ship.bl_number ? <div className="font-medium" data-ui="shipment-bl-number">{ship.bl_number}</div> : null}
-                      {ship.container_number ? <div className={ship.bl_number ? "mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" : "font-medium"} data-ui="shipment-container-number">{ship.container_number}</div> : null}
-                      {((ship.container_count ?? (ship.container_number ? 1 : 0)) > 0) ? <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">컨테이너 {ship.container_count ?? 1}대</div> : null}
+                      {renderDetail ? (
+                        <button type="button" className="mb-0.5 flex items-center gap-1.5 text-left" aria-expanded={rowOpen} aria-label={`${ship.bl_number || ship.container_number || copy.rowFallback} ${rowOpen ? "접기" : "펼치기"}`} onClick={(event) => { event.stopPropagation(); toggleRow(ship.id); }}>
+                          <ChevronDown aria-hidden="true" className={rowOpen ? "size-4 shrink-0 transition-transform" : "size-4 shrink-0 -rotate-90 transition-transform"} />
+                          {ship.bl_number ? <span data-ui="shipment-bl-number">{ship.bl_number}</span> : null}
+                        </button>
+                      ) : ship.bl_number ? <div data-ui="shipment-bl-number">{ship.bl_number}</div> : null}
+                      {ship.container_number ? <div className={ship.bl_number ? "mt-0.5 text-[15px] leading-[22px] text-[var(--color-gray-5)]" : undefined} data-ui="shipment-container-number">{ship.container_number}</div> : null}
+                      {((ship.container_count ?? (ship.container_number ? 1 : 0)) > 1) ? <div className="mt-0.5 text-[15px] leading-[22px] text-[var(--color-gray-5)]">컨테이너 {ship.container_count}대</div> : null}
                       {!ship.bl_number && !ship.container_number ? <span data-ui="shipment-identifier-fallback">{copy.rowFallback}</span> : null}
                     </HostTableCell>
                     <HostTableCell>
                       <div>{ship.pol || "—"} → {ship.pod || "—"}</div>
-                      <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{[ship.carrier, ship.vessel].filter(Boolean).join(" · ") || "—"}</div>
+                      <div className="mt-0.5 text-[15px] leading-[22px] text-[var(--color-gray-5)]">{[ship.carrier, ship.vessel].filter(Boolean).join(" · ") || "—"}</div>
                     </HostTableCell>
                     <HostTableCell>
                       <div className="tabular-nums">{effectiveEtd ? formatDate(effectiveEtd, dateTag) : "—"} / {effectiveEta ? formatDate(effectiveEta, dateTag) : "—"}</div>
-                      <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{ship.confirmed_eta || ship.confirmed_etd ? "확정 일정 기준" : copy.source[ship.source]}{dday !== null ? ` · ${ddayLabel(dday)}` : ""}</div>
+                      <div className="mt-0.5 text-[15px] leading-[22px] text-[var(--color-gray-5)]">{ship.confirmed_eta || ship.confirmed_etd ? "확정 일정 기준" : copy.source[ship.source]}{dday !== null ? ` · ${ddayLabel(dday)}` : ""}</div>
                       {ship.confirmed_eta || ship.provider_eta || ship.confirmed_etd || ship.provider_etd || ship.confirmed_status_at || ship.confirmed_status_by ? (
-                        <details className="ops-shipment-date-details text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" data-ui="shipment-eta-basis">
+                        <details onClick={(event) => event.stopPropagation()} className="ops-shipment-date-details text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]" data-ui="shipment-eta-basis">
                           <summary>일정 근거</summary>
                           {ship.confirmed_etd ? <p>확정 ETD {formatDate(ship.confirmed_etd, dateTag)}</p> : null}
                           {ship.confirmed_eta ? <p>확정 ETA {formatDate(ship.confirmed_eta, dateTag)}</p> : null}
@@ -607,38 +640,37 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                       ) : null}
                     </HostTableCell>
                     <HostTableCell>
-                      <div className="text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{ship.bl_number ? "B/L 번호 등록" : "B/L 번호 없음"}</div>
+                      <div>{ship.bl_number ? "B/L 번호 등록" : "B/L 번호 없음"}</div>
                       {shipEvidence ? <HostButton variant="outline" size="sm" asChild className="mt-1">
                         <Link href="/erp/snap-evidence" title={shipEvidence.allocationLabel ? copy.evidenceAllocatedTo.replace("{label}", shipEvidence.allocationLabel) : undefined}>
                           SNAP {ship.snap_evidence_count === undefined ? "" : `${ship.snap_evidence_count}건 · `}{shipEvidence.mediaCount}장
                         </Link>
-                      </HostButton> : <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">증거 미확인</div>}
+                      </HostButton> : <div className="mt-0.5 text-[15px] leading-[22px] text-[var(--color-gray-5)]">증거 미확인</div>}
                     </HostTableCell>
-                    <HostTableCell>
+                    <HostTableCell className="text-center">
                       <StatusBadge size="sm" meaning="state" tone={delayed ? "danger" : arriving ? "warning" : STATUS_TONE[ship.status]}>
                         {delayed ? copy.filters.delayed : arriving ? copy.filters.arriving : copy.status[ship.status] ?? ship.status}
                       </StatusBadge>
                       {delayed || arriving ? <div className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">{copy.status[ship.status] ?? ship.status}</div> : null}
                     </HostTableCell>
-                    <HostTableCell>
-                      <div className="flex items-center gap-1">
+                    <HostTableCell className="text-center" onClick={(event) => event.stopPropagation()}>
+                      <div className="flex items-center justify-center gap-1">
                         {trackingAction.kind === "refresh" && canRefresh ? (
-                          <HostButton className="h-7 w-auto px-2 text-xs" title="추적 정보 갱신" aria-label={refreshing ? copy.refreshingTracking : copy.refreshTracking} disabled={refreshState.status === "pending"} onClick={() => void refreshTracking(ship.id)} size="sm" type="button" variant="outline">
-                            <RefreshCw aria-hidden="true" className={refreshing ? "size-3.5 animate-spin" : "size-3.5"} />{refreshing ? "갱신 중" : "갱신"}
+                          <HostButton className="h-8 w-auto min-w-20 pr-3 pl-2.5 text-[13px] leading-[18px]" title="추적 정보 갱신" aria-label={refreshing ? copy.refreshingTracking : copy.refreshTracking} disabled={refreshState.status === "pending"} onClick={() => void refreshTracking(ship.id)} size="sm" type="button" variant="outline">
+                            <RefreshCw aria-hidden="true" className={refreshing ? "size-4 animate-spin" : "size-4"} />{refreshing ? "갱신 중" : "갱신"}
                           </HostButton>
                         ) : null}
                         {trackingAction.kind === "site" ? (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <HostButton className="h-7 w-auto px-2 text-xs" variant="outline" size="sm" asChild>
-                                <a href={trackingAction.href} target="_blank" rel="noopener noreferrer">선사 ↗</a>
+                              <HostButton className="h-8 w-auto min-w-20 pr-2.5 pl-3 text-[13px] leading-[18px]" variant="outline" size="sm" asChild>
+                                <a href={trackingAction.href} target="_blank" rel="noopener noreferrer">선사<ExternalLink aria-hidden="true" className="size-4" /></a>
                               </HostButton>
                             </TooltipTrigger>
                             <TooltipContent>선사 사이트 열기</TooltipContent>
                           </Tooltip>
                         ) : null}
                         {trackingAction.kind !== "site" && !(trackingAction.kind === "refresh" && canRefresh) ? <span aria-hidden="true" /> : null}
-                        <HostButton title={canRefresh ? "선적정보 수정" : "선적정보 수정 권한 필요"} aria-label={canRefresh ? "선적정보 수정" : "선적정보 수정 권한 필요"} disabled={!canRefresh || refreshState.status === "pending"} onClick={event => { editTrigger.current = event.currentTarget; setEditing(ship); }} size="icon-sm" className="size-8" type="button" variant="ghost"><Pencil aria-hidden="true" className="size-4" /></HostButton>
                       </div>
                       {ship.tracking_health === "stale" || ship.tracking_health === "fetch_failed" ? (
                         <p className={`mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] ${ship.tracking_health === "stale" ? "text-[var(--color-yellow-1)]" : "text-[var(--color-red-1)]"}`}>{ship.tracking_health === "stale" ? "조회 정보 오래됨" : "선사 조회 실패"}</p>
@@ -647,7 +679,16 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                       {!fetchedAt && (ship.tracking_health === "stale" || ship.tracking_health === "fetch_failed") ? <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-5)]">마지막 조회 기록 없음</p> : null}
                       {refreshError ? <p className="mt-1 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-red-1)]" role="alert">{refreshError}</p> : null}
                     </HostTableCell>
+                    <HostTableCell className="text-center" onClick={(event) => event.stopPropagation()}>
+                      <HostButton title={canRefresh ? "선적정보 수정" : "선적정보 수정 권한 필요"} aria-label={canRefresh ? "선적정보 수정" : "선적정보 수정 권한 필요"} disabled={!canRefresh || refreshState.status === "pending"} onClick={event => { editTrigger.current = event.currentTarget; setEditing(ship); }} size="icon-sm" className="size-8" type="button" variant="ghost-neutral"><Pencil aria-hidden="true" className="size-[18px]" /></HostButton>
+                    </HostTableCell>
                   </HostTableRow>
+                  {renderDetail && rowOpen ? (
+                    <HostTableRow className="hover:[&>td]:bg-transparent has-aria-expanded:[&>td]:bg-transparent!">
+                      <HostTableCell colSpan={7} className="!p-0"><div className="sticky left-0 w-[100cqw] p-3">{renderDetail(ship, rowIndex)}</div></HostTableCell>
+                    </HostTableRow>
+                  ) : null}
+                  </Fragment>
                 );
               })}
               </HostTableBody>
