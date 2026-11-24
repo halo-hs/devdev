@@ -150,19 +150,25 @@ function dealItemSummary(deal: Deal) {
 }
 
 
+// Figma Badge size sm (16px): 11/16 Regular, 10px inline padding. Used for
+// the 공유 · 단계 · 방향 badges inside a deal-list row.
+const ROW_SM_BADGE = "h-4 px-2.5 font-normal"
+
 function SelectControl({
   label,
   value,
   onChange,
   options,
+  size,
 }: {
   label: string
   value: string
   onChange: (value: string) => void
   options: Array<[string, string]>
+  size?: "sm" | "default"
 }) {
   return (
-    <BusinessFilterSelect label={label} value={value} onValueChange={onChange}
+    <BusinessFilterSelect label={label} value={value} onValueChange={onChange} size={size}
       options={options.map(([value, label]) => ({ value, label }))} />
   )
 }
@@ -1093,8 +1099,16 @@ export function DealsScreen({
               : "금액은 출처 문서 기준입니다. 근거가 없는 값은 —로 표시합니다."}
           </p>
           <div className="ml-auto flex flex-wrap items-center gap-2">
-            <BusinessFilterBar style={{ width: "auto" }}>
+            {/* Figma toolbar: 정렬 label body-md 15 + Select sm (32px, 15/22). */}
+            <BusinessFilterBar
+              style={{
+                width: "auto",
+                ["--filter-height" as string]: "var(--control-size-sm, 32px)",
+                ["--filter-font-size" as string]: "var(--text-body-8)",
+              }}
+            >
               <SelectControl
+                size="sm"
                 label="정렬"
                 value={sort}
                 onChange={(value) => {
@@ -1186,13 +1200,11 @@ export function DealsScreen({
                             }}
                           >
                             <span className="flex items-center gap-2">
-                              <strong className="text-sm leading-5 font-bold text-[var(--color-gray-1)]">
+                              <strong className="text-[14px] leading-5 font-bold text-[var(--color-gray-1)]">
                                 {displayDealId}
                               </strong>
                               {deal.shared && (
-                                <StatusBadge tone="ocean" className="h-4 px-2.5 font-normal">
-                                  공유
-                                </StatusBadge>
+                                <StatusBadge tone="ocean" className={ROW_SM_BADGE}>공유</StatusBadge>
                               )}
                             </span>
                             <span className="mt-0.5 block text-[13px] leading-[18px] text-[var(--color-gray-1)]">
@@ -1299,7 +1311,10 @@ export function DealsScreen({
                         <TableCell className="py-4 align-top tabular-nums">
                           <div className="flex flex-col items-center gap-0.5">
                             <span className="flex items-center gap-1.5">
-                              <StatusBadge tone={ddayTone(deal.dday)}>
+                              <StatusBadge
+                                tone={ddayTone(deal.dday)}
+                                className="px-2.5 text-[13px] leading-[18px] font-normal"
+                              >
                                 {deal.dday}
                               </StatusBadge>
                               {dDayBasisLabel(deal.dDayBasis) ? (
@@ -1332,6 +1347,7 @@ export function DealsScreen({
                                 tone={
                                   deal.stage === "settled" ? "success" : "neutral"
                                 }
+                                className={ROW_SM_BADGE}
                               >
                                 {stageLabels[deal.stage]}
                                 {deal.stage === "settled" ||
@@ -1339,7 +1355,7 @@ export function DealsScreen({
                                   ? ""
                                   : " 진행"}
                               </StatusBadge>
-                              <StatusBadge variant="outline">
+                              <StatusBadge variant="outline" className={ROW_SM_BADGE}>
                                 {deal.direction === "sales" ? "매출" : deal.direction === "purchase" ? "매입" : "방향 확인 필요"}
                               </StatusBadge>
                             </span>
@@ -1357,7 +1373,7 @@ export function DealsScreen({
                               </span>
                             ))}
                             {deal.risks.length > 0 && (
-                              <span className="rounded-full bg-[var(--color-orange-6)] px-2.5 py-0.5 text-[13px] leading-[18px] text-[var(--color-orange-1)]">
+                              <span className="inline-flex h-5 items-center rounded-full bg-[var(--color-orange-6)] px-2.5 text-[13px] leading-[18px] text-[var(--color-orange-1)]">
                                 리스크 {deal.risks.length}건 · {deal.risks
                                   .map((risk) => riskLabels[risk])
                                   .join(" · ")}

@@ -26,9 +26,11 @@ import {
   type DealWorkPlan,
 } from "@trade-os/lib/dealWorkflow"
 import { orderProgress, readDealSales, saleChangeEvent, writeDealSales, type DealSale } from "@trade-os/lib/dealFinanceWorkspace"
+import { exactFinanceMoney } from "@trade-os/lib/erpFinance"
 import { deals as dealFixtures } from "@trade-os/lib/prototypeDeals"
 import { DealFinanceWorkspace } from "@trade-os/deals/DealFinanceWorkspace"
 import {
+  Fragment,
   useCallback,
   useEffect,
   useEffectEvent,
@@ -46,6 +48,8 @@ import {
   ArrowUpRight,
   Check,
   ChevronDown,
+  ChevronRight,
+  ExternalLink,
   ChevronLeft,
   CircleAlert,
   FilePlus2,
@@ -128,9 +132,11 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { useIsCompactWorkspace } from "@/hooks/useIsMobile"
 import { StatusBadge } from "@/components/platform/StatusBadge"
+import { DocumentTypeBadge } from "@trade-os/components/DocumentTypeBadge"
 import { DatePicker } from "@/components/ui/DatePicker"
 import { prototypeBackend, type MutationResult } from "@trade-os/lib/prototypeBackend"
 import {
@@ -237,6 +243,9 @@ type AuditItem = {
   actor: string
   time: string
 }
+// Deal-wide auto-save status, raised from the contract editor to the sticky
+// deal header because every field and item on the page saves the same way.
+type DealSaveStatus = { state: "saved" | "pending" | "saving" | "error"; savedAt: Date; showRetry: boolean }
 type DealNoteItem = {
   id: number
   body: string
@@ -1314,23 +1323,6 @@ function DealDisclosureButton({ expanded, onClick, label, collapsedLabel = "보�
   </Button>
 }
 
-function AuditTrail({ items }: { items: AuditItem[] }) {
-  const dateTag = useLocaleTag()
-  return (
-    <div className="mt-3 border-l-2 pl-4">
-      {items.slice(0, 6).map((item) => (
-        <div key={item.id} className="pb-4 last:pb-0">
-          <strong className="text-sm">{item.action}</strong>
-          <p className="mt-0.5 text-xs text-muted-foreground">{item.detail}</p>
-          <small className="mt-1 block text-[11px] text-muted-foreground">
-            {item.actor} · {formatDateTime(item.time, dateTag)}
-          </small>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 type DealMissingField = {
   key: string
   label: string
@@ -1570,6 +1562,7 @@ function DealCompactAlerts({
     {
       key: "missing",
       label: "검토 필요",
+      short: "검토",
       // Solid tints stay legible on the blue sticky hero.
       tone: "border-destructive/25 bg-[var(--color-red-8)] text-destructive",
       items: missingFields.map((field) => ({
@@ -1581,6 +1574,7 @@ function DealCompactAlerts({
     {
       key: "confirmation",
       label: "확인 필요",
+      short: "확인",
       tone: "border-warning/30 bg-[var(--color-orange-6)] text-warning-foreground",
       items: notices.map((notice) => ({
         id: notice.id,
@@ -1600,8 +1594,9 @@ function DealCompactAlerts({
             onOpenChange={(value) => setOpen(value ? group.key : null)}
           >
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className={group.tone}>
-                {group.label} {group.items.length}건
+              <Button variant="outline" size="sm" className={group.tone} aria-label={`${group.label} ${group.items.length}건`}>
+                <span className="hidden @min-[1100px]/dealhead:inline">{group.label} {group.items.length}건</span>
+                <span className="@min-[1100px]/dealhead:hidden">{group.short} {group.items.length}</span>
                 <ChevronDown className="size-3" />
               </Button>
             </PopoverTrigger>
@@ -1715,7 +1710,7 @@ const splitShipmentReviewFixture = (dealId: string, onOpenDocument: (fileName: s
         { documentId: "pl-0707", code: "PL", number: "PL-2026-0707", fileName: "PackingList_0707.pdf" },
       ],
       connectedCommercialInvoices: [
-        { documentId: "ci-0703", fileName: "Invoice_HB-2607-003.pdf", uploadedAt: "2026.11.18 14:22", invoiceNumber: "CI-2026-0703", invoiceDate: "2026.11.17", currency: "USD", totalAmount: 1539996, item: "Aluminium Scrap Tough Taboo", quantity: "12 MT", unitPrice: "128,333 USD/MT", packageCount: "12", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_HB-2607-003.pdf", "ci-0703") },
+        { documentId: "ci-0703", fileName: "Invoice_HB-2607-003.pdf", uploadedAt: "2026.11.18 14:22", invoiceNumber: "CI-2026-0703", invoiceDate: "2026.11.17", currency: "USD", totalAmount: 1539996, item: "Aluminium Scrap Tough Taboo", quantity: "12 MT", unitPrice: "128,333 USD/MT", packageCount: "12", packageUnit: "bundles", pageCount: 2, fieldPages: { "수량": 2, "포장 수 / 단위": 2 }, onOpen: () => onOpenDocument("Invoice_HB-2607-003.pdf", "ci-0703") },
       ],
     },
     {
@@ -1754,6 +1749,72 @@ const splitShipmentReviewFixture = (dealId: string, onOpenDocument: (fileName: s
   }
 }
 
+// Prototype customs declarations (Figma 7872:185027). The real rows come from
+// confirmed declaration data; originals are not kept after confirmation.
+const customsDeclarations = (direction: DealProfile["direction"], dealId: string): Array<{ title: string; number: string; date: string; duty: string; vat: string; confirmed: boolean }> => {
+  // Demo data only for deals that already moved on to 정산 (customs done):
+  // their declarations are confirmed. Earlier deals keep customs empty/planned.
+  if (!["settlement", "settled"].includes(dealStage(dealId))) return []
+  const title = direction === "sales" ? "수출신고필증" : "수입신고필증"
+  return [
+    { title: `${title} A`, number: "12345-26-0000101", date: "2026.10.28", duty: "KRW 1,840,000", vat: "KRW 184,000", confirmed: true },
+    { title: `${title} B`, number: "12345-26-0000102", date: "2026.10.29", duty: "USD 650", vat: "USD 65", confirmed: true },
+  ]
+}
+
+// Registered sale in the CI sales row: amount only when the row is narrow,
+// customer · amount · date once it has room (container width ≥ 560px).
+function SaleSummary({ sale }: { sale: DealSale }) {
+  return (
+    <>
+      {sale.customer ? <span className="hidden @min-[560px]/sale:inline">{sale.customer} · </span> : null}
+      <span>{exactFinanceMoney(sale.amount, sale.currency)}</span>
+      {sale.date ? <span className="hidden @min-[560px]/sale:inline"> · {sale.date}</span> : null}
+    </>
+  )
+}
+
+// Anchor of a registered sale's row in 정산 › 판매 내역.
+const dealSaleAnchorId = (invoiceId: string) => `deal-sale-${invoiceId}`
+
+// Anchor of a B/L's row in the deal shipment table; CI linked-document links
+// jump there and ask the table to open the row.
+const dealBillAnchorId = (billId: string) => `deal-bill-${billId}`
+const openShipmentRowLink = (billId: string) => {
+  window.dispatchEvent(new CustomEvent("ecoya:open-shipment-row", { detail: dealBillAnchorId(billId) }))
+}
+
+// A page chip asks the document viewer to show a given page. The viewer may
+// mount after the request (it opens with the document), so keep it pending.
+// The viewer re-mounts per selected document, so the request names its file
+// and only the viewer showing that file takes it.
+let pendingDocumentPage: { file: string; page: number } | null = null
+const requestDocumentPage = (file: string, page: number) => {
+  pendingDocumentPage = { file, page }
+  window.dispatchEvent(new CustomEvent("ecoya:deal-document-page", { detail: pendingDocumentPage }))
+}
+
+// Describes the control the user clicked to open 「문서와 보기」 (by aria-label or
+// the nearest id) so it can be found again after the page re-mounts into the
+// split and the left pane can be scrolled to keep it at the same height.
+type ScrollAnchor = { selector: string; index: number; top: number }
+const describeScrollAnchor = (target: Element | null): ScrollAnchor | null => {
+  const root = target?.closest("[data-deal-page-content]") ?? document
+  for (let element = target; element && element !== document.body; element = element.parentElement) {
+    const label = element.getAttribute("aria-label")
+    const selector = label ? `[aria-label=${JSON.stringify(label)}]` : element.id ? `[id=${JSON.stringify(element.id)}]` : null
+    if (!selector) continue
+    const index = Array.from(root.querySelectorAll(selector)).indexOf(element)
+    if (index >= 0) return { selector, index, top: element.getBoundingClientRect().top }
+  }
+  return null
+}
+
+// Opening 「문서와 보기」 re-mounts the deal content inside the side-by-side
+// split, which would reset row state. Remember opened rows per deal.
+const openedInvoiceRows = new Map<string, Set<string>>()
+const openedItemRows = new Map<string, Set<number>>()
+
 type CommercialInvoiceRecord = {
   invoice: SplitShipmentView["billsOfLading"][number]["connectedCommercialInvoices"][number]
   billOfLadingIds: string[]
@@ -1777,23 +1838,122 @@ const billContainers = (bill: SplitShipmentView["billsOfLading"][number]) => {
   }]
 }
 
+// Expanded content of a deal shipment-table row (Figma 7872:184996 table):
+// linked CIs plus the packing list with per-container packages.
+function ShipmentBillDetail({ dealId, bill, view }: { dealId: string; bill: SplitShipmentView["billsOfLading"][number]; view: SplitShipmentView }) {
+  const [expanded, setExpanded] = useState<Set<string>>(
+    () => new Set((bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => `PL:${document.documentId}`))
+  )
+  const toggle = (id: string) => setExpanded((current) => {
+    const next = new Set(current)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    return next
+  })
+  const openShipmentDocument = (code: "BL" | "PL", fileName: string) => {
+    window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code, fileName } }))
+  }
+  const containers = billContainers(bill)
+  const relatedPackingLists = (bill.connectedDocuments ?? []).filter((document) => document.code === "PL")
+  const linkedInvoiceIds = Object.entries(readDealInvoiceRelations(dealId).invoiceToBills)
+    .filter(([, billIds]) => billIds.includes(bill.documentId))
+    .map(([invoiceId]) => invoiceId)
+  const relatedInvoices = [
+    ...bill.connectedCommercialInvoices,
+    ...view.unlinkedDocuments.filter((invoice) => linkedInvoiceIds.includes(invoice.documentId)),
+  ]
+  return (
+    <div className="flex flex-col gap-4 rounded-xl border border-[var(--color-gray-9)] bg-card p-4 text-left whitespace-normal" onClick={(event) => event.stopPropagation()}>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+        <span className="font-semibold">연결 CI</span>
+        {relatedInvoices.length ? relatedInvoices.map((invoice) => (
+          <button key={invoice.documentId} type="button" className="text-[var(--color-primary-4)] hover:underline" onClick={invoice.onOpen}>{invoice.invoiceNumber || invoice.fileName}</button>
+        )) : <StatusBadge size="sm" tone="warning">CI 연결 필요</StatusBadge>}
+      </div>
+                          {relatedPackingLists.length ? (
+            <div>
+              <div className="text-sm font-semibold">포장명세서</div>
+              <div className="mt-2 grid gap-2">
+                {relatedPackingLists.map((document) => {
+                  const packingEntryId = `PL:${document.documentId}`
+                  const packingOpen = expanded.has(packingEntryId)
+                  return (
+                    <div key={document.documentId} className="overflow-hidden rounded-md border bg-background">
+                      <div className="flex items-center gap-2 px-3 py-2">
+                        <button type="button" className="flex min-w-0 flex-1 items-center gap-2 text-left" aria-expanded={packingOpen} onClick={() => toggle(packingEntryId)}>
+                          <DocumentTypeBadge code="PL" />
+                          <strong className="truncate text-sm">{document.number ?? document.fileName}</strong>
+                          <span className="truncate text-[11px] text-muted-foreground">{document.fileName}</span>
+                          <ChevronDown className={cn("ml-auto size-4 transition-transform", packingOpen && "rotate-180")} aria-hidden="true" />
+                        </button>
+                        <Button type="button" size="xs" variant="outline" aria-label={`${document.number ?? document.fileName} 문서와 보기`} onClick={() => openShipmentDocument("PL", document.fileName)}><FileSearch data-icon="inline-start" />문서와 보기</Button>
+                      </div>
+                      {packingOpen ? (
+                        <div className="overflow-x-auto border-t">
+                          <Table className="min-w-[640px] text-left text-xs" aria-label={`${document.number ?? document.fileName} 컨테이너별 포장`}>
+                            <TableHeader className="bg-muted/40">
+                              <TableRow>
+                                {["컨테이너 번호", "씰 번호", "포장 수", "총중량", "용적"].map((label) => <TableHead key={label} className={cn("h-9 px-3 font-medium", ["포장 수", "총중량", "용적"].includes(label) ? "text-right" : "text-left")}>{label}</TableHead>)}
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {containers.length ? containers.map((container) => (
+                                <TableRow key={container.number}>
+                                  <TableCell className="px-3 py-2 font-medium whitespace-nowrap">{container.number}</TableCell>
+                                  <TableCell className="px-3 py-2 whitespace-nowrap">{container.sealNumber || "미확인"}</TableCell>
+                                  <TableCell className="px-3 py-2 text-right whitespace-nowrap tabular-nums">{container.packageCount ? `${container.packageCount}${container.packageUnit ? ` ${container.packageUnit}` : ""}` : "미확인"}</TableCell>
+                                  <TableCell className="px-3 py-2 text-right whitespace-nowrap tabular-nums">{container.grossWeight || "미확인"}</TableCell>
+                                  <TableCell className="px-3 py-2 text-right whitespace-nowrap tabular-nums">{container.volume || "미확인"}</TableCell>
+                                </TableRow>
+                              )) : (
+                                <TableRow><TableCell colSpan={5} className="px-3 py-3 text-muted-foreground">컨테이너 정보 미확인</TableCell></TableRow>
+                              )}
+                              {containers.length > 1 ? (
+                                <TableRow className="bg-muted/20 font-semibold hover:bg-muted/20">
+                                  <TableCell className="px-3 py-2">합계</TableCell>
+                                  <TableCell className="px-3 py-2 text-muted-foreground">{containers.length}대</TableCell>
+                                  <TableCell className="px-3 py-2 text-right whitespace-nowrap tabular-nums">{bill.fields.packageCount ? `${bill.fields.packageCount}${bill.fields.packageType ? ` ${bill.fields.packageType}` : ""}` : "—"}</TableCell>
+                                  <TableCell className="px-3 py-2 text-right whitespace-nowrap tabular-nums">{bill.fields.grossWeight || "—"}</TableCell>
+                                  <TableCell className="px-3 py-2 text-right whitespace-nowrap tabular-nums">{bill.fields.volume || "—"}</TableCell>
+                                </TableRow>
+                              ) : null}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      ) : null}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ) : <p className="text-sm text-muted-foreground">연결된 포장명세서가 없습니다. PL을 올리면 컨테이너별 포장 정보가 여기에 표시됩니다.</p>}
+    </div>
+  )
+}
+
 function CommercialInvoiceTransactionCard({
   dealId,
   view,
   linkedInvoiceTargets = {},
   onEditShipment,
+  canWrite = true,
 }: {
   dealId: string
   view: SplitShipmentView
   linkedInvoiceTargets?: Record<string, string>
   onEditShipment?: (bill: SplitShipmentView["billsOfLading"][number], trigger: HTMLButtonElement) => void
+  canWrite?: boolean
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set([
-      ...view.billsOfLading.flatMap((bill) => bill.connectedCommercialInvoices.slice(0, 1).map((invoice) => invoice.documentId)),
+    // Table rows start folded; only CIs still waiting for a B/L open so the
+    // link action is visible without an extra click. Packing lists are the
+    // content of an opened B/L row, so they start open inside it.
+    () => openedInvoiceRows.get(dealId) ?? new Set([
       ...view.unlinkedDocuments.map((invoice) => invoice.documentId),
+      ...view.billsOfLading.flatMap((bill) => (bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => `PL:${document.documentId}`)),
     ])
   )
+  useEffect(() => { openedInvoiceRows.set(dealId, expanded) }, [dealId, expanded])
   const [relationState, setRelationState] = useState(() => readDealInvoiceRelations(dealId))
   const [drafts, setDrafts] = useState<Record<string, Record<string, string>>>(() => relationState.invoiceFields)
   const [invoiceLinkSelections, setInvoiceLinkSelections] = useState<Record<string, string>>({})
@@ -1855,44 +2015,95 @@ function CommercialInvoiceTransactionCard({
     setRelationState(linkDealInvoiceToBill(dealId, invoiceId, billId))
   }
   const billById = new Map(view.billsOfLading.map((bill) => [bill.documentId, bill]))
+  // The 판매 내역 table exists only once 정산 has started (정산 중 · 정산 완료).
+  const financeStarted = ["settlement", "settled"].includes(dealStage(dealId))
+  const openShipmentDocument = (code: "BL" | "PL", fileName: string) => {
+    window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code, fileName } }))
+  }
   return (
-    <Card className="gap-0 px-5 py-4" aria-label="상업송장 정보">
+    <Card className="gap-0 px-5 py-4" aria-label="CI 결제정보">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-base font-semibold">상업송장(CI)</h2>
-          <p className="mt-1 text-sm text-muted-foreground">계약 품목을 실제 청구 단위로 확인하고 연결된 선적을 추적합니다.</p>
+          <h2 className="text-base font-semibold">CI 결제정보</h2>
         </div>
         <StatusBadge tone="info">{records.length}건</StatusBadge>
       </div>
-      <div className="mt-4 grid gap-2">
-        {records.map(({ invoice, billOfLadingIds }) => {
-          const isOpen = expanded.has(invoice.documentId)
-          const draft = drafts[invoice.documentId] ?? {}
-          const value = (field: string, fallback: string) => draft[field] ?? fallback
-          const linkedBills = billOfLadingIds.map((id) => billById.get(id)).filter(Boolean)
-          const saleAvailable = true
-          return (
-            <article key={invoice.documentId} className="overflow-hidden rounded-[var(--r-md)] border">
-              <div className="flex items-center gap-2 bg-muted/30 px-4 py-3">
-                <button type="button" className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left hover:bg-muted/50" aria-expanded={isOpen} onClick={() => toggle(invoice.documentId)}>
-                  <span className="flex min-w-0 items-center gap-2">
-                    <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">CI</span>
-                    <span className="min-w-0">
-                      <span className="flex flex-wrap items-center gap-2">
-                        <strong className="truncate text-sm">{invoice.invoiceNumber || invoice.fileName}</strong>
-                        <StatusBadge size="sm" tone={linkedBills.length ? "success" : "warning"}>{linkedBills.length ? `B/L ${linkedBills.length}건 연결` : "B/L 연결 필요"}</StatusBadge>
-                        {registeredSales[invoice.documentId] ? <StatusBadge size="sm" tone="info">판매 등록됨</StatusBadge> : null}
-                      </span>
-                      {linkedBills.length ? <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">{linkedBills.map((bill) => `${bill?.blNumber || "B/L 번호 미확인"} · ${bill ? containerCountLabel(bill) : "컨테이너 미확인"}`).join(" · ")}</span> : null}
-                    </span>
-                  </span>
-                  <ChevronDown className={cn("size-4 shrink-0 transition-transform", isOpen && "rotate-180")} aria-hidden="true" />
-                </button>
-                {invoice.onOpen ? <Button type="button" size="xs" variant="outline" onClick={invoice.onOpen}><FileSearch data-icon="inline-start" />문서와 보기</Button> : null}
-              </div>
-              {isOpen ? (
-                <div className="border-t p-4">
-                  <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {(
+        <div className={"mt-4 overflow-x-auto rounded-md border [&_[data-slot=table-container]]:[container-type:inline-size]"} role="region" aria-label="CI 목록">
+          <Table className="min-w-[960px] text-left text-xs" aria-label="CI 결제정보">
+            <TableHeader className="bg-muted/40">
+              <TableRow>
+                {["송장번호", "품목", "수량", "단가", "포장", "통화·금액", "연결 선적", ""].map((label, index) => <TableHead key={label || index} className="h-10 px-3 text-left font-medium">{label}</TableHead>)}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {records.map(({ invoice, billOfLadingIds }) => {
+                const isOpen = expanded.has(invoice.documentId)
+                // An opened CI shows its inputs directly, like the item table.
+                const isEditing = canWrite && isOpen
+                const draft = drafts[invoice.documentId] ?? {}
+                const value = (field: string, fallback: string) => draft[field] ?? fallback
+                const linkedBills = billOfLadingIds.map((id) => billById.get(id)).filter(Boolean)
+                const saleAvailable = true
+                const packageText = invoice.packageCount && invoice.packageUnit ? `${invoice.packageCount} ${invoice.packageUnit}` : invoice.packageCount ?? invoice.packageUnit ?? ""
+                const amountText = invoice.currency && invoice.totalAmount != null ? `${invoice.currency} ${invoice.totalAmount.toLocaleString()}` : invoice.currency ?? ""
+                return (
+                  <Fragment key={invoice.documentId}>
+                    <TableRow className="cursor-pointer has-aria-expanded:[&>td]:bg-transparent!" onClick={() => toggle(invoice.documentId)}>
+                      <TableCell className="px-3 py-3 align-top">
+                        <button type="button" className="flex items-center gap-2 text-left" aria-expanded={isOpen} aria-label={`${invoice.invoiceNumber || invoice.fileName} ${isOpen ? "접기" : "펼치기"}`} onClick={(event) => { event.stopPropagation(); toggle(invoice.documentId) }}>
+                          <ChevronDown className={cn("size-4 shrink-0 transition-transform", !isOpen && "-rotate-90")} aria-hidden="true" />
+                          <span className="min-w-0">
+                            <strong className="block whitespace-nowrap text-sm">{value("송장번호", invoice.invoiceNumber ?? "") || invoice.fileName}</strong>
+                            <span className="block text-[11px] text-muted-foreground">
+                              {value("송장일자", invoice.invoiceDate ?? "") || "송장일자 미확인"}
+                              {/* Registration status only (no amount, no badge); keeps the row at two lines. */}
+                              {registeredSales[invoice.documentId] ? <span className="text-[var(--color-green-1)]"> · 판매 등록</span> : null}
+                            </span>
+                          </span>
+                        </button>
+                      </TableCell>
+                      <TableCell className="max-w-[200px] px-3 py-3 align-top"><span className="block truncate" title={value("품목", invoice.item ?? "")}>{value("품목", invoice.item ?? "") || "—"}</span></TableCell>
+                      <TableCell className="whitespace-nowrap px-3 py-3 align-top tabular-nums">{value("수량", invoice.quantity ?? "") || "—"}</TableCell>
+                      <TableCell className="whitespace-nowrap px-3 py-3 align-top tabular-nums">{value("단가", invoice.unitPrice ?? "") || "—"}</TableCell>
+                      <TableCell className="whitespace-nowrap px-3 py-3 align-top">{value("포장 수 / 단위", packageText) || "—"}</TableCell>
+                      <TableCell className="whitespace-nowrap px-3 py-3 align-top text-right tabular-nums">
+                        {value("통화·금액", amountText) || "—"}
+                      </TableCell>
+                      <TableCell className="px-3 py-3 align-top">
+                        {linkedBills.length ? linkedBills.map((bill) => bill ? (
+                          <button key={bill.documentId} type="button" className="block whitespace-nowrap text-[13px] leading-[18px] text-[var(--color-primary-4)] hover:underline" title={`${bill.blNumber || "B/L"} 문서와 보기`} onClick={(event) => { event.stopPropagation(); openShipmentDocument("BL", bill.fileName) }}>{bill.blNumber || "B/L 번호 미확인"}</button>
+                        ) : null) : <StatusBadge size="sm" tone="warning">B/L 연결 필요</StatusBadge>}
+                      </TableCell>
+                      <TableCell className="w-12 cursor-default px-2 py-2 text-center align-top" onClick={(event) => event.stopPropagation()}>
+                        {invoice.onOpen ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${invoice.invoiceNumber || invoice.fileName} 문서와 보기`} onClick={invoice.onOpen}><FileSearch aria-hidden="true" className="size-4" /></Button>
+                            </TooltipTrigger>
+                            <TooltipContent>문서와 보기</TooltipContent>
+                          </Tooltip>
+                        ) : null}
+                      </TableCell>
+                    </TableRow>
+                    {isOpen ? (
+                      <TableRow className="hover:[&>td]:bg-transparent has-aria-expanded:[&>td]:bg-transparent!">
+                        <TableCell colSpan={8} className="p-0 whitespace-normal">
+                {/* Three groups: invoice fields, linked documents, one-line sales row. */}
+                <div className="sticky left-0 flex w-[100cqw] flex-col gap-3 p-3">
+                <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <h3 className="flex min-w-0 flex-wrap items-baseline gap-x-2 text-sm font-semibold">송장 정보<span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">{invoice.fileName} · {invoice.uploadedAt}</span></h3>
+                    {invoice.onOpen ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${invoice.invoiceNumber || invoice.fileName} 문서와 보기`} onClick={invoice.onOpen}><FileSearch aria-hidden="true" className="size-4" /></Button>
+                        </TooltipTrigger>
+                        <TooltipContent>문서와 보기</TooltipContent>
+                      </Tooltip>
+                    ) : null}
+                  </div>
+                  <dl className="grid gap-3 sm:grid-cols-2">
                     {[
                       ["송장번호", invoice.invoiceNumber ?? ""],
                       ["송장일자", invoice.invoiceDate ?? ""],
@@ -1901,49 +2112,24 @@ function CommercialInvoiceTransactionCard({
                       ["단가", invoice.unitPrice ?? ""],
                       ["포장 수 / 단위", invoice.packageCount && invoice.packageUnit ? `${invoice.packageCount} ${invoice.packageUnit}` : invoice.packageCount ?? invoice.packageUnit ?? ""],
                       ["통화·금액", invoice.currency && invoice.totalAmount != null ? `${invoice.currency} ${invoice.totalAmount.toLocaleString()}` : invoice.currency ?? ""],
-                    ].map(([label, fallback]) => <div key={label}><dt className="text-xs text-muted-foreground">{label}</dt><dd className="mt-1">{label === "송장일자" ? <DatePicker ariaLabel={`${invoice.invoiceNumber ?? invoice.fileName} ${label}`} value={value(label, fallback)} onValueChange={(next) => updateDraft(invoice.documentId, label, next)} className="w-full" /> : <Input aria-label={`${invoice.invoiceNumber ?? invoice.fileName} ${label}`} value={value(label, fallback)} onChange={(event) => updateDraft(invoice.documentId, label, event.target.value)} className="h-10" />}</dd></div>)}
+                    ].map(([label, fallback]) => <div key={label}><dt className="flex items-center gap-1.5 text-xs text-muted-foreground">{label}{(invoice.pageCount ?? 1) > 1 ? <button type="button" className="text-[11px] leading-4 text-[var(--color-gray-6)] underline-offset-2 hover:text-[var(--color-primary-4)] hover:underline" aria-label={`${label} 근거 ${invoice.fieldPages?.[label] ?? 1}페이지 보기`} onClick={() => { requestDocumentPage(invoice.fileName, invoice.fieldPages?.[label] ?? 1); invoice.onOpen?.() }}>p.{invoice.fieldPages?.[label] ?? 1}</button> : null}</dt><dd className="mt-1">{isEditing ? (label === "송장일자" ? <DatePicker ariaLabel={`${invoice.invoiceNumber ?? invoice.fileName} ${label}`} value={value(label, fallback)} onValueChange={(next) => updateDraft(invoice.documentId, label, next)} className="w-full" /> : <Input aria-label={`${invoice.invoiceNumber ?? invoice.fileName} ${label}`} value={value(label, fallback)} onChange={(event) => updateDraft(invoice.documentId, label, event.target.value)} className="h-10" />) : <div className="min-h-10 rounded-md bg-muted/30 px-3 py-2 text-sm font-medium">{value(label, fallback) || "—"}</div>}</dd></div>)}
                   </dl>
-                  <div className="mt-4 pt-4">
-                    <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">연결된 선적</h3><span className="text-xs text-muted-foreground">{linkedBills.length ? `${linkedBills.length}건` : "연결 필요"}</span></div>
+                </div>
+                  <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
+                    <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">연결 문서</h3><span className="text-xs text-muted-foreground">{linkedBills.length ? `${linkedBills.length}건` : "연결 필요"}</span></div>
                     {linkedBills.length ? (
-                      <ul className="mt-2 space-y-2">
-                        {linkedBills.map((bill) => {
-                          if (!bill) return null
-                          const containers = billContainers(bill)
-                          return (
-                            <li key={bill.documentId} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 rounded-md bg-muted/30 px-3 py-2 text-sm">
-                              <div className="min-w-0">
-                                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                                  <strong>{bill.blNumber || "B/L 번호 미확인"}</strong>
-                                  <span className="text-muted-foreground">{bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}</span>
-                                  <StatusBadge size="sm" tone="neutral">{containerCountLabel(bill)}</StatusBadge>
-                                  {bill.connectedDocuments?.map((document) => (
-                                    <StatusBadge key={document.documentId} size="sm" tone="info">
-                                      {document.code} {document.number ?? document.fileName}
-                                    </StatusBadge>
-                                  ))}
-                                </div>
-                              </div>
-                              <span className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground">{bill.fields.shippedOnBoardDate ?? "출항일 미확인"}</span>
-                                {onEditShipment ? <Button type="button" size="icon-sm" variant="ghost" aria-label={`${bill.blNumber || "연결된 선적"} 수정`} title="연결된 선적 수정" onClick={(event) => onEditShipment(bill, event.currentTarget)}><Pencil aria-hidden="true" className="size-4" /></Button> : null}
-                              </span>
-                              {containers.length ? (
-                                <ul className="col-span-2 mt-2 space-y-1" aria-label={`${bill.blNumber || "연결된 선적"} 컨테이너 목록`}>
-                                  {containers.map((container) => (
-                                    <li key={container.number} className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded bg-background/70 px-2 py-1.5 text-xs">
-                                      <span className="font-medium">{container.number}</span>
-                                      {container.sealNumber ? <span className="text-muted-foreground">씰 {container.sealNumber}</span> : null}
-                                      {container.packageCount ? <span className="text-muted-foreground">포장 {container.packageCount}{container.packageUnit ? ` ${container.packageUnit}` : ""}</span> : null}
-                                      {container.grossWeight ? <span className="text-muted-foreground">총중량 {container.grossWeight}</span> : null}
-                                      {container.volume ? <span className="text-muted-foreground">용적 {container.volume}</span> : null}
-                                    </li>
-                                  ))}
-                                </ul>
-                              ) : <p className="col-span-2 mt-2 text-xs text-muted-foreground">컨테이너 정보 미확인</p>}
-                            </li>
-                          )
-                        })}
+                      <ul className="mt-2 divide-y">
+                        {linkedBills.map((bill) => bill ? (
+                          <li key={bill.documentId} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 text-sm">
+                            <DocumentTypeBadge code="BL" />
+                            <a href={`#${dealBillAnchorId(bill.documentId)}`} className="font-semibold text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRowLink(bill.documentId)}>{bill.blNumber || "B/L 번호 미확인"}</a>
+                            <span className="text-muted-foreground">{bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}</span>
+                            <StatusBadge size="sm" tone="neutral">{containerCountLabel(bill)}</StatusBadge>
+                            <span className="text-xs text-muted-foreground">{bill.fields.shippedOnBoardDate ?? "선적일 미확인"}</span>
+                            {(bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => <a key={document.documentId} href={`#${dealBillAnchorId(bill.documentId)}`} className="text-[13px] text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRowLink(bill.documentId)}>PL {document.number ?? document.fileName}</a>)}
+                            {onEditShipment ? <Button type="button" size="icon-sm" variant="ghost" className="ml-auto" aria-label={`${bill.blNumber || "연결된 선적"} 수정`} title="연결된 선적 수정" onClick={(event) => onEditShipment(bill, event.currentTarget)}><Pencil aria-hidden="true" className="size-4" /></Button> : null}
+                          </li>
+                        ) : null)}
                       </ul>
                     ) : (
                       <div className="mt-2 rounded-md border border-warning/40 bg-warning/5 p-3">
@@ -1972,44 +2158,69 @@ function CommercialInvoiceTransactionCard({
                         </div>
                       </div>
                     )}
-                    <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
-                      <div><h3 className="text-sm font-semibold">판매 정보</h3><p className="mt-0.5 text-xs text-muted-foreground">{saleAvailable ? "판매 정보를 등록할 수 있습니다." : "도착 또는 통관 확인 후 판매 정보를 등록할 수 있습니다."}</p></div>
+                  </div>
+                    <div className="@container/sale flex items-center justify-between gap-3 rounded-xl border border-[var(--color-gray-9)] bg-card px-4 py-2.5">
+                      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+                        <h3 className="text-sm font-semibold">판매 정보</h3>
+                        {registeredSales[invoice.documentId] && !financeStarted ? (
+                          // 정산 not started yet: its 판매 내역 table is not shown, so plain text.
+                          <span className="min-w-0 truncate text-sm text-[var(--color-gray-4)]">
+                            <SaleSummary sale={registeredSales[invoice.documentId]} />
+                          </span>
+                        ) : registeredSales[invoice.documentId] ? (
+                          // Registered sale: a link to its row in 정산 › 판매 내역.
+                          <a
+                            href={`#${dealSaleAnchorId(invoice.documentId)}`}
+                            className="min-w-0 truncate text-sm text-[var(--color-primary-4)] hover:underline"
+                            onClick={(event) => {
+                              event.preventDefault()
+                              window.dispatchEvent(new CustomEvent("ecoya:open-deal-sale", { detail: invoice.documentId }))
+                            }}
+                          >
+                            <SaleSummary sale={registeredSales[invoice.documentId]} />
+                          </a>
+                        ) : null}
+                      </div>
                       <Button type="button" size="xs" variant="outline" disabled={!saleAvailable} onClick={() => { setSaleInvoiceId(invoice.documentId); setSaleDraft(registeredSales[invoice.documentId] ?? { amount: "", currency: "KRW", customer: "", date: new Date().toISOString().slice(0, 10), evidence: invoice.invoiceNumber ?? invoice.fileName }) }}><Plus data-icon="inline-start" />{registeredSales[invoice.documentId] ? "판매 정보 수정" : "판매 등록"}</Button>
+                        <AlertDialog open={saleInvoiceId === invoice.documentId} onOpenChange={(open) => { if (!open) setSaleInvoiceId(null) }}>
+                          <AlertDialogContent className="w-[min(720px,calc(100vw-32px))] !max-w-[min(720px,calc(100vw-32px))]">
+                            <AlertDialogHeader><AlertDialogTitle>판매 등록</AlertDialogTitle><AlertDialogDescription>{invoice.invoiceNumber ?? invoice.fileName}의 판매 정보를 입력합니다.</AlertDialogDescription></AlertDialogHeader>
+                            <div className="grid gap-3 sm:grid-cols-2">
+                              <label className="grid gap-1.5 text-sm"><span>판매 금액</span><div className="flex gap-2"><Input inputMode="decimal" numericFormat="amount" value={saleDraft.amount} onChange={(event) => setSaleDraft({ ...saleDraft, amount: event.target.value })} /><Select value={saleDraft.currency} onValueChange={(value) => setSaleDraft({ ...saleDraft, currency: value ?? "KRW" })}><SelectTrigger className="w-24"><SelectValue /></SelectTrigger><SelectContent>{["KRW", "USD", "EUR", "JPY", "CNY"].map((currency) => <SelectItem key={currency} value={currency}>{currency}</SelectItem>)}</SelectContent></Select></div></label>
+                              <label className="grid gap-1.5 text-sm"><span>판매일</span><DatePicker ariaLabel={`${invoice.invoiceNumber ?? invoice.fileName} 판매일`} value={saleDraft.date} onValueChange={(date) => setSaleDraft({ ...saleDraft, date })} className="w-full" /></label>
+                              <label className="grid gap-1.5 text-sm"><span>판매처</span><Input placeholder="판매처 입력" value={saleDraft.customer} onChange={(event) => setSaleDraft({ ...saleDraft, customer: event.target.value })} /></label>
+                              <div className="grid gap-1.5 text-sm"><span>판매 근거</span><p className="rounded-md bg-muted/40 px-3 py-2 text-sm text-muted-foreground">{saleDraft.evidence}</p></div>
+                            </div>
+                            <AlertDialogFooter><AlertDialogCancel>취소</AlertDialogCancel><AlertDialogAction disabled={!saleDraft.amount || !saleDraft.customer} onClick={() => {
+                              const existing = registeredSales[invoice.documentId]
+                              const nextSale: DealSale = {
+                                id: existing?.id ?? crypto.randomUUID(),
+                                invoiceId: invoice.documentId,
+                                invoiceNumber: invoice.invoiceNumber ?? invoice.fileName,
+                                amount: saleDraft.amount.trim(),
+                                currency: saleDraft.currency,
+                                date: saleDraft.date,
+                                customer: saleDraft.customer.trim(),
+                                evidence: invoice.invoiceNumber ?? invoice.fileName,
+                              }
+                              const nextSales = [...readDealSales(dealId).filter((sale) => sale.invoiceId !== invoice.documentId), nextSale]
+                              writeDealSales(dealId, nextSales)
+                              setSaleInvoiceId(null)
+                            }}>저장</AlertDialogAction></AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                     </div>
-                  </div>
                 </div>
-              ) : null}
-              <AlertDialog open={saleInvoiceId === invoice.documentId} onOpenChange={(open) => { if (!open) setSaleInvoiceId(null) }}>
-                <AlertDialogContent className="w-[min(720px,calc(100vw-32px))] !max-w-[min(720px,calc(100vw-32px))]">
-                  <AlertDialogHeader><AlertDialogTitle>판매 등록</AlertDialogTitle><AlertDialogDescription>{invoice.invoiceNumber ?? invoice.fileName}의 판매 정보를 입력합니다.</AlertDialogDescription></AlertDialogHeader>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <label className="grid gap-1.5 text-sm"><span>판매 금액</span><div className="flex gap-2"><Input inputMode="decimal" numericFormat="amount" value={saleDraft.amount} onChange={(event) => setSaleDraft({ ...saleDraft, amount: event.target.value })} /><Select value={saleDraft.currency} onValueChange={(value) => setSaleDraft({ ...saleDraft, currency: value ?? "KRW" })}><SelectTrigger className="w-24"><SelectValue /></SelectTrigger><SelectContent>{["KRW", "USD", "EUR", "JPY", "CNY"].map((currency) => <SelectItem key={currency} value={currency}>{currency}</SelectItem>)}</SelectContent></Select></div></label>
-                    <label className="grid gap-1.5 text-sm"><span>판매일</span><DatePicker ariaLabel={`${invoice.invoiceNumber ?? invoice.fileName} 판매일`} value={saleDraft.date} onValueChange={(date) => setSaleDraft({ ...saleDraft, date })} className="w-full" /></label>
-                    <label className="grid gap-1.5 text-sm"><span>판매처</span><Input placeholder="판매처 입력" value={saleDraft.customer} onChange={(event) => setSaleDraft({ ...saleDraft, customer: event.target.value })} /></label>
-                    <div className="grid gap-1.5 text-sm"><span>판매 근거</span><p className="rounded-md bg-muted/40 px-3 py-2 text-sm text-muted-foreground">{saleDraft.evidence}</p></div>
-                  </div>
-                  <AlertDialogFooter><AlertDialogCancel>취소</AlertDialogCancel><AlertDialogAction disabled={!saleDraft.amount || !saleDraft.customer} onClick={() => {
-                    const existing = registeredSales[invoice.documentId]
-                    const nextSale: DealSale = {
-                      id: existing?.id ?? crypto.randomUUID(),
-                      invoiceId: invoice.documentId,
-                      invoiceNumber: invoice.invoiceNumber ?? invoice.fileName,
-                      amount: saleDraft.amount.trim(),
-                      currency: saleDraft.currency,
-                      date: saleDraft.date,
-                      customer: saleDraft.customer.trim(),
-                      evidence: invoice.invoiceNumber ?? invoice.fileName,
-                    }
-                    const nextSales = [...readDealSales(dealId).filter((sale) => sale.invoiceId !== invoice.documentId), nextSale]
-                    writeDealSales(dealId, nextSales)
-                    setSaleInvoiceId(null)
-                  }}>저장</AlertDialogAction></AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </article>
-          )
-        })}
-      </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : null}
+                  </Fragment>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </Card>
   )
 }
@@ -2066,9 +2277,6 @@ function DealWorkBlock({
             }
           </span>
           <h2 className="text-lg font-semibold">{workLabels[work]}</h2>
-          <p className="min-w-0 truncate text-xs text-muted-foreground">
-            {documentStageGuidance[work]}
-          </p>
           <StatusBadge tone={state === "complete" ? "success" : "blue"}>
             {state === "complete"
               ? "완료"
@@ -2076,11 +2284,10 @@ function DealWorkBlock({
                 ? "현재 할 일"
                 : "진행 중"}
           </StatusBadge>
-          {plan.current === work && (
-            <p className="min-w-0 truncate pl-1 text-xs font-normal text-muted-foreground">
-              {plan.nextAction}
-            </p>
-          )}
+          {/* Title → label → description; the current stage describes its next action. */}
+          <p className="min-w-0 truncate pl-1 text-xs font-normal text-muted-foreground">
+            {plan.current === work ? plan.nextAction : documentStageGuidance[work]}
+          </p>
         </div>
         {children}
       </div>
@@ -2393,22 +2600,39 @@ function DealRecordSections({
   const [editingNoteBody, setEditingNoteBody] = useState("")
   const [deletingNote, setDeletingNote] = useState<DealNoteItem | null>(null)
   const [activityHistoryOpen, setActivityHistoryOpen] = useState(false)
+  const [activityShowAll, setActivityShowAll] = useState(false)
+  // 「전체 이력」 in 주문 이행 opens this card and scrolls to it.
+  useEffect(() => {
+    const open = () => {
+      setActivityHistoryOpen(true)
+      requestAnimationFrame(() => {
+        const card = document.getElementById("deal-activity-card")
+        card?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" })
+        card?.focus({ preventScroll: true })
+      })
+    }
+    window.addEventListener("ecoya:open-activity-history", open)
+    return () => window.removeEventListener("ecoya:open-activity-history", open)
+  }, [])
+  // Newest first, like the Figma activity timeline.
+  const sortedAudit = [...audit].sort((a, b) => b.time.localeCompare(a.time))
+  const visibleAudit = activityShowAll ? sortedAudit : sortedAudit.slice(0, 6)
 
   return (
-    <section>
-      <div className="pb-4">
+    <>
+      <section className="rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] p-5" aria-label="노트">
         <div className="flex items-center justify-between gap-3">
+          {/* Figma 7872:185137 노트 card header. */}
           <div>
-            <h3 className="text-sm font-semibold">노트</h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              업무자 간 공유 메모
+            <h3 className="text-[18px] leading-[26px] font-bold">노트</h3>
+            <p className="mt-1 text-[15px] leading-[22px] text-[var(--color-gray-5)]">
+              업무자 간 공유 메모 · 거래 참여자 모두에게 보입니다
             </p>
           </div>
-          <span className="text-xs text-muted-foreground">{notes.length}개</span>
         </div>
-        <div className="mt-3 flex flex-col gap-3">
+        <div className="mt-4 flex flex-col gap-2">
           {notes.map((item) => (
-            <div key={item.id} className="border-l-2 pl-3 text-sm">
+            <div key={item.id} className="rounded-xl bg-[var(--color-gray-11)] px-4 py-2.5">
               {editingNoteId === item.id ? (
                 <div className="flex flex-col gap-2">
                   <Textarea
@@ -2440,16 +2664,21 @@ function DealRecordSections({
                   </div>
                 </div>
               ) : (
-                <>
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="min-w-0 flex-1 whitespace-pre-wrap">
+                                <div className="flex items-center gap-2.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="whitespace-pre-wrap text-[15px] leading-[22px]">
                       {item.body}
                     </p>
+                    <p className="mt-0.5 text-[13px] leading-[18px] text-[var(--color-gray-5)]">
+                      {item.actor} · {item.time.length === 10 ? formatDate(item.time, dateTag) : formatDateTime(item.time, dateTag)}
+                    </p>
+                  </div>
                     <span className="flex shrink-0 items-center">
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="icon-xs"
+                        variant="ghost-neutral"
+                        size="icon-sm"
+                        className="[&_svg]:size-[18px]"
                         aria-label="노트 수정"
                         onClick={() => {
                           setEditingNoteId(item.id)
@@ -2460,34 +2689,79 @@ function DealRecordSections({
                       </Button>
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="icon-xs"
+                        variant="ghost-neutral"
+                        size="icon-sm"
+                        className="[&_svg]:size-[18px]"
                         aria-label="노트 삭제"
                         onClick={() => setDeletingNote(item)}
                       >
                         <Trash2 />
                       </Button>
                     </span>
-                  </div>
-                  <small className="mt-1 block text-muted-foreground">
-                    {item.actor} · {item.time.length === 10 ? formatDate(item.time, dateTag) : formatDateTime(item.time, dateTag)}
-                  </small>
-                </>
+                </div>
               )}
             </div>
           ))}
         </div>
-      </div>
-      <div className="border-t border-[var(--surface-border)] py-3">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h3 className="text-sm font-semibold">활동 이력</h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">거래에서 수정된 모든 내역</p>
+      </section>
+      {/* Figma 7872:185189 (closed) / 7872:188432 (open): separate card, TimelineItem rows. */}
+      <section id="deal-activity-card" tabIndex={-1} className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] outline-none" aria-label="활동 이력">
+        <div className="flex items-start gap-6">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[18px] leading-[26px] font-bold">활동 이력</h3>
+            <p className="mt-1 text-[15px] leading-[22px] text-[var(--color-gray-5)]">거래에서 수정된 모든 내역</p>
           </div>
-          <DealDisclosureButton expanded={activityHistoryOpen} onClick={() => setActivityHistoryOpen((open) => !open)} label="활동 이력" controls="deal-activity-history" />
+          <Button
+            type="button"
+            variant="ghost-neutral"
+            size="icon-sm"
+            className="[&_svg]:size-[18px]"
+            aria-label={`활동 이력 ${activityHistoryOpen ? "접기" : "펼치기"}`}
+            aria-expanded={activityHistoryOpen}
+            aria-controls="deal-activity-history"
+            onClick={() => setActivityHistoryOpen((open) => !open)}
+          >
+            <ChevronDown className={cn("transition-transform", activityHistoryOpen && "rotate-180")} />
+          </Button>
         </div>
-        {activityHistoryOpen ? <div id="deal-activity-history"><AuditTrail items={audit} /></div> : null}
-      </div>
+        {activityHistoryOpen ? (
+          <div id="deal-activity-history" className="mt-4">
+            {audit.length ? (
+              <ol>
+                {visibleAudit.map((item, index) => {
+                  const system = item.actor === "시스템"
+                  return (
+                    <li key={item.id} className="flex items-start gap-3">
+                      <div aria-hidden="true" className="flex w-3 shrink-0 flex-col items-center gap-1 self-stretch pt-1.5">
+                        <span className={cn("size-2.5 rounded-full", system ? "bg-[var(--color-gray-5)]" : "bg-[var(--color-primary-4)]")} />
+                        {index < visibleAudit.length - 1 ? <span className="w-0.5 flex-1 bg-[var(--color-gray-10)]" /> : null}
+                      </div>
+                      <div className="min-w-0 flex-1 pb-3.5">
+                        <p className="text-[15px] leading-[22px]">{item.action}</p>
+                        <p className="mt-0.5 text-[13px] leading-[18px] text-[var(--color-gray-5)]">{[item.detail, item.actor].filter(Boolean).join(" · ")}</p>
+                      </div>
+                      <span className="shrink-0 text-[13px] leading-[18px] text-[var(--color-gray-5)] tabular-nums">{formatDateTime(item.time, dateTag)}</span>
+                    </li>
+                  )
+                })}
+              </ol>
+            ) : <p className="text-[13px] leading-[18px] text-[var(--color-gray-5)]">아직 기록된 변경이 없습니다.</p>}
+            {audit.length > 6 ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="mt-3 h-8 gap-1 px-0 text-[13px] leading-[18px] font-normal text-[var(--color-primary-4)] hover:bg-transparent hover:text-[var(--color-primary-4)] hover:underline"
+                aria-expanded={activityShowAll}
+                onClick={() => setActivityShowAll((all) => !all)}
+              >
+                {activityShowAll ? "최근 이력만 보기" : `이전 이력 ${audit.length - 6}건 더 보기`}
+                <ChevronDown data-icon="inline-end" className={cn("size-4 transition-transform", activityShowAll && "rotate-180")} />
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
+      </section>
       {deletingNote ? (
         <ActionDialog
           title="노트 삭제"
@@ -2501,7 +2775,7 @@ function DealRecordSections({
           }}
         />
       ) : null}
-    </section>
+    </>
   )
 }
 
@@ -2523,7 +2797,22 @@ function DealPdf({
   const file = slot.file
   const preview = dealDocumentPreviews[slot.code] ?? dealDocumentPreviews.PO
   const fields = previewFields ?? preview.fields
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(() => {
+    if (pendingDocumentPage?.file !== file) return 1
+    const requested = pendingDocumentPage.page
+    pendingDocumentPage = null
+    return requested
+  })
+  useEffect(() => {
+    const show = (event: Event) => {
+      const request = (event as CustomEvent<{ file: string; page: number }>).detail
+      if (request.file !== file) return
+      setPage(request.page)
+      pendingDocumentPage = null
+    }
+    window.addEventListener("ecoya:deal-document-page", show)
+    return () => window.removeEventListener("ecoya:deal-document-page", show)
+  }, [file])
   const [zoom, setZoom] = useState(100)
   const [fullscreen, setFullscreen] = useState(false)
   const [downloading, setDownloading] = useState(false)
@@ -2655,76 +2944,89 @@ function CandidateValuePicker({
   value,
   candidates,
   onSelect,
+  trigger = "button",
 }: {
   label: string
   value: string
   candidates: DealFieldCandidate[]
   onSelect: (value: string) => void
+  /** "chevron" = arrow inside the input (Figma item quantity, 7872:184843). */
+  trigger?: "button" | "chevron"
 }) {
   const [open, setOpen] = useState(false)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-7 gap-1.5 border-destructive/35 px-2 text-[11px] text-destructive hover:bg-destructive/5 hover:text-destructive"
-        >
-          문서별 값 {candidates.length}개
-          <ChevronDown className="size-3" />
-        </Button>
+        {trigger === "chevron" ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label={`${label} 문서별 값 선택`}
+            className="size-7 text-[var(--color-gray-4)] hover:text-foreground"
+          >
+            <ChevronDown className={cn("size-4 transition-transform", open && "rotate-180")} />
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-7 gap-1.5 border-destructive/35 px-2 text-[11px] text-destructive hover:bg-destructive/5 hover:text-destructive"
+          >
+            문서별 값 {candidates.length}개
+            <ChevronDown className="size-3" />
+          </Button>
+        )}
       </PopoverTrigger>
-      <PopoverContent align="start" className="z-[var(--z-popup)] w-80 max-w-[calc(100vw-2rem)] gap-0 p-1">
-        <div className="border-b px-2.5 py-2">
-          <strong className="text-xs">{label} 기준값 선택</strong>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
-            연결 문서에서 읽은 값 중 거래에 사용할 값을 고릅니다.
-          </p>
-        </div>
-        <div className="max-h-64 overflow-y-auto py-1">
-          {candidates.map((candidate) => {
-            const selected =
-              normalizeCandidateValue(candidate.value) ===
-              normalizeCandidateValue(value)
-            const differs = !selected
+      {/* Figma 7992:200097: one radio row per document; rows whose value
+          differs from the current value are marked 「다른 값」. */}
+      <PopoverContent align="start" className="z-[var(--z-popup)] w-80 max-w-[calc(100vw-2rem)] gap-0 rounded-xl p-2.5">
+        <p className="text-[14px] leading-5 font-semibold text-foreground">{label} 기준값 선택</p>
+        <p className="text-[15px] leading-[22px] text-[var(--color-gray-5)]">
+          연결 문서에서 읽은 값 중 거래에 사용할 값 하나를 고릅니다.
+        </p>
+        <div role="radiogroup" aria-label={`${label} 기준값`} className="flex max-h-72 flex-col gap-0.5 overflow-y-auto pt-2">
+          {candidates.map((candidate, index) => {
+            const matches = normalizeCandidateValue(candidate.value) === normalizeCandidateValue(value)
+            // Several documents can share the current value; mark the first one.
+            const selected = matches && candidates.findIndex((entry) => normalizeCandidateValue(entry.value) === normalizeCandidateValue(value)) === index
             return (
-              <Button
+              <button
                 key={`${candidate.source}-${candidate.document}-${candidate.value}`}
                 type="button"
-                variant="ghost"
-                className="grid h-auto w-full grid-cols-[30px_minmax(0,1fr)_auto] items-center gap-2 rounded-sm px-2.5 py-2 text-left font-normal"
+                role="radio"
+                aria-checked={selected}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left outline-none hover:bg-[var(--color-gray-11)] focus-visible:[box-shadow:var(--shadow-keyboard-focus)]",
+                  selected && "bg-[var(--color-primary-10)] hover:bg-[var(--color-primary-10)]"
+                )}
                 onClick={() => {
                   onSelect(candidate.value)
                   setOpen(false)
                 }}
               >
-                <Badge
-                  variant="secondary"
-                  className="justify-center px-1 text-[10px]"
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "flex size-5 shrink-0 items-center justify-center rounded-full border bg-background",
+                    selected ? "border-[var(--color-primary-1)]" : "border-[var(--color-gray-7)]"
+                  )}
                 >
-                  {candidate.source}
-                </Badge>
-                <span className="min-w-0">
-                  <span
-                    className={cn(
-                      "block text-xs font-medium",
-                      differs && "text-destructive"
-                    )}
-                  >
+                  {selected ? <span className="size-2.5 rounded-full bg-[var(--color-primary-1)]" /> : null}
+                </span>
+                <StatusBadge tone="neutral" className="h-4 px-2.5 font-normal">{candidate.source}</StatusBadge>
+                <span className="min-w-0 flex-1">
+                  <span className={cn("block text-[14px] leading-5 font-semibold", !matches && "text-destructive")}>
                     {candidate.value}
                   </span>
-                  <span className="block truncate text-[10px] text-muted-foreground">
+                  <span className="block truncate text-[13px] leading-[18px] text-[var(--color-gray-5)]">
                     {candidate.document}
                   </span>
                 </span>
-                {selected ? (
-                  <Check className="size-3.5 text-primary" />
-                ) : (
-                  <span className="text-[10px] text-destructive">다른 값</span>
-                )}
-              </Button>
+                {!matches ? <span className="shrink-0 text-[13px] leading-[18px] text-destructive">다른 값</span> : null}
+              </button>
             )
           })}
         </div>
@@ -2790,8 +3092,11 @@ function DealFieldsPanel({
   onAddItem,
   onRemoveItem,
   paymentHistory,
+  rowStateKey,
 }: {
   profile: DealProfile
+  /** Deal id used to remember opened item rows across re-mounts. */
+  rowStateKey?: string
   fields: DealFieldDetail[]
   visibleGroups: DealFieldGroup[]
   items: DealLineItem[]
@@ -2812,6 +3117,24 @@ function DealFieldsPanel({
   const [query, setQuery] = useState("")
   const [editingPrice, setEditingPrice] = useState<number | null>(null)
   const editable = canMutate(role)
+  // An opened item row shows its inputs directly (edits autosave per field).
+  // Mismatched items start open so the value can be fixed right away.
+  const [expandedItems, setExpandedItems] = useState<Set<number>>(
+    () => (rowStateKey ? openedItemRows.get(rowStateKey) : undefined) ?? new Set(items.filter((item) => item.match === "확인 필요").map((item) => item.id))
+  )
+  useEffect(() => { if (rowStateKey) openedItemRows.set(rowStateKey, expandedItems) }, [rowStateKey, expandedItems])
+  const toggleItemExpanded = (id: number) => setExpandedItems((current) => {
+    const next = new Set(current)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    return next
+  })
+  const knownItemIds = useRef(new Set(items.map((item) => item.id)))
+  useEffect(() => {
+    const added = items.filter((item) => !knownItemIds.current.has(item.id)).map((item) => item.id)
+    knownItemIds.current = new Set(items.map((item) => item.id))
+    if (added.length) setExpandedItems((current) => new Set([...current, ...added]))
+  }, [items])
   const sections: (DealFieldGroup | "품목")[] = [
     "품목",
     "거래 기본",
@@ -2882,12 +3205,241 @@ function DealFieldsPanel({
     return Number.isFinite(amount) ? amount.toLocaleString("en-US") : "0"
   }
 
-  const itemTable =
+  // One item opens for editing at a time under its own table row; the
+  // existing 2-column input layout is kept inside that panel.
+  const renderItemEditor = (item: DealLineItem) => {
+    const number =
+      items.findIndex((entry) => entry.id === item.id) + 1
+    const input = (
+      key:
+        | "goods"
+        | "hsCode"
+        | "quantity"
+        | "unitPrice"
+        | "packageCount"
+        | "grossWeight"
+        | "netWeight",
+      label: string
+    ) => (
+      <Input
+        aria-label={`품목 ${number} ${label}`}
+        id={
+          key === "quantity"
+            ? `deal-field-item-${item.id}-quantity`
+            : `deal-item-${item.id}-${key}`
+        }
+        style={{
+          scrollMarginTop:
+            "calc(var(--deal-header-height,128px) + 16px)",
+        }}
+        className={cn(
+          "h-10 px-3 py-0",
+          !["goods", "hsCode"].includes(key) &&
+            "text-right tabular-nums",
+          // Figma: red border only; the value keeps the normal text colour.
+          key === "quantity" &&
+            item.match === "확인 필요" &&
+            "border-destructive"
+        )}
+        value={key === "unitPrice" ? groupItemDecimal(item[key], editingPrice !== item.id) : item[key]}
+        onFocus={() => { if (key === "unitPrice") setEditingPrice(item.id) }}
+        inputMode={
+          ["goods", "hsCode"].includes(key)
+            ? "text"
+            : key === "packageCount"
+              ? "numeric"
+              : "decimal"
+        }
+        disabled={!editable}
+        aria-describedby={key === "quantity" && item.match === "확인 필요" ? `deal-item-${item.id}-quantity-message` : undefined}
+        aria-invalid={
+          key === "quantity" && item.match === "확인 필요"
+        }
+        onChange={(event) => {
+          const control = event.currentTarget
+          const entered = control.value
+          const numeric = !["goods", "hsCode"].includes(key)
+          const value = numeric ? entered.replaceAll(",", "") : entered
+          const pattern = key === "packageCount" ? /^\d*$/
+            : key === "unitPrice" ? /^\d*(?:\.\d{0,2})?$/
+            : /^\d*(?:\.\d*)?$/
+          if (numeric && !pattern.test(value)) return
+          const caret = control.selectionStart ?? entered.length
+          const beforeCaret = entered.slice(0, caret).replaceAll(",", "").length
+          onItemChange(item.id, key, value)
+          if (key === "unitPrice") requestAnimationFrame(() => {
+            if (document.activeElement !== control) return
+            let remaining = beforeCaret
+            let position = 0
+            while (position < control.value.length && remaining > 0) {
+              if (control.value[position] !== ",") remaining--
+              position++
+            }
+            control.setSelectionRange(position, position)
+          })
+        }}
+        onBlur={() => {
+          if (key === "unitPrice") setEditingPrice(null)
+          let value = item[key]
+          if (key === "unitPrice" && item.currency === "USD" && value && value !== ".") {
+            const [whole, fraction = ""] = value.replaceAll(",", "").split(".")
+            value = `${whole || "0"}.${fraction.padEnd(2, "0")}`
+          } else if (!["goods", "hsCode"].includes(key)) {
+            value = value === "." ? "" : value.replace(/\.$/, "")
+          }
+          if (value !== item[key]) onItemChange(item.id, key, value)
+          onItemCommit(item.id, key, value, `품목 ${number} · ${label}`)
+        }}
+      />
+    )
+    const unit = (
+      key: "quantityUnit" | "packageUnit" | "weightUnit",
+      label: string,
+      options: string[]
+    ) => (
+      <Select
+        value={item[key]}
+        disabled={!editable}
+        onValueChange={(value) => {
+          const next = value ?? ""
+          onItemChange(item.id, key, next)
+          onItemCommit(
+            item.id,
+            key,
+            next,
+            `품목 ${number} · ${label}`
+          )
+        }}
+      >
+        <SelectTrigger
+          size="sm"
+          className="w-full gap-1 px-3 py-0 data-[size=sm]:h-10 data-[size=sm]:text-[length:var(--text-body-6)] data-[size=sm]:leading-[var(--leading-body-6)]"
+          aria-label={`품목 ${number} ${label}`}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="z-[var(--z-popup)]">
+          {options.map((option) => (
+            <SelectItem key={option} value={option}>
+              {option}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    )
+    const mismatch = item.match === "확인 필요"
+    const candidates = lineItemQuantityCandidates[item.id] ?? []
+    const canPick = editable && mismatch && new Set(candidates.map((candidate) => normalizeCandidateValue(candidate.value))).size > 1
+    const amountLabel = profile.direction === "direction_pending" ? "거래 금액" : `${directionLabels[profile.direction]} 금액`
+    // Figma 7872:184900 item card: title + delete, row 1 (name · quantity ·
+    // price · amount), separator, row 2 (HS · package · weights · unit).
+    return (
+      <div className="@container/items flex flex-col gap-3.5 rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
+        <div className="flex items-center gap-2">
+          <h5 className="min-w-0 flex-1 text-base leading-6 font-bold">품목 {number}</h5>
+          {editable && items.length > 1 ? (
+            <Button size="icon-sm" variant="ghost-neutral" aria-label={`품목 ${number} 삭제`} onClick={() => onRemoveItem(item.id)}>
+              <Trash2 />
+            </Button>
+          ) : null}
+        </div>
+        <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/items:grid-cols-[minmax(0,1fr)_280px_150px_150px] [&>div]:min-w-0">
+          <div className="col-span-2 @min-[760px]/items:col-span-1">
+            <FormFieldHeader className="mb-2.5" label={`품목 ${number} · 품목명`} htmlFor={`deal-item-${item.id}-goods`} />
+            {input("goods", "품목명")}
+          </div>
+          <div className="col-span-2 @min-[760px]/items:col-span-1">
+            <FormFieldHeader
+              id={`deal-field-label-item-${item.id}-quantity`}
+              data-quantity-heading
+              className="mb-2.5 scroll-mt-[calc(var(--deal-header-height,128px)+16px)]"
+              label="수량 / 단위"
+              htmlFor={`deal-field-item-${item.id}-quantity`}
+              badge={mismatch ? <StatusBadge tone="danger" className="h-4 px-2.5 font-normal">불일치</StatusBadge> : undefined}
+            />
+            <div className="flex gap-2">
+              <div className="relative min-w-0 flex-1 [&_input]:pr-10">
+                {input("quantity", "수량")}
+                {canPick ? (
+                  <span className="absolute top-1/2 right-1.5 -translate-y-1/2">
+                    <CandidateValuePicker
+                      trigger="chevron"
+                      label={`품목 ${number} 수량`}
+                      value={item.quantity}
+                      candidates={candidates}
+                      onSelect={(value) => {
+                        onItemChange(item.id, "quantity", value)
+                        onItemCommit(item.id, "quantity", value, `품목 ${number} · 수량`)
+                      }}
+                    />
+                  </span>
+                ) : null}
+              </div>
+              <div className="w-32 shrink-0">{unit("quantityUnit", "수량 단위", ["MT", "KG", "EA"])}</div>
+            </div>
+            {mismatch && candidates.length ? (
+              <FormFieldMessage id={`deal-item-${item.id}-quantity-message`} tone="danger" className="mt-2 items-start [&>svg]:mt-px">
+                문서마다 값이 달라 선택이 필요합니다 · {candidates.map((candidate) => `${candidate.source} ${candidate.value}`).join(" · ")} {item.quantityUnit}
+              </FormFieldMessage>
+            ) : null}
+          </div>
+          <div>
+            <FormFieldHeader data-item-unit-price-heading className="mb-2.5 scroll-mt-[calc(var(--deal-header-height,128px)+16px)]" label={`단가 · ${item.currency}/${item.quantityUnit}`} htmlFor={`deal-item-${item.id}-unitPrice`} />
+            {input("unitPrice", "단가")}
+          </div>
+          <div>
+            <FormFieldHeader className="mb-2.5" label={amountLabel} htmlFor={`deal-item-${item.id}-amount`} />
+            <Input
+              id={`deal-item-${item.id}-amount`}
+              aria-label={`품목 ${number} 금액`}
+              className="h-10 border-[var(--color-gray-9)] bg-[var(--color-gray-10)] px-3 py-0 tabular-nums shadow-none"
+              value={`${itemAmount(item)} ${item.currency}`}
+              readOnly
+            />
+          </div>
+        </div>
+        <div className="h-px bg-[var(--color-gray-10)]" role="separator" />
+        <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/items:grid-cols-[150px_280px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] [&>div]:min-w-0">
+          <div>
+            <FormFieldHeader className="mb-2" label="HS Code" htmlFor={`deal-item-${item.id}-hsCode`} />
+            {input("hsCode", "HS Code")}
+          </div>
+          <div className="col-span-2 @min-[760px]/items:col-span-1">
+            <FormFieldHeader className="mb-2" label="포장 수 / 단위" htmlFor={`deal-item-${item.id}-packageCount`} />
+            <div className="flex gap-2">
+              <div className="min-w-0 flex-1">{input("packageCount", "포장 수")}</div>
+              <div className="w-32 shrink-0">{unit("packageUnit", "포장 단위", ["bundles", "cartons", "pallets"])}</div>
+            </div>
+          </div>
+          <div>
+            <FormFieldHeader className="mb-2" label="총중량" htmlFor={`deal-item-${item.id}-grossWeight`} />
+            {input("grossWeight", "총중량")}
+          </div>
+          <div>
+            <FormFieldHeader className="mb-2" label="순중량" htmlFor={`deal-item-${item.id}-netWeight`} />
+            {input("netWeight", "순중량")}
+          </div>
+          <div>
+            <FormFieldHeader className="mb-2" label="중량 단위" />
+            {unit("weightUnit", "중량 단위", ["KG", "MT", "LB"])}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const quantityConflicts = (item: DealLineItem) =>
+    item.match === "확인 필요"
+      ? (lineItemQuantityCandidates[item.id] ?? []).filter((candidate) => normalizeCandidateValue(candidate.value) !== normalizeCandidateValue(item.quantity))
+      : []
+  const itemHeading = profile.direction === "direction_pending" ? "거래 품목" : `${directionLabels[profile.direction]} 품목`
+  const viewItemTable =
     !normalizedQuery || filteredItems.length ? (
       <section key="items" data-deal-items className="border-b pt-2 pb-5">
         <div className="flex items-center justify-between gap-3">
-          <h4 className="text-base font-semibold">
-            {profile.direction === "direction_pending" ? "거래 품목" : `${directionLabels[profile.direction]} 품목`}
+          <h4 className="flex items-center gap-2 text-base font-semibold">
+            {itemHeading}
+            <span className="text-xs font-normal text-muted-foreground">{filteredItems.length}건</span>
           </h4>
           {editable ? (
             <Button size="sm" variant="outline" onClick={onAddItem}>
@@ -2896,245 +3448,103 @@ function DealFieldsPanel({
             </Button>
           ) : null}
         </div>
-        <div
-          className="@container/items mt-3 max-w-full"
-          role="region"
-          aria-label="거래 품목 목록"
-        >
-          <table
-            className="block w-full text-left text-xs"
-            aria-label={profile.direction === "direction_pending" ? "거래 품목" : `${directionLabels[profile.direction]} 품목`}
-          >
+        <div className={"mt-3 overflow-x-auto rounded-md border [&_[data-slot=table-container]]:[container-type:inline-size]"} role="region" aria-label="거래 품목 목록">
+          <Table className="min-w-[880px] text-left text-xs" aria-label={itemHeading}>
+            <TableHeader className="bg-muted/40">
+              <TableRow>
+                {["품목", "수량 / 단위", "단가", "금액", "포장", "총중량", "순중량"].map((label) => <TableHead key={label} className={cn("h-10 px-3 font-medium", ["단가", "금액", "총중량", "순중량"].includes(label) ? "text-right" : "text-left")}>{label}</TableHead>)}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredItems.map((item) => {
-                const number =
-                  items.findIndex((entry) => entry.id === item.id) + 1
-                const input = (
-                  key:
-                    | "goods"
-                    | "hsCode"
-                    | "quantity"
-                    | "unitPrice"
-                    | "packageCount"
-                    | "grossWeight"
-                    | "netWeight",
-                  label: string
-                ) => (
-                  <Input
-                    aria-label={`품목 ${number} ${label}`}
-                    id={
-                      key === "quantity"
-                        ? `deal-field-item-${item.id}-quantity`
-                        : `deal-item-${item.id}-${key}`
-                    }
-                    style={{
-                      scrollMarginTop:
-                        "calc(var(--deal-header-height,128px) + 16px)",
-                    }}
-                    className={cn(
-                      "h-10 px-3 py-0",
-                      !["goods", "hsCode"].includes(key) &&
-                        "text-right tabular-nums",
-                      ["goods", "quantity"].includes(key) &&
-                        item.match === "확인 필요" &&
-                        "border-destructive/55 text-destructive"
-                    )}
-                    aria-describedby={key === "goods" && needsReview(item.match) ? `deal-item-${item.id}-goods-message` : undefined}
-                    value={key === "unitPrice" ? groupItemDecimal(item[key], editingPrice !== item.id) : item[key]}
-                    onFocus={() => { if (key === "unitPrice") setEditingPrice(item.id) }}
-                    inputMode={
-                      ["goods", "hsCode"].includes(key)
-                        ? "text"
-                        : key === "packageCount"
-                          ? "numeric"
-                          : "decimal"
-                    }
-                    disabled={!editable}
-                    aria-invalid={
-                      ["goods", "quantity"].includes(key) && item.match === "확인 필요"
-                    }
-                    onChange={(event) => {
-                      const control = event.currentTarget
-                      const entered = control.value
-                      const numeric = !["goods", "hsCode"].includes(key)
-                      const value = numeric ? entered.replaceAll(",", "") : entered
-                      const pattern = key === "packageCount" ? /^\d*$/
-                        : key === "unitPrice" ? /^\d*(?:\.\d{0,2})?$/
-                        : /^\d*(?:\.\d*)?$/
-                      if (numeric && !pattern.test(value)) return
-                      const caret = control.selectionStart ?? entered.length
-                      const beforeCaret = entered.slice(0, caret).replaceAll(",", "").length
-                      onItemChange(item.id, key, value)
-                      if (key === "unitPrice") requestAnimationFrame(() => {
-                        if (document.activeElement !== control) return
-                        let remaining = beforeCaret
-                        let position = 0
-                        while (position < control.value.length && remaining > 0) {
-                          if (control.value[position] !== ",") remaining--
-                          position++
-                        }
-                        control.setSelectionRange(position, position)
-                      })
-                    }}
-                    onBlur={() => {
-                      if (key === "unitPrice") setEditingPrice(null)
-                      let value = item[key]
-                      if (key === "unitPrice" && item.currency === "USD" && value && value !== ".") {
-                        const [whole, fraction = ""] = value.replaceAll(",", "").split(".")
-                        value = `${whole || "0"}.${fraction.padEnd(2, "0")}`
-                      } else if (!["goods", "hsCode"].includes(key)) {
-                        value = value === "." ? "" : value.replace(/\.$/, "")
-                      }
-                      if (value !== item[key]) onItemChange(item.id, key, value)
-                      onItemCommit(item.id, key, value, `품목 ${number} · ${label}`)
-                    }}
-                  />
-                )
-                const unit = (
-                  key: "quantityUnit" | "packageUnit" | "weightUnit",
-                  label: string,
-                  options: string[]
-                ) => (
-                  <Select
-                    value={item[key]}
-                    disabled={!editable}
-                    onValueChange={(value) => {
-                      const next = value ?? ""
-                      onItemChange(item.id, key, next)
-                      onItemCommit(
-                        item.id,
-                        key,
-                        next,
-                        `품목 ${number} · ${label}`
-                      )
-                    }}
-                  >
-                    <SelectTrigger
-                      size="sm"
-                      className="w-full gap-1 px-3 py-0 data-[size=sm]:h-10 data-[size=sm]:text-[length:var(--text-body-6)] data-[size=sm]:leading-[var(--leading-body-6)]"
-                      aria-label={`품목 ${number} ${label}`}
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="z-[var(--z-popup)]">
-                      {options.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )
+                const number = items.findIndex((entry) => entry.id === item.id) + 1
+                const mismatch = item.match === "확인 필요"
+                const conflicts = quantityConflicts(item)
+                const isOpen = expandedItems.has(item.id)
+                const isEditing = editable && isOpen
                 return (
-                  <tbody key={item.id} className="mb-3 block rounded-xl border bg-card p-3 last:mb-0 @min-[480px]/items:p-4">
-                    <tr className="relative grid grid-cols-2 gap-x-3 gap-y-0 @min-[480px]/items:grid-cols-3 @min-[760px]/items:grid-cols-[minmax(0,2fr)_minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,1.4fr)_32px] @min-[760px]/items:grid-rows-[auto_40px_auto] @min-[760px]/items:gap-y-0 [&>td:not(:last-child)]:row-span-3 [&>td:not(:last-child)]:grid [&>td:not(:last-child)]:grid-rows-subgrid [&>td:not(:last-child)]:pb-4 @min-[760px]/items:[&>td:not(:last-child)]:pb-0 [&>td]:min-w-0">
-                      <td className="col-span-2 pr-9 @min-[480px]/items:col-span-3 @min-[760px]/items:col-span-1 @min-[760px]/items:pr-0">
-                        <FormFieldHeader className="mb-2" label={`품목 ${number} · 품목명`} htmlFor={`deal-item-${item.id}-goods`} badge={needsReview(item.match) ? <StatusBadge tone={matchTone(item.match)}>{item.match === "확인 필요" ? "불일치" : item.match}</StatusBadge> : undefined} />
-                        {input("goods", "품목명")}
-                        {needsReview(item.match) && <FormFieldMessage id={`deal-item-${item.id}-goods-message`} tone="danger" className="mt-2">{item.evidence.join(" · ")}</FormFieldMessage>}
-                      </td>
-                      <td>
-                          <FormFieldHeader id={`deal-field-label-item-${item.id}-quantity`} data-quantity-heading className="mb-2 scroll-mt-[calc(var(--deal-header-height,128px)+16px)]" label="수량 / 단위" htmlFor={`deal-field-item-${item.id}-quantity`}
-                            badge={item.match === "확인 필요" ? <StatusBadge tone="warning">불일치</StatusBadge> : undefined}
-                            candidates={editable &&
-                          item.match === "확인 필요" &&
-                          new Set(
-                            (lineItemQuantityCandidates[item.id] ?? []).map(
-                              (candidate) =>
-                                normalizeCandidateValue(candidate.value)
-                            )
-                          ).size > 1 ? (
-                            <div className="shrink-0">
-                              <CandidateValuePicker
-                                label={`품목 ${number} 수량`}
-                                value={item.quantity}
-                                candidates={lineItemQuantityCandidates[item.id]}
-                                onSelect={(value) => {
-                                  onItemChange(item.id, "quantity", value)
-                                  onItemCommit(
-                                    item.id,
-                                    "quantity",
-                                    value,
-                                    `품목 ${number} · 수량`
-                                  )
-                                }}
-                              />
+                  <Fragment key={item.id}>
+                    <TableRow className="cursor-pointer has-aria-expanded:[&>td]:bg-transparent!" onClick={() => toggleItemExpanded(item.id)}>
+                      <TableCell className="max-w-[260px] px-3 py-3 align-top">
+                        <button type="button" className="flex min-w-0 items-start gap-2 text-left" aria-expanded={isOpen} aria-label={`품목 ${number} ${isOpen ? "접기" : "펼치기"}`} onClick={(event) => { event.stopPropagation(); toggleItemExpanded(item.id) }}>
+                          <ChevronDown className={cn("mt-0.5 size-4 shrink-0 transition-transform", !isOpen && "-rotate-90")} aria-hidden="true" />
+                          <span className="min-w-0">
+                            <span className="block truncate text-sm font-medium" title={item.goods}>{item.goods || "—"}</span>
+                            <span className="mt-1 block text-[11px] text-muted-foreground">품목 {number} · HS {item.hsCode || "—"}</span>
+                          </span>
+                        </button>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap px-3 py-3 align-top tabular-nums">
+                        <span className={cn("inline-flex items-center gap-1.5", mismatch && "font-semibold text-destructive")}>
+                          {item.quantity || "—"} {item.quantityUnit || ""}
+                          {mismatch ? <StatusBadge size="xs" tone="danger" className="h-4 px-2 font-normal">불일치</StatusBadge> : null}
+                        </span>
+                        {conflicts.length ? (
+                          <span className="mt-1 block text-[11px] leading-4 text-destructive" title={item.evidence.join(" · ")}>
+                            {conflicts.map((candidate) => `${candidate.source} ${candidate.value} ${item.quantityUnit}`).join(" · ")}
+                          </span>
+                        ) : null}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap px-3 py-3 text-right align-top tabular-nums">{groupItemDecimal(item.unitPrice)} {item.currency}</TableCell>
+                      <TableCell className="whitespace-nowrap px-3 py-3 text-right align-top tabular-nums">{itemAmount(item)} {item.currency}</TableCell>
+                      <TableCell className="whitespace-nowrap px-3 py-3 align-top">{item.packageCount || "—"} {item.packageUnit || ""}</TableCell>
+                      <TableCell className="whitespace-nowrap px-3 py-3 text-right align-top tabular-nums">{item.grossWeight || "—"} {item.weightUnit || ""}</TableCell>
+                      <TableCell className="whitespace-nowrap px-3 py-3 text-right align-top tabular-nums">{item.netWeight || "—"} {item.weightUnit || ""}</TableCell>
+                    </TableRow>
+                    {isOpen ? (
+                      <TableRow className="hover:[&>td]:bg-transparent has-aria-expanded:[&>td]:bg-transparent!">
+                        <TableCell colSpan={7} className="p-0 whitespace-normal">
+                          {/* Pinned to the visible width so the editor never scrolls with the wide table. */}
+                          <div className="sticky left-0 w-[100cqw] p-3">
+                          {isEditing ? renderItemEditor(item) : (
+                            <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
+                              <dl className="grid gap-3 sm:grid-cols-2">
+                                {[
+                                  ["품목명", item.goods],
+                                  ["HS Code", item.hsCode],
+                                  ["수량 / 단위", item.quantity ? `${item.quantity} ${item.quantityUnit}` : ""],
+                                  [`단가 · ${item.currency}/${item.quantityUnit}`, groupItemDecimal(item.unitPrice)],
+                                  [profile.direction === "direction_pending" ? "거래 금액" : `${directionLabels[profile.direction]} 금액`, `${itemAmount(item)} ${item.currency}`],
+                                  ["포장 수 / 단위", item.packageCount ? `${item.packageCount} ${item.packageUnit}` : ""],
+                                  ["총중량", item.grossWeight ? `${item.grossWeight} ${item.weightUnit}` : ""],
+                                  ["순중량", item.netWeight ? `${item.netWeight} ${item.weightUnit}` : ""],
+                                ].map(([label, value]) => (
+                                  <div key={label}>
+                                    <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">{label}{label === "수량 / 단위" && mismatch ? <StatusBadge size="xs" tone="danger" className="h-4 px-2 font-normal">불일치</StatusBadge> : null}</dt>
+                                    <dd className={cn("mt-1 min-h-10 rounded-md bg-muted/30 px-3 py-2 text-sm font-medium", label === "수량 / 단위" && mismatch && "text-destructive")}>{value || "—"}</dd>
+                                  </div>
+                                ))}
+                              </dl>
+                              {mismatch && lineItemQuantityCandidates[item.id]?.length ? (
+                                <div className="mt-4 border-t pt-4">
+                                  <h5 className="text-sm font-semibold">문서별 수량</h5>
+                                  <ul className="mt-2 flex flex-wrap gap-2">
+                                    {lineItemQuantityCandidates[item.id].map((candidate) => {
+                                      const differs = normalizeCandidateValue(candidate.value) !== normalizeCandidateValue(item.quantity)
+                                      return (
+                                        <li key={`${candidate.source}-${candidate.document}`} className={cn("rounded-md border px-3 py-1.5 text-xs", differs ? "border-destructive/40 bg-destructive/5 text-destructive" : "bg-background")} title={candidate.document}>
+                                          <span className="font-semibold">{candidate.source}</span> {candidate.value} {item.quantityUnit}
+                                        </li>
+                                      )
+                                    })}
+                                  </ul>
+                                </div>
+                              ) : null}
                             </div>
-                          ) : undefined}
-                          />
-                          <div className="grid grid-cols-[minmax(0,1fr)_72px] gap-1">
-                            {input("quantity", "수량")}
-                            {unit("quantityUnit", "수량 단위", ["MT", "KG", "EA"])}
+                          )}
                           </div>
-                      </td>
-                      <td>
-                          <FormFieldHeader data-item-unit-price-heading className="mb-2 scroll-mt-[calc(var(--deal-header-height,128px)+16px)]" label={`단가 · ${item.currency}/${item.quantityUnit}`} htmlFor={`deal-item-${item.id}-unitPrice`} />
-                        {input("unitPrice", "단가")}
-                      </td>
-                      <td className="col-span-2 @min-[760px]/items:col-span-1">
-                        <FormFieldHeader className="mb-2" label={profile.direction === "direction_pending" ? "거래 금액" : `${directionLabels[profile.direction]} 금액`} htmlFor={`deal-item-${item.id}-amount`} />
-                        <div className="flex min-w-0 items-center gap-2">
-                          <Input
-                            id={`deal-item-${item.id}-amount`}
-                            aria-label={`품목 ${number} 금액`}
-                            className="h-10 px-2 py-0 text-right tabular-nums"
-                            value={itemAmount(item)}
-                            readOnly
-                          />
-                          <span className="shrink-0 text-sm text-muted-foreground">{item.currency}</span>
-                        </div>
-                      </td>
-                      <td className="absolute top-0 right-0 text-right @min-[760px]/items:static @min-[760px]/items:flex @min-[760px]/items:h-10 @min-[760px]/items:items-center @min-[760px]/items:row-start-2 @min-[760px]/items:col-start-5">
-                        {editable && items.length > 1 && (
-                          <Button size="icon-sm" variant="ghost" aria-label={`품목 ${number} 삭제`} onClick={() => onRemoveItem(item.id)}>
-                            <Trash2 />
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                    <tr className="mt-3.5 block">
-                      <td colSpan={5} className="block">
-                        <div className="grid grid-cols-2 gap-3 @min-[480px]/items:grid-cols-3 @min-[680px]/items:grid-cols-[minmax(0,1fr)_184px_minmax(0,1fr)_minmax(0,1fr)_88px] [&>div]:min-w-0">
-                          <div className="order-1 @min-[480px]/items:order-none">
-                            <FormFieldHeader className="mb-2" label="HS Code" htmlFor={`deal-item-${item.id}-hsCode`} />
-                            {input("hsCode", "HS Code")}
-                          </div>
-                          <div className="order-3 col-span-2 @min-[480px]/items:order-none @min-[680px]/items:col-span-1">
-                            <FormFieldHeader className="mb-2" label="포장 수 / 단위" htmlFor={`deal-item-${item.id}-packageCount`} />
-                            <div className="grid grid-cols-[minmax(72px,.7fr)_minmax(108px,1fr)] gap-1">
-                              {input("packageCount", "포장 수")}
-                              {unit("packageUnit", "포장 단위", [
-                                "bundles",
-                                "cartons",
-                                "pallets",
-                              ])}
-                            </div>
-                          </div>
-                          <div className="order-4 @min-[480px]/items:order-none">
-                            <FormFieldHeader className="mb-2" label="총중량" htmlFor={`deal-item-${item.id}-grossWeight`} />
-                            {input("grossWeight", "총중량")}
-                          </div>
-                          <div className="order-5 @min-[480px]/items:order-none">
-                            <FormFieldHeader className="mb-2" label="순중량" htmlFor={`deal-item-${item.id}-netWeight`} />
-                            {input("netWeight", "순중량")}
-                          </div>
-                          <div className="order-2 @min-[480px]/items:order-none">
-                            <FormFieldHeader className="mb-2" label="중량 단위" />
-                            {unit("weightUnit", "중량 단위", [
-                              "KG",
-                              "MT",
-                              "LB",
-                            ])}
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
+                        </TableCell>
+                      </TableRow>
+                    ) : null}
+                  </Fragment>
                 )
               })}
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </section>
     ) : null
+
   const renderGroup = (group: DealFieldGroup) => {
     const groupFields = filteredFields.filter((field) => field.group === group)
     if (!groupFields.length) return null
@@ -3259,7 +3669,11 @@ function DealFieldsPanel({
       </div>
       <div className="min-w-0 overflow-x-hidden pr-2 pb-8">
         {sections.map((section) =>
-          section === "품목" ? itemTable : renderGroup(section)
+          // Only the item list folds into a table (rows open their own
+          // editor); the other contract groups keep their 2-column inputs.
+          section === "품목"
+            ? viewItemTable
+            : renderGroup(section)
         )}
         {!filteredFields.length && !filteredItems.length ? (
           <p className="py-8 text-center text-xs text-muted-foreground">
@@ -3603,6 +4017,8 @@ function DocumentsTab({
   onUpload,
   visibleGroups,
   onMissingFieldsChange,
+  onSaveStatusChange,
+  saveRetryRef,
   onMainInformationChange,
   onDocumentSummaryChange,
   commercialInvoiceView,
@@ -3629,6 +4045,8 @@ function DocumentsTab({
   onUpload: () => void
   visibleGroups: DealFieldGroup[]
   onMissingFieldsChange: (fields: DealMissingField[]) => void
+  onSaveStatusChange?: (status: DealSaveStatus) => void
+  saveRetryRef?: { current: () => void }
   onMainInformationChange: (
     info: Pick<DealProfile, "counterparty" | "amount" | "currency">
   ) => void
@@ -4106,6 +4524,9 @@ function DocumentsTab({
     const saved = await flushPendingEdits([target])
     if (saved) recordCommittedEdit(target, finalValue)
   }
+  useEffect(() => {
+    onSaveStatusChange?.({ state: saveState, savedAt: lastSavedAt, showRetry: saveState === "error" && !fieldConflict })
+  }, [saveState, lastSavedAt, fieldConflict, onSaveStatusChange])
   const retryPendingEdits = async () => {
     const saved = await flushPendingEdits()
     if (!saved) return
@@ -4113,6 +4534,9 @@ function DocumentsTab({
       recordCommittedEdit(target, readTargetValue(target))
     }
   }
+  useEffect(() => {
+    if (saveRetryRef) saveRetryRef.current = () => void retryPendingEdits()
+  })
   const useConflictValue = () => {
     if (!fieldConflict) return
     applyTargetValue(fieldConflict.target, fieldConflict.current)
@@ -4202,7 +4626,7 @@ function DocumentsTab({
         onOpenDocument={onOpenDocument}
         canWrite={canMutate(role)}
         profile={profile}
-        commercialInvoiceContent={<CommercialInvoiceTransactionCard dealId={dealId} view={commercialInvoiceView} linkedInvoiceTargets={linkedInvoiceTargets} onEditShipment={onEditShipment} />}
+        commercialInvoiceContent={<CommercialInvoiceTransactionCard dealId={dealId} view={commercialInvoiceView} linkedInvoiceTargets={linkedInvoiceTargets} onEditShipment={onEditShipment} canWrite={canMutate(role)} />}
         documentStrip={
           <div
             aria-label="거래 상세 서류 목록"
@@ -4269,7 +4693,7 @@ function DocumentsTab({
             <SectionHeading
               title={profile.direction === "direction_pending" ? "거래 상세" : `${directionLabels[profile.direction]} 거래 상세`}
               action={
-                canMutate(role) ? (
+                canMutate(role) ? (onSaveStatusChange ? null : (
                   <div className="flex items-center gap-2">
                     <AutoSaveStatus state={saveState} savedAt={lastSavedAt} />
                     {saveState === "error" && !fieldConflict ? (
@@ -4283,7 +4707,7 @@ function DocumentsTab({
                       </Button>
                     ) : null}
                   </div>
-                ) : (
+                )) : (
                   <span className="text-xs text-muted-foreground">
                     보기 전용
                   </span>
@@ -4328,6 +4752,7 @@ function DocumentsTab({
               </div>
             ) : null}
             <DealFieldsPanel
+              rowStateKey={dealId}
               paymentHistory={paymentHistory}
               profile={profile}
               fields={dealFields}
@@ -4682,7 +5107,6 @@ function FulfillmentTab({
   const [lifecycle, setLifecycle] = useState<OrderState>(() => dealFixtures.find((deal) => deal.id === dealId)?.orderLifecycle ?? "open")
   const [action, setAction] = useState<OrderAction>(null)
   const [reason, setReason] = useState("")
-  const [orderHistoryOpen, setOrderHistoryOpen] = useState(false)
   const [orderEvents, setOrderEvents] = useState<AuditItem[]>([
     {
       id: 1,
@@ -4828,8 +5252,8 @@ function FulfillmentTab({
           <div className="flex flex-col gap-6">
             <section>
               <SectionHeading
-                title={<span className="flex flex-wrap items-center gap-2 text-lg">주문 이행<StatusBadge tone={lifecycle === "closed" || lifecycle === "short_closed" ? "success" : lifecycle === "cancelled" ? "neutral" : "warning"}>{labels[lifecycle]}</StatusBadge></span>}
-                description="계약 20MT · 누적 선적 16MT"
+                title={<span className="flex flex-wrap items-center gap-2 text-lg">주문 이행{lifecycle === "open" ? <Badge palette="powder" tone="fill" className="font-normal">{labels[lifecycle]}</Badge> : <StatusBadge tone={lifecycle === "closed" || lifecycle === "short_closed" ? "success" : "neutral"}>{labels[lifecycle]}</StatusBadge>}</span>}
+                description="계약 20 MT 중 16 MT 선적"
                 action={
                   <div className="flex flex-wrap items-center gap-2">
                     <DealContractTool />
@@ -4850,7 +5274,7 @@ function FulfillmentTab({
                 }
               />
               <div className="mt-4">
-                <Progress value={80} className="h-1" aria-label="주문 이행률" />
+                <Progress value={80} className="h-2" aria-label="주문 이행률" />
                 <div className="mt-2 flex justify-between text-[11px] leading-4 text-muted-foreground">
                   <span>누적 16 MT · 80%</span>
                   <span>{terminal ? "마감 상태 · 잔량 경고 제외" : "잔여 4 MT"}</span>
@@ -4860,27 +5284,34 @@ function FulfillmentTab({
             </section>
             <section className="border-t pt-4">
               <SectionHeading title="주문 이력" action={
-                <Button size="sm" variant="ghost-neutral" className="shrink-0" aria-expanded={orderHistoryOpen} aria-controls="deal-order-history" onClick={() => setOrderHistoryOpen(open => !open)}>
-                  {orderHistoryOpen ? "접기" : "전체 보기"}<ChevronDown data-icon="inline-end" className={cn(orderHistoryOpen && "rotate-180")} />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-10 shrink-0 gap-1 px-0 text-[15px] leading-[22px] font-normal text-[var(--color-primary-4)] hover:bg-transparent hover:text-[var(--color-primary-4)] hover:underline"
+                  onClick={() => window.dispatchEvent(new CustomEvent("ecoya:open-activity-history"))}
+                >
+                  전체 이력<ChevronRight data-icon="inline-end" className="size-5" />
                 </Button>
               } />
-              <ol id="deal-order-history" className="mt-2" hidden={!orderHistoryOpen}>
+              {/* Figma TimelineItem (7934:199865): title + detail · actor, time on the right. */}
+              <ol id="deal-order-history" className="mt-2">
                 {orderEvents.map((event, index, visible) => (
                   <li key={event.id} className="flex items-start gap-3">
                     <div aria-hidden="true" className="flex w-3 shrink-0 flex-col items-center self-stretch gap-1 pt-1.5">
-                      <span className="size-2.5 rounded-full bg-primary" />
-                      {(index < visible.length - 1 || !terminal) && <span className="w-0.5 flex-1 bg-border" />}
+                      <span className="size-2.5 rounded-full bg-[var(--color-primary-4)]" />
+                      {(index < visible.length - 1 || !terminal) && <span className="w-0.5 flex-1 bg-[var(--color-gray-10)]" />}
                     </div>
                     <div className="min-w-0 flex-1 pb-3.5">
                       <p className="text-[15px] leading-[22px]">{event.action}</p>
-                      <p className="mt-0.5 text-[13px] leading-[18px] text-muted-foreground">{event.detail} · {formatDate(event.time, dateTag)} · {event.actor}</p>
+                      <p className="mt-0.5 text-[13px] leading-[18px] text-muted-foreground">{event.detail} · {event.actor}</p>
                     </div>
+                    <span className="shrink-0 text-[13px] leading-[18px] text-muted-foreground tabular-nums">{formatDateTime(event.time, dateTag)}</span>
                   </li>
                 ))}
                 {!terminal && <li className="flex items-start gap-3">
-                  <div aria-hidden="true" className="flex w-3 shrink-0 justify-center pt-1.5"><span className="size-2.5 rounded-full border-2 border-primary bg-card" /></div>
-                  <div className="min-w-0 flex-1"><p className="text-[15px] leading-[22px]">추가 선적 대기</p><p className="mt-0.5 text-[13px] leading-[18px] text-muted-foreground">잔여 4 MT</p></div>
-                  <span className="text-[13px] text-muted-foreground">잔여 4 MT</span>
+                  <div aria-hidden="true" className="flex w-3 shrink-0 justify-center pt-1.5"><span className="size-2.5 rounded-full border-2 border-[var(--color-primary-4)] bg-card" /></div>
+                  <div className="min-w-0 flex-1 pb-3.5"><p className="text-[15px] leading-[22px]">다음 · 추가 선적 대기</p><p className="mt-0.5 text-[13px] leading-[18px] text-muted-foreground">잔여 4 MT — 추가 선적하거나 완료 · 미달 마감으로 닫기</p></div>
+                  <span className="shrink-0 text-[13px] leading-[18px] text-muted-foreground">—</span>
                 </li>}
               </ol>
             </section>
@@ -5402,35 +5833,35 @@ function PeopleTab({
                   canMutate(role) ? (
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="ghost"
+                      className="h-10 shrink-0 gap-1 px-0 text-[15px] leading-[22px] font-normal text-[var(--color-primary-4)] hover:bg-transparent hover:text-[var(--color-primary-4)] hover:underline"
                       onClick={() => setContactOpen(true)}
                     >
-                      <UserPlus data-icon="inline-start" />
-                      연락처 연결
+                      연락처 연결<ChevronRight data-icon="inline-end" className="size-5" />
                     </Button>
                   ) : null
                 }
               />
-              <div className="mt-3 grid gap-x-6 sm:grid-cols-2">
+              {/* Figma 7872:185114 Item: name / role · company in a bordered row. */}
+              <div className="mt-3 grid gap-4 sm:grid-cols-2">
                 {contacts.map((contact) => (
                   <div
                     key={contact.id}
-                    className="flex min-w-0 items-center justify-between gap-3 border-b border-[var(--surface-border)] py-3"
+                    className="flex min-w-0 items-center gap-2.5 rounded-xl border border-[var(--color-gray-10)] bg-card px-4 py-2.5"
                   >
-                    <span className="min-w-0">
-                      <StatusBadge tone="blue">{contact.role}</StatusBadge>
-                      <strong className="mt-2 block truncate text-sm">
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15px] leading-[22px]">
                         {contact.name}
-                      </strong>
-                      <small className="mt-0.5 block truncate text-xs text-muted-foreground">
-                        {contact.company}
-                      </small>
+                      </span>
+                      <span className="mt-0.5 block truncate text-[13px] leading-[18px] text-[var(--color-gray-5)]">
+                        {[contact.role, contact.company].filter(Boolean).join(" · ")}
+                      </span>
                     </span>
                     {canMutate(role) ? (
                       <Button
-                        variant="ghost"
+                        variant="ghost-neutral"
                         size="sm"
-                        className="text-muted-foreground"
+                        className="shrink-0"
                         onClick={() => setContactRemove(contact)}
                       >
                         연결 해제
@@ -5674,6 +6105,13 @@ export function DealDetailScreen({
   const comparisonRestoreScrollTopRef = useRef<number | null>(null)
   const comparisonScrollTopRef = useRef<number | null>(null)
   const comparisonLeftScrollTopRef = useRef<number | null>(null)
+  const comparisonAnchorRef = useRef<ScrollAnchor | null>(null)
+  const lastPointerTargetRef = useRef<Element | null>(null)
+  useEffect(() => {
+    const remember = (event: PointerEvent) => { lastPointerTargetRef.current = event.target instanceof Element ? event.target : null }
+    document.addEventListener("pointerdown", remember, true)
+    return () => document.removeEventListener("pointerdown", remember, true)
+  }, [])
   const [comparisonHeight, setComparisonHeight] = useState<number | null>(null)
   useEffect(() => {
     if (!documentOpen) return
@@ -5708,13 +6146,28 @@ export function DealDetailScreen({
     const viewport = grid?.closest<HTMLElement>("[data-deal-scroll-viewport]")
     if (!grid || !pageContent || !viewport) return
     const savedScrollTop = comparisonScrollTopRef.current
+    const anchor = comparisonAnchorRef.current
+    comparisonAnchorRef.current = null
+    // Put the clicked control back at the height it had before the split;
+    // repeat once content that loads late (e.g. shipments) has settled.
+    const alignToAnchor = () => {
+      if (!anchor) return
+      const element = pageContent.querySelectorAll(anchor.selector)[anchor.index]
+      if (element) pageContent.scrollTop += element.getBoundingClientRect().top - anchor.top
+    }
+    const timers: number[] = []
     const frame = window.requestAnimationFrame(() => {
       if (savedScrollTop != null) viewport.scrollTop = savedScrollTop
       pageContent.scrollTop = comparisonLeftScrollTopRef.current ?? 0
       comparisonScrollTopRef.current = null
       comparisonLeftScrollTopRef.current = null
+      alignToAnchor()
+      timers.push(window.setTimeout(alignToAnchor, 350), window.setTimeout(alignToAnchor, 900))
     })
-    return () => window.cancelAnimationFrame(frame)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      timers.forEach((timer) => window.clearTimeout(timer))
+    }
   }, [comparisonHeight, documentOpen])
   const openDocumentPanel = useCallback(() => {
     if (!documentOpen) {
@@ -5724,13 +6177,20 @@ export function DealDetailScreen({
       comparisonRestoreScrollTopRef.current = viewport?.scrollTop ?? null
       const viewportRect = viewport?.getBoundingClientRect()
       const gridRect = grid?.getBoundingClientRect()
-      // Keep the outer deal viewport exactly where the user opened the
-      // comparison. The grid becomes sticky below the deal header, while its
-      // left pane receives the previous viewport offset below.
-      comparisonScrollTopRef.current = viewport?.scrollTop ?? null
+      // Keep the outer deal viewport where the user opened the comparison, but
+      // at least far enough down that the review/confirm notice boxes above the
+      // grid scroll away (the header then shows its compact alert buttons) and
+      // the split starts right below the deal header.
+      const header = document.querySelector<HTMLElement>("[data-deal-sticky-header]")
+      const headerBottom = header?.getBoundingClientRect().bottom ?? viewportRect?.top ?? 0
+      const gridBelowHeader = viewport && gridRect ? viewport.scrollTop + gridRect.top - headerBottom - 8 : null
+      comparisonScrollTopRef.current = viewport
+        ? Math.max(viewport.scrollTop, gridBelowHeader ?? 0)
+        : null
       comparisonLeftScrollTopRef.current = viewportRect && gridRect
         ? Math.max(0, viewportRect.top - gridRect.top)
         : null
+      comparisonAnchorRef.current = describeScrollAnchor(lastPointerTargetRef.current)
       if (viewport) viewport.style.overflowAnchor = "none"
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
     }
@@ -5814,6 +6274,10 @@ export function DealDetailScreen({
     },
     [connectedShipmentContainerDrafts, connectedShipmentDrafts, dealId]
   )
+  // Prototype data: the shipment API rows and the B/L document fixture use
+  // different numbers, so match by B/L number first and fall back to row order.
+  const billForShipment = (shipment: { bl_number?: string | null }, index: number) =>
+    splitShipmentView.billsOfLading.find((entry) => entry.blNumber && entry.blNumber === shipment.bl_number) ?? splitShipmentView.billsOfLading[index]
   const openDealDocument = (work: DealWorkKey) => {
     if (work === "finance") return
     const code = work === "fulfillment"
@@ -5968,6 +6432,8 @@ export function DealDetailScreen({
     [plan]
   )
   const [missingFields, setMissingFields] = useState<DealMissingField[]>([])
+  const [saveStatus, setSaveStatus] = useState<DealSaveStatus | null>(null)
+  const saveRetryRef = useRef<() => void>(() => {})
   const openFieldGroup = (group: DealFieldGroup) => {
     closeDocumentPanel()
     if (!visibleGroups.includes(group) && canMutate(role)) {
@@ -6109,6 +6575,27 @@ export function DealDetailScreen({
     setReviewFocusId(id)
     setVerificationOpen(true)
   }
+  useEffect(() => {
+    const openSale = (event: Event) => {
+      const anchorId = dealSaleAnchorId((event as CustomEvent<string>).detail)
+      setActiveSection("finance")
+      setPreviewWork((current) => current.includes("finance") ? current : [...current, "finance"])
+      let attempts = 30
+      const scrollWhenReady = () => {
+        const target = document.getElementById(anchorId) ?? (attempts <= 0 ? document.getElementById("deal-finance") : null)
+        if (target) {
+          target.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" })
+          window.history.replaceState(null, "", `#${anchorId}`)
+        } else {
+          attempts -= 1
+          requestAnimationFrame(scrollWhenReady)
+        }
+      }
+      requestAnimationFrame(scrollWhenReady)
+    }
+    window.addEventListener("ecoya:open-deal-sale", openSale)
+    return () => window.removeEventListener("ecoya:open-deal-sale", openSale)
+  }, [])
   const navigateSection = (value: Tab) => {
     closeDocumentPanel()
     if (value === "verification") {
@@ -6376,7 +6863,13 @@ export function DealDetailScreen({
             className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
           >
             <FulfillmentTab
-              shipmentContent={<OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} onOpenDocument={() => openDealDocument("fulfillment")} />}
+              shipmentContent={<OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} onOpenDocument={() => openDealDocument("fulfillment")} shipmentRowAnchorId={(shipment, index) => {
+                const bill = billForShipment(shipment, index)
+                return bill ? dealBillAnchorId(bill.documentId) : undefined
+              }} renderShipmentDetail={(shipment, index) => {
+                const bill = billForShipment(shipment, index)
+                return bill ? <ShipmentBillDetail dealId={dealId} bill={bill} view={splitShipmentView} /> : <p className="text-sm text-muted-foreground">연결된 B/L 문서가 없습니다. B/L을 올리면 포장명세서와 연결 CI가 여기에 표시됩니다.</p>
+              }} />}
               onSummaryChange={setShipmentSummary}
               onEditUnitPrice={openItemUnitPrice}
               dealId={dealId}
@@ -6391,26 +6884,63 @@ export function DealDetailScreen({
             tabIndex={-1}
             className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] p-5 outline-none"
           >
-            <h2 className="text-base font-semibold">
-              통관 문서 확인
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              수출입 신고서를 거래에 연결하고 문서의
-              신고번호·신고일·품목 정보를 확인합니다.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                onClick={() => openDealDocument("customs")}
-              >
-                거래 서류 확인
-              </Button>
+            {/* Figma 7872:185027 「통관 문서」: declaration rows with confirmed data only. */}
+            <div className="flex items-center gap-1">
+              <h2 className="min-w-0 flex-1 text-[18px] leading-[26px] font-bold">통관 문서</h2>
               {canMutate(role) && (
-                <Button onClick={onUpload}>
-                  이 거래로 통관 서류 올리기
+                <Button variant="outline" size="sm" onClick={onUpload}>
+                  <Plus data-icon="inline-start" />
+                  문서 올리기
                 </Button>
               )}
             </div>
+            <div className="mt-4 overflow-x-auto" role="region" aria-label="통관 문서 목록">
+              <Table className="min-w-[880px] table-fixed text-left text-[15px] leading-[22px]" aria-label="통관 문서">
+                <colgroup><col style={{ width: "28.5%" }} /><col style={{ width: "13.7%" }} /><col style={{ width: "15.9%" }} /><col style={{ width: "15.9%" }} /><col style={{ width: "10.1%" }} /><col style={{ width: "15.9%" }} /></colgroup>
+                <TableHeader className="bg-[var(--color-gray-11)]">
+                  <TableRow className="hover:bg-transparent">
+                    {["문서 / 신고번호", "통관일", "관세", "부가세", "상태", "작업"].map((label) => (
+                      <TableHead key={label} className={cn("h-14 px-3 text-[15px] leading-[22px] font-normal text-[var(--color-gray-4)]", (label === "상태" || label === "작업") && "text-center")}>{label}</TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {customsDeclarations(profile.direction, dealId).length === 0 ? (
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell colSpan={6} className="px-3 py-6 text-center text-[13px] leading-[18px] text-[var(--color-gray-5)] whitespace-normal">
+                        아직 확정된 통관 문서가 없습니다. {profile.direction === "sales" ? "수출신고필증" : "수입신고필증"}을 올리면 여기에 표시됩니다.
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                  {customsDeclarations(profile.direction, dealId).map((row) => (
+                    <TableRow key={row.number} className="h-14">
+                      <TableCell className="px-3 py-1.5">
+                        <div className="truncate">{row.title}</div>
+                        <div className="mt-0.5 truncate text-[var(--color-gray-5)] tabular-nums">{row.number}</div>
+                      </TableCell>
+                      <TableCell className="px-3 tabular-nums">{row.date}</TableCell>
+                      <TableCell className="px-3 tabular-nums">{row.duty}</TableCell>
+                      <TableCell className="px-3 tabular-nums">{row.vat}</TableCell>
+                      <TableCell className="px-3 text-center">
+                        <StatusBadge tone={row.confirmed ? "success" : "warning"} className="h-4 px-2.5 font-normal">{row.confirmed ? "확정" : "검토 필요"}</StatusBadge>
+                      </TableCell>
+                      <TableCell className="px-3 text-center">
+                        {row.confirmed ? (
+                          <Button variant="outline" size="sm" onClick={() => openDealDocument("customs")}>데이터 보기</Button>
+                        ) : (
+                          <Button variant="outline" size="sm" className="min-w-20 pr-2.5 pl-3" onClick={() => openDealDocument("customs")}>
+                            문서 검토<ExternalLink data-icon="inline-end" className="size-4" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <p className="mt-4 text-[13px] leading-[18px] text-[var(--color-gray-5)]">
+              {profile.direction === "sales" ? "수출신고필증" : "수입신고필증"}은 확정 후 원본을 보관하지 않습니다. 확정 데이터만 표시합니다.
+            </p>
           </section>
         ),
         finance: (
@@ -6437,6 +6967,8 @@ export function DealDetailScreen({
       onUpload={onUpload}
       visibleGroups={visibleGroups}
       onMissingFieldsChange={setMissingFields}
+      onSaveStatusChange={setSaveStatus}
+      saveRetryRef={saveRetryRef}
       onMainInformationChange={setMainInformation}
       onDocumentSummaryChange={setDocumentSummary}
       documentOpen={documentOpen}
@@ -6465,7 +6997,7 @@ export function DealDetailScreen({
       aria-label="거래 메모·활동 이력"
       id="deal-records-main"
       tabIndex={-1}
-      className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] p-5"
+      className="flex scroll-mt-[calc(var(--deal-header-height,128px)+16px)] flex-col gap-4 outline-none"
     >
       <DealRecordSections
         key={dealId}
@@ -6482,9 +7014,12 @@ export function DealDetailScreen({
       aria-label="거래 현황"
       data-deal-information-aside
       ref={informationRailRef}
-      className="min-w-0 self-start rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:h-fit xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
+      // Below xl the page is one column: the rail moves above the content
+      // (order-first) and, from md, lays its three blocks side by side so it
+      // stays short instead of pushing the content far down.
+      className="order-first min-w-0 self-start rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] xl:order-none xl:h-fit xl:sticky xl:top-[var(--deal-rail-sticky-top,144px)] [&_a]:underline-offset-4 [&_a:hover]:underline"
     >
-    <div className="divide-y divide-[var(--surface-border)]">
+    <div className="divide-y divide-[var(--surface-border)] md:max-xl:grid md:max-xl:grid-cols-3 md:max-xl:divide-x md:max-xl:divide-y-0">
       <section
         aria-label="주요 거래 정보"
         className="flex flex-col gap-4 p-5"
@@ -6588,9 +7123,11 @@ export function DealDetailScreen({
             data-deal-sticky-header
             // Figma 문서 올리기 V2 (6233:81736) layout, white: the title row is a
             // card (same radius as the body cards) inset 20px, with the alert card below it.
-            className="sticky top-0 z-30 mx-4 mt-1.5 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] sm:mx-5"
+            // @container/dealhead: actions shorten with the header's own width
+            // (also when 「문서와 보기」 narrows the page) so it stays one row.
+            className="@container/dealhead sticky top-0 z-30 mx-4 mt-1.5 rounded-[var(--r-lg)] bg-[var(--color-gray-12)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] sm:mx-5"
           >
-            <div className="flex min-h-14 flex-wrap items-center gap-2 px-3 py-2 sm:px-4 xl:px-6">
+            <div className="flex min-h-14 flex-wrap items-center gap-2 px-3 py-2 sm:px-4 xl:px-6 @min-[640px]/dealhead:flex-nowrap">
               <Button
                 type="button"
                 variant="ghost"
@@ -6601,7 +7138,7 @@ export function DealDetailScreen({
                 <ChevronLeft />
               </Button>
               <form
-                className="mr-auto min-w-0"
+                className="mr-auto min-w-0 @min-[640px]/dealhead:flex-1"
                 onSubmit={(event) => {
                   event.preventDefault()
                   void saveDealId()
@@ -6757,6 +7294,16 @@ export function DealDetailScreen({
                   </Button>
                 </div>
               </form>
+              {saveStatus && canMutate(role) ? (
+                <span className="mr-1 flex shrink-0 items-center gap-1.5" title={saveStatus.state === "saved" ? "모든 변경은 자동 저장됩니다" : undefined}>
+                  <AutoSaveStatus state={saveStatus.state} savedAt={saveStatus.savedAt} className="px-0 text-[13px] leading-[18px] @max-[899px]/dealhead:text-[0px]" />
+                  {saveStatus.showRetry ? (
+                    <Button type="button" variant="outline" size="xs" onClick={() => saveRetryRef.current()}>
+                      다시 저장
+                    </Button>
+                  ) : null}
+                </span>
+              ) : null}
               {compactAlerts && (
                 <div
                   ref={compactAlertsRef}
@@ -6779,8 +7326,10 @@ export function DealDetailScreen({
                 size="sm"
                 disabled={!canMutate(role)}
                 onClick={onUpload}
+                aria-label="문서 올리기"
+                title="문서 올리기"
               >
-                <NavigationIcon name="upload" className="!size-[18px]" />문서 올리기
+                <NavigationIcon name="upload" className="!size-[18px]" /><span className="hidden @min-[1100px]/dealhead:inline">문서 올리기</span>
               </Button>
               <Popover
                 open={documentTemplatePickerOpen}
@@ -6794,8 +7343,9 @@ export function DealDetailScreen({
                     variant="outline"
                     size="sm"
                     title={`${currentDealId} 거래 정보로 문서 만들기`}
+                    aria-label="문서 만들기"
                   >
-                    <NavigationIcon name="document" className="!size-[18px]" />문서 만들기
+                    <NavigationIcon name="document" className="!size-[18px]" /><span className="hidden @min-[1100px]/dealhead:inline">문서 만들기</span>
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
@@ -6855,7 +7405,7 @@ export function DealDetailScreen({
                         : "이 거래에서 만든 문서 보기"
                     }
                   >
-                    <span>문서 고객 전달</span>
+                    <span><span className="hidden @min-[900px]/dealhead:inline">문서 </span>고객 전달</span>
                     <span className="inline-flex min-w-4 items-center justify-center rounded-full bg-current/10 px-1 text-[11px] tabular-nums">
                       {generatedDocuments.length}
                     </span>

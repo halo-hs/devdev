@@ -112,6 +112,9 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
   const writable = canWrite && Boolean(baseline.edit_token);
   const containerDetailsChanged = JSON.stringify(containerDrafts) !== JSON.stringify(initialContainerDetails);
   const hasChanges = Object.keys(edits).length > 0 || Object.keys(detailEdits).length > 0 || containerDetailsChanged;
+  // Figma 7872:186116: the shipment table pencil opens schedule-only editing.
+  // The B/L edit (with container details) keeps the basic-info section.
+  const scheduleOnly = !containerDetails;
 
   const setField = (field: ConfirmationField, value: string) => {
     setDraft((old) => ({ ...old, [field]: value }));
@@ -186,14 +189,14 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] gap-5 overflow-y-auto p-6 sm:max-w-3xl" onCloseAutoFocus={(event) => { event.preventDefault(); returnFocus(); }}>
+      <DialogContent className={scheduleOnly ? "max-h-[90dvh] w-[calc(100%-2rem)] gap-4 overflow-y-auto sm:max-w-[720px]" : "max-h-[90dvh] w-[calc(100%-2rem)] gap-5 overflow-y-auto p-6 sm:max-w-3xl"} onCloseAutoFocus={(event) => { event.preventDefault(); returnFocus(); }}>
         <DialogHeader>
-          <DialogTitle>선적 정보 확인·수정</DialogTitle>
-          <DialogDescription>선적 기본 정보, 일정과 운송 상태를 수정합니다.</DialogDescription>
+          <DialogTitle className={scheduleOnly ? "text-[18px] leading-[26px]" : undefined}>{scheduleOnly ? "일정 확인·수정" : "선적 정보 확인·수정"}</DialogTitle>
+          <DialogDescription>{scheduleOnly ? "선적 일정과 운송 상태를 수정합니다." : "선적 기본 정보, 일정과 운송 상태를 수정합니다."}</DialogDescription>
         </DialogHeader>
         <form className="flex flex-col gap-4" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
-          <FieldDescription className="text-[var(--color-gray-4)]">{c.manualHint}</FieldDescription>
-          <section className="rounded-lg border p-4" aria-label="선적 기본 정보">
+          <FieldDescription className="text-[13px] leading-[18px] text-[var(--color-gray-5)]">{c.manualHint}</FieldDescription>
+          {scheduleOnly ? null : <section className="rounded-lg border p-4" aria-label="선적 기본 정보">
             <h3 className="text-sm font-semibold">선적 기본 정보</h3>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               {detailFields.filter(({ key }) => !(containerDetails && key === "container_number")).map(({ key, label }) => (
@@ -248,7 +251,7 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
                 </div>
               </section>
             ) : null}
-          </section>
+          </section>}
           <FieldGroup className="gap-4">
           {fields.map((field) => {
             const label = field === "confirmed_etd" ? c.etd : field === "confirmed_eta" ? c.eta : c.status;
@@ -266,12 +269,12 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
                   <DatePicker ariaLabel={label} className="w-full" disabled={pending || released || !writable} id={`shipment-${field}`} invalid={changed && !released && !draft[field]} onValueChange={(value) => setField(field, value)} value={draft[field] ?? ""} />
                 )}
                 {field === "confirmed_status" ? <ShipmentConfirmationRecord shipment={baseline} /> : null}
-                {field === "confirmed_status" ? <FieldDescription className="text-[var(--color-gray-4)]" id="shipment-status-hint">{c.statusHint}</FieldDescription> : null}
+                {field === "confirmed_status" ? <FieldDescription className="text-[13px] leading-[18px] text-[var(--color-gray-5)]" id="shipment-status-hint">{c.statusHint}</FieldDescription> : null}
                 {released ? <FieldDescription className="text-[var(--color-gray-4)]" role="status">{field === "confirmed_status" ? c.releaseStatusHint : c.releaseHint}</FieldDescription> : null}
-                <div className="flex flex-wrap gap-2">
+                {(baseline[field] != null && !released) || changed ? <div className="flex flex-wrap gap-2">
                   {baseline[field] != null && !released ? <Button aria-label={`${label}: ${field === "confirmed_status" ? c.useProviderStatus : c.useSource}`} disabled={pending || !writable} onClick={() => setEdits((old) => ({ ...old, [field]: null }))} size="sm" type="button" variant="link">{field === "confirmed_status" ? c.useProviderStatus : c.useSource}</Button> : null}
                   {changed ? <Button aria-label={`${label}: ${c.undo}`} disabled={pending} onClick={() => { setDraft((old) => ({ ...old, [field]: initial[field] })); setEdits((old) => { const next = { ...old }; delete next[field]; return next; }); }} size="sm" type="button" variant="link">{c.undo}</Button> : null}
-                </div>
+                </div> : null}
               </Field>
             );
           })}
@@ -296,8 +299,8 @@ export function ShipmentConfirmationDialog({ shipment, copy, canWrite, onSave, o
             </Alert>
           ) : null}
           <DialogFooter>
-            <Button onClick={onClose} size="lg" type="button" variant="outline">{pending ? c.close : c.cancel}</Button>
-              <Button disabled={!writable || pending || needsReview || invalidDate || !hasChanges} size="lg" type="submit">{pending ? c.saving : c.save}</Button>
+            <Button onClick={onClose} size={scheduleOnly ? "default" : "lg"} type="button" variant="outline">{pending ? c.close : c.cancel}</Button>
+              <Button disabled={!writable || pending || needsReview || invalidDate || !hasChanges} size={scheduleOnly ? "default" : "lg"} type="submit">{pending ? c.saving : c.save}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -200,8 +200,10 @@
 }
 .ops-screen .ops-shipment-list-card .ops-shipment-group + .ops-shipment-group { border-top: 1px solid var(--color-gray-10); }
 .ops-screen .ops-shipment-table { min-width: 1040px; table-layout: fixed; }
-.ops-screen .ops-shipment-table [data-slot="table-cell"] { white-space: normal; overflow-wrap: anywhere; padding-block: 16px; }
+.ops-screen .ops-shipment-table [data-slot="table-cell"] { white-space: normal; overflow-wrap: anywhere; padding-block: 9px; } /* Figma 7872:184996: 64px rows with two 15/22 lines. */
 .ops-screen .ops-shipment-table tbody tr:last-child td { border-bottom: 0; }
+/* Expanded deal rows pin to the visible table width (w-[100cqw]) instead of the 880px table. */
+.ops-screen .ops-shipment-group > [data-slot="table-container"] { container-type: inline-size; }
 .ops-screen .ops-shipment-date-details { margin-top: 4px; }
 .ops-screen .ops-shipment-date-details summary { cursor: pointer; }
 @media (max-width: 639px) { .ops-screen .ops-shipment-group-heading { padding: 16px; } }

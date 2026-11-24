@@ -78,11 +78,14 @@ export function BusinessFilterSelect({
   value,
   onValueChange,
   options,
+  size,
 }: {
   label: string
   value: string
   onValueChange: (value: string) => void
   options: Array<{ value: string; label: string }>
+  /** Figma Select size; omitted keeps the default (40px) trigger. */
+  size?: "sm" | "default"
 }) {
   return (
     <BusinessFilterField label={label}>
@@ -92,7 +95,7 @@ export function BusinessFilterSelect({
           if (next != null) onValueChange(next)
         }}
       >
-        <SelectTrigger aria-label={label}>
+        <SelectTrigger aria-label={label} size={size}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent align="start">
