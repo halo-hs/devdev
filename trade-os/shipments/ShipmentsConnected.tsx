@@ -126,6 +126,12 @@ export type CommercialInvoiceCard = {
   packageUnit?: string | null;
   onOpen?: () => void;
 };
+export type ShipmentDocumentLink = {
+  documentId: string;
+  code: "CI" | "PL";
+  number?: string | null;
+  fileName: string;
+};
 export type BillOfLadingCard = {
   documentId: string;
   blNumber: string | null;
@@ -148,6 +154,7 @@ export type BillOfLadingCard = {
     volume?: string | null;
   };
   containers?: ShipmentContainerCard[];
+  connectedDocuments?: ShipmentDocumentLink[];
   connectedCommercialInvoices: CommercialInvoiceCard[];
 };
 export type SplitShipmentView = {

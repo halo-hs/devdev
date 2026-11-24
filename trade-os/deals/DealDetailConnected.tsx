@@ -10,11 +10,14 @@ import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
 import { InfoBox } from "@trade-os/components/InfoBox"
 import { OperationsScreen } from "@trade-os/OperationsScreens"
 import type { SplitShipmentView } from "@trade-os/shipments/ShipmentsConnected"
+import { linkDealInvoiceToBill, readDealInvoiceRelations, saveDealInvoiceField } from "@trade-os/lib/dealDocumentRelations"
 import { ShipmentConfirmationDialog, type ShipmentContainerEdit } from "@trade-os/shipments/ShipmentConfirmationDialog"
 import type { Shipment } from "@trade-os/lib/api/shipments"
 import { messages } from "@trade-os/lib/i18n/messages"
 import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@/components/platform/FormItem"
 import {
+  documentStageGuidance,
+  documentStageRules,
   getDealWorkPlan,
   readStartedWork,
   workIds,
@@ -126,6 +129,7 @@ import {
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { useIsCompactWorkspace } from "@/hooks/useIsMobile"
 import { StatusBadge } from "@/components/platform/StatusBadge"
 import { DatePicker } from "@/components/ui/DatePicker"
 import { prototypeBackend, type MutationResult } from "@trade-os/lib/prototypeBackend"
@@ -310,6 +314,8 @@ async function requireMutation(
 const detectDealDocumentCode = (fileName: string) => {
   const normalized = fileName.toLowerCase()
   const matchers: Array<[string, RegExp]> = [
+    ["CUSTOMS_ENTRY", /(^|[\s_.-])(customs.entry|import.declaration|import.customs)([\s_.-]|$)/],
+    ["CUSTOMS_EXPORT", /(^|[\s_.-])(customs.export|export.declaration|export.customs)([\s_.-]|$)/],
     ["BL", /(^|[\s_.-])(b\/l|bl|bill.of.lading)([\s_.-]|$)/],
     ["CI", /(^|[\s_.-])(ci|invoice|commercial.invoice)([\s_.-]|$)/],
     ["PL", /(^|[\s_.-])(pl|packing.list|packinglist)([\s_.-]|$)/],
@@ -1704,6 +1710,10 @@ const splitShipmentReviewFixture = (dealId: string, onOpenDocument: (fileName: s
         { number: "HMMU1234567", sealNumber: "SEAL-01402-A", packageCount: "6", packageUnit: "bundles", grossWeight: "8,240 KG", volume: "16.2 CBM" },
         { number: "HMMU1234568", sealNumber: "SEAL-01402-B", packageCount: "6", packageUnit: "bundles", grossWeight: "8,240 KG", volume: "16.2 CBM" },
       ],
+      connectedDocuments: [
+        { documentId: "ci-0703", code: "CI", number: "CI-2026-0703", fileName: "Invoice_HB-2607-003.pdf" },
+        { documentId: "pl-0707", code: "PL", number: "PL-2026-0707", fileName: "PackingList_0707.pdf" },
+      ],
       connectedCommercialInvoices: [
         { documentId: "ci-0703", fileName: "Invoice_HB-2607-003.pdf", uploadedAt: "2026.11.18 14:22", invoiceNumber: "CI-2026-0703", invoiceDate: "2026.11.17", currency: "USD", totalAmount: 1539996, item: "Aluminium Scrap Tough Taboo", quantity: "12 MT", unitPrice: "128,333 USD/MT", packageCount: "12", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_HB-2607-003.pdf", "ci-0703") },
       ],
@@ -1715,6 +1725,10 @@ const splitShipmentReviewFixture = (dealId: string, onOpenDocument: (fileName: s
       uploadedAt: "2026.11.19 09:10",
       fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "015W", shippedOnBoardDate: "2026.11.27", containerNumber: "HMMU7654321", containerCount: 1, sealNumber: "SEAL-01503", packageCount: "6", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "8,200 KG", volume: "16.1 CBM" },
       containers: [{ number: "HMMU7654321", sealNumber: "SEAL-01503", packageCount: "6", packageUnit: "bundles", grossWeight: "8,200 KG", volume: "16.1 CBM" }],
+      connectedDocuments: [
+        { documentId: "ci-0712", code: "CI", number: "CI-2026-0712", fileName: "Invoice_HB-2607-012.pdf" },
+        { documentId: "pl-0708", code: "PL", number: "PL-2026-0708", fileName: "PackingList_0708.pdf" },
+      ],
       connectedCommercialInvoices: [{ documentId: "ci-0712", fileName: "Invoice_HB-2607-012.pdf", uploadedAt: "2026.11.19 09:12", invoiceNumber: "CI-2026-0712", invoiceDate: "2026.11.18", currency: "USD", totalAmount: 770000, item: "Aluminium Scrap", quantity: "6 MT", unitPrice: "128,333 USD/MT", packageCount: "6", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_HB-2607-012.pdf", "ci-0712") }],
     },
     {
@@ -1726,6 +1740,10 @@ const splitShipmentReviewFixture = (dealId: string, onOpenDocument: (fileName: s
       containers: [
         { number: "HMMU9876543", sealNumber: "SEAL-01604-A", packageCount: "4", packageUnit: "bundles", grossWeight: "5,200 KG", volume: "10.1 CBM" },
         { number: "HMMU9876544", sealNumber: "SEAL-01604-B", packageCount: "4", packageUnit: "bundles", grossWeight: "5,200 KG", volume: "10.1 CBM" },
+      ],
+      connectedDocuments: [
+        { documentId: "ci-0715", code: "CI", number: "CI-2026-0715", fileName: "Invoice_HB-2607-015.pdf" },
+        { documentId: "pl-0709", code: "PL", number: "PL-2026-0709", fileName: "PackingList_0709.pdf" },
       ],
       connectedCommercialInvoices: [{ documentId: "ci-0715", fileName: "Invoice_HB-2607-015.pdf", uploadedAt: "2026.11.20 10:07", invoiceNumber: "CI-2026-0715", invoiceDate: "2026.11.19", currency: "USD", totalAmount: 1026400, item: "Aluminium Scrap", quantity: "8 MT", unitPrice: "128,300 USD/MT", packageCount: "8", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_HB-2607-015.pdf", "ci-0715") }],
     },
@@ -1776,14 +1794,19 @@ function CommercialInvoiceTransactionCard({
       ...view.unlinkedDocuments.map((invoice) => invoice.documentId),
     ])
   )
-  const [drafts, setDrafts] = useState<Record<string, Record<string, string>>>({})
-  const [localInvoiceLinks, setLocalInvoiceLinks] = useState<Record<string, string>>({})
+  const [relationState, setRelationState] = useState(() => readDealInvoiceRelations(dealId))
+  const [drafts, setDrafts] = useState<Record<string, Record<string, string>>>(() => relationState.invoiceFields)
   const [invoiceLinkSelections, setInvoiceLinkSelections] = useState<Record<string, string>>({})
   const [saleInvoiceId, setSaleInvoiceId] = useState<string | null>(null)
   const [saleDraft, setSaleDraft] = useState({ amount: "", currency: "KRW", customer: "", date: new Date().toISOString().slice(0, 10), evidence: "" })
   const [registeredSales, setRegisteredSales] = useState<Record<string, DealSale>>(() =>
     Object.fromEntries(readDealSales(dealId).map((sale) => [sale.invoiceId, sale]))
   )
+  useEffect(() => {
+    const next = readDealInvoiceRelations(dealId)
+    setRelationState(next)
+    setDrafts(next.invoiceFields)
+  }, [dealId])
   useEffect(() => {
     const handleSalesChange = (event: Event) => {
       if ((event as CustomEvent<string>).detail !== dealId) return
@@ -1792,7 +1815,6 @@ function CommercialInvoiceTransactionCard({
     window.addEventListener(saleChangeEvent, handleSalesChange)
     return () => window.removeEventListener(saleChangeEvent, handleSalesChange)
   }, [dealId])
-  const invoiceLinks = useMemo(() => ({ ...linkedInvoiceTargets, ...localInvoiceLinks }), [linkedInvoiceTargets, localInvoiceLinks])
   const records = useMemo<CommercialInvoiceRecord[]>(() => {
     const byId = new Map<string, CommercialInvoiceRecord>()
     for (const bill of view.billsOfLading) {
@@ -1807,12 +1829,18 @@ function CommercialInvoiceTransactionCard({
     for (const invoice of view.unlinkedDocuments) {
       if (!byId.has(invoice.documentId)) byId.set(invoice.documentId, { invoice, billOfLadingIds: [] })
     }
-    for (const [invoiceId, billId] of Object.entries(invoiceLinks)) {
+    for (const [invoiceId, billId] of Object.entries(linkedInvoiceTargets)) {
       const record = byId.get(invoiceId)
       if (record && !record.billOfLadingIds.includes(billId)) record.billOfLadingIds.push(billId)
     }
+    for (const [invoiceId, billIds] of Object.entries(relationState.invoiceToBills)) {
+      const record = byId.get(invoiceId)
+      if (record) {
+        record.billOfLadingIds = [...new Set([...record.billOfLadingIds, ...billIds])]
+      }
+    }
     return [...byId.values()]
-  }, [invoiceLinks, view])
+  }, [linkedInvoiceTargets, relationState.invoiceToBills, view])
   const toggle = (id: string) => setExpanded((current) => {
     const next = new Set(current)
     if (next.has(id)) next.delete(id)
@@ -1821,9 +1849,10 @@ function CommercialInvoiceTransactionCard({
   })
   const updateDraft = (invoiceId: string, field: string, value: string) => {
     setDrafts((current) => ({ ...current, [invoiceId]: { ...current[invoiceId], [field]: value } }))
+    setRelationState(saveDealInvoiceField(dealId, invoiceId, field, value))
   }
   const linkInvoice = (invoiceId: string, billId: string) => {
-    setLocalInvoiceLinks((current) => ({ ...current, [invoiceId]: billId }))
+    setRelationState(linkDealInvoiceToBill(dealId, invoiceId, billId))
   }
   const billById = new Map(view.billsOfLading.map((bill) => [bill.documentId, bill]))
   return (
@@ -1888,6 +1917,11 @@ function CommercialInvoiceTransactionCard({
                                   <strong>{bill.blNumber || "B/L 번호 미확인"}</strong>
                                   <span className="text-muted-foreground">{bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}</span>
                                   <StatusBadge size="sm" tone="neutral">{containerCountLabel(bill)}</StatusBadge>
+                                  {bill.connectedDocuments?.map((document) => (
+                                    <StatusBadge key={document.documentId} size="sm" tone="info">
+                                      {document.code} {document.number ?? document.fileName}
+                                    </StatusBadge>
+                                  ))}
                                 </div>
                               </div>
                               <span className="flex items-center gap-2">
@@ -1922,11 +1956,11 @@ function CommercialInvoiceTransactionCard({
                           >
                             <SelectTrigger
                               aria-label={`${invoice.invoiceNumber || invoice.fileName} 연결할 선적 후보`}
-                              className="h-9 min-w-56"
+                              className="h-9 w-full min-w-0 sm:w-72"
                             >
                               <SelectValue placeholder="연결할 B/L 선택" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="min-w-[18rem] max-w-[calc(100vw-2rem)]">
                               {view.billsOfLading.map((bill) => (
                                 <SelectItem key={bill.documentId} value={bill.documentId}>
                                   {bill.blNumber || bill.fileName} · {bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}
@@ -2032,6 +2066,9 @@ function DealWorkBlock({
             }
           </span>
           <h2 className="text-lg font-semibold">{workLabels[work]}</h2>
+          <p className="min-w-0 truncate text-xs text-muted-foreground">
+            {documentStageGuidance[work]}
+          </p>
           <StatusBadge tone={state === "complete" ? "success" : "blue"}>
             {state === "complete"
               ? "완료"
@@ -2061,6 +2098,9 @@ function DealWorkBlock({
           <span className="text-sm font-semibold tabular-nums text-muted-foreground">{{ documents: "01", fulfillment: "02", customs: "03", finance: "04" }[work]}</span>
           <h2 className="text-lg font-semibold">{workLabels[work]}</h2>
           <StatusBadge>예정</StatusBadge>
+          <p className="min-w-0 truncate text-xs text-muted-foreground">
+            {documentStageGuidance[work]}
+          </p>
         </div>
         {showPlannedDocumentAction ? (
           <Button
@@ -2188,14 +2228,15 @@ function DealDocumentPanels({
           canWrite={canWrite}
         >
           {work === "documents" ? (
-            <section
-              id="deal-documents"
-              aria-label="거래 상세 정보"
-              tabIndex={-1}
-              // Title, document tabs and the detail editor share one card; the
-              // editor drops its own card chrome so cards are not nested.
-              className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 pt-5 pb-1 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] outline-none"
-            >
+            <>
+              <section
+                id="deal-documents"
+                aria-label="거래 상세 정보"
+                tabIndex={-1}
+                // Title, document tabs and the detail editor share one card; the
+                // editor drops its own card chrome so cards are not nested.
+                className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-[var(--r-lg)] bg-[var(--color-gray-12)] px-5 pt-5 pb-1 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)] outline-none"
+              >
               <div className="mb-3 flex items-center justify-between gap-3">
                 <h2 className="text-base font-semibold">거래 상세 정보</h2>
                 <Button
@@ -2216,13 +2257,14 @@ function DealDocumentPanels({
                   <PdfPanelWorkspaceCard className="-mx-5 rounded-none bg-transparent shadow-none ring-0">{primary}</PdfPanelWorkspaceCard>
                 </div>
               )}
-            </section>
+              </section>
+              {commercialInvoiceContent}
+            </>
           ) : failedPanel === work ? (
             <PanelFailure title={workLabels[work]} onRetry={onRetry} />
           ) : (
             <>
               {workspaces[work]}
-              {work === "fulfillment" ? commercialInvoiceContent : null}
             </>
           )}
         </DealWorkBlock>
@@ -5603,6 +5645,7 @@ export function DealDetailScreen({
   const profile = dealProfiles[dealId]
     ?? (createdProfile ? { ...createdProfile, direction: createdDirection ?? createdProfile.direction } : null)
     ?? (fixture ? { ...fixture, direction: "purchase" as const } : dealProfiles["DL-260708-01"])
+  const isCompactWorkspace = useIsCompactWorkspace()
   const settled = fixture?.stage === "settled"
   const nextDocument = !settled && fixture?.orderLifecycle !== "closed" && fixture?.orderLifecycle !== "cancelled" ? fixture?.nextDocument : undefined
   const nextDraft = generatedDocuments.find((document) => document.number.startsWith(`${nextDocument?.templateCode}-`) && document.state === "draft")
@@ -5638,6 +5681,10 @@ export function DealDetailScreen({
     if (!grid) return
     const viewport = grid.closest<HTMLElement>("[data-deal-scroll-viewport]")
     const updateHeight = () => {
+      if (isCompactWorkspace) {
+        setComparisonHeight(null)
+        return
+      }
       // The comparison surface is a viewport-level workspace. Deriving its
       // height from the grid's current document position makes it collapse
       // when the user opens it from a scrolled section (the grid can be
@@ -5653,7 +5700,7 @@ export function DealDetailScreen({
       observer.disconnect()
       window.removeEventListener("resize", updateHeight)
     }
-  }, [documentOpen])
+  }, [documentOpen, isCompactWorkspace])
   useLayoutEffect(() => {
     if (!documentOpen || comparisonHeight == null) return
     const grid = comparisonGridRef.current
@@ -5768,17 +5815,17 @@ export function DealDetailScreen({
     [connectedShipmentContainerDrafts, connectedShipmentDrafts, dealId]
   )
   const openDealDocument = (work: DealWorkKey) => {
-    const detail =
-      work === "fulfillment"
-        ? {
-            code: "BL",
-            fileName: splitShipmentView.billsOfLading[0]?.fileName,
-          }
-        : work === "customs"
-          ? { code: "CO" }
-          : work === "finance"
-            ? { code: "CI" }
-            : { code: profile.direction === "sales" ? "SC" : "PO" }
+    if (work === "finance") return
+    const code = work === "fulfillment"
+      ? "BL"
+      : work === "customs"
+        ? "CUSTOMS_ENTRY"
+        : work === "documents"
+          ? profile.direction === "sales" ? "SC" : "PO"
+          : Object.entries(documentStageRules).find(([, rule]) => rule.work === work)?.[0] ?? "PO"
+    const detail = code === "BL"
+      ? { code, fileName: splitShipmentView.billsOfLading[0]?.fileName }
+      : { code }
     window.dispatchEvent(
       new CustomEvent("ecoya:open-deal-document", { detail })
     )
@@ -6986,14 +7033,14 @@ export function DealDetailScreen({
               } : undefined}
               className={cn(
                 "min-h-0",
-                documentOpen &&
+                documentOpen && !isCompactWorkspace &&
                   "overflow-hidden rounded-[var(--r-lg)] bg-[var(--surface-background)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]"
               )}
             >
               {documentOpen ? (
                 <ResponsivePdfPanelSplit
                   label="거래 정보와 문서 원문 너비 조절"
-                  className="h-full"
+                  className={isCompactWorkspace ? "h-auto" : "h-full"}
                   desktopHeight="100%"
                   primary={dealPageContent}
                   preview={
