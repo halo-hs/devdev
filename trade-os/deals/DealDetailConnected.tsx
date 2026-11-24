@@ -4527,9 +4527,6 @@ function DocumentsTab({
   useEffect(() => {
     onSaveStatusChange?.({ state: saveState, savedAt: lastSavedAt, showRetry: saveState === "error" && !fieldConflict })
   }, [saveState, lastSavedAt, fieldConflict, onSaveStatusChange])
-  useEffect(() => {
-    if (saveRetryRef) saveRetryRef.current = () => void retryPendingEdits()
-  })
   const retryPendingEdits = async () => {
     const saved = await flushPendingEdits()
     if (!saved) return
@@ -4537,6 +4534,9 @@ function DocumentsTab({
       recordCommittedEdit(target, readTargetValue(target))
     }
   }
+  useEffect(() => {
+    if (saveRetryRef) saveRetryRef.current = () => void retryPendingEdits()
+  })
   const useConflictValue = () => {
     if (!fieldConflict) return
     applyTargetValue(fieldConflict.target, fieldConflict.current)
@@ -6237,10 +6237,6 @@ export function DealDetailScreen({
   const [connectedShipmentContainerDrafts, setConnectedShipmentContainerDrafts] = useState<Record<string, ShipmentContainerEdit[]>>({})
   const [editingConnectedShipment, setEditingConnectedShipment] = useState<Shipment | null>(null)
   const shipmentEditTrigger = useRef<HTMLButtonElement | null>(null)
-  // Prototype data: the shipment API rows and the B/L document fixture use
-  // different numbers, so match by B/L number first and fall back to row order.
-  const billForShipment = (shipment: { bl_number?: string | null }, index: number) =>
-    splitShipmentView.billsOfLading.find((entry) => entry.blNumber && entry.blNumber === shipment.bl_number) ?? splitShipmentView.billsOfLading[index]
   const splitShipmentView = useMemo(
     () => {
       const fixture = splitShipmentReviewFixture(dealId, (fileName, invoiceId) => {
@@ -6278,6 +6274,10 @@ export function DealDetailScreen({
     },
     [connectedShipmentContainerDrafts, connectedShipmentDrafts, dealId]
   )
+  // Prototype data: the shipment API rows and the B/L document fixture use
+  // different numbers, so match by B/L number first and fall back to row order.
+  const billForShipment = (shipment: { bl_number?: string | null }, index: number) =>
+    splitShipmentView.billsOfLading.find((entry) => entry.blNumber && entry.blNumber === shipment.bl_number) ?? splitShipmentView.billsOfLading[index]
   const openDealDocument = (work: DealWorkKey) => {
     if (work === "finance") return
     const code = work === "fulfillment"

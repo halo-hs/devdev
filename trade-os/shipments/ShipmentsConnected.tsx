@@ -177,15 +177,6 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
   const toggleRow = (id: string) => setOpenRows((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   // `<a href="#anchor">` links elsewhere on the deal page (e.g. a CI's linked
   // documents) scroll to a row; this event also opens that row.
-  const anchorToShipment = useRef(new Map<string, string>());
-  useEffect(() => {
-    const open = (event: Event) => {
-      const shipmentId = anchorToShipment.current.get((event as CustomEvent<string>).detail);
-      if (shipmentId) setOpenRows((current) => new Set([...current, shipmentId]));
-    };
-    window.addEventListener("ecoya:open-shipment-row", open);
-    return () => window.removeEventListener("ecoya:open-shipment-row", open);
-  }, []);
   const { entitlements, getIdToken } = usePlatformSession();
   const dateTag = useLocaleTag();
   const [state, setState] = useState<LoadState>({ status: "loading" });
@@ -350,6 +341,20 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
       return aEta.localeCompare(bEta);
     });
   }, [copy.unassigned, q, kind, state]);
+  // `<a href="#anchor">` links elsewhere on the deal page (e.g. a CI's linked
+  // documents) scroll to a row; this event also opens that row.
+  useEffect(() => {
+    if (!rowAnchorId) return;
+    const open = (event: Event) => {
+      const anchor = (event as CustomEvent<string>).detail;
+      for (const group of groups) {
+        const ship = group.rows.find((row, index) => rowAnchorId(row, index) === anchor);
+        if (ship) { setOpenRows((current) => new Set([...current, ship.id])); return; }
+      }
+    };
+    window.addEventListener("ecoya:open-shipment-row", open);
+    return () => window.removeEventListener("ecoya:open-shipment-row", open);
+  }, [groups, rowAnchorId]);
 
   const refreshTracking = useCallback(
     async (shipmentId: string) => {
@@ -604,7 +609,6 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                 const trackingAction = carrierTrackingAction(ship.carrier);
                 const rowOpen = openRows.has(ship.id);
                 const anchorId = rowAnchorId?.(ship, rowIndex);
-                if (anchorId) anchorToShipment.current.set(anchorId, ship.id);
                 return (
                   <Fragment key={ship.id}>
                   <HostTableRow id={anchorId} data-shipment-id={ship.id} aria-busy={refreshing} data-refresh-state={refreshError ? "error" : refreshing ? "pending" : "ready"} className={renderDetail ? "cursor-pointer scroll-mt-[calc(var(--deal-header-height,128px)+16px)] has-aria-expanded:[&>td]:bg-transparent!" : undefined} onClick={renderDetail ? () => toggleRow(ship.id) : undefined}>
