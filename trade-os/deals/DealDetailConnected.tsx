@@ -126,6 +126,7 @@ import {
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { useIsCompactWorkspace } from "@/hooks/useIsMobile"
 import { StatusBadge } from "@/components/platform/StatusBadge"
 import { DatePicker } from "@/components/ui/DatePicker"
 import { prototypeBackend, type MutationResult } from "@trade-os/lib/prototypeBackend"
@@ -5603,6 +5604,7 @@ export function DealDetailScreen({
   const profile = dealProfiles[dealId]
     ?? (createdProfile ? { ...createdProfile, direction: createdDirection ?? createdProfile.direction } : null)
     ?? (fixture ? { ...fixture, direction: "purchase" as const } : dealProfiles["DL-260708-01"])
+  const isCompactWorkspace = useIsCompactWorkspace()
   const settled = fixture?.stage === "settled"
   const nextDocument = !settled && fixture?.orderLifecycle !== "closed" && fixture?.orderLifecycle !== "cancelled" ? fixture?.nextDocument : undefined
   const nextDraft = generatedDocuments.find((document) => document.number.startsWith(`${nextDocument?.templateCode}-`) && document.state === "draft")
@@ -5638,6 +5640,10 @@ export function DealDetailScreen({
     if (!grid) return
     const viewport = grid.closest<HTMLElement>("[data-deal-scroll-viewport]")
     const updateHeight = () => {
+      if (isCompactWorkspace) {
+        setComparisonHeight(null)
+        return
+      }
       // The comparison surface is a viewport-level workspace. Deriving its
       // height from the grid's current document position makes it collapse
       // when the user opens it from a scrolled section (the grid can be
@@ -5653,7 +5659,7 @@ export function DealDetailScreen({
       observer.disconnect()
       window.removeEventListener("resize", updateHeight)
     }
-  }, [documentOpen])
+  }, [documentOpen, isCompactWorkspace])
   useLayoutEffect(() => {
     if (!documentOpen || comparisonHeight == null) return
     const grid = comparisonGridRef.current
@@ -6986,14 +6992,14 @@ export function DealDetailScreen({
               } : undefined}
               className={cn(
                 "min-h-0",
-                documentOpen &&
+                documentOpen && !isCompactWorkspace &&
                   "overflow-hidden rounded-[var(--r-lg)] bg-[var(--surface-background)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]"
               )}
             >
               {documentOpen ? (
                 <ResponsivePdfPanelSplit
                   label="거래 정보와 문서 원문 너비 조절"
-                  className="h-full"
+                  className={isCompactWorkspace ? "h-auto" : "h-full"}
                   desktopHeight="100%"
                   primary={dealPageContent}
                   preview={
