@@ -217,21 +217,24 @@
   .ops-screen .ops-shipment-table[data-deal-table] { table-layout: auto; }
   .ops-screen [data-deal-table] col:last-child { width: auto !important; }
   .ops-screen [data-deal-table] :is([data-slot="table-head"], [data-slot="table-cell"]:not([colspan])) { padding-inline: 8px !important; white-space: normal; }
-  .ops-screen [data-deal-table] :is([data-slot="table-head"], [data-slot="table-cell"]:not([colspan])) * { white-space: normal; }
-  /* Wrap between words only: identifiers (B/L, container, invoice numbers) stay whole. */
+  /* Keep explicit whitespace-nowrap utilities on identifiers and amounts. */
   .ops-screen [data-deal-table] [data-slot="table-cell"]:not([colspan]) { overflow-wrap: normal; word-break: keep-all; }
   .ops-screen [data-deal-table="shipments"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(3), :nth-child(5), :nth-child(7)) { display: none; }
   .ops-screen [data-deal-table="packing"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(2), :nth-child(4), :nth-child(7)) { display: none; }
-  .ops-screen [data-deal-table="invoices"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(2), :nth-child(3), :nth-child(4), :nth-child(5)) { display: none; }
   .ops-screen [data-deal-table="items"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(3), :nth-child(5), :nth-child(6), :nth-child(7)) { display: none; }
   .ops-screen [data-deal-table="customs"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(3), :nth-child(4)) { display: none; }
+  /* Keep the mobile list as an accordion index. Full CI details and inputs
+     are presented inside the opened row instead of squeezing columns. */
+  .ops-screen [data-deal-table="invoices"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(2), :nth-child(3), :nth-child(4), :nth-child(5), :nth-child(6), :nth-child(7)) { display: none; }
+  .ops-screen [data-deal-table="invoices"] col:nth-child(1) { width: 88% !important; }
+  .ops-screen [data-deal-table="invoices"] col:nth-child(8) { width: 12% !important; }
+  .ops-screen .ops-shipment-table[data-deal-table="invoices"] { table-layout: fixed; }
 }
-/* Phone width: keep the identifying column, one key value and the status/action. */
+/* Phone width trims shipment and packing columns further; CI stays an accordion index. */
 @container (max-width: 479px) {
   .ops-screen [data-deal-table] :is([data-slot="table-head"], [data-slot="table-cell"]:not([colspan])) { padding-inline: 6px !important; }
   .ops-screen [data-deal-table="shipments"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(2)) { display: none; }
   .ops-screen [data-deal-table="packing"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(3)) { display: none; }
-  .ops-screen [data-deal-table="invoices"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(7)) { display: none; }
 }
 .ops-screen .ops-shipment-date-details { margin-top: 4px; }
 .ops-screen .ops-shipment-date-details summary { cursor: pointer; }
