@@ -1,3 +1,4 @@
+import { readUploadOriginDeal, type UploadOriginDeal } from "@trade-os/lib/uploadOriginDeal"
 import { SnapStartGuidePage } from "@snap/onboarding/SnapStartGuidePage"
 import { dealDocumentFromReviewUrl } from "@trade-os/lib/dealDocumentActions"
 import { appLocation } from "@/app/appLocation"
@@ -125,6 +126,7 @@ export type GeneratedDocumentOpenOptions = {
 }
 export type UploadDetailStep = "compare" | "deal"
 export type RecentDocument = {
+  uploadOriginDeal?: UploadOriginDeal | null
   name: string
   uploadedAt: string
   pages?: number
@@ -433,9 +435,8 @@ export function App() {
   const [selectedDealId, setSelectedDealId] = useState(
     initialErpRoute?.params.dealId ?? "DL-260708-01"
   )
-  const [uploadOriginDealId, setUploadOriginDealId] = useState<string | null>(() =>
-    new URLSearchParams(appLocation.search).get("fromDeal")
-  )
+  const detailUploadOrigin = useRef<UploadOriginDeal | null>(null)
+  const [uploadOriginDeal, setUploadOriginDeal] = useState(readUploadOriginDeal)
   const [uploadDocumentDealLinks, setUploadDocumentDealLinks] =
     useState<UploadDocumentDealLinks>(readUploadDocumentDealLinks)
   const [dealHeaderActionsTarget, setDealHeaderActionsTarget] =
@@ -565,6 +566,7 @@ export function App() {
         nextRole === "admin" || nextRole === "member" ? nextRole : "owner"
       )
       const nextScreen = nextErpRoute?.screen ?? "home"
+      setUploadOriginDeal(nextScreen === "inbox" ? readUploadOriginDeal() : null)
       if (nextErpRoute?.params.dealId) {
         setSelectedDealId(nextErpRoute.params.dealId)
       }
@@ -684,7 +686,7 @@ export function App() {
     nextScreen: Exclude<Screen, "snap-platform">,
     params: ErpRouteMatch["params"] = {},
     replace = false,
-    originDealId: string | null = uploadOriginDealId
+    originDeal: UploadOriginDeal | null = uploadOriginDeal
   ) => {
     const nextPath = pathForErpScreen(nextScreen, params)
     const nextUrl = new URL(nextPath, appLocation.origin)
@@ -696,13 +698,16 @@ export function App() {
     if (plan === "trial" || plan === "expired") nextUrl.searchParams.set("plan", plan)
     const snap = new URLSearchParams(appLocation.search).get("snap")
     if (snap === "none") nextUrl.searchParams.set("snap", snap)
-    if (nextScreen === "inbox" && originDealId) nextUrl.searchParams.set("fromDeal", originDealId)
+    if (nextScreen === "inbox" && originDeal) {
+      nextUrl.searchParams.set("from", "deal")
+      nextUrl.searchParams.set("deal_id", originDeal.id)
+    }
     if (nextScreen === "create" && params.dealId) nextUrl.searchParams.set("deal_id", params.dealId)
     const nextLocation = `${nextUrl.pathname}${nextUrl.search}`
     const currentLocation = `${appLocation.pathname}${appLocation.search}`
     if (nextLocation !== currentLocation) {
       window.history[replace ? "replaceState" : "pushState"](
-        { product: "erp" },
+        { product: "erp", uploadOriginDeal: nextScreen === "inbox" ? originDeal : null },
         "",
         nextLocation
       )
@@ -718,7 +723,6 @@ export function App() {
       dealId?: string
       documentName?: string
       documentNumber?: string
-      originDealId?: string
       counterpartyId?: string
       replace?: boolean
     }
@@ -731,7 +735,9 @@ export function App() {
     if (nextScreen === "deal" && options?.dealId) {
       setSelectedDealId(options.dealId)
     }
-    setUploadOriginDealId(nextScreen === "inbox" ? options?.originDealId ?? null : null)
+    const originDeal = nextScreen === "inbox" && screen === "deal" && detailUploadOrigin.current?.id === selectedDealId
+      ? detailUploadOrigin.current : null
+    setUploadOriginDeal(originDeal)
     if (nextScreen === "ask") {
       setPendingAskQuestion(options?.question ?? "")
       setPendingAskSubmit(Boolean(options?.submit && options?.question?.trim()))
@@ -762,7 +768,7 @@ export function App() {
           counterpartyId: options?.counterpartyId,
         },
         options?.replace,
-        nextScreen === "inbox" ? options?.originDealId ?? null : null
+        originDeal
       )
     }
     setScreenLoading(true)
@@ -1070,7 +1076,7 @@ export function App() {
                   ) : screen === "inbox" ? (
                     <InboxScreen
                       role={erpHomeRole}
-                      originDealId={uploadOriginDealId}
+                      originDeal={uploadOriginDeal}
                       initialDocumentName={erpRoute?.params.documentName}
                       initialStep={
                         erpRoute?.params.uploadStep === "connect"
@@ -1195,7 +1201,8 @@ export function App() {
                       )}
                       documentTemplates={templates}
                       onCreateDocument={openDealDocumentCreate}
-                      onUpload={() => navigateTo("inbox", { originDealId: selectedDealId })}
+                      uploadOriginRef={detailUploadOrigin}
+                      onUpload={() => navigateTo("inbox")}
                       onDeliver={openDealDocumentDelivery}
                       onReviewDocument={openDealDocumentReview}
                       onOpenSettlement={() => navigateTo("settlement")}

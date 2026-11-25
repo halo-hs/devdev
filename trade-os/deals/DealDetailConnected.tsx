@@ -1,3 +1,4 @@
+import type { UploadOriginDeal } from "@trade-os/lib/uploadOriginDeal"
 import { initialDocumentFields } from "@trade-os/lib/dealDocumentFields"
 import { DealDocumentComparisonDialog } from "@trade-os/components/DealDocumentComparisonDialog"
 import { formatDate, formatDateTime } from "@trade-os/lib/orgDate"
@@ -6484,6 +6485,7 @@ export function DealDetailScreen({
   documentTemplates,
   onCreateDocument,
   onUpload,
+  uploadOriginRef,
   onDeliver,
   onReviewDocument,
   onOpenSettlement,
@@ -6499,6 +6501,7 @@ export function DealDetailScreen({
   documentTemplates: readonly DocumentTemplateOption[]
   onCreateDocument: (templateCode: string) => void
   onUpload: () => void
+  uploadOriginRef?: { current: UploadOriginDeal | null }
   onDeliver: (documentNumber: string, attachmentNames: string[]) => void
   onReviewDocument: (documentNumber: string) => void
   onOpenSettlement: () => void
@@ -6887,6 +6890,14 @@ export function DealDetailScreen({
     profile.title
   )
   const [dealTitle, setDealTitle] = useState(initialDealTitle)
+  useLayoutEffect(() => {
+    if (!uploadOriginRef || !exists) return
+    uploadOriginRef.current = {
+      id: dealId, displayId: currentDealId, title: dealTitle, party: mainInformation.counterparty,
+      amount: mainInformation.amount, currency: mainInformation.currency,
+    }
+    return () => { uploadOriginRef.current = null }
+  }, [uploadOriginRef, exists, dealId, currentDealId, dealTitle, mainInformation])
   const [dealTitleDraft, setDealTitleDraft] = useState(initialDealTitle)
   const [dealIdDraft, setDealIdDraft] = useState(currentDealId)
   const [editingDealId, setEditingDealId] = useState(false)

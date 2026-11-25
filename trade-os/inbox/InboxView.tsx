@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/badge"
+import type { UploadOriginDeal } from "@trade-os/lib/uploadOriginDeal"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { useState, useRef, type DragEvent as ReactDragEvent, useEffect } from "react"
 import { ViewSeatAction } from "@trade-os/components/ViewSeatGate"
@@ -1296,7 +1298,7 @@ function HorizontalDocumentTray({
 export function InboxScreen({
   role,
   onOpenDeal,
-  originDealId,
+  originDeal,
   initialDocumentName,
   initialStep,
   onDocumentOpen,
@@ -1305,7 +1307,7 @@ export function InboxScreen({
 }: {
   role: "owner" | "admin" | "member"
   onOpenDeal: (dealId: string, focus?: "finance") => void
-  originDealId?: string | null
+  originDeal?: UploadOriginDeal | null
   initialDocumentName?: string
   initialStep?: UploadDetailStep
   onDocumentOpen?: (
@@ -1322,7 +1324,8 @@ export function InboxScreen({
   const guide = useStartGuide()
   const [pendingCostDealId, setPendingCostDealId] = useState<string | null>(null)
   const [dealReviewDocument] = useState<DealDocumentRecord | null>(() => dealDocumentFromReviewUrl())
-  const dealReviewRequested = new URLSearchParams(window.location.search).get("from") === "deal"
+  const query = new URLSearchParams(window.location.search)
+  const dealReviewRequested = query.get("from") === "deal" && (query.has("tradeDocId") || query.has("dealId"))
   const reviewMatches = (document: RecentDocument) => dealReviewDocument
     ? document.dealDocumentId === dealReviewDocument.id
     : document.name === initialDocumentName
@@ -1370,11 +1373,6 @@ export function InboxScreen({
         reviewMatches
       )
     : -1
-  useEffect(() => {
-    if (initialDocumentName && initialDocumentIndex < 0 && !dealReviewRequested) {
-      onDocumentOpen?.(null)
-    }
-  }, [initialDocumentName, initialDocumentIndex, dealReviewRequested, onDocumentOpen])
   const initialSelectedDocument =
     initialUploadDocuments[initialDocumentIndex] ?? initialUploadDocuments[0]
   const [hasFile, setHasFile] = useState(initialDocumentIndex >= 0)
@@ -1389,6 +1387,11 @@ export function InboxScreen({
   const [uploadDocuments, setUploadDocuments] = useState<RecentDocument[]>(
     () => initialUploadDocuments
   )
+  useEffect(() => {
+    if (initialDocumentName && !dealReviewRequested && !uploadDocuments.some(document => document.name === initialDocumentName)) {
+      onDocumentOpen?.(null)
+    }
+  }, [initialDocumentName, dealReviewRequested, uploadDocuments, onDocumentOpen])
   useEffect(() => {
     try { localStorage.setItem(UPLOAD_QUEUE_STORAGE_KEY, JSON.stringify(uploadDocuments.filter(document => !document.dealDocumentId))); localStorage.setItem(UPLOAD_STATUS_SEEDS_KEY, "applied") } catch { /* Current session remains usable. */ }
   }, [uploadDocuments])
@@ -1467,6 +1470,10 @@ export function InboxScreen({
     selectedDocumentRef.current = next
     setUploadDocuments((documents) => documents.map((item) => item.name === document.name ? next : item))
   }
+  const documentOrigin = selectedDocument.uploadOriginDeal === undefined
+    ? (initialDocumentName === selectedDocument.name ? originDeal : null)
+    : selectedDocument.uploadOriginDeal
+  const returnDealId = dealReviewDocument?.dealId ?? documentOrigin?.id
   const currentReviewFields = resolvedReviewFields(selectedDocument)
   const uploadFieldErrors = currentReviewFields.flatMap((field) => {
     const missing = field.required && !field.value.trim()
@@ -1479,7 +1486,7 @@ export function InboxScreen({
   const eta = currentReviewFields.find((field) => field.key === "eta")?.value
   const pendingUploadDocuments = uploadDocuments
     .map((document, index) => ({ document, index }))
-    .filter(({ document }) => document.stage !== "confirmed")
+    .filter(({ document }) => document.stage !== "confirmed" && (!originDeal || document.uploadOriginDeal?.id === originDeal.id || (document.uploadOriginDeal === undefined && document.name === initialDocumentName)))
   const pendingSelectedIndex = pendingUploadDocuments.findIndex(({ index }) => index === selectedIndex)
   const isTypeUnresolved = isUploadDocumentTypeUnresolved(selectedDocument)
   const pdfReviewCompleted =
@@ -1760,6 +1767,7 @@ export function InboxScreen({
     }
 
     const pendingDocuments: RecentDocument[] = validFiles.map((file) => ({
+      uploadOriginDeal: originDeal ?? (hasFile ? documentOrigin : null) ?? null,
       name: file.name,
       uploadedAt: new Intl.DateTimeFormat("ko-KR", {
         year: "numeric",
@@ -1882,31 +1890,16 @@ export function InboxScreen({
   }, [uploadNotice])
   const handleDeleteDocument = (index: number) => {
     const deletedName = uploadDocuments[index]?.name
-    const nextDocuments = uploadDocuments.filter(
-      (_, currentIndex) => currentIndex !== index
-    )
     if (hasFile && index === selectedIndex) {
-      onDocumentOpen?.(
-        nextDocuments[Math.min(selectedIndex, nextDocuments.length - 1)]
-          ?.name ?? null,
-        "compare"
-      )
+      const neighbors = pendingUploadDocuments.filter(entry => entry.index !== index)
+      const next = neighbors.find(entry => entry.index > index) ?? neighbors.at(-1)
+      setSelectedIndex(next ? next.index - Number(next.index > index) : 0)
+      setHasFile(Boolean(next))
+      onDocumentOpen?.(next?.document.name ?? null, "compare")
+    } else if (index < selectedIndex) {
+      setSelectedIndex(selectedIndex - 1)
     }
-    setUploadDocuments((current) => {
-      const next = current.filter((_, currentIndex) => currentIndex !== index)
-      if (next.length === 0) {
-        setHasFile(false)
-        setSelectedIndex(0)
-        return next
-      }
-      setSelectedIndex((currentIndex) => {
-        if (index < currentIndex) return currentIndex - 1
-        if (index === currentIndex)
-          return Math.min(currentIndex, next.length - 1)
-        return currentIndex
-      })
-      return next
-    })
+    setUploadDocuments(current => current.filter(document => document.name !== deletedName))
     if (deletedName) toast.success(`${deletedName} 파일을 삭제했습니다.`)
   }
   const handleDocumentTypeChange = (documentType: UploadDocumentType) => {
@@ -1943,6 +1936,7 @@ export function InboxScreen({
           await handleFilesSelected([new File([pdf.output("blob")], "PO_시작가이드_예시.pdf", { type: "application/pdf" })])
         }}>예시 PDF 사용</Button></Alert></div>}
         <BeforeUploadState
+          originDeal={originDeal}
           documents={pendingUploadDocuments}
           onOpenDocument={(index) => {
             openUploadDocument(index)
@@ -1974,7 +1968,8 @@ export function InboxScreen({
       <div className="mx-3 mt-1.5 flex min-h-[72px] shrink-0 flex-wrap items-center justify-end gap-2 rounded-[22px] bg-[linear-gradient(120deg,#1d4ed8_0%,#2563eb_52%,#3b82f6_100%)] px-5 py-3 text-white sm:mx-4 sm:px-[30px] [&_[data-slot=button][data-variant=default]]:bg-white [&_[data-slot=button][data-variant=default]]:text-[var(--primary)] [&_[data-slot=popover-trigger][data-variant=outline]]:bg-[var(--color-red-8)]">
         <div className="mr-auto min-w-0">
           <h1 className="text-xl font-bold">문서 올리기</h1>
-          {(dealReviewDocument?.dealId || originDealId) && <a href={`/erp/deals/${dealReviewDocument?.dealId ?? originDealId}`} className="text-xs text-white/85 underline">{dealReviewDocument?.dealId ?? originDealId} 거래로 돌아가기</a>}
+          {documentOrigin && <UploadOriginNotice deal={documentOrigin} />}
+          {returnDealId && <button type="button" className="text-xs text-white/85 underline" onClick={() => onOpenDeal(returnDealId)}>거래로 돌아가기</button>}
         </div>
         <DocumentBlockingAlerts errors={uploadErrors} checks={uploadChecks} />
         <AutoSaveStatus
@@ -2085,7 +2080,7 @@ export function InboxScreen({
         <PdfPanelWorkspaceCard>
           <DocumentReviewWorkspace
             document={selectedDocument}
-            originDealId={originDealId}
+            originDeal={documentOrigin}
             step={step}
             onAutoSave={handleAutoSave}
             dealBlocked={isDealBlocked}
@@ -2396,7 +2391,20 @@ function PendingUploadDocumentsTable({
   )
 }
 
+function UploadOriginNotice({ deal }: { deal: UploadOriginDeal }) {
+  const amount = [deal.amount, deal.currency].filter(Boolean).join(" ")
+  return (
+    <span className="flex flex-wrap items-center gap-x-2 gap-y-1 py-1 text-[13px]">
+      <Badge variant="outline" className="border-white/60 bg-white text-primary">
+        연결할 거래 {deal.displayId}
+      </Badge>
+      <span>{[deal.title, deal.party, amount].filter(Boolean).join(" · ")}</span>
+    </span>
+  )
+}
+
 function BeforeUploadState({
+  originDeal,
   documents,
   onOpenDocument,
   onDeleteDocument,
@@ -2405,6 +2413,7 @@ function BeforeUploadState({
   duplicateUploadNotice,
   onDismissDuplicateUpload,
 }: {
+  originDeal?: UploadOriginDeal | null
   documents: ReadonlyArray<{ document: RecentDocument; index: number }>
   onOpenDocument: (index: number) => void
   onDeleteDocument: (index: number) => void
@@ -2426,7 +2435,7 @@ function BeforeUploadState({
         <HeroBanner
           eyebrow="AI 파일 올리기"
           title="문서 올리기"
-          description="PDF를 올려 내용을 검토한 뒤, 거래를 선택하고 반영할 내용을 확인하세요."
+          description={originDeal ? <UploadOriginNotice deal={originDeal} /> : "PDF를 올려 내용을 검토한 뒤, 거래를 선택하고 반영할 내용을 확인하세요."}
           summary={
         <div className="mx-auto w-full max-w-[1200px]">
           <Card className="w-full rounded-[22px] border bg-[var(--color-gray-12)]! shadow-[var(--shadow-section)]" size="sm">

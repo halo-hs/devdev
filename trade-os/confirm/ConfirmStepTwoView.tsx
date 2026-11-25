@@ -1,3 +1,4 @@
+import type { UploadOriginDeal } from "@trade-os/lib/uploadOriginDeal"
 import { type DocumentConnection, type DocumentDealLink, type CandidateEvidence } from "@trade-os/lib/documentDealConnection"
 import { type BankCashInput, readDocumentReview, eligibleBankSchedules, currentBankSchedules, bankCashValidation } from "@trade-os/lib/erpDocumentWorkflow"
 import { useState, useEffect, useRef } from "react"
@@ -27,7 +28,7 @@ import { resolvedReviewFields, readUploadDocumentDealLinks } from "@trade-os/inb
 
 export function DealConfirmPanel({
   document,
-  originDealId,
+  originDeal,
   linkedDealLabel,
   linking,
   tradeSeatAssigned,
@@ -38,7 +39,7 @@ export function DealConfirmPanel({
   onConnectionChanged,
 }: {
   document: RecentDocument
-  originDealId?: string | null
+  originDeal?: UploadOriginDeal | null
   linkedDealLabel: string | null
   linking: boolean
   tradeSeatAssigned: boolean
@@ -108,13 +109,14 @@ export function DealConfirmPanel({
   }, [document.name, connectionAttempt, linkedDealLabel])
   const [pendingCreatedDeal] = useState(() => {
     const review = readDocumentReview(document.name)
-    return review.status !== "committed" && !review.connectionHistory?.length
+    return !originDeal && review.status !== "committed" && !review.connectionHistory?.length
       ? prototypeBackend.deals.listCreated().find(deal => deal.sourceDocumentId === document.name) ?? null : null
   })
   const [selectedDeal, setSelectedDealId] = useState<string | null>(null)
-  const selectedDealId = selectedDeal ?? (!activeLink && loadedCandidates.some(candidate => candidate.id === originDealId) ? originDealId : null)
+  const fixedOrigin = activeLink ? null : originDeal
+  const selectedDealId = fixedOrigin?.id ?? selectedDeal
   const [searchQuery, setSearchQuery] = useState("")
-  const [newDealFormOpen, setNewDealFormOpen] = useState(Boolean(pendingCreatedDeal))
+  const [newDealFormOpen, setNewDealFormOpen] = useState(Boolean(pendingCreatedDeal && !originDeal))
   const [newDealName, setNewDealName] = useState(pendingCreatedDeal?.counterparty ?? aiCounterpartyName)
   const [newDealNumber, setNewDealNumber] = useState(() =>
     pendingCreatedDeal?.id ?? prototypeBackend.deals.getNextId()
@@ -137,17 +139,25 @@ export function DealConfirmPanel({
   useEffect(() => {
     let active = true
     const created: DocumentSourceDeal[] = prototypeBackend.deals.listCreated().map(deal => ({ id: deal.id, title: deal.title, party: deal.counterparty, amount: deal.amount, currency: deal.currency, item: "품목 미등록", stage: "신규 거래", tone: "neutral" }))
-    prototypeBackend.tradeDocuments.listCandidates([...documentSourceDeals, ...created], { counterparty: readCounterparty, amount: readAmountField?.value ?? "", currency: readCurrency })
+    const deals = [...documentSourceDeals, ...created]
+    if (originDeal) {
+      const index = deals.findIndex(row => row.id === originDeal.id)
+      const candidate: DocumentSourceDeal = { ...(deals[index] ?? { item: "—", stage: "거래 상세", tone: "neutral" }), ...originDeal }
+      if (index >= 0) deals[index] = candidate
+      else deals.push(candidate)
+    }
+    prototypeBackend.tradeDocuments.listCandidates(deals, { counterparty: readCounterparty, amount: readAmountField?.value ?? "", currency: readCurrency })
       .then(rows => { if (active) { setLoadedCandidates(rows); setCandidateLoadState("ready") } })
       .catch(() => { if (active) setCandidateLoadState("error") })
     return () => { active = false }
-  }, [document.name, readCounterparty, readAmountField?.value, readCurrency, candidateAttempt])
+  }, [document.name, readCounterparty, readAmountField?.value, readCurrency, candidateAttempt, originDeal])
   const [creatingDeal, setCreatingDeal] = useState(false)
   const creatingRef = useRef(false)
   const [createdDeal, setCreatedDeal] = useState<DocumentDealLink | null>(() => pendingCreatedDeal ? { dealId: pendingCreatedDeal.id, dealLabel: `${pendingCreatedDeal.id} · ${pendingCreatedDeal.counterparty}` } : null)
   const createdCounterparty = useRef<string | null>(null)
   const normalizedQuery = searchQuery.trim().toLowerCase()
   const candidates = loadedCandidates
+    .filter(candidate => !fixedOrigin || candidate.id === fixedOrigin.id)
     .filter((candidate) =>
       normalizedQuery
         ? [candidate.id, candidate.title, candidate.party, candidate.item].some(
@@ -266,7 +276,7 @@ export function DealConfirmPanel({
           scheduleId: bankScheduleId, amount: normalizeDecimalInput(bankMatchAmount),
           currency: readCurrency, valueDate: bankValueDate,
         } : undefined,
-        selectedCandidate.reasons.length ? selectedCandidate.reasons : ["직접 선택"],
+        fixedOrigin ? ["거래 상세에서 올린 문서"] : selectedCandidate.reasons.length ? selectedCandidate.reasons : ["직접 선택"],
       )
     } catch {
       toast.error("거래 연결 중 오류가 발생했습니다. 다시 시도해 주세요.")
@@ -376,8 +386,8 @@ export function DealConfirmPanel({
               : <p role="status" className="text-xs text-muted-foreground">현재 거래 연결을 확인하고 있습니다.</p>}
             {!tradeSeatAssigned ? <p role="status" className="text-xs text-muted-foreground">Trade OS는 조회만 가능해요. 거래를 연결하려면 사용 권한이 필요합니다.</p> : null}
             {connectionReady && !activeLink ? <p className="text-xs text-muted-foreground">거래 방향 확인 필요</p> : null}
-            {originDealId && connectionReady && !activeLink ? (
-              <p className="text-xs text-muted-foreground">거래 상세에서 올린 문서입니다. {originDealId} 거래를 먼저 선택했습니다. 다른 거래도 선택할 수 있습니다.</p>
+            {fixedOrigin && connectionReady ? (
+              <p className="text-xs text-muted-foreground">{fixedOrigin.displayId} · {fixedOrigin.title} 거래에 연결합니다.</p>
             ) : null}
             {document.documentType === "OTHER" ? (
               <Alert className="border-[var(--color-orange-4)] bg-[var(--color-orange-5)]">
@@ -427,12 +437,12 @@ export function DealConfirmPanel({
                 <div>
                   <div className="flex items-center gap-2 text-sm font-semibold">
                     <Building2 className="size-4 text-primary" />
-                    거래 후보
+                    {fixedOrigin ? "연결할 거래" : "거래 후보"}
                   </div>
                   <p className="mt-1 text-[11px] text-muted-foreground">
                     {changingConnection
                       ? "변경할 거래를 선택하세요. 변경을 확정하기 전까지 현재 연결은 유지됩니다."
-                      : "거래처·식별번호·금액 등 일치 근거를 기준으로 찾았습니다."}
+                      : fixedOrigin ? "거래 상세에서 선택한 거래입니다." : "거래처·식별번호·금액 등 일치 근거를 기준으로 찾았습니다."}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
@@ -451,7 +461,7 @@ export function DealConfirmPanel({
                         ? "조회 실패"
                         : `${candidates.length}건`}
                   </ToneBadge>
-                  <Button
+                  {!fixedOrigin && <Button
                     type="button"
                     variant="outline"
                     size="sm"
@@ -467,7 +477,7 @@ export function DealConfirmPanel({
                     }}
                   >
                     {newDealFormOpen ? "등록 닫기" : "새 거래 등록"}
-                  </Button>
+                  </Button>}
                 </div>
               </div>
 
@@ -603,7 +613,7 @@ export function DealConfirmPanel({
                     ) : null
                   ) : (
                     <>
-                      {!changingConnection && (ambiguousCandidates > 1 || !recommendedDealId) ? (
+                      {!fixedOrigin && !changingConnection && (ambiguousCandidates > 1 || !recommendedDealId) ? (
                         <Alert className="mt-3 border-[var(--color-orange-4)] bg-[var(--color-orange-5)]">
                           <AlertTriangle className="size-4" />
                           <AlertDescription className="text-xs">
@@ -613,7 +623,7 @@ export function DealConfirmPanel({
                           </AlertDescription>
                         </Alert>
                       ) : null}
-                      <div className="relative mt-3">
+                      {!fixedOrigin && <div className="relative mt-3">
                         <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                           className="pl-9"
@@ -624,7 +634,7 @@ export function DealConfirmPanel({
                           placeholder="거래번호, 거래명, 거래처 검색"
                           aria-label="거래 후보 검색"
                         />
-                      </div>
+                      </div>}
 
                       <div
                         className="mt-3 overflow-hidden rounded-[var(--r-lg)] border border-[var(--color-gray-9)]"
@@ -633,7 +643,7 @@ export function DealConfirmPanel({
                       >
                         {candidates.map((candidate) => {
                           const selected = selectedDealId === candidate.id
-                          const recommended = candidate.id === recommendedDealId
+                          const recommended = !fixedOrigin && candidate.id === recommendedDealId
                           return (
                             <div key={candidate.id} className={cn("flex flex-wrap items-center border-b border-[var(--color-gray-10)] last:border-b-0", selected && "bg-[var(--color-primary-10)]")}>
                             <button
