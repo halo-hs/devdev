@@ -1,3 +1,4 @@
+import { LinkedDeals } from "./LinkedDeals"
 import type { UploadOriginDeal } from "@trade-os/lib/uploadOriginDeal"
 import { initialDocumentFields } from "@trade-os/lib/dealDocumentFields"
 import { DealDocumentComparisonDialog } from "@trade-os/components/DealDocumentComparisonDialog"
@@ -1395,7 +1396,7 @@ function DealMissingInformation({
                 key={field.key}
                 type="button"
                 onClick={() => onOpenField(field.key)}
-                className="text-left underline decoration-destructive/30 underline-offset-2 hover:text-destructive"
+                className="text-left text-destructive underline decoration-destructive/30 underline-offset-2 hover:text-destructive"
               >
                 {field.label}
               </button>
@@ -1421,8 +1422,8 @@ function DealMissingInformation({
               className="flex min-h-12 w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-destructive/5 focus-visible:outline-2 focus-visible:outline-primary"
             >
               <span className="min-w-0 flex-1">
-                <span className="font-medium">
-                  {field.label} {field.issue}
+                <span className="inline-flex items-center gap-2 font-medium text-destructive">
+                  {field.label}<StatusBadge size="xs" tone="danger">{field.issue}</StatusBadge>
                 </span>
                 <span className="ml-2 text-xs text-muted-foreground">
                   {field.group}
@@ -1932,7 +1933,7 @@ function ShipmentDocumentLinks({ invoices }: { invoices: ReturnType<typeof shipm
 function BlReferenceNotice({ reference, linked }: { reference?: string | null; linked?: string | null }) {
   if (!blNumbersMismatch(reference, linked)) return null
   return <div role="status" className="flex basis-full flex-wrap items-center gap-2 text-xs">
-    <StatusBadge size="sm" tone="warning">B/L 번호 불일치</StatusBadge>
+    <StatusBadge size="sm" tone="danger">B/L 번호 불일치</StatusBadge>
     <span className="break-all text-muted-foreground">문서 B/L: {reference} · 연결 B/L: {linked}</span>
   </div>
 }
@@ -2783,6 +2784,7 @@ function DealWorkBlock({
 function DealDocumentPanels({
   plan,
   aiQuestion,
+  linkedDeals,
   workspaces,
   previewWork,
   onPreviewWork,
@@ -2802,6 +2804,7 @@ function DealDocumentPanels({
 }: {
   plan: DealWorkPlan
   aiQuestion: ReactNode
+  linkedDeals: ReactNode
   workspaces: Partial<Record<DealWorkKey, ReactNode>>
   previewWork: DealWorkKey[]
   onPreviewWork: (key: DealWorkKey) => void
@@ -2857,6 +2860,7 @@ function DealDocumentPanels({
             <p className="text-xs font-semibold text-foreground">거래 서류</p>
             {documentStrip}
           </div>
+          {linkedDeals}
         </Card>
       </section>
       {plan.order.map((work) => (
@@ -3365,11 +3369,9 @@ function DealPdf({
   return fullscreen ? createPortal(viewer, document.body) : viewer
 }
 
-function matchTone(match: DealFieldMatch) {
-  if (match === "일치") return "success" as const
-  if (match === "확인 필요") return "warning" as const
-  if (match === "누락") return "danger" as const
-  return "neutral" as const
+function DealReviewBadge({ match }: { match: DealFieldMatch }) {
+  if (!needsReview(match)) return null
+  return <StatusBadge size="xs" tone="danger">{match === "누락" ? "누락" : "불일치"}</StatusBadge>
 }
 
 const normalizeCandidateValue = (value: string) =>
@@ -3674,7 +3676,7 @@ function DealFieldsPanel({
             "text-right tabular-nums",
           // Figma: red border only; the value keeps the normal text colour.
           key === "quantity" &&
-            item.match === "확인 필요" &&
+            needsReview(item.match) &&
             "border-destructive"
         )}
         value={key === "unitPrice" ? groupItemDecimal(item[key], editingPrice !== item.id) : item[key]}
@@ -3791,7 +3793,8 @@ function DealFieldsPanel({
               className="mb-2.5 scroll-mt-[calc(var(--deal-header-height,128px)+16px)]"
               label="수량 / 단위"
               htmlFor={`deal-field-item-${item.id}-quantity`}
-              badge={mismatch ? <StatusBadge tone="danger" className="h-4 px-2.5 font-normal">불일치</StatusBadge> : undefined}
+              invalid={needsReview(item.match)}
+              badge={needsReview(item.match) ? <DealReviewBadge match={item.match} /> : undefined}
             />
             <div className="flex gap-2">
               <div className="relative min-w-0 flex-1 [&_input]:pr-10">
@@ -3912,9 +3915,9 @@ function DealFieldsPanel({
                         </button>
                       </HostTableCell>
                       <HostTableCell className="whitespace-nowrap px-3 py-3 align-top tabular-nums">
-                        <span className={cn("inline-flex items-center gap-1.5", mismatch && "font-semibold text-destructive")}>
+                        <span className={cn("inline-flex items-center gap-1.5", needsReview(item.match) && "font-semibold text-destructive")}>
                           {item.quantity || "—"} {item.quantityUnit || ""}
-                          {mismatch ? <StatusBadge size="xs" tone="danger" className="h-4 px-2 font-normal">불일치</StatusBadge> : null}
+                          <DealReviewBadge match={item.match} />
                         </span>
                         {conflicts.length ? (
                           <span className="mt-1 block text-[11px] leading-4 text-destructive" title={item.evidence.join(" · ")}>
@@ -3947,8 +3950,8 @@ function DealFieldsPanel({
                                   ["순중량", item.netWeight ? `${item.netWeight} ${item.weightUnit}` : ""],
                                 ].map(([label, value]) => (
                                   <div key={label}>
-                                    <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">{label}{label === "수량 / 단위" && mismatch ? <StatusBadge size="xs" tone="danger" className="h-4 px-2 font-normal">불일치</StatusBadge> : null}</dt>
-                                    <dd className={cn("mt-1 min-h-10 rounded-md bg-muted/30 px-3 py-2 text-sm font-medium", label === "수량 / 단위" && mismatch && "text-destructive")}>{value || "—"}</dd>
+                                    <dt className={cn("flex items-center gap-1.5 text-xs text-muted-foreground", label === "수량 / 단위" && needsReview(item.match) && "text-destructive")}>{label}{label === "수량 / 단위" && <DealReviewBadge match={item.match} />}</dt>
+                                    <dd className={cn("mt-1 min-h-10 rounded-md bg-muted/30 px-3 py-2 text-sm font-medium", label === "수량 / 단위" && needsReview(item.match) && "text-destructive")}>{value || "—"}</dd>
                                   </div>
                                 ))}
                               </dl>
@@ -4010,7 +4013,8 @@ function DealFieldsPanel({
               htmlFor={`deal-field-${field.key}`}
               id={`deal-field-label-${field.key}`}
               style={{ scrollMarginTop: "calc(var(--deal-header-height,128px) + 16px)" }}
-              badge={needsReview(field.match) ? <StatusBadge tone={matchTone(field.match)}>{field.match === "확인 필요" ? "불일치" : field.match}</StatusBadge> : undefined}
+              invalid={needsReview(field.match)}
+              badge={needsReview(field.match) ? <DealReviewBadge match={field.match} /> : undefined}
               message={needsReview(field.match) ? field.evidence.join(" · ") || undefined : undefined}
               messageId={`deal-field-${field.key}-message`}
               tone={field.match === "누락" || field.match === "확인 필요" ? "danger" : "neutral"}
@@ -4442,6 +4446,7 @@ function GeneratedDealDocumentsList({
 function DocumentsTab({
   plan,
   aiQuestion,
+  linkedDeals,
   workspaces,
   previewWork,
   onPreviewWork,
@@ -4469,6 +4474,7 @@ function DocumentsTab({
 }: {
   plan: DealWorkPlan
   aiQuestion: ReactNode
+  linkedDeals: ReactNode
   workspaces: Partial<Record<DealWorkKey, ReactNode>>
   previewWork: DealWorkKey[]
   onPreviewWork: (key: DealWorkKey) => void
@@ -5054,6 +5060,7 @@ function DocumentsTab({
   return (
     <div className="min-w-0">
       <DealDocumentPanels
+        linkedDeals={linkedDeals}
         aiQuestion={aiQuestion}
         plan={plan}
         workspaces={workspaces}
@@ -6477,6 +6484,8 @@ function PeopleTab({
 
 export function DealDetailScreen({
   dealId,
+  workspaceId,
+  onOpenDeal,
   role,
   focusTarget,
   onBack,
@@ -6492,6 +6501,8 @@ export function DealDetailScreen({
   workspaceActionsTarget,
 }: {
   dealId: string
+  workspaceId: string
+  onOpenDeal: (id: string) => void
   /** Organization role of the signed-in (demo) account. */
   role: Role
   focusTarget?: NotificationDealTarget | null
@@ -6514,7 +6525,7 @@ export function DealDetailScreen({
   const [savingDirection, setSavingDirection] = useState(false)
   const profile = dealProfiles[dealId]
     ?? (createdProfile ? { ...createdProfile, direction: createdDirection ?? createdProfile.direction } : null)
-    ?? (fixture ? { ...fixture, direction: "purchase" as const } : dealProfiles["DL-260708-01"])
+    ?? (fixture ? { ...fixture, direction: fixture.direction ?? "direction_pending" as const } : dealProfiles["DL-260708-01"])
   const isCompactWorkspace = useIsCompactWorkspace()
   const settled = fixture?.stage === "settled"
   const nextDocument = !settled && fixture?.orderLifecycle !== "closed" && fixture?.orderLifecycle !== "cancelled" ? fixture?.nextDocument : undefined
@@ -7276,6 +7287,7 @@ export function DealDetailScreen({
     )}
   >
     <DocumentsTab
+      linkedDeals={<LinkedDeals dealId={dealId} direction={profile.direction} workspaceId={workspaceId} canWrite={canMutate(role)} onOpenDeal={onOpenDeal} />}
       aiQuestion={<DealAiQuestion onAskAi={onAskAi} />}
       key={dealId}
       plan={plan}
@@ -7359,14 +7371,14 @@ export function DealDetailScreen({
                   {customsDeclarations(profile.direction, dealId).map((row) => (
                     <HostTableRow key={row.number}>
                       <HostTableCell className="px-3 py-1.5">
-                        <div className="truncate">{row.title}</div>
+                        <div className={cn("truncate", !row.confirmed && "text-destructive")}>{row.title}</div>
                         <div className="mt-0.5 truncate text-[var(--color-gray-5)] tabular-nums">{row.number}</div>
                       </HostTableCell>
                       <HostTableCell className="px-3 tabular-nums">{row.date}</HostTableCell>
                       <HostTableCell className="px-3 tabular-nums">{row.duty}</HostTableCell>
                       <HostTableCell className="px-3 tabular-nums">{row.vat}</HostTableCell>
                       <HostTableCell className="px-3 text-center">
-                        <StatusBadge tone={row.confirmed ? "success" : "warning"} className="h-4 px-2.5 font-normal">{row.confirmed ? "확정" : "검토 필요"}</StatusBadge>
+                        <StatusBadge tone={row.confirmed ? "success" : "danger"} className="h-4 px-2.5 font-normal">{row.confirmed ? "확정" : "검토 필요"}</StatusBadge>
                       </HostTableCell>
                       <HostTableCell className="px-3 text-center">
                         {row.confirmed ? (

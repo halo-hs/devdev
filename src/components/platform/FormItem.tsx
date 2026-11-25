@@ -12,6 +12,7 @@ export function FormFieldHeader({
   badge,
   candidates,
   sourceAction,
+  invalid = false,
   className,
   ...props
 }: ComponentProps<"div"> & {
@@ -20,6 +21,7 @@ export function FormFieldHeader({
   badge?: ReactNode
   candidates?: ReactNode
   sourceAction?: ReactNode
+  invalid?: boolean
 }) {
   return (
     <div
@@ -32,7 +34,7 @@ export function FormFieldHeader({
     >
       <FieldLabel
         htmlFor={htmlFor}
-        className="text-foreground"
+        className={invalid ? "text-destructive" : "text-foreground"}
       >
         {label}
       </FieldLabel>
@@ -107,6 +109,7 @@ export function FormField({
   message,
   messageId,
   tone,
+  invalid,
   children,
   className,
   ...props
@@ -116,6 +119,7 @@ export function FormField({
   badge?: ReactNode
   candidates?: ReactNode
   sourceAction?: ReactNode
+  invalid?: boolean
   message?: ReactNode
   messageId?: string
   tone?: FieldTone
@@ -132,6 +136,7 @@ export function FormField({
         badge={badge}
         candidates={candidates}
         sourceAction={sourceAction}
+        invalid={invalid}
       />
       <div data-slot="form-field-control" className="min-w-0">
         {children}

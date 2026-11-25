@@ -1192,6 +1192,11 @@ export function App() {
                     <DealDetailScreen
                       key={selectedDealId}
                       dealId={selectedDealId}
+                      workspaceId={activeWorkspace.id}
+                      onOpenDeal={id => {
+                        setDealNotificationTarget(null)
+                        navigateTo("deal", { dealId: id })
+                      }}
                       role={erpHomeRole}
                       focusTarget={dealNotificationTarget}
                       onBack={() => navigateTo("deals")}
