@@ -2096,12 +2096,10 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
                     <HostTableRow className="hover:bg-transparent">
                       <HostTableCell colSpan={8} className="!p-0">
                         <div className="sticky left-0 w-[100cqw] p-3">
-                          <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4 whitespace-normal">
-                            <h3 className="text-[15px] leading-[22px] font-semibold">컨테이너별 포장 · {containers.length}대</h3>
-                            {/* One block per container, stacked, so its fields stay together when they wrap. */}
-                            <div className="mt-3 flex flex-col gap-3">
+                          {/* Just one block per container, stacked, so its fields stay together when they wrap. */}
+                          <div className="flex flex-col gap-3 whitespace-normal">
                               {containers.map((container, index) => (
-                                <fieldset key={index} id={dealContainerAnchorId(container.number)} className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-lg border border-[var(--color-gray-9)] p-3">
+                                <fieldset key={index} id={dealContainerAnchorId(container.number)} className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-xl border border-[var(--color-gray-9)] bg-card px-4 pt-2 pb-4">
                                   <legend className="px-1 text-[13px] leading-[18px] font-semibold text-[var(--color-gray-3)]">컨테이너 {index + 1}{container.number ? ` · ${container.number}` : ""}</legend>
                                   <div className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 xl:grid-cols-6">
                                   {packingContainerFields.map(({ key, label, align }) => (
@@ -2117,7 +2115,6 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
                                   </div>
                                 </fieldset>
                               ))}
-                            </div>
                           </div>
                         </div>
                       </HostTableCell>
