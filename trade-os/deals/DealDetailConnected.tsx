@@ -1836,12 +1836,10 @@ const billContainers = (bill: SplitShipmentView["billsOfLading"][number]) => {
 }
 
 const dealPackingListAnchorId = (documentId: string) => `deal-pl-${documentId}`
+const dealContainerAnchorId = (containerNumber: string) => `deal-container-${containerNumber}`
 
-// 서류·근거 cell of a deal shipment row: the CIs and packing lists linked to
-// this B/L. Packing-list details live in their own card below the shipment
-// table; these links jump there (and its B/L column jumps back here).
+// 서류·근거 cell of a deal shipment row: the CIs linked to this B/L.
 function ShipmentDocumentLinks({ dealId, bill, view }: { dealId: string; bill: SplitShipmentView["billsOfLading"][number]; view: SplitShipmentView }) {
-  const relatedPackingLists = (bill.connectedDocuments ?? []).filter((document) => document.code === "PL")
   const linkedInvoiceIds = Object.entries(readDealInvoiceRelations(dealId).invoiceToBills)
     .filter(([, billIds]) => billIds.includes(bill.documentId))
     .map(([invoiceId]) => invoiceId)
@@ -1860,15 +1858,22 @@ function ShipmentDocumentLinks({ dealId, bill, view }: { dealId: string; bill: S
           </Fragment>
         )) : <span className="text-[var(--color-orange-2)]">연결 필요</span>}
       </div>
-      <div className="mt-0.5 truncate">
-        <span className="text-[var(--color-gray-5)]">PL </span>
-        {relatedPackingLists.length ? relatedPackingLists.map((document, index) => (
-          <Fragment key={document.documentId}>
-            {index ? ", " : null}
-            <a href={`#${dealPackingListAnchorId(document.documentId)}`} className="text-[var(--color-primary-4)] hover:underline">{document.number ?? document.fileName}</a>
-          </Fragment>
-        )) : <span className="text-[var(--color-gray-5)]">없음</span>}
-      </div>
+    </>
+  )
+}
+
+// Container numbers of a deal shipment row, taken from its packing list (the
+// packing basis). Each links to that container's row in the packing list card.
+function ShipmentContainerLinks({ bill }: { bill: SplitShipmentView["billsOfLading"][number] }) {
+  const containers = billContainers(bill)
+  if (!containers.length) return null
+  const shown = containers.slice(0, 2)
+  return (
+    <>
+      {shown.map((container) => (
+        <a key={container.number} href={`#${dealContainerAnchorId(container.number)}`} className="mt-0.5 block w-fit text-[15px] leading-[22px] text-[var(--color-primary-4)] hover:underline" data-ui="shipment-container-number">{container.number}</a>
+      ))}
+      {containers.length > shown.length ? <span className="mt-0.5 block text-[15px] leading-[22px] text-[var(--color-gray-5)]">외 {containers.length - shown.length}대</span> : null}
     </>
   )
 }
@@ -1934,7 +1939,7 @@ function PackingListCard({ view, onUpload }: { view: SplitShipmentView; onUpload
                       ) : null}
                       {container ? (
                         <>
-                          <TableCell className={cn(cell, "whitespace-nowrap tabular-nums")}>{container.number}</TableCell>
+                          <TableCell id={dealContainerAnchorId(container.number)} className={cn(cell, "scroll-mt-[calc(var(--deal-header-height,128px)+16px)] whitespace-nowrap tabular-nums")}>{container.number}</TableCell>
                           <TableCell className={cn(cell, "whitespace-nowrap tabular-nums")}>{container.sealNumber || "미확인"}</TableCell>
                           <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{container.packageCount ? `${container.packageCount}${container.packageUnit ? ` ${container.packageUnit}` : ""}` : "미확인"}</TableCell>
                           <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{container.grossWeight || "미확인"}</TableCell>
@@ -6906,6 +6911,9 @@ export function DealDetailScreen({
               shipmentContent={<><OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} onOpenDocument={() => openDealDocument("fulfillment")} shipmentRowAnchorId={(shipment, index) => {
                 const bill = billForShipment(shipment, index)
                 return bill ? dealBillAnchorId(bill.documentId) : undefined
+              }} renderShipmentContainers={(shipment, index) => {
+                const bill = billForShipment(shipment, index)
+                return bill && billContainers(bill).length ? <ShipmentContainerLinks bill={bill} /> : undefined
               }} renderShipmentDocuments={(shipment, index) => {
                 const bill = billForShipment(shipment, index)
                 return bill ? <ShipmentDocumentLinks dealId={dealId} bill={bill} view={splitShipmentView} /> : <div>{shipment.bl_number ? "B/L 문서 미연결" : "B/L 번호 없음"}</div>

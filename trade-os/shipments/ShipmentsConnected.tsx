@@ -168,7 +168,7 @@ export type SplitShipmentView = {
 
 // Opening 「문서와 보기」 re-mounts the deal page into a side-by-side split;
 // remember opened rows per deal so they survive that re-mount.
-export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange, onOpenDocument, renderDocuments, rowAnchorId }: { copy: ShipmentsCopy; renderHeader?: (controls: ReactNode) => ReactNode; dealId?: string; onSummaryChange?: (summary: ShipmentSummary) => void; onOpenDocument?: () => void; renderDocuments?: (shipment: Shipment, index: number) => ReactNode; rowAnchorId?: (shipment: Shipment, index: number) => string | undefined }) {
+export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange, onOpenDocument, renderDocuments, renderContainers, rowAnchorId }: { copy: ShipmentsCopy; renderHeader?: (controls: ReactNode) => ReactNode; dealId?: string; onSummaryChange?: (summary: ShipmentSummary) => void; onOpenDocument?: () => void; renderDocuments?: (shipment: Shipment, index: number) => ReactNode; renderContainers?: (shipment: Shipment, index: number) => ReactNode; rowAnchorId?: (shipment: Shipment, index: number) => string | undefined }) {
   // `<a href="#anchor">` links elsewhere on the deal page (e.g. a CI's linked
   // documents) scroll to a row; this event also opens that row.
   const { entitlements, getIdToken } = usePlatformSession();
@@ -592,8 +592,12 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                   <HostTableRow key={ship.id} id={anchorId} data-shipment-id={ship.id} aria-busy={refreshing} data-refresh-state={refreshError ? "error" : refreshing ? "pending" : "ready"} className={anchorId ? "scroll-mt-[calc(var(--deal-header-height,128px)+16px)]" : undefined}>
                     <HostTableCell>
                       {ship.bl_number ? <div data-ui="shipment-bl-number">{ship.bl_number}</div> : null}
-                      {ship.container_number ? <div className={ship.bl_number ? "mt-0.5 text-[15px] leading-[22px] text-[var(--color-gray-5)]" : undefined} data-ui="shipment-container-number">{ship.container_number}</div> : null}
-                      {((ship.container_count ?? (ship.container_number ? 1 : 0)) > 1) ? <div className="mt-0.5 text-[15px] leading-[22px] text-[var(--color-gray-5)]">컨테이너 {ship.container_count}대</div> : null}
+                      {renderContainers?.(ship, rowIndex) ?? (
+                        <>
+                          {ship.container_number ? <div className={ship.bl_number ? "mt-0.5 text-[15px] leading-[22px] text-[var(--color-gray-5)]" : undefined} data-ui="shipment-container-number">{ship.container_number}</div> : null}
+                          {((ship.container_count ?? (ship.container_number ? 1 : 0)) > 1) ? <div className="mt-0.5 text-[15px] leading-[22px] text-[var(--color-gray-5)]">컨테이너 {ship.container_count}대</div> : null}
+                        </>
+                      )}
                       {!ship.bl_number && !ship.container_number ? <span data-ui="shipment-identifier-fallback">{copy.rowFallback}</span> : null}
                     </HostTableCell>
                     <HostTableCell>
