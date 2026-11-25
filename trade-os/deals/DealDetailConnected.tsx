@@ -1949,12 +1949,13 @@ function ShipmentLinkedDocuments({ dealId, shipmentKey, blNumber, links, canWrit
 // packing basis). Each links to that container's row in the packing list card.
 function ShipmentContainerLinks({ bill }: { bill: SplitShipmentView["billsOfLading"][number] }) {
   const containers = billContainers(bill)
+  const packingListId = (bill.connectedDocuments ?? []).find((entry) => entry.code === "PL")?.documentId
   if (!containers.length) return null
   const shown = containers.slice(0, 2)
   return (
     <>
       {shown.map((container) => (
-        <a key={container.number} href={`#${dealContainerAnchorId(container.number)}`} className="mt-0.5 block w-fit text-[15px] leading-[22px] text-[var(--color-primary-4)] hover:underline" data-ui="shipment-container-number" onClick={(event) => { event.stopPropagation(); for (const document of (bill.connectedDocuments ?? []).filter((entry) => entry.code === "PL")) window.dispatchEvent(new CustomEvent("ecoya:open-packing-list", { detail: document.documentId })) }}>{container.number}</a>
+        <a key={container.number} href={`#${packingListId ? dealPackingListAnchorId(packingListId) : dealContainerAnchorId(container.number)}`} className="mt-0.5 block w-fit text-[15px] leading-[22px] text-[var(--color-primary-4)] hover:underline" data-ui="shipment-container-number" onClick={(event) => { event.stopPropagation(); for (const document of (bill.connectedDocuments ?? []).filter((entry) => entry.code === "PL")) window.dispatchEvent(new CustomEvent("ecoya:open-packing-list", { detail: document.documentId })) }}>{container.number}</a>
       ))}
       {containers.length > shown.length ? <span className="mt-0.5 block text-[15px] leading-[22px] text-[var(--color-gray-5)]">외 {containers.length - shown.length}대</span> : null}
     </>
@@ -1962,10 +1963,10 @@ function ShipmentContainerLinks({ bill }: { bill: SplitShipmentView["billsOfLadi
 }
 
 // Packing lists of this deal as their own card, in the shipment table's style.
-// Each packing list is a header row (document · B/L · container count ·
-// totals) followed by its container rows — seal, packages and weights are
-// per container number. Opening the header edits all its containers at once
-// (autosave); container rows themselves don't open.
+// One row per packing list document: its B/L, container and seal numbers
+// (paired line by line, two at most then "외 N대") and document totals.
+// Per-container packages and weights differ, so they show — and are edited —
+// when the row is opened (autosave).
 const openedPackingLists = new Map<string, Set<string>>()
 type PackingContainer = ReturnType<typeof billContainers>[number]
 const packingContainerFields: Array<{ key: keyof PackingContainer; label: string; align?: "right" }> = [
@@ -1976,6 +1977,7 @@ const packingContainerFields: Array<{ key: keyof PackingContainer; label: string
   { key: "grossWeight", label: "총중량", align: "right" },
   { key: "volume", label: "용적", align: "right" },
 ]
+const PACKING_ROW_CONTAINERS = 2
 // Sums container measures such as "8,240 KG" + "8,240 KG" → "16,480 KG".
 // Returns null when a value is missing or the units differ.
 const sumMeasure = (values: Array<string | null | undefined>) => {
@@ -2020,6 +2022,12 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
   const containerCount = lists.reduce((total, list) => total + list.containers.length, 0)
   const cell = "align-top"
   const numeric = "text-right whitespace-nowrap tabular-nums"
+  const stacked = (values: string[], more: number) => (
+    <>
+      {values.map((value, index) => <div key={index} className={index ? "mt-0.5" : undefined}>{value}</div>)}
+      {more > 0 ? <div className="mt-0.5 text-[var(--color-gray-5)]">외 {more}대</div> : null}
+    </>
+  )
   return (
     <div className="ops-screen">
     <section aria-label="포장명세서" className="ops-shipment-group">
@@ -2035,10 +2043,10 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
           </Button>
         ) : null}
       </div>
-        <HostTable className="ops-shipment-table !min-w-[880px]" aria-label="포장명세서">
-          <colgroup><col style={{ width: "26%" }} /><col style={{ width: "20%" }} /><col style={{ width: "16%" }} /><col style={{ width: "17%" }} /><col style={{ width: "16%" }} /><col style={{ width: "5%" }} /></colgroup>
+        <HostTable className="ops-shipment-table !min-w-[960px]" aria-label="포장명세서">
+          <colgroup><col style={{ width: "15%" }} /><col style={{ width: "14%" }} /><col style={{ width: "14%" }} /><col style={{ width: "13%" }} /><col style={{ width: "12%" }} /><col style={{ width: "13%" }} /><col style={{ width: "11%" }} /><col style={{ width: "5%" }} /></colgroup>
           <HostTableHeader><HostTableRow>
-            {["컨테이너 번호", "씰 번호", "포장 수", "총중량", "용적", ""].map((label, index) => (
+            {["포장명세서", "연결 B/L", "컨테이너", "씰 번호", "포장 수", "총중량", "용적", ""].map((label, index) => (
               <HostTableHead key={label || index} className={cn(["포장 수", "총중량", "용적"].includes(label) && "text-right")}>
                 {label || <span className="sr-only">원문</span>}
               </HostTableHead>
@@ -2047,7 +2055,7 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
           <HostTableBody>
             {lists.length === 0 ? (
               <HostTableRow className="hover:bg-transparent">
-                <HostTableCell colSpan={6} className="px-3 py-6 text-center text-[13px] leading-[18px] text-[var(--color-gray-5)] whitespace-normal">
+                <HostTableCell colSpan={8} className="px-3 py-6 text-center text-[13px] leading-[18px] text-[var(--color-gray-5)] whitespace-normal">
                   아직 연결된 포장명세서가 없습니다. 포장명세서를 올리면 컨테이너별 포장 정보가 여기에 표시됩니다.
                 </HostTableCell>
               </HostTableRow>
@@ -2055,59 +2063,47 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
             {lists.map(({ bill, document, containers }) => {
               const name = document.number ?? document.fileName
               const open = openLists.has(document.documentId)
+              const shown = containers.slice(0, PACKING_ROW_CONTAINERS)
+              const more = containers.length - shown.length
               return (
                 <Fragment key={document.documentId}>
-                  <HostTableRow id={dealPackingListAnchorId(document.documentId)} className="cursor-pointer scroll-mt-[calc(var(--deal-header-height,128px)+16px)] bg-[var(--color-gray-11)]/40 has-aria-expanded:[&>td]:bg-transparent!" onClick={() => toggleList(document.documentId)}>
-                    <HostTableCell colSpan={2} className={cn(cell, "whitespace-normal")}>
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <button type="button" className="flex items-center gap-1.5 text-left font-semibold" aria-expanded={open} aria-label={`${name} 컨테이너 정보 ${open ? "접기" : "열기"}`} onClick={(event) => { event.stopPropagation(); toggleList(document.documentId) }}>
-                          <ChevronDown aria-hidden="true" className={cn("size-4 shrink-0 transition-transform", !open && "-rotate-90")} />
-                          {name}
-                        </button>
-                        <span className="text-[var(--color-gray-5)]">·</span>
-                        <span className="text-[var(--color-gray-5)]">B/L</span>
-                        <a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline" onClick={(event) => { event.stopPropagation(); openShipmentRow(bill.documentId) }}>{bill.blNumber || "B/L 번호 미확인"}</a>
-                        <span className="text-[var(--color-gray-5)]">· {containers.length}대</span>
-                      </div>
+                  <HostTableRow id={dealPackingListAnchorId(document.documentId)} className="cursor-pointer scroll-mt-[calc(var(--deal-header-height,128px)+16px)] has-aria-expanded:[&>td]:bg-transparent!" onClick={() => toggleList(document.documentId)}>
+                    <HostTableCell className={cell}>
+                      <button type="button" className="flex items-center gap-1.5 text-left" aria-expanded={open} aria-label={`${name} 컨테이너별 포장 ${open ? "접기" : "열기"}`} onClick={(event) => { event.stopPropagation(); toggleList(document.documentId) }}>
+                        <ChevronDown aria-hidden="true" className={cn("size-4 shrink-0 transition-transform", !open && "-rotate-90")} />
+                        {name}
+                      </button>
                     </HostTableCell>
-                    <HostTableCell className={cn(cell, numeric, "font-semibold")}>{sumMeasure(containers.map((container) => container.packageCount ? `${container.packageCount} ${container.packageUnit ?? ""}` : null)) ?? "—"}</HostTableCell>
-                    <HostTableCell className={cn(cell, numeric, "font-semibold")}>{sumMeasure(containers.map((container) => container.grossWeight)) ?? "—"}</HostTableCell>
-                    <HostTableCell className={cn(cell, numeric, "font-semibold")}>{sumMeasure(containers.map((container) => container.volume)) ?? "—"}</HostTableCell>
+                    <HostTableCell className={cell} onClick={(event) => event.stopPropagation()}>
+                      <a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRow(bill.documentId)}>{bill.blNumber || "B/L 번호 미확인"}</a>
+                    </HostTableCell>
+                    <HostTableCell className={cn(cell, "whitespace-nowrap tabular-nums")}>
+                      {containers.length ? stacked(shown.map((container) => container.number), more) : <span className="text-[var(--color-gray-5)]">미확인</span>}
+                    </HostTableCell>
+                    <HostTableCell className={cn(cell, "whitespace-nowrap tabular-nums")}>
+                      {containers.length ? stacked(shown.map((container) => container.sealNumber || "미확인"), 0) : "—"}
+                    </HostTableCell>
+                    <HostTableCell className={cn(cell, numeric)}>{sumMeasure(containers.map((container) => container.packageCount ? `${container.packageCount} ${container.packageUnit ?? ""}` : null)) ?? "—"}</HostTableCell>
+                    <HostTableCell className={cn(cell, numeric)}>{sumMeasure(containers.map((container) => container.grossWeight)) ?? "—"}</HostTableCell>
+                    <HostTableCell className={cn(cell, numeric)}>{sumMeasure(containers.map((container) => container.volume)) ?? "—"}</HostTableCell>
                     <HostTableCell className={cn(cell, "text-center")} onClick={(event) => event.stopPropagation()}>
                       <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${name} 문서와 보기`} title={`${name} 문서와 보기`} onClick={() => openPackingList(document.fileName)}>
                         <FileSearch aria-hidden="true" className="size-4" />
                       </Button>
                     </HostTableCell>
                   </HostTableRow>
-                  {containers.length === 0 ? (
-                    <HostTableRow className="hover:bg-transparent">
-                      <HostTableCell colSpan={6} className={cn(cell, "text-[var(--color-gray-5)]")}>컨테이너 정보 미확인</HostTableCell>
-                    </HostTableRow>
-                  ) : null}
-                  {containers.map((container, index) => (
-                    <HostTableRow key={index} className="hover:bg-transparent">
-                      <HostTableCell id={dealContainerAnchorId(container.number)} className={cn(cell, "scroll-mt-[calc(var(--deal-header-height,128px)+16px)] whitespace-nowrap tabular-nums")}>
-                        <span className="pl-[22px]">{container.number}</span>
-                      </HostTableCell>
-                      <HostTableCell className={cn(cell, "whitespace-nowrap tabular-nums")}>{container.sealNumber || "미확인"}</HostTableCell>
-                      <HostTableCell className={cn(cell, numeric)}>{container.packageCount ? `${container.packageCount}${container.packageUnit ? ` ${container.packageUnit}` : ""}` : "미확인"}</HostTableCell>
-                      <HostTableCell className={cn(cell, numeric)}>{container.grossWeight || "미확인"}</HostTableCell>
-                      <HostTableCell className={cn(cell, numeric)}>{container.volume || "미확인"}</HostTableCell>
-                      <HostTableCell className={cell} />
-                    </HostTableRow>
-                  ))}
                   {open && containers.length ? (
                     <HostTableRow className="hover:bg-transparent">
-                      <HostTableCell colSpan={6} className="!p-0">
+                      <HostTableCell colSpan={8} className="!p-0">
                         <div className="sticky left-0 w-[100cqw] p-3">
                           <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4 whitespace-normal">
-                            <h3 className="text-[15px] leading-[22px] font-semibold">컨테이너 정보 · {name}</h3>
+                            <h3 className="text-[15px] leading-[22px] font-semibold">컨테이너별 포장 · {containers.length}대</h3>
                             <div className="mt-3 flex flex-col gap-4">
                               {containers.map((container, index) => (
-                                <div key={index} className="grid gap-x-3 gap-y-2 sm:grid-cols-3 xl:grid-cols-6">
+                                <div key={index} id={dealContainerAnchorId(container.number)} className="grid scroll-mt-[calc(var(--deal-header-height,128px)+16px)] gap-x-3 gap-y-2 sm:grid-cols-3 xl:grid-cols-6">
                                   {packingContainerFields.map(({ key, label, align }) => (
                                     <label key={key} className="flex flex-col gap-1.5">
-                                      <span className="text-[13px] leading-[18px] text-[var(--color-gray-4)]">{index === 0 ? label : <span className="xl:sr-only">{label}</span>}</span>
+                                      <span className={cn("text-[13px] leading-[18px] text-[var(--color-gray-4)]", index > 0 && "xl:sr-only")}>{label}</span>
                                       {canWrite ? (
                                         <Input aria-label={`컨테이너 ${index + 1} ${label}`} className={cn("h-10", align === "right" && "text-right")} value={container[key] ?? ""} onChange={(event) => onUpdateContainer(bill, index, { [key]: event.target.value })} />
                                       ) : (
