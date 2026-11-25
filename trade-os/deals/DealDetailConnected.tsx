@@ -2099,11 +2099,12 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
                           {/* Just one block per container, stacked, so its fields stay together when they wrap. */}
                           <div className="flex flex-col gap-3 whitespace-normal">
                               {containers.map((container, index) => (
-                                <fieldset key={index} id={dealContainerAnchorId(container.number)} className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-xl border border-[var(--color-gray-9)] bg-card px-4 pt-2 pb-4">
-                                  <legend className="px-1 text-[13px] leading-[18px] font-semibold text-[var(--color-gray-3)]">컨테이너 {index + 1}{container.number ? ` · ${container.number}` : ""}</legend>
-                                  <div className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 xl:grid-cols-6">
+                                // Same card as the shipment row's 선적 정보 (title inside, 3-column fields).
+                                <div key={index} id={dealContainerAnchorId(container.number)} className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
+                                  <h3 className="text-[15px] leading-[22px] font-semibold">컨테이너 {index + 1}</h3>
+                                  <div className="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
                                   {packingContainerFields.map(({ key, label, align }) => (
-                                    <label key={key} className={cn("flex min-w-0 flex-col gap-1.5", (key === "number" || key === "sealNumber") && "col-span-2 sm:col-span-1")}>
+                                    <label key={key} className="flex flex-col gap-1.5">
                                       <span className="text-[13px] leading-[18px] text-[var(--color-gray-4)]">{label}</span>
                                       {canWrite ? (
                                         <Input aria-label={`컨테이너 ${index + 1} ${label}`} className={cn("h-10", align === "right" && "text-right")} value={container[key] ?? ""} onChange={(event) => onUpdateContainer(bill, index, { [key]: event.target.value })} />
@@ -2113,7 +2114,7 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
                                     </label>
                                   ))}
                                   </div>
-                                </fieldset>
+                                </div>
                               ))}
                           </div>
                         </div>
