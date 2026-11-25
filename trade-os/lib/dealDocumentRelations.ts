@@ -128,6 +128,29 @@ export function addDealManualPackingList(dealId: string) {
   return { state, id }
 }
 
+/** Removes a CI added by hand, with its fields and links. */
+export function removeDealManualInvoice(dealId: string, id: string) {
+  const state = readDealInvoiceRelations(dealId)
+  state.manualInvoices = state.manualInvoices.filter((entry) => entry !== id)
+  delete state.invoiceFields[id]
+  delete state.invoiceToBills[id]
+  writeDealInvoiceRelations(dealId, state)
+  notify(dealId)
+  return state
+}
+
+/** Removes a packing list added by hand, with its links. */
+export function removeDealManualPackingList(dealId: string, id: string) {
+  const state = readDealInvoiceRelations(dealId)
+  const { [id]: _removed, ...rest } = state.manualPackingLists
+  void _removed
+  state.manualPackingLists = rest
+  delete state.packingToShipments[id]
+  writeDealInvoiceRelations(dealId, state)
+  notify(dealId)
+  return state
+}
+
 export function saveDealManualPackingList(dealId: string, id: string, list: ManualPackingList) {
   const state = readDealInvoiceRelations(dealId)
   state.manualPackingLists = { ...state.manualPackingLists, [id]: list }

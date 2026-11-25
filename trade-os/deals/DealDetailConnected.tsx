@@ -9,8 +9,8 @@ import { dealDocumentPreviews, importantDealDocuments as documents, supplementar
 import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
 import { InfoBox } from "@trade-os/components/InfoBox"
 import { OperationsScreen } from "@trade-os/OperationsScreens"
-import type { CommercialInvoiceCard, SplitShipmentView } from "@trade-os/shipments/ShipmentsConnected"
-import { addDealManualInvoice, addDealManualPackingList, saveDealManualPackingList, linkDealInvoiceToBill, linkDealInvoiceToShipment, linkDealPackingListToShipment, readDealInvoiceRelations, saveDealInvoiceField, type DealInvoiceRelationState } from "@trade-os/lib/dealDocumentRelations"
+import { ConfirmDeleteButton, type CommercialInvoiceCard, type SplitShipmentView } from "@trade-os/shipments/ShipmentsConnected"
+import { addDealManualInvoice, addDealManualPackingList, removeDealManualInvoice, removeDealManualPackingList, saveDealManualPackingList, linkDealInvoiceToBill, linkDealInvoiceToShipment, linkDealPackingListToShipment, readDealInvoiceRelations, saveDealInvoiceField, type DealInvoiceRelationState } from "@trade-os/lib/dealDocumentRelations"
 import type { ShipmentContainerEdit } from "@trade-os/shipments/ShipmentConfirmationDialog"
 import { HostTable, HostTableBody, HostTableCell, HostTableHead, HostTableHeader, HostTableRow } from "@trade-os/components/HostTable"
 import type { Shipment } from "@trade-os/lib/api/shipments"
@@ -1837,6 +1837,18 @@ const billContainers = (bill: SplitShipmentView["billsOfLading"][number]) => {
 const dealPackingListAnchorId = (documentId: string) => `deal-pl-${documentId}`
 const dealContainerAnchorId = (containerNumber: string) => `deal-container-${containerNumber}`
 const dealInvoiceAnchorId = (invoiceId: string) => `deal-invoice-${invoiceId}`
+// After 「추가」: bring the new (opened) row into view and focus its first input.
+const revealAddedRow = (rowId: string) => {
+  let tries = 0
+  const reveal = () => {
+    const row = document.getElementById(rowId)
+    if (!row) { if (tries++ < 20) requestAnimationFrame(reveal); return }
+    row.scrollIntoView({ block: "start", behavior: "smooth" })
+    const input = row.nextElementSibling?.querySelector<HTMLInputElement>("input:not([disabled])")
+    input?.focus({ preventScroll: true })
+  }
+  requestAnimationFrame(reveal)
+}
 // Jumping to a shipment or CI row also opens it.
 const openShipmentRowByAnchor = (anchor: string) => window.dispatchEvent(new CustomEvent("ecoya:open-shipment-row", { detail: anchor }))
 const openShipmentRow = (billId: string) => openShipmentRowByAnchor(dealBillAnchorId(billId))
@@ -2003,7 +2015,8 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onSetContainers }: 
   onSetContainers: (bill: BillCard, containers: PackingContainer[]) => void
 }) {
   const relations = useDealRelations(dealId)
-  const [openLists, setOpenLists] = useState<Set<string>>(() => openedPackingLists.get(dealId) ?? new Set())
+  // The first packing list row starts open.
+  const [openLists, setOpenLists] = useState<Set<string>>(() => openedPackingLists.get(dealId) ?? new Set(view.billsOfLading.flatMap((bill) => (bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => document.documentId)).slice(0, 1)))
   useEffect(() => { openedPackingLists.set(dealId, openLists) }, [dealId, openLists])
   const toggleList = (id: string) => setOpenLists((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next })
   // A container link elsewhere (shipment table) opens its packing list.
@@ -2076,7 +2089,7 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onSetContainers }: 
         </div>
         <div className="flex items-center gap-2">
           {canWrite ? (
-            <Button variant="outline" size="sm" onClick={() => { const { id } = addDealManualPackingList(dealId); setOpenLists((current) => new Set([...current, id])) }}>
+            <Button variant="outline" size="sm" onClick={() => { const { id } = addDealManualPackingList(dealId); setOpenLists(new Set([id])); revealAddedRow(dealPackingListAnchorId(id)) }}>
               <Plus data-icon="inline-start" />
               포장명세서 추가
             </Button>
@@ -2089,7 +2102,7 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onSetContainers }: 
           ) : null}
         </div>
       </div>
-        <HostTable className="ops-shipment-table !min-w-[960px]" aria-label="포장명세서">
+        <HostTable className="ops-shipment-table" data-deal-table="packing" aria-label="포장명세서">
           <colgroup><col style={{ width: "15%" }} /><col style={{ width: "14%" }} /><col style={{ width: "14%" }} /><col style={{ width: "13%" }} /><col style={{ width: "12%" }} /><col style={{ width: "13%" }} /><col style={{ width: "11%" }} /><col style={{ width: "5%" }} /></colgroup>
           <HostTableHeader><HostTableRow>
             {["포장명세서", "연결 B/L", "컨테이너", "씰 번호", "포장 수", "총중량", "용적", ""].map((label, index) => (
@@ -2153,14 +2166,20 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onSetContainers }: 
                           <div className="flex flex-col gap-3 whitespace-normal">
                               {list.manual ? (
                                 <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
-                                  <h5 className="text-base leading-6 font-bold">포장명세서 <span className="text-xs font-normal text-[var(--color-gray-5)]">직접 입력 · 문서 없음</span></h5>
+                                  <div className="flex items-center gap-2">
+                                    <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">포장명세서<span className="text-xs font-normal text-[var(--color-gray-5)]">직접 입력 · 문서 없음</span></h5>
+                                    {canWrite ? <ConfirmDeleteButton label="포장명세서" description="직접 추가한 포장명세서와 컨테이너 정보, 연결을 지웁니다." onConfirm={() => { removeDealManualPackingList(dealId, document.documentId) }} /> : null}
+                                  </div>
                                   <div className="mt-3.5 w-full sm:w-[240px]"><FormFieldHeader className="mb-2.5" label="포장명세서 번호" /><Input aria-label="포장명세서 번호" disabled={!canWrite} className="h-10 px-3 py-0" value={relations.manualPackingLists[document.documentId]?.number ?? ""} onChange={(event) => saveDealManualPackingList(dealId, document.documentId, { number: event.target.value, containers })} /></div>
                                 </div>
                               ) : null}
                               {containers.map((container, index) => (
                                 // Same layout as the item card: title, row 1 (identity · packages), separator, row 2 (weight · volume with unit selects).
                                 <div key={index} id={dealContainerAnchorId(container.number)} className="@container/pl flex scroll-mt-[calc(var(--deal-header-height,128px)+16px)] flex-col gap-3.5 rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
-                                  <h5 className="text-base leading-6 font-bold">컨테이너 {index + 1}</h5>
+                                  <div className="flex items-center gap-2">
+                                    <h5 className="min-w-0 flex-1 text-base leading-6 font-bold">컨테이너 {index + 1}</h5>
+                                    {canWrite && containers.length > 1 ? <ConfirmDeleteButton label={`컨테이너 ${index + 1}`} description={`${container.number || "번호 미입력"} 컨테이너의 입력 정보를 지웁니다.`} onConfirm={() => setContainers(list, containers.filter((_, containerIndex) => containerIndex !== index))} /> : null}
+                                  </div>
                                   <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/pl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_240px] [&>div]:min-w-0">
                                     <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="컨테이너 번호" />{textInput(update, index, container, "number", "컨테이너 번호")}</div>
                                     <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="씰 번호" />{textInput(update, index, container, "sealNumber", "씰 번호")}</div>
@@ -2210,6 +2229,8 @@ function CommercialInvoiceTransactionCard({
     // link action is visible without an extra click. Packing lists are the
     // content of an opened B/L row, so they start open inside it.
     () => openedInvoiceRows.get(dealId) ?? new Set([
+      // The first CI row starts open.
+      ...[view.billsOfLading.flatMap((bill) => bill.connectedCommercialInvoices)[0]?.documentId ?? view.unlinkedDocuments[0]?.documentId].filter((id): id is string => Boolean(id)),
       ...view.unlinkedDocuments.map((invoice) => invoice.documentId),
       ...view.billsOfLading.flatMap((bill) => (bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => `PL:${document.documentId}`)),
     ])
@@ -2310,7 +2331,8 @@ function CommercialInvoiceTransactionCard({
             <Button size="sm" variant="outline" onClick={() => {
               const { state, id } = addDealManualInvoice(dealId)
               setRelationState(state)
-              setExpanded((current) => new Set([...current, id]))
+              setExpanded(new Set([id]))
+              revealAddedRow(dealInvoiceAnchorId(id))
             }}>
               <Plus data-icon="inline-start" />
               CI 추가
@@ -2320,7 +2342,7 @@ function CommercialInvoiceTransactionCard({
       </div>
       {(
         <div className="ops-screen mt-4" role="region" aria-label="CI 목록">
-          <HostTable className="ops-shipment-table !min-w-[960px] text-left" aria-label="CI 결제정보">
+          <HostTable className="ops-shipment-table text-left" data-deal-table="invoices" aria-label="CI 결제정보">
             <colgroup><col style={{ width: "16%" }} /><col style={{ width: "18%" }} /><col style={{ width: "10%" }} /><col style={{ width: "11%" }} /><col style={{ width: "11%" }} /><col style={{ width: "14%" }} /><col style={{ width: "15%" }} /><col style={{ width: "5%" }} /></colgroup>
             <HostTableHeader>
               <HostTableRow>
@@ -2394,6 +2416,7 @@ function CommercialInvoiceTransactionCard({
                   {/* Same layout as the item card: title row, row 1 (identity), separator, row 2 (quantities with unit selects). */}
                   <div className="flex items-center gap-2">
                     <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">송장 정보<span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">{invoice.fileName ? `${invoice.fileName} · ${invoice.uploadedAt}` : "직접 입력 · 문서 없음"}</span></h5>
+                    {canWrite && !invoice.fileName ? <ConfirmDeleteButton label="CI" description="직접 추가한 CI와 입력한 정보, 연결을 지웁니다." onConfirm={() => { setRelationState(removeDealManualInvoice(dealId, invoice.documentId)); setExpanded((current) => { const next = new Set(current); next.delete(invoice.documentId); return next }) }} /> : null}
                     {invoice.onOpen ? (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -3458,7 +3481,7 @@ function DealFieldsPanel({
   // An opened item row shows its inputs directly (edits autosave per field).
   // Mismatched items start open so the value can be fixed right away.
   const [expandedItems, setExpandedItems] = useState<Set<number>>(
-    () => (rowStateKey ? openedItemRows.get(rowStateKey) : undefined) ?? new Set(items.filter((item) => item.match === "확인 필요").map((item) => item.id))
+    () => (rowStateKey ? openedItemRows.get(rowStateKey) : undefined) ?? new Set([...(items[0] ? [items[0].id] : []), ...items.filter((item) => item.match === "확인 필요").map((item) => item.id)])
   )
   useEffect(() => { if (rowStateKey) openedItemRows.set(rowStateKey, expandedItems) }, [rowStateKey, expandedItems])
   const toggleItemExpanded = (id: number) => setExpandedItems((current) => {
@@ -3787,7 +3810,7 @@ function DealFieldsPanel({
           ) : null}
         </div>
         <div className="ops-screen mt-3" role="region" aria-label="거래 품목 목록">
-          <HostTable className="ops-shipment-table !min-w-[880px] text-left" aria-label={itemHeading}>
+          <HostTable className="ops-shipment-table text-left" data-deal-table="items" aria-label={itemHeading}>
             <colgroup><col style={{ width: "24%" }} /><col style={{ width: "15%" }} /><col style={{ width: "12%" }} /><col style={{ width: "14%" }} /><col style={{ width: "12%" }} /><col style={{ width: "11.5%" }} /><col style={{ width: "11.5%" }} /></colgroup>
             <HostTableHeader>
               <HostTableRow>
@@ -7221,7 +7244,7 @@ export function DealDetailScreen({
               )}
             </div>
             <div className="ops-screen mt-4" role="region" aria-label="통관 문서 목록">
-              <HostTable className="ops-shipment-table !min-w-[880px] text-left" aria-label="통관 문서">
+              <HostTable className="ops-shipment-table text-left" data-deal-table="customs" aria-label="통관 문서">
                 <colgroup><col style={{ width: "28.5%" }} /><col style={{ width: "13.7%" }} /><col style={{ width: "15.9%" }} /><col style={{ width: "15.9%" }} /><col style={{ width: "10.1%" }} /><col style={{ width: "15.9%" }} /></colgroup>
                 <HostTableHeader>
                   <HostTableRow className="hover:bg-transparent">

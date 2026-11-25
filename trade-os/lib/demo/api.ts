@@ -181,10 +181,15 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
       const created: Shipment = {
         id: crypto.randomUUID(), deal_id: deal.deal_id, deal_title: deal.title, deal_counterparty: deal.counterparty_name,
         bl_number: null, container_number: null, carrier: null, vessel: null, pol: null, pod: null,
-        etd: null, eta: null, edit_token: crypto.randomUUID(), status: 'booked', source: 'manual',
+        etd: null, eta: null, edit_token: crypto.randomUUID(), status: 'booked', source: 'manual', manual_entry: true,
       }
       localStorage.setItem(createdKey, JSON.stringify([...createdShipments(), created]))
       value = { shipment: created }
+    } else if (method === 'DELETE' && /^\/trade\/shipments\/[^/]+$/.test(path)) {
+      const id = path.split('/').pop()
+      if (!createdShipments().some(row => row.id === id)) throw new ApiError({ status: 409, code: 'TRADE_SHIPMENT_NOT_MANUAL', message: '문서로 만든 선적은 삭제할 수 없습니다.' })
+      localStorage.setItem(createdKey, JSON.stringify(createdShipments().filter(row => row.id !== id)))
+      value = { ok: true }
     } else if (method === 'PATCH' && confirmationMatch) {
       const current = shipments().find(row => row.id === confirmationMatch[1])
       if (!current) throw new ApiError({status:404, code:'TRADE_SHIPMENT_NOT_FOUND', message:'선적을 찾을 수 없습니다.'})

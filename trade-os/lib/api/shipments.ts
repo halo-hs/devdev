@@ -17,6 +17,8 @@ export type ShipmentStatus =
 
 export type Shipment = {
   id: string;
+  /** Prototype: added by hand on a deal (no B/L document); only these can be deleted. */
+  manual_entry?: boolean | null;
   deal_id?: string | null;
   bl_number?: string | null;
   container_number?: string | null;
@@ -249,6 +251,15 @@ export async function createShipment(getIdToken: () => Promise<string>, dealId: 
   );
   publishShipmentUpdate({ shipmentId: response.shipment.id, dealId: response.shipment.deal_id });
   return response;
+}
+
+/** Deletes a shipment that was added by hand (prototype). */
+export async function deleteShipment(getIdToken: () => Promise<string>, shipment: Shipment): Promise<void> {
+  await apiRequest<{ ok: boolean }>(
+    apiPath(`/trade/shipments/${encodeURIComponent(shipment.id)}`),
+    { baseUrl: apiBaseUrl(), getIdToken, init: { method: "DELETE" } },
+  );
+  publishShipmentUpdate({ shipmentId: shipment.id, dealId: shipment.deal_id });
 }
 
 export async function confirmShipment(
