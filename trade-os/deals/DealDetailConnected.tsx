@@ -1836,6 +1836,11 @@ const billContainers = (bill: SplitShipmentView["billsOfLading"][number]) => {
 
 const dealPackingListAnchorId = (documentId: string) => `deal-pl-${documentId}`
 const dealContainerAnchorId = (containerNumber: string) => `deal-container-${containerNumber}`
+const dealInvoiceAnchorId = (invoiceId: string) => `deal-invoice-${invoiceId}`
+// Jumping to a shipment or CI row also opens it.
+const openShipmentRow = (billId: string) => window.dispatchEvent(new CustomEvent("ecoya:open-shipment-row", { detail: dealBillAnchorId(billId) }))
+const openInvoiceRow = (invoiceId: string) => window.dispatchEvent(new CustomEvent("ecoya:open-invoice-row", { detail: invoiceId }))
+const openBillDocument = (bill: { fileName: string }) => window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code: "BL", fileName: bill.fileName } }))
 
 // 서류·근거 cell of a deal shipment row: the CIs linked to this B/L.
 function ShipmentDocumentLinks({ dealId, bill, view }: { dealId: string; bill: SplitShipmentView["billsOfLading"][number]; view: SplitShipmentView }) {
@@ -1858,6 +1863,46 @@ function ShipmentDocumentLinks({ dealId, bill, view }: { dealId: string; bill: S
         )) : <span className="text-[var(--color-orange-2)]">연결 필요</span>}
       </div>
     </>
+  )
+}
+
+// 연결 문서 of an opened shipment row: one line per linked CI and packing list,
+// laid out like the CI row's 연결 문서 (type badge · number link · key facts).
+function ShipmentLinkedDocuments({ dealId, bill, view }: { dealId: string; bill?: SplitShipmentView["billsOfLading"][number]; view: SplitShipmentView }) {
+  const linkedInvoiceIds = bill ? Object.entries(readDealInvoiceRelations(dealId).invoiceToBills)
+    .filter(([, billIds]) => billIds.includes(bill.documentId))
+    .map(([invoiceId]) => invoiceId) : []
+  const invoices = bill ? [
+    ...bill.connectedCommercialInvoices,
+    ...view.unlinkedDocuments.filter((invoice) => linkedInvoiceIds.includes(invoice.documentId)),
+  ] : []
+  const packingLists = (bill?.connectedDocuments ?? []).filter((document) => document.code === "PL")
+  const count = invoices.length + packingLists.length
+  return (
+    <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
+      <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">연결 문서</h3><span className="text-xs text-muted-foreground">{count ? `${count}건` : "연결 필요"}</span></div>
+      {count ? (
+        <ul className="mt-2 divide-y">
+          {invoices.map((invoice) => (
+            <li key={invoice.documentId} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 text-sm">
+              <DocumentTypeBadge code="CI" />
+              <a href={`#${dealInvoiceAnchorId(invoice.documentId)}`} className="font-semibold text-[var(--color-primary-4)] hover:underline" onClick={() => openInvoiceRow(invoice.documentId)}>{invoice.invoiceNumber || invoice.fileName}</a>
+              {invoice.currency && invoice.totalAmount != null ? <span className="text-muted-foreground tabular-nums">{invoice.currency} {invoice.totalAmount.toLocaleString()}</span> : null}
+              {invoice.invoiceDate ? <span className="text-xs text-muted-foreground">{invoice.invoiceDate}</span> : null}
+            </li>
+          ))}
+          {packingLists.map((document) => (
+            <li key={document.documentId} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 text-sm">
+              <DocumentTypeBadge code="PL" />
+              <a href={`#${dealPackingListAnchorId(document.documentId)}`} className="font-semibold text-[var(--color-primary-4)] hover:underline">{document.number ?? document.fileName}</a>
+              {bill ? <StatusBadge size="sm" tone="neutral">{containerCountLabel(bill)}</StatusBadge> : null}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-2 text-sm text-muted-foreground">이 선적에 연결된 상업송장·포장명세서가 없습니다.</p>
+      )}
+    </div>
   )
 }
 
@@ -1961,7 +2006,7 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
                     <TableRow id={dealPackingListAnchorId(document.documentId)} className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] hover:bg-transparent">
                       <TableCell colSpan={5} className={cn(cell, "text-[var(--color-gray-5)]")}>컨테이너 정보 미확인</TableCell>
                       <TableCell className={cn(cell, "font-medium")}>{name}</TableCell>
-                      <TableCell className={cell}><a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline">{bill.blNumber || "B/L 번호 미확인"}</a></TableCell>
+                      <TableCell className={cell}><a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRow(bill.documentId)}>{bill.blNumber || "B/L 번호 미확인"}</a></TableCell>
                       <TableCell className={cn(cell, "w-12 text-center")} />
                     </TableRow>
                   ) : null}
@@ -1983,7 +2028,7 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
                           <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{container.volume || "미확인"}</TableCell>
                           <TableCell className={cn(cell, index ? "text-[var(--color-gray-5)]" : "font-medium")}>{name}</TableCell>
                           <TableCell className={cell} onClick={(event) => event.stopPropagation()}>
-                            <a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline">{bill.blNumber || "B/L 번호 미확인"}</a>
+                            <a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRow(bill.documentId)}>{bill.blNumber || "B/L 번호 미확인"}</a>
                           </TableCell>
                           <TableCell className={cn(cell, "w-12 text-center")} onClick={(event) => event.stopPropagation()}>
                             {index === 0 ? (
@@ -2113,6 +2158,14 @@ function CommercialInvoiceTransactionCard({
     else next.add(id)
     return next
   })
+  useEffect(() => {
+    const open = (event: Event) => {
+      const invoiceId = (event as CustomEvent<string>).detail
+      setExpanded((current) => current.has(invoiceId) ? current : new Set([...current, invoiceId]))
+    }
+    window.addEventListener("ecoya:open-invoice-row", open)
+    return () => window.removeEventListener("ecoya:open-invoice-row", open)
+  }, [])
   const updateDraft = (invoiceId: string, field: string, value: string) => {
     setDrafts((current) => ({ ...current, [invoiceId]: { ...current[invoiceId], [field]: value } }))
     setRelationState(saveDealInvoiceField(dealId, invoiceId, field, value))
@@ -2155,7 +2208,7 @@ function CommercialInvoiceTransactionCard({
                 const amountText = invoice.currency && invoice.totalAmount != null ? `${invoice.currency} ${invoice.totalAmount.toLocaleString()}` : invoice.currency ?? ""
                 return (
                   <Fragment key={invoice.documentId}>
-                    <TableRow className="cursor-pointer has-aria-expanded:[&>td]:bg-transparent!" onClick={() => toggle(invoice.documentId)}>
+                    <TableRow id={dealInvoiceAnchorId(invoice.documentId)} className="cursor-pointer scroll-mt-[calc(var(--deal-header-height,128px)+16px)] has-aria-expanded:[&>td]:bg-transparent!" onClick={() => toggle(invoice.documentId)}>
                       <TableCell className="px-3 py-3 align-top">
                         <button type="button" className="flex items-center gap-2 text-left" aria-expanded={isOpen} aria-label={`${invoice.invoiceNumber || invoice.fileName} ${isOpen ? "접기" : "펼치기"}`} onClick={(event) => { event.stopPropagation(); toggle(invoice.documentId) }}>
                           <ChevronDown className={cn("size-4 shrink-0 transition-transform", !isOpen && "-rotate-90")} aria-hidden="true" />
@@ -2228,7 +2281,7 @@ function CommercialInvoiceTransactionCard({
                         {linkedBills.map((bill) => bill ? (
                           <li key={bill.documentId} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 text-sm">
                             <DocumentTypeBadge code="BL" />
-                            <a href={`#${dealBillAnchorId(bill.documentId)}`} className="font-semibold text-[var(--color-primary-4)] hover:underline">{bill.blNumber || "B/L 번호 미확인"}</a>
+                            <a href={`#${dealBillAnchorId(bill.documentId)}`} className="font-semibold text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRow(bill.documentId)}>{bill.blNumber || "B/L 번호 미확인"}</a>
                             <span className="text-muted-foreground">{bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}</span>
                             <StatusBadge size="sm" tone="neutral">{containerCountLabel(bill)}</StatusBadge>
                             <span className="text-xs text-muted-foreground">{bill.fields.shippedOnBoardDate ?? "선적일 미확인"}</span>
@@ -6375,10 +6428,10 @@ export function DealDetailScreen({
     },
     [connectedShipmentContainerDrafts, connectedShipmentDrafts, dealId]
   )
-  // Prototype data: the shipment API rows and the B/L document fixture use
-  // different numbers, so match by B/L number first and fall back to row order.
-  const billForShipment = (shipment: { bl_number?: string | null }, index: number) =>
-    splitShipmentView.billsOfLading.find((entry) => entry.blNumber && entry.blNumber === shipment.bl_number) ?? splitShipmentView.billsOfLading[index]
+  // A shipment row and a B/L document are the same lot when their B/L numbers
+  // match; unmatched rows show no linked documents.
+  const billForShipment = (shipment: { bl_number?: string | null }) =>
+    splitShipmentView.billsOfLading.find((entry) => entry.blNumber && entry.blNumber === shipment.bl_number)
   const openDealDocument = (work: DealWorkKey) => {
     if (work === "finance") return
     const code = work === "fulfillment"
@@ -6940,15 +6993,21 @@ export function DealDetailScreen({
             className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
           >
             <FulfillmentTab
-              shipmentContent={<><OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} onOpenDocument={() => openDealDocument("fulfillment")} shipmentRowAnchorId={(shipment, index) => {
-                const bill = billForShipment(shipment, index)
+              shipmentContent={<><OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} onOpenDocument={() => openDealDocument("fulfillment")} shipmentRowAnchorId={(shipment) => {
+                const bill = billForShipment(shipment)
                 return bill ? dealBillAnchorId(bill.documentId) : undefined
-              }} renderShipmentContainers={(shipment, index) => {
-                const bill = billForShipment(shipment, index)
+              }} renderShipmentContainers={(shipment) => {
+                const bill = billForShipment(shipment)
                 return bill && billContainers(bill).length ? <ShipmentContainerLinks bill={bill} /> : undefined
-              }} renderShipmentDocuments={(shipment, index) => {
-                const bill = billForShipment(shipment, index)
-                return bill ? <ShipmentDocumentLinks dealId={dealId} bill={bill} view={splitShipmentView} /> : <div>{shipment.bl_number ? "B/L 문서 미연결" : "B/L 번호 없음"}</div>
+              }} renderShipmentDocuments={(shipment) => {
+                const bill = billForShipment(shipment)
+                return bill ? <ShipmentDocumentLinks dealId={dealId} bill={bill} view={splitShipmentView} /> : <div className="text-[var(--color-gray-5)]">연결 문서 없음</div>
+              }} renderShipmentLinkedDocuments={(shipment) => {
+                const bill = billForShipment(shipment)
+                return <ShipmentLinkedDocuments dealId={dealId} bill={bill} view={splitShipmentView} />
+              }} renderShipmentDocumentAction={(shipment) => {
+                const bill = billForShipment(shipment)
+                return bill ? <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${bill.blNumber || "B/L"} 문서와 보기`} title={`${bill.blNumber || "B/L"} 문서와 보기`} onClick={() => openBillDocument(bill)}><FileSearch aria-hidden="true" className="size-4" /></Button> : null
               }} /><PackingListCard dealId={dealId} view={splitShipmentView} canWrite={canMutate(role)} onUpload={canMutate(role) ? onUpload : undefined} onUpdateContainer={(bill, index, patch) => setConnectedShipmentContainerDrafts((current) => ({ ...current, [bill.documentId]: billContainers(bill).map((container, containerIndex) => containerIndex === index ? { ...container, ...patch } : container) }))} /></>}
               onSummaryChange={setShipmentSummary}
               onEditUnitPrice={openItemUnitPrice}

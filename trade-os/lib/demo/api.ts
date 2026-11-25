@@ -11,7 +11,7 @@ import { ApiError } from '../api/client'
 // Sanitized development seed contracts, used only by the explicitly labelled demo.
 const responses = captured as Record<string, unknown>
 const copy = <T,>(value: T): T => structuredClone(value)
-const storageKey = 'ecoya:public-demo:shipment-overrides:v1'
+const storageKey = 'ecoya:public-demo:shipment-overrides:v2'
 const monthClosesStorageKey = 'ecoya:public-demo:month-closes:v1'
 let monthClosesFallback: MonthClose[] | undefined
 const demoUser = '940ff121-2c36-58fa-9c13-05870353ce22'
@@ -29,7 +29,25 @@ const shipmentsPerDeal = [4, 3, 4, 3, 4, 3, 4, 3]
 const shipmentDeals = [primary, ...hostDeals.filter(d => d.deal_id !== primary.deal_id)]
   .slice(0, shipmentsPerDeal.length)
   .flatMap((deal, dealIndex) => Array.from({ length: shipmentsPerDeal[dealIndex] }, () => deal))
+// The primary deal's first three lots match its B/L documents (deal detail
+// links shipment rows to B/L, CI and packing list by B/L number). Its fourth
+// lot stays without documents to show the unlinked state.
+const primaryLots = [
+  { bl_number: 'HMM-014W-2607', container_number: 'HMMU1234567' },
+  { bl_number: 'HMM-015W-2607', container_number: 'HMMU7654321' },
+  { bl_number: 'HMM-016W-2607', container_number: 'HMMU9876543' },
+]
 const seedShipments: Shipment[] = shipmentDeals.map((deal, index) => {
+  const lot = deal.deal_id === primary.deal_id ? primaryLots[index] : undefined
+  if (lot) return {
+    id: `5e000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
+    deal_id: deal.deal_id, deal_title: deal.title, deal_counterparty: deal.counterparty_name,
+    ...lot, container_count: index === 1 ? 1 : 2,
+    carrier: 'HMM', vessel: 'HMM Green', pol: 'Melbourne', pod: 'Busan',
+    etd: date(-10), eta: date(index === 0 ? -2 : 2),
+    edit_token: `shipment-${index}-initial`,
+    status: 'departed', source: 'manual',
+  }
   return {
     id: `5e000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
     deal_id: deal.deal_id, deal_title: deal.title, deal_counterparty: deal.counterparty_name,
