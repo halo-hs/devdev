@@ -745,7 +745,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                         <Link href="/erp/snap-evidence" title={shipEvidence.allocationLabel ? copy.evidenceAllocatedTo.replace("{label}", shipEvidence.allocationLabel) : undefined}>
                           SNAP {ship.snap_evidence_count === undefined ? "" : `${ship.snap_evidence_count}건 · `}{shipEvidence.mediaCount}장
                         </Link>
-                      </HostButton> : <div className="mt-0.5 text-[15px] leading-[22px] text-[var(--color-gray-5)]">증거 미확인</div>}
+                      </HostButton> : <div className="mt-0.5 text-[15px] leading-[22px] text-[var(--color-gray-5)]">{inlineEdit ? "SNAP 없음" : "증거 미확인"}</div>}
                     </HostTableCell>
                     <HostTableCell className="text-center">
                       <StatusBadge size="sm" meaning="state" tone={delayed ? "danger" : arriving ? "warning" : STATUS_TONE[ship.status]}>
