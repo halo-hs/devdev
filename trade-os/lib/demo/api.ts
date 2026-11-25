@@ -1,3 +1,5 @@
+import { listShipmentDocumentRegistrations } from "../erpDocumentWorkflow"
+import { prototypeBackend } from "../prototypeBackend"
 import { createDemoPaymentSchedule, withDemoScheduleLedger, withDemoSettlementTotals } from "./dealPaymentSchedules"
 import type { CreatePaymentScheduleBody, LedgerResponse, SettlementOverview, SettlementCalendar } from "../api/settlement"
 import { salesPerformancePreview, salesPerformanceRanking } from "./salesPerformancePreview"
@@ -70,11 +72,27 @@ const deletedKey = 'ecoya:public-demo:shipment-deleted:v1'
 function deletedShipments(): string[] {
   try { const ids: unknown = JSON.parse(localStorage.getItem(deletedKey) || '[]'); return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [] } catch { return [] }
 }
+function dealCatalog() {
+  return [...hostDeals, ...prototypeBackend.deals.listCreated().map(deal => ({
+    deal_id: deal.id, display_id: deal.id, title: deal.title, counterparty_name: deal.counterparty,
+    status: "contract", risks: [], documents: [], next_actions: [],
+  }))]
+}
+
 function shipments() {
   let overrides: Record<string, Partial<Shipment>> = {}
   try { overrides = JSON.parse(localStorage.getItem(storageKey) || '{}') } catch { /* A corrupt demo cache starts fresh. */ }
   const deleted = new Set(deletedShipments())
-  return [...seedShipments, ...createdShipments()].filter(row => !deleted.has(row.id)).map(row => ({ ...row, ...overrides[row.id] }))
+  const catalog = dealCatalog()
+  const uploadedBills: Shipment[] = listShipmentDocumentRegistrations().filter(doc => doc.active && doc.code === "BL").map(doc => {
+    const deal = catalog.find(row => row.display_id === doc.dealId)
+    return { id: doc.documentId, deal_id: deal?.deal_id ?? doc.dealId, deal_title: deal?.title,
+      deal_counterparty: deal?.counterparty_name, bl_number: doc.fields.bl_number?.value,
+      vessel: doc.fields.vessel?.value, pod: doc.fields.port?.value, container_number: doc.fields.container_number?.value,
+      etd: doc.fields.etd?.value, eta: doc.fields.eta?.value, status: "unknown", source: "document",
+      edit_token: doc.documentId + "-initial" }
+  })
+  return [...seedShipments, ...createdShipments(), ...uploadedBills].filter(row => !deleted.has(row.id)).map(row => ({ ...row, ...overrides[row.id] }))
 }
 function monthCloses(): MonthClose[] {
   const withSnapshot = (rows: MonthClose[]) => rows.map(row =>
@@ -186,7 +204,7 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
       value = reopened
     } else if (method === 'POST' && path === '/trade/shipments') {
       const { deal_id } = requestBody<{ deal_id: string }>(init)
-      const deal = hostDeals.find(d => d.deal_id === deal_id)
+      const deal = dealCatalog().find(d => d.deal_id === deal_id)
       if (!deal) throw new ApiError({ status: 404, code: 'TRADE_DEAL_NOT_FOUND', message: '거래를 찾을 수 없습니다.' })
       const created: Shipment = {
         id: crypto.randomUUID(), deal_id: deal.deal_id, deal_title: deal.title, deal_counterparty: deal.counterparty_name,
@@ -201,7 +219,7 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
       else localStorage.setItem(deletedKey, JSON.stringify([...new Set([...deletedShipments(), id])]))
       value = { ok: true }
     } else if (method === 'PATCH' && confirmationMatch) {
-      const current = shipments().find(row => row.id === confirmationMatch[1])
+      const current = shipments().find(row => row.id === decodeURIComponent(confirmationMatch[1]))
       if (!current) throw new ApiError({status:404, code:'TRADE_SHIPMENT_NOT_FOUND', message:'선적을 찾을 수 없습니다.'})
       const body = requestBody<ShipmentConfirmation>(init)
       if (body.expected_edit_token !== current.edit_token) throw new ApiError({status:409, code:'TRADE_SHIPMENT_EDIT_CONFLICT', message:'다른 사용자가 수정했습니다.'})
@@ -224,7 +242,7 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
       localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(shipments().map(row => [row.id, row.id === saved.id ? saved : row]))))
       value = {shipment:saved}
     } else if (method === 'POST' && match) {
-      const current = shipments().find(row => row.id === match[1])
+      const current = shipments().find(row => row.id === decodeURIComponent(match[1]))
       if (!current) throw new Error('예시 선적을 찾을 수 없습니다.')
       const refreshed: Shipment = { ...current, eta: current.confirmed_eta || date(3), provider_eta: date(3), provider_fetched_at: new Date().toISOString(), last_carrier_sync_at: new Date().toISOString(), status: current.confirmed_status || (current.status === 'arrived' ? 'arrived' : 'loaded'), source: 'carrier' }
       // Store IDs and small synthetic records only. Other tabs re-read this same state.
@@ -254,10 +272,13 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
   else if (path === '/trade/shipments') {
     const rows = shipments().filter(row => !query.get('deal_id') || row.deal_id === query.get('deal_id'))
     value = { shipments: rows.slice(Number(query.get('offset') || 0), Number(query.get('offset') || 0) + Number(query.get('limit') || 500)), sync_status: 'ok' }
-  } else if (path === '/trade/deals') value = { items: hostDeals, meta: { page: 1, page_size: 100, page_count: 1, total: hostDeals.length } }
+  } else if (path === '/trade/deals') {
+    const items = dealCatalog()
+    value = { items, meta: { page: 1, page_size: 100, page_count: 1, total: items.length } }
+  }
   else if (path.startsWith('/trade/deals/')) {
     const id = path.split('/').pop()
-    const deal = hostDeals.find(d => d.deal_id === id)
+    const deal = dealCatalog().find(d => d.deal_id === id)
     if (!deal) throw new Error('이 예시 데이터에는 해당 거래 상세가 없습니다.')
     value = deal
   } else if (path === '/trade/snap-evidence/containers') value = { containers: seedShipments.slice(0, 5).map((s, i) => ({ id: s.id, container_no: s.container_number, media_count: i + 2, allocation_label: null })) }

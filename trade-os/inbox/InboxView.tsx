@@ -1551,6 +1551,8 @@ export function InboxScreen({
     setLinkingDocument(true)
     try {
       const result = await prototypeBackend.tradeDocuments.confirmTransition({
+        fileName: selectedDocument.name,
+        fields: Object.fromEntries(resolvedReviewFields(selectedDocument).map(field => [field.key, { value: field.value, unit: field.unit, userEdited: field.userEdited ?? false }])),
         id: documentName, dealId, dealLabel, evidence, documentType: selectedDocument.documentType,
         expectedRevision: readDocumentReview(documentName).revision,
         idempotencyKey: crypto.randomUUID(),

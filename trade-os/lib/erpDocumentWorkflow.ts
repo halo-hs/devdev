@@ -15,6 +15,7 @@ export type DocumentConnectionEvent = {
   evidence: string[]
 }
 export type DocumentReviewState = {
+  fileName?: string
   revision: number
   fields: Record<string, ReviewedField>
   status: "review" | "committed"
@@ -143,6 +144,27 @@ export function readDocumentReview(id: string): DocumentReviewState {
   return { revision: 1, status: "review", fields: {} }
 }
 
+/** Includes historical registrations so removing a document cannot promote the next one. */
+export function listShipmentDocumentRegistrations(dealId?: string) {
+  const rows: { dealId: string; code: "CI" | "PL" | "BL"; documentId: string; fileName: string; registeredAt: string; active: boolean; fields: DocumentReviewState["fields"] }[] = []
+  let keys: string[]
+  try { keys = Object.keys(localStorage) } catch { return rows }
+  for (const key of keys.filter(key => key.startsWith(reviewPrefix))) {
+    const id = key.slice(reviewPrefix.length)
+    const review = readDocumentReview(id)
+    const code = review.documentType
+    if (code !== "CI" && code !== "BL" && code !== "PL") continue
+    const owner = dealId ?? review.dealId
+    if (!owner) continue
+    const registration = review.connectionHistory?.find(event => event.dealId === owner && event.action !== "unlinked")
+    const active = review.status === "committed" && review.dealId === owner
+    if (!active && !registration) continue
+    rows.push({ dealId: owner, code, documentId: "upload:" + id, fileName: review.fileName ?? id, active,
+      registeredAt: registration?.occurredAt ?? "", fields: review.fields })
+  }
+  return rows.sort((a, b) => a.registeredAt.localeCompare(b.registeredAt) || a.documentId.localeCompare(b.documentId))
+}
+
 export function saveDocumentReview(
   id: string,
   fields: Record<string, ReviewedField>
@@ -156,6 +178,8 @@ export function saveDocumentReview(
 }
 
 export function confirmDocumentReview(input: {
+  fileName?: string
+  fields?: Record<string, ReviewedField>
   id: string
   dealId: string
   documentType: string
@@ -185,6 +209,8 @@ export function confirmDocumentReview(input: {
   const next: DocumentReviewState = {
     ...current,
     status: "committed",
+    fileName: input.fileName ?? current.fileName,
+    fields: input.fields ?? current.fields,
     dealId: input.dealId,
     documentType: input.documentType === "C/O" ? "CO" : input.documentType,
     idempotencyKey: input.idempotencyKey,

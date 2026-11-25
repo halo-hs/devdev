@@ -63,7 +63,24 @@ export function uploadDocumentTypeLabel(documentType: UploadDocumentType) {
 }
 
 export function resolvedReviewFields(document: Pick<RecentDocument, "documentType" | "reviewedFields">): ReviewField[] {
-  return reviewFieldsForDocument(document.documentType).map((field) => {
+  const fields = reviewFieldsForDocument(document.documentType)
+  if (document.documentType === "CI" && document.reviewedFields?.hs_code) {
+    const item = fields.find(field => field.key === "item_name")!
+    fields.push({ ...item, key: "hs_code", label: "HS 코드", required: false, value: "" })
+  }
+  if (document.documentType === "PL") {
+    const itemNumbers = [...new Set(Object.keys(document.reviewedFields ?? {}).flatMap(key => {
+      const match = /^(?:item_name|hs_code):(\d+)$/.exec(key)
+      return match && Number(match[1]) > 1 ? [Number(match[1])] : []
+    }))].sort((a, b) => a - b)
+    for (const n of itemNumbers) {
+      for (const key of ["item_name", "hs_code"]) {
+        const base = fields.find(field => field.key === key)!
+        fields.push({ ...base, key: key + ":" + n, label: `품목 ${n} · ${base.label}`, value: "", tone: "danger", status: "누락" })
+      }
+    }
+  }
+  return fields.map((field) => {
     const reviewed = document.reviewedFields?.[field.key]
     if (!reviewed) return field
     const missing = field.required && !reviewed.value.trim()
@@ -164,6 +181,8 @@ export function reviewFieldsForDocument(
   if (documentType === "PL") {
     return [
       ...parties,
+      extracted("item_name", "품목명", "Aluminium Scrap Tough Taboo"),
+      missing("hs_code", "HS 코드"),
       extracted("invoice_number", "Invoice No.", "INV-2026-0703"),
       extracted("quantity", "수량", "20", { unit: "MT" }),
       missing("gross_weight", "총중량", { kind: "number", unit: "KG" }),

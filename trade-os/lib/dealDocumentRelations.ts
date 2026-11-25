@@ -1,3 +1,4 @@
+import type { PackingItem } from "./packingItems"
 export type DealInvoiceRelationState = {
   /** Missing key uses the document's original B/L; [] explicitly unlinks it. */
   invoiceToBills: Record<string, string[]>
@@ -23,7 +24,7 @@ export type ManualContainer = {
   grossWeight?: string | null
   volume?: string | null
 }
-export type ManualPackingList = { number: string; containers: ManualContainer[] }
+export type ManualPackingList = { items?: PackingItem[]; number: string; containers: ManualContainer[] }
 
 const storageKey = (dealId: string) => `ecoya-deal-document-relations-v1:${dealId}`
 
@@ -102,15 +103,9 @@ export function blNumbersMismatch(documentNumber?: string | null, linkedNumber?:
 
 export function resolveDealShipmentLink(
   links: Record<string, string[]>, documentId: string, originalShipmentKey?: string,
-  referenceBlNumber?: string | null, bills: Array<{ documentId: string; blNumber: string | null }> = [],
 ) {
-  // An explicit unlink must survive automatic matching and page reloads.
   if (Object.prototype.hasOwnProperty.call(links, documentId)) return links[documentId]?.[0]
-  if (originalShipmentKey) return originalShipmentKey
-  const number = normalizeBlNumber(referenceBlNumber)
-  if (!number) return undefined
-  const matches = bills.filter((bill) => normalizeBlNumber(bill.blNumber) === number)
-  return matches.length === 1 ? matches[0].documentId : undefined
+  return originalShipmentKey
 }
 
 /** Keep the document and its inputs; an explicit empty override prevents the original link returning. */
@@ -198,7 +193,7 @@ export function removeDealManualPackingList(dealId: string, id: string) {
 
 export function saveDealManualPackingList(dealId: string, id: string, list: ManualPackingList) {
   const state = readDealInvoiceRelations(dealId)
-  state.manualPackingLists = { ...state.manualPackingLists, [id]: list }
+  state.manualPackingLists = { ...state.manualPackingLists, [id]: { ...state.manualPackingLists[id], ...list } }
   writeDealInvoiceRelations(dealId, state)
   notify(dealId)
   return state
