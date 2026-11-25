@@ -11,9 +11,8 @@ import { InfoBox } from "@trade-os/components/InfoBox"
 import { OperationsScreen } from "@trade-os/OperationsScreens"
 import type { SplitShipmentView } from "@trade-os/shipments/ShipmentsConnected"
 import { linkDealInvoiceToBill, readDealInvoiceRelations, saveDealInvoiceField } from "@trade-os/lib/dealDocumentRelations"
-import { ShipmentConfirmationDialog, type ShipmentContainerEdit } from "@trade-os/shipments/ShipmentConfirmationDialog"
+import type { ShipmentContainerEdit } from "@trade-os/shipments/ShipmentConfirmationDialog"
 import type { Shipment } from "@trade-os/lib/api/shipments"
-import { messages } from "@trade-os/lib/i18n/messages"
 import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@/components/platform/FormItem"
 import {
   documentStageGuidance,
@@ -1871,7 +1870,7 @@ function ShipmentContainerLinks({ bill }: { bill: SplitShipmentView["billsOfLadi
   return (
     <>
       {shown.map((container) => (
-        <a key={container.number} href={`#${dealContainerAnchorId(container.number)}`} className="mt-0.5 block w-fit text-[15px] leading-[22px] text-[var(--color-primary-4)] hover:underline" data-ui="shipment-container-number">{container.number}</a>
+        <a key={container.number} href={`#${dealContainerAnchorId(container.number)}`} className="mt-0.5 block w-fit text-[15px] leading-[22px] text-[var(--color-primary-4)] hover:underline" data-ui="shipment-container-number" onClick={(event) => event.stopPropagation()}>{container.number}</a>
       ))}
       {containers.length > shown.length ? <span className="mt-0.5 block text-[15px] leading-[22px] text-[var(--color-gray-5)]">외 {containers.length - shown.length}대</span> : null}
     </>
@@ -1879,9 +1878,44 @@ function ShipmentContainerLinks({ bill }: { bill: SplitShipmentView["billsOfLadi
 }
 
 // Packing lists of this deal as their own card (same table style as 통관 문서):
-// one row per container, with the B/L it belongs to linking back to the
-// shipment row.
-function PackingListCard({ view, onUpload }: { view: SplitShipmentView; onUpload?: () => void }) {
+// one row per container. A container row opens below to edit that container
+// (autosave); its B/L links back to the shipment row.
+const openedContainerRows = new Map<string, Set<string>>()
+type PackingContainer = ReturnType<typeof billContainers>[number]
+const packingContainerFields: Array<{ key: keyof PackingContainer; label: string }> = [
+  { key: "number", label: "컨테이너 번호" },
+  { key: "sealNumber", label: "씰 번호" },
+  { key: "packageCount", label: "포장 수" },
+  { key: "packageUnit", label: "포장 단위" },
+  { key: "grossWeight", label: "총중량" },
+  { key: "volume", label: "용적" },
+]
+// Sums container measures such as "8,240 KG" + "8,240 KG" → "16,480 KG".
+// Returns null when a value is missing or the units differ.
+const sumMeasure = (values: Array<string | null | undefined>) => {
+  let total = 0
+  let unit: string | null = null
+  for (const value of values) {
+    const match = value?.trim().match(/^([\d,]+(?:\.\d+)?)\s*(.*)$/)
+    if (!match) return null
+    const nextUnit = match[2].trim()
+    if (unit !== null && unit !== nextUnit) return null
+    unit = nextUnit
+    total += Number(match[1].replaceAll(",", ""))
+  }
+  const decimals = Math.max(0, ...values.map((value) => value?.match(/\.(\d+)/)?.[1].length ?? 0))
+  return `${total.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${unit ? ` ${unit}` : ""}`
+}
+function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }: {
+  dealId: string
+  view: SplitShipmentView
+  canWrite: boolean
+  onUpload?: () => void
+  onUpdateContainer: (bill: SplitShipmentView["billsOfLading"][number], index: number, patch: Partial<PackingContainer>) => void
+}) {
+  const [openRows, setOpenRows] = useState<Set<string>>(() => openedContainerRows.get(dealId) ?? new Set())
+  useEffect(() => { openedContainerRows.set(dealId, openRows) }, [dealId, openRows])
+  const toggleRow = (id: string) => setOpenRows((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next })
   const openPackingList = (fileName: string) => {
     window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code: "PL", fileName } }))
   }
@@ -1900,11 +1934,11 @@ function PackingListCard({ view, onUpload }: { view: SplitShipmentView; onUpload
           </Button>
         ) : null}
       </div>
-      <div className="mt-4 overflow-x-auto" role="region" aria-label="포장명세서 목록">
+      <div className="@container/plist mt-4 overflow-x-auto" role="region" aria-label="포장명세서 목록">
         <Table className="min-w-[880px] text-left text-[15px] leading-[22px]" aria-label="포장명세서">
           <TableHeader className="bg-[var(--color-gray-11)]">
             <TableRow className="hover:bg-transparent">
-              {["포장명세서", "연결 B/L", "컨테이너 번호", "씰 번호", "포장 수", "총중량", "용적", ""].map((label, index) => (
+              {["컨테이너 번호", "씰 번호", "포장 수", "총중량", "용적", "포장명세서", "연결 B/L", ""].map((label, index) => (
                 <TableHead key={label || index} className={cn("h-14 px-3 text-[15px] leading-[22px] font-normal text-[var(--color-gray-4)]", ["포장 수", "총중량", "용적"].includes(label) && "text-right")}>
                   {label || <span className="sr-only">원문</span>}
                 </TableHead>
@@ -1920,50 +1954,79 @@ function PackingListCard({ view, onUpload }: { view: SplitShipmentView; onUpload
               </TableRow>
             ) : null}
             {lists.map(({ bill, document, containers }) => {
-              const rows = containers.length ? containers : [null]
-              const span = rows.length + (containers.length > 1 ? 1 : 0)
               const name = document.number ?? document.fileName
               return (
                 <Fragment key={document.documentId}>
-                  {rows.map((container, index) => (
-                    <TableRow key={container?.number ?? "none"} id={index === 0 ? dealPackingListAnchorId(document.documentId) : undefined} className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] hover:bg-transparent">
-                      {index === 0 ? (
-                        <>
-                          <TableCell rowSpan={span} className={cn(cell, "font-medium")}>
-                            <div className="truncate">{name}</div>
+                  {containers.length === 0 ? (
+                    <TableRow id={dealPackingListAnchorId(document.documentId)} className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] hover:bg-transparent">
+                      <TableCell colSpan={5} className={cn(cell, "text-[var(--color-gray-5)]")}>컨테이너 정보 미확인</TableCell>
+                      <TableCell className={cn(cell, "font-medium")}>{name}</TableCell>
+                      <TableCell className={cell}><a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline">{bill.blNumber || "B/L 번호 미확인"}</a></TableCell>
+                      <TableCell className={cn(cell, "w-12 text-center")} />
+                    </TableRow>
+                  ) : null}
+                  {containers.map((container, index) => {
+                    const rowId = `${document.documentId}:${index}`
+                    const open = openRows.has(rowId)
+                    return (
+                      <Fragment key={rowId}>
+                        <TableRow id={index === 0 ? dealPackingListAnchorId(document.documentId) : undefined} className="cursor-pointer scroll-mt-[calc(var(--deal-header-height,128px)+16px)] has-aria-expanded:[&>td]:bg-transparent!" onClick={() => toggleRow(rowId)}>
+                          <TableCell id={dealContainerAnchorId(container.number)} className={cn(cell, "scroll-mt-[calc(var(--deal-header-height,128px)+16px)] whitespace-nowrap tabular-nums")}>
+                            <button type="button" className="flex items-center gap-1.5 text-left" aria-expanded={open} aria-label={`${container.number} 컨테이너 정보 ${open ? "접기" : "열기"}`} onClick={(event) => { event.stopPropagation(); toggleRow(rowId) }}>
+                              <ChevronDown aria-hidden="true" className={cn("size-4 shrink-0 transition-transform", !open && "-rotate-90")} />
+                              {container.number}
+                            </button>
                           </TableCell>
-                          <TableCell rowSpan={span} className={cell}>
-                            <a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline">{bill.blNumber || "B/L 번호 미확인"}</a>
-                          </TableCell>
-                        </>
-                      ) : null}
-                      {container ? (
-                        <>
-                          <TableCell id={dealContainerAnchorId(container.number)} className={cn(cell, "scroll-mt-[calc(var(--deal-header-height,128px)+16px)] whitespace-nowrap tabular-nums")}>{container.number}</TableCell>
                           <TableCell className={cn(cell, "whitespace-nowrap tabular-nums")}>{container.sealNumber || "미확인"}</TableCell>
                           <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{container.packageCount ? `${container.packageCount}${container.packageUnit ? ` ${container.packageUnit}` : ""}` : "미확인"}</TableCell>
                           <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{container.grossWeight || "미확인"}</TableCell>
                           <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{container.volume || "미확인"}</TableCell>
-                        </>
-                      ) : (
-                        <TableCell colSpan={5} className={cn(cell, "text-[var(--color-gray-5)]")}>컨테이너 정보 미확인</TableCell>
-                      )}
-                      {index === 0 ? (
-                        <TableCell rowSpan={span} className={cn(cell, "w-12 text-center")}>
-                          <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${name} 문서와 보기`} title={`${name} 문서와 보기`} onClick={() => openPackingList(document.fileName)}>
-                            <FileSearch aria-hidden="true" className="size-4" />
-                          </Button>
-                        </TableCell>
-                      ) : null}
-                    </TableRow>
-                  ))}
+                          <TableCell className={cn(cell, index ? "text-[var(--color-gray-5)]" : "font-medium")}>{name}</TableCell>
+                          <TableCell className={cell} onClick={(event) => event.stopPropagation()}>
+                            <a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline">{bill.blNumber || "B/L 번호 미확인"}</a>
+                          </TableCell>
+                          <TableCell className={cn(cell, "w-12 text-center")} onClick={(event) => event.stopPropagation()}>
+                            {index === 0 ? (
+                              <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${name} 문서와 보기`} title={`${name} 문서와 보기`} onClick={() => openPackingList(document.fileName)}>
+                                <FileSearch aria-hidden="true" className="size-4" />
+                              </Button>
+                            ) : null}
+                          </TableCell>
+                        </TableRow>
+                        {open ? (
+                          <TableRow className="hover:bg-transparent">
+                            <TableCell colSpan={8} className="!p-0">
+                              <div className="sticky left-0 w-[100cqw] p-3">
+                                <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4 whitespace-normal">
+                                  <h3 className="text-[15px] leading-[22px] font-semibold">컨테이너 정보</h3>
+                                  <div className="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+                                    {packingContainerFields.map(({ key, label }) => (
+                                      <label key={key} className="flex flex-col gap-1.5">
+                                        <span className="text-[13px] leading-[18px] text-[var(--color-gray-4)]">{label}</span>
+                                        {canWrite ? (
+                                          <Input aria-label={`${container.number} ${label}`} className="h-10" value={container[key] ?? ""} onChange={(event) => onUpdateContainer(bill, index, { [key]: event.target.value })} />
+                                        ) : (
+                                          <span className="min-h-10 rounded-md bg-muted/30 px-3 py-2 text-sm">{container[key] || "—"}</span>
+                                        )}
+                                      </label>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ) : null}
+                      </Fragment>
+                    )
+                  })}
                   {containers.length > 1 ? (
                     <TableRow className="bg-[var(--color-gray-11)]/50 font-semibold hover:bg-[var(--color-gray-11)]/50">
                       <TableCell className={cell}>합계 · {containers.length}대</TableCell>
                       <TableCell className={cell} />
-                      <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{bill.fields.packageCount ? `${bill.fields.packageCount}${bill.fields.packageType ? ` ${bill.fields.packageType}` : ""}` : "—"}</TableCell>
-                      <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{bill.fields.grossWeight || "—"}</TableCell>
-                      <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{bill.fields.volume || "—"}</TableCell>
+                      <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{sumMeasure(containers.map((container) => container.packageCount ? `${container.packageCount} ${container.packageUnit ?? ""}` : null)) ?? "—"}</TableCell>
+                      <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{sumMeasure(containers.map((container) => container.grossWeight)) ?? "—"}</TableCell>
+                      <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{sumMeasure(containers.map((container) => container.volume)) ?? "—"}</TableCell>
+                      <TableCell className={cell} colSpan={3} />
                     </TableRow>
                   ) : null}
                 </Fragment>
@@ -1980,13 +2043,11 @@ function CommercialInvoiceTransactionCard({
   dealId,
   view,
   linkedInvoiceTargets = {},
-  onEditShipment,
   canWrite = true,
 }: {
   dealId: string
   view: SplitShipmentView
   linkedInvoiceTargets?: Record<string, string>
-  onEditShipment?: (bill: SplitShipmentView["billsOfLading"][number], trigger: HTMLButtonElement) => void
   canWrite?: boolean
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(
@@ -2172,7 +2233,6 @@ function CommercialInvoiceTransactionCard({
                             <StatusBadge size="sm" tone="neutral">{containerCountLabel(bill)}</StatusBadge>
                             <span className="text-xs text-muted-foreground">{bill.fields.shippedOnBoardDate ?? "선적일 미확인"}</span>
                             {(bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => <a key={document.documentId} href={`#${dealPackingListAnchorId(document.documentId)}`} className="text-[13px] text-[var(--color-primary-4)] hover:underline">PL {document.number ?? document.fileName}</a>)}
-                            {onEditShipment ? <Button type="button" size="icon-sm" variant="ghost" className="ml-auto" aria-label={`${bill.blNumber || "연결된 선적"} 수정`} title="연결된 선적 수정" onClick={(event) => onEditShipment(bill, event.currentTarget)}><Pencil aria-hidden="true" className="size-4" /></Button> : null}
                           </li>
                         ) : null)}
                       </ul>
@@ -4068,7 +4128,6 @@ function DocumentsTab({
   onDocumentSummaryChange,
   commercialInvoiceView,
   linkedInvoiceTargets,
-  onEditShipment,
   documentOpen,
   documentPanelTarget,
   onDocumentOpenChange,
@@ -4098,7 +4157,6 @@ function DocumentsTab({
   onDocumentSummaryChange: (summary: DealDocumentSummary) => void
   commercialInvoiceView: SplitShipmentView
   linkedInvoiceTargets?: Record<string, string>
-  onEditShipment: (bill: SplitShipmentView["billsOfLading"][number], trigger: HTMLButtonElement) => void
   documentOpen: boolean
   documentPanelTarget: HTMLElement | null
   onDocumentOpenChange: (open: boolean) => void
@@ -4671,7 +4729,7 @@ function DocumentsTab({
         onOpenDocument={onOpenDocument}
         canWrite={canMutate(role)}
         profile={profile}
-        commercialInvoiceContent={<CommercialInvoiceTransactionCard dealId={dealId} view={commercialInvoiceView} linkedInvoiceTargets={linkedInvoiceTargets} onEditShipment={onEditShipment} canWrite={canMutate(role)} />}
+        commercialInvoiceContent={<CommercialInvoiceTransactionCard dealId={dealId} view={commercialInvoiceView} linkedInvoiceTargets={linkedInvoiceTargets} canWrite={canMutate(role)} />}
         documentStrip={
           <div
             aria-label="거래 상세 서류 목록"
@@ -6278,10 +6336,8 @@ export function DealDetailScreen({
     return () => window.removeEventListener("ecoya:open-deal-document", handleDealDocumentRequest)
   }, [openDocumentPanel])
   const [linkedInvoiceTargets] = useState<Record<string, string>>({})
-  const [connectedShipmentDrafts, setConnectedShipmentDrafts] = useState<Record<string, Partial<Shipment>>>({})
+  const [connectedShipmentDrafts] = useState<Record<string, Partial<Shipment>>>({})
   const [connectedShipmentContainerDrafts, setConnectedShipmentContainerDrafts] = useState<Record<string, ShipmentContainerEdit[]>>({})
-  const [editingConnectedShipment, setEditingConnectedShipment] = useState<Shipment | null>(null)
-  const shipmentEditTrigger = useRef<HTMLButtonElement | null>(null)
   const splitShipmentView = useMemo(
     () => {
       const fixture = splitShipmentReviewFixture(dealId, (fileName, invoiceId) => {
@@ -6338,29 +6394,6 @@ export function DealDetailScreen({
     window.dispatchEvent(
       new CustomEvent("ecoya:open-deal-document", { detail })
     )
-  }
-  const openConnectedShipmentEdit = (bill: SplitShipmentView["billsOfLading"][number], trigger: HTMLButtonElement) => {
-    shipmentEditTrigger.current = trigger
-    const draft = connectedShipmentDrafts[bill.documentId] ?? {}
-    const shippedOnBoardDate = (draft.confirmed_etd ?? bill.fields.shippedOnBoardDate ?? "").replaceAll(".", "-")
-    setEditingConnectedShipment({
-      id: bill.documentId,
-      deal_id: dealId,
-      bl_number: draft.bl_number ?? bill.blNumber,
-      container_number: draft.container_number ?? bill.fields.containerNumber,
-      carrier: draft.carrier ?? bill.fields.carrier,
-      vessel: draft.vessel ?? bill.fields.vessel,
-      pol: draft.pol ?? bill.fields.portOfLoading,
-      pod: draft.pod ?? bill.fields.portOfDischarge,
-      etd: shippedOnBoardDate || null,
-      eta: draft.confirmed_eta ?? null,
-      confirmed_etd: (draft.confirmed_etd ?? shippedOnBoardDate) || null,
-      confirmed_eta: draft.confirmed_eta ?? null,
-      confirmed_status: draft.confirmed_status ?? "booked",
-      edit_token: `fixture-edit-${bill.documentId}`,
-      status: draft.confirmed_status ?? "booked",
-      source: "document",
-    })
   }
   const scrollViewportRef = useRef<HTMLDivElement>(null)
   const stickyHeaderRef = useRef<HTMLDivElement>(null)
@@ -6899,7 +6932,6 @@ export function DealDetailScreen({
       onOpenDocument={openDealDocument}
       commercialInvoiceView={splitShipmentView}
       linkedInvoiceTargets={linkedInvoiceTargets}
-      onEditShipment={openConnectedShipmentEdit}
       workspaces={{
         fulfillment: (
           <section
@@ -6917,7 +6949,7 @@ export function DealDetailScreen({
               }} renderShipmentDocuments={(shipment, index) => {
                 const bill = billForShipment(shipment, index)
                 return bill ? <ShipmentDocumentLinks dealId={dealId} bill={bill} view={splitShipmentView} /> : <div>{shipment.bl_number ? "B/L 문서 미연결" : "B/L 번호 없음"}</div>
-              }} /><PackingListCard view={splitShipmentView} onUpload={canMutate(role) ? onUpload : undefined} /></>}
+              }} /><PackingListCard dealId={dealId} view={splitShipmentView} canWrite={canMutate(role)} onUpload={canMutate(role) ? onUpload : undefined} onUpdateContainer={(bill, index, patch) => setConnectedShipmentContainerDrafts((current) => ({ ...current, [bill.documentId]: billContainers(bill).map((container, containerIndex) => containerIndex === index ? { ...container, ...patch } : container) }))} /></>}
               onSummaryChange={setShipmentSummary}
               onEditUnitPrice={openItemUnitPrice}
               dealId={dealId}
@@ -7757,32 +7789,6 @@ export function DealDetailScreen({
           onClose={() => {
             setShareDialogOpen(false)
             setShareCandidate("")
-          }}
-        />
-      ) : null}
-      {editingConnectedShipment ? (
-        <ShipmentConfirmationDialog
-          shipment={editingConnectedShipment}
-          copy={messages.erpShipments.shipments}
-          canWrite={canMutate(role)}
-          containerDetails={connectedShipmentContainerDrafts[editingConnectedShipment.id] ?? splitShipmentView.billsOfLading.find((bill) => bill.documentId === editingConnectedShipment.id)?.containers}
-          returnFocus={() => shipmentEditTrigger.current?.focus()}
-          onReload={async () => editingConnectedShipment}
-          onClose={() => setEditingConnectedShipment(null)}
-          onSave={async (body) => {
-            setConnectedShipmentDrafts((current) => {
-              const next = { ...(current[editingConnectedShipment.id] ?? {}) }
-              const fields = ["bl_number", "container_number", "carrier", "vessel", "pol", "pod", "confirmed_etd", "confirmed_eta", "confirmed_status"] as const
-              for (const field of fields) {
-                if (body[field] !== undefined) Object.assign(next, { [field]: body[field] })
-              }
-              return { ...current, [editingConnectedShipment.id]: next }
-            })
-          }}
-          onSaveContainerDetails={(containers) => {
-            setConnectedShipmentContainerDrafts((current) => ({ ...current, [editingConnectedShipment.id]: containers }))
-            const firstContainer = containers[0]
-            if (firstContainer) setConnectedShipmentDrafts((current) => ({ ...current, [editingConnectedShipment.id]: { ...(current[editingConnectedShipment.id] ?? {}), container_number: firstContainer.number } }))
           }}
         />
       ) : null}

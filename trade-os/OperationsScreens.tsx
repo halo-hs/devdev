@@ -88,7 +88,7 @@ export function OperationsScreen({ screen, dealId, onShipmentSummary, onOpenDocu
       <p>화면 데이터를 불러오지 못했습니다.</p><p>{error}</p>
       <button className="mt-3 underline" onClick={() => { setError(""); setAttempt(n => n + 1) }}>다시 시도</button>
     </div> : session ? <PlatformSessionProvider {...session} getIdToken={getIdToken}>
-      {screen === "deal-shipments" && dealId ? <ShipmentsConnected key={dealId} copy={messages.erpShipments.shipments} dealId={dealId} onSummaryChange={onShipmentSummary} onOpenDocument={onOpenDocument} renderDocuments={renderShipmentDocuments} renderContainers={renderShipmentContainers} rowAnchorId={shipmentRowAnchorId} /> : screen !== "deal-shipments" ? <Body screen={screen} /> : null}
+      {screen === "deal-shipments" && dealId ? <ShipmentsConnected key={dealId} copy={messages.erpShipments.shipments} dealId={dealId} onSummaryChange={onShipmentSummary} onOpenDocument={onOpenDocument} renderDocuments={renderShipmentDocuments} inlineEdit renderContainers={renderShipmentContainers} rowAnchorId={shipmentRowAnchorId} /> : screen !== "deal-shipments" ? <Body screen={screen} /> : null}
     </PlatformSessionProvider> : <div className="p-6" role="status">화면 데이터를 불러오는 중입니다…</div>}
   </div></div>
 }
