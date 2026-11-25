@@ -1,3 +1,4 @@
+import type { UploadOriginDeal } from "@trade-os/lib/uploadOriginDeal"
 import { type BankCashInput, type ReviewedField } from "@trade-os/lib/erpDocumentWorkflow"
 import { type DocumentConnection } from "@trade-os/lib/documentDealConnection"
 import { useIsMobile } from "@/hooks/useIsMobile"
@@ -23,7 +24,7 @@ import { isUploadDocumentTypeUnresolved, uploadDocumentTypeLabel, manualUploadDo
 // Kept as a fallback for older prototype routes while the card workspace ships.
 export function DocumentReviewWorkspace({
   document,
-  originDealId,
+  originDeal,
   step,
   onAutoSave,
   dealBlocked,
@@ -43,7 +44,7 @@ export function DocumentReviewWorkspace({
   onMobilePaneChange,
 }: {
   document: RecentDocument
-  originDealId?: string | null
+  originDeal?: UploadOriginDeal | null
   step: UploadDetailStep
   onAutoSave: (phase?: "pending" | "commit") => void
   dealBlocked?: boolean
@@ -205,7 +206,7 @@ export function DocumentReviewWorkspace({
       <DealConfirmPanel
         key={document.name}
         document={document}
-        originDealId={originDealId}
+        originDeal={originDeal}
         linkedDealLabel={linkedDealLabel}
         linking={linkingDocument}
         tradeSeatAssigned={tradeSeatAssigned}
