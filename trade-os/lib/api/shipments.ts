@@ -253,7 +253,7 @@ export async function createShipment(getIdToken: () => Promise<string>, dealId: 
   return response;
 }
 
-/** Deletes a shipment that was added by hand (prototype). */
+/** Deletes a shipment from its deal (prototype). */
 export async function deleteShipment(getIdToken: () => Promise<string>, shipment: Shipment): Promise<void> {
   await apiRequest<{ ok: boolean }>(
     apiPath(`/trade/shipments/${encodeURIComponent(shipment.id)}`),

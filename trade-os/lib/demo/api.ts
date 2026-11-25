@@ -64,10 +64,15 @@ const createdKey = 'ecoya:public-demo:shipment-created:v1'
 function createdShipments(): Shipment[] {
   try { const rows: unknown = JSON.parse(localStorage.getItem(createdKey) || '[]'); return Array.isArray(rows) ? rows as Shipment[] : [] } catch { return [] }
 }
+const deletedKey = 'ecoya:public-demo:shipment-deleted:v1'
+function deletedShipments(): string[] {
+  try { const ids: unknown = JSON.parse(localStorage.getItem(deletedKey) || '[]'); return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [] } catch { return [] }
+}
 function shipments() {
   let overrides: Record<string, Partial<Shipment>> = {}
   try { overrides = JSON.parse(localStorage.getItem(storageKey) || '{}') } catch { /* A corrupt demo cache starts fresh. */ }
-  return [...seedShipments, ...createdShipments()].map(row => ({ ...row, ...overrides[row.id] }))
+  const deleted = new Set(deletedShipments())
+  return [...seedShipments, ...createdShipments()].filter(row => !deleted.has(row.id)).map(row => ({ ...row, ...overrides[row.id] }))
 }
 function monthCloses(): MonthClose[] {
   const withSnapshot = (rows: MonthClose[]) => rows.map(row =>
@@ -186,9 +191,9 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
       localStorage.setItem(createdKey, JSON.stringify([...createdShipments(), created]))
       value = { shipment: created }
     } else if (method === 'DELETE' && /^\/trade\/shipments\/[^/]+$/.test(path)) {
-      const id = path.split('/').pop()
-      if (!createdShipments().some(row => row.id === id)) throw new ApiError({ status: 409, code: 'TRADE_SHIPMENT_NOT_MANUAL', message: '문서로 만든 선적은 삭제할 수 없습니다.' })
-      localStorage.setItem(createdKey, JSON.stringify(createdShipments().filter(row => row.id !== id)))
+      const id = path.split('/').pop() ?? ''
+      if (createdShipments().some(row => row.id === id)) localStorage.setItem(createdKey, JSON.stringify(createdShipments().filter(row => row.id !== id)))
+      else localStorage.setItem(deletedKey, JSON.stringify([...new Set([...deletedShipments(), id])]))
       value = { ok: true }
     } else if (method === 'PATCH' && confirmationMatch) {
       const current = shipments().find(row => row.id === confirmationMatch[1])

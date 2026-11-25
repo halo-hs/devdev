@@ -9,6 +9,8 @@ export type DealInvoiceRelationState = {
   manualInvoices: string[]
   /** Packing lists entered by hand (no document). */
   manualPackingLists: Record<string, ManualPackingList>
+  /** Document CIs / packing lists taken out of this deal (the documents themselves stay). */
+  removedDocuments: string[]
 }
 
 export type ManualContainer = {
@@ -30,6 +32,7 @@ const emptyState = (): DealInvoiceRelationState => ({
   shipmentLabels: {},
   manualInvoices: [],
   manualPackingLists: {},
+  removedDocuments: [],
 })
 
 export function readDealInvoiceRelations(dealId: string): DealInvoiceRelationState {
@@ -66,7 +69,8 @@ export function readDealInvoiceRelations(dealId: string): DealInvoiceRelationSta
     const manualPackingLists = Object.fromEntries(
       Object.entries(parsed.manualPackingLists ?? {}).filter(([, list]) => list && typeof list === "object" && Array.isArray((list as ManualPackingList).containers))
     ) as Record<string, ManualPackingList>
-    return { invoiceToBills, invoiceFields, packingToShipments: idLists(parsed.packingToShipments), shipmentLabels, manualInvoices, manualPackingLists }
+    const removedDocuments = Array.isArray(parsed.removedDocuments) ? parsed.removedDocuments.filter((id): id is string => typeof id === "string") : []
+    return { invoiceToBills, invoiceFields, packingToShipments: idLists(parsed.packingToShipments), shipmentLabels, manualInvoices, manualPackingLists, removedDocuments }
   } catch {
     return emptyState()
   }
@@ -126,6 +130,17 @@ export function addDealManualPackingList(dealId: string) {
   writeDealInvoiceRelations(dealId, state)
   notify(dealId)
   return { state, id }
+}
+
+/** Takes a document CI or packing list out of this deal; the document itself stays. */
+export function removeDealDocument(dealId: string, id: string) {
+  const state = readDealInvoiceRelations(dealId)
+  if (!state.removedDocuments.includes(id)) state.removedDocuments = [...state.removedDocuments, id]
+  delete state.invoiceToBills[id]
+  delete state.packingToShipments[id]
+  writeDealInvoiceRelations(dealId, state)
+  notify(dealId)
+  return state
 }
 
 /** Removes a CI added by hand, with its fields and links. */

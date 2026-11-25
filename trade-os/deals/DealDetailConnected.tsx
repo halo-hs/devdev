@@ -10,7 +10,7 @@ import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
 import { InfoBox } from "@trade-os/components/InfoBox"
 import { OperationsScreen } from "@trade-os/OperationsScreens"
 import { ConfirmDeleteButton, type CommercialInvoiceCard, type SplitShipmentView } from "@trade-os/shipments/ShipmentsConnected"
-import { addDealManualInvoice, addDealManualPackingList, removeDealManualInvoice, removeDealManualPackingList, saveDealManualPackingList, linkDealInvoiceToBill, linkDealInvoiceToShipment, linkDealPackingListToShipment, readDealInvoiceRelations, saveDealInvoiceField, type DealInvoiceRelationState } from "@trade-os/lib/dealDocumentRelations"
+import { addDealManualInvoice, addDealManualPackingList, removeDealDocument, removeDealManualInvoice, removeDealManualPackingList, saveDealManualPackingList, linkDealInvoiceToBill, linkDealInvoiceToShipment, linkDealPackingListToShipment, readDealInvoiceRelations, saveDealInvoiceField, type DealInvoiceRelationState } from "@trade-os/lib/dealDocumentRelations"
 import type { ShipmentContainerEdit } from "@trade-os/shipments/ShipmentConfirmationDialog"
 import { HostTable, HostTableBody, HostTableCell, HostTableHead, HostTableHeader, HostTableRow } from "@trade-os/components/HostTable"
 import type { Shipment } from "@trade-os/lib/api/shipments"
@@ -1879,13 +1879,13 @@ function shipmentLinkedDocuments(view: SplitShipmentView, relations: DealInvoice
     const card: CommercialInvoiceCard = { documentId: id, fileName: "", uploadedAt: "", invoiceNumber: fields["송장번호"] || "송장번호 미입력", invoiceDate: fields["송장일자"] || null, currency: amount?.[1] ?? null, totalAmount: amount?.[2] ? Number(amount[2].replaceAll(",", "")) : null }
     return card
   })
-  const allInvoices = [...new Map([...view.billsOfLading.flatMap((entry) => entry.connectedCommercialInvoices), ...view.unlinkedDocuments, ...manualInvoices].map((invoice) => [invoice.documentId, invoice])).values()]
+  const allInvoices = [...new Map([...view.billsOfLading.flatMap((entry) => entry.connectedCommercialInvoices), ...view.unlinkedDocuments, ...manualInvoices].map((invoice) => [invoice.documentId, invoice])).values()].filter((invoice) => !relations.removedDocuments.includes(invoice.documentId))
   const invoices = [...new Map([
-    ...(bill?.connectedCommercialInvoices ?? []),
+    ...(bill?.connectedCommercialInvoices ?? []).filter((invoice) => !relations.removedDocuments.includes(invoice.documentId)),
     ...allInvoices.filter((invoice) => relations.invoiceToBills[invoice.documentId]?.includes(key)),
   ].map((invoice) => [invoice.documentId, invoice])).values()]
   const allPackingLists: Array<{ document: { documentId: string; number?: string | null; fileName: string }; owner?: BillCard; containerCount: number }> = [
-    ...view.billsOfLading.flatMap((owner) => (owner.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => ({ document, owner, containerCount: billContainers(owner).length }))),
+    ...view.billsOfLading.flatMap((owner) => (owner.connectedDocuments ?? []).filter((document) => document.code === "PL" && !relations.removedDocuments.includes(document.documentId)).map((document) => ({ document, owner, containerCount: billContainers(owner).length }))),
     ...Object.entries(relations.manualPackingLists).map(([id, list]) => ({ document: { documentId: id, number: list.number || "포장명세서 번호 미입력", fileName: "" }, containerCount: list.containers.length })),
   ]
   const packingLists = allPackingLists.filter(({ document, owner }) => (owner && owner.documentId === bill?.documentId) || relations.packingToShipments[document.documentId]?.includes(key))
@@ -2034,7 +2034,7 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onSetContainers }: 
   type ListEntry = { bill?: BillCard; document: { documentId: string; number?: string | null; fileName: string }; containers: PackingContainer[]; manual?: boolean }
   const lists: ListEntry[] = [
     ...view.billsOfLading.flatMap((bill) =>
-      (bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => ({ bill, document, containers: billContainers(bill) }))
+      (bill.connectedDocuments ?? []).filter((document) => document.code === "PL" && !relations.removedDocuments.includes(document.documentId)).map((document) => ({ bill, document, containers: billContainers(bill) }))
     ),
     // Packing lists entered by hand (no document).
     ...Object.entries(relations.manualPackingLists).map(([id, list]) => ({ document: { documentId: id, number: list.number, fileName: "" }, containers: list.containers as PackingContainer[], manual: true })),
@@ -2164,15 +2164,21 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onSetContainers }: 
                         <div className="sticky left-0 w-[100cqw] p-3">
                           {/* Just one block per container, stacked, so its fields stay together when they wrap. */}
                           <div className="flex flex-col gap-3 whitespace-normal">
-                              {list.manual ? (
-                                <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
-                                  <div className="flex items-center gap-2">
-                                    <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">포장명세서<span className="text-xs font-normal text-[var(--color-gray-5)]">직접 입력 · 문서 없음</span></h5>
-                                    {canWrite ? <ConfirmDeleteButton label="포장명세서" description="직접 추가한 포장명세서와 컨테이너 정보, 연결을 지웁니다." onConfirm={() => { removeDealManualPackingList(dealId, document.documentId) }} /> : null}
-                                  </div>
-                                  <div className="mt-3.5 w-full sm:w-[240px]"><FormFieldHeader className="mb-2.5" label="포장명세서 번호" /><Input aria-label="포장명세서 번호" disabled={!canWrite} className="h-10 px-3 py-0" value={relations.manualPackingLists[document.documentId]?.number ?? ""} onChange={(event) => saveDealManualPackingList(dealId, document.documentId, { number: event.target.value, containers })} /></div>
+                              {/* Packing list title row, same as the CI's 송장 정보: title · note, 원문 보기, delete at the far right. */}
+                              <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
+                                <div className="flex items-center gap-2">
+                                  <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">포장명세서<span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">{list.manual ? "직접 입력 · 문서 없음" : document.fileName}</span></h5>
+                                  {document.fileName ? (
+                                    <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${name} 문서와 보기`} title={`${name} 문서와 보기`} onClick={() => openPackingList(document.fileName)}>
+                                      <FileSearch aria-hidden="true" className="size-4" />
+                                    </Button>
+                                  ) : null}
+                                  {canWrite ? <ConfirmDeleteButton label="포장명세서" description={list.manual ? "직접 추가한 포장명세서와 컨테이너 정보, 연결을 지웁니다." : `${name}을(를) 이 거래에서 뺍니다. 원본 문서는 문서함에 남습니다.`} onConfirm={() => { if (list.manual) removeDealManualPackingList(dealId, document.documentId); else removeDealDocument(dealId, document.documentId) }} /> : null}
                                 </div>
-                              ) : null}
+                                {list.manual ? (
+                                  <div className="mt-3.5 w-full sm:w-[240px]"><FormFieldHeader className="mb-2.5" label="포장명세서 번호" /><Input aria-label="포장명세서 번호" disabled={!canWrite} className="h-10 px-3 py-0" value={relations.manualPackingLists[document.documentId]?.number ?? ""} onChange={(event) => saveDealManualPackingList(dealId, document.documentId, { number: event.target.value, containers })} /></div>
+                                ) : null}
+                              </div>
                               {containers.map((container, index) => (
                                 // Same layout as the item card: title, row 1 (identity · packages), separator, row 2 (weight · volume with unit selects).
                                 <div key={index} id={dealContainerAnchorId(container.number)} className="@container/pl flex scroll-mt-[calc(var(--deal-header-height,128px)+16px)] flex-col gap-3.5 rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
@@ -2285,8 +2291,8 @@ function CommercialInvoiceTransactionCard({
         record.billOfLadingIds = [...new Set([...record.billOfLadingIds, ...billIds])]
       }
     }
-    return [...byId.values()]
-  }, [linkedInvoiceTargets, relationState.invoiceToBills, relationState.manualInvoices, view])
+    return [...byId.values()].filter((record) => !relationState.removedDocuments.includes(record.invoice.documentId))
+  }, [linkedInvoiceTargets, relationState.invoiceToBills, relationState.manualInvoices, relationState.removedDocuments, view])
   const toggle = (id: string) => setExpanded((current) => {
     const next = new Set(current)
     if (next.has(id)) next.delete(id)
@@ -2416,7 +2422,6 @@ function CommercialInvoiceTransactionCard({
                   {/* Same layout as the item card: title row, row 1 (identity), separator, row 2 (quantities with unit selects). */}
                   <div className="flex items-center gap-2">
                     <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">송장 정보<span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">{invoice.fileName ? `${invoice.fileName} · ${invoice.uploadedAt}` : "직접 입력 · 문서 없음"}</span></h5>
-                    {canWrite && !invoice.fileName ? <ConfirmDeleteButton label="CI" description="직접 추가한 CI와 입력한 정보, 연결을 지웁니다." onConfirm={() => { setRelationState(removeDealManualInvoice(dealId, invoice.documentId)); setExpanded((current) => { const next = new Set(current); next.delete(invoice.documentId); return next }) }} /> : null}
                     {invoice.onOpen ? (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -2425,6 +2430,8 @@ function CommercialInvoiceTransactionCard({
                         <TooltipContent>문서와 보기</TooltipContent>
                       </Tooltip>
                     ) : null}
+                    {/* Delete sits at the far right, like the item card's trash. */}
+                    {canWrite ? <ConfirmDeleteButton label="CI" description={invoice.fileName ? `${invoice.invoiceNumber || invoice.fileName}을(를) 이 거래에서 뺍니다. 원본 문서는 문서함에 남습니다.` : "직접 추가한 CI와 입력한 정보, 연결을 지웁니다."} onConfirm={() => { setRelationState(invoice.fileName ? removeDealDocument(dealId, invoice.documentId) : removeDealManualInvoice(dealId, invoice.documentId)); setExpanded((current) => { const next = new Set(current); next.delete(invoice.documentId); return next }) }} /> : null}
                   </div>
                   {(() => {
                     const name = invoice.invoiceNumber ?? invoice.fileName

@@ -237,11 +237,12 @@ function ShipmentInlineEditor({ shipment, copy, canWrite, onSave, onDelete, docu
   return (
     <div className="flex flex-col gap-3 text-left whitespace-normal" onClick={(event) => event.stopPropagation()}>
       <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
-        {/* Same title row as the CI's 송장 정보: title · note, then delete (hand-added only) and 원문 보기. */}
+        {/* Same title row as the CI's 송장 정보: title · note, 원문 보기, then delete at the far right. */}
         <div className="flex items-center gap-2">
           <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">선적 정보{shipment.manual_entry || !documentAction ? <span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">직접 입력 · 문서 없음</span> : null}</h5>
-          {writable && shipment.manual_entry && onDelete ? <ConfirmDeleteButton label="선적" description="직접 추가한 선적과 입력한 정보를 지웁니다. 연결한 문서는 남습니다." onConfirm={onDelete} /> : null}
           {documentAction}
+          {/* Delete sits at the far right, like the item card's trash. */}
+          {writable && onDelete ? <ConfirmDeleteButton label="선적" description={shipment.manual_entry ? "직접 추가한 선적과 입력한 정보를 지웁니다. 연결한 문서는 남습니다." : "이 선적을 거래에서 뺍니다. B/L 원본 문서는 문서함에 남습니다."} onConfirm={onDelete} /> : null}
         </div>
         <div className="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
           {inlineShipmentFields.map(({ key, label }) => (
