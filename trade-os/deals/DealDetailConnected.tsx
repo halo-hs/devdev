@@ -1778,11 +1778,8 @@ function SaleSummary({ sale }: { sale: DealSale }) {
 const dealSaleAnchorId = (invoiceId: string) => `deal-sale-${invoiceId}`
 
 // Anchor of a B/L's row in the deal shipment table; CI linked-document links
-// jump there and ask the table to open the row.
+// and the packing list card jump there.
 const dealBillAnchorId = (billId: string) => `deal-bill-${billId}`
-const openShipmentRowLink = (billId: string) => {
-  window.dispatchEvent(new CustomEvent("ecoya:open-shipment-row", { detail: dealBillAnchorId(billId) }))
-}
 
 // A page chip asks the document viewer to show a given page. The viewer may
 // mount after the request (it opens with the document), so keep it pending.
@@ -1840,10 +1837,10 @@ const billContainers = (bill: SplitShipmentView["billsOfLading"][number]) => {
 
 const dealPackingListAnchorId = (documentId: string) => `deal-pl-${documentId}`
 
-// Expanded content of a deal shipment-table row: the CIs and packing lists
-// linked to this B/L. Packing-list details live in their own card below the
-// shipment table; these links jump there (and its B/L column jumps back).
-function ShipmentBillDetail({ dealId, bill, view }: { dealId: string; bill: SplitShipmentView["billsOfLading"][number]; view: SplitShipmentView }) {
+// 서류·근거 cell of a deal shipment row: the CIs and packing lists linked to
+// this B/L. Packing-list details live in their own card below the shipment
+// table; these links jump there (and its B/L column jumps back here).
+function ShipmentDocumentLinks({ dealId, bill, view }: { dealId: string; bill: SplitShipmentView["billsOfLading"][number]; view: SplitShipmentView }) {
   const relatedPackingLists = (bill.connectedDocuments ?? []).filter((document) => document.code === "PL")
   const linkedInvoiceIds = Object.entries(readDealInvoiceRelations(dealId).invoiceToBills)
     .filter(([, billIds]) => billIds.includes(bill.documentId))
@@ -1853,20 +1850,26 @@ function ShipmentBillDetail({ dealId, bill, view }: { dealId: string; bill: Spli
     ...view.unlinkedDocuments.filter((invoice) => linkedInvoiceIds.includes(invoice.documentId)),
   ]
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-[var(--color-gray-9)] bg-card px-4 py-3 text-left text-sm whitespace-normal" onClick={(event) => event.stopPropagation()}>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="w-20 shrink-0 font-semibold">연결 CI</span>
-        {relatedInvoices.length ? relatedInvoices.map((invoice) => (
-          <button key={invoice.documentId} type="button" className="text-[var(--color-primary-4)] hover:underline" onClick={invoice.onOpen}>{invoice.invoiceNumber || invoice.fileName}</button>
-        )) : <StatusBadge size="sm" tone="warning">CI 연결 필요</StatusBadge>}
+    <>
+      <div className="truncate">
+        <span className="text-[var(--color-gray-5)]">CI </span>
+        {relatedInvoices.length ? relatedInvoices.map((invoice, index) => (
+          <Fragment key={invoice.documentId}>
+            {index ? ", " : null}
+            <button type="button" className="text-[var(--color-primary-4)] hover:underline" title={`${invoice.invoiceNumber || invoice.fileName} 문서와 보기`} onClick={invoice.onOpen}>{invoice.invoiceNumber || invoice.fileName}</button>
+          </Fragment>
+        )) : <span className="text-[var(--color-orange-2)]">연결 필요</span>}
       </div>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="w-20 shrink-0 font-semibold">포장명세서</span>
-        {relatedPackingLists.length ? relatedPackingLists.map((document) => (
-          <a key={document.documentId} href={`#${dealPackingListAnchorId(document.documentId)}`} className="text-[var(--color-primary-4)] hover:underline">{document.number ?? document.fileName}</a>
-        )) : <span className="text-muted-foreground">연결된 포장명세서 없음</span>}
+      <div className="mt-0.5 truncate">
+        <span className="text-[var(--color-gray-5)]">PL </span>
+        {relatedPackingLists.length ? relatedPackingLists.map((document, index) => (
+          <Fragment key={document.documentId}>
+            {index ? ", " : null}
+            <a href={`#${dealPackingListAnchorId(document.documentId)}`} className="text-[var(--color-primary-4)] hover:underline">{document.number ?? document.fileName}</a>
+          </Fragment>
+        )) : <span className="text-[var(--color-gray-5)]">없음</span>}
       </div>
-    </div>
+    </>
   )
 }
 
@@ -1925,7 +1928,7 @@ function PackingListCard({ view, onUpload }: { view: SplitShipmentView; onUpload
                             <div className="truncate">{name}</div>
                           </TableCell>
                           <TableCell rowSpan={span} className={cell}>
-                            <a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRowLink(bill.documentId)}>{bill.blNumber || "B/L 번호 미확인"}</a>
+                            <a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline">{bill.blNumber || "B/L 번호 미확인"}</a>
                           </TableCell>
                         </>
                       ) : null}
@@ -2159,7 +2162,7 @@ function CommercialInvoiceTransactionCard({
                         {linkedBills.map((bill) => bill ? (
                           <li key={bill.documentId} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 text-sm">
                             <DocumentTypeBadge code="BL" />
-                            <a href={`#${dealBillAnchorId(bill.documentId)}`} className="font-semibold text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRowLink(bill.documentId)}>{bill.blNumber || "B/L 번호 미확인"}</a>
+                            <a href={`#${dealBillAnchorId(bill.documentId)}`} className="font-semibold text-[var(--color-primary-4)] hover:underline">{bill.blNumber || "B/L 번호 미확인"}</a>
                             <span className="text-muted-foreground">{bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}</span>
                             <StatusBadge size="sm" tone="neutral">{containerCountLabel(bill)}</StatusBadge>
                             <span className="text-xs text-muted-foreground">{bill.fields.shippedOnBoardDate ?? "선적일 미확인"}</span>
@@ -6903,9 +6906,9 @@ export function DealDetailScreen({
               shipmentContent={<><OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} onOpenDocument={() => openDealDocument("fulfillment")} shipmentRowAnchorId={(shipment, index) => {
                 const bill = billForShipment(shipment, index)
                 return bill ? dealBillAnchorId(bill.documentId) : undefined
-              }} renderShipmentDetail={(shipment, index) => {
+              }} renderShipmentDocuments={(shipment, index) => {
                 const bill = billForShipment(shipment, index)
-                return bill ? <ShipmentBillDetail dealId={dealId} bill={bill} view={splitShipmentView} /> : <p className="text-sm text-muted-foreground">연결된 B/L 문서가 없습니다. B/L을 올리면 연결 CI와 포장명세서가 여기에 표시됩니다.</p>
+                return bill ? <ShipmentDocumentLinks dealId={dealId} bill={bill} view={splitShipmentView} /> : <div>{shipment.bl_number ? "B/L 문서 미연결" : "B/L 번호 없음"}</div>
               }} /><PackingListCard view={splitShipmentView} onUpload={canMutate(role) ? onUpload : undefined} /></>}
               onSummaryChange={setShipmentSummary}
               onEditUnitPrice={openItemUnitPrice}
