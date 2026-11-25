@@ -1,3 +1,5 @@
+import { createDemoPaymentSchedule, withDemoScheduleLedger, withDemoSettlementTotals } from "./dealPaymentSchedules"
+import type { CreatePaymentScheduleBody, LedgerResponse, SettlementOverview, SettlementCalendar } from "../api/settlement"
 import { salesPerformancePreview, salesPerformanceRanking } from "./salesPerformancePreview"
 import { demoExceptionResponse } from "./settlementExceptions"
 import captured from './responses.json'
@@ -152,6 +154,9 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
     const match = path.match(/^\/trade\/shipments\/([^/]+)\/refresh-tracking$/)
     const confirmationMatch = path.match(/^\/trade\/shipments\/([^/]+)\/confirmation$/)
     const reopenMatch = path.match(/^\/erp\/reports\/month-closes\/([^/]+)\/reopen$/)
+    if (method === 'POST' && path === '/erp/payment-schedules') {
+      return createDemoPaymentSchedule(requestBody<CreatePaymentScheduleBody>(init)) as T
+    }
     if (method === 'POST' && path === '/erp/reports/month-close') {
       const { period, note } = requestBody<MonthCloseRequest>(init)
       const currentPeriod = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 7)
@@ -277,7 +282,12 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
       return score(b) - score(a)
     })
     value = candidates[0]?.[1]
-    if (value && Number(query.get('offset') || 0) > 0) value = { ...(value as object), items: [], entries: [], facts: [] }
+    if (value && path === '/trade/settlement/ledger') {
+      const asOf = (responses['/trade/settlement/overview'] as SettlementOverview).data_as_of
+      value = withDemoScheduleLedger(value as LedgerResponse, query, asOf)
+    } else if (value && (path === '/trade/settlement/overview' || path === '/trade/settlement/calendar')) {
+      value = withDemoSettlementTotals(value as SettlementOverview | SettlementCalendar)
+    } else if (value && Number(query.get('offset') || 0) > 0) value = { ...(value as object), items: [], entries: [], facts: [] }
   }
   if (value === undefined) throw new Error(`예시 데이터가 없는 항목입니다: ${path}`)
   return copy(value) as T

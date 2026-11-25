@@ -295,6 +295,21 @@ const dealFieldVersions = new Map<
   { value: string; version: number; updatedBy: string; updatedAt: string }
 >()
 
+const settlementSourceFields = ["field:amount_total", "field:currency"]
+function readDealField(dealId: string, target: string) {
+  const key = `${dealId}:${target}`
+  if (settlementSourceFields.includes(target)) {
+    try {
+      const saved = JSON.parse(localStorage.getItem("ecoya:deal-settlement-field:" + key) ?? "null")
+      if (typeof saved?.value === "string" && Number.isInteger(saved.version) && saved.version > 0 &&
+          typeof saved.updatedBy === "string" && typeof saved.updatedAt === "string") {
+        dealFieldVersions.set(key, saved)
+      }
+    } catch { /* Older sessions may only have the in-memory field. */ }
+  }
+  return dealFieldVersions.get(key)
+}
+
 async function localMutation(id: string): Promise<MutationResult> {
   await new Promise((resolve) => setTimeout(resolve, latency))
   return { ok: true, id, updatedAt: new Date().toISOString() }
@@ -305,7 +320,7 @@ async function patchDealField(
 ): Promise<DealFieldPatchResult> {
   await new Promise((resolve) => setTimeout(resolve, latency))
   const recordKey = `${input.dealId}:${input.target}`
-  const current = dealFieldVersions.get(recordKey)
+  const current = readDealField(input.dealId, input.target)
 
   if (current && current.version !== input.baseVersion && !input.force) {
     return {
@@ -321,12 +336,16 @@ async function patchDealField(
 
   const updatedAt = new Date().toISOString()
   const version = (current?.version ?? input.baseVersion) + 1
-  dealFieldVersions.set(recordKey, {
+  const field = {
     value: input.value,
     version,
     updatedBy: input.actor,
     updatedAt,
-  })
+  }
+  if (settlementSourceFields.includes(input.target)) {
+    localStorage.setItem("ecoya:deal-settlement-field:" + recordKey, JSON.stringify(field))
+  }
+  dealFieldVersions.set(recordKey, field)
   return {
     ok: true,
     id: recordKey,
@@ -413,6 +432,7 @@ export const prototypeBackend = {
     // local edits, never invented finance/risk calculations.
     read: async (dealId: string) => {
       await new Promise(resolve => setTimeout(resolve, latency))
+      for (const target of settlementSourceFields) readDealField(dealId, target)
       return {
         displayId: renamedDealIds.get(dealId) ?? dealId,
         title: updatedDealTitles.get(dealId),
@@ -450,6 +470,7 @@ export const prototypeBackend = {
       if (result.ok) writeCreatedDeals(readCreatedDeals().map(deal => deal.id === dealId ? { ...deal, direction } : deal))
       return result
     },
+    getSavedField: (dealId: string, target: string) => readDealField(dealId, target)?.value,
     getDisplayId: (dealId: string) => renamedDealIds.get(dealId) ?? dealId,
     getTitle: (dealId: string, fallbackTitle: string) =>
       updatedDealTitles.get(dealId) ?? fallbackTitle,
@@ -483,7 +504,7 @@ export const prototypeBackend = {
       return localMutation(input.dealId)
     },
     getFieldVersion: (dealId: string, target: string) =>
-      dealFieldVersions.get(`${dealId}:${target}`)?.version ?? 0,
+      readDealField(dealId, target)?.version ?? 0,
     updateField: (input: DealFieldPatchInput) => patchDealField(input),
     unlinkDocument: (input: DealDocumentInput) => {
       void input

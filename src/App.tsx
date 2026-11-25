@@ -702,7 +702,7 @@ export function App() {
       nextUrl.searchParams.set("from", "deal")
       nextUrl.searchParams.set("deal_id", originDeal.id)
     }
-    if (nextScreen === "create" && params.dealId) nextUrl.searchParams.set("deal_id", params.dealId)
+    if ((nextScreen === "create" || nextScreen === "settlement") && params.dealId) nextUrl.searchParams.set("deal_id", params.dealId)
     const nextLocation = `${nextUrl.pathname}${nextUrl.search}`
     const currentLocation = `${appLocation.pathname}${appLocation.search}`
     if (nextLocation !== currentLocation) {
@@ -1210,7 +1210,7 @@ export function App() {
                       onUpload={() => navigateTo("inbox")}
                       onDeliver={openDealDocumentDelivery}
                       onReviewDocument={openDealDocumentReview}
-                      onOpenSettlement={() => navigateTo("settlement")}
+                      onOpenSettlement={() => navigateTo("settlement", { dealId: selectedDealId })}
                       workspaceActionsTarget={dealHeaderActionsTarget}
                     />
                   ) : screen === "shipments" ? (

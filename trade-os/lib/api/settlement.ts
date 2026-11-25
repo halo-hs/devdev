@@ -345,6 +345,7 @@ export type RecordSettlementPaymentResponse = {
   idempotency_replayed: boolean;
 };
 export type CreatePaymentScheduleBody = {
+  deal_id?: string;
   amount: string;
   counterparty_name?: string;
   currency: string;

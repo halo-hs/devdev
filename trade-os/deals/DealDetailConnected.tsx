@@ -1,3 +1,4 @@
+import { readTotalRounding, roundedDealTotal, totalRoundingLabels, writeTotalRounding, type TotalRounding } from "./dealTotalRounding"
 import { LinkedDeals } from "./LinkedDeals"
 import type { UploadOriginDeal } from "@trade-os/lib/uploadOriginDeal"
 import { initialDocumentFields } from "@trade-os/lib/dealDocumentFields"
@@ -41,7 +42,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import { createPortal } from "react-dom"
+import { createPortal, flushSync } from "react-dom"
 import { toast } from "sonner"
 import {
   AlertTriangle,
@@ -3531,10 +3532,16 @@ function DealFieldsPanel({
   onRemoveItem,
   paymentHistory,
   rowStateKey,
+  totalRounding,
+  displayTotal,
+  onTotalRoundingChange,
 }: {
   profile: DealProfile
   /** Deal id used to remember opened item rows across re-mounts. */
   rowStateKey?: string
+  totalRounding: TotalRounding
+  displayTotal: string
+  onTotalRoundingChange: (mode: TotalRounding) => void
   fields: DealFieldDetail[]
   visibleGroups: DealFieldGroup[]
   items: DealLineItem[]
@@ -3555,6 +3562,23 @@ function DealFieldsPanel({
   const [query, setQuery] = useState("")
   const [editingPrice, setEditingPrice] = useState<number | null>(null)
   const editable = canMutate(role)
+  const [editingTotal, setEditingTotal] = useState(false)
+  const focusTotal = (input: HTMLInputElement) => {
+    flushSync(() => setEditingTotal(true))
+    input.select()
+  }
+  const roundingSelector = (
+    <Select value={totalRounding} disabled={!editable} onValueChange={value => {
+      if (value === "truncate" || value === "round") onTotalRoundingChange(value)
+    }}>
+      <SelectTrigger size="sm" aria-label="총금액 처리 방식" className="gap-1 px-2 data-[size=sm]:h-7">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {Object.entries(totalRoundingLabels).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
+      </SelectContent>
+    </Select>
+  )
   // An opened item row shows its inputs directly (edits autosave per field).
   // Mismatched items start open so the value can be fixed right away.
   const [expandedItems, setExpandedItems] = useState<Set<number>>(
@@ -4014,7 +4038,10 @@ function DealFieldsPanel({
               id={`deal-field-label-${field.key}`}
               style={{ scrollMarginTop: "calc(var(--deal-header-height,128px) + 16px)" }}
               invalid={needsReview(field.match)}
-              badge={needsReview(field.match) ? <DealReviewBadge match={field.match} /> : undefined}
+              badge={field.key === "amount_total" || needsReview(field.match) ? <>
+                {field.key === "amount_total" && roundingSelector}
+                <DealReviewBadge match={field.match} />
+              </> : undefined}
               message={needsReview(field.match) ? field.evidence.join(" · ") || undefined : undefined}
               messageId={`deal-field-${field.key}-message`}
               tone={field.match === "누락" || field.match === "확인 필요" ? "danger" : "neutral"}
@@ -4064,7 +4091,7 @@ function DealFieldsPanel({
                     "calc(var(--deal-header-height,128px) + 16px)",
                 }}
                 type={field.inputType ?? "text"}
-                value={field.value}
+                value={field.key === "amount_total" && !editingTotal ? displayTotal : field.value}
                 disabled={!editable || field.key === "direction"}
                 placeholder={`${field.label} 입력`}
                 aria-invalid={
@@ -4073,9 +4100,11 @@ function DealFieldsPanel({
                 onChange={(event) =>
                   onFieldChange(field.key, event.target.value)
                 }
-                onBlur={() =>
+                onFocus={event => { if (field.key === "amount_total") focusTotal(event.currentTarget) }}
+                onBlur={() => {
+                  if (field.key === "amount_total") setEditingTotal(false)
                   onFieldCommit(field.key, field.value, field.label)
-                }
+                }}
               />
               )}
             </FormField>
@@ -4534,9 +4563,9 @@ function DocumentsTab({
         (field.key === "buyer" && profile.direction === "sales")
           ? profile.counterparty
           : field.key === "amount_total"
-            ? profile.amount
+            ? prototypeBackend.deals.getSavedField(dealId, "field:amount_total") ?? profile.amount
             : field.key === "currency"
-              ? profile.currency
+              ? prototypeBackend.deals.getSavedField(dealId, "field:currency") ?? profile.currency
               : field.value,
     }))
   )
@@ -4552,6 +4581,21 @@ function DocumentsTab({
         : field
     }))
   }
+  const [totalRounding, setTotalRounding] = useState(() => readTotalRounding(dealId))
+  const currency = dealFields.find(field => field.key === "currency")?.value ?? profile.currency
+  const rawTotal = dealFields.find(field => field.key === "amount_total")?.value ?? profile.amount
+  const displayTotal = roundedDealTotal(rawTotal, currency, totalRounding)
+  const changeTotalRounding = (mode: TotalRounding) => {
+    if (!canMutate(role) || mode === totalRounding) return
+    try {
+      writeTotalRounding(dealId, mode)
+    } catch {
+      toast.error("총금액 처리 방식을 저장하지 못했습니다.")
+      return
+    }
+    setTotalRounding(mode)
+    addAudit("총금액 처리 방식 변경", `${totalRoundingLabels[totalRounding]} → ${totalRoundingLabels[mode]}`)
+  }
   const mainInformation = useMemo(
     () => ({
       counterparty:
@@ -4559,19 +4603,15 @@ function DocumentsTab({
           (field) =>
             field.key === (profile.direction === "sales" ? "buyer" : "seller")
         )?.value ?? profile.counterparty,
-      amount:
-        dealFields.find((field) => field.key === "amount_total")?.value ??
-        profile.amount,
-      currency:
-        dealFields.find((field) => field.key === "currency")?.value ??
-        profile.currency,
+      amount: displayTotal,
+      currency,
     }),
     [
       dealFields,
       profile.direction,
       profile.counterparty,
-      profile.amount,
-      profile.currency,
+      displayTotal,
+      currency,
     ]
   )
   useEffect(() => {
@@ -5197,6 +5237,9 @@ function DocumentsTab({
             ) : null}
             <DealFieldsPanel
               rowStateKey={dealId}
+              totalRounding={totalRounding}
+              displayTotal={displayTotal}
+              onTotalRoundingChange={changeTotalRounding}
               paymentHistory={paymentHistory}
               profile={profile}
               fields={dealFields}
@@ -7409,6 +7452,9 @@ export function DealDetailScreen({
               <DealFinanceWorkspace
                 key={dealId}
                 dealId={dealId}
+                settlementAmount={mainInformation.amount}
+                settlementCurrency={mainInformation.currency}
+                onOpenSettlement={onOpenSettlement}
                 canWrite={canMutate(role)}
                 addAudit={addAudit}
               />

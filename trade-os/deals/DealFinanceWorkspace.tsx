@@ -87,10 +87,16 @@ const blankCost = (): DealCost => ({
 
 export function DealFinanceWorkspace({
   dealId,
+  settlementAmount,
+  settlementCurrency,
+  onOpenSettlement,
   canWrite,
   addAudit,
 }: {
   dealId: string
+  settlementAmount: string
+  settlementCurrency: string
+  onOpenSettlement: () => void
   canWrite: boolean
   addAudit: (action: string, detail: string) => void
 }) {
@@ -198,6 +204,11 @@ export function DealFinanceWorkspace({
   }
   return (
     <div className="space-y-7" data-testid="deal-finance-workspace">
+      <section className="flex flex-wrap items-center justify-between gap-2" aria-label="계약 기준 정산 금액">
+        <div><h3 className="text-sm font-semibold">계약 기준 정산 금액</h3>
+          <p className="mt-1 text-base font-semibold tabular-nums">{settlementAmount || "—"} {settlementCurrency}</p></div>
+        <Button variant="outline" size="sm" onClick={onOpenSettlement}>정산에서 보기</Button>
+      </section>
       <section aria-label="거래 경제 (Deal Economics)" className="border-b pb-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-1">
