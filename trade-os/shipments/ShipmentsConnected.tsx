@@ -1,7 +1,7 @@
 "use client";
 import { BusinessListToolbar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar";
 
-import { ChevronDown, ExternalLink, FileSearch, RefreshCw, Pencil } from "lucide-react";
+import { ChevronDown, ExternalLink, FileSearch, Plus, RefreshCw, Pencil } from "lucide-react";
 import { ShipmentConfirmationDialog } from "./ShipmentConfirmationDialog";
 import { ShipmentConfirmationRecord } from "./ShipmentConfirmationRecord";
 import { carrierTrackingAction } from "./carrierSites";
@@ -22,6 +22,7 @@ import { usePlatformSession } from "@trade-os/lib/session/platformSession";
 import { ApiError } from "@trade-os/lib/api/client";
 import {
   confirmShipment,
+  createShipment,
   effectiveShipmentEta,
   effectiveShipmentEtd,
   listAllShipments,
@@ -439,6 +440,18 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
     };
   }, [groups, rowAnchorId]);
 
+  const [adding, setAdding] = useState(false);
+  // Deal detail: add a shipment by hand (no B/L document yet) and open it for input.
+  const addShipment = async () => {
+    const id = resolvedDealId.current;
+    if (!id || adding) return;
+    setAdding(true);
+    try {
+      const { shipment } = await createShipment(getIdToken, id);
+      setState(current => current.status === "ready" ? { ...current, shipments: [...current.shipments, shipment] } : current);
+      setOpenRows(current => new Set([...current, shipment.id]));
+    } finally { setAdding(false); }
+  };
   const refreshTracking = useCallback(
     async (shipmentId: string) => {
       if (!canRefresh || refreshInFlight.current) return;
@@ -641,7 +654,10 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
           </section>
         ) : (
         // erp-v2-adapt: end
-        <p className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-4)]">{copy.empty}</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-[length:var(--text-body-9)] leading-[var(--leading-body-9)] text-[var(--color-gray-4)]">{copy.empty}</p>
+          {dealId && inlineEdit && canRefresh ? <Button variant="outline" size="sm" disabled={adding} onClick={() => void addShipment()} type="button"><Plus data-icon="inline-start" />선적 추가</Button> : null}
+        </div>
         // erp-v2-adapt: begin — close the filtered-empty conditional removed by the parity oracle.
         )
         // erp-v2-adapt: end
@@ -656,9 +672,16 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                 </p>
               </div>
               {dealId && onOpenDocument ? (
+                <div className="flex items-center gap-2">
+                {inlineEdit && canRefresh ? (
+                  <HostButton variant="outline" size="sm" disabled={adding} onClick={() => void addShipment()}>
+                    <Plus data-icon="inline-start" />선적 추가
+                  </HostButton>
+                ) : null}
                 <HostButton variant="outline" size="sm" onClick={onOpenDocument}>
                   <FileSearch data-icon="inline-start" />문서와 보기
                 </HostButton>
+                </div>
               ) : !dealId && group.key !== "__none__" ? (
                 <HostButton variant="outline" size="sm" asChild>
                   <Link href={`/erp/deals/${encodeURIComponent(group.key)}`} data-ui="shipments-deal-link">{copy.dealLink}</Link>

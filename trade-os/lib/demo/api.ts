@@ -59,10 +59,15 @@ const seedShipments: Shipment[] = shipmentDeals.map((deal, index) => {
     status: index % 5 === 4 ? 'arrived' : 'departed', source: 'manual',
   }
 })
+// Shipments added by hand on a deal (prototype only: the platform API has no create route yet).
+const createdKey = 'ecoya:public-demo:shipment-created:v1'
+function createdShipments(): Shipment[] {
+  try { const rows: unknown = JSON.parse(localStorage.getItem(createdKey) || '[]'); return Array.isArray(rows) ? rows as Shipment[] : [] } catch { return [] }
+}
 function shipments() {
   let overrides: Record<string, Partial<Shipment>> = {}
   try { overrides = JSON.parse(localStorage.getItem(storageKey) || '{}') } catch { /* A corrupt demo cache starts fresh. */ }
-  return seedShipments.map(row => ({ ...row, ...overrides[row.id] }))
+  return [...seedShipments, ...createdShipments()].map(row => ({ ...row, ...overrides[row.id] }))
 }
 function monthCloses(): MonthClose[] {
   const withSnapshot = (rows: MonthClose[]) => rows.map(row =>
@@ -169,6 +174,17 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
       const reopened: MonthClose = { ...existing, reopened: true, reopened_at: new Date().toISOString(), reopened_by: demoUser, reopen_reason: reason.trim() }
       saveMonthCloses(rows.map(row => row.id === existing.id ? reopened : row))
       value = reopened
+    } else if (method === 'POST' && path === '/trade/shipments') {
+      const { deal_id } = requestBody<{ deal_id: string }>(init)
+      const deal = hostDeals.find(d => d.deal_id === deal_id)
+      if (!deal) throw new ApiError({ status: 404, code: 'TRADE_DEAL_NOT_FOUND', message: '거래를 찾을 수 없습니다.' })
+      const created: Shipment = {
+        id: crypto.randomUUID(), deal_id: deal.deal_id, deal_title: deal.title, deal_counterparty: deal.counterparty_name,
+        bl_number: null, container_number: null, carrier: null, vessel: null, pol: null, pod: null,
+        etd: null, eta: null, edit_token: crypto.randomUUID(), status: 'booked', source: 'manual',
+      }
+      localStorage.setItem(createdKey, JSON.stringify([...createdShipments(), created]))
+      value = { shipment: created }
     } else if (method === 'PATCH' && confirmationMatch) {
       const current = shipments().find(row => row.id === confirmationMatch[1])
       if (!current) throw new ApiError({status:404, code:'TRADE_SHIPMENT_NOT_FOUND', message:'선적을 찾을 수 없습니다.'})

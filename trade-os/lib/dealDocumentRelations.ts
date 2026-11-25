@@ -5,7 +5,21 @@ export type DealInvoiceRelationState = {
   packingToShipments: Record<string, string[]>
   /** Display label (B/L number) for shipment keys without a B/L document. */
   shipmentLabels: Record<string, string>
+  /** CIs entered by hand (no document); their fields live in invoiceFields. */
+  manualInvoices: string[]
+  /** Packing lists entered by hand (no document). */
+  manualPackingLists: Record<string, ManualPackingList>
 }
+
+export type ManualContainer = {
+  number: string
+  sealNumber?: string | null
+  packageCount?: string | null
+  packageUnit?: string | null
+  grossWeight?: string | null
+  volume?: string | null
+}
+export type ManualPackingList = { number: string; containers: ManualContainer[] }
 
 const storageKey = (dealId: string) => `ecoya-deal-document-relations-v1:${dealId}`
 
@@ -14,6 +28,8 @@ const emptyState = (): DealInvoiceRelationState => ({
   invoiceFields: {},
   packingToShipments: {},
   shipmentLabels: {},
+  manualInvoices: [],
+  manualPackingLists: {},
 })
 
 export function readDealInvoiceRelations(dealId: string): DealInvoiceRelationState {
@@ -46,7 +62,11 @@ export function readDealInvoiceRelations(dealId: string): DealInvoiceRelationSta
     const shipmentLabels = Object.fromEntries(
       Object.entries(parsed.shipmentLabels ?? {}).filter(([, label]) => typeof label === "string")
     )
-    return { invoiceToBills, invoiceFields, packingToShipments: idLists(parsed.packingToShipments), shipmentLabels }
+    const manualInvoices = Array.isArray(parsed.manualInvoices) ? parsed.manualInvoices.filter((id): id is string => typeof id === "string") : []
+    const manualPackingLists = Object.fromEntries(
+      Object.entries(parsed.manualPackingLists ?? {}).filter(([, list]) => list && typeof list === "object" && Array.isArray((list as ManualPackingList).containers))
+    ) as Record<string, ManualPackingList>
+    return { invoiceToBills, invoiceFields, packingToShipments: idLists(parsed.packingToShipments), shipmentLabels, manualInvoices, manualPackingLists }
   } catch {
     return emptyState()
   }
@@ -83,6 +103,34 @@ export function linkDealPackingListToShipment(dealId: string, packingListId: str
   const current = state.packingToShipments[packingListId] ?? []
   if (!current.includes(shipmentKey)) state.packingToShipments[packingListId] = [...current, shipmentKey]
   if (label) state.shipmentLabels[shipmentKey] = label
+  writeDealInvoiceRelations(dealId, state)
+  notify(dealId)
+  return state
+}
+
+/** Adds a CI row without a document, for information entered by hand. */
+export function addDealManualInvoice(dealId: string) {
+  const state = readDealInvoiceRelations(dealId)
+  const id = `manual-ci-${Date.now().toString(36)}`
+  state.manualInvoices = [...state.manualInvoices, id]
+  writeDealInvoiceRelations(dealId, state)
+  notify(dealId)
+  return { state, id }
+}
+
+/** Adds a packing list without a document, with one empty container. */
+export function addDealManualPackingList(dealId: string) {
+  const state = readDealInvoiceRelations(dealId)
+  const id = `manual-pl-${Date.now().toString(36)}`
+  state.manualPackingLists = { ...state.manualPackingLists, [id]: { number: "", containers: [{ number: "", packageUnit: "bundles" }] } }
+  writeDealInvoiceRelations(dealId, state)
+  notify(dealId)
+  return { state, id }
+}
+
+export function saveDealManualPackingList(dealId: string, id: string, list: ManualPackingList) {
+  const state = readDealInvoiceRelations(dealId)
+  state.manualPackingLists = { ...state.manualPackingLists, [id]: list }
   writeDealInvoiceRelations(dealId, state)
   notify(dealId)
   return state

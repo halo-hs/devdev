@@ -9,8 +9,8 @@ import { dealDocumentPreviews, importantDealDocuments as documents, supplementar
 import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
 import { InfoBox } from "@trade-os/components/InfoBox"
 import { OperationsScreen } from "@trade-os/OperationsScreens"
-import type { SplitShipmentView } from "@trade-os/shipments/ShipmentsConnected"
-import { linkDealInvoiceToBill, linkDealInvoiceToShipment, linkDealPackingListToShipment, readDealInvoiceRelations, saveDealInvoiceField, type DealInvoiceRelationState } from "@trade-os/lib/dealDocumentRelations"
+import type { CommercialInvoiceCard, SplitShipmentView } from "@trade-os/shipments/ShipmentsConnected"
+import { addDealManualInvoice, addDealManualPackingList, saveDealManualPackingList, linkDealInvoiceToBill, linkDealInvoiceToShipment, linkDealPackingListToShipment, readDealInvoiceRelations, saveDealInvoiceField, type DealInvoiceRelationState } from "@trade-os/lib/dealDocumentRelations"
 import type { ShipmentContainerEdit } from "@trade-os/shipments/ShipmentConfirmationDialog"
 import { HostTable, HostTableBody, HostTableCell, HostTableHead, HostTableHeader, HostTableRow } from "@trade-os/components/HostTable"
 import type { Shipment } from "@trade-os/lib/api/shipments"
@@ -1860,13 +1860,23 @@ function useDealRelations(dealId: string) {
 const shipmentLinkKey = (shipment: { id: string }, bill?: BillCard) => bill?.documentId ?? `shipment:${shipment.id}`
 const dealShipmentAnchorId = (shipmentId: string) => `deal-shipment-${shipmentId}`
 function shipmentLinkedDocuments(view: SplitShipmentView, relations: DealInvoiceRelationState, key: string, bill?: BillCard) {
-  const allInvoices = [...new Map([...view.billsOfLading.flatMap((entry) => entry.connectedCommercialInvoices), ...view.unlinkedDocuments].map((invoice) => [invoice.documentId, invoice])).values()]
+  // CIs and packing lists entered by hand count as documents of the deal too.
+  const manualInvoices = relations.manualInvoices.map((id) => {
+    const fields = relations.invoiceFields[id] ?? {}
+    const amount = (fields["통화·금액"] ?? "").match(/^([A-Z]{3})?\s*([\d,.]+)?/)
+    const card: CommercialInvoiceCard = { documentId: id, fileName: "", uploadedAt: "", invoiceNumber: fields["송장번호"] || "송장번호 미입력", invoiceDate: fields["송장일자"] || null, currency: amount?.[1] ?? null, totalAmount: amount?.[2] ? Number(amount[2].replaceAll(",", "")) : null }
+    return card
+  })
+  const allInvoices = [...new Map([...view.billsOfLading.flatMap((entry) => entry.connectedCommercialInvoices), ...view.unlinkedDocuments, ...manualInvoices].map((invoice) => [invoice.documentId, invoice])).values()]
   const invoices = [...new Map([
     ...(bill?.connectedCommercialInvoices ?? []),
     ...allInvoices.filter((invoice) => relations.invoiceToBills[invoice.documentId]?.includes(key)),
   ].map((invoice) => [invoice.documentId, invoice])).values()]
-  const allPackingLists = view.billsOfLading.flatMap((owner) => (owner.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => ({ document, owner })))
-  const packingLists = allPackingLists.filter(({ document, owner }) => owner.documentId === bill?.documentId || relations.packingToShipments[document.documentId]?.includes(key))
+  const allPackingLists: Array<{ document: { documentId: string; number?: string | null; fileName: string }; owner?: BillCard; containerCount: number }> = [
+    ...view.billsOfLading.flatMap((owner) => (owner.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => ({ document, owner, containerCount: billContainers(owner).length }))),
+    ...Object.entries(relations.manualPackingLists).map(([id, list]) => ({ document: { documentId: id, number: list.number || "포장명세서 번호 미입력", fileName: "" }, containerCount: list.containers.length })),
+  ]
+  const packingLists = allPackingLists.filter(({ document, owner }) => (owner && owner.documentId === bill?.documentId) || relations.packingToShipments[document.documentId]?.includes(key))
   return {
     invoices,
     packingLists,
@@ -1932,11 +1942,11 @@ function ShipmentLinkedDocuments({ dealId, shipmentKey, blNumber, links, canWrit
           </li>
         ))}
         {invoices.length ? null : linkRow("CI", invoiceCandidates.map((invoice) => ({ id: invoice.documentId, label: invoice.invoiceNumber || invoice.fileName })), invoiceChoice, setInvoiceChoice, () => { linkDealInvoiceToShipment(dealId, invoiceChoice, shipmentKey, blNumber ?? undefined); setInvoiceChoice("") })}
-        {packingLists.map(({ document, owner }) => (
+        {packingLists.map(({ document, containerCount }) => (
           <li key={document.documentId} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 text-sm">
             <DocumentTypeBadge code="PL" />
-            <a href={`#${dealPackingListAnchorId(document.documentId)}`} className="font-semibold text-[var(--color-primary-4)] hover:underline">{document.number ?? document.fileName}</a>
-            <StatusBadge size="sm" tone="neutral">{containerCountLabel(owner)}</StatusBadge>
+            <a href={`#${dealPackingListAnchorId(document.documentId)}`} className="font-semibold text-[var(--color-primary-4)] hover:underline" onClick={() => window.dispatchEvent(new CustomEvent("ecoya:open-packing-list", { detail: document.documentId }))}>{document.number || document.fileName}</a>
+            <StatusBadge size="sm" tone="neutral">컨테이너 {containerCount}대</StatusBadge>
           </li>
         ))}
         {packingLists.length ? null : linkRow("PL", packingCandidates.map(({ document }) => ({ id: document.documentId, label: document.number ?? document.fileName })), packingChoice, setPackingChoice, () => { linkDealPackingListToShipment(dealId, packingChoice, shipmentKey, blNumber ?? undefined); setPackingChoice("") })}
@@ -1947,15 +1957,13 @@ function ShipmentLinkedDocuments({ dealId, shipmentKey, blNumber, links, canWrit
 
 // Container numbers of a deal shipment row, taken from its packing list (the
 // packing basis). Each links to that container's row in the packing list card.
-function ShipmentContainerLinks({ bill }: { bill: SplitShipmentView["billsOfLading"][number] }) {
-  const containers = billContainers(bill)
-  const packingListId = (bill.connectedDocuments ?? []).find((entry) => entry.code === "PL")?.documentId
-  if (!containers.length) return null
+function ShipmentContainerLinks({ containers, packingListId }: { containers: Array<{ number: string }>; packingListId?: string }) {
   const shown = containers.slice(0, 2)
+  if (!shown.length) return null
   return (
     <>
-      {shown.map((container) => (
-        <a key={container.number} href={`#${packingListId ? dealPackingListAnchorId(packingListId) : dealContainerAnchorId(container.number)}`} className="mt-0.5 block w-fit text-[15px] leading-[22px] text-[var(--color-primary-4)] hover:underline" data-ui="shipment-container-number" onClick={(event) => { event.stopPropagation(); for (const document of (bill.connectedDocuments ?? []).filter((entry) => entry.code === "PL")) window.dispatchEvent(new CustomEvent("ecoya:open-packing-list", { detail: document.documentId })) }}>{container.number}</a>
+      {shown.map((container, index) => (
+        <a key={`${container.number}-${index}`} href={`#${packingListId ? dealPackingListAnchorId(packingListId) : dealContainerAnchorId(container.number)}`} className="mt-0.5 block w-fit text-[15px] leading-[22px] text-[var(--color-primary-4)] hover:underline" data-ui="shipment-container-number" onClick={(event) => { event.stopPropagation(); if (packingListId) window.dispatchEvent(new CustomEvent("ecoya:open-packing-list", { detail: packingListId })) }}>{container.number || "번호 미입력"}</a>
       ))}
       {containers.length > shown.length ? <span className="mt-0.5 block text-[15px] leading-[22px] text-[var(--color-gray-5)]">외 {containers.length - shown.length}대</span> : null}
     </>
@@ -1986,13 +1994,15 @@ const sumMeasure = (values: Array<string | null | undefined>) => {
   const decimals = Math.max(0, ...values.map((value) => value?.match(/\.(\d+)/)?.[1].length ?? 0))
   return `${total.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${unit ? ` ${unit}` : ""}`
 }
-function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }: {
+function PackingListCard({ dealId, view, canWrite, onUpload, onSetContainers }: {
   dealId: string
   view: SplitShipmentView
   canWrite: boolean
   onUpload?: () => void
-  onUpdateContainer: (bill: SplitShipmentView["billsOfLading"][number], index: number, patch: Partial<PackingContainer>) => void
+  /** Saves a document packing list's containers (drafts over the document values). */
+  onSetContainers: (bill: BillCard, containers: PackingContainer[]) => void
 }) {
+  const relations = useDealRelations(dealId)
   const [openLists, setOpenLists] = useState<Set<string>>(() => openedPackingLists.get(dealId) ?? new Set())
   useEffect(() => { openedPackingLists.set(dealId, openLists) }, [dealId, openLists])
   const toggleList = (id: string) => setOpenLists((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next })
@@ -2008,9 +2018,23 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
   const openPackingList = (fileName: string) => {
     window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code: "PL", fileName } }))
   }
-  const lists = view.billsOfLading.flatMap((bill) =>
-    (bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => ({ bill, document, containers: billContainers(bill) }))
-  )
+  type ListEntry = { bill?: BillCard; document: { documentId: string; number?: string | null; fileName: string }; containers: PackingContainer[]; manual?: boolean }
+  const lists: ListEntry[] = [
+    ...view.billsOfLading.flatMap((bill) =>
+      (bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => ({ bill, document, containers: billContainers(bill) }))
+    ),
+    // Packing lists entered by hand (no document).
+    ...Object.entries(relations.manualPackingLists).map(([id, list]) => ({ document: { documentId: id, number: list.number, fileName: "" }, containers: list.containers as PackingContainer[], manual: true })),
+  ]
+  const setContainers = (list: ListEntry, containers: PackingContainer[]) => {
+    if (list.manual) saveDealManualPackingList(dealId, list.document.documentId, { number: relations.manualPackingLists[list.document.documentId]?.number ?? "", containers })
+    else if (list.bill) onSetContainers(list.bill, containers)
+  }
+  // B/L shown for a packing list: its own B/L document, or shipments it was linked to by hand.
+  const linkedShipmentsOf = (list: ListEntry) => (relations.packingToShipments[list.document.documentId] ?? []).map((key) => {
+    const bill = view.billsOfLading.find((entry) => entry.documentId === key)
+    return bill ? { key, label: bill.blNumber || "B/L 번호 미확인", anchor: dealBillAnchorId(bill.documentId) } : { key, label: relations.shipmentLabels[key] || "B/L 번호 미확인", anchor: dealShipmentAnchorId(key.replace(/^shipment:/, "")) }
+  })
   const containerCount = lists.reduce((total, list) => total + list.containers.length, 0)
   const cell = "align-top"
   const numeric = "text-right whitespace-nowrap tabular-nums"
@@ -2020,19 +2044,19 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
       <SelectContent className="z-[var(--z-popup)]">{[...new Set([value, ...options])].filter(Boolean).map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
     </Select>
   )
-  const textInput = (bill: BillCard, index: number, container: PackingContainer, key: "number" | "sealNumber" | "packageCount", label: string, align?: string) => (
-    <Input aria-label={`컨테이너 ${index + 1} ${label}`} disabled={!canWrite} className={cn("h-10 px-3 py-0 tabular-nums", align)} value={container[key] ?? ""} onChange={(event) => onUpdateContainer(bill, index, { [key]: event.target.value })} />
+  const textInput = (update: (index: number, patch: Partial<PackingContainer>) => void, index: number, container: PackingContainer, key: "number" | "sealNumber" | "packageCount", label: string, align?: string) => (
+    <Input aria-label={`컨테이너 ${index + 1} ${label}`} disabled={!canWrite} className={cn("h-10 px-3 py-0 tabular-nums", align)} value={container[key] ?? ""} onChange={(event) => update(index, { [key]: event.target.value })} />
   )
   // "8,240 KG" → number input and a unit select in their own columns (like
   // the item card's 총중량 · 중량 단위), saved back as one value.
-  const measureFields = (bill: BillCard, index: number, container: PackingContainer, key: "grossWeight" | "volume", label: string, unitLabel: string, units: string[]) => {
+  const measureFields = (update: (index: number, patch: Partial<PackingContainer>) => void, index: number, container: PackingContainer, key: "grossWeight" | "volume", label: string, unitLabel: string, units: string[]) => {
     const match = (container[key] ?? "").trim().match(/^(.*?)\s*([A-Za-z]+)?$/)
     const amount = match?.[1] ?? ""
     const unit = match?.[2] ?? units[0]
     return (
       <>
-        <div><FormFieldHeader className="mb-2.5" label={label} /><Input aria-label={`컨테이너 ${index + 1} ${label}`} disabled={!canWrite} className="h-10 px-3 py-0 text-right tabular-nums" value={amount} onChange={(event) => onUpdateContainer(bill, index, { [key]: `${event.target.value} ${unit}`.trim() })} /></div>
-        <div><FormFieldHeader className="mb-2.5" label={unitLabel} />{unitSelect(unit, units, `컨테이너 ${index + 1} ${unitLabel}`, (next) => onUpdateContainer(bill, index, { [key]: `${amount} ${next}`.trim() }))}</div>
+        <div><FormFieldHeader className="mb-2.5" label={label} /><Input aria-label={`컨테이너 ${index + 1} ${label}`} disabled={!canWrite} className="h-10 px-3 py-0 text-right tabular-nums" value={amount} onChange={(event) => update(index, { [key]: `${event.target.value} ${unit}`.trim() })} /></div>
+        <div><FormFieldHeader className="mb-2.5" label={unitLabel} />{unitSelect(unit, units, `컨테이너 ${index + 1} ${unitLabel}`, (next) => update(index, { [key]: `${amount} ${next}`.trim() }))}</div>
       </>
     )
   }
@@ -2050,12 +2074,20 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
           <h2 className="text-[18px] leading-[26px] font-bold text-[var(--color-gray-2)]">포장명세서</h2>
           <p className="mt-1 text-[15px] leading-[22px] text-[var(--color-gray-5)]">{lists.length ? `포장명세서 ${lists.length}건 · 컨테이너 ${containerCount}대` : "연결된 포장명세서 없음"}</p>
         </div>
-        {onUpload ? (
-          <Button variant="outline" size="sm" onClick={onUpload}>
-            <Plus data-icon="inline-start" />
-            문서 올리기
-          </Button>
-        ) : null}
+        <div className="flex items-center gap-2">
+          {canWrite ? (
+            <Button variant="outline" size="sm" onClick={() => { const { id } = addDealManualPackingList(dealId); setOpenLists((current) => new Set([...current, id])) }}>
+              <Plus data-icon="inline-start" />
+              포장명세서 추가
+            </Button>
+          ) : null}
+          {onUpload ? (
+            <Button variant="outline" size="sm" onClick={onUpload}>
+              <Plus data-icon="inline-start" />
+              문서 올리기
+            </Button>
+          ) : null}
+        </div>
       </div>
         <HostTable className="ops-shipment-table !min-w-[960px]" aria-label="포장명세서">
           <colgroup><col style={{ width: "15%" }} /><col style={{ width: "14%" }} /><col style={{ width: "14%" }} /><col style={{ width: "13%" }} /><col style={{ width: "12%" }} /><col style={{ width: "13%" }} /><col style={{ width: "11%" }} /><col style={{ width: "5%" }} /></colgroup>
@@ -2074,8 +2106,11 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
                 </HostTableCell>
               </HostTableRow>
             ) : null}
-            {lists.map(({ bill, document, containers }) => {
-              const name = document.number ?? document.fileName
+            {lists.map((list) => {
+              const { bill, document, containers } = list
+              const name = document.number || document.fileName || "포장명세서 번호 미입력"
+              const update = (index: number, patch: Partial<PackingContainer>) => setContainers(list, containers.map((container, containerIndex) => containerIndex === index ? { ...container, ...patch } : container))
+              const linkedShipments = linkedShipmentsOf(list)
               const open = openLists.has(document.documentId)
               const shown = containers.slice(0, PACKING_ROW_CONTAINERS)
               const more = containers.length - shown.length
@@ -2089,7 +2124,9 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
                       </button>
                     </HostTableCell>
                     <HostTableCell className={cell} onClick={(event) => event.stopPropagation()}>
-                      <a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRow(bill.documentId)}>{bill.blNumber || "B/L 번호 미확인"}</a>
+                      {bill ? <a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRow(bill.documentId)}>{bill.blNumber || "B/L 번호 미확인"}</a> : null}
+                      {linkedShipments.filter((shipment) => shipment.key !== bill?.documentId).map((shipment) => <a key={shipment.key} href={`#${shipment.anchor}`} className="block whitespace-nowrap text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRowByAnchor(shipment.anchor)}>{shipment.label}</a>)}
+                      {!bill && !linkedShipments.length ? <span className="text-[var(--color-orange-2)]">연결 필요</span> : null}
                     </HostTableCell>
                     <HostTableCell className={cn(cell, "whitespace-nowrap tabular-nums")}>
                       {containers.length ? stacked(shown.map((container) => container.number), more) : <span className="text-[var(--color-gray-5)]">미확인</span>}
@@ -2101,33 +2138,47 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
                     <HostTableCell className={cn(cell, numeric)}>{sumMeasure(containers.map((container) => container.grossWeight)) ?? "—"}</HostTableCell>
                     <HostTableCell className={cn(cell, numeric)}>{sumMeasure(containers.map((container) => container.volume)) ?? "—"}</HostTableCell>
                     <HostTableCell className={cn(cell, "text-center")} onClick={(event) => event.stopPropagation()}>
-                      <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${name} 문서와 보기`} title={`${name} 문서와 보기`} onClick={() => openPackingList(document.fileName)}>
-                        <FileSearch aria-hidden="true" className="size-4" />
-                      </Button>
+                      {document.fileName ? (
+                        <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${name} 문서와 보기`} title={`${name} 문서와 보기`} onClick={() => openPackingList(document.fileName)}>
+                          <FileSearch aria-hidden="true" className="size-4" />
+                        </Button>
+                      ) : null}
                     </HostTableCell>
                   </HostTableRow>
-                  {open && containers.length ? (
+                  {open ? (
                     <HostTableRow className="hover:bg-transparent">
                       <HostTableCell colSpan={8} className="!p-0">
                         <div className="sticky left-0 w-[100cqw] p-3">
                           {/* Just one block per container, stacked, so its fields stay together when they wrap. */}
                           <div className="flex flex-col gap-3 whitespace-normal">
+                              {list.manual ? (
+                                <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
+                                  <h5 className="text-base leading-6 font-bold">포장명세서 <span className="text-xs font-normal text-[var(--color-gray-5)]">직접 입력 · 문서 없음</span></h5>
+                                  <div className="mt-3.5 w-full sm:w-[240px]"><FormFieldHeader className="mb-2.5" label="포장명세서 번호" /><Input aria-label="포장명세서 번호" disabled={!canWrite} className="h-10 px-3 py-0" value={relations.manualPackingLists[document.documentId]?.number ?? ""} onChange={(event) => saveDealManualPackingList(dealId, document.documentId, { number: event.target.value, containers })} /></div>
+                                </div>
+                              ) : null}
                               {containers.map((container, index) => (
                                 // Same layout as the item card: title, row 1 (identity · packages), separator, row 2 (weight · volume with unit selects).
                                 <div key={index} id={dealContainerAnchorId(container.number)} className="@container/pl flex scroll-mt-[calc(var(--deal-header-height,128px)+16px)] flex-col gap-3.5 rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
                                   <h5 className="text-base leading-6 font-bold">컨테이너 {index + 1}</h5>
                                   <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/pl:grid-cols-[220px_240px_240px] [&>div]:min-w-0">
-                                    <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="컨테이너 번호" />{textInput(bill, index, container, "number", "컨테이너 번호")}</div>
-                                    <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="씰 번호" />{textInput(bill, index, container, "sealNumber", "씰 번호")}</div>
-                                    <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="포장 수 / 단위" /><div className="flex gap-2"><div className="min-w-0 flex-1">{textInput(bill, index, container, "packageCount", "포장 수", "text-right")}</div><div className="w-32 shrink-0">{unitSelect(container.packageUnit ?? "bundles", ["bundles", "cartons", "pallets"], `컨테이너 ${index + 1} 포장 단위`, (unit) => onUpdateContainer(bill, index, { packageUnit: unit }))}</div></div></div>
+                                    <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="컨테이너 번호" />{textInput(update, index, container, "number", "컨테이너 번호")}</div>
+                                    <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="씰 번호" />{textInput(update, index, container, "sealNumber", "씰 번호")}</div>
+                                    <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="포장 수 / 단위" /><div className="flex gap-2"><div className="min-w-0 flex-1">{textInput(update, index, container, "packageCount", "포장 수", "text-right")}</div><div className="w-32 shrink-0">{unitSelect(container.packageUnit ?? "bundles", ["bundles", "cartons", "pallets"], `컨테이너 ${index + 1} 포장 단위`, (unit) => update(index, { packageUnit: unit }))}</div></div></div>
                                   </div>
                                   <div className="h-px bg-[var(--color-gray-10)]" role="separator" />
                                   <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/pl:grid-cols-[150px_120px_150px_120px] [&>div]:min-w-0">
-                                    {measureFields(bill, index, container, "grossWeight", "총중량", "중량 단위", ["KG", "MT", "LB"])}
-                                    {measureFields(bill, index, container, "volume", "용적", "용적 단위", ["CBM", "CFT"])}
+                                    {measureFields(update, index, container, "grossWeight", "총중량", "중량 단위", ["KG", "MT", "LB"])}
+                                    {measureFields(update, index, container, "volume", "용적", "용적 단위", ["CBM", "CFT"])}
                                   </div>
                                 </div>
                               ))}
+                              {canWrite ? (
+                                <Button type="button" size="sm" variant="outline" className="self-start" onClick={() => setContainers(list, [...containers, { number: "", packageUnit: containers[0]?.packageUnit ?? "bundles" }])}>
+                                  <Plus data-icon="inline-start" />
+                                  컨테이너 추가
+                                </Button>
+                              ) : null}
                           </div>
                         </div>
                       </HostTableCell>
@@ -2199,6 +2250,10 @@ function CommercialInvoiceTransactionCard({
     for (const invoice of view.unlinkedDocuments) {
       if (!byId.has(invoice.documentId)) byId.set(invoice.documentId, { invoice, billOfLadingIds: [] })
     }
+    // CIs entered by hand: no file; fields come from the saved drafts.
+    for (const id of relationState.manualInvoices) {
+      if (!byId.has(id)) byId.set(id, { invoice: { documentId: id, fileName: "", uploadedAt: "", currency: "USD" }, billOfLadingIds: [] })
+    }
     for (const [invoiceId, billId] of Object.entries(linkedInvoiceTargets)) {
       const record = byId.get(invoiceId)
       if (record && !record.billOfLadingIds.includes(billId)) record.billOfLadingIds.push(billId)
@@ -2210,7 +2265,7 @@ function CommercialInvoiceTransactionCard({
       }
     }
     return [...byId.values()]
-  }, [linkedInvoiceTargets, relationState.invoiceToBills, view])
+  }, [linkedInvoiceTargets, relationState.invoiceToBills, relationState.manualInvoices, view])
   const toggle = (id: string) => setExpanded((current) => {
     const next = new Set(current)
     if (next.has(id)) next.delete(id)
@@ -2249,7 +2304,19 @@ function CommercialInvoiceTransactionCard({
         <div>
           <h2 className="text-base font-semibold">CI 결제정보</h2>
         </div>
-        <StatusBadge tone="info">{records.length}건</StatusBadge>
+        <div className="flex items-center gap-2">
+          <StatusBadge tone="info">{records.length}건</StatusBadge>
+          {canWrite ? (
+            <Button size="sm" variant="outline" onClick={() => {
+              const { state, id } = addDealManualInvoice(dealId)
+              setRelationState(state)
+              setExpanded((current) => new Set([...current, id]))
+            }}>
+              <Plus data-icon="inline-start" />
+              CI 추가
+            </Button>
+          ) : null}
+        </div>
       </div>
       {(
         <div className="ops-screen mt-4" role="region" aria-label="CI 목록">
@@ -2281,7 +2348,7 @@ function CommercialInvoiceTransactionCard({
                         <button type="button" className="flex items-center gap-2 text-left" aria-expanded={isOpen} aria-label={`${invoice.invoiceNumber || invoice.fileName} ${isOpen ? "접기" : "펼치기"}`} onClick={(event) => { event.stopPropagation(); toggle(invoice.documentId) }}>
                           <ChevronDown className={cn("size-4 shrink-0 transition-transform", !isOpen && "-rotate-90")} aria-hidden="true" />
                           <span className="min-w-0">
-                            <strong className="block whitespace-nowrap text-sm">{value("송장번호", invoice.invoiceNumber ?? "") || invoice.fileName}</strong>
+                            <strong className="block whitespace-nowrap text-sm">{value("송장번호", invoice.invoiceNumber ?? "") || invoice.fileName || "송장번호 미입력"}</strong>
                             <span className="block text-[11px] text-muted-foreground">
                               {value("송장일자", invoice.invoiceDate ?? "") || "송장일자 미확인"}
                               {/* Registration status only (no amount, no badge); keeps the row at two lines. */}
@@ -2326,7 +2393,7 @@ function CommercialInvoiceTransactionCard({
                 <div className="@container/ci flex flex-col gap-3.5 rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
                   {/* Same layout as the item card: title row, row 1 (identity), separator, row 2 (quantities with unit selects). */}
                   <div className="flex items-center gap-2">
-                    <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">송장 정보<span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">{invoice.fileName} · {invoice.uploadedAt}</span></h5>
+                    <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">송장 정보<span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">{invoice.fileName ? `${invoice.fileName} · ${invoice.uploadedAt}` : "직접 입력 · 문서 없음"}</span></h5>
                     {invoice.onOpen ? (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -7113,9 +7180,11 @@ export function DealDetailScreen({
                 return bill ? dealBillAnchorId(bill.documentId) : dealShipmentAnchorId(shipment.id)
               }} renderShipmentContainers={(shipment) => {
                 const bill = billForShipment(shipment)
-                const owners = bill ? [bill] : shipmentLinkedDocuments(splitShipmentView, dealRelations, shipmentLinkKey(shipment), bill).packingLists.map(({ owner }) => owner)
-                const withContainers = owners.filter((owner) => billContainers(owner).length)
-                return withContainers.length ? <>{withContainers.map((owner) => <ShipmentContainerLinks key={owner.documentId} bill={owner} />)}</> : undefined
+                const lists = shipmentLinkedDocuments(splitShipmentView, dealRelations, shipmentLinkKey(shipment, bill), bill).packingLists
+                  .map(({ document, owner }) => ({ id: document.documentId, containers: owner ? billContainers(owner) : dealRelations.manualPackingLists[document.documentId]?.containers ?? [] }))
+                  .filter((list) => list.containers.length)
+                if (!lists.length && bill && billContainers(bill).length) return <ShipmentContainerLinks containers={billContainers(bill)} />
+                return lists.length ? <>{lists.map((list) => <ShipmentContainerLinks key={list.id} containers={list.containers} packingListId={list.id} />)}</> : undefined
               }} renderShipmentDocuments={(shipment) => {
                 const bill = billForShipment(shipment)
                 return <ShipmentDocumentLinks invoices={shipmentLinkedDocuments(splitShipmentView, dealRelations, shipmentLinkKey(shipment, bill), bill).invoices} />
@@ -7126,7 +7195,7 @@ export function DealDetailScreen({
               }} renderShipmentDocumentAction={(shipment) => {
                 const bill = billForShipment(shipment)
                 return bill ? <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${bill.blNumber || "B/L"} 문서와 보기`} title={`${bill.blNumber || "B/L"} 문서와 보기`} onClick={() => openBillDocument(bill)}><FileSearch aria-hidden="true" className="size-4" /></Button> : null
-              }} /><PackingListCard dealId={dealId} view={splitShipmentView} canWrite={canMutate(role)} onUpload={canMutate(role) ? onUpload : undefined} onUpdateContainer={(bill, index, patch) => setConnectedShipmentContainerDrafts((current) => ({ ...current, [bill.documentId]: billContainers(bill).map((container, containerIndex) => containerIndex === index ? { ...container, ...patch } : container) }))} /></>}
+              }} /><PackingListCard dealId={dealId} view={splitShipmentView} canWrite={canMutate(role)} onUpload={canMutate(role) ? onUpload : undefined} onSetContainers={(bill, containers) => setConnectedShipmentContainerDrafts((current) => ({ ...current, [bill.documentId]: containers }))} /></>}
               onSummaryChange={setShipmentSummary}
               onEditUnitPrice={openItemUnitPrice}
               dealId={dealId}

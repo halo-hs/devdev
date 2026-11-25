@@ -241,6 +241,16 @@ export type ShipmentConfirmation = {
   pod?: string | null;
 };
 
+/** Adds an empty shipment to a deal for information entered by hand (no B/L document yet). */
+export async function createShipment(getIdToken: () => Promise<string>, dealId: string): Promise<{ shipment: Shipment }> {
+  const response = await apiRequest<{ shipment: Shipment }>(
+    apiPath("/trade/shipments"),
+    { baseUrl: apiBaseUrl(), getIdToken, init: { method: "POST", body: JSON.stringify({ deal_id: dealId }) } },
+  );
+  publishShipmentUpdate({ shipmentId: response.shipment.id, dealId: response.shipment.deal_id });
+  return response;
+}
+
 export async function confirmShipment(
   getIdToken: () => Promise<string>,
   shipmentId: string,
