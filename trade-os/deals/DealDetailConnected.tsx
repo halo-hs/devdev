@@ -2161,13 +2161,13 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onSetContainers }: 
                                 // Same layout as the item card: title, row 1 (identity · packages), separator, row 2 (weight · volume with unit selects).
                                 <div key={index} id={dealContainerAnchorId(container.number)} className="@container/pl flex scroll-mt-[calc(var(--deal-header-height,128px)+16px)] flex-col gap-3.5 rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
                                   <h5 className="text-base leading-6 font-bold">컨테이너 {index + 1}</h5>
-                                  <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/pl:grid-cols-[220px_240px_240px] [&>div]:min-w-0">
+                                  <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/pl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_240px] [&>div]:min-w-0">
                                     <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="컨테이너 번호" />{textInput(update, index, container, "number", "컨테이너 번호")}</div>
                                     <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="씰 번호" />{textInput(update, index, container, "sealNumber", "씰 번호")}</div>
                                     <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="포장 수 / 단위" /><div className="flex gap-2"><div className="min-w-0 flex-1">{textInput(update, index, container, "packageCount", "포장 수", "text-right")}</div><div className="w-32 shrink-0">{unitSelect(container.packageUnit ?? "bundles", ["bundles", "cartons", "pallets"], `컨테이너 ${index + 1} 포장 단위`, (unit) => update(index, { packageUnit: unit }))}</div></div></div>
                                   </div>
                                   <div className="h-px bg-[var(--color-gray-10)]" role="separator" />
-                                  <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/pl:grid-cols-[150px_120px_150px_120px] [&>div]:min-w-0">
+                                  <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/pl:grid-cols-[minmax(0,1fr)_140px_minmax(0,1fr)_140px] [&>div]:min-w-0">
                                     {measureFields(update, index, container, "grossWeight", "총중량", "중량 단위", ["KG", "MT", "LB"])}
                                     {measureFields(update, index, container, "volume", "용적", "용적 단위", ["CBM", "CFT"])}
                                   </div>
