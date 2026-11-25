@@ -2821,6 +2821,10 @@ function DealDocumentPanels({
   const closeRef = useRef<HTMLButtonElement>(null)
   useEffect(() => {
     if (!documentOpen || !documentPanelTarget) return
+    if (documentPanelTarget.closest('[role="dialog"]')) {
+      closeRef.current?.focus({ preventScroll: true })
+      return
+    }
     const returnFocus = editButtonRef.current
     return () => {
       returnFocus?.focus({ preventScroll: true })
@@ -6532,6 +6536,8 @@ export function DealDetailScreen({
     invoiceId?: string
   } | null>(null)
   const [documentPanelTarget, setDocumentPanelTarget] = useState<HTMLElement | null>(null)
+  const documentTriggerRef = useRef<HTMLElement | null>(null)
+  const splitDocumentOpen = documentOpen && !isCompactWorkspace
   const comparisonGridRef = useRef<HTMLDivElement>(null)
   const comparisonViewportRef = useRef<HTMLElement | null>(null)
   const comparisonRestoreScrollTopRef = useRef<number | null>(null)
@@ -6572,7 +6578,7 @@ export function DealDetailScreen({
     }
   }, [documentOpen, isCompactWorkspace])
   useLayoutEffect(() => {
-    if (!documentOpen || comparisonHeight == null) return
+    if (!splitDocumentOpen || comparisonHeight == null) return
     const grid = comparisonGridRef.current
     const pageContent = grid?.querySelector<HTMLElement>("[data-deal-page-content]")
     const viewport = grid?.closest<HTMLElement>("[data-deal-scroll-viewport]")
@@ -6600,9 +6606,11 @@ export function DealDetailScreen({
       window.cancelAnimationFrame(frame)
       timers.forEach((timer) => window.clearTimeout(timer))
     }
-  }, [comparisonHeight, documentOpen])
+  }, [comparisonHeight, splitDocumentOpen])
   const openDocumentPanel = useCallback(() => {
-    if (!documentOpen) {
+    if (documentOpen) return
+    documentTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    if (!isCompactWorkspace) {
       const viewport = document.querySelector<HTMLElement>("[data-deal-scroll-viewport]")
       const grid = comparisonGridRef.current
       comparisonViewportRef.current = viewport
@@ -6627,7 +6635,7 @@ export function DealDetailScreen({
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
     }
     setDocumentOpen(true)
-  }, [documentOpen])
+  }, [documentOpen, isCompactWorkspace])
   const closeDocumentPanel = useCallback(() => {
     const viewport = comparisonViewportRef.current
     const restoreScrollTop = comparisonRestoreScrollTopRef.current
@@ -8000,7 +8008,7 @@ export function DealDetailScreen({
             </div>}
             <div
               ref={comparisonGridRef}
-              style={documentOpen && comparisonHeight ? {
+              style={splitDocumentOpen && comparisonHeight ? {
                 height: comparisonHeight,
                 position: "sticky",
                 top: "var(--deal-header-height, 0px)",
@@ -8008,14 +8016,14 @@ export function DealDetailScreen({
               } : undefined}
               className={cn(
                 "min-h-0",
-                documentOpen && !isCompactWorkspace &&
+                splitDocumentOpen &&
                   "overflow-hidden rounded-[var(--r-lg)] bg-[var(--surface-background)] shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]"
               )}
             >
-              {documentOpen ? (
+              {splitDocumentOpen ? (
                 <ResponsivePdfPanelSplit
                   label="거래 정보와 문서 원문 너비 조절"
-                  className={isCompactWorkspace ? "h-auto" : "h-full"}
+                  className="h-full"
                   desktopHeight="100%"
                   primary={dealPageContent}
                   preview={
@@ -8035,6 +8043,23 @@ export function DealDetailScreen({
             </div>
           </div>
         </div>
+        {isCompactWorkspace && (
+          <Sheet open={documentOpen} onOpenChange={handleDocumentOpenChange}>
+            <SheetContent
+              side="right"
+              showCloseButton={false}
+              className="min-h-0 overflow-hidden data-[side=right]:w-full data-[side=right]:sm:max-w-2xl"
+              aria-describedby="deal-comparison-description"
+              onCloseAutoFocus={(event) => {
+                event.preventDefault()
+                documentTriggerRef.current?.focus({ preventScroll: true })
+              }}
+            >
+              <SheetTitle className="sr-only">문서 보기</SheetTitle>
+              <div ref={setDocumentPanelTarget} className="min-h-0 min-w-0 flex-1" />
+            </SheetContent>
+          </Sheet>
+        )}
         <Sheet open={verificationOpen} onOpenChange={setVerificationOpen}>
           <SheetContent
             onOpenAutoFocus={(event) => {
