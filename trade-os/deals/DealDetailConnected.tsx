@@ -2159,27 +2159,25 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onSetContainers }: 
                     </HostTableCell>
                   </HostTableRow>
                   {open ? (
-                    <HostTableRow className="hover:bg-transparent">
+                    <HostTableRow className="hover:[&>td]:bg-transparent has-aria-expanded:[&>td]:bg-transparent!">
                       <HostTableCell colSpan={8} className="!p-0">
                         <div className="sticky left-0 w-[100cqw] p-3">
                           {/* Just one block per container, stacked, so its fields stay together when they wrap. */}
                           <div className="flex flex-col gap-3 whitespace-normal">
-                              {/* Packing list title row, same as the CI's 송장 정보: title · note, delete at the far right. */}
-                              <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
-                                <div className="flex items-center gap-2">
-                                  <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">포장명세서<span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">{list.manual ? "직접 입력 · 문서 없음" : document.fileName}</span></h5>
-                                  {canWrite ? <ConfirmDeleteButton label="포장명세서" description={list.manual ? "직접 추가한 포장명세서와 컨테이너 정보, 연결을 지웁니다." : `${name}을(를) 이 거래에서 뺍니다. 원본 문서는 문서함에 남습니다.`} onConfirm={() => { if (list.manual) removeDealManualPackingList(dealId, document.documentId); else removeDealDocument(dealId, document.documentId) }} /> : null}
-                                </div>
-                                {list.manual ? (
-                                  <div className="mt-3.5 w-full sm:w-[240px]"><FormFieldHeader className="mb-2.5" label="포장명세서 번호" /><Input aria-label="포장명세서 번호" disabled={!canWrite} className="h-10 px-3 py-0" value={relations.manualPackingLists[document.documentId]?.number ?? ""} onChange={(event) => saveDealManualPackingList(dealId, document.documentId, { number: event.target.value, containers })} /></div>
-                                ) : null}
-                              </div>
+                              {/* No packing list title: deleting the last container removes the packing list row. */}
+                              {list.manual ? (
+                                <div className="w-full sm:w-[240px]"><FormFieldHeader className="mb-2.5" label="포장명세서 번호" /><Input aria-label="포장명세서 번호" disabled={!canWrite} className="h-10 px-3 py-0" value={relations.manualPackingLists[document.documentId]?.number ?? ""} onChange={(event) => saveDealManualPackingList(dealId, document.documentId, { number: event.target.value, containers })} /></div>
+                              ) : null}
                               {containers.map((container, index) => (
                                 // Same layout as the item card: title, row 1 (identity · packages), separator, row 2 (weight · volume with unit selects).
                                 <div key={index} id={dealContainerAnchorId(container.number)} className="@container/pl flex scroll-mt-[calc(var(--deal-header-height,128px)+16px)] flex-col gap-3.5 rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
                                   <div className="flex items-center gap-2">
                                     <h5 className="min-w-0 flex-1 text-base leading-6 font-bold">컨테이너 {index + 1}</h5>
-                                    {canWrite && containers.length > 1 ? <ConfirmDeleteButton label={`컨테이너 ${index + 1}`} description={`${container.number || "번호 미입력"} 컨테이너의 입력 정보를 지웁니다.`} onConfirm={() => setContainers(list, containers.filter((_, containerIndex) => containerIndex !== index))} /> : null}
+                                    {canWrite ? <ConfirmDeleteButton label={`컨테이너 ${index + 1}`} description={containers.length > 1 ? `${container.number || "번호 미입력"} 컨테이너의 입력 정보를 지웁니다.` : list.manual ? "마지막 컨테이너라 포장명세서 행도 함께 지웁니다." : `마지막 컨테이너라 ${name}이(가) 이 거래에서 빠집니다. 원본 문서는 문서함에 남습니다.`} onConfirm={() => {
+                                      if (containers.length > 1) setContainers(list, containers.filter((_, containerIndex) => containerIndex !== index))
+                                      else if (list.manual) removeDealManualPackingList(dealId, document.documentId)
+                                      else removeDealDocument(dealId, document.documentId)
+                                    }} /> : null}
                                   </div>
                                   <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/pl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_240px] [&>div]:min-w-0">
                                     <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="컨테이너 번호" />{textInput(update, index, container, "number", "컨테이너 번호")}</div>

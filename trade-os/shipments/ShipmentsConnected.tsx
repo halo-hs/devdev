@@ -854,7 +854,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                     )}
                   </HostTableRow>
                   {rowOpen ? (
-                    <HostTableRow className="hover:[&>td]:bg-transparent">
+                    <HostTableRow className="hover:[&>td]:bg-transparent has-aria-expanded:[&>td]:bg-transparent!">
                       <HostTableCell colSpan={8} className="!p-0"><div className="sticky left-0 w-[100cqw] p-3">
                         <ShipmentInlineEditor shipment={ship} copy={copy} canWrite={canRefresh} hasDocument={Boolean(renderDocumentAction?.(ship, rowIndex))} linkedDocuments={renderLinkedDocuments?.(ship, rowIndex)} onDelete={async () => {
                           await deleteShipment(getIdToken, ship);
