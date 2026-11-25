@@ -1969,14 +1969,6 @@ function ShipmentContainerLinks({ bill }: { bill: SplitShipmentView["billsOfLadi
 // when the row is opened (autosave).
 const openedPackingLists = new Map<string, Set<string>>()
 type PackingContainer = ReturnType<typeof billContainers>[number]
-const packingContainerFields: Array<{ key: keyof PackingContainer; label: string; align?: "right" }> = [
-  { key: "number", label: "컨테이너 번호" },
-  { key: "sealNumber", label: "씰 번호" },
-  { key: "packageCount", label: "포장 수", align: "right" },
-  { key: "packageUnit", label: "포장 단위" },
-  { key: "grossWeight", label: "총중량", align: "right" },
-  { key: "volume", label: "용적", align: "right" },
-]
 const PACKING_ROW_CONTAINERS = 2
 // Sums container measures such as "8,240 KG" + "8,240 KG" → "16,480 KG".
 // Returns null when a value is missing or the units differ.
@@ -2022,6 +2014,33 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
   const containerCount = lists.reduce((total, list) => total + list.containers.length, 0)
   const cell = "align-top"
   const numeric = "text-right whitespace-nowrap tabular-nums"
+  const unitSelect = (value: string, options: string[], label: string, onChange: (next: string) => void) => (
+    <Select value={value} disabled={!canWrite} onValueChange={(next) => onChange(next ?? "")}>
+      <SelectTrigger size="sm" aria-label={label} className="w-full gap-1 px-3 py-0 data-[size=sm]:h-10 data-[size=sm]:text-[length:var(--text-body-6)] data-[size=sm]:leading-[var(--leading-body-6)]"><SelectValue /></SelectTrigger>
+      <SelectContent className="z-[var(--z-popup)]">{[...new Set([value, ...options])].filter(Boolean).map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
+    </Select>
+  )
+  const containerField = (label: string, width: string, control: ReactNode) => (
+    <div key={label} className={cn("flex min-w-0 flex-col gap-1.5", width)}>
+      <span className="text-[13px] leading-[18px] text-[var(--color-gray-4)]">{label}</span>
+      {control}
+    </div>
+  )
+  const textInput = (bill: BillCard, index: number, container: PackingContainer, key: "number" | "sealNumber" | "packageCount", label: string, align?: string) => (
+    <Input aria-label={`컨테이너 ${index + 1} ${label}`} disabled={!canWrite} className={cn("h-10 tabular-nums", align)} value={container[key] ?? ""} onChange={(event) => onUpdateContainer(bill, index, { [key]: event.target.value })} />
+  )
+  // "8,240 KG" → number input + unit select, saved back as one value.
+  const measureInput = (bill: BillCard, index: number, container: PackingContainer, key: "grossWeight" | "volume", label: string, units: string[]) => {
+    const match = (container[key] ?? "").trim().match(/^(.*?)\s*([A-Za-z³]+)?$/)
+    const amount = match?.[1] ?? ""
+    const unit = match?.[2] ?? units[0]
+    return (
+      <div className="flex gap-2">
+        <div className="w-36"><Input aria-label={`컨테이너 ${index + 1} ${label}`} disabled={!canWrite} className="h-10 text-right tabular-nums" value={amount} onChange={(event) => onUpdateContainer(bill, index, { [key]: `${event.target.value} ${unit}`.trim() })} /></div>
+        <div className="w-24">{unitSelect(unit, units, `컨테이너 ${index + 1} ${label} 단위`, (next) => onUpdateContainer(bill, index, { [key]: `${amount} ${next}`.trim() }))}</div>
+      </div>
+    )
+  }
   const stacked = (values: string[], more: number) => (
     <>
       {values.map((value, index) => <div key={index} className={index ? "mt-0.5" : undefined}>{value}</div>)}
@@ -2102,17 +2121,13 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
                                 // Same card as the shipment row's 선적 정보 (title inside, 3-column fields).
                                 <div key={index} id={dealContainerAnchorId(container.number)} className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
                                   <h3 className="text-[15px] leading-[22px] font-semibold">컨테이너 {index + 1}</h3>
-                                  <div className="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
-                                  {packingContainerFields.map(({ key, label, align }) => (
-                                    <label key={key} className="flex flex-col gap-1.5">
-                                      <span className="text-[13px] leading-[18px] text-[var(--color-gray-4)]">{label}</span>
-                                      {canWrite ? (
-                                        <Input aria-label={`컨테이너 ${index + 1} ${label}`} className={cn("h-10", align === "right" && "text-right")} value={container[key] ?? ""} onChange={(event) => onUpdateContainer(bill, index, { [key]: event.target.value })} />
-                                      ) : (
-                                        <span className="min-h-10 rounded-md bg-muted/30 px-3 py-2 text-sm">{container[key] || "—"}</span>
-                                      )}
-                                    </label>
-                                  ))}
+                                  {/* Like the item editor: sized inputs, units as their own selects. */}
+                                  <div className="mt-3 flex flex-wrap items-start gap-x-4 gap-y-3">
+                                    {containerField("컨테이너 번호", "w-full sm:w-[220px]", textInput(bill, index, container, "number", "컨테이너 번호"))}
+                                    {containerField("씰 번호", "w-full sm:w-[240px]", textInput(bill, index, container, "sealNumber", "씰 번호"))}
+                                    {containerField("포장 수 / 단위", "w-full sm:w-auto", <div className="flex gap-2"><div className="w-24">{textInput(bill, index, container, "packageCount", "포장 수", "text-right")}</div><div className="w-32">{unitSelect(container.packageUnit ?? "bundles", ["bundles", "cartons", "pallets"], `컨테이너 ${index + 1} 포장 단위`, (unit) => onUpdateContainer(bill, index, { packageUnit: unit }))}</div></div>)}
+                                    {containerField("총중량", "w-full sm:w-auto", measureInput(bill, index, container, "grossWeight", "총중량", ["KG", "MT", "LB"]))}
+                                    {containerField("용적", "w-full sm:w-auto", measureInput(bill, index, container, "volume", "용적", ["CBM", "CFT"]))}
                                   </div>
                                 </div>
                               ))}
