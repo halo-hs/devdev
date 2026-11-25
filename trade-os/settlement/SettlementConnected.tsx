@@ -1,3 +1,4 @@
+import { readSettlementBasis, roundedDealTotal, totalRoundingLabels } from "@trade-os/deals/dealTotalRounding";
 "use client";
 
 import { Input } from "@/components/ui/input"
@@ -1961,19 +1962,21 @@ function SettlementView({
     setRecordFor(null);
     recTriggerRef.current?.focus();
   };
+  const basis = readSettlementBasis(new URLSearchParams(window.location.search).get("deal_id"));
   const openManualSchedule = () => {
-    setManualScheduleAmount("");
-    setManualScheduleCounterparty("");
-    setManualScheduleCurrency(ledgerCurrency ?? "");
+    setManualScheduleAmount(basis?.amount.replaceAll(",", "") ?? "");
+    setManualScheduleCounterparty(basis?.counterparty ?? "");
+    setManualScheduleCurrency(basis?.currency ?? ledgerCurrency ?? "");
     setManualScheduleDueDate(asOfISO || localTodayISO());
-    setManualScheduleType("payable");
+    setManualScheduleType(basis?.type ?? "payable");
     setManualScheduleError(null);
     setManualScheduleOpen(true);
   };
 
   const saveManualSchedule = async () => {
-    const amount = manualScheduleAmount.trim();
+    const rawAmount = manualScheduleAmount.trim();
     const currency = manualScheduleCurrency.trim().toUpperCase();
+    const amount = basis && isFinanceDecimal(rawAmount) ? roundedDealTotal(rawAmount, currency, basis.mode).replaceAll(",", "") : rawAmount;
     const dueDate = manualScheduleDueDate.trim();
     if (
       !isFinanceDecimal(amount) ||
@@ -1992,6 +1995,7 @@ function SettlementView({
       await createPaymentSchedule(
         {
           amount,
+          ...(basis ? { deal_id: basis.dealId } : {}),
           ...(manualScheduleCounterparty.trim()
             ? { counterparty_name: manualScheduleCounterparty.trim() }
             : {}),
@@ -2001,6 +2005,7 @@ function SettlementView({
         },
         getIdToken,
       );
+      if (basis) setTab(manualScheduleType);
       setManualScheduleOpen(false);
       onRecordStatus(copy.ledger.recordSaved);
       onReload();
@@ -3469,6 +3474,9 @@ function SettlementView({
           </Button>
         }
       >
+        {basis && <p className="mb-3 text-sm" aria-label="계약 기준 정산 금액">
+          {basis.dealId} · 계약 기준 정산 금액 <strong className="tabular-nums">{basis.amount} {basis.currency}</strong> · {totalRoundingLabels[basis.mode]}
+        </p>}
         {/* Direction tabs sit under the title, matching the 자금 일정 card. */}
         <Tabs
           className="mb-3"
@@ -4331,7 +4339,7 @@ function SettlementView({
               aria-label={copy.ledger.amount}
               className="h-9 rounded-md border border-border px-2 text-[length:var(--text-body-10)] leading-[var(--leading-body-10)] text-[var(--color-gray-2)]"
               disabled={manualScheduleBusy}
-              inputMode="decimal" numericFormat="amount"
+              inputMode="decimal" numericFormat={basis ? "decimal" : "amount"}
               onChange={(event) => setManualScheduleAmount(event.target.value)}
               value={manualScheduleAmount}
             />
