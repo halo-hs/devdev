@@ -9,16 +9,12 @@ concurrency:
   group: github-pages-preview
   cancel-in-progress: false
 jobs:
-  preview:
+  build:
     if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,6 +30,16 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+  preview:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Publish shared preview
         id: deployment
         uses: actions/deploy-pages@v4
