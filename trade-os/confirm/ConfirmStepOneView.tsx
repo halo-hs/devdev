@@ -130,6 +130,14 @@ export function OcrFieldReviewList({
             </FormField>
           )
         })}
+        {documentType === "PL" && mode === "compare" && (
+          <Button variant="outline" size="sm" onClick={() => {
+            const next = 1 + Math.max(1, ...fields.filter(field => field.key.startsWith("item_name:")).map(field => Number(field.key.split(":")[1])))
+            onReviewedFieldChange("item_name:" + next, { value: "" })
+            onAutoSave("pending")
+            onAutoSave("commit")
+          }}>품목 추가</Button>
+        )}
       </div>
     </div>
   )

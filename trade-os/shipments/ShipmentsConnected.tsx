@@ -1,3 +1,4 @@
+import type { PackingItem } from "../lib/packingItems"
 "use client";
 import { BusinessListToolbar, BusinessFilterSearch } from "@/components/platform/SearchFilterBar";
 
@@ -120,6 +121,7 @@ export type ShipmentContainerCard = {
   volume?: string | null;
 };
 export type CommercialInvoiceCard = {
+  hsCode?: string;
   documentId: string;
   /** B/L number read from this CI, independent of its current relationship. */
   referenceBlNumber?: string | null;
@@ -141,6 +143,8 @@ export type CommercialInvoiceCard = {
   onOpen?: () => void;
 };
 export type ShipmentDocumentLink = {
+  items?: PackingItem[];
+  containers?: ShipmentContainerCard[];
   documentId: string;
   /** B/L number read from this document. */
   referenceBlNumber?: string | null;

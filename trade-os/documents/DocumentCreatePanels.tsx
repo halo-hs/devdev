@@ -184,6 +184,7 @@ type PackingLineValue = {
   containerNumber: string
   sealNumber: string
   containerType: string
+  hsCode: string
   description: string
   quantity: string
   packageCount: string
@@ -213,6 +214,7 @@ function PackingListLineItemEditor({
     containerNumber: values.containerNumber ?? "",
     sealNumber: values.sealNumber ?? "",
     containerType: values.containerType ?? "40FT HC",
+    hsCode: values.hsCode ?? "",
     description: values.description ?? "",
     quantity: values.quantity ?? "",
     packageCount: values.packageCount ?? "",
@@ -226,6 +228,7 @@ function PackingListLineItemEditor({
         createRow("pl-row-1", {
           containerNumber: "HMMU1234567",
           sealNumber: "SEAL-01402-A",
+          hsCode: "7602.00",
           description: "Aluminium Scrap Tough Taboo",
           quantity: "12",
           packageCount: "6",
@@ -236,6 +239,7 @@ function PackingListLineItemEditor({
         createRow("pl-row-2", {
           containerNumber: "HMMU1234568",
           sealNumber: "SEAL-01402-B",
+          hsCode: "7602.00",
           description: "Aluminium Scrap Tough Taboo",
           quantity: "12",
           packageCount: "6",
@@ -268,7 +272,8 @@ function PackingListLineItemEditor({
     }
     rows.forEach((row, index) => {
       const requiredFields: Array<[keyof Omit<PackingLineValue, "id">, string]> = [
-        ["description", "품명"],
+        ["description", "품목명"],
+        ["hsCode", "HS 코드"],
         ["quantity", "수량"],
         ["packageCount", "포장 수"],
       ]
@@ -277,7 +282,7 @@ function PackingListLineItemEditor({
       })
     })
     onSummaryChange({
-      completedCount: rows.filter((row) => Boolean(row.description.trim() && row.quantity.trim() && row.packageCount.trim() && row.containerNumber.trim())).length,
+      completedCount: rows.filter((row) => Boolean(row.description.trim() && row.hsCode.trim() && row.quantity.trim() && row.packageCount.trim() && row.containerNumber.trim())).length,
       rowCount: rows.length,
       issues,
       itemNames: rows.map((row) => row.description.trim()).filter(Boolean),
@@ -288,7 +293,8 @@ function PackingListLineItemEditor({
     ["containerNumber", "컨테이너 번호", "예: HMMU1234567"],
     ["sealNumber", "씰 번호", "선택"],
     ["containerType", "컨테이너 유형", "예: 40FT HC"],
-    ["description", "품명", "필수"],
+    ["description", "품목명", "필수"],
+    ["hsCode", "HS 코드", "필수"],
     ["quantity", "수량", "필수"],
     ["packageCount", "포장 수", "필수"],
     ["grossWeight", "총중량", "선택"],
@@ -307,7 +313,7 @@ function PackingListLineItemEditor({
         </Button>
       </div>
       <div className="overflow-x-auto rounded-md border">
-        <Table className="min-w-[1180px] table-fixed">
+        <Table className="min-w-[1300px] table-fixed">
           <TableHeader>
             <TableRow>
               {fields.map(([, label]) => <TableHead key={label} className="text-left!">{label}</TableHead>)}
