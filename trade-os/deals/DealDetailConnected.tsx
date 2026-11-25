@@ -1838,22 +1838,12 @@ const billContainers = (bill: SplitShipmentView["billsOfLading"][number]) => {
   }]
 }
 
-// Expanded content of a deal shipment-table row (Figma 7872:184996 table):
-// linked CIs plus the packing list with per-container packages.
+const dealPackingListAnchorId = (documentId: string) => `deal-pl-${documentId}`
+
+// Expanded content of a deal shipment-table row: the CIs and packing lists
+// linked to this B/L. Packing-list details live in their own card below the
+// shipment table; these links jump there (and its B/L column jumps back).
 function ShipmentBillDetail({ dealId, bill, view }: { dealId: string; bill: SplitShipmentView["billsOfLading"][number]; view: SplitShipmentView }) {
-  const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set((bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => `PL:${document.documentId}`))
-  )
-  const toggle = (id: string) => setExpanded((current) => {
-    const next = new Set(current)
-    if (next.has(id)) next.delete(id)
-    else next.add(id)
-    return next
-  })
-  const openShipmentDocument = (code: "BL" | "PL", fileName: string) => {
-    window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code, fileName } }))
-  }
-  const containers = billContainers(bill)
   const relatedPackingLists = (bill.connectedDocuments ?? []).filter((document) => document.code === "PL")
   const linkedInvoiceIds = Object.entries(readDealInvoiceRelations(dealId).invoiceToBills)
     .filter(([, billIds]) => billIds.includes(bill.documentId))
@@ -1863,71 +1853,118 @@ function ShipmentBillDetail({ dealId, bill, view }: { dealId: string; bill: Spli
     ...view.unlinkedDocuments.filter((invoice) => linkedInvoiceIds.includes(invoice.documentId)),
   ]
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-[var(--color-gray-9)] bg-card p-4 text-left whitespace-normal" onClick={(event) => event.stopPropagation()}>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-        <span className="font-semibold">연결 CI</span>
+    <div className="flex flex-col gap-2 rounded-xl border border-[var(--color-gray-9)] bg-card px-4 py-3 text-left text-sm whitespace-normal" onClick={(event) => event.stopPropagation()}>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span className="w-20 shrink-0 font-semibold">연결 CI</span>
         {relatedInvoices.length ? relatedInvoices.map((invoice) => (
           <button key={invoice.documentId} type="button" className="text-[var(--color-primary-4)] hover:underline" onClick={invoice.onOpen}>{invoice.invoiceNumber || invoice.fileName}</button>
         )) : <StatusBadge size="sm" tone="warning">CI 연결 필요</StatusBadge>}
       </div>
-                          {relatedPackingLists.length ? (
-            <div>
-              <div className="text-sm font-semibold">포장명세서</div>
-              <div className="mt-2 grid gap-2">
-                {relatedPackingLists.map((document) => {
-                  const packingEntryId = `PL:${document.documentId}`
-                  const packingOpen = expanded.has(packingEntryId)
-                  return (
-                    <div key={document.documentId} className="overflow-hidden rounded-md border bg-background">
-                      <div className="flex items-center gap-2 px-3 py-2">
-                        <button type="button" className="flex min-w-0 flex-1 items-center gap-2 text-left" aria-expanded={packingOpen} onClick={() => toggle(packingEntryId)}>
-                          <DocumentTypeBadge code="PL" />
-                          <strong className="truncate text-sm">{document.number ?? document.fileName}</strong>
-                          <span className="truncate text-[11px] text-muted-foreground">{document.fileName}</span>
-                          <ChevronDown className={cn("ml-auto size-4 transition-transform", packingOpen && "rotate-180")} aria-hidden="true" />
-                        </button>
-                        <Button type="button" size="xs" variant="outline" aria-label={`${document.number ?? document.fileName} 문서와 보기`} onClick={() => openShipmentDocument("PL", document.fileName)}><FileSearch data-icon="inline-start" />문서와 보기</Button>
-                      </div>
-                      {packingOpen ? (
-                        <div className="overflow-x-auto border-t">
-                          <Table className="min-w-[640px] text-left text-xs" aria-label={`${document.number ?? document.fileName} 컨테이너별 포장`}>
-                            <TableHeader className="bg-muted/40">
-                              <TableRow>
-                                {["컨테이너 번호", "씰 번호", "포장 수", "총중량", "용적"].map((label) => <TableHead key={label} className={cn("h-9 px-3 font-medium", ["포장 수", "총중량", "용적"].includes(label) ? "text-right" : "text-left")}>{label}</TableHead>)}
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {containers.length ? containers.map((container) => (
-                                <TableRow key={container.number}>
-                                  <TableCell className="px-3 py-2 font-medium whitespace-nowrap">{container.number}</TableCell>
-                                  <TableCell className="px-3 py-2 whitespace-nowrap">{container.sealNumber || "미확인"}</TableCell>
-                                  <TableCell className="px-3 py-2 text-right whitespace-nowrap tabular-nums">{container.packageCount ? `${container.packageCount}${container.packageUnit ? ` ${container.packageUnit}` : ""}` : "미확인"}</TableCell>
-                                  <TableCell className="px-3 py-2 text-right whitespace-nowrap tabular-nums">{container.grossWeight || "미확인"}</TableCell>
-                                  <TableCell className="px-3 py-2 text-right whitespace-nowrap tabular-nums">{container.volume || "미확인"}</TableCell>
-                                </TableRow>
-                              )) : (
-                                <TableRow><TableCell colSpan={5} className="px-3 py-3 text-muted-foreground">컨테이너 정보 미확인</TableCell></TableRow>
-                              )}
-                              {containers.length > 1 ? (
-                                <TableRow className="bg-muted/20 font-semibold hover:bg-muted/20">
-                                  <TableCell className="px-3 py-2">합계</TableCell>
-                                  <TableCell className="px-3 py-2 text-muted-foreground">{containers.length}대</TableCell>
-                                  <TableCell className="px-3 py-2 text-right whitespace-nowrap tabular-nums">{bill.fields.packageCount ? `${bill.fields.packageCount}${bill.fields.packageType ? ` ${bill.fields.packageType}` : ""}` : "—"}</TableCell>
-                                  <TableCell className="px-3 py-2 text-right whitespace-nowrap tabular-nums">{bill.fields.grossWeight || "—"}</TableCell>
-                                  <TableCell className="px-3 py-2 text-right whitespace-nowrap tabular-nums">{bill.fields.volume || "—"}</TableCell>
-                                </TableRow>
-                              ) : null}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      ) : null}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          ) : <p className="text-sm text-muted-foreground">연결된 포장명세서가 없습니다. PL을 올리면 컨테이너별 포장 정보가 여기에 표시됩니다.</p>}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span className="w-20 shrink-0 font-semibold">포장명세서</span>
+        {relatedPackingLists.length ? relatedPackingLists.map((document) => (
+          <a key={document.documentId} href={`#${dealPackingListAnchorId(document.documentId)}`} className="text-[var(--color-primary-4)] hover:underline">{document.number ?? document.fileName}</a>
+        )) : <span className="text-muted-foreground">연결된 포장명세서 없음</span>}
+      </div>
     </div>
+  )
+}
+
+// Packing lists of this deal as their own card (same table style as 통관 문서):
+// one row per container, with the B/L it belongs to linking back to the
+// shipment row.
+function PackingListCard({ view, onUpload }: { view: SplitShipmentView; onUpload?: () => void }) {
+  const openPackingList = (fileName: string) => {
+    window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code: "PL", fileName } }))
+  }
+  const lists = view.billsOfLading.flatMap((bill) =>
+    (bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => ({ bill, document, containers: billContainers(bill) }))
+  )
+  const cell = "px-3 py-3 align-top"
+  return (
+    <section aria-label="포장명세서" className="rounded-[var(--r-lg)] bg-[var(--color-gray-12)] p-5 shadow-[var(--shadow-section)] ring-1 ring-[var(--color-gray-10)]">
+      <div className="flex items-center gap-1">
+        <h2 className="min-w-0 flex-1 text-[18px] leading-[26px] font-bold">포장명세서</h2>
+        {onUpload ? (
+          <Button variant="outline" size="sm" onClick={onUpload}>
+            <Plus data-icon="inline-start" />
+            문서 올리기
+          </Button>
+        ) : null}
+      </div>
+      <div className="mt-4 overflow-x-auto" role="region" aria-label="포장명세서 목록">
+        <Table className="min-w-[880px] text-left text-[15px] leading-[22px]" aria-label="포장명세서">
+          <TableHeader className="bg-[var(--color-gray-11)]">
+            <TableRow className="hover:bg-transparent">
+              {["포장명세서", "연결 B/L", "컨테이너 번호", "씰 번호", "포장 수", "총중량", "용적", ""].map((label, index) => (
+                <TableHead key={label || index} className={cn("h-14 px-3 text-[15px] leading-[22px] font-normal text-[var(--color-gray-4)]", ["포장 수", "총중량", "용적"].includes(label) && "text-right")}>
+                  {label || <span className="sr-only">원문</span>}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {lists.length === 0 ? (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={8} className="px-3 py-6 text-center text-[13px] leading-[18px] text-[var(--color-gray-5)] whitespace-normal">
+                  아직 연결된 포장명세서가 없습니다. 포장명세서를 올리면 컨테이너별 포장 정보가 여기에 표시됩니다.
+                </TableCell>
+              </TableRow>
+            ) : null}
+            {lists.map(({ bill, document, containers }) => {
+              const rows = containers.length ? containers : [null]
+              const span = rows.length + (containers.length > 1 ? 1 : 0)
+              const name = document.number ?? document.fileName
+              return (
+                <Fragment key={document.documentId}>
+                  {rows.map((container, index) => (
+                    <TableRow key={container?.number ?? "none"} id={index === 0 ? dealPackingListAnchorId(document.documentId) : undefined} className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] hover:bg-transparent">
+                      {index === 0 ? (
+                        <>
+                          <TableCell rowSpan={span} className={cn(cell, "font-medium")}>
+                            <div className="truncate">{name}</div>
+                          </TableCell>
+                          <TableCell rowSpan={span} className={cell}>
+                            <a href={`#${dealBillAnchorId(bill.documentId)}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRowLink(bill.documentId)}>{bill.blNumber || "B/L 번호 미확인"}</a>
+                          </TableCell>
+                        </>
+                      ) : null}
+                      {container ? (
+                        <>
+                          <TableCell className={cn(cell, "whitespace-nowrap tabular-nums")}>{container.number}</TableCell>
+                          <TableCell className={cn(cell, "whitespace-nowrap tabular-nums")}>{container.sealNumber || "미확인"}</TableCell>
+                          <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{container.packageCount ? `${container.packageCount}${container.packageUnit ? ` ${container.packageUnit}` : ""}` : "미확인"}</TableCell>
+                          <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{container.grossWeight || "미확인"}</TableCell>
+                          <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{container.volume || "미확인"}</TableCell>
+                        </>
+                      ) : (
+                        <TableCell colSpan={5} className={cn(cell, "text-[var(--color-gray-5)]")}>컨테이너 정보 미확인</TableCell>
+                      )}
+                      {index === 0 ? (
+                        <TableCell rowSpan={span} className={cn(cell, "w-12 text-center")}>
+                          <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${name} 문서와 보기`} title={`${name} 문서와 보기`} onClick={() => openPackingList(document.fileName)}>
+                            <FileSearch aria-hidden="true" className="size-4" />
+                          </Button>
+                        </TableCell>
+                      ) : null}
+                    </TableRow>
+                  ))}
+                  {containers.length > 1 ? (
+                    <TableRow className="bg-[var(--color-gray-11)]/50 font-semibold hover:bg-[var(--color-gray-11)]/50">
+                      <TableCell className={cell}>합계 · {containers.length}대</TableCell>
+                      <TableCell className={cell} />
+                      <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{bill.fields.packageCount ? `${bill.fields.packageCount}${bill.fields.packageType ? ` ${bill.fields.packageType}` : ""}` : "—"}</TableCell>
+                      <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{bill.fields.grossWeight || "—"}</TableCell>
+                      <TableCell className={cn(cell, "text-right whitespace-nowrap tabular-nums")}>{bill.fields.volume || "—"}</TableCell>
+                    </TableRow>
+                  ) : null}
+                </Fragment>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </section>
   )
 }
 
@@ -2126,7 +2163,7 @@ function CommercialInvoiceTransactionCard({
                             <span className="text-muted-foreground">{bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}</span>
                             <StatusBadge size="sm" tone="neutral">{containerCountLabel(bill)}</StatusBadge>
                             <span className="text-xs text-muted-foreground">{bill.fields.shippedOnBoardDate ?? "선적일 미확인"}</span>
-                            {(bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => <a key={document.documentId} href={`#${dealBillAnchorId(bill.documentId)}`} className="text-[13px] text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRowLink(bill.documentId)}>PL {document.number ?? document.fileName}</a>)}
+                            {(bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => <a key={document.documentId} href={`#${dealPackingListAnchorId(document.documentId)}`} className="text-[13px] text-[var(--color-primary-4)] hover:underline">PL {document.number ?? document.fileName}</a>)}
                             {onEditShipment ? <Button type="button" size="icon-sm" variant="ghost" className="ml-auto" aria-label={`${bill.blNumber || "연결된 선적"} 수정`} title="연결된 선적 수정" onClick={(event) => onEditShipment(bill, event.currentTarget)}><Pencil aria-hidden="true" className="size-4" /></Button> : null}
                           </li>
                         ) : null)}
@@ -6863,13 +6900,13 @@ export function DealDetailScreen({
             className="min-w-0 scroll-mt-[calc(var(--deal-header-height,128px)+16px)] outline-none"
           >
             <FulfillmentTab
-              shipmentContent={<OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} onOpenDocument={() => openDealDocument("fulfillment")} shipmentRowAnchorId={(shipment, index) => {
+              shipmentContent={<><OperationsScreen screen="deal-shipments" dealId={dealId} onShipmentSummary={setShipmentSummary} onOpenDocument={() => openDealDocument("fulfillment")} shipmentRowAnchorId={(shipment, index) => {
                 const bill = billForShipment(shipment, index)
                 return bill ? dealBillAnchorId(bill.documentId) : undefined
               }} renderShipmentDetail={(shipment, index) => {
                 const bill = billForShipment(shipment, index)
-                return bill ? <ShipmentBillDetail dealId={dealId} bill={bill} view={splitShipmentView} /> : <p className="text-sm text-muted-foreground">연결된 B/L 문서가 없습니다. B/L을 올리면 포장명세서와 연결 CI가 여기에 표시됩니다.</p>
-              }} />}
+                return bill ? <ShipmentBillDetail dealId={dealId} bill={bill} view={splitShipmentView} /> : <p className="text-sm text-muted-foreground">연결된 B/L 문서가 없습니다. B/L을 올리면 연결 CI와 포장명세서가 여기에 표시됩니다.</p>
+              }} /><PackingListCard view={splitShipmentView} onUpload={canMutate(role) ? onUpload : undefined} /></>}
               onSummaryChange={setShipmentSummary}
               onEditUnitPrice={openItemUnitPrice}
               dealId={dealId}
