@@ -1,13 +1,14 @@
 export type DealInvoiceRelationState = {
+  /** Missing key uses the document's original B/L; [] explicitly unlinks it. */
   invoiceToBills: Record<string, string[]>
   invoiceFields: Record<string, Record<string, string>>
-  /** Packing list document id → shipment keys it was linked to by hand. */
+  /** PL linkage overrides, with the same missing-key / [] semantics as CI. */
   packingToShipments: Record<string, string[]>
   /** Display label (B/L number) for shipment keys without a B/L document. */
   shipmentLabels: Record<string, string>
   /** CIs entered by hand (no document); their fields live in invoiceFields. */
   manualInvoices: string[]
-  /** Packing lists entered by hand (no document). */
+  /** Packing lists entered by hand and per-document PL input drafts. */
   manualPackingLists: Record<string, ManualPackingList>
   /** Document CIs / packing lists taken out of this deal (the documents themselves stay). */
   removedDocuments: string[]
@@ -15,6 +16,7 @@ export type DealInvoiceRelationState = {
 
 export type ManualContainer = {
   number: string
+  containerType?: string | null
   sealNumber?: string | null
   packageCount?: string | null
   packageUnit?: string | null
@@ -40,10 +42,11 @@ export function readDealInvoiceRelations(dealId: string): DealInvoiceRelationSta
     const raw = localStorage.getItem(storageKey(dealId))
     if (!raw) return emptyState()
     const parsed = JSON.parse(raw) as Partial<DealInvoiceRelationState>
+    // Each CI and PL can point to one B/L. A B/L may still have many CI/PLs.
     const invoiceToBills = Object.fromEntries(
       Object.entries(parsed.invoiceToBills ?? {}).map(([invoiceId, billIds]) => [
         invoiceId,
-        Array.isArray(billIds) ? billIds.filter((id): id is string => typeof id === "string") : [],
+        Array.isArray(billIds) ? billIds.filter((id): id is string => typeof id === "string").slice(0, 1) : [],
       ])
     )
     const invoiceFields = Object.fromEntries(
@@ -70,7 +73,8 @@ export function readDealInvoiceRelations(dealId: string): DealInvoiceRelationSta
       Object.entries(parsed.manualPackingLists ?? {}).filter(([, list]) => list && typeof list === "object" && Array.isArray((list as ManualPackingList).containers))
     ) as Record<string, ManualPackingList>
     const removedDocuments = Array.isArray(parsed.removedDocuments) ? parsed.removedDocuments.filter((id): id is string => typeof id === "string") : []
-    return { invoiceToBills, invoiceFields, packingToShipments: idLists(parsed.packingToShipments), shipmentLabels, manualInvoices, manualPackingLists, removedDocuments }
+    const packingToShipments = Object.fromEntries(Object.entries(idLists(parsed.packingToShipments)).map(([id, shipmentIds]) => [id, shipmentIds.slice(0, 1)]))
+    return { invoiceToBills, invoiceFields, packingToShipments, shipmentLabels, manualInvoices, manualPackingLists, removedDocuments }
   } catch {
     return emptyState()
   }
@@ -81,21 +85,48 @@ function writeDealInvoiceRelations(dealId: string, state: DealInvoiceRelationSta
 }
 
 export function linkDealInvoiceToBill(dealId: string, invoiceId: string, billId: string) {
-  const state = readDealInvoiceRelations(dealId)
-  const current = state.invoiceToBills[invoiceId] ?? []
-  if (!current.includes(billId)) state.invoiceToBills[invoiceId] = [...current, billId]
-  writeDealInvoiceRelations(dealId, state)
-  return state
+  return linkDealInvoiceToShipment(dealId, invoiceId, billId)
 }
 
 // Other cards on the deal page re-read relations when they change.
 const notify = (dealId: string) => window.dispatchEvent(new CustomEvent("ecoya:deal-relations-changed", { detail: dealId }))
 
+/** Resolve one B/L consistently in document detail, shipment detail, and candidates. */
+export const normalizeBlNumber = (value?: string | null) => value?.trim().replace(/\s+/g, "").toUpperCase() ?? ""
+
+export function blNumbersMismatch(documentNumber?: string | null, linkedNumber?: string | null) {
+  const expected = normalizeBlNumber(documentNumber)
+  const actual = normalizeBlNumber(linkedNumber)
+  return Boolean(expected && actual && expected !== actual)
+}
+
+export function resolveDealShipmentLink(
+  links: Record<string, string[]>, documentId: string, originalShipmentKey?: string,
+  referenceBlNumber?: string | null, bills: Array<{ documentId: string; blNumber: string | null }> = [],
+) {
+  // An explicit unlink must survive automatic matching and page reloads.
+  if (Object.prototype.hasOwnProperty.call(links, documentId)) return links[documentId]?.[0]
+  if (originalShipmentKey) return originalShipmentKey
+  const number = normalizeBlNumber(referenceBlNumber)
+  if (!number) return undefined
+  const matches = bills.filter((bill) => normalizeBlNumber(bill.blNumber) === number)
+  return matches.length === 1 ? matches[0].documentId : undefined
+}
+
+/** Keep the document and its inputs; an explicit empty override prevents the original link returning. */
+export function unlinkDealDocumentFromShipment(dealId: string, code: "CI" | "PL", documentId: string) {
+  const state = readDealInvoiceRelations(dealId)
+  const links = code === "CI" ? state.invoiceToBills : state.packingToShipments
+  links[documentId] = []
+  writeDealInvoiceRelations(dealId, state)
+  notify(dealId)
+  return state
+}
+
 /** Links a CI to a shipment from the shipment side (key: B/L document id or `shipment:<id>`). */
 export function linkDealInvoiceToShipment(dealId: string, invoiceId: string, shipmentKey: string, label?: string) {
   const state = readDealInvoiceRelations(dealId)
-  const current = state.invoiceToBills[invoiceId] ?? []
-  if (!current.includes(shipmentKey)) state.invoiceToBills[invoiceId] = [...current, shipmentKey]
+  state.invoiceToBills[invoiceId] = [shipmentKey]
   if (label) state.shipmentLabels[shipmentKey] = label
   writeDealInvoiceRelations(dealId, state)
   notify(dealId)
@@ -104,8 +135,7 @@ export function linkDealInvoiceToShipment(dealId: string, invoiceId: string, shi
 
 export function linkDealPackingListToShipment(dealId: string, packingListId: string, shipmentKey: string, label?: string) {
   const state = readDealInvoiceRelations(dealId)
-  const current = state.packingToShipments[packingListId] ?? []
-  if (!current.includes(shipmentKey)) state.packingToShipments[packingListId] = [...current, shipmentKey]
+  state.packingToShipments[packingListId] = [shipmentKey]
   if (label) state.shipmentLabels[shipmentKey] = label
   writeDealInvoiceRelations(dealId, state)
   notify(dealId)
@@ -186,5 +216,6 @@ export function saveDealInvoiceField(
     [field]: value,
   }
   writeDealInvoiceRelations(dealId, state)
+  notify(dealId)
   return state
 }

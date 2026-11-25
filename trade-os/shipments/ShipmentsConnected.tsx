@@ -112,6 +112,7 @@ function summarizeEvidence(rows: SnapContainerEvidence[]): Map<string, EvidenceS
 export type ShipmentSummary = { state: string; eta: string; count: number; snap: string };
 export type ShipmentContainerCard = {
   number: string;
+  containerType?: string | null;
   sealNumber?: string | null;
   packageCount?: string | null;
   packageUnit?: string | null;
@@ -120,6 +121,8 @@ export type ShipmentContainerCard = {
 };
 export type CommercialInvoiceCard = {
   documentId: string;
+  /** B/L number read from this CI, independent of its current relationship. */
+  referenceBlNumber?: string | null;
   fileName: string;
   uploadedAt: string;
   invoiceNumber?: string | null;
@@ -139,6 +142,8 @@ export type CommercialInvoiceCard = {
 };
 export type ShipmentDocumentLink = {
   documentId: string;
+  /** B/L number read from this document. */
+  referenceBlNumber?: string | null;
   code: "CI" | "PL";
   number?: string | null;
   fileName: string;
@@ -171,6 +176,7 @@ export type BillOfLadingCard = {
 export type SplitShipmentView = {
   billsOfLading: BillOfLadingCard[];
   unlinkedDocuments: CommercialInvoiceCard[];
+  unlinkedPackingLists?: ShipmentDocumentLink[];
 };
 
 // Opening 「문서와 보기」 re-mounts the deal page into a side-by-side split;

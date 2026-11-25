@@ -15,6 +15,8 @@ export type DealDocumentRecord = {
   state: "ready" | "needs_review" | "needs_type" | "processing"
   revision: number
   fileDataUrl?: string
+  /** Confirmed/extracted B/L reference from this document, when available. */
+  referenceBlNumber?: string | null
 }
 export const dealDocumentStorageKey = "ecoya-preview-deal-documents-v1"
 type Store = { documents: Record<string, DealDocumentRecord>; history: Array<{ documentId: string; action: string; from: string | null; to: string | null; reason: string; at: string }> }
@@ -122,7 +124,7 @@ export async function replaceDealDocument(record: DealDocumentRecord, file: File
     reader.readAsDataURL(new Blob([file], { type: "application/pdf" }))
   })
   currentDocument(record) // Recheck after asynchronous file reading.
-  return saveDocument(current, { ...current, file: file.name, fileDataUrl, state: current.state === "needs_type" ? "needs_type" : "needs_review", revision: current.revision + 1 }, "파일 교체")
+  return saveDocument(current, { ...current, file: file.name, fileDataUrl, referenceBlNumber: null, state: current.state === "needs_type" ? "needs_type" : "needs_review", revision: current.revision + 1 }, "파일 교체")
 }
 export type DocumentMovePreview = { documentId: string; revision: number; sourceId: string; targetId: string; sourceCount: number; targetCount: number }
 export function previewDocumentMove(record: DealDocumentRecord, targetId: string): DocumentMovePreview {
