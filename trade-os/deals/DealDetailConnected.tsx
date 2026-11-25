@@ -2020,25 +2020,20 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
       <SelectContent className="z-[var(--z-popup)]">{[...new Set([value, ...options])].filter(Boolean).map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
     </Select>
   )
-  const containerField = (label: string, width: string, control: ReactNode) => (
-    <div key={label} className={cn("flex min-w-0 flex-col gap-1.5", width)}>
-      <span className="text-[13px] leading-[18px] text-[var(--color-gray-4)]">{label}</span>
-      {control}
-    </div>
-  )
   const textInput = (bill: BillCard, index: number, container: PackingContainer, key: "number" | "sealNumber" | "packageCount", label: string, align?: string) => (
-    <Input aria-label={`컨테이너 ${index + 1} ${label}`} disabled={!canWrite} className={cn("h-10 tabular-nums", align)} value={container[key] ?? ""} onChange={(event) => onUpdateContainer(bill, index, { [key]: event.target.value })} />
+    <Input aria-label={`컨테이너 ${index + 1} ${label}`} disabled={!canWrite} className={cn("h-10 px-3 py-0 tabular-nums", align)} value={container[key] ?? ""} onChange={(event) => onUpdateContainer(bill, index, { [key]: event.target.value })} />
   )
-  // "8,240 KG" → number input + unit select, saved back as one value.
-  const measureInput = (bill: BillCard, index: number, container: PackingContainer, key: "grossWeight" | "volume", label: string, units: string[]) => {
-    const match = (container[key] ?? "").trim().match(/^(.*?)\s*([A-Za-z³]+)?$/)
+  // "8,240 KG" → number input and a unit select in their own columns (like
+  // the item card's 총중량 · 중량 단위), saved back as one value.
+  const measureFields = (bill: BillCard, index: number, container: PackingContainer, key: "grossWeight" | "volume", label: string, unitLabel: string, units: string[]) => {
+    const match = (container[key] ?? "").trim().match(/^(.*?)\s*([A-Za-z]+)?$/)
     const amount = match?.[1] ?? ""
     const unit = match?.[2] ?? units[0]
     return (
-      <div className="flex gap-2">
-        <div className="w-36"><Input aria-label={`컨테이너 ${index + 1} ${label}`} disabled={!canWrite} className="h-10 text-right tabular-nums" value={amount} onChange={(event) => onUpdateContainer(bill, index, { [key]: `${event.target.value} ${unit}`.trim() })} /></div>
-        <div className="w-24">{unitSelect(unit, units, `컨테이너 ${index + 1} ${label} 단위`, (next) => onUpdateContainer(bill, index, { [key]: `${amount} ${next}`.trim() }))}</div>
-      </div>
+      <>
+        <div><FormFieldHeader className="mb-2.5" label={label} /><Input aria-label={`컨테이너 ${index + 1} ${label}`} disabled={!canWrite} className="h-10 px-3 py-0 text-right tabular-nums" value={amount} onChange={(event) => onUpdateContainer(bill, index, { [key]: `${event.target.value} ${unit}`.trim() })} /></div>
+        <div><FormFieldHeader className="mb-2.5" label={unitLabel} />{unitSelect(unit, units, `컨테이너 ${index + 1} ${unitLabel}`, (next) => onUpdateContainer(bill, index, { [key]: `${amount} ${next}`.trim() }))}</div>
+      </>
     )
   }
   const stacked = (values: string[], more: number) => (
@@ -2118,16 +2113,18 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onUpdateContainer }
                           {/* Just one block per container, stacked, so its fields stay together when they wrap. */}
                           <div className="flex flex-col gap-3 whitespace-normal">
                               {containers.map((container, index) => (
-                                // Same card as the shipment row's 선적 정보 (title inside, 3-column fields).
-                                <div key={index} id={dealContainerAnchorId(container.number)} className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)] rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
-                                  <h3 className="text-[15px] leading-[22px] font-semibold">컨테이너 {index + 1}</h3>
-                                  {/* Like the item editor: sized inputs, units as their own selects. */}
-                                  <div className="mt-3 flex flex-wrap items-start gap-x-4 gap-y-3">
-                                    {containerField("컨테이너 번호", "w-full sm:w-[220px]", textInput(bill, index, container, "number", "컨테이너 번호"))}
-                                    {containerField("씰 번호", "w-full sm:w-[240px]", textInput(bill, index, container, "sealNumber", "씰 번호"))}
-                                    {containerField("포장 수 / 단위", "w-full sm:w-auto", <div className="flex gap-2"><div className="w-24">{textInput(bill, index, container, "packageCount", "포장 수", "text-right")}</div><div className="w-32">{unitSelect(container.packageUnit ?? "bundles", ["bundles", "cartons", "pallets"], `컨테이너 ${index + 1} 포장 단위`, (unit) => onUpdateContainer(bill, index, { packageUnit: unit }))}</div></div>)}
-                                    {containerField("총중량", "w-full sm:w-auto", measureInput(bill, index, container, "grossWeight", "총중량", ["KG", "MT", "LB"]))}
-                                    {containerField("용적", "w-full sm:w-auto", measureInput(bill, index, container, "volume", "용적", ["CBM", "CFT"]))}
+                                // Same layout as the item card: title, row 1 (identity · packages), separator, row 2 (weight · volume with unit selects).
+                                <div key={index} id={dealContainerAnchorId(container.number)} className="@container/pl flex scroll-mt-[calc(var(--deal-header-height,128px)+16px)] flex-col gap-3.5 rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
+                                  <h5 className="text-base leading-6 font-bold">컨테이너 {index + 1}</h5>
+                                  <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/pl:grid-cols-[220px_240px_240px] [&>div]:min-w-0">
+                                    <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="컨테이너 번호" />{textInput(bill, index, container, "number", "컨테이너 번호")}</div>
+                                    <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="씰 번호" />{textInput(bill, index, container, "sealNumber", "씰 번호")}</div>
+                                    <div className="col-span-2 @min-[760px]/pl:col-span-1"><FormFieldHeader className="mb-2.5" label="포장 수 / 단위" /><div className="flex gap-2"><div className="min-w-0 flex-1">{textInput(bill, index, container, "packageCount", "포장 수", "text-right")}</div><div className="w-32 shrink-0">{unitSelect(container.packageUnit ?? "bundles", ["bundles", "cartons", "pallets"], `컨테이너 ${index + 1} 포장 단위`, (unit) => onUpdateContainer(bill, index, { packageUnit: unit }))}</div></div></div>
+                                  </div>
+                                  <div className="h-px bg-[var(--color-gray-10)]" role="separator" />
+                                  <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/pl:grid-cols-[150px_120px_150px_120px] [&>div]:min-w-0">
+                                    {measureFields(bill, index, container, "grossWeight", "총중량", "중량 단위", ["KG", "MT", "LB"])}
+                                    {measureFields(bill, index, container, "volume", "용적", "용적 단위", ["CBM", "CFT"])}
                                   </div>
                                 </div>
                               ))}
@@ -2326,9 +2323,10 @@ function CommercialInvoiceTransactionCard({
                         <HostTableCell colSpan={8} className="!p-0 whitespace-normal">
                 {/* Three groups: invoice fields, linked documents, one-line sales row. */}
                 <div className="sticky left-0 flex w-[100cqw] flex-col gap-3 p-3">
-                <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <h3 className="flex min-w-0 flex-wrap items-baseline gap-x-2 text-sm font-semibold">송장 정보<span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">{invoice.fileName} · {invoice.uploadedAt}</span></h3>
+                <div className="@container/ci flex flex-col gap-3.5 rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
+                  {/* Same layout as the item card: title row, row 1 (identity), separator, row 2 (quantities with unit selects). */}
+                  <div className="flex items-center gap-2">
+                    <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">송장 정보<span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">{invoice.fileName} · {invoice.uploadedAt}</span></h5>
                     {invoice.onOpen ? (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -2338,17 +2336,49 @@ function CommercialInvoiceTransactionCard({
                       </Tooltip>
                     ) : null}
                   </div>
-                  <dl className="grid gap-3 sm:grid-cols-2">
-                    {[
-                      ["송장번호", invoice.invoiceNumber ?? ""],
-                      ["송장일자", invoice.invoiceDate ?? ""],
-                      ["품목", invoice.item ?? ""],
-                      ["수량", invoice.quantity ?? ""],
-                      ["단가", invoice.unitPrice ?? ""],
-                      ["포장 수 / 단위", invoice.packageCount && invoice.packageUnit ? `${invoice.packageCount} ${invoice.packageUnit}` : invoice.packageCount ?? invoice.packageUnit ?? ""],
-                      ["통화·금액", invoice.currency && invoice.totalAmount != null ? `${invoice.currency} ${invoice.totalAmount.toLocaleString()}` : invoice.currency ?? ""],
-                    ].map(([label, fallback]) => <div key={label}><dt className="flex items-center gap-1.5 text-xs text-muted-foreground">{label}{(invoice.pageCount ?? 1) > 1 ? <button type="button" className="text-[11px] leading-4 text-[var(--color-gray-6)] underline-offset-2 hover:text-[var(--color-primary-4)] hover:underline" aria-label={`${label} 근거 ${invoice.fieldPages?.[label] ?? 1}페이지 보기`} onClick={() => { requestDocumentPage(invoice.fileName, invoice.fieldPages?.[label] ?? 1); invoice.onOpen?.() }}>p.{invoice.fieldPages?.[label] ?? 1}</button> : null}</dt><dd className="mt-1">{isEditing ? (label === "송장일자" ? <DatePicker ariaLabel={`${invoice.invoiceNumber ?? invoice.fileName} ${label}`} value={value(label, fallback)} onValueChange={(next) => updateDraft(invoice.documentId, label, next)} className="w-full" /> : <Input aria-label={`${invoice.invoiceNumber ?? invoice.fileName} ${label}`} value={value(label, fallback)} onChange={(event) => updateDraft(invoice.documentId, label, event.target.value)} className="h-10" />) : <div className="min-h-10 rounded-md bg-muted/30 px-3 py-2 text-sm font-medium">{value(label, fallback) || "—"}</div>}</dd></div>)}
-                  </dl>
+                  {(() => {
+                    const name = invoice.invoiceNumber ?? invoice.fileName
+                    const pageChip = (label: string) => (invoice.pageCount ?? 1) > 1 ? <button type="button" className="text-[11px] leading-4 text-[var(--color-gray-6)] underline-offset-2 hover:text-[var(--color-primary-4)] hover:underline" aria-label={`${label} 근거 ${invoice.fieldPages?.[label] ?? 1}페이지 보기`} onClick={() => { requestDocumentPage(invoice.fileName, invoice.fieldPages?.[label] ?? 1); invoice.onOpen?.() }}>p.{invoice.fieldPages?.[label] ?? 1}</button> : undefined
+                    const header = (label: string, shown = label) => <FormFieldHeader className="mb-2.5" label={shown} badge={pageChip(label)} />
+                    const readOnly = (text: string) => <div className="flex min-h-10 items-center rounded-md bg-muted/30 px-3 text-sm font-medium">{text || "—"}</div>
+                    // Stored as one text per field ("2 MT", "USD 256,600"); edited as number + unit.
+                    const tail = (text: string) => { const match = text.trim().match(/^(.*?)\s*([A-Za-z]+)?$/); return { amount: match?.[1] ?? "", unit: match?.[2] ?? "" } }
+                    const quantity = tail(value("수량", invoice.quantity ?? ""))
+                    const quantityUnit = quantity.unit || "MT"
+                    const price = value("단가", invoice.unitPrice ?? "").replace(/\s*[A-Za-z]+\/[A-Za-z]+$/, "")
+                    const amountText = value("통화·금액", invoice.currency && invoice.totalAmount != null ? `${invoice.currency} ${invoice.totalAmount.toLocaleString()}` : invoice.currency ?? "")
+                    const currencyMatch = amountText.trim().match(/^([A-Z]{3})?\s*(.*)$/)
+                    const currency = currencyMatch?.[1] || invoice.currency || "USD"
+                    const amount = currencyMatch?.[2] ?? ""
+                    const packages = tail(value("포장 수 / 단위", invoice.packageCount && invoice.packageUnit ? `${invoice.packageCount} ${invoice.packageUnit}` : invoice.packageCount ?? invoice.packageUnit ?? ""))
+                    const packageUnit = packages.unit || "bundles"
+                    const set = (label: string, next: string) => updateDraft(invoice.documentId, label, next)
+                    const textInput = (label: string, current: string, onChange: (next: string) => void, numeric = false) => isEditing
+                      ? <Input aria-label={`${name} ${label}`} value={current} onChange={(event) => onChange(event.target.value)} className={cn("h-10 px-3 py-0", numeric && "text-right tabular-nums")} inputMode={numeric ? "decimal" : "text"} />
+                      : readOnly(current)
+                    const unitSelect = (label: string, current: string, options: string[], onChange: (next: string) => void) => isEditing ? (
+                      <Select value={current} onValueChange={(next) => onChange(next ?? "")}>
+                        <SelectTrigger size="sm" aria-label={`${name} ${label}`} className="w-full gap-1 px-3 py-0 data-[size=sm]:h-10 data-[size=sm]:text-[length:var(--text-body-6)] data-[size=sm]:leading-[var(--leading-body-6)]"><SelectValue /></SelectTrigger>
+                        <SelectContent className="z-[var(--z-popup)]">{[...new Set([current, ...options])].filter(Boolean).map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
+                      </Select>
+                    ) : readOnly(current)
+                    return (
+                      <>
+                        <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/ci:grid-cols-[200px_200px_minmax(0,1fr)] [&>div]:min-w-0">
+                          <div>{header("송장번호")}{textInput("송장번호", value("송장번호", invoice.invoiceNumber ?? ""), (next) => set("송장번호", next))}</div>
+                          <div>{header("송장일자")}{isEditing ? <DatePicker ariaLabel={`${name} 송장일자`} value={value("송장일자", invoice.invoiceDate ?? "").replaceAll(".", "-")} onValueChange={(next) => set("송장일자", next.replaceAll("-", "."))} className="w-full" /> : readOnly(value("송장일자", invoice.invoiceDate ?? ""))}</div>
+                          <div className="col-span-2 @min-[760px]/ci:col-span-1">{header("품목")}{textInput("품목", value("품목", invoice.item ?? ""), (next) => set("품목", next))}</div>
+                        </div>
+                        <div className="h-px bg-[var(--color-gray-10)]" role="separator" />
+                        <div className="grid grid-cols-2 items-start gap-3 @min-[760px]/ci:grid-cols-[minmax(0,1fr)_150px_minmax(0,1fr)_minmax(0,1fr)] [&>div]:min-w-0">
+                          <div className="col-span-2 @min-[760px]/ci:col-span-1">{header("수량", "수량 / 단위")}<div className="flex gap-2"><div className="min-w-0 flex-1">{textInput("수량", quantity.amount, (next) => set("수량", `${next} ${quantityUnit}`.trim()), true)}</div><div className="w-28 shrink-0">{unitSelect("수량 단위", quantityUnit, ["MT", "KG", "EA"], (next) => set("수량", `${quantity.amount} ${next}`.trim()))}</div></div></div>
+                          <div>{header("단가", `단가 · ${currency}/${quantityUnit}`)}{textInput("단가", price, (next) => set("단가", `${next} ${currency}/${quantityUnit}`.trim()), true)}</div>
+                          <div className="col-span-2 @min-[760px]/ci:col-span-1">{header("포장 수 / 단위")}<div className="flex gap-2"><div className="min-w-0 flex-1">{textInput("포장 수", packages.amount, (next) => set("포장 수 / 단위", `${next} ${packageUnit}`.trim()), true)}</div><div className="w-32 shrink-0">{unitSelect("포장 단위", packageUnit, ["bundles", "cartons", "pallets"], (next) => set("포장 수 / 단위", `${packages.amount} ${next}`.trim()))}</div></div></div>
+                          <div className="col-span-2 @min-[760px]/ci:col-span-1">{header("통화·금액", "통화 · 금액")}<div className="flex gap-2"><div className="w-24 shrink-0">{unitSelect("통화", currency, ["USD", "KRW", "EUR", "JPY", "CNY"], (next) => set("통화·금액", `${next} ${amount}`.trim()))}</div><div className="min-w-0 flex-1">{textInput("금액", amount, (next) => set("통화·금액", `${currency} ${next}`.trim()), true)}</div></div></div>
+                        </div>
+                      </>
+                    )
+                  })()}
                 </div>
                   <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
                     <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">연결 문서</h3><span className="text-xs text-muted-foreground">{linkedCount ? `${linkedCount}건` : "연결 필요"}</span></div>
