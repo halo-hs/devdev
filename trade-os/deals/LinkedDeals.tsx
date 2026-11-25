@@ -1,3 +1,4 @@
+import { linkedDealPrefix } from "@trade-os/lib/linkedDealStorage"
 import { useEffect, useReducer, useState } from "react"
 import { ArrowUpRight, Link2 } from "lucide-react"
 import { toast } from "sonner"
@@ -39,7 +40,7 @@ export function LinkedDeals({
 }) {
   const [open, setOpen] = useState(false)
   const [, refresh] = useReducer((version) => version + 1, 0)
-  const prefix = `trade-os:linked-deals:v1:${encodeURIComponent(workspaceId)}:`
+  const prefix = linkedDealPrefix(workspaceId)
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
       if (event.key === null || event.key.startsWith(prefix)) refresh()

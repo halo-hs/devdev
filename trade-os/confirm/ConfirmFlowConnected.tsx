@@ -1,3 +1,4 @@
+import { uploadDocumentId } from "@trade-os/inbox/uploadDocumentModel"
 import type { UploadOriginDeal } from "@trade-os/lib/uploadOriginDeal"
 import { type BankCashInput, type ReviewedField } from "@trade-os/lib/erpDocumentWorkflow"
 import { type DocumentConnection } from "@trade-os/lib/documentDealConnection"
@@ -67,7 +68,7 @@ export function DocumentReviewWorkspace({
   const isCompact = useIsMobile()
   const [requestedPage, setRequestedPage] = useState<{ page: number }>()
   const previewRef = useRef<HTMLElement>(null)
-  const documentKey = `${document.name}:${document.documentType}`
+  const documentKey = `${uploadDocumentId(document)}:${document.documentType}`
   const [previousDocument, setPreviousDocument] = useState(documentKey)
   if (previousDocument !== documentKey) {
     setPreviousDocument(documentKey)
@@ -129,7 +130,7 @@ export function DocumentReviewWorkspace({
           ) : (
             <div className="space-y-4">
               <OcrFieldReviewList
-                key={`${document.name}:${document.documentType}`}
+                key={`${uploadDocumentId(document)}:${document.documentType}`}
                 mode={step === "deal" ? "deal" : "compare"}
                 documentType={document.documentType}
                 onAutoSave={onAutoSave}
@@ -204,7 +205,7 @@ export function DocumentReviewWorkspace({
       )}
     >
       <DealConfirmPanel
-        key={document.name}
+        key={uploadDocumentId(document)}
         document={document}
         originDeal={originDeal}
         linkedDealLabel={linkedDealLabel}
