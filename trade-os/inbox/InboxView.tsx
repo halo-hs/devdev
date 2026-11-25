@@ -1,3 +1,5 @@
+import { areDealsLinked } from "@trade-os/lib/linkedDealStorage"
+import { uploadDocumentId } from "./uploadDocumentModel"
 import { Badge } from "@/components/ui/badge"
 import type { UploadOriginDeal } from "@trade-os/lib/uploadOriginDeal"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
@@ -1184,9 +1186,9 @@ function HorizontalDocumentTray({
                             ) : null}
                             {/* Portal menu so the scrolling table never clips it. */}
                             <DropdownMenu
-                              open={openMenu === document.name}
+                              open={openMenu === uploadDocumentId(document)}
                               onOpenChange={(open) =>
-                                setOpenMenu(open ? document.name : null)
+                                setOpenMenu(open ? uploadDocumentId(document) : null)
                               }
                             >
                               <DropdownMenuTrigger asChild>
@@ -1296,6 +1298,7 @@ function HorizontalDocumentTray({
 }
 
 export function InboxScreen({
+  workspaceId,
   role,
   onOpenDeal,
   originDeal,
@@ -1305,6 +1308,7 @@ export function InboxScreen({
   linkedDealsByDocument,
   onDocumentDealLinked,
 }: {
+  workspaceId: string
   role: "owner" | "admin" | "member"
   onOpenDeal: (dealId: string, focus?: "finance") => void
   originDeal?: UploadOriginDeal | null
@@ -1328,7 +1332,7 @@ export function InboxScreen({
   const dealReviewRequested = query.get("from") === "deal" && (query.has("tradeDocId") || query.has("dealId"))
   const reviewMatches = (document: RecentDocument) => dealReviewDocument
     ? document.dealDocumentId === dealReviewDocument.id
-    : document.name === initialDocumentName
+    : uploadDocumentId(document) === initialDocumentName
   const reviewCode = dealReviewDocument?.code === "CO" ? "C/O" : dealReviewDocument?.code === "IC" ? "INSURANCE_CERTIFICATE" : dealReviewDocument?.code
   const reviewEntry: RecentDocument | null = dealReviewDocument ? {
     name: dealReviewDocument.file, uploadedAt: "거래 서류", dealDocumentId: dealReviewDocument.id,
@@ -1341,14 +1345,14 @@ export function InboxScreen({
   const initialUploadDocuments: RecentDocument[] = (reviewEntry ? [reviewEntry, ...queue] : queue).map(
     (document) => {
       if (reviewEntry && document.dealDocumentId === reviewEntry.dealDocumentId) return document
-      const review = readDocumentReview(document.name)
+      const review = readDocumentReview(uploadDocumentId(document))
       document = { ...document, reviewedFields: review.fields }
       const link = review.connectionKnown || review.dealId
         ? review.dealId ? { dealId: review.dealId, dealLabel: review.dealLabel ?? review.dealId } : null
-        : linkedDealsByDocument[document.name]
+        : linkedDealsByDocument[uploadDocumentId(document)]
       if (review.connectionKnown && !link) document = { ...document, dealLabel: undefined, stage: "field", status: "거래 연결 필요", tone: "warning" }
       const opensConnectedStep =
-        initialStep === "deal" && document.name === initialDocumentName
+        initialStep === "deal" && uploadDocumentId(document) === initialDocumentName
       return link
         ? {
             ...document,
@@ -1388,7 +1392,7 @@ export function InboxScreen({
     () => initialUploadDocuments
   )
   useEffect(() => {
-    if (initialDocumentName && !dealReviewRequested && !uploadDocuments.some(document => document.name === initialDocumentName)) {
+    if (initialDocumentName && !dealReviewRequested && !uploadDocuments.some(document => uploadDocumentId(document) === initialDocumentName)) {
       onDocumentOpen?.(null)
     }
   }, [initialDocumentName, dealReviewRequested, uploadDocuments, onDocumentOpen])
@@ -1431,7 +1435,7 @@ export function InboxScreen({
     ) return
     previousUploadRoute.current = { initialDocumentName, initialStep }
     const index = uploadDocuments.findIndex(
-      (document) => document.name === initialDocumentName
+      (document) => uploadDocumentId(document) === initialDocumentName
     )
     setHasFile(index >= 0)
     if (index < 0) return
@@ -1449,13 +1453,13 @@ export function InboxScreen({
   useEffect(() => {
     const anchor = guide?.state?.anchor
     if (!anchor || anchor.stage !== "processing") return
-    const pending = uploadDocuments.find(document => document.name === anchor.documentId)
+    const pending = uploadDocuments.find(document => uploadDocumentId(document) === anchor.documentId)
     if (!pending || !["queued", "ocr"].includes(pending.stage)) return
     const timer = window.setTimeout(() => {
       const failed = /encrypted|password|fail/i.test(pending.name)
-      setUploadDocuments(current => current.map(document => document.name === pending.name ? { ...document, stage: failed ? "failed" : "field", status: failed ? "처리 실패" : "검토 대기", tone: failed ? "danger" : "warning" } : document))
-      if (!failed) guide?.record({ type: "document-created", documentId: pending.name, receipt: crypto.randomUUID() })
-      guide?.record({ type: "extraction", documentId: pending.name, stage: failed ? "failed" : "ready" })
+      setUploadDocuments(current => current.map(document => uploadDocumentId(document) === uploadDocumentId(pending) ? { ...document, stage: failed ? "failed" : "field", status: failed ? "처리 실패" : "검토 대기", tone: failed ? "danger" : "warning" } : document))
+      if (!failed) guide?.record({ type: "document-created", documentId: uploadDocumentId(pending), receipt: crypto.randomUUID() })
+      guide?.record({ type: "extraction", documentId: uploadDocumentId(pending), stage: failed ? "failed" : "ready" })
     }, 1000)
     return () => window.clearTimeout(timer)
   }, [guide, uploadDocuments])
@@ -1468,10 +1472,10 @@ export function InboxScreen({
     const current = document.reviewedFields?.[key] ?? { value: original?.value ?? "", unit: original?.unit }
     const next = { ...document, pdfReviewCompleted: false, reviewedFields: { ...document.reviewedFields, [key]: { ...current, ...patch, userEdited: true } } }
     selectedDocumentRef.current = next
-    setUploadDocuments((documents) => documents.map((item) => item.name === document.name ? next : item))
+    setUploadDocuments((documents) => documents.map((item) => uploadDocumentId(item) === uploadDocumentId(document) ? next : item))
   }
   const documentOrigin = selectedDocument.uploadOriginDeal === undefined
-    ? (initialDocumentName === selectedDocument.name ? originDeal : null)
+    ? (initialDocumentName === uploadDocumentId(selectedDocument) ? originDeal : null)
     : selectedDocument.uploadOriginDeal
   const returnDealId = dealReviewDocument?.dealId ?? documentOrigin?.id
   const currentReviewFields = resolvedReviewFields(selectedDocument)
@@ -1486,7 +1490,7 @@ export function InboxScreen({
   const eta = currentReviewFields.find((field) => field.key === "eta")?.value
   const pendingUploadDocuments = uploadDocuments
     .map((document, index) => ({ document, index }))
-    .filter(({ document }) => document.stage !== "confirmed" && (!originDeal || document.uploadOriginDeal?.id === originDeal.id || (document.uploadOriginDeal === undefined && document.name === initialDocumentName)))
+    .filter(({ document }) => document.stage !== "confirmed" && (!originDeal || document.uploadOriginDeal?.id === originDeal.id || (document.uploadOriginDeal === undefined && uploadDocumentId(document) === initialDocumentName)))
   const pendingSelectedIndex = pendingUploadDocuments.findIndex(({ index }) => index === selectedIndex)
   const isTypeUnresolved = isUploadDocumentTypeUnresolved(selectedDocument)
   const pdfReviewCompleted =
@@ -1499,7 +1503,7 @@ export function InboxScreen({
 
   const openUploadRequirement = (key?: string) => {
     setStep("compare")
-    onDocumentOpen?.(selectedDocument.name, "compare")
+    onDocumentOpen?.(uploadDocumentId(selectedDocument), "compare")
     setMobilePane("fields")
     focusDocumentRequirement(key ? `[data-upload-field="${key}"]` : '[aria-label="항목 점검"]')
   }
@@ -1523,7 +1527,7 @@ export function InboxScreen({
       } catch (error) { toast.error(error instanceof Error ? error.message : "검토 상태를 저장하지 못했습니다.") }
       return
     }
-    guide?.record({ type: "reviewed", documentId: selectedDocument.name, receipt: crypto.randomUUID() })
+    guide?.record({ type: "reviewed", documentId: uploadDocumentId(selectedDocument), receipt: crypto.randomUUID() })
     setUploadDocuments((current) =>
       current.map((document, index) =>
         index === selectedIndex
@@ -1537,13 +1541,13 @@ export function InboxScreen({
       )
     )
     setStep("deal")
-    onDocumentOpen?.(selectedDocument.name, "deal")
+    onDocumentOpen?.(uploadDocumentId(selectedDocument), "deal")
     setMobilePane("fields")
     toast.success("연결할 거래를 선택해 주세요.")
   }
   const handleDealLink = async (dealId: string, dealLabel: string, bankCash?: Omit<BankCashInput, "sourceDocumentId" | "idempotencyKey">, evidence?: string[]) => {
     if (!tradeSeatAssigned || linkingDocument || isDealBlocked) return false
-    const documentName = selectedDocument.name
+    const documentName = uploadDocumentId(selectedDocument)
     setLinkingDocument(true)
     try {
       const result = await prototypeBackend.tradeDocuments.confirmTransition({
@@ -1554,7 +1558,7 @@ export function InboxScreen({
       if (!result.ok) { toast.error(result.error); return false }
       onDocumentDealLinked(documentName, { dealId, dealLabel })
       guide?.record({ type: "linked", documentId: documentName, dealId, receipt: crypto.randomUUID() })
-      setUploadDocuments((current) => current.map((document) => document.name === documentName
+      setUploadDocuments((current) => current.map((document) => uploadDocumentId(document) === documentName
         ? { ...document, dealLabel, stage: "confirmed", status: "거래 연결 완료", tone: "success" }
         : document))
       if (bankCash) {
@@ -1582,8 +1586,8 @@ export function InboxScreen({
     }
   }
   const handleConnectionChanged = (connection: DocumentConnection) => {
-    onDocumentDealLinked(selectedDocument.name, connection.link)
-    setUploadDocuments(current => current.map(document => document.name === selectedDocument.name
+    onDocumentDealLinked(uploadDocumentId(selectedDocument), connection.link)
+    setUploadDocuments(current => current.map(document => uploadDocumentId(document) === uploadDocumentId(selectedDocument)
       ? { ...document, dealLabel: connection.link?.dealLabel, stage: connection.link ? "confirmed" : "field", status: connection.link ? "거래 연결 완료" : "거래 연결 필요", tone: connection.link ? "success" : "warning", pdfReviewCompleted: true }
       : document))
   }
@@ -1609,7 +1613,7 @@ export function InboxScreen({
     setSelectedIndex(index)
     setStep(nextStep)
     setMobilePane("fields")
-    onDocumentOpen?.(document?.name ?? null, nextStep)
+    onDocumentOpen?.(document ? uploadDocumentId(document) : null, nextStep)
   }
   const handleAutoSave = async (
     phase: "pending" | "commit" | "retry" = "commit"
@@ -1631,12 +1635,12 @@ export function InboxScreen({
     const [result] = await Promise.all([
       prototypeBackend.tradeDocuments.saveFields({
         id: dealReviewDocument && savingDocument.dealDocumentId === dealReviewDocument.id
-          ? `${dealReviewDocument.id}:${dealReviewDocument.revision}` : savingDocument.name,
+          ? `${dealReviewDocument.id}:${dealReviewDocument.revision}` : uploadDocumentId(savingDocument),
         fields: Object.fromEntries(resolvedReviewFields(savingDocument).map((field) => [field.key, { value: field.value, unit: field.unit, userEdited: field.userEdited ?? false }])) ,
       }),
       new Promise<void>((resolve) => window.setTimeout(resolve, 800)),
     ])
-    if (version !== autoSaveVersionRef.current || savingDocument.name !== selectedDocumentRef.current.name) return
+    if (version !== autoSaveVersionRef.current || uploadDocumentId(savingDocument) !== uploadDocumentId(selectedDocumentRef.current)) return
     if (!result.ok) {
       setAutoSaving(false)
       setAutoSaveError(true)
@@ -1656,10 +1660,10 @@ export function InboxScreen({
     const uploadOrigin = uploadOriginRef.current
     setUploadDocuments((current) => {
       const remainingDocuments = current.filter(
-        (document) => !canceledNames.has(document.name)
+        (document) => !canceledNames.has(uploadDocumentId(document))
       )
       const previousSelectionIndex = remainingDocuments.findIndex(
-        (document) => document.name === uploadOrigin.selectedDocumentName
+        (document) => uploadDocumentId(document) === uploadOrigin.selectedDocumentName
       )
       setSelectedIndex(
         completedCount > 0
@@ -1701,41 +1705,42 @@ export function InboxScreen({
     const unsupported = files.filter(
       (file) => !file.name.toLowerCase().endsWith(".pdf")
     )
-    const existingNames = new Set(
-      uploadDocuments.map((document) => document.name.toLowerCase())
-    )
-    const duplicates = files.filter((file) =>
-      existingNames.has(file.name.toLowerCase())
-    )
-    const firstDuplicate = duplicates[0]
-    if (firstDuplicate) {
-      setFileTrayOpen(true)
-      const existingDocument = uploadDocuments.find(
-        (document) =>
-          document.name.toLowerCase() === firstDuplicate.name.toLowerCase()
-      )
-      setDuplicateUploadNotice({
-        fileName: existingDocument?.name ?? firstDuplicate.name,
-        dealLabel: existingDocument?.dealLabel,
-      })
-    } else {
-      setDuplicateUploadNotice(null)
-    }
-    const batchNames = new Set(existingNames)
-    const contentHashes = new Map(uploadDocuments.filter((document) => document.contentHash).map((document) => [document.contentHash, document]))
+    // Only duplicates belonging to a directly linked counterpart qualify.
+    // A second match in this deal or outside the pair must still block the upload.
+    const blockingDocuments = uploadDocuments.filter(document => {
+      if (!originDeal || (document.uploadWorkspaceId && document.uploadWorkspaceId !== workspaceId)) return true
+      const id = uploadDocumentId(document)
+      const review = readDocumentReview(id)
+      const ownerId = review.connectionKnown ? review.dealId : review.dealId
+        ?? linkedDealsByDocument[id]?.dealId ?? document.uploadOriginDeal?.id
+      return !ownerId || !areDealsLinked(workspaceId, originDeal.id, ownerId)
+    })
+    const filename = (value: string) => value.trim().toLowerCase()
+    const existingByName = new Map(blockingDocuments.map(doc => [filename(doc.name), doc]))
+    const contentHashes = new Map(blockingDocuments.filter(doc => doc.contentHash).map(doc => [doc.contentHash, doc]))
+    const batchNames = new Set<string>()
+    const duplicates: File[] = []
+    setDuplicateUploadNotice(null)
     const hashesByName = new Map<string, string>()
     const validFiles: File[] = []
     uploadPreparingRef.current = true
     try {
       for (const file of files) {
-        const name = file.name.toLowerCase()
-        if (file.size === 0 || file.size > TRADE_DOCUMENT_MAX_UPLOAD_BYTES || !name.endsWith(".pdf") || batchNames.has(name)) continue
+        const name = filename(file.name)
+        if (file.size === 0 || file.size > TRADE_DOCUMENT_MAX_UPLOAD_BYTES || !name.endsWith(".pdf")) continue
         const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer())
         const hash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("")
         const duplicate = contentHashes.get(hash)
-        if (duplicate || Array.from(hashesByName.values()).includes(hash)) {
+        const sameContent = validFiles.find(item => hashesByName.get(item.name) === hash)
+        const sameName = existingByName.get(name)
+        if (duplicate || sameContent || sameName || batchNames.has(name)) {
+          duplicates.push(file)
           setFileTrayOpen(true)
-          setDuplicateUploadNotice({ fileName: duplicate?.name ?? validFiles.find((item) => hashesByName.get(item.name) === hash)?.name ?? file.name, dealLabel: duplicate?.dealLabel, kind: "content" })
+          setDuplicateUploadNotice({
+            fileName: duplicate?.name ?? sameContent?.name ?? sameName?.name ?? file.name,
+            dealLabel: (duplicate ?? sameName)?.dealLabel,
+            kind: duplicate || sameContent ? "content" : "filename",
+          })
           continue
         }
         batchNames.add(name)
@@ -1768,6 +1773,8 @@ export function InboxScreen({
 
     const pendingDocuments: RecentDocument[] = validFiles.map((file) => ({
       uploadOriginDeal: originDeal ?? (hasFile ? documentOrigin : null) ?? null,
+      uploadId: uploadDocuments.some(doc => filename(doc.name) === filename(file.name)) ? crypto.randomUUID() : undefined,
+      uploadWorkspaceId: workspaceId,
       name: file.name,
       uploadedAt: new Intl.DateTimeFormat("ko-KR", {
         year: "numeric",
@@ -1789,17 +1796,17 @@ export function InboxScreen({
     }))
     uploadOriginRef.current = {
       hasFile,
-      selectedDocumentName: selectedDocument?.name ?? null,
+      selectedDocumentName: selectedDocument ? uploadDocumentId(selectedDocument) : null,
     }
     activeUploadDocumentNamesRef.current = pendingDocuments.map(
-      (document) => document.name
+      (document) => uploadDocumentId(document)
     )
     activeUploadCompletedRef.current = 0
-    guide?.record({ type: "upload-started", documentId: pendingDocuments[0].name })
+    guide?.record({ type: "upload-started", documentId: uploadDocumentId(pendingDocuments[0]) })
     setUploadDocuments((current) => [...pendingDocuments, ...current])
     setHasFile(true)
     setSelectedIndex(0)
-    onDocumentOpen?.(pendingDocuments[0]?.name ?? null, "compare")
+    onDocumentOpen?.(uploadDocumentId(pendingDocuments[0]), "compare")
     setStep("compare")
     setUploadProgress({ completed: 0, total: validFiles.length })
     if (excludedCount > 0) {
@@ -1814,13 +1821,14 @@ export function InboxScreen({
     uploadTimerRef.current = window.setInterval(() => {
       const currentFile = validFiles[completed]
       if (!currentFile) return
+      const currentId = uploadDocumentId(pendingDocuments[completed])
       const failed = /encrypted|password|fail/i.test(currentFile.name)
-      if (!failed) guide?.record({ type: "document-created", documentId: currentFile.name, receipt: crypto.randomUUID() })
-      guide?.record({ type: "extraction", documentId: currentFile.name, stage: failed ? "failed" : "ready" })
+      if (!failed) guide?.record({ type: "document-created", documentId: currentId, receipt: crypto.randomUUID() })
+      guide?.record({ type: "extraction", documentId: currentId, stage: failed ? "failed" : "ready" })
       if (failed) failedCount += 1
       setUploadDocuments((current) =>
         current.map((document) =>
-          document.name === currentFile.name
+          uploadDocumentId(document) === currentId
             ? {
                 ...document,
                 status: failed
@@ -1863,15 +1871,15 @@ export function InboxScreen({
   const rereadingDocuments = useRef(new Set<string>())
   const retryDocument = async (index: number) => {
     const document = uploadDocuments[index]
-    if (!document || isUploadDocumentTypeUnresolved(document) || (document.stage !== "failed" && !document.rereadAfterTypeSelection) || (document.retryCount ?? 0) >= 3 || rereadingDocuments.current.has(document.name)) return
-    const name = document.name
+    if (!document || isUploadDocumentTypeUnresolved(document) || (document.stage !== "failed" && !document.rereadAfterTypeSelection) || (document.retryCount ?? 0) >= 3 || rereadingDocuments.current.has(uploadDocumentId(document))) return
+    const name = uploadDocumentId(document)
     rereadingDocuments.current.add(name)
-    setUploadDocuments((current) => current.map((item) => item.name === name
+    setUploadDocuments((current) => current.map((item) => uploadDocumentId(item) === name
       ? { ...item, retryCount: (item.retryCount ?? 0) + 1, stage: "ocr", status: "분석 중...", tone: "blue" } : item))
     const result = await prototypeBackend.tradeDocuments.retry({ id: name, documentType: document.documentType }).catch(() => ({ ok: false }))
     rereadingDocuments.current.delete(name)
-    const failed = !result.ok || /encrypted|password|fail/i.test(name)
-    setUploadDocuments((current) => current.map((item) => item.name === name
+    const failed = !result.ok || /encrypted|password|fail/i.test(document.name)
+    setUploadDocuments((current) => current.map((item) => uploadDocumentId(item) === name
       ? { ...item, rereadAfterTypeSelection: false, stage: failed ? "failed" : "field", status: failed ? "처리 실패 · 파일 확인 필요" : "검토 대기", tone: failed ? "danger" : "warning" } : item))
     if (!failed) guide?.record({ type: "document-created", documentId: name, receipt: crypto.randomUUID() })
     guide?.record({ type: "extraction", documentId: name, stage: failed ? "failed" : "ready" })
@@ -1895,15 +1903,15 @@ export function InboxScreen({
       const next = neighbors.find(entry => entry.index > index) ?? neighbors.at(-1)
       setSelectedIndex(next ? next.index - Number(next.index > index) : 0)
       setHasFile(Boolean(next))
-      onDocumentOpen?.(next?.document.name ?? null, "compare")
+      onDocumentOpen?.(next ? uploadDocumentId(next.document) : null, "compare")
     } else if (index < selectedIndex) {
       setSelectedIndex(selectedIndex - 1)
     }
-    setUploadDocuments(current => current.filter(document => document.name !== deletedName))
+    setUploadDocuments(current => current.filter((_, rowIndex) => rowIndex !== index))
     if (deletedName) toast.success(`${deletedName} 파일을 삭제했습니다.`)
   }
   const handleDocumentTypeChange = (documentType: UploadDocumentType) => {
-    if (rereadingDocuments.current.has(selectedDocument.name) || (documentType === selectedDocument.documentType && !isUploadDocumentTypeUnresolved(selectedDocument))) return
+    if (rereadingDocuments.current.has(uploadDocumentId(selectedDocument)) || (documentType === selectedDocument.documentType && !isUploadDocumentTypeUnresolved(selectedDocument))) return
     setUploadDocuments((current) =>
       current.map((document, index) =>
         index === selectedIndex
@@ -2040,7 +2048,7 @@ export function InboxScreen({
               size="sm"
               onClick={() => {
                 setStep("compare")
-                onDocumentOpen?.(selectedDocument.name, "compare")
+                onDocumentOpen?.(uploadDocumentId(selectedDocument), "compare")
                 setMobilePane("fields")
               }}
             >

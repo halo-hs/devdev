@@ -126,6 +126,8 @@ export type GeneratedDocumentOpenOptions = {
 }
 export type UploadDetailStep = "compare" | "deal"
 export type RecentDocument = {
+  uploadId?: string
+  uploadWorkspaceId?: string
   uploadOriginDeal?: UploadOriginDeal | null
   name: string
   uploadedAt: string
@@ -1076,6 +1078,7 @@ export function App() {
                   ) : screen === "inbox" ? (
                     <InboxScreen
                       role={erpHomeRole}
+                      workspaceId={activeWorkspace.id}
                       originDeal={uploadOriginDeal}
                       initialDocumentName={erpRoute?.params.documentName}
                       initialStep={

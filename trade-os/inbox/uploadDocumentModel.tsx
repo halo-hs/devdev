@@ -315,3 +315,8 @@ export function reviewFieldsForDocument(
 
 export const UPLOAD_DOCUMENT_DEAL_LINKS_STORAGE_KEY =
   "ecoya-prototype-upload-document-deal-links"
+
+// Older uploads use their unique filename as the review and routing key.
+export function uploadDocumentId(document: RecentDocument): string {
+  return document.uploadId ?? document.name
+}

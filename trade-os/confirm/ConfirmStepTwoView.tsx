@@ -1,3 +1,4 @@
+import { uploadDocumentId } from "@trade-os/inbox/uploadDocumentModel"
 import type { UploadOriginDeal } from "@trade-os/lib/uploadOriginDeal"
 import { type DocumentConnection, type DocumentDealLink, type CandidateEvidence } from "@trade-os/lib/documentDealConnection"
 import { type BankCashInput, readDocumentReview, eligibleBankSchedules, currentBankSchedules, bankCashValidation } from "@trade-os/lib/erpDocumentWorkflow"
@@ -83,7 +84,8 @@ export function DealConfirmPanel({
   const recommendedDealId = loadedCandidates.find(candidate => candidate.recommended)?.id ?? null
   const activeLink = connection?.link ?? null
   const connectionReady = Boolean(connection) && !connectionError
-  const connectionRequest = JSON.stringify([document.name, connectionAttempt, linkedDealLabel])
+  const documentId = uploadDocumentId(document)
+  const connectionRequest = JSON.stringify([documentId, connectionAttempt, linkedDealLabel])
   const [previousConnectionRequest, setPreviousConnectionRequest] = useState(connectionRequest)
   if (previousConnectionRequest !== connectionRequest) {
     setPreviousConnectionRequest(connectionRequest)
@@ -91,8 +93,8 @@ export function DealConfirmPanel({
   }
   useEffect(() => {
     let active = true
-    const legacy = readUploadDocumentDealLinks()[document.name]
-    prototypeBackend.tradeDocuments.getConnection(document.name, legacy)
+    const legacy = readUploadDocumentDealLinks()[documentId]
+    prototypeBackend.tradeDocuments.getConnection(documentId, legacy)
       .then(value => {
         if (!active) return
         if (linkedDealLabel && !value.link && !value.connectionKnown) throw new Error("현재 연결의 거래 정보를 확인하지 못했습니다.")
@@ -106,11 +108,11 @@ export function DealConfirmPanel({
       })
       .catch(error => { if (active) setConnectionError(error instanceof Error ? error.message : "현재 연결 정보를 불러오지 못했습니다.") })
     return () => { active = false }
-  }, [document.name, connectionAttempt, linkedDealLabel])
+  }, [documentId, connectionAttempt, linkedDealLabel])
   const [pendingCreatedDeal] = useState(() => {
-    const review = readDocumentReview(document.name)
+    const review = readDocumentReview(documentId)
     return !originDeal && review.status !== "committed" && !review.connectionHistory?.length
-      ? prototypeBackend.deals.listCreated().find(deal => deal.sourceDocumentId === document.name) ?? null : null
+      ? prototypeBackend.deals.listCreated().find(deal => deal.sourceDocumentId === documentId) ?? null : null
   })
   const [selectedDeal, setSelectedDealId] = useState<string | null>(null)
   const fixedOrigin = activeLink ? null : originDeal
@@ -130,7 +132,7 @@ export function DealConfirmPanel({
   const [candidateLoadState, setCandidateLoadState] = useState<
     "loading" | "ready" | "error"
   >("loading")
-  const candidateRequest = JSON.stringify([document.name, readCounterparty, readAmountField?.value, readCurrency, candidateAttempt])
+  const candidateRequest = JSON.stringify([documentId, readCounterparty, readAmountField?.value, readCurrency, candidateAttempt])
   const [previousCandidateRequest, setPreviousCandidateRequest] = useState(candidateRequest)
   if (previousCandidateRequest !== candidateRequest) {
     setPreviousCandidateRequest(candidateRequest)
@@ -150,7 +152,7 @@ export function DealConfirmPanel({
       .then(rows => { if (active) { setLoadedCandidates(rows); setCandidateLoadState("ready") } })
       .catch(() => { if (active) setCandidateLoadState("error") })
     return () => { active = false }
-  }, [document.name, readCounterparty, readAmountField?.value, readCurrency, candidateAttempt, originDeal])
+  }, [documentId, readCounterparty, readAmountField?.value, readCurrency, candidateAttempt, originDeal])
   const [creatingDeal, setCreatingDeal] = useState(false)
   const creatingRef = useRef(false)
   const [createdDeal, setCreatedDeal] = useState<DocumentDealLink | null>(() => pendingCreatedDeal ? { dealId: pendingCreatedDeal.id, dealLabel: `${pendingCreatedDeal.id} · ${pendingCreatedDeal.counterparty}` } : null)
@@ -222,7 +224,7 @@ export function DealConfirmPanel({
       ...(newDealDirection ? { direction: newDealDirection } : {}),
       amount: normalizeDecimalInput(readAmountField?.value ?? "0"),
       currency: readCurrency || "USD",
-      sourceDocumentId: document.name,
+      sourceDocumentId: documentId,
     })
     if (!result.ok) {
       toast.error(result.error)
@@ -844,7 +846,7 @@ export function DealConfirmPanel({
           </div>
         </ScrollArea>
       </div>
-      {tradeSeatAssigned && changeDialog && connection ? <DocumentConnectionChangeDialog documentId={document.name} connection={connection} target={changeDialog.target} evidence={changeDialog.evidence} open
+      {tradeSeatAssigned && changeDialog && connection ? <DocumentConnectionChangeDialog documentId={documentId} connection={connection} target={changeDialog.target} evidence={changeDialog.evidence} open
         onClose={() => setChangeDialog(null)}
         onApplied={accepted => { setConnection(accepted); setChangingConnection(false); setNewDealFormOpen(false); setSelectedDealId(null); onConnectionChanged?.(accepted); toast.success(accepted.link ? "거래 연결을 변경했습니다." : "거래 연결을 해제했습니다.") }} /> : null}
     </>
