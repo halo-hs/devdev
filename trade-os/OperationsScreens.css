@@ -228,6 +228,7 @@
 }
 /* Phone width: keep the identifying column, one key value and the status/action. */
 @container (max-width: 479px) {
+  .ops-screen [data-deal-table] :is([data-slot="table-head"], [data-slot="table-cell"]:not([colspan])) { padding-inline: 6px !important; }
   .ops-screen [data-deal-table="shipments"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(2)) { display: none; }
   .ops-screen [data-deal-table="packing"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(3)) { display: none; }
   .ops-screen [data-deal-table="invoices"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(7)) { display: none; }

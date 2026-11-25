@@ -2164,15 +2164,10 @@ function PackingListCard({ dealId, view, canWrite, onUpload, onSetContainers }: 
                         <div className="sticky left-0 w-[100cqw] p-3">
                           {/* Just one block per container, stacked, so its fields stay together when they wrap. */}
                           <div className="flex flex-col gap-3 whitespace-normal">
-                              {/* Packing list title row, same as the CI's 송장 정보: title · note, 원문 보기, delete at the far right. */}
+                              {/* Packing list title row, same as the CI's 송장 정보: title · note, delete at the far right. */}
                               <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
                                 <div className="flex items-center gap-2">
                                   <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">포장명세서<span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">{list.manual ? "직접 입력 · 문서 없음" : document.fileName}</span></h5>
-                                  {document.fileName ? (
-                                    <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${name} 문서와 보기`} title={`${name} 문서와 보기`} onClick={() => openPackingList(document.fileName)}>
-                                      <FileSearch aria-hidden="true" className="size-4" />
-                                    </Button>
-                                  ) : null}
                                   {canWrite ? <ConfirmDeleteButton label="포장명세서" description={list.manual ? "직접 추가한 포장명세서와 컨테이너 정보, 연결을 지웁니다." : `${name}을(를) 이 거래에서 뺍니다. 원본 문서는 문서함에 남습니다.`} onConfirm={() => { if (list.manual) removeDealManualPackingList(dealId, document.documentId); else removeDealDocument(dealId, document.documentId) }} /> : null}
                                 </div>
                                 {list.manual ? (
@@ -2422,15 +2417,7 @@ function CommercialInvoiceTransactionCard({
                   {/* Same layout as the item card: title row, row 1 (identity), separator, row 2 (quantities with unit selects). */}
                   <div className="flex items-center gap-2">
                     <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">송장 정보<span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">{invoice.fileName ? `${invoice.fileName} · ${invoice.uploadedAt}` : "직접 입력 · 문서 없음"}</span></h5>
-                    {invoice.onOpen ? (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${invoice.invoiceNumber || invoice.fileName} 문서와 보기`} onClick={invoice.onOpen}><FileSearch aria-hidden="true" className="size-4" /></Button>
-                        </TooltipTrigger>
-                        <TooltipContent>문서와 보기</TooltipContent>
-                      </Tooltip>
-                    ) : null}
-                    {/* Delete sits at the far right, like the item card's trash. */}
+                    {/* Only delete in the title row, like the item card; 원문 보기 stays on the table row. */}
                     {canWrite ? <ConfirmDeleteButton label="CI" description={invoice.fileName ? `${invoice.invoiceNumber || invoice.fileName}을(를) 이 거래에서 뺍니다. 원본 문서는 문서함에 남습니다.` : "직접 추가한 CI와 입력한 정보, 연결을 지웁니다."} onConfirm={() => { setRelationState(invoice.fileName ? removeDealDocument(dealId, invoice.documentId) : removeDealManualInvoice(dealId, invoice.documentId)); setExpanded((current) => { const next = new Set(current); next.delete(invoice.documentId); return next }) }} /> : null}
                   </div>
                   {(() => {

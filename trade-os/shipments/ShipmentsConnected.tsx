@@ -214,7 +214,7 @@ export function ConfirmDeleteButton({ label, description, onConfirm }: { label: 
 // save button — and lists the documents linked to it. Containers are edited
 // in the packing list card.
 const inlineStatuses: ShipmentStatus[] = ["unknown", "booked", "loaded", "departed", "arrived", "delivered"];
-function ShipmentInlineEditor({ shipment, copy, canWrite, onSave, onDelete, documentAction, linkedDocuments }: { shipment: Shipment; copy: ShipmentsCopy; canWrite: boolean; onSave: (patch: Omit<ShipmentConfirmation, "expected_edit_token">) => Promise<void>; onDelete?: () => Promise<void>; documentAction?: ReactNode; linkedDocuments?: ReactNode }) {
+function ShipmentInlineEditor({ shipment, copy, canWrite, onSave, onDelete, hasDocument = false, linkedDocuments }: { shipment: Shipment; copy: ShipmentsCopy; canWrite: boolean; onSave: (patch: Omit<ShipmentConfirmation, "expected_edit_token">) => Promise<void>; onDelete?: () => Promise<void>; hasDocument?: boolean; linkedDocuments?: ReactNode }) {
   const c = copy.confirmation;
   const [drafts, setDrafts] = useState<Partial<Record<InlineShipmentField, string>>>({});
   const [error, setError] = useState<string | null>(null);
@@ -237,11 +237,10 @@ function ShipmentInlineEditor({ shipment, copy, canWrite, onSave, onDelete, docu
   return (
     <div className="flex flex-col gap-3 text-left whitespace-normal" onClick={(event) => event.stopPropagation()}>
       <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
-        {/* Same title row as the CI's 송장 정보: title · note, 원문 보기, then delete at the far right. */}
+        {/* Same title row as the CI's 송장 정보: title · note, then delete at the far right. */}
         <div className="flex items-center gap-2">
-          <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">선적 정보{shipment.manual_entry || !documentAction ? <span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">직접 입력 · 문서 없음</span> : null}</h5>
-          {documentAction}
-          {/* Delete sits at the far right, like the item card's trash. */}
+          <h5 className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 text-base leading-6 font-bold">선적 정보{shipment.manual_entry || !hasDocument ? <span className="min-w-0 truncate text-xs font-normal text-[var(--color-gray-5)]">직접 입력 · 문서 없음</span> : null}</h5>
+          {/* Only delete in the title row, like the item card; 원문 보기 stays on the table row. */}
           {writable && onDelete ? <ConfirmDeleteButton label="선적" description={shipment.manual_entry ? "직접 추가한 선적과 입력한 정보를 지웁니다. 연결한 문서는 남습니다." : "이 선적을 거래에서 뺍니다. B/L 원본 문서는 문서함에 남습니다."} onConfirm={onDelete} /> : null}
         </div>
         <div className="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -857,7 +856,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                   {rowOpen ? (
                     <HostTableRow className="hover:[&>td]:bg-transparent">
                       <HostTableCell colSpan={8} className="!p-0"><div className="sticky left-0 w-[100cqw] p-3">
-                        <ShipmentInlineEditor shipment={ship} copy={copy} canWrite={canRefresh} documentAction={renderDocumentAction?.(ship, rowIndex)} linkedDocuments={renderLinkedDocuments?.(ship, rowIndex)} onDelete={async () => {
+                        <ShipmentInlineEditor shipment={ship} copy={copy} canWrite={canRefresh} hasDocument={Boolean(renderDocumentAction?.(ship, rowIndex))} linkedDocuments={renderLinkedDocuments?.(ship, rowIndex)} onDelete={async () => {
                           await deleteShipment(getIdToken, ship);
                           setState(current => current.status === "ready" ? { ...current, shipments: current.shipments.filter(row => row.id !== ship.id) } : current);
                         }} onSave={async (patch) => {
