@@ -11,7 +11,7 @@ import { ApiError } from '../api/client'
 // Sanitized development seed contracts, used only by the explicitly labelled demo.
 const responses = captured as Record<string, unknown>
 const copy = <T,>(value: T): T => structuredClone(value)
-const storageKey = 'ecoya:public-demo:shipment-overrides:v1'
+const storageKey = 'ecoya:public-demo:shipment-overrides:v2'
 const monthClosesStorageKey = 'ecoya:public-demo:month-closes:v1'
 let monthClosesFallback: MonthClose[] | undefined
 const demoUser = '940ff121-2c36-58fa-9c13-05870353ce22'
@@ -29,7 +29,25 @@ const shipmentsPerDeal = [4, 3, 4, 3, 4, 3, 4, 3]
 const shipmentDeals = [primary, ...hostDeals.filter(d => d.deal_id !== primary.deal_id)]
   .slice(0, shipmentsPerDeal.length)
   .flatMap((deal, dealIndex) => Array.from({ length: shipmentsPerDeal[dealIndex] }, () => deal))
+// The primary deal's first three lots match its B/L documents (deal detail
+// links shipment rows to B/L, CI and packing list by B/L number). Its fourth
+// lot stays without documents to show the unlinked state.
+const primaryLots = [
+  { bl_number: 'HMM-014W-2607', container_number: 'HMMU1234567' },
+  { bl_number: 'HMM-015W-2607', container_number: 'HMMU7654321' },
+  { bl_number: 'HMM-016W-2607', container_number: 'HMMU9876543' },
+]
 const seedShipments: Shipment[] = shipmentDeals.map((deal, index) => {
+  const lot = deal.deal_id === primary.deal_id ? primaryLots[index] : undefined
+  if (lot) return {
+    id: `5e000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
+    deal_id: deal.deal_id, deal_title: deal.title, deal_counterparty: deal.counterparty_name,
+    ...lot, container_count: index === 1 ? 1 : 2,
+    carrier: 'HMM', vessel: 'HMM Green', pol: 'Melbourne', pod: 'Busan',
+    etd: date(-10), eta: date(index === 0 ? -2 : 2),
+    edit_token: `shipment-${index}-initial`,
+    status: 'departed', source: 'manual',
+  }
   return {
     id: `5e000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
     deal_id: deal.deal_id, deal_title: deal.title, deal_counterparty: deal.counterparty_name,
@@ -41,10 +59,20 @@ const seedShipments: Shipment[] = shipmentDeals.map((deal, index) => {
     status: index % 5 === 4 ? 'arrived' : 'departed', source: 'manual',
   }
 })
+// Shipments added by hand on a deal (prototype only: the platform API has no create route yet).
+const createdKey = 'ecoya:public-demo:shipment-created:v1'
+function createdShipments(): Shipment[] {
+  try { const rows: unknown = JSON.parse(localStorage.getItem(createdKey) || '[]'); return Array.isArray(rows) ? rows as Shipment[] : [] } catch { return [] }
+}
+const deletedKey = 'ecoya:public-demo:shipment-deleted:v1'
+function deletedShipments(): string[] {
+  try { const ids: unknown = JSON.parse(localStorage.getItem(deletedKey) || '[]'); return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [] } catch { return [] }
+}
 function shipments() {
   let overrides: Record<string, Partial<Shipment>> = {}
   try { overrides = JSON.parse(localStorage.getItem(storageKey) || '{}') } catch { /* A corrupt demo cache starts fresh. */ }
-  return seedShipments.map(row => ({ ...row, ...overrides[row.id] }))
+  const deleted = new Set(deletedShipments())
+  return [...seedShipments, ...createdShipments()].filter(row => !deleted.has(row.id)).map(row => ({ ...row, ...overrides[row.id] }))
 }
 function monthCloses(): MonthClose[] {
   const withSnapshot = (rows: MonthClose[]) => rows.map(row =>
@@ -151,6 +179,22 @@ export async function demoRequest<T>(rawPath: string, init?: RequestInit): Promi
       const reopened: MonthClose = { ...existing, reopened: true, reopened_at: new Date().toISOString(), reopened_by: demoUser, reopen_reason: reason.trim() }
       saveMonthCloses(rows.map(row => row.id === existing.id ? reopened : row))
       value = reopened
+    } else if (method === 'POST' && path === '/trade/shipments') {
+      const { deal_id } = requestBody<{ deal_id: string }>(init)
+      const deal = hostDeals.find(d => d.deal_id === deal_id)
+      if (!deal) throw new ApiError({ status: 404, code: 'TRADE_DEAL_NOT_FOUND', message: '거래를 찾을 수 없습니다.' })
+      const created: Shipment = {
+        id: crypto.randomUUID(), deal_id: deal.deal_id, deal_title: deal.title, deal_counterparty: deal.counterparty_name,
+        bl_number: null, container_number: null, carrier: null, vessel: null, pol: null, pod: null,
+        etd: null, eta: null, edit_token: crypto.randomUUID(), status: 'booked', source: 'manual', manual_entry: true,
+      }
+      localStorage.setItem(createdKey, JSON.stringify([...createdShipments(), created]))
+      value = { shipment: created }
+    } else if (method === 'DELETE' && /^\/trade\/shipments\/[^/]+$/.test(path)) {
+      const id = path.split('/').pop() ?? ''
+      if (createdShipments().some(row => row.id === id)) localStorage.setItem(createdKey, JSON.stringify(createdShipments().filter(row => row.id !== id)))
+      else localStorage.setItem(deletedKey, JSON.stringify([...new Set([...deletedShipments(), id])]))
+      value = { ok: true }
     } else if (method === 'PATCH' && confirmationMatch) {
       const current = shipments().find(row => row.id === confirmationMatch[1])
       if (!current) throw new ApiError({status:404, code:'TRADE_SHIPMENT_NOT_FOUND', message:'선적을 찾을 수 없습니다.'})

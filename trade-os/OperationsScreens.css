@@ -202,8 +202,37 @@
 .ops-screen .ops-shipment-table { min-width: 1040px; table-layout: fixed; }
 .ops-screen .ops-shipment-table [data-slot="table-cell"] { white-space: normal; overflow-wrap: anywhere; padding-block: 9px; } /* Figma 7872:184996: 64px rows with two 15/22 lines. */
 .ops-screen .ops-shipment-table tbody tr:last-child td { border-bottom: 0; }
-/* Expanded deal rows pin to the visible table width (w-[100cqw]) instead of the 880px table. */
-.ops-screen .ops-shipment-group > [data-slot="table-container"] { container-type: inline-size; }
+/* Deal detail tables (items, CI, shipments, packing lists, customs) share this
+   table style. Opened rows pin to the visible width (w-[100cqw]). */
+.ops-screen [data-slot="table-container"]:has(> .ops-shipment-table) { container-type: inline-size; border-radius: 0; box-shadow: none; }
+.ops-screen .ops-shipment-table :is([data-slot="table-head"], [data-slot="table-cell"]):first-child { padding-left: 20px; }
+.ops-screen .ops-shipment-table :is([data-slot="table-head"], [data-slot="table-cell"]):last-child { padding-right: 20px; }
+/* Deal detail tables follow the browser width: no minimum width (columns
+   shrink and wrap), and when the table gets narrow the secondary columns
+   hide — their values show when the row is opened. Opened-row cells span
+   all columns from the first cell, so hiding later cells never hides them. */
+.ops-screen .ops-shipment-table[data-deal-table] { min-width: 0; }
+.ops-screen :is([data-deal-table="shipments"], [data-deal-table="packing"], [data-deal-table="invoices"]) col:last-child { width: 64px !important; }
+@container (max-width: 759px) {
+  .ops-screen .ops-shipment-table[data-deal-table] { table-layout: auto; }
+  .ops-screen [data-deal-table] col:last-child { width: auto !important; }
+  .ops-screen [data-deal-table] :is([data-slot="table-head"], [data-slot="table-cell"]:not([colspan])) { padding-inline: 8px !important; white-space: normal; }
+  .ops-screen [data-deal-table] :is([data-slot="table-head"], [data-slot="table-cell"]:not([colspan])) * { white-space: normal; }
+  /* Wrap between words only: identifiers (B/L, container, invoice numbers) stay whole. */
+  .ops-screen [data-deal-table] [data-slot="table-cell"]:not([colspan]) { overflow-wrap: normal; word-break: keep-all; }
+  .ops-screen [data-deal-table="shipments"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(3), :nth-child(5), :nth-child(7)) { display: none; }
+  .ops-screen [data-deal-table="packing"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(2), :nth-child(4), :nth-child(7)) { display: none; }
+  .ops-screen [data-deal-table="invoices"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(2), :nth-child(3), :nth-child(4), :nth-child(5)) { display: none; }
+  .ops-screen [data-deal-table="items"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(3), :nth-child(5), :nth-child(6), :nth-child(7)) { display: none; }
+  .ops-screen [data-deal-table="customs"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(3), :nth-child(4)) { display: none; }
+}
+/* Phone width: keep the identifying column, one key value and the status/action. */
+@container (max-width: 479px) {
+  .ops-screen [data-deal-table] :is([data-slot="table-head"], [data-slot="table-cell"]:not([colspan])) { padding-inline: 6px !important; }
+  .ops-screen [data-deal-table="shipments"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(2)) { display: none; }
+  .ops-screen [data-deal-table="packing"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(3)) { display: none; }
+  .ops-screen [data-deal-table="invoices"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(7)) { display: none; }
+}
 .ops-screen .ops-shipment-date-details { margin-top: 4px; }
 .ops-screen .ops-shipment-date-details summary { cursor: pointer; }
 @media (max-width: 639px) { .ops-screen .ops-shipment-group-heading { padding: 16px; } }
