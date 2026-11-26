@@ -118,6 +118,8 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuGroup,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -1969,10 +1971,22 @@ function BlReferenceNotice({ reference, linked }: { reference?: string | null; l
 // 반올림/절사 choice of one amount; every amount (총금액, 품목 금액, CI 금액) has its own.
 function AmountRoundingSelect({ value, onValueChange, disabled, label }: { value: TotalRounding; onValueChange: (mode: TotalRounding) => void; disabled?: boolean; label: string }) {
   return (
-    <Select value={value} disabled={disabled} onValueChange={(next) => { if (next === "truncate" || next === "round") onValueChange(next) }}>
-      <SelectTrigger size="sm" aria-label={label} className="gap-1 px-2 data-[size=sm]:h-7"><SelectValue /></SelectTrigger>
-      <SelectContent>{Object.entries(totalRoundingLabels).map(([mode, text]) => <SelectItem key={mode} value={mode}>{text}</SelectItem>)}</SelectContent>
-    </Select>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost-neutral" size="xs" disabled={disabled} aria-label={`${label}, 현재 ${totalRoundingLabels[value]}`}>
+          {totalRoundingLabels[value]}
+          <ChevronDown data-icon="inline-end" aria-hidden="true" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" aria-label={label}>
+        <DropdownMenuRadioGroup value={value} onValueChange={(mode) => {
+          if (mode === "round" || mode === "truncate") onValueChange(mode)
+        }}>
+          <DropdownMenuRadioItem value="round">{totalRoundingLabels.round}</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="truncate">{totalRoundingLabels.truncate} (버림)</DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -2617,7 +2631,7 @@ function CommercialInvoiceTransactionCard({
                   {(() => {
                     const name = invoice.invoiceNumber ?? invoice.fileName
                     const pageChip = (label: string) => (invoice.pageCount ?? 1) > 1 ? <button type="button" className="text-[11px] leading-4 text-[var(--color-gray-6)] underline-offset-2 hover:text-[var(--color-primary-4)] hover:underline" aria-label={`${label} 근거 ${invoice.fieldPages?.[label] ?? 1}페이지 보기`} onClick={() => { requestDocumentPage(invoice.fileName, invoice.fieldPages?.[label] ?? 1); invoice.onOpen?.() }}>p.{invoice.fieldPages?.[label] ?? 1}</button> : undefined
-                    const header = (label: string, shown = label, extra?: React.ReactNode) => <FormFieldHeader className="mb-2.5" label={shown} badge={extra ? <>{extra}{pageChip(label)}</> : pageChip(label)} />
+                    const header = (label: string, shown = label, extra?: React.ReactNode) => <FormFieldHeader className="mb-2.5" label={shown} badge={pageChip(label)} sourceAction={extra} />
                     const readOnly = (text: string) => <div className="flex min-h-10 items-center rounded-md bg-muted/30 px-3 text-sm font-medium">{text || "—"}</div>
                     // Stored as one text per field ("2 MT", "USD 256,600"); edited as number + unit.
                     const tail = (text: string) => { const match = text.trim().match(/^(.*?)\s*([A-Za-z]+)?$/); return { amount: match?.[1] ?? "", unit: match?.[2] ?? "" } }
@@ -3916,7 +3930,7 @@ function DealFieldsPanel({
             {input("unitPrice", "단가")}
           </div>
           <div>
-            <FormFieldHeader className="mb-2.5" label={amountLabel} htmlFor={`deal-item-${item.id}-amount`} badge={<AmountRoundingSelect label={`품목 ${number} 금액 처리 방식`} value={rounding.read(`item:${item.id}`)} disabled={!editable} onValueChange={(mode) => rounding.write(`item:${item.id}`, mode)} />} />
+            <FormFieldHeader className="mb-2.5" label={amountLabel} htmlFor={`deal-item-${item.id}-amount`} sourceAction={<AmountRoundingSelect label={`품목 ${number} 금액 처리 방식`} value={rounding.read(`item:${item.id}`)} disabled={!editable} onValueChange={(mode) => rounding.write(`item:${item.id}`, mode)} />} />
             <Input
               id={`deal-item-${item.id}-amount`}
               aria-label={`품목 ${number} 금액`}
@@ -4103,9 +4117,9 @@ function DealFieldsPanel({
               id={`deal-field-label-${field.key}`}
               style={{ scrollMarginTop: "calc(var(--deal-header-height,128px) + 16px)" }}
               invalid={needsReview(field.match)}
-              badge={field.key === "amount_total" || needsReview(field.match) || dealContractSource.fieldPages[field.key] ? <>
+              sourceAction={field.key === "amount_total" ? roundingSelector : undefined}
+              badge={needsReview(field.match) || dealContractSource.fieldPages[field.key] ? <>
                 {dealContractSource.fieldPages[field.key] && <DocumentPageMarker label={field.label} page={dealContractSource.fieldPages[field.key]!} fileName={dealContractSource.fileName} code={dealContractSource.code} />}
-                {field.key === "amount_total" && roundingSelector}
                 <DealReviewBadge match={field.match} />
               </> : undefined}
               message={needsReview(field.match) ? field.evidence.join(" · ") || undefined : undefined}
