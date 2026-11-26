@@ -132,6 +132,10 @@ export function writeDealCosts(dealId: string, costs: DealCost[]) {
   localStorage.setItem(costStorageKey(dealId), JSON.stringify(costs))
   window.dispatchEvent(new CustomEvent(costChangeEvent, { detail: dealId }))
 }
+export function normalizeSaleAmount(amount: string) {
+  return amount.trim().replaceAll(",", "").replace(/^\.(?=\d)/, "0.").replace(/(\d)\.$/, "$1")
+}
+
 export function readDealSales(dealId: string): DealSale[] {
   try {
     const raw = localStorage.getItem(saleStorageKey(dealId))
@@ -147,6 +151,7 @@ export function readDealSales(dealId: string): DealSale[] {
       typeof (item as DealSale).date === "string" &&
       typeof (item as DealSale).customer === "string" &&
       typeof (item as DealSale).evidence === "string")
+      .map(sale => ({ ...sale, amount: normalizeSaleAmount(sale.amount) }))
   } catch {
     return []
   }
@@ -155,6 +160,28 @@ export function writeDealSales(dealId: string, sales: DealSale[]) {
   localStorage.setItem(saleStorageKey(dealId), JSON.stringify(sales))
   window.dispatchEvent(new CustomEvent(saleChangeEvent, { detail: dealId }))
 }
+// Sales and purchase facts are denominated in their original currencies.
+export function summarizeDealSales(sales: DealSale[], facts: FinanceFact[]) {
+  const totals = new Map<string, bigint | null>()
+  for (const sale of sales) {
+    const amount = decimalMagnitude(normalizeSaleAmount(sale.amount), SCALE)
+    const current = totals.get(sale.currency)
+    totals.set(sale.currency, current === null || amount === null ? null : (current ?? BigInt(0)) + amount)
+  }
+
+  return Array.from(totals, ([currency, total]) => {
+    const fact = facts.find((entry) => entry.currency === currency)
+    const costBlocked = fact?.handoff_blockers?.some((reason) =>
+      ["missing_invoice_basis", "invalid_invoice_basis", "missing_cost_basis"].includes(reason)
+    )
+    const purchase = costBlocked ? null : decimalMagnitude(fact?.goods_cost_amount, SCALE)
+    const additive = decimalMagnitude(fact?.landed_cost_amount, SCALE)
+    const margin = total !== null && purchase !== null && additive !== null ? total - purchase - additive : null
+    const percent = margin !== null && total !== null ? roundedPercentage(margin, total) : null
+    return { currency, total, margin, rate: percent === null ? null : formatScaledDecimal(percent, BigInt(10)) }
+  })
+}
+
 export function calculateDealFinance(
   dealId: string,
   costs: DealCost[]
