@@ -552,7 +552,7 @@ export function SnapWorkersPage() {
                 <h2 className="text-[18px] leading-[26px] font-bold">가입 요청</h2>
                 <Badge variant="secondary">{joinRequests.length}건</Badge>
               </div>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">
+              <p className="mt-2 text-sm leading-5 text-muted-foreground">
                 초대받은 작업자 또는 작업 매니저가 링크를 수락하면 표시됩니다. 조직 Owner 또는 Admin이 승인하면 현장 업무에 참여할 수 있습니다.
               </p>
             </div>
@@ -579,7 +579,7 @@ export function SnapWorkersPage() {
                           <span className="flex size-9 items-center justify-center rounded-full bg-sidebar text-xs font-semibold">{initials(member)}</span>
                           <div className="min-w-0">
                             <div className="truncate font-medium">{member.name}</div>
-                            <div className="truncate text-xs text-muted-foreground">{member.email}</div>
+                            <div className="truncate text-sm text-muted-foreground">{member.email}</div>
                           </div>
                         </div>
                       </TableCell>
@@ -591,7 +591,7 @@ export function SnapWorkersPage() {
                             <ShieldCheck /> 가입 승인
                           </Button>
                         ) : (
-                          <span className="text-xs text-muted-foreground">Owner/Admin 승인 필요</span>
+                          <span className="text-sm text-muted-foreground">Owner/Admin 승인 필요</span>
                         )}
                       </TableCell>
                     </TableRow>
@@ -610,7 +610,7 @@ export function SnapWorkersPage() {
           <div className="flex flex-wrap items-center justify-between gap-3 pb-3">
             <div>
               <h2 className="text-[18px] leading-[26px] font-bold">작업자 및 작업 매니저</h2>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">현장 실행 역할과 가입 상태를 관리합니다. 조직 권한은 별도 정보로 표시합니다.</p>
+              <p className="mt-2 text-sm leading-5 text-muted-foreground">현장 실행 역할과 가입 상태를 관리합니다. 조직 권한은 별도 정보로 표시합니다.</p>
             </div>
             <div className="flex w-full items-center gap-2 sm:w-auto">
               <BusinessFilterBar className="min-w-0 flex-1 sm:w-72">
@@ -653,7 +653,7 @@ export function SnapWorkersPage() {
                                 <span className="truncate font-medium">{member.name}</span>
                                 {organizationRoleLabel(member.role) ? <Badge variant="outline">{organizationRoleLabel(member.role)}</Badge> : null}
                               </div>
-                              <div className="truncate text-xs text-muted-foreground">{member.email}</div>
+                              <div className="truncate text-sm text-muted-foreground">{member.email}</div>
                             </div>
                           </div>
                         </TableCell>
@@ -670,7 +670,7 @@ export function SnapWorkersPage() {
                         <TableCell className="text-right">
                           {editable && member.status === "active" ? <Button size="lg" variant="ghost" className="text-destructive" onClick={() => setConfirmAction({ kind: "deactivate", member })}>비활성화</Button> : null}
                           {editable && member.status === "inactive" ? <Button size="lg" variant="outline" onClick={() => setConfirmAction({ kind: "reactivate", member })}>복구</Button> : null}
-                          {!editable ? <span className="text-xs text-muted-foreground">-</span> : null}
+                          {!editable ? <span className="text-sm text-muted-foreground">-</span> : null}
                         </TableCell>
                       </TableRow>
                     )
@@ -682,11 +682,11 @@ export function SnapWorkersPage() {
         </Card> : null}
 
         {showPending ? <Card className="mt-6 p-4 sm:p-5">
-          <div className="flex items-center justify-between"><div><h2 className="text-[18px] leading-[26px] font-bold">보낸 초대</h2><p className="mt-2 text-xs leading-5 text-muted-foreground">아직 사용자가 수락하지 않은 초대입니다. 수락 후에는 위 가입 요청으로 이동합니다.</p></div><Badge variant="secondary">{invites.length}건</Badge></div>
+          <div className="flex items-center justify-between"><div><h2 className="text-[18px] leading-[26px] font-bold">보낸 초대</h2><p className="mt-2 text-sm leading-5 text-muted-foreground">아직 사용자가 수락하지 않은 초대입니다. 수락 후에는 위 가입 요청으로 이동합니다.</p></div><Badge variant="secondary">{invites.length}건</Badge></div>
           <div className="mt-4 divide-y border-y">
             {invites.length ? invites.map((invite) => (
               <div key={invite.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-                <div className="flex min-w-0 items-center gap-3"><Mail className="size-4 text-muted-foreground" /><div className="min-w-0"><div className="truncate text-sm font-medium">{invite.email}</div><div className="text-xs text-muted-foreground">{roleLabel(invite.role)} · {formatDate(invite.createdAt)}</div></div></div>
+                <div className="flex min-w-0 items-center gap-3"><Mail className="size-4 text-muted-foreground" /><div className="min-w-0"><div className="truncate text-sm font-medium">{invite.email}</div><div className="text-sm text-muted-foreground">{roleLabel(invite.role)} · {formatDate(invite.createdAt)}</div></div></div>
                 {isAdmin ? <Button size="sm" variant="outline" onClick={() => setConfirmAction({ kind: "revoke", invite })}>초대 회수</Button> : null}
               </div>
             )) : <div className="py-10 text-center text-sm text-muted-foreground">대기 중인 초대가 없습니다.</div>}

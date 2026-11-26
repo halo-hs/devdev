@@ -447,7 +447,7 @@ function FieldReports({ rows, navigate }: { rows: SnapJsonRecord[]; navigate: Sn
                   <TableRow key={id || reportTitle(row)}>
                     <TableCell>
                       <div className="font-medium">{reportTitle(row)}</div>
-                      <div className="text-xs text-muted-foreground">{id}</div>
+                      <div className="text-sm text-muted-foreground">{id}</div>
                     </TableCell>
                     <TableCell>{textValue(row, "customer_name", "customer") || "미지정"}</TableCell>
                     <TableCell className="text-right tabular-nums">{numberValue(row, "media_count", "evidence_count")}개</TableCell>
@@ -499,7 +499,7 @@ function ReviewReports({ rows, navigate, onChanged }: { rows: SnapJsonRecord[]; 
                   <TableRow key={reportId(row)}>
                     <TableCell>
                       <div className="font-medium">{reportTitle(row)}</div>
-                      <div className="text-xs text-muted-foreground">{reportId(row)} · v{textValue(row, "version") || "1"}</div>
+                      <div className="text-sm text-muted-foreground">{reportId(row)} · v{textValue(row, "version") || "1"}</div>
                     </TableCell>
                     <TableCell>{textValue(row, "customer_name", "customer") || "미지정"}</TableCell>
                     <TableCell>{textValue(row, "review_reason", "reason") || "고객 공개 내용 확인"}</TableCell>
@@ -589,7 +589,7 @@ function ReviewSheet({ selected, onOpenChange, navigate, onChanged }: { selected
               ["최근 수정", selected ? compactDate(selected.updated_at) : "-"],
             ].map(([label, value]) => (
               <div key={label} className="bg-background p-3">
-                <div className="text-xs text-muted-foreground">{label}</div>
+                <div className="text-sm text-muted-foreground">{label}</div>
                 <div className="mt-1 font-medium">{value}</div>
               </div>
             ))}
@@ -730,9 +730,9 @@ function SentReports({ rows, onChanged }: { rows: SnapJsonRecord[]; onChanged: (
                 const active = textValue(row, "status") === "active" && !boolValue(row, "revoked")
                 return (
                   <TableRow key={linkId || token}>
-                    <TableCell><div className="font-medium">{reportTitle(row)}</div><div className="text-xs text-muted-foreground">{reportId(row)}</div></TableCell>
+                    <TableCell><div className="font-medium">{reportTitle(row)}</div><div className="text-sm text-muted-foreground">{reportId(row)}</div></TableCell>
                     <TableCell>{compactDate(row.created_at)}</TableCell>
-                    <TableCell>{compactDate(row.last_opened_at)}<div className="text-xs text-muted-foreground">{numberValue(row, "open_count", "view_count")}회</div></TableCell>
+                    <TableCell>{compactDate(row.last_opened_at)}<div className="text-sm text-muted-foreground">{numberValue(row, "open_count", "view_count")}회</div></TableCell>
                     <TableCell>{textValue(row, "locale") || "-"}</TableCell>
                     <TableCell>{boolValue(row, "acknowledged") ? <PlatformStatusBadge tone="success">확인됨</PlatformStatusBadge> : "미확인"}</TableCell>
                     <TableCell><StatusBadge value={textValue(row, "status") || "active"} /></TableCell>
