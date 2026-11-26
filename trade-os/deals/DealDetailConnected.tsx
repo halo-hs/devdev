@@ -1978,7 +1978,7 @@ function AmountRoundingSelect({ value, onValueChange, disabled, label }: { value
           <ChevronDown data-icon="inline-end" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" aria-label={label}>
+      <DropdownMenuContent align="end" aria-label={label} className="w-max min-w-40 whitespace-nowrap">
         <DropdownMenuRadioGroup value={value} onValueChange={(mode) => {
           if (mode === "round" || mode === "truncate") onValueChange(mode)
         }}>
