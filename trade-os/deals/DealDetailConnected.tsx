@@ -93,6 +93,7 @@ import {
   PdfPanelWorkspaceCard,
   ResponsivePdfPanelSplit,
 } from "@/components/platform/PdfPanelResizeHandle"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { PannablePdfViewport } from "@/components/platform/DocumentViewerStage"
 import { AutoSaveStatus } from "@/components/platform/AutoSaveStatus"
 import {
@@ -3347,13 +3348,6 @@ function DealPdf({
   const [zoom, setZoom] = useState(100)
   const [fullscreen, setFullscreen] = useState(false)
   const [downloading, setDownloading] = useState(false)
-  useEffect(() => {
-    const close = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setFullscreen(false)
-    }
-    window.addEventListener("keydown", close)
-    return () => window.removeEventListener("keydown", close)
-  }, [])
   const download = async () => {
     setDownloading(true)
     await wait(350)
@@ -3369,12 +3363,9 @@ function DealPdf({
   const viewer = (
     <div
       className={cn(
-        "relative mt-2 flex min-h-[480px] flex-col overflow-hidden bg-background",
-        fullscreen && "fixed inset-0 z-[70] mt-0 h-screen min-h-0 bg-background"
+        "relative mt-2 flex h-[clamp(320px,72dvh,920px)] min-h-0 flex-col overflow-hidden bg-background",
+        fullscreen && "mt-0 h-full"
       )}
-      role={fullscreen ? "dialog" : undefined}
-      aria-modal={fullscreen ? "true" : undefined}
-      aria-label={fullscreen ? `${slot.type} 전체 화면 미리보기` : undefined}
     >
       <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--surface-border)] bg-background px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
@@ -3414,16 +3405,12 @@ function DealPdf({
           />
         </div>
       </div>
-      {slot.fileDataUrl ? (
-        <iframe title={`${file} 원본 PDF`} src={slot.fileDataUrl} className="min-h-[600px] w-full flex-1 border-0" />
-      ) : <PannablePdfViewport zoom={zoom} className="min-h-0 flex-1 px-4 pb-20">
-        <div
-          className="mx-auto mt-4 aspect-[.72] max-h-[760px] w-[min(90%,560px)] origin-top border bg-background p-8 shadow-sm"
-          style={{
-            transform: `scale(${zoom / 100})`,
-            transformOrigin: "top center",
-          }}
-        >
+      <PannablePdfViewport
+        zoom={zoom}
+        nativePdf={slot.fileDataUrl ? { src: `${slot.fileDataUrl}#page=${page}`, title: `${file} 원본 PDF` } : undefined}
+        className={slot.fileDataUrl ? undefined : "px-4 pb-20"}
+      >
+        <div className="mx-auto mt-4 aspect-[.72] max-h-[760px] w-[min(90%,560px)] border bg-background p-8 shadow-sm">
           <span className="text-xs font-semibold tracking-widest text-primary">
             TRADE DOCUMENT
           </span>
@@ -3442,7 +3429,7 @@ function DealPdf({
             </div>
           ))}
         </div>
-      </PannablePdfViewport>}
+      </PannablePdfViewport>
       <PdfFloatingControls
         page={page}
         pageCount={2}
@@ -3457,7 +3444,15 @@ function DealPdf({
       />
     </div>
   )
-  return fullscreen ? createPortal(viewer, document.body) : viewer
+  if (!fullscreen) return viewer
+  return (
+    <Dialog open onOpenChange={setFullscreen}>
+      <DialogContent showCloseButton={false} aria-describedby={undefined} className="h-dvh max-w-none gap-0 rounded-none border-0 p-0 sm:max-w-none">
+        <DialogTitle className="sr-only">{slot.type} 전체 화면 미리보기</DialogTitle>
+        {viewer}
+      </DialogContent>
+    </Dialog>
+  )
 }
 
 function DealReviewBadge({ match }: { match: DealFieldMatch }) {

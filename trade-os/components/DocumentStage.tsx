@@ -201,6 +201,7 @@ export function DocumentStage({
   requestedPage,
   previewContent,
   paperClassName,
+  nativePdf,
 }: {
   result?: boolean
   fitPage?: boolean
@@ -231,6 +232,7 @@ export function DocumentStage({
   requestedPage?: { page: number }
   previewContent?: ReactNode | ((page: number, pageCount: number) => ReactNode)
   paperClassName?: string
+  nativePdf?: { src: string; title: string }
 }) {
   const stageRef = useRef<HTMLDivElement | null>(null)
   const [zoom, setZoom] = useState(100)
@@ -348,32 +350,23 @@ export function DocumentStage({
       ) : null}
       <PannablePdfViewport
         zoom={zoom}
-        className={cn(
-          "flex min-h-0 flex-1 justify-center overflow-auto bg-white px-3 pb-20 xl:px-8",
-          fitPage ? "items-center pt-6" : "items-start pt-8"
-        )}
+        centerPage={fitPage}
+        nativePdf={nativePdf && { ...nativePdf, src: `${nativePdf.src}#page=${page}` }}
+        className={nativePdf ? undefined : cn("bg-white px-3 pb-20 xl:px-8", fitPage ? "pt-6" : "pt-8")}
       >
-        <div
-          className="w-full transition-transform duration-150"
-          style={{
-            transform: `scale(${zoom / 100})`,
-            transformOrigin: "top center",
-          }}
-        >
-          {typeof previewContent === "function"
-            ? previewContent(page, pageCount)
-            : (previewContent ?? (
-                <DocumentPaper
-                  result={result}
-                  templateCode={templateCode}
-                  accent={accent}
-                  fontStyle={fontStyle}
-                  archetype={archetype}
-                  logo={logo}
-                  className={paperClassName}
-                />
-              ))}
-        </div>
+        {typeof previewContent === "function"
+          ? previewContent(page, pageCount)
+          : (previewContent ?? (
+              <DocumentPaper
+                result={result}
+                templateCode={templateCode}
+                accent={accent}
+                fontStyle={fontStyle}
+                archetype={archetype}
+                logo={logo}
+                className={paperClassName}
+              />
+            ))}
       </PannablePdfViewport>
       {aiDetectionVisible ? (
         <div className="pointer-events-none absolute top-18 right-7 hidden w-44 rounded-md border bg-background/95 p-3 shadow-sm xl:block">

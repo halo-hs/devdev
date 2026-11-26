@@ -173,7 +173,8 @@ export function DocumentReviewWorkspace({
         <ChevronLeft data-icon="inline-start" />
         {step === "deal" ? "거래 연결" : "필드 검토"}
       </Button>
-      {document.fileDataUrl ? <iframe title={`${document.name} 원본 PDF`} src={requestedPage ? `${document.fileDataUrl}#page=${requestedPage.page}` : document.fileDataUrl} className="min-h-[480px] w-full flex-1 border-0" /> : <DocumentStage
+      <DocumentStage
+        nativePdf={document.fileDataUrl ? { src: document.fileDataUrl, title: `${document.name} 원본 PDF` } : undefined}
         downloadName={document.name}
         requestedPage={requestedPage}
         pageCountOverride={document.pages}
@@ -182,7 +183,7 @@ export function DocumentReviewWorkspace({
           <p className="mb-6 break-all text-muted-foreground">{document.name}</p>
           {(dealDocumentPreviews[document.documentType]?.fields ?? []).map(([label, value]) => <div key={label} className="flex justify-between gap-4 border-b py-3"><span>{label}</span><span>{value}</span></div>)}
         </div> : undefined}
-        showAiDetection={document.dealDocumentId ? false : step === "compare" && !pdfReviewCompleted}
+        showAiDetection={!document.fileDataUrl && !document.dealDocumentId && step === "compare" && !pdfReviewCompleted}
         reviewMode
         paperClassName="w-full max-w-none"
         canDownload={false}
@@ -193,7 +194,7 @@ export function DocumentReviewWorkspace({
           onComplete: onPdfReviewComplete,
           onDownload: onDownloadDraft,
         }}
-      />}
+      />
     </section>
   )
 
