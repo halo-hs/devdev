@@ -1,4 +1,5 @@
 import { listShipmentDocumentRegistrations } from "../erpDocumentWorkflow"
+import { splitShipmentReviewFixture } from "./splitShipmentReviewFixture"
 import { prototypeBackend } from "../prototypeBackend"
 import { createDemoPaymentSchedule, withDemoScheduleLedger, withDemoSettlementTotals } from "./dealPaymentSchedules"
 import type { CreatePaymentScheduleBody, LedgerResponse, SettlementOverview, SettlementCalendar } from "../api/settlement"
@@ -63,6 +64,14 @@ const seedShipments: Shipment[] = shipmentDeals.map((deal, index) => {
     status: index % 5 === 4 ? 'arrived' : 'departed', source: 'manual',
   }
 })
+// The document-linked lots use the same identities and fields as the deal's CI and PL examples.
+const nordicDeal = hostDeals.find(deal => deal.display_id === 'DL-260704-02')!
+const documentShipments: Shipment[] = splitShipmentReviewFixture(nordicDeal.display_id).billsOfLading.map(bill => ({
+  id: bill.documentId, deal_id: nordicDeal.deal_id, deal_title: nordicDeal.title, deal_counterparty: nordicDeal.counterparty_name,
+  bl_number: bill.blNumber, container_number: bill.fields.containerNumber, container_count: bill.fields.containerCount,
+  carrier: bill.fields.carrier, vessel: bill.fields.vessel, pol: bill.fields.portOfLoading, pod: bill.fields.portOfDischarge,
+  source: 'document', status: 'unknown', edit_token: bill.documentId + '-initial',
+}))
 // Shipments added by hand on a deal (prototype only: the platform API has no create route yet).
 const createdKey = 'ecoya:public-demo:shipment-created:v1'
 function createdShipments(): Shipment[] {
@@ -92,7 +101,7 @@ function shipments() {
       etd: doc.fields.etd?.value, eta: doc.fields.eta?.value, status: "unknown", source: "document",
       edit_token: doc.documentId + "-initial" }
   })
-  return [...seedShipments, ...createdShipments(), ...uploadedBills].filter(row => !deleted.has(row.id)).map(row => ({ ...row, ...overrides[row.id] }))
+  return [...seedShipments, ...documentShipments, ...createdShipments(), ...uploadedBills].filter(row => !deleted.has(row.id)).map(row => ({ ...row, ...overrides[row.id] }))
 }
 function monthCloses(): MonthClose[] {
   const withSnapshot = (rows: MonthClose[]) => rows.map(row =>

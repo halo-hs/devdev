@@ -5,7 +5,7 @@ import {
   EmptyDescription,
 } from "@/components/ui/empty"
 import { DealClaimTool } from "@trade-os/deals/DealHandoffTools"
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import { Info, Pencil, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,9 +30,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { FINANCE_DECIMAL_SCALE } from "@trade-os/lib/financeDecimal"
+import { currencyFractionDigits, formatScaledMoney } from "@trade-os/lib/money"
 import { exactFinanceMoney, presentFinanceFact } from "@trade-os/lib/erpFinance"
 import {
   calculateDealFinance,
+  summarizeDealSales,
   costCurrencies,
   costTypes,
   readDealSales,
@@ -75,6 +78,9 @@ function FinanceHelp({
   )
 }
 
+const saleMoney = (amount: bigint, currency: string) =>
+  formatScaledMoney(amount, FINANCE_DECIMAL_SCALE, currency, "en-US", currencyFractionDigits(currency))
+
 const blankCost = (): DealCost => ({
   id: "draft",
   type: "운임",
@@ -87,6 +93,7 @@ const blankCost = (): DealCost => ({
 
 export function DealFinanceWorkspace({
   dealId,
+  invoiceIds,
   settlementAmount,
   settlementCurrency,
   onOpenSettlement,
@@ -94,6 +101,7 @@ export function DealFinanceWorkspace({
   addAudit,
 }: {
   dealId: string
+  invoiceIds: string[]
   settlementAmount: string
   settlementCurrency: string
   onOpenSettlement: () => void
@@ -125,20 +133,10 @@ export function DealFinanceWorkspace({
         : costs.map((c) => (c.id === draft.id ? draft : c))
       : costs
   const previewFacts = calculateDealFinance(dealId, previewCosts)
-  const saleTotals = useMemo(() => sales.reduce<Record<string, number>>((totals, sale) => {
-    const amount = Number(sale.amount)
-    if (Number.isFinite(amount)) totals[sale.currency] = (totals[sale.currency] ?? 0) + amount
-    return totals
-  }, {}), [sales])
-  const saleMargins = useMemo(() => Object.entries(saleTotals).reduce<Record<string, { amount: number; rate: number | null }>>((result, [currency, total]) => {
-    const fact = savedFacts.find((item) => item.currency === currency)
-    const purchase = Number(fact?.goods_cost_amount)
-    const additiveCosts = costs.filter((cost) => cost.currency === currency && cost.basis === "additive").reduce((sum, cost) => sum + Number(cost.amount || 0), 0)
-    if (!Number.isFinite(purchase)) return result
-    const amount = total - purchase - additiveCosts
-    result[currency] = { amount, rate: total ? (amount / total) * 100 : null }
-    return result
-  }, {}), [costs, saleTotals, savedFacts])
+  const saleSummary = summarizeDealSales(sales, savedFacts)
+  const soldInvoices = new Set(sales.map(sale => sale.invoiceId))
+  const partialSales = invoiceIds.some(id => !soldInvoices.has(id))
+  const provisionalMargin = partialSales || saleSummary.length > 1
   const mutate = async (
     next: DealCost[],
     action: string,
@@ -235,6 +233,7 @@ export function DealFinanceWorkspace({
         <div aria-live="polite" className="mt-4 space-y-3">
           {previewFacts.map((fact) => {
             const money = presentFinanceFact(fact)
+            const sale = saleSummary.find(row => row.currency === fact.currency)
             return (
               <div
                 key={fact.currency}
@@ -243,11 +242,11 @@ export function DealFinanceWorkspace({
               >
                 <div className="mb-3 flex items-center gap-2">
                   <strong>{fact.currency}</strong>
-                  {saleTotals[fact.currency] != null && (
-                    <Badge variant="outline">판매 입력 {exactFinanceMoney(String(saleTotals[fact.currency]), fact.currency)}</Badge>
+                  {sale?.total != null && (
+                    <Badge variant="outline">판매 입력 {saleMoney(sale.total, fact.currency)}</Badge>
                   )}
-                  {saleMargins[fact.currency]?.rate != null && (
-                    <Badge variant="outline">판매 기준 예상 마진율 {saleMargins[fact.currency].rate!.toFixed(1)}%</Badge>
+                  {sale?.rate != null && (
+                    <Badge variant="outline">판매 기준 예상 마진율 {sale.rate}%{provisionalMargin && " · 잠정"}</Badge>
                   )}
                   {fact.adjusted_gp_pct != null && (
                     <Badge variant="outline">
@@ -287,19 +286,31 @@ export function DealFinanceWorkspace({
 
       <section aria-label="판매 내역">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
+          <div className="flex items-center gap-1">
             <h3 className="text-base font-semibold">판매 내역</h3>
-            <p className="mt-1 text-xs text-muted-foreground">
-              선적과 별도로 실제 판매가 발생한 건을 입력합니다. 입력 합계는 거래 경제에 반영됩니다.
-            </p>
+            <FinanceHelp label="판매 합계와 마진 계산식">
+              <p>판매 합계 = 같은 통화로 등록한 CI 판매 금액의 합계</p>
+              <p>판매 기준 예상 마진 = 판매 합계 − 같은 통화의 매입 상품 원가 − 가산 부대비용</p>
+              <p>마진율 = 예상 마진 ÷ 판매 합계 × 100</p>
+            </FinanceHelp>
           </div>
           <Badge variant="outline">{sales.length}건</Badge>
         </div>
-        {Object.entries(saleMargins).length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 rounded-md bg-muted/40 px-3 py-2 text-xs">
-            {Object.entries(saleMargins).map(([currency, margin]) => (
-              <span key={currency}>판매 기준 예상 마진 <strong>{exactFinanceMoney(String(margin.amount), currency)}</strong> · {margin.rate == null ? "—" : `${margin.rate.toFixed(1)}%`}</span>
+        {saleSummary.length > 0 && (
+          <div aria-label="통화별 판매 요약" role="region" aria-live="polite" className="mt-3 divide-y rounded-md bg-muted/40 px-3">
+            {saleSummary.map(({ currency, total, margin, rate }) => (
+              <div key={currency} className="flex flex-wrap items-baseline gap-x-5 gap-y-1 py-2 text-sm tabular-nums">
+                <span>판매 합계 <strong>{total === null ? `${currency} · 판매 금액 확인 필요` : saleMoney(total, currency)}</strong></span>
+                {margin !== null ? (
+                  <span>판매 기준 예상 마진 <strong>{saleMoney(margin, currency)}</strong> · 마진율 {rate === null ? "—" : `${rate}%`}{provisionalMargin && " · 잠정"}</span>
+                ) : total !== null && (
+                  <span className="text-muted-foreground">마진 계산 대기 · {currency} 원가 확인 필요</span>
+                )}
+              </div>
             ))}
+            {provisionalMargin && saleSummary.some(row => row.margin !== null) && (
+              <p className="py-2 text-xs text-muted-foreground">{partialSales ? "일부 CI의 판매가 등록되었습니다." : "판매 통화가 여러 개입니다."} 잠정 마진은 통화별 등록 판매액에서 거래 전체의 같은 통화 원가를 차감한 금액입니다.</p>
+            )}
           </div>
         )}
         <Table aria-label="판매 내역" className="mt-4 min-w-[640px]"><TableHeader><TableRow>{["CI", "판매 금액", "판매처", "판매일"].map((label) => <TableHead key={label}>{label}</TableHead>)}</TableRow></TableHeader><TableBody>{sales.length > 0 ? sales.map((sale) => <TableRow key={sale.id} id={`deal-sale-${sale.invoiceId}`} className="scroll-mt-[calc(var(--deal-header-height,128px)+16px)]"><TableCell><strong>{sale.invoiceNumber}</strong><small className="mt-1 block text-muted-foreground">{sale.evidence}</small></TableCell><TableCell className="tabular-nums">{exactFinanceMoney(sale.amount, sale.currency)}</TableCell><TableCell>{sale.customer}</TableCell><TableCell>{sale.date || "—"}</TableCell></TableRow>) : <TableRow><TableCell colSpan={4} className="py-6 text-center text-sm text-muted-foreground">CI 카드에서 판매를 등록하면 이 표에 자동으로 표시됩니다.</TableCell></TableRow>}</TableBody></Table>

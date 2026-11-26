@@ -234,8 +234,11 @@
 @container (max-width: 479px) {
   .ops-screen [data-deal-table] :is([data-slot="table-head"], [data-slot="table-cell"]:not([colspan])) { padding-inline: 6px !important; }
   .ops-screen [data-deal-table="shipments"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(2)) { display: none; }
-  .ops-screen [data-deal-table="packing"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(3)) { display: none; }
+  /* Weight is what gets matched (customs, freight, B/L); package count shows in the opened row. */
+  .ops-screen [data-deal-table="packing"] :is(col, [data-slot="table-head"], [data-slot="table-cell"]:not([colspan])):is(:nth-child(3), :nth-child(5)) { display: none; }
 }
+/* Quantities never break between number and unit ("8,240 / KG"). */
+.ops-screen [data-deal-table="packing"] [data-slot="table-cell"]:not([colspan]):is(:nth-child(5), :nth-child(6), :nth-child(7)) { white-space: nowrap; }
 .ops-screen .ops-shipment-date-details { margin-top: 4px; }
 .ops-screen .ops-shipment-date-details summary { cursor: pointer; }
 @media (max-width: 639px) { .ops-screen .ops-shipment-group-heading { padding: 16px; } }

@@ -1,6 +1,7 @@
+import { Checkbox } from "@/components/ui/checkbox"
 import { packingItemIssue, type PackingItem } from "@trade-os/lib/packingItems"
 import { dealShipmentDocuments } from "./firstShipmentDocuments"
-import { readTotalRounding, roundedDealTotal, totalRoundingLabels, writeTotalRounding, type TotalRounding } from "./dealTotalRounding"
+import { multiplyDecimal, readTotalRounding, roundedDealTotal, totalRoundingLabels, useAmountRoundings, writeTotalRounding, type TotalRounding } from "./dealTotalRounding"
 import { LinkedDeals } from "./LinkedDeals"
 import type { UploadOriginDeal } from "@trade-os/lib/uploadOriginDeal"
 import { initialDocumentFields } from "@trade-os/lib/dealDocumentFields"
@@ -14,14 +15,18 @@ import { dealDocumentPreviews, importantDealDocuments as documents, supplementar
 import { DealDocumentActions } from "@trade-os/deals/DealDocumentActions"
 import { InfoBox } from "@trade-os/components/InfoBox"
 import { OperationsScreen } from "@trade-os/OperationsScreens"
+import { splitShipmentReviewFixture } from "@trade-os/lib/demo/splitShipmentReviewFixture"
 import { ConfirmDeleteButton, type CommercialInvoiceCard, type SplitShipmentView } from "@trade-os/shipments/ShipmentsConnected"
-import { addDealManualInvoice, addDealManualPackingList, removeDealDocument, removeDealManualInvoice, removeDealManualPackingList, saveDealManualPackingList, linkDealInvoiceToShipment, linkDealPackingListToShipment, unlinkDealDocumentFromShipment, resolveDealShipmentLink, blNumbersMismatch, readDealInvoiceRelations, saveDealInvoiceField, type DealInvoiceRelationState } from "@trade-os/lib/dealDocumentRelations"
+import { addDealManualInvoice, addDealManualPackingList, removeDealDocument, removeDealManualInvoice, removeDealManualPackingList, saveDealManualPackingList, setPackingInvoice, linkDealInvoiceToShipment, linkDealPackingListToShipment, unlinkDealDocumentFromShipment, resolveDealShipmentLink, resolveDealShipmentLinks, blNumbersMismatch, readDealInvoiceRelations, saveDealInvoiceField, type DealInvoiceRelationState } from "@trade-os/lib/dealDocumentRelations"
 import { HostTable, HostTableBody, HostTableCell, HostTableHead, HostTableHeader, HostTableRow } from "@trade-os/components/HostTable"
 import type { Shipment } from "@trade-os/lib/api/shipments"
 import { FormField, FormFieldHeader, FormFieldMessage, SimpleFormField } from "@/components/platform/FormItem"
 import {
   documentStageGuidance,
   documentStageRules,
+  applyCustomsPreference,
+  setCustomsSkipped,
+  useSkippedCustoms,
   getDealWorkPlan,
   readStartedWork,
   workIds,
@@ -29,7 +34,8 @@ import {
   type DealWorkKey,
   type DealWorkPlan,
 } from "@trade-os/lib/dealWorkflow"
-import { orderProgress, readDealSales, saleChangeEvent, writeDealSales, type DealSale } from "@trade-os/lib/dealFinanceWorkspace"
+import { isFinanceDecimal } from "@trade-os/lib/financeDecimal"
+import { normalizeSaleAmount, orderProgress, readDealSales, saleChangeEvent, writeDealSales, type DealSale } from "@trade-os/lib/dealFinanceWorkspace"
 import { exactFinanceMoney } from "@trade-os/lib/erpFinance"
 import { deals as dealFixtures } from "@trade-os/lib/prototypeDeals"
 import { DealFinanceWorkspace } from "@trade-os/deals/DealFinanceWorkspace"
@@ -87,6 +93,7 @@ import {
   PdfPanelWorkspaceCard,
   ResponsivePdfPanelSplit,
 } from "@/components/platform/PdfPanelResizeHandle"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { PannablePdfViewport } from "@/components/platform/DocumentViewerStage"
 import { AutoSaveStatus } from "@/components/platform/AutoSaveStatus"
 import {
@@ -111,6 +118,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuGroup,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -216,8 +227,7 @@ const dealSections: {
 ]
 const dealStage = (dealId: string) =>
   dealFixtures.find((deal) => deal.id === dealId)?.stage ?? "contract"
-const stageEntryTab = (dealId: string): Tab => {
-  const stage = dealStage(dealId)
+const stageEntryTab = (stage: ReturnType<typeof dealStage>): Tab => {
   return stage === "settled" || stage === "settlement"
     ? "finance"
     : stage === "shipment" || stage === "customs"
@@ -454,6 +464,7 @@ function DealProgressNavigation({
   earlyGroups,
   shipment,
   role,
+  onRestoreCustoms,
   onOpenGroup,
   onNavigate,
 }: {
@@ -463,6 +474,7 @@ function DealProgressNavigation({
   earlyGroups: DealFieldGroup[]
   shipment: DealShipmentSummary | null
   role: Role
+  onRestoreCustoms: () => void
   onOpenGroup: (group: DealFieldGroup) => void
   onNavigate: (tab: Tab) => void
 }) {
@@ -577,7 +589,7 @@ function DealProgressNavigation({
                         complete ? "bg-[var(--color-green-6)] text-[var(--color-green-1)]" : active ? "bg-primary/10 text-primary" : "text-muted-foreground"
                       )}
                     >
-                      {complete
+                      {plan.states[key] === "skipped" ? "해당 없음" : complete
                         ? "완료"
                         : active
                           ? "현재 할 일"
@@ -595,7 +607,12 @@ function DealProgressNavigation({
                           : "선적 예정"}
                       </p>
                     )}
-                    {stage.value === "customs" && !complete && (
+                    {key === "customs" && plan.states.customs === "skipped" && canMutate(role) && (
+                      <Button variant="link" size="sm" className="px-0" onClick={onRestoreCustoms}>
+                        통관 다시 사용
+                      </Button>
+                    )}
+                    {stage.value === "customs" && plan.states[key] !== "skipped" && !complete && (
                       <p className="py-1 text-[13px] leading-[18px] text-muted-foreground">
                         {active ? "통관 업무 확인" : "B/L 연결 후 진행"}
                       </p>
@@ -1692,76 +1709,17 @@ type DealShipmentSummary = {
   snap: string
 }
 
-// Prototype relation fixture for the split-shipment review. In production this
-// shape is supplied by the document relationship API; the UI never infers a
-// relationship from matching filenames or extracted field values.
-const splitShipmentReviewFixture = (dealId: string, onOpenDocument: (fileName: string, invoiceId: string) => void): SplitShipmentView => {
-  const shipmentCount = dealId === "DL-260708-01" ? 3 : dealId === "DL-260707-04" ? 2 : 3
-  const billsOfLading: SplitShipmentView["billsOfLading"] = [
-    {
-      documentId: "bl-014w-02",
-      blNumber: "HMM-014W-2607",
-      fileName: "B/L_2607_014.pdf",
-      uploadedAt: "2026.11.18 14:20",
-      fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "014W", shippedOnBoardDate: "2026.11.20", containerNumber: "HMMU1234567", containerCount: 2, sealNumber: "SEAL-01402", packageCount: "12", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "16,480 KG", volume: "32.4 CBM" },
-      containers: [
-        { number: "HMMU1234567", containerType: "40HC", sealNumber: "SEAL-01402-A", packageCount: "6", packageUnit: "bundles", grossWeight: "8,240 KG", volume: "16.2 CBM" },
-        { number: "HMMU1234568", containerType: "40HC", sealNumber: "SEAL-01402-B", packageCount: "6", packageUnit: "bundles", grossWeight: "8,240 KG", volume: "16.2 CBM" },
-      ],
-      connectedDocuments: [
-        { documentId: "ci-0703", referenceBlNumber: "HMM-014W-2607", code: "CI", number: "CI-2026-0703", fileName: "Invoice_HB-2607-003.pdf" },
-        { documentId: "pl-0707", referenceBlNumber: "HMM-014W-2607", code: "PL", items: [{ name: "Aluminium Scrap Tough Taboo", hsCode: "7602.00" }], number: "PL-2026-0707", fileName: "PackingList_0707.pdf" },
-      ],
-      connectedCommercialInvoices: [
-        { documentId: "ci-0703", referenceBlNumber: "HMM-014W-2607", fileName: "Invoice_HB-2607-003.pdf", uploadedAt: "2026.11.18 14:22", invoiceNumber: "CI-2026-0703", invoiceDate: "2026.11.17", currency: "USD", totalAmount: 1539996, item: "Aluminium Scrap Tough Taboo", quantity: "12 MT", unitPrice: "128,333 USD/MT", packageCount: "12", packageUnit: "bundles", pageCount: 2, fieldPages: { "수량": 2, "포장 수 / 단위": 2 }, onOpen: () => onOpenDocument("Invoice_HB-2607-003.pdf", "ci-0703") },
-      ],
-    },
-    {
-      documentId: "bl-015w-03",
-      blNumber: "HMM-015W-2607",
-      fileName: "B/L_2607_015.pdf",
-      uploadedAt: "2026.11.19 09:10",
-      fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "015W", shippedOnBoardDate: "2026.11.27", containerNumber: "HMMU7654321", containerCount: 1, sealNumber: "SEAL-01503", packageCount: "6", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "8,200 KG", volume: "16.1 CBM" },
-      containers: [{ number: "HMMU7654321", containerType: "40HC", sealNumber: "SEAL-01503", packageCount: "6", packageUnit: "bundles", grossWeight: "8,200 KG", volume: "16.1 CBM" }],
-      connectedDocuments: [
-        { documentId: "ci-0712", referenceBlNumber: "HMM-015W-2607", code: "CI", number: "CI-2026-0712", fileName: "Invoice_HB-2607-012.pdf" },
-        { documentId: "pl-0708", referenceBlNumber: "HMM-015W-2607", code: "PL", items: [{ name: "Aluminium Scrap Taint Tabor", hsCode: "7602.00" }], number: "PL-2026-0708", fileName: "PackingList_0708.pdf" },
-      ],
-      connectedCommercialInvoices: [{ documentId: "ci-0712", referenceBlNumber: "HMM-015W-2607", fileName: "Invoice_HB-2607-012.pdf", uploadedAt: "2026.11.19 09:12", invoiceNumber: "CI-2026-0712", invoiceDate: "2026.11.18", currency: "USD", totalAmount: 770000, item: "Aluminium Scrap", quantity: "6 MT", unitPrice: "128,333 USD/MT", packageCount: "6", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_HB-2607-012.pdf", "ci-0712") }],
-    },
-    {
-      documentId: "bl-016w-04",
-      blNumber: "HMM-016W-2607",
-      fileName: "B/L_2607_016.pdf",
-      uploadedAt: "2026.11.20 10:05",
-      fields: { portOfLoading: "Melbourne", portOfDischarge: "Busan", carrier: "HMM", vessel: "HMM Green", voyageNo: "016W", shippedOnBoardDate: "2026.12.03", containerNumber: "HMMU9876543", containerCount: 2, sealNumber: "SEAL-01604", packageCount: "8", packageType: "bundles", goods: "Aluminium Scrap", grossWeight: "10,400 KG", volume: "20.2 CBM" },
-      containers: [
-        { number: "HMMU9876543", containerType: "40GP", sealNumber: "SEAL-01604-A", packageCount: "4", packageUnit: "bundles", grossWeight: "5,200 KG", volume: "10.1 CBM" },
-        { number: "HMMU9876544", containerType: "40GP", sealNumber: "SEAL-01604-B", packageCount: "4", packageUnit: "bundles", grossWeight: "5,200 KG", volume: "10.1 CBM" },
-      ],
-      connectedDocuments: [
-        { documentId: "ci-0715", referenceBlNumber: "HMM-016W-2607", code: "CI", number: "CI-2026-0715", fileName: "Invoice_HB-2607-015.pdf" },
-        { documentId: "pl-0709", referenceBlNumber: "HMM-016W-2607", code: "PL", items: [{ name: "Aluminium Scrap", hsCode: "7602.00" }], number: "PL-2026-0709", fileName: "PackingList_0709.pdf" },
-      ],
-      connectedCommercialInvoices: [{ documentId: "ci-0715", referenceBlNumber: "HMM-016W-2607", fileName: "Invoice_HB-2607-015.pdf", uploadedAt: "2026.11.20 10:07", invoiceNumber: "CI-2026-0715", invoiceDate: "2026.11.19", currency: "USD", totalAmount: 1026400, item: "Aluminium Scrap", quantity: "8 MT", unitPrice: "128,300 USD/MT", packageCount: "8", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_HB-2607-015.pdf", "ci-0715") }],
-    },
-  ]
-  return {
-    billsOfLading: billsOfLading.slice(0, shipmentCount),
-    unlinkedDocuments: [{ documentId: "ci-unlinked-01", referenceBlNumber: "HMM-017W-2607", fileName: "Invoice_awaiting_bl.pdf", uploadedAt: "2026.11.19 09:18", invoiceNumber: "CI-2026-0718", invoiceDate: "2026.11.19", currency: "USD", totalAmount: 256600, item: "Aluminium Scrap", quantity: "2 MT", unitPrice: "128,300 USD/MT", packageCount: "2", packageUnit: "bundles", onOpen: () => onOpenDocument("Invoice_awaiting_bl.pdf", "ci-unlinked-01") }],
-  }
-}
-
 // Prototype customs declarations (Figma 7872:185027). The real rows come from
 // confirmed declaration data; originals are not kept after confirmation.
-const customsDeclarations = (direction: DealProfile["direction"], dealId: string): Array<{ title: string; number: string; date: string; duty: string; vat: string; confirmed: boolean }> => {
+const customsDeclarations = (direction: DealProfile["direction"], dealId: string): Array<{ title: string; number: string; date: string; duty: string; vat: string; confirmed: boolean; fileName: string }> => {
   // Demo data only for deals that already moved on to 정산 (customs done):
   // their declarations are confirmed. Earlier deals keep customs empty/planned.
   if (!["settlement", "settled"].includes(dealStage(dealId))) return []
   const title = direction === "sales" ? "수출신고필증" : "수입신고필증"
   return [
-    { title: `${title} A`, number: "12345-26-0000101", date: "2026.10.28", duty: "KRW 1,840,000", vat: "KRW 184,000", confirmed: true },
-    { title: `${title} B`, number: "12345-26-0000102", date: "2026.10.29", duty: "USD 650", vat: "USD 65", confirmed: true },
+    // Duties and VAT on a Korean declaration are in KRW (#1221 pattern).
+    { title: `${title} A`, number: "12345-26-0000101", date: "2026.10.28", duty: "KRW 1,840,000", vat: "KRW 184,000", confirmed: true, fileName: `${title}_12345-26-0000101.pdf` },
+    { title: `${title} B`, number: "12345-26-0000102", date: "2026.10.29", duty: "KRW 872,000", vat: "KRW 87,200", confirmed: true, fileName: `${title}_12345-26-0000102.pdf` },
   ]
 }
 
@@ -1794,6 +1752,39 @@ const requestDocumentPage = (file: string, page: number) => {
   window.dispatchEvent(new CustomEvent("ecoya:deal-document-page", { detail: pendingDocumentPage }))
 }
 
+// Small p.N next to a field read from a multi-page document (CI, contract,
+// B/L): opens the document beside the deal at that page. Same look as the CI.
+function DocumentPageMarker({ label, page, fileName, code }: { label: string; page: number; fileName: string; code: string }) {
+  return (
+    <button
+      type="button"
+      className="text-[11px] leading-4 text-[var(--color-gray-6)] underline-offset-2 hover:text-[var(--color-primary-4)] hover:underline"
+      aria-label={`${label} 근거 ${page}페이지 보기`}
+      onClick={() => {
+        requestDocumentPage(fileName, page)
+        window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code, fileName } }))
+      }}
+    >
+      p.{page}
+    </button>
+  )
+}
+
+// Prototype: the deal's basis contract (multi-page) and the page each contract
+// field is read from. A field read from several documents shows this contract's
+// page only; shipping fields read from the B/L have no contract page.
+const dealContractSource = {
+  code: "SC",
+  fileName: "SC-2026-0708.pdf",
+  pageCount: 3,
+  fieldPages: {
+    buyer: 1, seller: 1, contract_number: 1, contract_date: 1,
+    currency: 2, amount_total: 2, incoterms: 2, payment_terms: 2,
+    required_date: 3, latest_shipment_date: 3, port_loading: 3, port_discharge: 3,
+    bank_name: 3, bank_account: 3, bank_swift: 3,
+  } as Partial<Record<string, number>>,
+}
+
 // Describes the control the user clicked to open 「문서와 보기」 (by aria-label or
 // the nearest id) so it can be found again after the page re-mounts into the
 // split and the left pane can be scrolled to keep it at the same height.
@@ -1815,15 +1806,7 @@ const describeScrollAnchor = (target: Element | null): ScrollAnchor | null => {
 const openedInvoiceRows = new Map<string, Set<string>>()
 const openedItemRows = new Map<string, Set<number>>()
 
-type CommercialInvoiceRecord = {
-  invoice: SplitShipmentView["billsOfLading"][number]["connectedCommercialInvoices"][number]
-  billOfLadingIds: string[]
-}
 
-const containerCountLabel = (bill: SplitShipmentView["billsOfLading"][number]) => {
-  const count = bill.containers?.length || bill.fields.containerCount || (bill.fields.containerNumber ? 1 : 0)
-  return count ? `컨테이너 ${count}대` : "컨테이너 미확인"
-}
 
 const billContainers = (bill: SplitShipmentView["billsOfLading"][number]) => {
   if (bill.containers?.length) return bill.containers
@@ -1853,11 +1836,27 @@ const revealAddedRow = (rowId: string) => {
   }
   requestAnimationFrame(reveal)
 }
-// Jumping to a shipment or CI row also opens it.
-const openShipmentRowByAnchor = (anchor: string) => window.dispatchEvent(new CustomEvent("ecoya:open-shipment-row", { detail: anchor }))
-const openShipmentRow = (billId: string) => openShipmentRowByAnchor(dealBillAnchorId(billId))
-const openInvoiceRow = (invoiceId: string) => window.dispatchEvent(new CustomEvent("ecoya:open-invoice-row", { detail: invoiceId }))
+// Jumping to a shipment, CI or packing list row opens it, scrolls it under
+// the sticky header and moves keyboard focus to its open/close toggle.
+const focusRow = (anchor: string) => requestAnimationFrame(() => requestAnimationFrame(() => {
+  const row = document.getElementById(anchor)
+  if (!row) return
+  row.scrollIntoView({ block: "start", behavior: "smooth" })
+  row.querySelector<HTMLElement>("[aria-expanded]")?.focus({ preventScroll: true })
+}))
+const openShipmentRowByAnchor = (anchor: string) => { window.dispatchEvent(new CustomEvent("ecoya:open-shipment-row", { detail: anchor })); focusRow(anchor) }
+const openInvoiceRow = (invoiceId: string) => { window.dispatchEvent(new CustomEvent("ecoya:open-invoice-row", { detail: invoiceId })); focusRow(dealInvoiceAnchorId(invoiceId)) }
+const openPackingListRow = (documentId: string) => { window.dispatchEvent(new CustomEvent("ecoya:open-packing-list", { detail: documentId })); focusRow(dealPackingListAnchorId(documentId)) }
 const openBillDocument = (bill: { fileName: string }) => window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code: "BL", fileName: bill.fileName } }))
+
+function followBillLink(event: React.MouseEvent<HTMLAnchorElement>, anchor: string, bill?: { fileName: string }) {
+  if (bill?.fileName && !document.getElementById(anchor)) {
+    event.preventDefault()
+    openBillDocument(bill)
+  } else {
+    openShipmentRowByAnchor(anchor)
+  }
+}
 
 // 서류·근거 cell of a deal shipment row: the CIs linked to this B/L.
 type BillCard = SplitShipmentView["billsOfLading"][number]
@@ -1880,7 +1879,7 @@ function billOptionLabel(bill: BillCard, bills: BillCard[]) {
   return repeated ? `${bill.blNumber} · ${bill.fileName}` : bill.blNumber
 }
 const dealShipmentAnchorId = (shipmentId: string) => `deal-shipment-${shipmentId}`
-type PackingListEntry = { bill?: BillCard; document: { documentId: string; number?: string | null; fileName: string; referenceBlNumber?: string | null; containers?: PackingContainer[]; items?: PackingItem[] }; containers: PackingContainer[]; manual?: boolean }
+type PackingListEntry = { bill?: BillCard; document: Pick<NonNullable<BillCard["connectedDocuments"]>[number], "documentId" | "number" | "fileName" | "referenceBlNumber" | "containers" | "items" | "grossWeight" | "quantity" | "unitPrice" | "amount">; containers: PackingContainer[]; manual?: boolean }
 function dealPackingLists(view: SplitShipmentView, relations: DealInvoiceRelationState): PackingListEntry[] {
   const lists = new Map<string, PackingListEntry>()
   const add = (document: PackingListEntry["document"], bill?: BillCard, manual = false) => {
@@ -1896,33 +1895,58 @@ function dealPackingLists(view: SplitShipmentView, relations: DealInvoiceRelatio
   for (const [id, list] of Object.entries(relations.manualPackingLists)) add({ documentId: id, number: list.number, fileName: "" }, undefined, true)
   return [...lists.values()]
 }
-function shipmentLinkedDocuments(view: SplitShipmentView, relations: DealInvoiceRelationState, key: string) {
+function dealDocumentLinks(view: SplitShipmentView, relations: DealInvoiceRelationState) {
   // CIs and packing lists entered by hand count as documents of the deal too.
   const manualInvoices = relations.manualInvoices.map((id) => {
     const fields = relations.invoiceFields[id] ?? {}
     const amount = (fields["통화·금액"] ?? "").match(/^([A-Z]{3})?\s*([\d,.]+)?/)
-    const card: CommercialInvoiceCard = { documentId: id, fileName: "", uploadedAt: "", invoiceNumber: fields["송장번호"] || "송장번호 미입력", invoiceDate: fields["송장일자"] || null, currency: amount?.[1] ?? null, totalAmount: amount?.[2] ? Number(amount[2].replaceAll(",", "")) : null }
+    const card: CommercialInvoiceCard = { documentId: id, fileName: "", uploadedAt: "", invoiceNumber: fields["송장번호"] || "송장번호 미입력", invoiceDate: fields["송장일자"] || null, currency: amount?.[1] ?? null, totalAmount: amount?.[2] ? Number(amount[2].replaceAll(",", "")) : null, quantity: fields["수량"] || null }
     return card
   })
-  const invoiceOwner = new Map<string, string>()
-  for (const entry of view.billsOfLading) for (const invoice of entry.connectedCommercialInvoices) if (!invoiceOwner.has(invoice.documentId)) invoiceOwner.set(invoice.documentId, entry.documentId)
-  const ownedInvoices = view.billsOfLading.flatMap((entry) => entry.connectedCommercialInvoices.filter((invoice) => invoiceOwner.get(invoice.documentId) === entry.documentId))
+  // A CI may arrive on several B/Ls (split shipment); all of them are its links.
+  const invoiceOwners = new Map<string, string[]>()
+  for (const entry of view.billsOfLading) for (const invoice of entry.connectedCommercialInvoices) invoiceOwners.set(invoice.documentId, [...(invoiceOwners.get(invoice.documentId) ?? []), entry.documentId])
+  const ownedInvoices = view.billsOfLading.flatMap((entry) => entry.connectedCommercialInvoices)
   const allInvoices = [...new Map([...ownedInvoices, ...view.unlinkedDocuments, ...manualInvoices].map((invoice) => [invoice.documentId, invoice])).values()].filter((invoice) => !relations.removedDocuments.includes(invoice.documentId))
-  const invoiceLink = (invoice: CommercialInvoiceCard) => resolveDealShipmentLink(relations.invoiceToBills, invoice.documentId, invoiceOwner.get(invoice.documentId))
-  const invoices = allInvoices.filter((invoice) => invoiceLink(invoice) === key)
-  const allPackingLists = dealPackingLists(view, relations).map(({ bill: owner, document, containers }) => ({ document, owner, containers, containerCount: containers.length }))
-  const packingLink = (entry: typeof allPackingLists[number]) => resolveDealShipmentLink(relations.packingToShipments, entry.document.documentId, entry.owner?.documentId)
-  const packingLists = allPackingLists.filter((entry) => packingLink(entry) === key)
-  return {
-    invoices,
-    packingLists,
-    invoiceCandidates: allInvoices.filter((invoice) => !invoiceLink(invoice)),
-    packingCandidates: allPackingLists.filter((entry) => !packingLink(entry)),
-  }
+  const directBills = (id: string) => resolveDealShipmentLinks(relations.invoiceToBills, id, view.firstPackingInvoices ? [] : invoiceOwners.get(id))
+  const explicitPackingBills = new Set(Object.values(relations.packingToShipments).flat())
+  const packing = dealPackingLists(view, relations).map(list => {
+    const { document, containers } = list
+    const originalBill = list.bill?.documentId
+    const automaticBill = originalBill && !explicitPackingBills.has(originalBill) ? originalBill : undefined
+    const shipmentKey = resolveDealShipmentLink(relations.packingToShipments, document.documentId, automaticBill)
+    // Retain pairs from older saved deals where the two documents shared a manually linked shipment.
+    const legacyOwner = shipmentKey ? allInvoices.find(invoice => directBills(invoice.documentId).includes(shipmentKey)) : undefined
+    const firstInvoice = view.firstPackingInvoices?.[document.documentId]
+    const owner = resolveDealShipmentLink(relations.packingToInvoices, document.documentId, legacyOwner?.documentId || firstInvoice)
+    return { ...list, shipmentKey, invoiceId: allInvoices.some(ci => ci.documentId === owner) ? owner : undefined,
+      containerCount: containers.length, grossWeight: packingGrossWeight(containers, document.grossWeight) }
+  })
+  const invoices = allInvoices.map(invoice => {
+    const direct = directBills(invoice.documentId)
+    const indirect = packing.filter(pl => pl.invoiceId === invoice.documentId && pl.shipmentKey).map(pl => pl.shipmentKey!)
+    const links = [...new Set([...direct, ...indirect])]
+    const draft = relations.invoiceFields[invoice.documentId] ?? {}
+    return {
+      ...invoice,
+      quantity: draft["수량"] ?? invoice.quantity,
+      unitPrice: draft["단가"] ?? invoice.unitPrice,
+      amount: draft["통화·금액"] ?? (invoice.totalAmount != null ? [invoice.currency, invoice.totalAmount].filter(value => value != null).join(" ") : ""),
+      invoiceNumber: draft["송장번호"] ?? invoice.invoiceNumber,
+      direct, links,
+      linkedNumbers: links.map(key => view.billsOfLading.find(bill => bill.documentId === key)?.blNumber ?? relations.shipmentLabels[key]),
+    }
+  })
+  return { invoices, packing }
+}
+
+type DealDocumentLinks = ReturnType<typeof dealDocumentLinks>
+function documentsForShipment(graph: DealDocumentLinks, key: string) {
+  return { invoices: graph.invoices.filter(ci => ci.links.includes(key)), packingLists: graph.packing.filter(pl => pl.shipmentKey === key) }
 }
 
 // 연결 column of a deal shipment row: the CIs linked to this shipment.
-function ShipmentDocumentLinks({ invoices }: { invoices: ReturnType<typeof shipmentLinkedDocuments>["invoices"] }) {
+function ShipmentDocumentLinks({ invoices }: { invoices: DealDocumentLinks["invoices"] }) {
   return (
     <div className="truncate">
       <span className="text-[var(--color-gray-5)]">CI </span>
@@ -1931,7 +1955,7 @@ function ShipmentDocumentLinks({ invoices }: { invoices: ReturnType<typeof shipm
           {index ? ", " : null}
           <a href={`#${dealInvoiceAnchorId(invoice.documentId)}`} className="text-[var(--color-primary-4)] hover:underline" onClick={() => openInvoiceRow(invoice.documentId)}>{invoice.invoiceNumber || invoice.fileName}</a>
         </Fragment>
-      )) : <span className="text-[var(--color-orange-2)]">연결 필요</span>}
+      )) : <span className="text-muted-foreground">B/L 대기</span>}
     </div>
   )
 }
@@ -1946,90 +1970,212 @@ function BlReferenceNotice({ reference, linked }: { reference?: string | null; l
   </div>
 }
 
-function DocumentLinkControl({ code, options, value, onValueChange, onLink, canWrite, existingCount, helperText, sourceBlNumber }: {
-  code: "BL" | "CI" | "PL"
-  options: Array<{ id: string; label: string; blNumber?: string | null }>
-  value: string
-  onValueChange: (value: string) => void
-  onLink: () => void
-  canWrite: boolean
-  existingCount: number
-  helperText?: string
-  sourceBlNumber?: string | null
-}) {
-  if (existingCount > 0) return null
-  const label = code === "CI" ? "상업송장" : code === "PL" ? "포장명세서" : "선적 B/L"
+// 반올림/절사 choice of one amount; every amount (총금액, 품목 금액, CI 금액) has its own.
+function AmountRoundingSelect({ value, onValueChange, disabled, label }: { value: TotalRounding; onValueChange: (mode: TotalRounding) => void; disabled?: boolean; label: string }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
-      <DocumentTypeBadge code={code} />
-      <StatusBadge size="sm" tone="warning">연결 필요</StatusBadge>
-      {canWrite && options.length ? (
-        <>
-          <Select value={value} onValueChange={onValueChange}>
-            <SelectTrigger size="sm" className="w-full min-w-0 sm:w-56" aria-label={`연결할 ${label} 선택`}><SelectValue placeholder={`${label} 선택`} /></SelectTrigger>
-            <SelectContent className="max-w-[calc(100vw-2rem)]">{options.map((option) => <SelectItem key={option.id} value={option.id}>{option.label}</SelectItem>)}</SelectContent>
-          </Select>
-          <Button type="button" size="sm" variant="outline" disabled={!value} onClick={onLink}>연결</Button>
-        </>
-      ) : <span className="text-muted-foreground">{helperText ?? (canWrite ? "연결할 문서가 없습니다. 문서를 올리면 연결할 수 있습니다." : "연결된 문서가 없습니다.")}</span>}
-      <BlReferenceNotice reference={code === "BL" ? sourceBlNumber : options.find((option) => option.id === value)?.blNumber} linked={code === "BL" ? options.find((option) => option.id === value)?.blNumber : sourceBlNumber} />
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost-neutral" size="xs" disabled={disabled} aria-label={`${label}, 현재 ${totalRoundingLabels[value]}`}>
+          {totalRoundingLabels[value]}
+          <ChevronDown data-icon="inline-end" aria-hidden="true" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" aria-label={label} className="w-max min-w-40 whitespace-nowrap">
+        <DropdownMenuRadioGroup value={value} onValueChange={(mode) => {
+          if (mode === "round" || mode === "truncate") onValueChange(mode)
+        }}>
+          <DropdownMenuRadioItem value="round">{totalRoundingLabels.round}</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="truncate">{totalRoundingLabels.truncate} (버림)</DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
-function DocumentUnlinkButton({ dealId, code, documentId, label, canWrite }: {
-  dealId: string; code: "CI" | "PL"; documentId: string; label: string; canWrite: boolean
-}) {
-  if (!canWrite) return null
-  return (
-    <Button type="button" size="sm" variant="ghost-neutral" className="ml-auto shrink-0" aria-label={`${label} 연결 해제`} onClick={(event) => {
-      event.stopPropagation()
-      unlinkDealDocumentFromShipment(dealId, code, documentId)
-    }}>연결 해제</Button>
-  )
+// "USD 1539999.965" shown with its amount's rounding; the stored text stays as entered.
+const roundedAmountText = (text: string, mode: TotalRounding) => {
+  const match = text.trim().match(/^([A-Z]{3})\s+(.+)$/)
+  return match ? `${match[1]} ${roundedDealTotal(match[2], match[1], mode)}` : text
 }
 
-// 연결 문서 of an opened shipment row: one line per linked CI and packing list,
-// laid out like the CI row's 연결 문서 (type badge · number link · key facts).
-// When a CI or packing list is missing, the line offers candidates to link.
-function ShipmentLinkedDocuments({ dealId, shipmentKey, blNumber, links, canWrite }: {
-  dealId: string
-  shipmentKey: string
-  blNumber?: string | null
-  links: ReturnType<typeof shipmentLinkedDocuments>
-  canWrite: boolean
+function LinkedDocumentMeasures({ grossWeight, quantity, amount }: {
+  grossWeight?: string | null
+  quantity?: string | null
+  amount?: string | null
 }) {
-  const [invoiceChoice, setInvoiceChoice] = useState("")
-  const [packingChoice, setPackingChoice] = useState("")
-  const { invoices, packingLists, invoiceCandidates, packingCandidates } = links
-  const count = invoices.length + packingLists.length
+  return <>
+    {grossWeight ? <strong className="tabular-nums">총중량 {grossWeight}</strong>
+      : quantity ? <span className="tabular-nums">{/\b(MT|KG|LB|TON)$/i.test(quantity.trim()) ? "중량" : "수량"} {quantity}</span>
+      : <span className="text-muted-foreground">중량 미확인</span>}
+    {amount && <span className="tabular-nums">금액 {amount}</span>}
+  </>
+}
+
+type LinkableDocument = "CI" | "PL" | "BL"
+type CandidateSummary = { id: string; label: string; grossWeight: string | null | undefined }
+type PackingChoice = CandidateSummary & { connect: () => void }
+type DocumentCandidate = CandidateSummary & {
+  code: LinkableDocument; reference?: string | null; linkedBl?: string | null
+} & ({ connect: () => void; choices?: undefined } | { choices: PackingChoice[]; connect?: undefined })
+
+function billGrossWeight(bill: BillCard) {
+  return bill.fields.grossWeight?.trim() || sumMeasure((bill.containers ?? []).map(container => container.grossWeight))
+}
+
+function CandidateLabel({ candidate }: { candidate: CandidateSummary }) {
+  return <>
+    <span className="min-w-0 flex-1 break-all">{candidate.label}</span>
+    <span className="ml-auto whitespace-nowrap text-[13px] text-muted-foreground tabular-nums">총중량 {candidate.grossWeight?.trim() || "미확인"}</span>
+  </>
+}
+
+function DealLinkedDocuments({ dealId, code, id, name, view, graph, relations, canWrite }: {
+  dealId: string; code: LinkableDocument; id: string; name: string; view: SplitShipmentView
+  graph: DealDocumentLinks; relations: DealInvoiceRelationState; canWrite: boolean
+}) {
+  const [adding, setAdding] = useState(false)
+  const [choosingBill, setChoosingBill] = useState<string | null>(null)
+  const rounding = useAmountRoundings(dealId)
+  const close = () => { setAdding(false); setChoosingBill(null) }
+  const invoice = code === "CI" ? graph.invoices.find(ci => ci.documentId === id) : undefined
+  const packing = code === "PL" ? graph.packing.find(pl => pl.document.documentId === id) : undefined
+  const linkedPacking = graph.packing.filter(pl => code === "CI" ? pl.invoiceId === id : code === "BL" && pl.shipmentKey === id)
+  const linkedInvoices = graph.invoices.filter(ci => code === "PL" ? ci.documentId === packing?.invoiceId : code === "BL" && ci.links.includes(id))
+  const billIds = invoice?.links ?? (packing?.shipmentKey ? [packing.shipmentKey] : [])
+  const candidates: DocumentCandidate[] = []
+  if (code === "CI" || (code === "BL" && !linkedPacking.length)) {
+    for (const pl of graph.packing) {
+      if (code === "CI" && (pl.invoiceId || (pl.shipmentKey && graph.invoices.some(ci => ci.documentId !== id && ci.links.includes(pl.shipmentKey!))))) continue
+      if (code === "BL" && (pl.shipmentKey || (pl.invoiceId && linkedInvoices.some(ci => ci.documentId !== pl.invoiceId)))) continue
+      const plId = pl.document.documentId
+      candidates.push({ code: "PL", id: plId, grossWeight: pl.grossWeight, label: pl.document.number || pl.document.fileName || "포장번호 미입력",
+        reference: code === "BL" ? pl.document.referenceBlNumber : undefined, linkedBl: code === "BL" ? name : undefined,
+        connect: () => code === "CI" ? setPackingInvoice(dealId, plId, id) : linkDealPackingListToShipment(dealId, plId, id, name) })
+    }
+  }
+  if (packing) {
+    if (!packing.invoiceId) {
+      for (const ci of graph.invoices) {
+        if (packing.shipmentKey && graph.invoices.some(other => other.documentId !== ci.documentId && other.links.includes(packing.shipmentKey!))) continue
+        candidates.push({ code: "CI", id: ci.documentId, grossWeight: ci.grossWeight, label: ci.invoiceNumber || ci.fileName || "송장번호 미입력",
+          connect: () => setPackingInvoice(dealId, id, ci.documentId) })
+      }
+    }
+    if (!packing.shipmentKey) {
+      for (const bill of view.billsOfLading) {
+        if (graph.packing.some(pl => pl.shipmentKey === bill.documentId)) continue
+        if (packing.invoiceId && graph.invoices.some(ci => ci.documentId !== packing.invoiceId && ci.links.includes(bill.documentId))) continue
+        candidates.push({ code: "BL", id: bill.documentId, label: billOptionLabel(bill, view.billsOfLading), grossWeight: billGrossWeight(bill),
+          reference: packing.document.referenceBlNumber, linkedBl: bill.blNumber,
+          connect: () => linkDealPackingListToShipment(dealId, id, bill.documentId, bill.blNumber ?? undefined) })
+      }
+    }
+  }
+  if (invoice) {
+    const pending = linkedPacking.filter(pl => !pl.shipmentKey)
+    for (const bill of view.billsOfLading) {
+      const key = bill.documentId
+      if (graph.invoices.some(ci => ci.links.includes(key))) continue
+      const owner = graph.packing.find(pl => pl.shipmentKey === key)
+      const option = { code: "BL" as const, id: key, label: billOptionLabel(bill, view.billsOfLading), grossWeight: billGrossWeight(bill),
+        reference: invoice.referenceBlNumber, linkedBl: bill.blNumber }
+      if (owner) {
+        candidates.push({ ...option, connect: () => setPackingInvoice(dealId, owner.document.documentId, id) })
+      } else if (pending.length) {
+        const choices = pending.map(({ document, grossWeight }) => ({
+          id: document.documentId, grossWeight, label: document.number || document.fileName || "포장번호 미입력",
+          connect: () => linkDealPackingListToShipment(dealId, document.documentId, key, bill.blNumber ?? undefined),
+        }))
+        candidates.push(choices.length === 1 ? { ...option, connect: choices[0].connect } : { ...option, choices })
+      } else {
+        candidates.push({ ...option, connect: () => linkDealInvoiceToShipment(dealId, id, key, bill.blNumber ?? undefined, invoice.direct) })
+      }
+    }
+  }
+  const selectedBill = candidates.find(option => option.code === "BL" && option.id === choosingBill && option.choices)
+  const unlink = (label: string, action: () => void) => canWrite && (
+    <Button type="button" size="sm" variant="ghost-neutral" className="ml-auto" aria-label={`${label} 연결 해제`} onClick={action}>연결 해제</Button>
+  )
+  const rowClass = "flex flex-wrap items-center gap-x-2 gap-y-1 py-2 text-sm"
+  const linkClass = "font-semibold text-[var(--color-primary-4)] hover:underline"
+  const count = linkedPacking.length + linkedInvoices.length + billIds.length
   return (
-    <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
-      <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">연결 문서</h3><span className="text-xs text-muted-foreground">{count ? `${count}건` : "연결 필요"}</span></div>
-      <ul className="mt-2 divide-y">
-        {invoices.map((invoice) => (
-          <li key={invoice.documentId} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 text-sm">
-            <DocumentTypeBadge code="CI" />
-            <a href={`#${dealInvoiceAnchorId(invoice.documentId)}`} className="font-semibold text-[var(--color-primary-4)] hover:underline" onClick={() => openInvoiceRow(invoice.documentId)}>{invoice.invoiceNumber || invoice.fileName}</a>
-            {invoice.currency && invoice.totalAmount != null ? <span className="text-muted-foreground tabular-nums">{invoice.currency} {invoice.totalAmount.toLocaleString()}</span> : null}
-            {invoice.invoiceDate ? <span className="text-xs text-muted-foreground">{invoice.invoiceDate}</span> : null}
-            <DocumentUnlinkButton dealId={dealId} code="CI" documentId={invoice.documentId} label={invoice.invoiceNumber || invoice.fileName || "CI"} canWrite={canWrite} />
-            <BlReferenceNotice reference={invoice.referenceBlNumber} linked={blNumber} />
+    <section aria-label={`${name} 연결 문서`} className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="text-sm font-semibold">연결 문서</h3>
+        {canWrite && <DropdownMenu open={adding} onOpenChange={open => open ? setAdding(true) : close()}>
+          <DropdownMenuTrigger asChild>
+            <Button type="button" size="sm" variant="outline" className="ml-auto"><Plus data-icon="inline-start" />연결추가</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" aria-label="연결 후보" className="w-96 max-w-[calc(100vw-2rem)]">
+            {selectedBill?.choices ? <>
+              <DropdownMenuLabel>{selectedBill.label}에 연결할 포장분</DropdownMenuLabel>
+              {selectedBill.choices.map(pl => <DropdownMenuItem key={pl.id} textValue={pl.label} onSelect={pl.connect}><CandidateLabel candidate={pl} /></DropdownMenuItem>)}
+            </> : (["CI", "PL", "BL"] as const).map(type => {
+              const group = candidates.filter(option => option.code === type)
+              return group.length > 0 && <DropdownMenuGroup key={type}>
+                <DropdownMenuLabel>{type === "CI" ? "상업송장" : type === "PL" ? "포장명세서" : "선하증권"}</DropdownMenuLabel>
+                {group.map(option => <DropdownMenuItem key={option.id} textValue={option.label} onSelect={event => {
+                  if (option.choices) { event.preventDefault(); setChoosingBill(option.id) }
+                  else option.connect()
+                }}>
+                  <CandidateLabel candidate={option} />
+                  {blNumbersMismatch(option.reference, option.linkedBl) && <StatusBadge size="sm" tone="danger">번호 불일치</StatusBadge>}
+                </DropdownMenuItem>)}
+              </DropdownMenuGroup>
+            })}
+            {!candidates.length && <DropdownMenuItem disabled>연결할 수 있는 문서가 없습니다.</DropdownMenuItem>}
+          </DropdownMenuContent>
+        </DropdownMenu>}
+
+      </div>
+      {count > 0 && <ul className="mt-2 divide-y">
+        {linkedInvoices.map(ci => {
+          const label = ci.invoiceNumber || ci.fileName || "송장번호 미입력"
+          const via = linkedPacking.find(pl => pl.invoiceId === ci.documentId)
+          return <li key={`ci:${ci.documentId}`} className={rowClass}>
+            <DocumentTypeBadge code="CI" /><a className={linkClass} href={`#${dealInvoiceAnchorId(ci.documentId)}`} onClick={() => openInvoiceRow(ci.documentId)}>{label}</a>
+            <LinkedDocumentMeasures grossWeight={ci.grossWeight || undefined} quantity={ci.quantity} amount={roundedAmountText(ci.amount, rounding.read(`ci:${ci.documentId}`))} />
+            {code === "PL" ? unlink(label, () => setPackingInvoice(dealId, id, null)) : via
+              ? <span className="text-xs text-muted-foreground">PL로 연결</span>
+              : unlink(label, () => unlinkDealDocumentFromShipment(dealId, { code: "CI", documentId: ci.documentId, shipmentKey: id, directKeys: ci.direct }))}
+            {code === "BL" && !ci.linkedNumbers.some(number => number && !blNumbersMismatch(ci.referenceBlNumber, number)) && <BlReferenceNotice reference={ci.referenceBlNumber} linked={name} />}
           </li>
-        ))}
-        {invoices.length === 0 ? <li className="py-2 text-sm"><DocumentLinkControl code="CI" sourceBlNumber={blNumber} options={invoiceCandidates.map((invoice) => ({ id: invoice.documentId, label: invoice.invoiceNumber || invoice.fileName, blNumber: invoice.referenceBlNumber }))} value={invoiceChoice} onValueChange={setInvoiceChoice} canWrite={canWrite} existingCount={invoices.length} onLink={() => { linkDealInvoiceToShipment(dealId, invoiceChoice, shipmentKey, blNumber ?? undefined); setInvoiceChoice("") }} helperText="연결할 상업송장이 없습니다. 문서를 올리면 연결할 수 있습니다." /></li> : null}
-        {packingLists.map(({ document, containerCount }) => (
-          <li key={document.documentId} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 text-sm">
-            <DocumentTypeBadge code="PL" />
-            <a href={`#${dealPackingListAnchorId(document.documentId)}`} className="font-semibold text-[var(--color-primary-4)] hover:underline" onClick={() => window.dispatchEvent(new CustomEvent("ecoya:open-packing-list", { detail: document.documentId }))}>{document.number || document.fileName}</a>
-            <StatusBadge size="sm" tone="neutral">컨테이너 {containerCount}대</StatusBadge>
-            <DocumentUnlinkButton dealId={dealId} code="PL" documentId={document.documentId} label={document.number || document.fileName || "PL"} canWrite={canWrite} />
-            <BlReferenceNotice reference={document.referenceBlNumber} linked={blNumber} />
+        })}
+        {linkedPacking.map(pl => {
+          const doc = pl.document
+          const label = doc.number || doc.fileName || "포장번호 미입력"
+          return <li key={`pl:${doc.documentId}`} className={rowClass}>
+            <DocumentTypeBadge code="PL" /><a className={linkClass} href={`#${dealPackingListAnchorId(doc.documentId)}`} onClick={() => openPackingListRow(doc.documentId)}>{label}</a>
+            <LinkedDocumentMeasures grossWeight={pl.grossWeight ?? null} quantity={doc.quantity} />
+            {code === "CI" && !pl.shipmentKey && <span className="text-xs text-muted-foreground">B/L 대기</span>}
+            {unlink(label, () => code === "CI" ? setPackingInvoice(dealId, doc.documentId, null) : unlinkDealDocumentFromShipment(dealId, { code: "PL", documentId: doc.documentId, invoiceId: pl.invoiceId }))}
+            {code === "BL" && <BlReferenceNotice reference={doc.referenceBlNumber} linked={name} />}
           </li>
-        ))}
-        {packingLists.length === 0 ? <li className="py-2 text-sm"><DocumentLinkControl code="PL" sourceBlNumber={blNumber} options={packingCandidates.map(({ document }) => ({ id: document.documentId, label: document.number ?? document.fileName, blNumber: document.referenceBlNumber }))} value={packingChoice} onValueChange={setPackingChoice} canWrite={canWrite} existingCount={packingLists.length} onLink={() => { linkDealPackingListToShipment(dealId, packingChoice, shipmentKey, blNumber ?? undefined); setPackingChoice("") }} helperText="연결할 포장명세서가 없습니다. 문서를 올리면 연결할 수 있습니다." /></li> : null}
-      </ul>
-    </div>
+        })}
+        {billIds.map(key => {
+          const bill = view.billsOfLading.find(entry => entry.documentId === key)
+          const label = bill?.blNumber || relations.shipmentLabels[key] || "B/L 번호 미확인"
+          const anchor = bill ? dealBillAnchorId(key) : dealShipmentAnchorId(key.replace(/^shipment:/, ""))
+          const via = linkedPacking.find(pl => pl.shipmentKey === key)
+          const linkedList = via ?? packing
+          const containerCount = bill?.fields.containerCount ?? (bill?.containers?.length || linkedList?.containerCount || (bill?.fields.containerNumber ? 1 : undefined))
+          return <li key={`bl:${key}`} className={rowClass}>
+            <DocumentTypeBadge code="BL" /><a className={linkClass} href={`#${anchor}`} onClick={event => followBillLink(event, anchor, bill)}>{label}</a>
+            {bill && <LinkedDocumentMeasures grossWeight={billGrossWeight(bill)} quantity={bill.fields.quantity} />}
+            <StatusBadge size="sm" tone="neutral">{containerCount == null ? "컨테이너 대수 미확인" : `컨테이너 ${containerCount}대`}</StatusBadge>
+            {via && <span className="text-xs text-muted-foreground">{via.document.number || via.document.fileName || "포장명세서"}로 연결</span>}
+            {unlink(label, () => unlinkDealDocumentFromShipment(dealId, invoice
+              ? { code: "CI", documentId: id, shipmentKey: key, directKeys: invoice.direct,
+                  viaPackingIds: linkedPacking.filter(pl => pl.shipmentKey === key).map(pl => pl.document.documentId) }
+              : { code: "PL", documentId: id, invoiceId: packing?.invoiceId }))}
+            {!invoice?.linkedNumbers.some(number => number && !blNumbersMismatch(invoice.referenceBlNumber, number)) && <BlReferenceNotice reference={invoice?.referenceBlNumber ?? packing?.document.referenceBlNumber} linked={label} />}
+          </li>
+        })}
+      </ul>}
+      {!count && !adding && <p className="mt-2 text-sm text-muted-foreground">연결된 문서가 없습니다.</p>}
+
+    </section>
   )
 }
 
@@ -2041,7 +2187,7 @@ function ShipmentContainerLinks({ containers, packingListId }: { containers: Arr
   return (
     <>
       {shown.map((container, index) => (
-        <a key={`${container.number}-${index}`} href={`#${packingListId ? dealPackingListAnchorId(packingListId) : dealContainerAnchorId(container.number)}`} className="mt-0.5 block w-fit text-[15px] leading-[22px] text-[var(--color-primary-4)] hover:underline" data-ui="shipment-container-number" onClick={(event) => { event.stopPropagation(); if (packingListId) window.dispatchEvent(new CustomEvent("ecoya:open-packing-list", { detail: packingListId })) }}>{container.number || "번호 미입력"}</a>
+        <a key={`${container.number}-${index}`} href={`#${packingListId ? dealPackingListAnchorId(packingListId) : dealContainerAnchorId(container.number)}`} className="mt-0.5 block w-fit text-[15px] leading-[22px] text-[var(--color-primary-4)] hover:underline" data-ui="shipment-container-number" onClick={(event) => { event.stopPropagation(); if (packingListId) openPackingListRow(packingListId) }}>{container.number || "번호 미입력"}</a>
       ))}
       {containers.length > shown.length ? <span className="mt-0.5 block text-[15px] leading-[22px] text-[var(--color-gray-5)]">외 {containers.length - shown.length}대</span> : null}
     </>
@@ -2059,6 +2205,7 @@ const PACKING_ROW_CONTAINERS = 2
 // Sums container measures such as "8,240 KG" + "8,240 KG" → "16,480 KG".
 // Returns null when a value is missing or the units differ.
 const sumMeasure = (values: Array<string | null | undefined>) => {
+  if (!values.length) return null
   let total = 0
   let unit: string | null = null
   for (const value of values) {
@@ -2072,6 +2219,10 @@ const sumMeasure = (values: Array<string | null | undefined>) => {
   const decimals = Math.max(0, ...values.map((value) => value?.match(/\.(\d+)/)?.[1].length ?? 0))
   return `${total.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${unit ? ` ${unit}` : ""}`
 }
+function packingGrossWeight(containers: PackingContainer[], documentWeight?: string) {
+  return sumMeasure(containers.map(container => container.grossWeight)) ?? (documentWeight || null)
+}
+
 function PackingListCard({ dealId, view, canWrite, onUpload, contractItems }: {
   contractItems: DealLineItem[]
   dealId: string
@@ -2080,7 +2231,6 @@ function PackingListCard({ dealId, view, canWrite, onUpload, contractItems }: {
   onUpload?: () => void
 }) {
   const relations = useDealRelations(dealId)
-  const [shipmentChoices, setShipmentChoices] = useState<Record<string, string>>({})
   // The first packing list row starts open.
   const [openLists, setOpenLists] = useState<Set<string>>(() => openedPackingLists.get(dealId) ?? new Set(view.billsOfLading.flatMap((bill) => (bill.connectedDocuments ?? []).filter((document) => document.code === "PL").map((document) => document.documentId)).slice(0, 1)))
   useEffect(() => { openedPackingLists.set(dealId, openLists) }, [dealId, openLists])
@@ -2097,17 +2247,18 @@ function PackingListCard({ dealId, view, canWrite, onUpload, contractItems }: {
   const openPackingList = (fileName: string) => {
     window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code: "PL", fileName } }))
   }
-  const lists = dealPackingLists(view, relations)
+  const graph = dealDocumentLinks(view, relations)
+  const lists = graph.packing
   // PL edits belong to the PL, so comparing them must not overwrite the B/L reference.
   const setContainers = (list: PackingListEntry, containers: PackingContainer[]) => {
     saveDealManualPackingList(dealId, list.document.documentId, { number: list.document.number ?? "", containers })
   }
   // The same single B/L is shown in the list summary and the opened detail.
-  const linkedShipmentOf = (list: PackingListEntry) => {
-    const key = resolveDealShipmentLink(relations.packingToShipments, list.document.documentId, list.bill?.documentId)
+  const linkedShipmentOf = (list: DealDocumentLinks["packing"][number]) => {
+    const key = list.shipmentKey
     if (!key) return null
     const bill = view.billsOfLading.find((entry) => entry.documentId === key)
-    return bill ? { key, label: bill.blNumber || "B/L 번호 미확인", anchor: dealBillAnchorId(bill.documentId) } : { key, label: relations.shipmentLabels[key] || "B/L 번호 미확인", anchor: dealShipmentAnchorId(key.replace(/^shipment:/, "")) }
+    return bill ? { bill, key, label: bill.blNumber || "B/L 번호 미확인", anchor: dealBillAnchorId(bill.documentId) } : { key, label: relations.shipmentLabels[key] || "B/L 번호 미확인", anchor: dealShipmentAnchorId(key.replace(/^shipment:/, "")) }
   }
   const containerCount = lists.reduce((total, list) => total + list.containers.length, 0)
   const cell = "align-top"
@@ -2186,9 +2337,9 @@ function PackingListCard({ dealId, view, canWrite, onUpload, contractItems }: {
               const update = (index: number, patch: Partial<PackingContainer>) => setContainers(list, containers.map((container, containerIndex) => containerIndex === index ? { ...container, ...patch } : container))
               const linkedShipment = linkedShipmentOf(list)
               const items = document.items?.length ? document.items : [{ name: "", hsCode: "" }]
-              const ciReferences = linkedShipment ? shipmentLinkedDocuments(view, relations, linkedShipment.key).invoices.map(invoice => ({
+              const ciReferences = graph.invoices.filter(ci => ci.documentId === list.invoiceId).map(invoice => ({
                 name: relations.invoiceFields[invoice.documentId]?.["품목"] ?? invoice.item ?? "", hsCode: invoice.hsCode ?? "", source: invoice.invoiceNumber || "CI",
-              })) : []
+              }))
               const references = [...contractItems.map(item => ({ name: item.goods, hsCode: item.hsCode, source: "계약" })), ...ciReferences]
               const issues = items.map(item => packingItemIssue(item, references))
               const saveItems = (next: PackingItem[]) => saveDealManualPackingList(dealId, document.documentId, { number: document.number ?? "", containers, items: next })
@@ -2207,8 +2358,8 @@ function PackingListCard({ dealId, view, canWrite, onUpload, contractItems }: {
                     </HostTableCell>
                     <HostTableCell className={cell} onClick={(event) => event.stopPropagation()}>
                       {linkedShipment ? (
-                        <a href={`#${linkedShipment.anchor}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRowByAnchor(linkedShipment.anchor)}>{linkedShipment.label}</a>
-                      ) : <span className="text-[var(--color-orange-2)]">연결 필요</span>}
+                        <a href={`#${linkedShipment.anchor}`} className="whitespace-nowrap text-[var(--color-primary-4)] hover:underline" onClick={event => followBillLink(event, linkedShipment.anchor, linkedShipment.bill)}>{linkedShipment.label}</a>
+                      ) : <span className="text-muted-foreground">B/L 대기</span>}
                     </HostTableCell>
                     <HostTableCell className={cn(cell, "whitespace-nowrap tabular-nums")}>
                       {containers.length ? stacked(shown.map((container) => container.number), more) : <span className="text-[var(--color-gray-5)]">미확인</span>}
@@ -2217,7 +2368,7 @@ function PackingListCard({ dealId, view, canWrite, onUpload, contractItems }: {
                       {containers.length ? stacked(shown.map((container) => container.sealNumber || "미확인"), 0) : "—"}
                     </HostTableCell>
                     <HostTableCell className={cn(cell, numeric)}>{sumMeasure(containers.map((container) => container.packageCount ? `${container.packageCount} ${container.packageUnit ?? ""}` : null)) ?? "—"}</HostTableCell>
-                    <HostTableCell className={cn(cell, numeric)}>{sumMeasure(containers.map((container) => container.grossWeight)) ?? "—"}</HostTableCell>
+                    <HostTableCell className={cn(cell, numeric)}>{packingGrossWeight(containers, document.grossWeight) ?? "—"}</HostTableCell>
                     <HostTableCell className={cn(cell, numeric)}>{sumMeasure(containers.map((container) => container.volume)) ?? "—"}</HostTableCell>
                     <HostTableCell className={cn(cell, "text-center")} onClick={(event) => event.stopPropagation()}>
                       {document.fileName ? (
@@ -2292,38 +2443,7 @@ function PackingListCard({ dealId, view, canWrite, onUpload, contractItems }: {
                                   컨테이너 추가
                                 </Button>
                               ) : null}
-                              <section aria-label={`${name} 연결 문서`} className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
-                                <div className="flex items-center justify-between gap-2">
-                                  <h3 className="text-sm font-semibold">연결 문서</h3>
-                                  <span className="text-xs text-muted-foreground">{linkedShipment ? "B/L 연결됨" : "연결 필요"}</span>
-                                </div>
-                                <div className="mt-2 py-2 text-sm">
-                                  {linkedShipment ? (
-                                    <div className="flex flex-wrap items-center gap-2">
-                                      <DocumentTypeBadge code="BL" />
-                                      <a href={`#${linkedShipment.anchor}`} className="font-semibold text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRowByAnchor(linkedShipment.anchor)}>{linkedShipment.label}</a>
-                                      <DocumentUnlinkButton dealId={dealId} code="PL" documentId={document.documentId} label={linkedShipment.label} canWrite={canWrite} />
-                                      <BlReferenceNotice reference={document.referenceBlNumber} linked={view.billsOfLading.find((entry) => entry.documentId === linkedShipment.key)?.blNumber ?? relations.shipmentLabels[linkedShipment.key]} />
-                                    </div>
-                                  ) : (
-                                    <DocumentLinkControl
-                                      code="BL"
-                                      sourceBlNumber={document.referenceBlNumber}
-                                      options={view.billsOfLading.map((candidate) => ({ id: candidate.documentId, label: billOptionLabel(candidate, view.billsOfLading), blNumber: candidate.blNumber }))}
-                                      value={shipmentChoices[document.documentId] ?? ""}
-                                      onValueChange={(value) => setShipmentChoices((current) => ({ ...current, [document.documentId]: value }))}
-                                      onLink={() => {
-                                        const candidate = view.billsOfLading.find((entry) => entry.documentId === shipmentChoices[document.documentId])
-                                        if (!candidate) return
-                                        linkDealPackingListToShipment(dealId, document.documentId, candidate.documentId, candidate.blNumber ?? undefined)
-                                        setShipmentChoices((current) => ({ ...current, [document.documentId]: "" }))
-                                      }}
-                                      canWrite={canWrite}
-                                      existingCount={0}
-                                    />
-                                  )}
-                                </div>
-                              </section>
+                              <DealLinkedDocuments code="PL" id={document.documentId} name={name} dealId={dealId} view={view} graph={graph} relations={relations} canWrite={canWrite} />
                           </div>
                         </div>
                       </HostTableCell>
@@ -2341,13 +2461,13 @@ function PackingListCard({ dealId, view, canWrite, onUpload, contractItems }: {
 
 function CommercialInvoiceTransactionCard({
   dealId,
+  financeStarted,
   view,
-  linkedInvoiceTargets = {},
   canWrite = true,
 }: {
   dealId: string
   view: SplitShipmentView
-  linkedInvoiceTargets?: Record<string, string>
+  financeStarted: boolean
   canWrite?: boolean
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(
@@ -2364,7 +2484,6 @@ function CommercialInvoiceTransactionCard({
   useEffect(() => { openedInvoiceRows.set(dealId, expanded) }, [dealId, expanded])
   const [relationState, setRelationState] = useState(() => readDealInvoiceRelations(dealId))
   const [drafts, setDrafts] = useState<Record<string, Record<string, string>>>(() => relationState.invoiceFields)
-  const [invoiceLinkSelections, setInvoiceLinkSelections] = useState<Record<string, string>>({})
   const [saleInvoiceId, setSaleInvoiceId] = useState<string | null>(null)
   const [saleDraft, setSaleDraft] = useState({ amount: "", currency: "KRW", customer: "", date: new Date().toISOString().slice(0, 10), evidence: "" })
   const [registeredSales, setRegisteredSales] = useState<Record<string, DealSale>>(() =>
@@ -2383,30 +2502,8 @@ function CommercialInvoiceTransactionCard({
     window.addEventListener(saleChangeEvent, handleSalesChange)
     return () => window.removeEventListener(saleChangeEvent, handleSalesChange)
   }, [dealId])
-  const records = useMemo<CommercialInvoiceRecord[]>(() => {
-    const byId = new Map<string, CommercialInvoiceRecord>()
-    for (const bill of view.billsOfLading) {
-      for (const invoice of bill.connectedCommercialInvoices) {
-        if (!byId.has(invoice.documentId)) byId.set(invoice.documentId, { invoice, billOfLadingIds: [bill.documentId] })
-      }
-    }
-    for (const invoice of view.unlinkedDocuments) {
-      if (!byId.has(invoice.documentId)) byId.set(invoice.documentId, { invoice, billOfLadingIds: [] })
-    }
-    // CIs entered by hand: no file; fields come from the saved drafts.
-    for (const id of relationState.manualInvoices) {
-      if (!byId.has(id)) byId.set(id, { invoice: { documentId: id, fileName: "", uploadedAt: "", currency: "USD" }, billOfLadingIds: [] })
-    }
-    for (const [invoiceId, billId] of Object.entries(linkedInvoiceTargets)) {
-      const record = byId.get(invoiceId)
-      if (record && !record.billOfLadingIds.length) record.billOfLadingIds = [billId]
-    }
-    for (const record of byId.values()) {
-      const linkedBill = resolveDealShipmentLink(relationState.invoiceToBills, record.invoice.documentId, record.billOfLadingIds[0])
-      record.billOfLadingIds = linkedBill ? [linkedBill] : []
-    }
-    return [...byId.values()].filter((record) => !relationState.removedDocuments.includes(record.invoice.documentId))
-  }, [linkedInvoiceTargets, relationState.invoiceToBills, relationState.manualInvoices, relationState.removedDocuments, view])
+  const graph = useMemo(() => dealDocumentLinks(view, relationState), [view, relationState])
+  const records = graph.invoices.map(invoice => ({ invoice, billOfLadingIds: invoice.links }))
   const toggle = (id: string) => setExpanded((current) => {
     const next = new Set(current)
     if (next.has(id)) next.delete(id)
@@ -2430,16 +2527,9 @@ function CommercialInvoiceTransactionCard({
     setDrafts((current) => ({ ...current, [invoiceId]: { ...current[invoiceId], [field]: value } }))
     setRelationState(saveDealInvoiceField(dealId, invoiceId, field, value))
   }
-  const linkInvoice = (invoiceId: string, billId: string) => {
-    const bill = view.billsOfLading.find((entry) => entry.documentId === billId)
-    setRelationState(linkDealInvoiceToShipment(dealId, invoiceId, billId, bill?.blNumber ?? undefined))
-  }
   const billById = new Map(view.billsOfLading.map((bill) => [bill.documentId, bill]))
+  const rounding = useAmountRoundings(dealId)
   // The 판매 내역 table exists only once 정산 has started (정산 중 · 정산 완료).
-  const financeStarted = ["settlement", "settled"].includes(dealStage(dealId))
-  const openShipmentDocument = (code: "BL" | "PL", fileName: string) => {
-    window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code, fileName } }))
-  }
   return (
     <Card className="gap-0 px-5 py-4" aria-label="CI 결제정보">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -2505,17 +2595,17 @@ function CommercialInvoiceTransactionCard({
                       <HostTableCell className="whitespace-nowrap px-3 py-3 align-top tabular-nums">{value("단가", invoice.unitPrice ?? "") || "—"}</HostTableCell>
                       <HostTableCell className="whitespace-nowrap px-3 py-3 align-top">{value("포장 수 / 단위", packageText) || "—"}</HostTableCell>
                       <HostTableCell className="whitespace-nowrap px-3 py-3 align-top text-right tabular-nums">
-                        {value("통화·금액", amountText) || "—"}
+                        {roundedAmountText(value("통화·금액", amountText), rounding.read(`ci:${invoice.documentId}`)) || "—"}
                       </HostTableCell>
                       <HostTableCell className="px-3 py-3 align-top">
                         {linkedCount ? <>
                           {linkedBills.map((bill) => bill ? (
-                            <button key={bill.documentId} type="button" className="block whitespace-nowrap text-[13px] leading-[18px] text-[var(--color-primary-4)] hover:underline" title={`${bill.blNumber || "B/L"} 문서와 보기`} onClick={(event) => { event.stopPropagation(); openShipmentDocument("BL", bill.fileName) }}>{bill.blNumber || "B/L 번호 미확인"}</button>
+                            <a key={bill.documentId} href={`#${dealBillAnchorId(bill.documentId)}`} className="block whitespace-nowrap text-[13px] leading-[18px] text-[var(--color-primary-4)] hover:underline" onClick={(event) => { event.stopPropagation(); followBillLink(event, dealBillAnchorId(bill.documentId), bill) }}>{bill.blNumber || "B/L 번호 미확인"}</a>
                           ) : null)}
                           {linkedShipments.map((shipment) => (
                             <a key={shipment.id} href={`#${dealShipmentAnchorId(shipment.id)}`} className="block whitespace-nowrap text-[13px] leading-[18px] text-[var(--color-primary-4)] hover:underline" onClick={(event) => { event.stopPropagation(); openShipmentRowByAnchor(dealShipmentAnchorId(shipment.id)) }}>{shipment.label}</a>
                           ))}
-                        </> : <StatusBadge size="sm" tone="warning">B/L 연결 필요</StatusBadge>}
+                        </> : <StatusBadge size="sm" tone="neutral">B/L 대기</StatusBadge>}
                       </HostTableCell>
                       <HostTableCell className="w-12 cursor-default px-2 py-2 text-center align-top" onClick={(event) => event.stopPropagation()}>
                         {invoice.onOpen ? (
@@ -2543,7 +2633,7 @@ function CommercialInvoiceTransactionCard({
                   {(() => {
                     const name = invoice.invoiceNumber ?? invoice.fileName
                     const pageChip = (label: string) => (invoice.pageCount ?? 1) > 1 ? <button type="button" className="text-[11px] leading-4 text-[var(--color-gray-6)] underline-offset-2 hover:text-[var(--color-primary-4)] hover:underline" aria-label={`${label} 근거 ${invoice.fieldPages?.[label] ?? 1}페이지 보기`} onClick={() => { requestDocumentPage(invoice.fileName, invoice.fieldPages?.[label] ?? 1); invoice.onOpen?.() }}>p.{invoice.fieldPages?.[label] ?? 1}</button> : undefined
-                    const header = (label: string, shown = label) => <FormFieldHeader className="mb-2.5" label={shown} badge={pageChip(label)} />
+                    const header = (label: string, shown = label, extra?: React.ReactNode) => <FormFieldHeader className="mb-2.5" label={shown} badge={pageChip(label)} sourceAction={extra} />
                     const readOnly = (text: string) => <div className="flex min-h-10 items-center rounded-md bg-muted/30 px-3 text-sm font-medium">{text || "—"}</div>
                     // Stored as one text per field ("2 MT", "USD 256,600"); edited as number + unit.
                     const tail = (text: string) => { const match = text.trim().match(/^(.*?)\s*([A-Za-z]+)?$/); return { amount: match?.[1] ?? "", unit: match?.[2] ?? "" } }
@@ -2578,51 +2668,13 @@ function CommercialInvoiceTransactionCard({
                           <div className="col-span-2 @min-[480px]/ci:col-span-1 @min-[760px]/ci:col-span-1">{header("수량", "수량 / 단위")}<div className="flex gap-2"><div className="min-w-0 flex-1">{textInput("수량", quantity.amount, (next) => set("수량", `${next} ${quantityUnit}`.trim()), true)}</div><div className="w-28 shrink-0">{unitSelect("수량 단위", quantityUnit, ["MT", "KG", "EA"], (next) => set("수량", `${quantity.amount} ${next}`.trim()))}</div></div></div>
                           <div>{header("단가", `단가 · ${currency}/${quantityUnit}`)}{textInput("단가", price, (next) => set("단가", `${next} ${currency}/${quantityUnit}`.trim()), true)}</div>
                           <div className="col-span-2 @min-[480px]/ci:col-span-1 @min-[760px]/ci:col-span-1">{header("포장 수 / 단위")}<div className="flex gap-2"><div className="min-w-0 flex-1">{textInput("포장 수", packages.amount, (next) => set("포장 수 / 단위", `${next} ${packageUnit}`.trim()), true)}</div><div className="w-32 shrink-0">{unitSelect("포장 단위", packageUnit, ["bundles", "cartons", "pallets"], (next) => set("포장 수 / 단위", `${packages.amount} ${next}`.trim()))}</div></div></div>
-                          <div className="col-span-2 @min-[480px]/ci:col-span-1 @min-[760px]/ci:col-span-1">{header("통화·금액", "통화 · 금액")}<div className="flex gap-2"><div className="w-24 shrink-0">{unitSelect("통화", currency, ["USD", "KRW", "EUR", "JPY", "CNY"], (next) => set("통화·금액", `${next} ${amount}`.trim()))}</div><div className="min-w-0 flex-1">{textInput("금액", amount, (next) => set("통화·금액", `${currency} ${next}`.trim()), true)}</div></div></div>
+                          <div className="col-span-2 @min-[480px]/ci:col-span-1 @min-[760px]/ci:col-span-1">{header("통화·금액", "통화 · 금액", <AmountRoundingSelect label={`${name} 금액 처리 방식`} value={rounding.read(`ci:${invoice.documentId}`)} disabled={!canWrite} onValueChange={(mode) => rounding.write(`ci:${invoice.documentId}`, mode)} />)}<div className="flex gap-2"><div className="w-24 shrink-0">{unitSelect("통화", currency, ["USD", "KRW", "EUR", "JPY", "CNY"], (next) => set("통화·금액", `${next} ${amount}`.trim()))}</div><div className="min-w-0 flex-1">{textInput("금액", isEditing ? amount : roundedDealTotal(amount, currency, rounding.read(`ci:${invoice.documentId}`)), (next) => set("통화·금액", `${currency} ${next}`.trim()), true)}</div></div></div>
                         </div>
                       </>
                     )
                   })()}
                 </div>
-                  <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
-                    <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">연결 문서</h3><span className="text-xs text-muted-foreground">{linkedCount ? "B/L 연결됨" : "연결 필요"}</span></div>
-                    <ul className="mt-2 divide-y">
-                        {linkedBills.map((bill) => bill ? (
-                          <li key={bill.documentId} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 text-sm">
-                            <DocumentTypeBadge code="BL" />
-                            <a href={`#${dealBillAnchorId(bill.documentId)}`} className="font-semibold text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRow(bill.documentId)}>{bill.blNumber || "B/L 번호 미확인"}</a>
-                            <span className="text-muted-foreground">{bill.fields.portOfLoading ?? "선적항 미확인"} → {bill.fields.portOfDischarge ?? "도착항 미확인"}</span>
-                            <StatusBadge size="sm" tone="neutral">{containerCountLabel(bill)}</StatusBadge>
-                            <span className="text-xs text-muted-foreground">{bill.fields.shippedOnBoardDate ?? "선적일 미확인"}</span>
-                            {shipmentLinkedDocuments(view, relationState, bill.documentId).packingLists.map(({ document }) => <a key={document.documentId} href={`#${dealPackingListAnchorId(document.documentId)}`} className="text-[13px] text-[var(--color-primary-4)] hover:underline">PL {document.number ?? document.fileName}</a>)}
-                            <DocumentUnlinkButton dealId={dealId} code="CI" documentId={invoice.documentId} label={bill.blNumber || "B/L"} canWrite={canWrite} />
-                            <BlReferenceNotice reference={invoice.referenceBlNumber} linked={bill.blNumber} />
-                          </li>
-                        ) : null)}
-                        {linkedShipments.map((shipment) => (
-                          <li key={shipment.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 text-sm">
-                            <DocumentTypeBadge code="BL" />
-                            <a href={`#${dealShipmentAnchorId(shipment.id)}`} className="font-semibold text-[var(--color-primary-4)] hover:underline" onClick={() => openShipmentRowByAnchor(dealShipmentAnchorId(shipment.id))}>{shipment.label}</a>
-                            <span className="text-muted-foreground">B/L 문서 없음 · 선적에서 직접 연결</span>
-                            <DocumentUnlinkButton dealId={dealId} code="CI" documentId={invoice.documentId} label={shipment.label} canWrite={canWrite} />
-                            <BlReferenceNotice reference={invoice.referenceBlNumber} linked={relationState.shipmentLabels[`shipment:${shipment.id}`]} />
-                          </li>
-                        ))}
-                        {linkedCount === 0 ? <li className="py-2 text-sm">
-                          <DocumentLinkControl
-                            code="BL"
-                            sourceBlNumber={invoice.referenceBlNumber}
-                            options={view.billsOfLading.filter((bill) => !billOfLadingIds.includes(bill.documentId)).map((bill) => ({ id: bill.documentId, blNumber: bill.blNumber, label: `${billOptionLabel(bill, view.billsOfLading)} · ${bill.fields.portOfLoading ?? "선적항 미확인"} → ${bill.fields.portOfDischarge ?? "도착항 미확인"}` }))}
-                            value={invoiceLinkSelections[invoice.documentId] ?? ""}
-                            onValueChange={(value) => setInvoiceLinkSelections((current) => ({ ...current, [invoice.documentId]: value }))}
-                            onLink={() => { const billId = invoiceLinkSelections[invoice.documentId]; if (billId) { linkInvoice(invoice.documentId, billId); setInvoiceLinkSelections((current) => ({ ...current, [invoice.documentId]: "" })) } }}
-                            canWrite={canWrite}
-                            existingCount={linkedCount}
-                            helperText="연결할 선적 후보를 선택하세요. 선적 목록의 B/L을 선택하면 연결됩니다."
-                          />
-                        </li> : null}
-                    </ul>
-                  </div>
+                  <DealLinkedDocuments code="CI" id={invoice.documentId} name={invoice.invoiceNumber || invoice.fileName || "상업송장"} dealId={dealId} view={view} graph={graph} relations={relationState} canWrite={canWrite} />
                     <div className="@container/sale flex items-center justify-between gap-3 rounded-xl border border-[var(--color-gray-9)] bg-card px-4 py-2.5">
                       <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
                         <h3 className="text-sm font-semibold">판매 정보</h3>
@@ -2650,18 +2702,18 @@ function CommercialInvoiceTransactionCard({
                           <AlertDialogContent className="w-[min(720px,calc(100vw-32px))] !max-w-[min(720px,calc(100vw-32px))]">
                             <AlertDialogHeader><AlertDialogTitle>판매 등록</AlertDialogTitle><AlertDialogDescription>{invoice.invoiceNumber ?? invoice.fileName}의 판매 정보를 입력합니다.</AlertDialogDescription></AlertDialogHeader>
                             <div className="grid gap-3 sm:grid-cols-2">
-                              <label className="grid gap-1.5 text-sm"><span>판매 금액</span><div className="flex gap-2"><Input inputMode="decimal" numericFormat="amount" value={saleDraft.amount} onChange={(event) => setSaleDraft({ ...saleDraft, amount: event.target.value })} /><Select value={saleDraft.currency} onValueChange={(value) => setSaleDraft({ ...saleDraft, currency: value ?? "KRW" })}><SelectTrigger className="w-24"><SelectValue /></SelectTrigger><SelectContent>{["KRW", "USD", "EUR", "JPY", "CNY"].map((currency) => <SelectItem key={currency} value={currency}>{currency}</SelectItem>)}</SelectContent></Select></div></label>
+                              <label className="grid gap-1.5 text-sm"><span>판매 금액</span><div className="flex gap-2"><Input inputMode="decimal" numericFormat="amount" value={saleDraft.amount} onChange={(event) => setSaleDraft({ ...saleDraft, amount: event.target.value })} /><Select value={saleDraft.currency} onValueChange={(value) => setSaleDraft({ ...saleDraft, currency: value ?? "KRW" })}><SelectTrigger className="w-24"><SelectValue /></SelectTrigger><SelectContent className="z-[calc(var(--z-alert-dialog)+1)]">{["KRW", "USD", "EUR", "JPY", "CNY"].map((currency) => <SelectItem key={currency} value={currency}>{currency}</SelectItem>)}</SelectContent></Select></div></label>
                               <label className="grid gap-1.5 text-sm"><span>판매일</span><DatePicker ariaLabel={`${invoice.invoiceNumber ?? invoice.fileName} 판매일`} value={saleDraft.date} onValueChange={(date) => setSaleDraft({ ...saleDraft, date })} className="w-full" /></label>
                               <label className="grid gap-1.5 text-sm"><span>판매처</span><Input placeholder="판매처 입력" value={saleDraft.customer} onChange={(event) => setSaleDraft({ ...saleDraft, customer: event.target.value })} /></label>
                               <div className="grid gap-1.5 text-sm"><span>판매 근거</span><p className="rounded-md bg-muted/40 px-3 py-2 text-sm text-muted-foreground">{saleDraft.evidence}</p></div>
                             </div>
-                            <AlertDialogFooter><AlertDialogCancel>취소</AlertDialogCancel><AlertDialogAction disabled={!saleDraft.amount || !saleDraft.customer} onClick={() => {
+                            <AlertDialogFooter><AlertDialogCancel>취소</AlertDialogCancel><AlertDialogAction disabled={!isFinanceDecimal(normalizeSaleAmount(saleDraft.amount)) || !saleDraft.customer.trim()} onClick={() => {
                               const existing = registeredSales[invoice.documentId]
                               const nextSale: DealSale = {
                                 id: existing?.id ?? crypto.randomUUID(),
                                 invoiceId: invoice.documentId,
                                 invoiceNumber: invoice.invoiceNumber ?? invoice.fileName,
-                                amount: saleDraft.amount.trim(),
+                                amount: normalizeSaleAmount(saleDraft.amount),
                                 currency: saleDraft.currency,
                                 date: saleDraft.date,
                                 customer: saleDraft.customer.trim(),
@@ -2698,6 +2750,7 @@ const workPreviewFields: Record<DealWorkKey, string[]> = {
 function DealWorkBlock({
   work,
   plan,
+  customsControl,
   previewOpen,
   onPreview,
   onStart,
@@ -2706,6 +2759,7 @@ function DealWorkBlock({
   children,
 }: {
   work: DealWorkKey
+  customsControl: ReactNode
   plan: DealWorkPlan
   previewOpen: boolean
   onPreview: (key: DealWorkKey) => void
@@ -2715,12 +2769,14 @@ function DealWorkBlock({
   children: ReactNode
 }) {
   const state = plan.states[work]
+  const customsSetting = work === "customs" ? customsControl : null
   const canCompareDocument = work !== "finance" && work !== "customs" && Boolean(onOpenDocument)
   const showPlannedDocumentAction = state === "planned" && canCompareDocument
   if (state !== "planned")
     return (
       <div
         data-work-section={work}
+        id={state === "skipped" ? workIds[work] : undefined}
         data-work-state={state}
         className="min-w-0 space-y-3"
       >
@@ -2741,8 +2797,8 @@ function DealWorkBlock({
             }
           </span>
           <h2 className="text-lg font-semibold">{workLabels[work]}</h2>
-          <StatusBadge tone={state === "complete" ? "success" : "blue"}>
-            {state === "complete"
+          <StatusBadge tone={state === "skipped" ? "neutral" : state === "complete" ? "success" : "blue"}>
+            {state === "skipped" ? "해당 없음" : state === "complete"
               ? "완료"
               : plan.current === work
                 ? "현재 할 일"
@@ -2750,10 +2806,11 @@ function DealWorkBlock({
           </StatusBadge>
           {/* Title → label → description; the current stage describes its next action. */}
           <p className="min-w-0 truncate pl-1 text-xs font-normal text-muted-foreground">
-            {plan.current === work ? plan.nextAction : documentStageGuidance[work]}
+            {state !== "skipped" && (plan.current === work ? plan.nextAction : documentStageGuidance[work])}
           </p>
+          {customsSetting}
         </div>
-        {children}
+        {state !== "skipped" && children}
       </div>
     )
   return (
@@ -2773,6 +2830,7 @@ function DealWorkBlock({
             {documentStageGuidance[work]}
           </p>
         </div>
+        {customsSetting}
         {showPlannedDocumentAction ? (
           <Button
             type="button"
@@ -2814,6 +2872,7 @@ function DealWorkBlock({
 
 function DealDocumentPanels({
   plan,
+  customsControl,
   aiQuestion,
   linkedDeals,
   workspaces,
@@ -2833,6 +2892,7 @@ function DealDocumentPanels({
   failedPanel,
   onRetry,
 }: {
+  customsControl: ReactNode
   plan: DealWorkPlan
   aiQuestion: ReactNode
   linkedDeals: ReactNode
@@ -2896,6 +2956,7 @@ function DealDocumentPanels({
       </section>
       {plan.order.map((work) => (
         <DealWorkBlock
+          customsControl={customsControl}
           key={work}
           work={work}
           plan={plan}
@@ -2990,10 +3051,8 @@ function DealDocumentPanels({
                 문서 보기 닫기
               </Button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              <div id="deal-document-preview" className="min-h-full p-4 sm:p-5">
-                {preview}
-              </div>
+            <div id="deal-document-preview" className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-4 sm:px-5 sm:pt-5">
+              {preview}
             </div>
           </section>,
           documentPanelTarget
@@ -3287,13 +3346,6 @@ function DealPdf({
   const [zoom, setZoom] = useState(100)
   const [fullscreen, setFullscreen] = useState(false)
   const [downloading, setDownloading] = useState(false)
-  useEffect(() => {
-    const close = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setFullscreen(false)
-    }
-    window.addEventListener("keydown", close)
-    return () => window.removeEventListener("keydown", close)
-  }, [])
   const download = async () => {
     setDownloading(true)
     await wait(350)
@@ -3309,12 +3361,9 @@ function DealPdf({
   const viewer = (
     <div
       className={cn(
-        "relative mt-2 flex min-h-[480px] flex-col overflow-hidden bg-background",
-        fullscreen && "fixed inset-0 z-[70] mt-0 h-screen min-h-0 bg-background"
+        "relative mt-2 flex min-h-0 flex-1 flex-col overflow-hidden bg-background",
+        fullscreen && "mt-0 h-full"
       )}
-      role={fullscreen ? "dialog" : undefined}
-      aria-modal={fullscreen ? "true" : undefined}
-      aria-label={fullscreen ? `${slot.type} 전체 화면 미리보기` : undefined}
     >
       <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--surface-border)] bg-background px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
@@ -3354,16 +3403,12 @@ function DealPdf({
           />
         </div>
       </div>
-      {slot.fileDataUrl ? (
-        <iframe title={`${file} 원본 PDF`} src={slot.fileDataUrl} className="min-h-[600px] w-full flex-1 border-0" />
-      ) : <PannablePdfViewport zoom={zoom} className="min-h-0 flex-1 px-4 pb-20">
-        <div
-          className="mx-auto mt-4 aspect-[.72] max-h-[760px] w-[min(90%,560px)] origin-top border bg-background p-8 shadow-sm"
-          style={{
-            transform: `scale(${zoom / 100})`,
-            transformOrigin: "top center",
-          }}
-        >
+      <PannablePdfViewport
+        zoom={zoom}
+        nativePdf={slot.fileDataUrl ? { src: `${slot.fileDataUrl}#page=${page}`, title: `${file} 원본 PDF` } : undefined}
+        className={cn("overscroll-contain", !slot.fileDataUrl && "px-4 pb-20")}
+      >
+        <div className="mx-auto mt-4 aspect-[.72] max-h-[760px] w-[min(90%,560px)] border bg-background p-8 shadow-sm">
           <span className="text-xs font-semibold tracking-widest text-primary">
             TRADE DOCUMENT
           </span>
@@ -3382,7 +3427,7 @@ function DealPdf({
             </div>
           ))}
         </div>
-      </PannablePdfViewport>}
+      </PannablePdfViewport>
       <PdfFloatingControls
         page={page}
         pageCount={2}
@@ -3397,7 +3442,15 @@ function DealPdf({
       />
     </div>
   )
-  return fullscreen ? createPortal(viewer, document.body) : viewer
+  if (!fullscreen) return viewer
+  return (
+    <Dialog open onOpenChange={setFullscreen}>
+      <DialogContent showCloseButton={false} aria-describedby={undefined} className="h-dvh max-w-none gap-0 rounded-none border-0 p-0 sm:max-w-none">
+        <DialogTitle className="sr-only">{slot.type} 전체 화면 미리보기</DialogTitle>
+        {viewer}
+      </DialogContent>
+    </Dialog>
+  )
 }
 
 function DealReviewBadge({ match }: { match: DealFieldMatch }) {
@@ -3597,18 +3650,7 @@ function DealFieldsPanel({
     flushSync(() => setEditingTotal(true))
     input.select()
   }
-  const roundingSelector = (
-    <Select value={totalRounding} disabled={!editable} onValueChange={value => {
-      if (value === "truncate" || value === "round") onTotalRoundingChange(value)
-    }}>
-      <SelectTrigger size="sm" aria-label="총금액 처리 방식" className="gap-1 px-2 data-[size=sm]:h-7">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {Object.entries(totalRoundingLabels).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
-      </SelectContent>
-    </Select>
-  )
+  const roundingSelector = <AmountRoundingSelect label="총금액 처리 방식" value={totalRounding} disabled={!editable} onValueChange={onTotalRoundingChange} />
   // An opened item row shows its inputs directly (edits autosave per field).
   // Mismatched items start open so the value can be fixed right away.
   const [expandedItems, setExpandedItems] = useState<Set<number>>(
@@ -3690,11 +3732,12 @@ function DealFieldsPanel({
     profile.direction
   ).length
 
+  // 수량 × 단가 computed exactly, then shown with this item's own 반올림/절사.
+  const rounding = useAmountRoundings(rowStateKey ?? "")
   const itemAmount = (item: DealLineItem) => {
-    const amount =
-      Number(item.quantity.replaceAll(",", "")) *
-      Number(item.unitPrice.replaceAll(",", ""))
-    return Number.isFinite(amount) ? amount.toLocaleString("en-US") : "0"
+    const amount = multiplyDecimal(item.quantity, item.unitPrice)
+    if (!amount) return "0"
+    return item.currency.trim() ? roundedDealTotal(amount, item.currency, rounding.read(`item:${item.id}`)) : Number(amount).toLocaleString("en-US")
   }
 
   // One item opens for editing at a time under its own table row; the
@@ -3881,7 +3924,7 @@ function DealFieldsPanel({
             {input("unitPrice", "단가")}
           </div>
           <div>
-            <FormFieldHeader className="mb-2.5" label={amountLabel} htmlFor={`deal-item-${item.id}-amount`} />
+            <FormFieldHeader className="mb-2.5" label={amountLabel} htmlFor={`deal-item-${item.id}-amount`} sourceAction={<AmountRoundingSelect label={`품목 ${number} 금액 처리 방식`} value={rounding.read(`item:${item.id}`)} disabled={!editable} onValueChange={(mode) => rounding.write(`item:${item.id}`, mode)} />} />
             <Input
               id={`deal-item-${item.id}-amount`}
               aria-label={`품목 ${number} 금액`}
@@ -4068,8 +4111,9 @@ function DealFieldsPanel({
               id={`deal-field-label-${field.key}`}
               style={{ scrollMarginTop: "calc(var(--deal-header-height,128px) + 16px)" }}
               invalid={needsReview(field.match)}
-              badge={field.key === "amount_total" || needsReview(field.match) ? <>
-                {field.key === "amount_total" && roundingSelector}
+              sourceAction={field.key === "amount_total" ? roundingSelector : undefined}
+              badge={needsReview(field.match) || dealContractSource.fieldPages[field.key] ? <>
+                {dealContractSource.fieldPages[field.key] && <DocumentPageMarker label={field.label} page={dealContractSource.fieldPages[field.key]!} fileName={dealContractSource.fileName} code={dealContractSource.code} />}
                 <DealReviewBadge match={field.match} />
               </> : undefined}
               message={needsReview(field.match) ? field.evidence.join(" · ") || undefined : undefined}
@@ -4365,7 +4409,9 @@ function DealVerificationPanels({
 
 function DealHealthReference({
   documentSummary,
+  customsSkipped,
 }: {
+  customsSkipped: boolean
   documentSummary: DealDocumentSummary
 }) {
   const [expanded, setExpanded] = useState(false)
@@ -4379,7 +4425,7 @@ function DealHealthReference({
     ["결제", 70, "계좌 변경 확인 필요"],
     ["선적", 74, "잔량 4 MT"],
     ["마진", 68, "원가 2건 추정값"],
-    ["규정", 82, "통관 서류 준비 중"],
+    ...(customsSkipped ? [] : [["규정", 82, "통관 서류 준비 중"]] as const),
   ] as const
   return (
     <section aria-label="거래 건강도와 서류 대조" className="p-5">
@@ -4504,6 +4550,7 @@ function GeneratedDealDocumentsList({
 
 function DocumentsTab({
   plan,
+  customsControl,
   aiQuestion,
   linkedDeals,
   workspaces,
@@ -4524,7 +4571,6 @@ function DocumentsTab({
   onContractItemsChange,
   onDocumentSummaryChange,
   commercialInvoiceView,
-  linkedInvoiceTargets,
   documentOpen,
   documentPanelTarget,
   onDocumentOpenChange,
@@ -4532,6 +4578,7 @@ function DocumentsTab({
   failedPanel,
   onRetry,
 }: {
+  customsControl: ReactNode
   plan: DealWorkPlan
   aiQuestion: ReactNode
   linkedDeals: ReactNode
@@ -4555,7 +4602,6 @@ function DocumentsTab({
   ) => void
   onDocumentSummaryChange: (summary: DealDocumentSummary) => void
   commercialInvoiceView: SplitShipmentView
-  linkedInvoiceTargets?: Record<string, string>
   documentOpen: boolean
   documentPanelTarget: HTMLElement | null
   onDocumentOpenChange: (open: boolean) => void
@@ -5133,6 +5179,7 @@ function DocumentsTab({
   return (
     <div className="min-w-0">
       <DealDocumentPanels
+        customsControl={customsControl}
         linkedDeals={linkedDeals}
         aiQuestion={aiQuestion}
         plan={plan}
@@ -5143,7 +5190,7 @@ function DocumentsTab({
         onOpenDocument={onOpenDocument}
         canWrite={canMutate(role)}
         profile={profile}
-        commercialInvoiceContent={<CommercialInvoiceTransactionCard dealId={dealId} view={commercialInvoiceView} linkedInvoiceTargets={linkedInvoiceTargets} canWrite={canMutate(role)} />}
+        commercialInvoiceContent={<CommercialInvoiceTransactionCard financeStarted={plan.states.finance !== "planned"} dealId={dealId} view={commercialInvoiceView} canWrite={canMutate(role)} />}
         documentStrip={
           <div
             aria-label="거래 상세 서류 목록"
@@ -5372,8 +5419,8 @@ function DocumentsTab({
           </section>
         }
         preview={
-          <aside className="field-scrollbar min-w-0 border-t px-4 py-4 xl:h-full xl:overflow-y-auto xl:border-t-0 xl:px-5 xl:pb-8">
-            <div className="border-b border-[var(--surface-border)] pb-2">
+          <aside className="flex min-h-0 min-w-0 flex-1 flex-col border-t px-4 pt-4 xl:border-t-0 xl:px-5">
+            <div className="shrink-0 border-b border-[var(--surface-border)] pb-2">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-semibold">거래 서류</h3>
                 <Popover open={documentsExpanded} onOpenChange={setDocumentsExpanded}>
@@ -5450,7 +5497,7 @@ function DocumentsTab({
             {movedDocument && <p role="status" className="my-2 rounded-md bg-muted px-3 py-2 text-xs">
               {movedDocument.file} 서류를 이동했습니다. <a href={`/erp/deals/${movedDocument.dealId}`} className="font-medium text-primary underline">이동한 거래 보기</a>
             </p>}
-            <div className="mt-2">
+            <div className={cn("mt-2 flex min-h-0 flex-1 flex-col", !selected.file && "overflow-y-auto")}>
               {!selected.file ? (
                 <div className="flex min-w-0 items-center gap-2 border-y border-[var(--surface-border)] px-1 py-2.5">
                   <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[9px] font-semibold text-[var(--color-red-2)]">
@@ -6595,7 +6642,9 @@ export function DealDetailScreen({
   workspaceActionsTarget?: HTMLElement | null
 }) {
   const createdProfile = prototypeBackend.deals.getCreated(dealId)
-  const fixture = dealFixtures.find((deal) => deal.id === dealId)
+  const customsSkipped = useSkippedCustoms(workspaceId).has(dealId)
+  const sourceDeal = dealFixtures.find((deal) => deal.id === dealId)
+  const fixture = sourceDeal && applyCustomsPreference(sourceDeal, customsSkipped)
   const exists = Boolean(dealProfiles[dealId] || createdProfile || fixture)
   const [createdDirection, setCreatedDirection] = useState<DealDirection | null>(createdProfile?.direction ?? null)
   const [savingDirection, setSavingDirection] = useState(false)
@@ -6618,7 +6667,7 @@ export function DealDetailScreen({
   const [shipmentSummary, setShipmentSummary] =
     useState<DealShipmentSummary | null>(null)
   const [activeSection, setActiveSection] = useState<Tab>(
-    focusTarget?.tab ?? stageEntryTab(dealId)
+    focusTarget?.tab ?? stageEntryTab(fixture?.stage ?? "contract")
   )
   const [documentOpen, setDocumentOpen] = useState(false)
   const [documentRequest, setDocumentRequest] = useState<{
@@ -6657,7 +6706,7 @@ export function DealDetailScreen({
       // when the user opens it from a scrolled section (the grid can be
       // partially or completely outside the viewport at that moment).
       const availableHeight = viewport?.clientHeight ?? window.innerHeight
-      setComparisonHeight(Math.max(620, Math.round(availableHeight - 16)))
+      setComparisonHeight(Math.max(1, Math.round(availableHeight - 16)))
     }
     updateHeight()
     const observer = new ResizeObserver(updateHeight)
@@ -6763,7 +6812,6 @@ export function DealDetailScreen({
     window.addEventListener("ecoya:open-deal-document", handleDealDocumentRequest)
     return () => window.removeEventListener("ecoya:open-deal-document", handleDealDocumentRequest)
   }, [openDocumentPanel])
-  const [linkedInvoiceTargets] = useState<Record<string, string>>({})
   const [connectedShipmentDrafts] = useState<Record<string, Partial<Shipment>>>({})
   const [dealDocumentVersion, setDealDocumentVersion] = useState(0)
   useEffect(() => {
@@ -6808,6 +6856,7 @@ export function DealDetailScreen({
   // A shipment row and a B/L document are the same lot when their B/L numbers
   // match; unmatched rows show no linked documents.
   const dealRelations = useDealRelations(dealId)
+  const documentLinks = useMemo(() => dealDocumentLinks(splitShipmentView, dealRelations), [splitShipmentView, dealRelations])
   const billForShipment = (shipment: { id: string; bl_number?: string | null }) => {
     const bills = splitShipmentView.billsOfLading
     return bills.find(bill => bill.documentId === shipment.id)
@@ -6904,9 +6953,10 @@ export function DealDetailScreen({
             : []),
           ...(earlyGroups.includes("결제 정보") ? ["finance" as const] : []),
         ],
-        preferredWork
+        preferredWork,
+        customsSkipped
       ),
-    [dealId, startedWork, earlyGroups, preferredWork, hasShipmentDocument]
+    [dealId, startedWork, earlyGroups, preferredWork, hasShipmentDocument, customsSkipped]
   )
   const previewSection = (key: DealWorkKey) =>
     setPreviewWork((current) =>
@@ -7357,6 +7407,19 @@ export function DealDetailScreen({
         </div>
       </div>
     )
+  function changeCustomsSetting(skipped: boolean) {
+    if (!canMutate(role) || skipped === customsSkipped) return
+    try {
+      setCustomsSkipped(workspaceId, dealId, skipped)
+    } catch {
+      toast.error("통관 설정을 저장하지 못했습니다.")
+      return
+    }
+    addAudit("통관 설정 변경", skipped ? "통관 없음" : "통관 진행")
+    if (!skipped) navigateSection("customs")
+    else if (plan.current === "customs") navigateSection("finance")
+  }
+
   const dealPageContent = (
   <div
     data-deal-page-content
@@ -7366,6 +7429,12 @@ export function DealDetailScreen({
     )}
   >
     <DocumentsTab
+      customsControl={canMutate(role) ? (
+        <label className="ml-auto inline-flex min-h-8 shrink-0 cursor-pointer items-center gap-2 text-sm">
+          <Checkbox checked={customsSkipped} onCheckedChange={value => changeCustomsSetting(value === true)} />
+          통관 없음
+        </label>
+      ) : null}
       linkedDeals={<LinkedDeals dealId={dealId} direction={profile.direction} workspaceId={workspaceId} canWrite={canMutate(role)} onOpenDeal={onOpenDeal} />}
       aiQuestion={<DealAiQuestion onAskAi={onAskAi} />}
       key={dealId}
@@ -7375,7 +7444,6 @@ export function DealDetailScreen({
       onStartWork={startWork}
       onOpenDocument={openDealDocument}
       commercialInvoiceView={splitShipmentView}
-      linkedInvoiceTargets={linkedInvoiceTargets}
       workspaces={{
         fulfillment: (
           <section
@@ -7389,18 +7457,23 @@ export function DealDetailScreen({
                 return bill ? dealBillAnchorId(bill.documentId) : dealShipmentAnchorId(shipment.id)
               }} renderShipmentContainers={(shipment) => {
                 const bill = billForShipment(shipment)
-                const lists = shipmentLinkedDocuments(splitShipmentView, dealRelations, shipmentLinkKey(shipment, bill)).packingLists
+                const lists = documentsForShipment(documentLinks, shipmentLinkKey(shipment, bill)).packingLists
                   .map(({ document, containers }) => ({ id: document.documentId, containers }))
                   .filter((list) => list.containers.length)
                 if (!lists.length && bill && billContainers(bill).length) return <ShipmentContainerLinks containers={billContainers(bill)} />
                 return lists.length ? <>{lists.map((list) => <ShipmentContainerLinks key={list.id} containers={list.containers} packingListId={list.id} />)}</> : undefined
               }} renderShipmentDocuments={(shipment) => {
                 const bill = billForShipment(shipment)
-                return <ShipmentDocumentLinks invoices={shipmentLinkedDocuments(splitShipmentView, dealRelations, shipmentLinkKey(shipment, bill)).invoices} />
+                return <ShipmentDocumentLinks invoices={documentsForShipment(documentLinks, shipmentLinkKey(shipment, bill)).invoices} />
+              }} renderShipmentFieldPage={(shipment, field) => {
+                // B/L fields show the page they were read from when the B/L has several pages.
+                const bill = billForShipment(shipment)
+                const page = bill && (bill.pageCount ?? 1) > 1 ? bill.fieldPages?.[field] : undefined
+                return bill && page ? <DocumentPageMarker label={field} page={page} fileName={bill.fileName} code="BL" /> : undefined
               }} renderShipmentLinkedDocuments={(shipment) => {
                 const bill = billForShipment(shipment)
                 const key = shipmentLinkKey(shipment, bill)
-                return <ShipmentLinkedDocuments dealId={dealId} shipmentKey={key} blNumber={shipment.bl_number} links={shipmentLinkedDocuments(splitShipmentView, dealRelations, key)} canWrite={canMutate(role)} />
+                return <DealLinkedDocuments code="BL" id={key} name={shipment.bl_number || bill?.blNumber || "선적"} dealId={dealId} view={splitShipmentView} graph={documentLinks} relations={dealRelations} canWrite={canMutate(role)} />
               }} renderShipmentDocumentAction={(shipment) => {
                 const bill = billForShipment(shipment)
                 return bill ? <Button type="button" size="icon-sm" variant="ghost-neutral" aria-label={`${bill.blNumber || "B/L"} 문서와 보기`} title={`${bill.blNumber || "B/L"} 문서와 보기`} onClick={() => openBillDocument(bill)}><FileSearch aria-hidden="true" className="size-4" /></Button> : null
@@ -7461,7 +7534,7 @@ export function DealDetailScreen({
                       </HostTableCell>
                       <HostTableCell className="px-3 text-center">
                         {row.confirmed ? (
-                          <Button variant="outline" size="sm" onClick={() => openDealDocument("customs")}>데이터 보기</Button>
+                          <Button variant="outline" size="sm" aria-label={`${row.title} 데이터 보기`} onClick={() => window.dispatchEvent(new CustomEvent("ecoya:open-deal-document", { detail: { code: "CUSTOMS_ENTRY", fileName: row.fileName } }))}>데이터 보기</Button>
                         ) : (
                           <Button variant="outline" size="sm" className="min-w-20 pr-2.5 pl-3" onClick={() => openDealDocument("customs")}>
                             문서 검토<ExternalLink data-icon="inline-end" className="size-4" />
@@ -7488,6 +7561,7 @@ export function DealDetailScreen({
               <DealFinanceWorkspace
                 key={dealId}
                 dealId={dealId}
+                invoiceIds={documentLinks.invoices.map(invoice => invoice.documentId)}
                 settlementAmount={mainInformation.amount}
                 settlementCurrency={mainInformation.currency}
                 onOpenSettlement={onOpenSettlement}
@@ -7633,8 +7707,9 @@ export function DealDetailScreen({
         role={role}
         onOpenGroup={openFieldGroup}
         onNavigate={navigateSection}
+        onRestoreCustoms={() => changeCustomsSetting(false)}
       />
-      <DealHealthReference documentSummary={documentSummary} />
+      <DealHealthReference documentSummary={documentSummary} customsSkipped={customsSkipped} />
     </div>
     </aside>
   )
@@ -8136,7 +8211,7 @@ export function DealDetailScreen({
                     <aside
                       ref={setDocumentPanelTarget}
                       aria-label="원문 문서 패널"
-                      className="min-w-0 min-h-[620px] overflow-hidden bg-[var(--surface-background)] xl:h-full"
+                      className="h-full min-h-0 min-w-0 overflow-hidden bg-[var(--surface-background)]"
                     />
                   }
                 />

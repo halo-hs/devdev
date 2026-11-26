@@ -4,6 +4,7 @@ export type DealInvoiceRelationState = {
   invoiceToBills: Record<string, string[]>
   invoiceFields: Record<string, Record<string, string>>
   /** PL linkage overrides, with the same missing-key / [] semantics as CI. */
+  packingToInvoices: Record<string, string[]>
   packingToShipments: Record<string, string[]>
   /** Display label (B/L number) for shipment keys without a B/L document. */
   shipmentLabels: Record<string, string>
@@ -31,6 +32,7 @@ const storageKey = (dealId: string) => `ecoya-deal-document-relations-v1:${dealI
 const emptyState = (): DealInvoiceRelationState => ({
   invoiceToBills: {},
   invoiceFields: {},
+  packingToInvoices: {},
   packingToShipments: {},
   shipmentLabels: {},
   manualInvoices: [],
@@ -43,11 +45,12 @@ export function readDealInvoiceRelations(dealId: string): DealInvoiceRelationSta
     const raw = localStorage.getItem(storageKey(dealId))
     if (!raw) return emptyState()
     const parsed = JSON.parse(raw) as Partial<DealInvoiceRelationState>
-    // Each CI and PL can point to one B/L. A B/L may still have many CI/PLs.
+    // A CI is usually on one B/L but may span several (split shipment);
+    // a packing list belongs to one B/L. Preserve previously saved links.
     const invoiceToBills = Object.fromEntries(
       Object.entries(parsed.invoiceToBills ?? {}).map(([invoiceId, billIds]) => [
         invoiceId,
-        Array.isArray(billIds) ? billIds.filter((id): id is string => typeof id === "string").slice(0, 1) : [],
+        Array.isArray(billIds) ? [...new Set(billIds.filter((id): id is string => typeof id === "string"))] : [],
       ])
     )
     const invoiceFields = Object.fromEntries(
@@ -75,7 +78,7 @@ export function readDealInvoiceRelations(dealId: string): DealInvoiceRelationSta
     ) as Record<string, ManualPackingList>
     const removedDocuments = Array.isArray(parsed.removedDocuments) ? parsed.removedDocuments.filter((id): id is string => typeof id === "string") : []
     const packingToShipments = Object.fromEntries(Object.entries(idLists(parsed.packingToShipments)).map(([id, shipmentIds]) => [id, shipmentIds.slice(0, 1)]))
-    return { invoiceToBills, invoiceFields, packingToShipments, shipmentLabels, manualInvoices, manualPackingLists, removedDocuments }
+    return { invoiceToBills, invoiceFields, packingToInvoices: idLists(parsed.packingToInvoices), packingToShipments, shipmentLabels, manualInvoices, manualPackingLists, removedDocuments }
   } catch {
     return emptyState()
   }
@@ -101,27 +104,63 @@ export function blNumbersMismatch(documentNumber?: string | null, linkedNumber?:
   return Boolean(expected && actual && expected !== actual)
 }
 
+/**
+ * B/L(s) a CI or packing list is linked to. Order: the user's explicit links
+ * (including [] after an unlink, so automatic matching never re-adds it) →
+ * the relation the document arrived with → automatic link by the B/L number
+ * read from the document, only when it matches exactly one B/L of the deal.
+ * In production the server applies the automatic link when the extracted B/L
+ * number arrives; the prototype mirrors that rule here.
+ */
+export function resolveDealShipmentLinks(
+  links: Record<string, string[]>, documentId: string, originalShipmentKeys: string[] = [],
+): string[] {
+  if (Object.prototype.hasOwnProperty.call(links, documentId)) return links[documentId] ?? []
+  return originalShipmentKeys
+}
+
+/** Single-B/L form, for packing lists. */
 export function resolveDealShipmentLink(
   links: Record<string, string[]>, documentId: string, originalShipmentKey?: string,
 ) {
-  if (Object.prototype.hasOwnProperty.call(links, documentId)) return links[documentId]?.[0]
-  return originalShipmentKey
+  return resolveDealShipmentLinks(links, documentId, originalShipmentKey ? [originalShipmentKey] : [])[0]
 }
 
-/** Keep the document and its inputs; an explicit empty override prevents the original link returning. */
-export function unlinkDealDocumentFromShipment(dealId: string, code: "CI" | "PL", documentId: string) {
+type ShipmentUnlink =
+  | { code: "CI"; documentId: string; shipmentKey: string; directKeys: string[]; viaPackingIds?: string[] }
+  | { code: "PL"; documentId: string; invoiceId?: string }
+
+/** Clear the selected B/L and retain the invoice of each affected packing list. */
+export function unlinkDealDocumentFromShipment(dealId: string, link: ShipmentUnlink) {
   const state = readDealInvoiceRelations(dealId)
-  const links = code === "CI" ? state.invoiceToBills : state.packingToShipments
-  links[documentId] = []
+  if (link.code === "CI") {
+    const current = state.invoiceToBills[link.documentId] ?? link.directKeys
+    state.invoiceToBills[link.documentId] = current.filter(key => key !== link.shipmentKey)
+    for (const packingId of link.viaPackingIds ?? []) {
+      const owner = resolveDealShipmentLink(state.packingToInvoices, packingId, link.documentId)
+      const bill = resolveDealShipmentLink(state.packingToShipments, packingId, link.shipmentKey)
+      if (owner === link.documentId && bill === link.shipmentKey) {
+        state.packingToInvoices[packingId] = [owner]
+        state.packingToShipments[packingId] = []
+      }
+    }
+  } else {
+    if (link.invoiceId) state.packingToInvoices[link.documentId] = [link.invoiceId]
+    state.packingToShipments[link.documentId] = []
+  }
   writeDealInvoiceRelations(dealId, state)
   notify(dealId)
   return state
 }
 
-/** Links a CI to a shipment from the shipment side (key: B/L document id or `shipment:<id>`). */
-export function linkDealInvoiceToShipment(dealId: string, invoiceId: string, shipmentKey: string, label?: string) {
+/**
+ * Links a CI to a shipment (key: B/L document id or `shipment:<id>`), keeping
+ * its current links (`currentKeys`): a CI may span several B/Ls.
+ */
+export function linkDealInvoiceToShipment(dealId: string, invoiceId: string, shipmentKey: string, label?: string, currentKeys: string[] = []) {
   const state = readDealInvoiceRelations(dealId)
-  state.invoiceToBills[invoiceId] = [shipmentKey]
+  if (Object.entries(state.invoiceToBills).some(([id, keys]) => id !== invoiceId && keys.includes(shipmentKey))) return state
+  state.invoiceToBills[invoiceId] = [...new Set([...(state.invoiceToBills[invoiceId] ?? currentKeys), shipmentKey])]
   if (label) state.shipmentLabels[shipmentKey] = label
   writeDealInvoiceRelations(dealId, state)
   notify(dealId)
@@ -130,11 +169,21 @@ export function linkDealInvoiceToShipment(dealId: string, invoiceId: string, shi
 
 export function linkDealPackingListToShipment(dealId: string, packingListId: string, shipmentKey: string, label?: string) {
   const state = readDealInvoiceRelations(dealId)
+  if (Object.entries(state.packingToShipments).some(([id, keys]) => id !== packingListId && keys.includes(shipmentKey))) return state
+  if (state.packingToShipments[packingListId]?.some(key => key !== shipmentKey)) return state
   state.packingToShipments[packingListId] = [shipmentKey]
   if (label) state.shipmentLabels[shipmentKey] = label
   writeDealInvoiceRelations(dealId, state)
   notify(dealId)
   return state
+}
+
+/** An explicit empty list keeps an unlinked PL from rejoining its first CI. */
+export function setPackingInvoice(dealId: string, packingId: string, invoiceId: string | null) {
+  const state = readDealInvoiceRelations(dealId)
+  state.packingToInvoices[packingId] = invoiceId ? [invoiceId] : []
+  writeDealInvoiceRelations(dealId, state)
+  notify(dealId)
 }
 
 /** Adds a CI row without a document, for information entered by hand. */

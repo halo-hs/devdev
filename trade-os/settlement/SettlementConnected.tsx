@@ -73,7 +73,7 @@ import {
   type ScheduleCashLedger,
 } from "@trade-os/lib/api/scheduleCash";
 import { isFinanceDecimal } from "@trade-os/lib/financeDecimal";
-import { formatScaledMoney, normalizeDecimalInput } from "@trade-os/lib/money";
+import { currencyFractionDigits, formatScaledMoney, normalizeDecimalInput } from "@trade-os/lib/money";
 import { formatDate, formatDateTime, localTodayISO, todayISOIn } from "@trade-os/lib/orgDate";
 import { withRetry } from "@trade-os/lib/api/retry";
 import { ApiError } from "@trade-os/lib/api/client";
@@ -522,9 +522,6 @@ function hasProjectedOpenSettlementDispute(entry: LedgerEntry): boolean {
   return entry.open_dispute_status?.toLowerCase() === "open";
 }
 
-// SSOT 05-settlement.md:179/:185/:189/:191 name these values as max-4dp or
-// "통화별 정확한 소수", so they are formatted from the exact scale-10 integer
-// rather than a minor-unit-rounded double.
 // bigint subtraction cannot feed Array.sort, which requires a number.
 function compareFinance(a: bigint, b: bigint): number {
   return a < b ? -1 : a > b ? 1 : 0;
@@ -532,7 +529,7 @@ function compareFinance(a: bigint, b: bigint): number {
 
 function fmtExact(value: bigint | string, currency?: string, locale?: string): string {
   const scaled = typeof value === "bigint" ? value : financeDecimalMagnitude(value);
-  return formatScaledMoney(scaled, FINANCE_DECIMAL_SCALE, currency, locale);
+  return formatScaledMoney(scaled, FINANCE_DECIMAL_SCALE, currency, locale, currency ? currencyFractionDigits(currency) : 2);
 }
 
 function exactMoneyCacheKey(
@@ -1837,19 +1834,19 @@ function SettlementView({
         add(bucket.payable.total, currency);
       }
     }
-    for (const rows of agingByCurrency.values()) {
-      for (const total of Object.values(rows.receivable)) add(total);
-      for (const total of Object.values(rows.payable)) add(total);
+    for (const [currency, rows] of agingByCurrency) {
+      for (const total of Object.values(rows.receivable)) add(total, currency);
+      for (const total of Object.values(rows.payable)) add(total, currency);
     }
     for (const row of overview.by_currency ?? []) {
-      add(row.net);
-      add(row.payable);
-      add(row.receivable);
+      add(row.net, row.currency);
+      add(row.payable, row.currency);
+      add(row.receivable, row.currency);
     }
     for (const row of overview.by_counterparty ?? []) {
-      add(row.overdue_receivable);
-      add(row.payable);
-      add(row.receivable);
+      add(row.overdue_receivable, row.currency);
+      add(row.payable, row.currency);
+      add(row.receivable, row.currency);
     }
     for (const entry of ledger) {
       add(entry.amount, entry.currency);
@@ -1873,6 +1870,9 @@ function SettlementView({
       fmtExact(value, currency, moneyLocale),
     [exactMoneyCache, moneyLocale],
   );
+  // These tables already show the currency in their heading or a dedicated column.
+  const amountWithoutCode = (value: bigint | string, currency: string) =>
+    exactMoney(value, currency).slice(currency.length + 1);
 
   // M6 통화 혼재: a counterparty carrying AR/AP across >1 currency holds FX
   // exposure that no single per-currency row reveals — flag the names that appear
@@ -3242,17 +3242,17 @@ function SettlementView({
                     <span
                       className={`text-[16px] leading-[1.45] font-semibold tabular-nums ${net >= FINANCE_ZERO ? "text-[#178c4d]" : "text-[#d63333]"}`}
                     >
-                      <span className="sr-only">{copy.fx.net} </span><span aria-hidden="true">{financeSignGlyph(net)} </span>{exactMoney(c.net)}
+                      <span className="sr-only">{copy.fx.net} </span><span aria-hidden="true">{financeSignGlyph(net)} </span>{amountWithoutCode(c.net, c.currency)}
                     </span>
                   </div>
                   <dl className="grid gap-3 tabular-nums">
                     <div className="flex justify-between gap-2">
                       <dt className="text-[14px] leading-[1.45] text-[var(--color-gray-5)]">{copy.kpi.receivable}</dt>
-                      <dd className="text-[15px] leading-[1.45] font-medium text-[var(--color-gray-2)]">{exactMoney(c.receivable)}</dd>
+                      <dd className="text-[15px] leading-[1.45] font-medium text-[var(--color-gray-2)]">{amountWithoutCode(c.receivable, c.currency)}</dd>
                     </div>
                     <div className="flex justify-between gap-2">
                       <dt className="text-[14px] leading-[1.45] text-[var(--color-gray-5)]">{copy.kpi.payable}</dt>
-                      <dd className="text-[15px] leading-[1.45] font-medium text-[var(--color-gray-2)]">{exactMoney(c.payable)}</dd>
+                      <dd className="text-[15px] leading-[1.45] font-medium text-[var(--color-gray-2)]">{amountWithoutCode(c.payable, c.currency)}</dd>
                     </div>
                   </dl>
                 </div>
@@ -3304,7 +3304,7 @@ function SettlementView({
                               key={b}
                               className={`px-3 py-2 text-right ${overdue ? "text-[var(--color-red-1)]" : "text-[var(--color-gray-2)]"}`}
                             >
-                              {v !== FINANCE_ZERO ? exactMoney(v) : "—"}
+                              {v !== FINANCE_ZERO ? amountWithoutCode(v, currency) : "—"}
                             </HostTableCell>
                           );
                         })}
@@ -3380,10 +3380,10 @@ function SettlementView({
                           ) : null}
                         </HostTableCell>
                         <HostTableCell className="px-3 py-2 text-[var(--color-gray-3)]">{c.currency}</HostTableCell>
-                        <HostTableCell className="px-3 py-2 text-right text-[var(--color-gray-2)]">{exactMoney(c.receivable)}</HostTableCell>
-                        <HostTableCell className="px-3 py-2 text-right text-[var(--color-gray-2)]">{exactMoney(c.payable)}</HostTableCell>
+                        <HostTableCell className="px-3 py-2 text-right text-[var(--color-gray-2)]">{amountWithoutCode(c.receivable, c.currency)}</HostTableCell>
+                        <HostTableCell className="px-3 py-2 text-right text-[var(--color-gray-2)]">{amountWithoutCode(c.payable, c.currency)}</HostTableCell>
                         <HostTableCell className={`px-3 py-2 text-right ${overdue > FINANCE_ZERO ? "font-medium text-[var(--color-red-1)]" : "text-[var(--color-gray-5)]"}`}>
-                          {overdue > FINANCE_ZERO ? exactMoney(c.overdue_receivable) : "—"}
+                          {overdue > FINANCE_ZERO ? amountWithoutCode(c.overdue_receivable, c.currency) : "—"}
                         </HostTableCell>
                       </HostTableRow>
                       {expanded ? (

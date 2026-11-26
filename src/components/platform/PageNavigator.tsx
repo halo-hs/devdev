@@ -130,6 +130,7 @@ export function PdfFloatingControls({
   variant?: "full" | "pager"
 }) {
   const [pagePickerOpen, setPagePickerOpen] = useState(false)
+  const pickerTriggerRef = useRef<HTMLButtonElement>(null)
   const activePageRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
@@ -160,6 +161,7 @@ export function PdfFloatingControls({
             <Button
               variant="ghost"
               className="h-[34px] gap-2 rounded-[var(--r-pill)] px-3 text-[13px] leading-[18px] font-normal text-[var(--color-gray-1)] tabular-nums"
+              ref={pickerTriggerRef}
               aria-label={`페이지 목록 열기, 현재 ${page} / ${pageCount} 페이지`}
             >
               <Files className="size-[18px]" />
@@ -171,6 +173,7 @@ export function PdfFloatingControls({
             side="top"
             align="center"
             sideOffset={8}
+            portalContainer={pickerTriggerRef.current?.closest<HTMLElement>('[role="dialog"]')}
             className="w-[min(420px,calc(100vw-2rem))] gap-0 overflow-hidden rounded-[var(--r-lg)] p-0"
           >
             <div className="flex items-start justify-between border-b border-[var(--color-gray-9)] px-5 pt-5 pb-3.5 text-[13px] leading-[18px]">
