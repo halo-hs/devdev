@@ -3051,10 +3051,8 @@ function DealDocumentPanels({
                 문서 보기 닫기
               </Button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              <div id="deal-document-preview" className="min-h-full p-4 sm:p-5">
-                {preview}
-              </div>
+            <div id="deal-document-preview" className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-4 sm:px-5 sm:pt-5">
+              {preview}
             </div>
           </section>,
           documentPanelTarget
@@ -3363,7 +3361,7 @@ function DealPdf({
   const viewer = (
     <div
       className={cn(
-        "relative mt-2 flex h-[clamp(320px,72dvh,920px)] min-h-0 flex-col overflow-hidden bg-background",
+        "relative mt-2 flex min-h-0 flex-1 flex-col overflow-hidden bg-background",
         fullscreen && "mt-0 h-full"
       )}
     >
@@ -3408,7 +3406,7 @@ function DealPdf({
       <PannablePdfViewport
         zoom={zoom}
         nativePdf={slot.fileDataUrl ? { src: `${slot.fileDataUrl}#page=${page}`, title: `${file} 원본 PDF` } : undefined}
-        className={slot.fileDataUrl ? undefined : "px-4 pb-20"}
+        className={cn("overscroll-contain", !slot.fileDataUrl && "px-4 pb-20")}
       >
         <div className="mx-auto mt-4 aspect-[.72] max-h-[760px] w-[min(90%,560px)] border bg-background p-8 shadow-sm">
           <span className="text-xs font-semibold tracking-widest text-primary">
@@ -5421,8 +5419,8 @@ function DocumentsTab({
           </section>
         }
         preview={
-          <aside className="field-scrollbar min-w-0 border-t px-4 py-4 xl:h-full xl:overflow-y-auto xl:border-t-0 xl:px-5 xl:pb-8">
-            <div className="border-b border-[var(--surface-border)] pb-2">
+          <aside className="flex min-h-0 min-w-0 flex-1 flex-col border-t px-4 pt-4 xl:border-t-0 xl:px-5">
+            <div className="shrink-0 border-b border-[var(--surface-border)] pb-2">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-semibold">거래 서류</h3>
                 <Popover open={documentsExpanded} onOpenChange={setDocumentsExpanded}>
@@ -5499,7 +5497,7 @@ function DocumentsTab({
             {movedDocument && <p role="status" className="my-2 rounded-md bg-muted px-3 py-2 text-xs">
               {movedDocument.file} 서류를 이동했습니다. <a href={`/erp/deals/${movedDocument.dealId}`} className="font-medium text-primary underline">이동한 거래 보기</a>
             </p>}
-            <div className="mt-2">
+            <div className={cn("mt-2 flex min-h-0 flex-1 flex-col", !selected.file && "overflow-y-auto")}>
               {!selected.file ? (
                 <div className="flex min-w-0 items-center gap-2 border-y border-[var(--surface-border)] px-1 py-2.5">
                   <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--r-xs)] border border-[var(--surface-border)] text-[9px] font-semibold text-[var(--color-red-2)]">
@@ -6708,7 +6706,7 @@ export function DealDetailScreen({
       // when the user opens it from a scrolled section (the grid can be
       // partially or completely outside the viewport at that moment).
       const availableHeight = viewport?.clientHeight ?? window.innerHeight
-      setComparisonHeight(Math.max(620, Math.round(availableHeight - 16)))
+      setComparisonHeight(Math.max(1, Math.round(availableHeight - 16)))
     }
     updateHeight()
     const observer = new ResizeObserver(updateHeight)
@@ -8213,7 +8211,7 @@ export function DealDetailScreen({
                     <aside
                       ref={setDocumentPanelTarget}
                       aria-label="원문 문서 패널"
-                      className="min-w-0 min-h-[620px] overflow-hidden bg-[var(--surface-background)] xl:h-full"
+                      className="h-full min-h-0 min-w-0 overflow-hidden bg-[var(--surface-background)]"
                     />
                   }
                 />
