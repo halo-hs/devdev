@@ -3,6 +3,8 @@ import { ViewSeatAction } from "@trade-os/components/ViewSeatGate"
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import {
   getDealWorkPlan,
+  applyCustomsPreference,
+  useSkippedCustoms,
   workLabels,
   type DealWorkKey,
 } from "@trade-os/lib/dealWorkflow"
@@ -414,9 +416,11 @@ function optionLabel(options: FilterOptions, value: string) {
 }
 
 export function DealsScreen({
+  workspaceId,
   onOpenDeal,
   role = "owner",
 }: {
+  workspaceId: string
   onOpenDeal: (dealId: string, tab?: DealWorkKey) => void
   role?: DealsRole
 }) {
@@ -452,13 +456,14 @@ export function DealsScreen({
   const [restorePendingId, setRestorePendingId] = useState<string | null>(null)
   const [restoreError, setRestoreError] = useState("")
   const [createdDeals, setCreatedDeals] = useState<Deal[]>([])
+  const skippedCustoms = useSkippedCustoms(workspaceId)
   const allDeals = useMemo(
     () =>
       [...createdDeals, ...deals].filter(
         (deal) =>
           !archivedDeals.some((archivedDeal) => archivedDeal.id === deal.id)
-      ),
-    [archivedDeals, createdDeals]
+      ).map(deal => applyCustomsPreference(deal, skippedCustoms.has(deal.id))),
+    [archivedDeals, createdDeals, skippedCustoms]
   )
 
   // KPI counts use this set so they stay stable while a KPI filter is applied.
@@ -1159,6 +1164,7 @@ export function DealsScreen({
               <TableBody>
                 {visibleDeals.length ? (
                   visibleDeals.map((deal) => {
+                    const workPlan = getDealWorkPlan(deal.id, [], undefined, skippedCustoms.has(deal.id))
                     const displayDealId = prototypeBackend.deals.getDisplayId(
                       deal.id
                     )
@@ -1385,12 +1391,12 @@ export function DealsScreen({
                                 event.stopPropagation()
                                 onOpenDeal(
                                   deal.id,
-                                  getDealWorkPlan(deal.id).current ?? "finance"
+                                  workPlan.current ?? "finance"
                                 )
                               }}
                             >
-                              {getDealWorkPlan(deal.id).current
-                                ? `${workLabels[getDealWorkPlan(deal.id).current!]} 확인 · ${deal.nextAction}`
+                              {workPlan.current
+                                ? `${workLabels[workPlan.current!]} 확인 · ${deal.nextAction}`
                                 : "정산 상세 보기"}
                             </button>
                           </div>

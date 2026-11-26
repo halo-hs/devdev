@@ -1,7 +1,8 @@
-import { deals } from "./prototypeDeals"
+import { useMemo, useSyncExternalStore } from "react"
+import { deals, type Deal } from "./prototypeDeals"
 
 export type DealWorkKey = "documents" | "fulfillment" | "customs" | "finance"
-export type DealWorkState = "planned" | "active" | "complete"
+export type DealWorkState = "planned" | "active" | "complete" | "skipped"
 export const dealWorkKeys: DealWorkKey[] = [
   "documents",
   "fulfillment",
@@ -39,14 +40,66 @@ export const documentStageGuidance: Record<DealWorkKey, string> = {
 }
 export type DealWorkPlan = ReturnType<typeof getDealWorkPlan>
 
+const customsPreferenceEvent = "ecoya:deal-customs-changed"
+
+function subscribeCustoms(listener: () => void) {
+  window.addEventListener("storage", listener)
+  window.addEventListener(customsPreferenceEvent, listener)
+  return () => {
+    window.removeEventListener("storage", listener)
+    window.removeEventListener(customsPreferenceEvent, listener)
+  }
+}
+
+function customsKeyPrefix(workspaceId: string) {
+  return `ecoya:customs-skipped:${encodeURIComponent(workspaceId)}:`
+}
+
+export function useSkippedCustoms(workspaceId: string) {
+  const prefix = customsKeyPrefix(workspaceId)
+  const snapshot = useSyncExternalStore(subscribeCustoms, () => {
+    try {
+      return JSON.stringify(Object.keys(localStorage).filter(key => key.startsWith(prefix)).sort())
+    } catch {
+      return "[]"
+    }
+  }, () => "[]")
+  return useMemo(() => new Set<string>(
+    (JSON.parse(snapshot) as string[]).map(key => key.slice(prefix.length))
+  ), [snapshot, prefix])
+}
+
+export function setCustomsSkipped(workspaceId: string, dealId: string, skipped: boolean) {
+  const key = customsKeyPrefix(workspaceId) + dealId
+  if (skipped) localStorage.setItem(key, "1")
+  else localStorage.removeItem(key)
+  window.dispatchEvent(new Event(customsPreferenceEvent))
+}
+
+export function applyCustomsPreference(deal: Deal, skipped: boolean): Deal {
+  if (!skipped) return deal
+  const advance = (deal.nextWork ?? (deal.stage === "customs" ? "customs" : undefined)) === "customs"
+  const customsDocument = ["IMPORT_DECLARATION", "EXPORT_DECLARATION", "CUSTOMS_ENTRY", "CUSTOMS_EXPORT"].includes(deal.nextDocument?.templateCode ?? "")
+  return {
+    ...deal,
+    stage: deal.stage === "customs" ? "settlement" : deal.stage,
+    nextWork: advance ? "finance" : deal.nextWork,
+    nextAction: advance ? "정산 정보 확인" : deal.nextAction,
+    nextDocument: customsDocument ? undefined : deal.nextDocument,
+  }
+}
+
 // Both the body and progress rail consume this adapter. nextWork identifies the
 // work behind the existing nextAction; it is independent of the Deal milestone.
 export function getDealWorkPlan(
   dealId: string,
   started: DealWorkKey[] = [],
-  preferred?: DealWorkKey
+  preferred?: DealWorkKey,
+  customsSkipped = false
 ) {
-  const deal = deals.find((item) => item.id === dealId)
+  const fixture = deals.find((item) => item.id === dealId)
+  const deal = fixture && applyCustomsPreference(fixture, customsSkipped)
+  const preferredWork = customsSkipped && preferred === "customs" ? "finance" : preferred
   const stageWork: DealWorkKey =
     deal?.stage === "shipment"
       ? "fulfillment"
@@ -59,11 +112,11 @@ export function getDealWorkPlan(
   const allComplete = deal?.stage === "settled"
   const current = allComplete
     ? null
-    : (preferred ?? deal?.nextWork ?? stageWork)
+    : (preferredWork ?? deal?.nextWork ?? stageWork)
   const states = Object.fromEntries(
     dealWorkKeys.map((key, index) => [
       key,
-      allComplete
+      key === "customs" && customsSkipped ? "skipped" : allComplete
         ? "complete"
         : key === current
           ? "active"
@@ -87,8 +140,8 @@ export function getDealWorkPlan(
     states,
     order: [...dealWorkKeys].sort((a, b) => rank(a) - rank(b)),
     nextAction:
-      preferred && preferred !== deal?.nextWork
-        ? `${workLabels[preferred]} 정보 직접 입력`
+      preferredWork && preferredWork !== deal?.nextWork
+        ? `${workLabels[preferredWork]} 정보 직접 입력`
         : (deal?.nextAction ?? "거래 문서를 연결하고 내용을 확인하세요."),
   }
 }

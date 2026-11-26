@@ -9,6 +9,7 @@ import { carrierTrackingAction } from "./carrierSites";
 import Link from "@trade-os/lib/AppLink";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { Input } from "@/components/ui/input";
+import { FormField, FormFieldMessage } from "@/components/platform/FormItem";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -113,6 +114,7 @@ function summarizeEvidence(rows: SnapContainerEvidence[]): Map<string, EvidenceS
 export type ShipmentSummary = { state: string; eta: string; count: number; snap: string };
 export type ShipmentContainerCard = {
   number: string;
+  /** Container size/type such as 40HC (#1207). */
   containerType?: string | null;
   sealNumber?: string | null;
   packageCount?: string | null;
@@ -121,6 +123,7 @@ export type ShipmentContainerCard = {
   volume?: string | null;
 };
 export type CommercialInvoiceCard = {
+  grossWeight?: string | null;
   hsCode?: string;
   documentId: string;
   /** B/L number read from this CI, independent of its current relationship. */
@@ -143,6 +146,10 @@ export type CommercialInvoiceCard = {
   onOpen?: () => void;
 };
 export type ShipmentDocumentLink = {
+  quantity?: string;
+  grossWeight?: string;
+  unitPrice?: string;
+  amount?: string;
   items?: PackingItem[];
   containers?: ShipmentContainerCard[];
   documentId: string;
@@ -157,7 +164,13 @@ export type BillOfLadingCard = {
   blNumber: string | null;
   fileName: string;
   uploadedAt: string;
+  /** Multi-page B/Ls show p.N next to each field (like the CI). */
+  pageCount?: number | null;
+  fieldPages?: Partial<Record<string, number>> | null;
   fields: {
+    amount?: string;
+    unitPrice?: string;
+    quantity?: string;
     portOfLoading?: string | null;
     portOfDischarge?: string | null;
     carrier?: string | null;
@@ -178,6 +191,7 @@ export type BillOfLadingCard = {
   connectedCommercialInvoices: CommercialInvoiceCard[];
 };
 export type SplitShipmentView = {
+  firstPackingInvoices?: Record<string, string>;
   billsOfLading: BillOfLadingCard[];
   unlinkedDocuments: CommercialInvoiceCard[];
   unlinkedPackingLists?: ShipmentDocumentLink[];
@@ -187,7 +201,7 @@ export type SplitShipmentView = {
 // remember opened rows per deal so they survive that re-mount.
 const openedShipmentRows = new Map<string, Set<string>>();
 
-type InlineShipmentField = "bl_number" | "pol" | "pod" | "carrier" | "vessel";
+export type InlineShipmentField = "bl_number" | "pol" | "pod" | "carrier" | "vessel";
 const inlineShipmentFields: Array<{ key: InlineShipmentField; label: string }> = [
   { key: "bl_number", label: "B/L 번호" },
   { key: "pol", label: "선적항" },
@@ -224,8 +238,9 @@ export function ConfirmDeleteButton({ label, description, onConfirm }: { label: 
 // save button — and lists the documents linked to it. Containers are edited
 // in the packing list card.
 const inlineStatuses: ShipmentStatus[] = ["unknown", "booked", "loaded", "departed", "arrived", "delivered"];
-function ShipmentInlineEditor({ shipment, copy, canWrite, onSave, onDelete, hasDocument = false, linkedDocuments }: { shipment: Shipment; copy: ShipmentsCopy; canWrite: boolean; onSave: (patch: Omit<ShipmentConfirmation, "expected_edit_token">) => Promise<void>; onDelete?: () => Promise<void>; hasDocument?: boolean; linkedDocuments?: ReactNode }) {
+function ShipmentInlineEditor({ shipment, copy, canWrite, onSave, onDelete, hasDocument = false, linkedDocuments, fieldPage }: { shipment: Shipment; copy: ShipmentsCopy; canWrite: boolean; /** Page marker (p.N) of the B/L field, like the CI fields. */ fieldPage?: (field: InlineShipmentField) => ReactNode; onSave: (patch: Omit<ShipmentConfirmation, "expected_edit_token">) => Promise<void>; onDelete?: () => Promise<void>; hasDocument?: boolean; linkedDocuments?: ReactNode }) {
   const c = copy.confirmation;
+  const locale = useLocaleTag();
   const [drafts, setDrafts] = useState<Partial<Record<InlineShipmentField, string>>>({});
   const [error, setError] = useState<string | null>(null);
   const writable = canWrite && Boolean(shipment.edit_token);
@@ -238,14 +253,13 @@ function ShipmentInlineEditor({ shipment, copy, canWrite, onSave, onDelete, hasD
     if (value === undefined || value === (shipment[field] ?? "")) return;
     if (await save({ [field]: value })) setDrafts((current) => { const next = { ...current }; delete next[field]; return next; });
   };
-  const fieldLabel = "text-[13px] leading-[18px] text-[var(--color-gray-4)]";
   const readValue = "min-h-10 rounded-md bg-muted/30 px-3 py-2 text-sm";
   const schedule: Array<{ key: "confirmed_etd" | "confirmed_eta"; label: string; value: string }> = [
     { key: "confirmed_etd", label: c.etd, value: effectiveShipmentEtd(shipment)?.slice(0, 10) ?? "" },
     { key: "confirmed_eta", label: c.eta, value: effectiveShipmentEta(shipment)?.slice(0, 10) ?? "" },
   ];
   return (
-    <div className="flex flex-col gap-3 text-left whitespace-normal" onClick={(event) => event.stopPropagation()}>
+    <div className="@container/shipment flex flex-col gap-3 text-left whitespace-normal" onClick={(event) => event.stopPropagation()}>
       <div className="rounded-xl border border-[var(--color-gray-9)] bg-card p-4">
         {/* Same title row as the CI's 송장 정보: title · note, then delete at the far right. */}
         <div className="flex items-center gap-2">
@@ -253,48 +267,54 @@ function ShipmentInlineEditor({ shipment, copy, canWrite, onSave, onDelete, hasD
           {/* Only delete in the title row, like the item card; 원문 보기 stays on the table row. */}
           {writable && onDelete ? <ConfirmDeleteButton label="선적" description={shipment.manual_entry ? "직접 추가한 선적과 입력한 정보를 지웁니다. 연결한 문서는 남습니다." : "이 선적을 거래에서 뺍니다. B/L 원본 문서는 문서함에 남습니다."} onConfirm={onDelete} /> : null}
         </div>
-        <div className="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-3 grid gap-x-4 gap-y-3 @min-[480px]/shipment:grid-cols-2 @min-[720px]/shipment:grid-cols-3">
+          {/* Same FormField (label · control · message) as the item and CI cards. */}
           {inlineShipmentFields.map(({ key, label }) => (
-            <label key={key} className="flex flex-col gap-1.5">
-              <span className={fieldLabel}>{label}</span>
+            <FormField key={key} label={label} htmlFor={`shipment-${shipment.id}-${key}`} badge={fieldPage?.(key)}>
               {writable ? (
-                <Input aria-label={`${shipment.bl_number || "선적"} ${label}`} className="h-10" value={drafts[key] ?? shipment[key] ?? ""} onChange={(event) => setDrafts((current) => ({ ...current, [key]: event.target.value }))} onBlur={() => void commit(key)} />
+                <Input id={`shipment-${shipment.id}-${key}`} aria-label={`${shipment.bl_number || "선적"} ${label}`} className="h-10" value={drafts[key] ?? shipment[key] ?? ""} onChange={(event) => setDrafts((current) => ({ ...current, [key]: event.target.value }))} onBlur={() => void commit(key)} />
               ) : (
                 <span className={readValue}>{shipment[key] || "—"}</span>
               )}
-            </label>
+            </FormField>
           ))}
         </div>
         <h3 className="mt-5 text-[15px] leading-[22px] font-semibold">일정·상태</h3>
-        <p className="mt-0.5 text-[13px] leading-[18px] text-[var(--color-gray-5)]">{c.manualHint}</p>
-        <div className="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-3 grid gap-x-4 gap-y-3 @min-[480px]/shipment:grid-cols-2 @min-[720px]/shipment:grid-cols-3">
           {schedule.map(({ key, label, value }) => (
-            <div key={key} className="flex flex-col gap-1.5">
-              <span className={fieldLabel}>{label}</span>
+            <FormField
+              key={key}
+              label={label}
+              // Back to the document / carrier value: the header's action slot, as in the other cards.
+              sourceAction={writable && shipment[key] != null ? <Button type="button" variant="link" size="xs" className="h-auto p-0" onClick={() => void save({ [key]: null })}>{c.useSource}</Button> : undefined}
+            >
               {writable ? <DatePicker ariaLabel={`${shipment.bl_number || "선적"} ${label}`} className="w-full" value={value} onValueChange={(next) => { if (next && next !== value) void save({ [key]: next }); }} /> : <span className={readValue}>{value || "—"}</span>}
-              {writable && shipment[key] != null ? <button type="button" className="w-fit text-[13px] leading-[18px] text-[var(--color-primary-4)] hover:underline" onClick={() => void save({ [key]: null })}>{c.useSource}</button> : null}
-            </div>
+            </FormField>
           ))}
-          <div className="flex flex-col gap-1.5">
-            <span className={fieldLabel}>{c.status}</span>
+          <FormField
+            label={c.status}
+            sourceAction={writable && shipment.confirmed_status != null ? <Button type="button" variant="link" size="xs" className="h-auto p-0" onClick={() => void save({ confirmed_status: null })}>{c.useProviderStatus}</Button> : undefined}
+            // Only a real confirmation record is shown; no "정보 없음" filler.
+            message={shipment.confirmed_status_by || shipment.confirmed_status_at
+              ? ["운송 상태 최근 확인", [shipment.confirmed_status_by, shipment.confirmed_status_at ? formatDateTime(shipment.confirmed_status_at, locale) : null].filter(Boolean).join(" · ")].join(": ")
+              : undefined}
+          >
             {writable ? (
               <Select value={shipment.status} onValueChange={(next) => { if (next !== shipment.status) void save({ confirmed_status: next as ShipmentStatus }); }}>
                 <SelectTrigger aria-label={`${shipment.bl_number || "선적"} ${c.status}`} className="h-10 w-full"><SelectValue /></SelectTrigger>
                 <SelectContent position="popper"><SelectGroup>{inlineStatuses.map((status) => <SelectItem key={status} value={status}>{copy.status[status]}</SelectItem>)}</SelectGroup></SelectContent>
               </Select>
             ) : <span className={readValue}>{copy.status[shipment.status] ?? shipment.status}</span>}
-            <div className="text-[13px] leading-[18px] text-[var(--color-gray-5)]"><ShipmentConfirmationRecord shipment={shipment} /></div>
-            {writable && shipment.confirmed_status != null ? <button type="button" className="w-fit text-[13px] leading-[18px] text-[var(--color-primary-4)] hover:underline" onClick={() => void save({ confirmed_status: null })}>{c.useProviderStatus}</button> : null}
-          </div>
+          </FormField>
         </div>
-        {error ? <p className="mt-2 text-[13px] leading-[18px] text-[var(--color-red-1)]" role="alert">{error}</p> : null}
+        {error ? <FormFieldMessage tone="danger" className="mt-2">{error}</FormFieldMessage> : null}
       </div>
       {linkedDocuments}
     </div>
   );
 }
 
-export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange, renderDocuments, renderContainers, renderLinkedDocuments, renderDocumentAction, rowAnchorId, inlineEdit = false }: { copy: ShipmentsCopy; renderHeader?: (controls: ReactNode) => ReactNode; dealId?: string; onSummaryChange?: (summary: ShipmentSummary) => void; onOpenDocument?: () => void; renderDocuments?: (shipment: Shipment, index: number) => ReactNode; renderContainers?: (shipment: Shipment, index: number) => ReactNode; renderLinkedDocuments?: (shipment: Shipment, index: number) => ReactNode; renderDocumentAction?: (shipment: Shipment, index: number) => ReactNode; rowAnchorId?: (shipment: Shipment, index: number) => string | undefined; inlineEdit?: boolean }) {
+export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange, renderDocuments, renderContainers, renderLinkedDocuments, renderDocumentAction, rowAnchorId, renderFieldPage, inlineEdit = false }: { copy: ShipmentsCopy; renderHeader?: (controls: ReactNode) => ReactNode; dealId?: string; onSummaryChange?: (summary: ShipmentSummary) => void; onOpenDocument?: () => void; renderDocuments?: (shipment: Shipment, index: number) => ReactNode; renderContainers?: (shipment: Shipment, index: number) => ReactNode; renderLinkedDocuments?: (shipment: Shipment, index: number) => ReactNode; renderDocumentAction?: (shipment: Shipment, index: number) => ReactNode; rowAnchorId?: (shipment: Shipment, index: number) => string | undefined; renderFieldPage?: (shipment: Shipment, field: InlineShipmentField) => ReactNode; inlineEdit?: boolean }) {
   const [openRows, setOpenRows] = useState<Set<string>>(() => (dealId ? openedShipmentRows.get(dealId) : undefined) ?? new Set());
   // The first shipment row starts open (once, when the deal's rows first load).
   const firstRowOpened = useRef(Boolean(dealId && openedShipmentRows.has(dealId)));
@@ -487,6 +507,24 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
       }
     };
   }, [groups, rowAnchorId]);
+
+  // A shared deal URL can arrive before its asynchronously loaded B/L row exists.
+  const revealedTarget = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!inlineEdit || !rowAnchorId) return;
+    const reveal = () => {
+      const id = window.location.hash.slice(1);
+      const row = id.startsWith("deal-bill-") ? document.getElementById(id) : null;
+      if (row && row !== revealedTarget.current) {
+        openRowRef.current(id);
+        row.scrollIntoView({ block: "start", behavior: "instant" });
+      }
+      revealedTarget.current = row;
+    };
+    reveal();
+    window.addEventListener("hashchange", reveal);
+    return () => window.removeEventListener("hashchange", reveal);
+  }, [groups, inlineEdit, rowAnchorId]);
 
   const [adding, setAdding] = useState(false);
   // Deal detail: add a shipment by hand (no B/L document yet) and open it for input.
@@ -866,7 +904,7 @@ export function ShipmentsConnected({ copy, renderHeader, dealId, onSummaryChange
                   {rowOpen ? (
                     <HostTableRow className="hover:[&>td]:bg-transparent has-aria-expanded:[&>td]:bg-transparent!">
                       <HostTableCell colSpan={8} className="!p-0"><div className="sticky left-0 w-[100cqw] p-3">
-                        <ShipmentInlineEditor shipment={ship} copy={copy} canWrite={canRefresh} hasDocument={Boolean(renderDocumentAction?.(ship, rowIndex))} linkedDocuments={renderLinkedDocuments?.(ship, rowIndex)} onDelete={async () => {
+                        <ShipmentInlineEditor shipment={ship} copy={copy} canWrite={canRefresh} fieldPage={renderFieldPage ? (field) => renderFieldPage(ship, field) : undefined} hasDocument={Boolean(renderDocumentAction?.(ship, rowIndex))} linkedDocuments={renderLinkedDocuments?.(ship, rowIndex)} onDelete={async () => {
                           await deleteShipment(getIdToken, ship);
                           setState(current => current.status === "ready" ? { ...current, shipments: current.shipments.filter(row => row.id !== ship.id) } : current);
                         }} onSave={async (patch) => {

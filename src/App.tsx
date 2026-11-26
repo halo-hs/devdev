@@ -542,8 +542,17 @@ export function App() {
     return () => window.clearTimeout(loadingTimer)
   }, [screenLoadingKey])
 
+  // Path of the screen last rendered (pushState navigations re-render too).
+  const renderedPathRef = useRef("")
+  useEffect(() => { renderedPathRef.current = `${window.location.pathname}${window.location.search}` })
+
   useEffect(() => {
     const handlePopState = () => {
+      // In-page anchors (`#deal-bill-…`) only change the hash: the screen
+      // stays, so no route loading starts (nothing would end it).
+      const path = `${window.location.pathname}${window.location.search}`
+      if (path === renderedPathRef.current) return
+      renderedPathRef.current = path
       const nextRoute = readCurrentSnapRoute()
       setSnapRoute(nextRoute)
       if (nextRoute) {
@@ -1184,6 +1193,7 @@ export function App() {
                     />
                   ) : screen === "deals" ? (
                     <DealsScreen
+                      workspaceId={activeWorkspace.id}
                       role={erpHomeRole}
                       onOpenDeal={(dealId, tab) => {
                         setDealNotificationTarget(tab ? { tab: tab === "documents" ? "overview" : tab, sectionId: tab === "documents" ? "deal-documents" : tab === "fulfillment" ? "deal-fulfillment" : tab === "customs" ? "deal-customs" : "deal-finance" } : null)
