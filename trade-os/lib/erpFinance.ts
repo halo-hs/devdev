@@ -1,6 +1,6 @@
 // Contract: develop-local@7bc36be0; backend@8f5cfcfd.
 import { decimalMagnitude, FINANCE_DECIMAL_SCALE } from "./financeDecimal"
-import { formatScaledMoney } from "./money"
+import { currencyFractionDigits, formatScaledMoney } from "./money"
 
 export type TradeFinanceFact = {
   deal_id?: string | null
@@ -47,7 +47,7 @@ export function exactFinanceMoney(
   const amount = decimalMagnitude(value, FINANCE_DECIMAL_SCALE)
   return amount === null
     ? "—"
-    : formatScaledMoney(amount, FINANCE_DECIMAL_SCALE, currency, "en-US")
+    : formatScaledMoney(amount, FINANCE_DECIMAL_SCALE, currency, "en-US", currencyFractionDigits(currency))
 }
 
 export function presentFinanceFact(
